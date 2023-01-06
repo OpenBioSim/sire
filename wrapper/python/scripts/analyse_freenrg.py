@@ -229,7 +229,7 @@ if __name__ == '__main__':
         if args.version:
             print("analyse_freenrg -- from Sire release version <%s>" % Sire.__version__)
             print("This particular release can be downloaded here: "
-                  "https://github.com/michellab/Sire/releases/tag/v%s" % Sire.__version__)
+                  "https://github.com/openbiosim/sire/releases/tag/v%s" % Sire.__version__)
             must_exit = True
 
         if must_exit:
@@ -451,7 +451,7 @@ if __name__ == '__main__':
         if args.version:
             print("analyse_freenrg mbar -- from Sire release version <%s>" % Sire.__version__)
             print("This particular release can be downloaded here: "
-                  "https://github.com/michellab/Sire/releases/tag/v%s" % Sire.__version__)
+                  "https://github.com/openbiosim/sire/releases/tag/v%s" % Sire.__version__)
             must_exit = True
         if args.description:
             print("%s\n" % description_mbar)

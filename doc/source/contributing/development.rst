@@ -453,5 +453,5 @@ at adding new functionality, fixing bugs, writing docs etc.
 We would also like to thank Lester Hedges and the
 `BioSimSpace <https://biosimspace.org>`__ team who provided great advice
 to set up the above, and from whose
-`GitHub repo <https://github.com/michellab/biosimspace>`__
+`GitHub repo <https://github.com/openbiosim/biosimspace>`__
 most of the procedures, scripts and documentation above is derived.

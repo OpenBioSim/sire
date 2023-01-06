@@ -69,7 +69,7 @@ if args.author:
 if args.version:
     print("standardstatecorrection -- from Sire release version <%s>" %Sire.__version__)
     print("This particular release can be downloaded here: "
-          "https://github.com/michellab/Sire/releases/tag/v%s" %Sire.__version__)
+          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
     must_exit = True
 
 if args.help_config:

@@ -166,7 +166,7 @@ polynomial least squares fitting. This is used under the terms of
 the GPLv3 license.
 
 The source code for this module can be
-`found here <https://github.com/michellab/Sire/blob/devel/corelib/src/libs/SireAnalysis/third_party/regress.cpp>`__.
+`found here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/SireAnalysis/third_party/regress.cpp>`__.
 
 eig3
 ----
@@ -177,7 +177,7 @@ from the Java matrix library JAMA (also public domain).
 
 Information about this can be
 `found here <http://barnesc.blogspot.co.uk/2007/02/eigenvectors-of-3x3-symmetric-matrix.html>`__,
-with the license within Sire `found here <https://github.com/michellab/Sire/blob/devel/corelib/src/libs/SireMaths/third_party/eig3/readme.txt>`__.
+with the license within Sire `found here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/SireMaths/third_party/eig3/readme.txt>`__.
 
 Mersenne Twister
 ----------------
@@ -311,7 +311,7 @@ LAP (Linear Assignment Problem Solver)
 --------------------------------------
 
 Sire implements its own C++ version of the LAP library for solving the
-linear assignment problem. This is `available here <https://github.com/michellab/Sire/blob/devel/corelib/src/libs/SireMaths/linearap.cpp>`__.
+linear assignment problem. This is `available here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/SireMaths/linearap.cpp>`__.
 
 The original code is Freeware, with more information about it available
 `from here <http://www.assignmentproblems.com/linearAP.htm>`__.

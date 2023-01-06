@@ -29,7 +29,7 @@ class _tutorial_url:
         return self._value.startswith(value)
 
 
-tutorial_url = _tutorial_url("https://siremol.org/m")
+tutorial_url = _tutorial_url("https://sire.openbiosim.org/m")
 
 _range = range
 

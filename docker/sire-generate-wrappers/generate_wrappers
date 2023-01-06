@@ -42,13 +42,13 @@ then
 fi
 
 echo "Checking out sire..."
-git clone --branch $BRANCH https://github.com/michellab/Sire
+git clone --branch $BRANCH https://github.com/openbiosim/sire
 
 echo "Changing into the wrapper directory..."
-cd Sire/wrapper
+cd sire/wrapper
 
 echo "Running scanheaders..."
-python AutoGenerate/scanheaders.py $HOME/Sire/corelib/src/libs .
+python AutoGenerate/scanheaders.py $HOME/sire/corelib/src/libs .
 
 echo "Now generating all of the headers..."
 python create_all_wrappers.py

@@ -5,7 +5,7 @@ package:
   version: {{ GIT_DESCRIBE_TAG if GIT_DESCRIBE_TAG is not none else 'PR' }}
 
 source:
-  git_url: https://github.com/michellab/Sire.git
+  git_url: https://github.com/openbiosim/sire.git
   git_tag: SIRE_BRANCH
 
 build:
@@ -55,11 +55,11 @@ test:
     - pytest -vvv --color=yes tests
 
 about:
-  home: https://github.com/michellab/Sire
+  home: https://github.com/openbiosim/sire
   license: GPL-2.0-or-later
   license_file: '{{ environ["RECIPE_DIR"] }}/LICENSE'
   summary: "An advanced, multiscale, molecular-simulation framework."
-  dev_url: https://github.com/michellab/Sire
+  dev_url: https://github.com/openbiosim/sire
   doc_url: https://siremol.org
   description: |
                 Sire is a free, open source, multiscale molecular-simulation framework,
