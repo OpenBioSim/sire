@@ -12,8 +12,8 @@
 # This will read SIRE_DISABLE_SSE, SIRE_DISABLE_AVX and SIRE_DISABLE_AVX512F
 # to decide whether or not these levels of vectorisation should be disabled
 
-function( GET_SIRE_VECTOR_FLAGS OMP_SIMD_FLAG SSE2_FLAG AVX_FLAG AVX512F_FLAG )
-  #message( STATUS "Checking flags ${OMP_SIMD_FLAG} | ${SSE2_FLAG} | ${AVX_FLAG} | ${AVX512F_FLAG}" )
+function( GET_SIRE_VECTOR_FLAGS OMP_SIMD_FLAG SSE2_FLAG AVX_FLAG AVX512F_FLAG NEON_FLAG )
+  #message( STATUS "Checking flags ${OMP_SIMD_FLAG} | ${SSE2_FLAG} | ${AVX_FLAG} | ${AVX512F_FLAG} | ${NEON_FLAG}" )
   if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
     set (SLASH_HYPHEN "/")
   else()
@@ -28,6 +28,7 @@ function( GET_SIRE_VECTOR_FLAGS OMP_SIMD_FLAG SSE2_FLAG AVX_FLAG AVX512F_FLAG )
   set( ENABLE_AVX512F 1 )
   set( ENABLE_AVX 1 )
   set( ENABLE_SSE2 1 )
+  set( ENABLE_NEON 1 )
 
   if ( SIRE_DISABLE_SSE )
     set( ENABLE_SSE2 0 )
@@ -41,11 +42,16 @@ function( GET_SIRE_VECTOR_FLAGS OMP_SIMD_FLAG SSE2_FLAG AVX_FLAG AVX512F_FLAG )
     set( ENABLE_AVX512F 0 )
   endif()
 
+  if ( SIRE_DISABLE_NEON )
+    set( ENABLE_NEON 0 )
+  endif()
+
   # check that the compiler has the required flags
   CHECK_CXX_COMPILER_FLAG( "${OMP_SIMD_FLAG}" HAVE_OMP_SIMD_FLAG )
   CHECK_CXX_COMPILER_FLAG( "${SSE2_FLAG}" HAVE_SSE2_FLAG )
   CHECK_CXX_COMPILER_FLAG( "${AVX_FLAG}" HAVE_AVX_FLAG )
   CHECK_CXX_COMPILER_FLAG( "${AVX512F_FLAG}" HAVE_AVX512F_FLAG )
+  CHECK_CXX_COMPILER_FLAG( "${NEON_FLAG}" HAVE_NEON_FLAG )
 
   # Need this to check that C source files can run
   INCLUDE(CheckCSourceRuns)
@@ -119,7 +125,30 @@ function( GET_SIRE_VECTOR_FLAGS OMP_SIMD_FLAG SSE2_FLAG AVX_FLAG AVX512F_FLAG )
     if (CAN_RUN_AVX512F_PROGRAM)
       set( HAVE_AVX512F_SYSTEM 1 )
     endif()
-  endif()  
+  endif()
+
+  if ( HAVE_NEON_FLAG )
+    set(CMAKE_OLD_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+    set(CMAKE_OLD_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
+    set(CMAKE_REQUIRED_FLAGS "${NEON_FLAG}")
+    set(CMAKE_REQUIRED_INCLUDES "${CMAKE_SOURCE_DIR}/src/libs/SireMaths/ThirdParty")
+
+    CHECK_C_SOURCE_RUNS("
+      #include \"sse2neon.h\"
+      int main()
+      {
+          __m128d a = _mm_set_pd1(1.0);
+          return 0;
+      }"
+      CAN_RUN_NEON_PROGRAM)
+
+    set(CMAKE_REQUIRED_FLAGS ${CMAKE_OLD_REQUIRED_FLAGS})
+    set(CMAKE_REQUIRED_INCLUDES ${CMAKE_OLD_REQUIRED_INCLUDES})
+
+    if (CAN_RUN_NEON_PROGRAM)
+      set( HAVE_NEON_SYSTEM 1 )
+    endif()
+  endif()
 
   if (HAVE_OMP_SIMD_SYSTEM)
     message( STATUS "We can compile and run a program using pragma omp simd" )
@@ -145,6 +174,12 @@ function( GET_SIRE_VECTOR_FLAGS OMP_SIMD_FLAG SSE2_FLAG AVX_FLAG AVX512F_FLAG )
     message( STATUS "Not possible to compile and run a program with AVX512-F support" )
   endif()
 
+  if (HAVE_NEON_SYSTEM)
+    message( STATUS "We can compile and run a program with NEON support" )
+  else()
+    message( STATUS "Not possible to compile and run a program with NEON support" )
+  endif()
+
   if (HAVE_AVX512F_SYSTEM AND ENABLE_AVX512F)
     set( VECTOR_FLAGS "${AVX512F_FLAG} ${SLASH_HYPHEN}DSIRE_USE_AVX ${SLASH_HYPHEN}DSIRE_USE_AVX2 ${SLASH_HYPHEN}DSIRE_USE_AVX512F" )
     message( STATUS "Compiling using AVX-512F. Note that the resulting binary will only work on really new Intel processors" )
@@ -152,6 +187,8 @@ function( GET_SIRE_VECTOR_FLAGS OMP_SIMD_FLAG SSE2_FLAG AVX_FLAG AVX512F_FLAG )
     set( VECTOR_FLAGS "${AVX_FLAG} ${SLASH_HYPHEN}DSIRE_USE_AVX" )
   elseif ( HAVE_SSE2_SYSTEM AND ENABLE_SSE2 )
     set( VECTOR_FLAGS "${SSE2_FLAG} ${SLASH_HYPHEN}DSIRE_USE_SSE" )
+  elseif ( HAVE_NEON_SYSTEM AND ENABLE_NEON )
+    set( VECTOR_FLAGS "${NEON_FLAG} ${SLASH_HYPHEN}DSIRE_USE_NEON" )
   endif()
 
   if (HAVE_OMP_SIMD_SYSTEM)
