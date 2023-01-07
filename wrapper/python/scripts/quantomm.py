@@ -65,7 +65,7 @@ parser = argparse.ArgumentParser(description="Calculate QM/MM to MM correction f
                                              "the Warshel free energy cycle",
                                  epilog="quantomm is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/waterswap",
+                                        "http://sire.openbiosim.org/waterswap",
                                  prog="quantomm")
 
 parser.add_argument('--description', action="store_true",

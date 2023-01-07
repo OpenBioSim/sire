@@ -28,7 +28,7 @@ parser = argparse.ArgumentParser(description="An app to calculate the analytical
                                              "this is not the case, the numerical expression should be used.",
                                 epilog="boresch_analytical_correction is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org",
+                                        "http://sire.openbiosim.org",
                                  prog="boresch_analytical_correction")
 
 parser.add_argument('-C', '--config', nargs="?",
@@ -57,7 +57,7 @@ if args.author:
 if args.version:
     print("standardstatecorrection -- from Sire release version <%s>" %Sire.__version__)
     print("This particular release can be downloaded here: "
-          "https://github.com/michellab/Sire/releases/tag/v%s" %Sire.__version__)
+          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
     must_exit = True
 
 if must_exit:

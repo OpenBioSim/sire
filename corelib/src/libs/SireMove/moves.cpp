@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -66,15 +65,15 @@ using namespace SireStream;
 ///////
 
 static const RegisterMetaType<Moves> r_moves( MAGIC_ONLY, "SireMove::Moves" );
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Moves &moves)
 {
     writeHeader(ds, r_moves, 2);
-    
+
     ds << moves.acceptable_delta << moves.check_running_total
        << static_cast<const Property&>(moves);
-    
+
     return ds;
 }
 
@@ -82,7 +81,7 @@ QDataStream &operator<<(QDataStream &ds, const Moves &moves)
 QDataStream &operator>>(QDataStream &ds, Moves &moves)
 {
     VersionID v = readHeader(ds, r_moves);
-    
+
     if (v == 2)
     {
         ds >> moves.acceptable_delta >> moves.check_running_total
@@ -92,12 +91,12 @@ QDataStream &operator>>(QDataStream &ds, Moves &moves)
     {
         moves.acceptable_delta = 1e-2;
         moves.check_running_total = true;
-    
+
         ds >> static_cast<Property&>(moves);
     }
     else
         throw version_error(v, "1,2", r_moves, CODELOC);
-        
+
     return ds;
 }
 
@@ -138,34 +137,34 @@ bool Moves::operator==(const Moves &other) const
 const Move& Moves::operator[](int i) const
 {
     QList<MovePtr> mvs = this->moves();
-    
+
     return mvs.at( Index(i).map(mvs.count()) ).read();
 }
 
-/** Return the average time per move for the ith Move object in this set 
+/** Return the average time per move for the ith Move object in this set
     of Moves. This returns 0 if no timing data is available */
 SireUnits::Dimension::Time Moves::timing(int i) const
 {
     QList<SireUnits::Dimension::Time> times = this->timing();
-    
+
     return times.at( Index(i).map(times.count()) );
 }
 
-/** Return the number of different move types in this set of Moves 
+/** Return the number of different move types in this set of Moves
     (this is the maximum number of Move objects that can be iterated over) */
 int Moves::nMoveTypes() const
 {
     return this->moves().count();
 }
 
-/** Return the number of different move types in this set of Moves 
+/** Return the number of different move types in this set of Moves
     (this is the maximum number of Move objects that can be iterated over) */
 int Moves::count() const
 {
     return this->nMoveTypes();
 }
 
-/** Return the number of different move types in this set of Moves 
+/** Return the number of different move types in this set of Moves
     (this is the maximum number of Move objects that can be iterated over) */
 int Moves::size() const
 {
@@ -177,23 +176,23 @@ int Moves::size() const
 int Moves::nMoves() const
 {
     const QList<MovePtr> mvs = this->moves();
-    
+
     int nmoves = 0;
-    
+
     for (QList<MovePtr>::const_iterator it = mvs.constBegin();
          it != mvs.constEnd();
          ++it)
     {
         nmoves += it->read().nMoves();
     }
-    
+
     return nmoves;
 }
-    
-/** Set the energy component used by these moves - by default 
+
+/** Set the energy component used by these moves - by default
     this will raise an error as setting the energy component is
-    not supported 
-    
+    not supported
+
     \throw SireError::unsupported
 */
 void Moves::setEnergyComponent(const Symbol &nrg_component)
@@ -205,10 +204,10 @@ void Moves::setEnergyComponent(const Symbol &nrg_component)
                 .arg(nrg_component.toString()), CODELOC );
 }
 
-/** Set the space property used by these moves - by default 
+/** Set the space property used by these moves - by default
     this will raise an error as setting the space property is
-    not supported 
-    
+    not supported
+
     \throw SireError::unsupported
 */
 void Moves::setSpaceProperty(const PropertyName &space_property)
@@ -236,10 +235,10 @@ Volume Moves::volume(const System &system) const
 Ensemble Moves::ensemble() const
 {
     QList<MovePtr> mvs = this->moves();
-    
+
     if (mvs.isEmpty())
         return Ensemble();
-    
+
     Ensemble merged = mvs.takeFirst()->ensemble();
 
     for (QList<MovePtr>::const_iterator it = mvs.constBegin();
@@ -248,7 +247,7 @@ Ensemble Moves::ensemble() const
     {
         merged = Ensemble::merge(merged, (*it)->ensemble());
     }
-    
+
     return merged;
 }
 
@@ -301,11 +300,11 @@ Temperature Moves::temperature() const
             "sample from the %1")
                 .arg(this->ensemble().toString()),
                     CODELOC );
-                    
+
     return this->ensemble().temperature();
 }
 
-/** Return the constant pressure that these moves sample 
+/** Return the constant pressure that these moves sample
 
     \throw SireError::incompatible_error
 */
@@ -317,11 +316,11 @@ Pressure Moves::pressure() const
             "sample from the %1")
                 .arg( this->ensemble().toString() ),
                     CODELOC );
-                    
+
     return this->ensemble().pressure();
 }
 
-/** Return the constant fugacity that these moves sample 
+/** Return the constant fugacity that these moves sample
 
     \throw SireError::incompatible_error
 */
@@ -333,11 +332,11 @@ Pressure Moves::fugacity() const
             "sample from the %1")
                 .arg( this->ensemble().toString() ),
                     CODELOC );
-                    
+
     return this->ensemble().fugacity();
 }
 
-/** Return the constant chemical potential that these moves sample 
+/** Return the constant chemical potential that these moves sample
 
     \throw SireError::incompatible_error
 */
@@ -349,7 +348,7 @@ MolarEnergy Moves::chemicalPotential() const
             "samples from the %1")
                 .arg( this->ensemble().toString() ),
                     CODELOC );
-                    
+
     return this->ensemble().chemicalPotential();
 }
 
@@ -357,7 +356,7 @@ MolarEnergy Moves::chemicalPotential() const
 bool Moves::isConstantLambda(const Symbol &lam) const
 {
     QList<MovePtr> mvs = this->moves();
-    
+
     for (QList<MovePtr>::const_iterator it = mvs.constBegin();
          it != mvs.constEnd();
          ++it)
@@ -365,13 +364,13 @@ bool Moves::isConstantLambda(const Symbol &lam) const
         if (not (*it)->isConstantLambda(lam))
             return false;
     }
-    
+
     return true;
 }
 
-/** Set the temperature that these constant temperature moves sample 
+/** Set the temperature that these constant temperature moves sample
     to 'temperature'
-    
+
     \throw SireError::incompatible_error
 */
 void Moves::setTemperature(const Temperature &temperature)
@@ -387,9 +386,9 @@ void Moves::setTemperature(const Temperature &temperature)
     this->_pvt_setTemperature(temperature);
 }
 
-/** Set the pressure that these constant pressure moves sample 
+/** Set the pressure that these constant pressure moves sample
     to 'pressure'
-    
+
     \throw SireError::incompatible_error
 */
 void Moves::setPressure(const SireUnits::Dimension::Pressure &pressure)
@@ -405,9 +404,9 @@ void Moves::setPressure(const SireUnits::Dimension::Pressure &pressure)
     this->_pvt_setPressure(pressure);
 }
 
-/** Set the chemical potential that these constant chemical potential moves sample 
+/** Set the chemical potential that these constant chemical potential moves sample
     to 'chemical_potential'
-    
+
     \throw SireError::incompatible_error
 */
 void Moves::setChemicalPotential(const MolarEnergy &chemical_potential)
@@ -425,9 +424,9 @@ void Moves::setChemicalPotential(const MolarEnergy &chemical_potential)
                                         .fugacity() );
 }
 
-/** Set the fugacity that these constant fugacity moves sample 
+/** Set the fugacity that these constant fugacity moves sample
     to 'fugacity'
-    
+
     \throw SireError::incompatible_error
 */
 void Moves::setFugacity(const Pressure &fugacity)
@@ -453,10 +452,10 @@ void Moves::preCheck(System &system) const
     while (not system.constraintsSatisfied())
     {
         QStringList unsatisfied_constraints;
-    
+
         //a constraint is violated - get all unsatisfied constraints
         QVector<ConstraintPtr> constraints = system.constraints().constraints();
-        
+
         for (QVector<ConstraintPtr>::const_iterator it = constraints.constBegin();
              it != constraints.constEnd();
              ++it)
@@ -468,7 +467,7 @@ void Moves::preCheck(System &system) const
                         .arg(it->read().toString()) );
             }
         }
-        
+
         ++ntries;
 
         qDebug() << "WARNING - constraints not satisfied\n"
@@ -518,10 +517,10 @@ void Moves::postCheck(System &system) const
     if (not system.constraintsSatisfied())
     {
         QStringList unsatisfied_constraints;
-    
+
         //a constraint is violated - get all unsatisfied constraints
         QVector<ConstraintPtr> constraints = system.constraints().constraints();
-        
+
         for (QVector<ConstraintPtr>::const_iterator it = constraints.constBegin();
              it != constraints.constEnd();
              ++it)
@@ -533,7 +532,7 @@ void Moves::postCheck(System &system) const
                         .arg(it->read().toString()) );
             }
         }
-        
+
         throw SireSystem::constraint_error( QObject::tr(
                 "Performing the moves has resulted in the system containing "
                 "unsatisfied constraints. The number of unsatisfied constraints "
@@ -543,22 +542,22 @@ void Moves::postCheck(System &system) const
                     .arg(unsatisfied_constraints.join("\n"))
                     .arg(this->toString()), CODELOC );
     }
-    
+
     if (check_running_total)
     {
         //now check that the total energy equals the accumulated total energy
         SireCAS::Values oldnrgs = system.energies();
-        
+
         system.mustNowRecalculateFromScratch();
-        
+
         SireCAS::Values newnrgs = system.energies();
-        
+
         QStringList broken_nrgs;
-        
+
         for (SireCAS::Symbol key : oldnrgs.keys())
         {
             double delta = std::abs( newnrgs[key] - oldnrgs[key] );
-            
+
             if (delta > acceptable_delta)
             {
                 broken_nrgs.append( QString(
@@ -568,7 +567,7 @@ void Moves::postCheck(System &system) const
                         .arg(delta) );
             }
         }
-        
+
         if (not broken_nrgs.isEmpty())
         {
             throw SireError::program_bug( QObject::tr(
@@ -594,11 +593,11 @@ static const RegisterMetaType<SameMoves> r_samemoves;
 QDataStream &operator<<(QDataStream &ds, const SameMoves &samemoves)
 {
     writeHeader(ds, r_samemoves, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << samemoves.mv << samemoves.avgtime << static_cast<const Moves&>(samemoves);
-    
+
     return ds;
 }
 
@@ -606,24 +605,24 @@ QDataStream &operator<<(QDataStream &ds, const SameMoves &samemoves)
 QDataStream &operator>>(QDataStream &ds, SameMoves &samemoves)
 {
     VersionID v = readHeader(ds, r_samemoves);
-    
+
     if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> samemoves.mv >> samemoves.avgtime >> static_cast<Moves&>(samemoves);
     }
     else if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         samemoves.avgtime = Average();
-        
+
         sds >> samemoves.mv >> static_cast<Moves&>(samemoves);
     }
     else
         throw version_error(v, "1,2", r_samemoves, CODELOC);
-        
+
     return ds;
 }
 
@@ -696,7 +695,7 @@ System SameMoves::move(const System &system, int nmoves, bool record_stats)
 
     SameMoves old_state(*this);
     System new_system(system);
-    
+
     try
     {
         //ensure that the system is in a sane state before the moves
@@ -707,14 +706,14 @@ System SameMoves::move(const System &system, int nmoves, bool record_stats)
 
         //perform the moves
         mv.edit().move(new_system, nmoves, record_stats);
-        
+
         qint64 ns = t.nsecsElapsed();
-        
+
         for (int i=0; i<nmoves; ++i)
         {
             avgtime.accumulate( (1.0*ns) / nmoves );
         }
-        
+
         //ensure that the system has been placed into a sane state
         //after the moves
         this->postCheck(new_system);
@@ -724,7 +723,7 @@ System SameMoves::move(const System &system, int nmoves, bool record_stats)
         this->operator=(old_state);
         throw;
     }
-    
+
     return new_system;
 }
 
@@ -732,7 +731,7 @@ System SameMoves::move(const System &system, int nmoves, bool record_stats)
 QList<SireUnits::Dimension::Time> SameMoves::timing() const
 {
     QList<SireUnits::Dimension::Time> times;
-    
+
     times.append( avgtime.average() * nanosecond );
 
     return times;
@@ -753,7 +752,7 @@ void SameMoves::setEnergyComponent(const Symbol &component)
     }
 }
 
-/** Set the name of the property that all of the moves will use to 
+/** Set the name of the property that all of the moves will use to
     find the simulation space (simulation box) to 'spaceproperty' */
 void SameMoves::setSpaceProperty(const PropertyName &spaceproperty)
 {
@@ -819,7 +818,7 @@ QList<MovePtr> SameMoves::moves() const
 {
     QList<MovePtr> mvs;
     mvs.append(mv);
-    
+
     return mvs;
 }
 

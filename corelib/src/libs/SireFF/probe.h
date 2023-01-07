@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,7 +48,7 @@ namespace SireFF
 {
 
 /** This is the base class of all Probes - a Probe is an object
-    that is used to probe the potential or field at a point in 
+    that is used to probe the potential or field at a point in
     space caused by a ForceField. For example, a Probe could
     be a point unit charge, or a united atom methane point etc.
 
@@ -64,13 +63,13 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, Probe&);
 public:
     Probe();
     Probe(const Probe &other);
-    
+
     ~Probe();
-    
+
     static const char* typeName();
-    
+
     virtual Probe* clone() const=0;
-    
+
     static const Probe& null();
 
     template<class T>
@@ -78,7 +77,7 @@ public:
 
 protected:
     Probe& operator=(const Probe &other);
-    
+
     bool operator==(const Probe &other) const;
     bool operator!=(const Probe &other) const;
 
@@ -96,14 +95,14 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, NullProbe&);
 public:
     NullProbe();
     NullProbe(const NullProbe &other);
-    
+
     ~NullProbe();
-    
+
     NullProbe& operator=(const NullProbe &other);
-    
+
     bool operator==(const NullProbe &other) const;
     bool operator!=(const NullProbe &other) const;
-    
+
     static const char* typeName();
 };
 
@@ -115,7 +114,7 @@ template<class T>
 T Probe::convertTo() const
 {
     const T *as_t = dynamic_cast<const T*>(this);
-    
+
     if (as_t == 0)
         return T(*this);
     else

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -42,13 +41,13 @@ using namespace SireStream;
 static const RegisterMetaType<CombineSpaces> r_combinespaces;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                        const CombineSpaces &combinespaces)
 {
     writeHeader(ds, r_combinespaces, 1);
-    
+
     ds << static_cast<const CombineProperties&>(combinespaces);
-    
+
     return ds;
 }
 
@@ -56,14 +55,14 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, CombineSpaces &combinespaces)
 {
     VersionID v = readHeader(ds, r_combinespaces);
-    
+
     if (v == 1)
     {
         ds >> static_cast<CombineProperties&>(combinespaces);
     }
     else
         throw version_error( v, "1", r_combinespaces, CODELOC );
-        
+
     return ds;
 }
 
@@ -76,7 +75,7 @@ CombineSpaces::CombineSpaces(const PropertyName &source)
               : ConcreteProperty<CombineSpaces,CombineProperties>(source)
 {}
 
-/** Construct to combine together the two spaces specified by the 
+/** Construct to combine together the two spaces specified by the
     two supplied sources */
 CombineSpaces::CombineSpaces(const PropertyName &source0, const PropertyName &source1)
               : ConcreteProperty<CombineSpaces,CombineProperties>(source0, source1)
@@ -130,9 +129,9 @@ bool CombineSpaces::operator!=(const CombineSpaces &other) const
     return CombineProperties::operator!=(other);
 }
 
-/** Update this combined space by extracting the required space 
+/** Update this combined space by extracting the required space
     properties from 'properties'
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -141,7 +140,7 @@ void CombineSpaces::updateFrom(const Properties &properties)
 {
     if (this->isEmpty())
         return;
-        
+
     else if (this->count() == 1)
     {
         this->setCombinedProperty( properties.property(this->at(0))
@@ -150,14 +149,14 @@ void CombineSpaces::updateFrom(const Properties &properties)
     else
     {
         QList<SpacePtr> spaces;
-        
+
         for (CombineProperties::const_iterator it = this->constBegin();
              it != this->constEnd();
              ++it)
         {
             spaces.append( properties.property(*it).asA<Space>() );
         }
-        
+
         this->setCombinedProperty( CombinedSpace(spaces) );
     }
 }

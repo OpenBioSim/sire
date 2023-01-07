@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -39,9 +38,9 @@ static const RegisterMetaType<PointDipole> r_pointdipole(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const PointDipole &q)
 {
     writeHeader(ds, r_pointdipole, 1);
-    
+
     ds << q.cent << q.dipol;
-    
+
     return ds;
 }
 
@@ -49,14 +48,14 @@ QDataStream &operator<<(QDataStream &ds, const PointDipole &q)
 QDataStream &operator>>(QDataStream &ds, PointDipole &q)
 {
     VersionID v = readHeader(ds, r_pointdipole);
-    
+
     if (v == 1)
     {
         ds >> q.cent >> q.dipol;
     }
     else
         throw version_error(v, "1", r_pointdipole, CODELOC);
-        
+
     return ds;
 }
 
@@ -64,7 +63,7 @@ QDataStream &operator>>(QDataStream &ds, PointDipole &q)
 PointDipole::PointDipole()
 {}
 
-/** Construct a point dipole at the specified location with the 
+/** Construct a point dipole at the specified location with the
     specified dipole */
 PointDipole::PointDipole(const Vector &coords, const Vector &dipole)
             : cent(coords), dipol(dipole)

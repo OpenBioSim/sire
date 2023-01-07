@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -104,7 +103,7 @@ QList<MonitorName> MonitorID::processMatches(QList<MonitorName> &matches,
         throw SireSystem::missing_monitor( QObject::tr(
             "There are no monitors available that match the ID \"%1\".")
                 .arg(this->toString()), CODELOC );
-                
+
     return matches;
 }
 
@@ -118,9 +117,9 @@ static const RegisterMetaType<MonitorIdx> r_monidx;
 QDataStream &operator<<(QDataStream &ds, const MonitorIdx &monidx)
 {
     writeHeader(ds, r_monidx, 1);
-    
+
     ds << static_cast<const SireID::Index_T_<MonitorIdx>&>(monidx);
-    
+
     return ds;
 }
 
@@ -128,14 +127,14 @@ QDataStream &operator<<(QDataStream &ds, const MonitorIdx &monidx)
 QDataStream &operator>>(QDataStream &ds, MonitorIdx &monidx)
 {
     VersionID v = readHeader(ds, r_monidx);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Index_T_<MonitorIdx>&>(monidx);
     }
     else
         throw version_error( v, "1", r_monidx, CODELOC );
-        
+
     return ds;
 }
 
@@ -145,7 +144,7 @@ MonitorIdx::MonitorIdx() : SireID::Index_T_<MonitorIdx>(), MonitorID()
 MonitorIdx::MonitorIdx(qint32 idx) : SireID::Index_T_<MonitorIdx>(idx), MonitorID()
 {}
 
-MonitorIdx::MonitorIdx(const MonitorIdx &other) 
+MonitorIdx::MonitorIdx(const MonitorIdx &other)
            : SireID::Index_T_<MonitorIdx>(other), MonitorID(other)
 {}
 
@@ -204,9 +203,9 @@ static const RegisterMetaType<MonitorName> r_monname;
 QDataStream &operator<<(QDataStream &ds, const MonitorName &monname)
 {
     writeHeader(ds, r_monname, 1);
-    
+
     ds << static_cast<const SireID::Name&>(monname);
-    
+
     return ds;
 }
 
@@ -214,14 +213,14 @@ QDataStream &operator<<(QDataStream &ds, const MonitorName &monname)
 QDataStream &operator>>(QDataStream &ds, MonitorName &monname)
 {
     VersionID v = readHeader(ds, r_monname);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Name&>(monname);
     }
     else
         throw version_error( v, "1", r_monname, CODELOC );
-        
+
     return ds;
 }
 
@@ -236,7 +235,7 @@ MonitorName::MonitorName(const MonitorName &other) : SireID::Name(other), Monito
 
 MonitorName::~MonitorName()
 {}
-    
+
 bool MonitorName::isNull() const
 {
     return SireID::Name::isNull();

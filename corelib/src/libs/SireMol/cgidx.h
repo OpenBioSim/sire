@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,7 +51,7 @@ class CGAtomIdx;
 
     @author Christopher Woods
 */
-class SIREMOL_EXPORT CGIdx 
+class SIREMOL_EXPORT CGIdx
        : public SireID::Index_T_<CGIdx>, public CGID
 {
 
@@ -61,38 +60,38 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CGIdx&);
 
 public:
     CGIdx();
-    
+
     explicit CGIdx(qint32 idx);
-    
+
     CGIdx(const CGIdx &other);
-    
+
     ~CGIdx();
-    
+
     static const char* typeName();
 
     const char* what() const
     {
         return SireID::Index_T_<CGIdx>::what();
     }
-    
+
     CGIdx* clone() const;
-    
+
     static CGIdx null();
-    
+
     using CGID::operator+;
-    
+
     CGAtomIdx operator+(const SireID::Index &other) const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
 
     QString toString() const;
-    
+
     CGIdx& operator=(const CGIdx &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     using SireID::Index_T_<CGIdx>::operator=;
 
     using SireID::Index_T_<CGIdx>::operator==;
@@ -102,14 +101,14 @@ public:
     using SireID::Index_T_<CGIdx>::operator++;
     using SireID::Index_T_<CGIdx>::operator-=;
     using SireID::Index_T_<CGIdx>::operator--;
-    
+
     using SireID::Index_T_<CGIdx>::map;
-    
+
     QList<CGIdx> map(const MolInfo &molinfo) const;
 };
 
 SIREMOL_EXPORT CGAtomIdx operator+(const SireID::Index &index, const CGIdx &cgidx);
-    
+
 }
 
 Q_DECLARE_METATYPE(SireMol::CGIdx);

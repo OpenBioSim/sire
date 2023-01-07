@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -63,9 +62,9 @@ static const RegisterMetaType<Integrator> r_integrator(MAGIC_ONLY,
 QDataStream &operator<<(QDataStream &ds, const Integrator &integrator)
 {
     writeHeader(ds, r_integrator, 1);
-    
+
     ds << static_cast<const Property&>(integrator);
-    
+
     return ds;
 }
 
@@ -73,14 +72,14 @@ QDataStream &operator<<(QDataStream &ds, const Integrator &integrator)
 QDataStream &operator>>(QDataStream &ds, Integrator &integrator)
 {
     VersionID v = readHeader(ds, r_integrator);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(integrator);
     }
     else
         throw version_error(v, "1", r_integrator, CODELOC);
-        
+
     return ds;
 }
 
@@ -132,9 +131,9 @@ static const RegisterMetaType<NullIntegrator> r_nullint;
 QDataStream &operator<<(QDataStream &ds, const NullIntegrator &nullint)
 {
     writeHeader(ds, r_nullint, 1);
-    
+
     ds << static_cast<const Integrator&>(nullint);
-    
+
     return ds;
 }
 
@@ -142,14 +141,14 @@ QDataStream &operator<<(QDataStream &ds, const NullIntegrator &nullint)
 QDataStream &operator>>(QDataStream &ds, NullIntegrator &nullint)
 {
     VersionID v = readHeader(ds, r_nullint);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Integrator&>(nullint);
     }
     else
         throw version_error(v, "1", r_nullint, CODELOC);
-        
+
     return ds;
 }
 
@@ -204,8 +203,8 @@ bool NullIntegrator::isTimeReversible() const
 }
 
 /** The null integrator does nothing */
-void NullIntegrator::integrate(IntegratorWorkspace&, 
-                               const Symbol&, 
+void NullIntegrator::integrate(IntegratorWorkspace&,
+                               const Symbol&,
                                SireUnits::Dimension::Time,
                                int, bool)
 {}

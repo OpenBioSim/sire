@@ -26,7 +26,7 @@ def disable_thumbs_up():
     """Permanently disable thumbs up. This will write a file
     into your home directory called '.sire_no_thumbs_up.txt'.
     If this file exists, then thumbs up are denied and
-    no data will be sent to siremol.org.
+    no data will be sent to sire.openbiosim.org.
 
     The only way to re-enable thumbs up is to remove
     the $HOME/.sire_no_thumbs_up.txt file.
@@ -43,7 +43,7 @@ _thumbs_up_data = None
 
 
 def get_thumbs_up_info():
-    """Return the info that will be sent to siremol.org if you call
+    """Return the info that will be sent to sire.openbiosim.org if you call
     the thumbs_up() function. This will return nothing if you
     have disabled thumbs up using the 'disable_thumbs_up()' function.
     """
@@ -121,14 +121,14 @@ _sent_usage_data = None
 
 def thumbs_up():
     """Give Sire a thumbs up! This will send a small amount of data
-    to siremol.org to let us know that you like Sire, and what
+    to sire.openbiosim.org to let us know that you like Sire, and what
     operating system and version of Sire you are using.
 
     (you can see all of the information that would be sent
      by calling "get_thumbs_up_info()")
 
     You can get more information about what is sent and why
-    this is useful to us by visiting https://siremol.org/thumbs_up
+    this is useful to us by visiting https://sire.openbiosim.org/thumbs_up
 
     You can permanently disable thumbs_up() on your computer by
     calling "disable_thumbs_up()". This will write a small
@@ -161,7 +161,7 @@ def thumbs_up():
 
         _sent_usage_data = data
 
-        conn = htc.HTTPSConnection("siremol.org")
+        conn = htc.HTTPSConnection("sire.openbiosim.org")
         conn.request("POST", "/phonehome/postusagestats.php", params, headers)
 
         # Next time this breaks, remember to uncomment the below lines so that

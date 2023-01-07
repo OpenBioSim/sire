@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ namespace SireMove
 
 /** This is the base class of all sets of moves that can be applied
     to supra-systems
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT SupraMoves : public SireBase::Property
@@ -61,46 +60,46 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SupraMoves&);
 
 public:
     SupraMoves();
-    
+
     SupraMoves(const SupraMoves &other);
-    
+
     virtual ~SupraMoves();
-    
+
     virtual SupraMoves* clone() const=0;
-    
+
     static const char* typeName()
     {
         return "SireMove::SupraMoves";
     }
-    
+
     const SupraMove& operator[](int i) const;
-    
+
     int count() const;
     int size() const;
     int nSubMoveTypes() const;
-    
+
     virtual int nMoves() const=0;
-    
+
     virtual QString toString() const=0;
-    
+
     virtual void move(SupraSystem &system, int nmoves, bool record_stats=true)=0;
-                      
+
     virtual void clearStatistics()=0;
-    
+
     virtual QList<SupraMovePtr> moves() const=0;
-    
+
     static const SameSupraMoves& null();
 
 protected:
     SupraMoves& operator=(const SupraMoves &other);
-    
+
     bool operator==(const SupraMoves &other) const;
     bool operator!=(const SupraMoves &other) const;
 };
 
 /** This SupraMoves object is used to apply the same SupraMove
     repeatedly to a SupraSystem
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT SameSupraMoves
@@ -113,26 +112,26 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SameSupraMoves&);
 public:
     SameSupraMoves();
     SameSupraMoves(const SupraMove &move);
-    
+
     SameSupraMoves(const SameSupraMoves &other);
-    
+
     ~SameSupraMoves();
-    
+
     SameSupraMoves& operator=(const SameSupraMoves &other);
-    
+
     bool operator==(const SameSupraMoves &other) const;
     bool operator!=(const SameSupraMoves &other) const;
-    
+
     static const char* typeName();
-    
+
     QString toString() const;
-    
+
     void move(SupraSystem &system, int nmoves, bool record_stats=true);
 
     int nMoves() const;
 
     void clearStatistics();
-    
+
     QList<SupraMovePtr> moves() const;
 
 private:

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -38,9 +37,9 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-/** This class provides a temporary directory that is created in the 
+/** This class provides a temporary directory that is created in the
     constructor, and deleted in the destructor.
-    
+
     @author Christopher Woods
 */
 class SIREBASE_EXPORT TempDir
@@ -50,27 +49,27 @@ public:
     TempDir(const QString &temp_root);
 
     ~TempDir();
-    
+
     static const char* typeName()
     {
         return "SireBase::TempDir";
     }
-    
+
     const char* what() const
     {
         return TempDir::typeName();
     }
-    
+
     QString toString() const;
-    
+
     QString path() const;
-    
+
     void doNotDelete();
-    
+
 private:
     TempDir(const TempDir&)
     {}
-    
+
     TempDir& operator=(const TempDir&)
     {
         return *this;
@@ -80,7 +79,7 @@ private:
 
     /** The temporary directory */
     QDir tmpdir;
-    
+
     /** Whether or not to delete the directory at exit */
     bool do_not_delete;
 };

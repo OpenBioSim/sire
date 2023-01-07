@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,9 +47,9 @@ static const RegisterMetaType<ChainIdentifier> r_chainid;
 QDataStream &operator<<(QDataStream &ds, const ChainIdentifier &chainid)
 {
     writeHeader(ds, r_chainid, 1);
-    
+
     SireStream::savePolyPointer(ds, chainid.d);
-    
+
     return ds;
 }
 
@@ -58,14 +57,14 @@ QDataStream &operator<<(QDataStream &ds, const ChainIdentifier &chainid)
 QDataStream &operator>>(QDataStream &ds, ChainIdentifier &chainid)
 {
     VersionID v = readHeader(ds, r_chainid);
-    
+
     if (v == 1)
     {
         SireStream::loadPolyPointer(ds, chainid.d);
     }
     else
         throw version_error( v, "1", r_chainid, CODELOC );
-        
+
     return ds;
 }
 
@@ -106,7 +105,7 @@ uint ChainIdentifier::hash() const
     else
         return d->hash();
 }
-            
+
 /** Return a string representatio of this ID */
 QString ChainIdentifier::toString() const
 {
@@ -141,7 +140,7 @@ ChainIdentifier& ChainIdentifier::operator=(const ChainID &other)
         d.reset();
     else
         d.reset(other.clone());
-    
+
     return *this;
 }
 
@@ -219,9 +218,9 @@ static const RegisterMetaType<ChainIdx> r_chainidx;
 QDataStream &operator<<(QDataStream &ds, const ChainIdx &chainidx)
 {
     writeHeader(ds, r_chainidx, 1);
-    
+
     ds << static_cast<const SireID::Index_T_<ChainIdx>&>(chainidx);
-    
+
     return ds;
 }
 
@@ -229,14 +228,14 @@ QDataStream &operator<<(QDataStream &ds, const ChainIdx &chainidx)
 QDataStream &operator>>(QDataStream &ds, ChainIdx &chainidx)
 {
     VersionID v = readHeader(ds, r_chainidx);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Index_T_<ChainIdx>&>(chainidx);
     }
     else
         throw version_error( v, "1", r_chainidx, CODELOC );
-        
+
     return ds;
 }
 
@@ -304,9 +303,9 @@ static const RegisterMetaType<ChainName> r_chainname;
 QDataStream &operator<<(QDataStream &ds, const ChainName &chainname)
 {
     writeHeader(ds, r_chainname, 1);
-    
+
     ds << static_cast<const SireID::Name&>(chainname);
-    
+
     return ds;
 }
 
@@ -314,14 +313,14 @@ QDataStream &operator<<(QDataStream &ds, const ChainName &chainname)
 QDataStream &operator>>(QDataStream &ds, ChainName &chainname)
 {
     VersionID v = readHeader(ds, r_chainname);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Name&>(chainname);
     }
     else
         throw version_error( v, "1", r_chainname, CODELOC );
-        
+
     return ds;
 }
 

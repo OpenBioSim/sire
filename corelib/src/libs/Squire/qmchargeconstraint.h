@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -60,7 +59,7 @@ using SireBase::PropertyMap;
     of molecules to equal those calculated from QM calculations
     (e.g. the charges can be constrained to equal those
     from AM1-BCC calculations)
-    
+
     @author Christopher Woods
 */
 class SQUIRE_EXPORT QMChargeConstraint
@@ -72,29 +71,29 @@ friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, QMChargeConstraint&
 
 public:
     QMChargeConstraint();
-    
+
     QMChargeConstraint(const MoleculeGroup &molgroup,
                        const PropertyMap &map = PropertyMap());
-    
+
     QMChargeConstraint(const MoleculeGroup &molgroup,
                        const QMChargeCalculator &chargecalculator,
                        const PropertyMap &map = PropertyMap());
-                       
+
     QMChargeConstraint(const QMChargeConstraint &other);
-    
+
     ~QMChargeConstraint();
-    
+
     static const char* typeName();
-    
+
     QMChargeConstraint& operator=(const QMChargeConstraint &other);
-    
+
     bool operator==(const QMChargeConstraint &other) const;
     bool operator!=(const QMChargeConstraint &other) const;
-    
+
     QString toString() const;
-    
+
     const QMChargeCalculator& chargeCalculator() const;
-    
+
     void setChargeCalculator(const QMChargeCalculator &chargecalculator);
 
 protected:
@@ -112,7 +111,7 @@ private:
 
     /** The set of molecules that need to change to maintain this constraint */
     Molecules mols_to_change;
-    
+
     /** If this flag is set, then all of the charges need
         to be recalculated */
     bool must_recalc_from_scratch;

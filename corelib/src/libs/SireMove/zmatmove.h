@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,10 +60,10 @@ using SireMol::PartialMolecule;
 /** This class implements a z-matrix based intramolecular Monte Carlo
     move that may be applied to a random molecule (or part of a molecule)
     within a MoleculeGroup
-    
+
     @author Christopher Woods
 */
-class SIREMOVE_EXPORT ZMatMove 
+class SIREMOVE_EXPORT ZMatMove
             : public SireBase::ConcreteProperty<ZMatMove,MonteCarlo>
 {
 
@@ -73,18 +72,18 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, ZMatMove&);
 
 public:
     ZMatMove(const PropertyMap &map = PropertyMap());
-    
+
     ZMatMove(const MoleculeGroup &molgroup,
              const PropertyMap &map = PropertyMap());
     ZMatMove(const Sampler &sampler,
              const PropertyMap &map = PropertyMap());
-    
+
     ZMatMove(const ZMatMove &other);
-    
+
     ~ZMatMove();
-    
+
     ZMatMove& operator=(const ZMatMove &other);
-    
+
     static const char* typeName();
 
     bool operator==(const ZMatMove &other) const;
@@ -106,12 +105,12 @@ public:
     void setSynchronisedBonds(bool on);
     void setSynchronisedAngles(bool on);
     void setSynchronisedDihedrals(bool on);
-    
+
     bool synchronisedMotion() const;
     bool synchronisedBonds() const;
     bool synchronisedAngles() const;
     bool synchronisedDihedrals() const;
-    
+
     void setGenerator(const RanGenerator &rangenerator);
 
     void move(System &system, int nmoves, bool record_stats=true);
@@ -126,19 +125,19 @@ private:
 
     /** The sampler used to select random molecules for the move */
     SamplerPtr smplr;
-    
+
     /** The name of the property that contains the z-matrix */
     PropertyName zmatrix_property;
-    
+
     /** Whether or not to move equivalent bonds in different
-        molecules by the same amount (equivalent is judged by 
+        molecules by the same amount (equivalent is judged by
         AtomIdx) */
     bool sync_bonds;
-    
+
     /** Whether or not to move equivalent angles in different
         molecules by the same amount */
     bool sync_angles;
-    
+
     /** Whether or not to move equivalent dihedrals in different
         molecules by the same amount */
     bool sync_dihedrals;

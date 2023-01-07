@@ -30,7 +30,7 @@ parser = argparse.ArgumentParser(description="Visualise the distribution of wate
                                              "a binding site, both with and without a ligand present.",
                                  epilog="waterview is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/waterview",
+                                        "http://sire.openbiosim.org/waterview",
                                  prog="waterview")
 
 parser.add_argument('--description', action="store_true",

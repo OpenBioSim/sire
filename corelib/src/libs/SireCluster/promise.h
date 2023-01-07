@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,7 +48,7 @@ class PromisePvt;
 /** This class provides a handle to the (future) result of
     a piece of work that is being conducted on a node
     in the cluster
-    
+
     @author Christopher Woods
 */
 class SIRECLUSTER_EXPORT Promise
@@ -59,42 +58,42 @@ friend class Node;
 
 public:
     Promise();
-    
+
     Promise(const Promise &other);
-    
+
     ~Promise();
-    
+
     Promise& operator=(const Promise &other);
-    
+
     bool operator==(const Promise &other) const;
     bool operator!=(const Promise &other) const;
-    
+
     void abort();
     void stop();
-    
+
     void wait();
     bool wait(int timeout);
-    
+
     bool isNull() const;
-    
+
     bool isRunning();
-    
+
     bool isError();
     void throwError();
-    
+
     bool wasStopped();
-    
+
     bool wasAborted();
-    
+
     float progress();
 
     WorkPacket input();
     WorkPacket interimResult();
     WorkPacket result();
-    
+
 protected:
     Promise(const Node &node, const WorkPacket &initial_workpacket);
-    
+
     /** Pointer to the private implementation */
     boost::shared_ptr<detail::PromisePvt> d;
 };

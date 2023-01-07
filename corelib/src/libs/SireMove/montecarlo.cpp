@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -74,7 +73,7 @@ QDataStream &operator>>(QDataStream &ds, MonteCarlo &mc)
     if (v == 2)
     {
         SharedDataStream sds(ds);
-    
+
         sds >> mc.ensmble
             >> mc.rangenerator
             >> mc.naccept >> mc.nreject
@@ -84,7 +83,7 @@ QDataStream &operator>>(QDataStream &ds, MonteCarlo &mc)
     else if (v == 1)
     {
         SharedDataStream sds(ds);
-    
+
         sds >> mc.ensmble
             >> mc.rangenerator
             >> mc.naccept >> mc.nreject
@@ -190,7 +189,7 @@ quint32 MonteCarlo::nRejected() const
 double MonteCarlo::acceptanceRatio() const
 {
     int ntotal = this->nAttempted();
-    
+
     if (ntotal == 0)
         return 0;
     else
@@ -211,7 +210,7 @@ void MonteCarlo::clearStatistics()
 }
 
 /** Turn on use of optimised MC moves. This turns on newer (and potentially more buggy)
-    code that aims to speed up the memory allocation and energy calculation for 
+    code that aims to speed up the memory allocation and energy calculation for
     MC moves. */
 void MonteCarlo::enableOptimisedMoves()
 {
@@ -285,7 +284,7 @@ bool MonteCarlo::test(double new_energy, double old_energy)
     }
 }
 
-/** Perform the NPT Monte Carlo test, using the supplied change in 
+/** Perform the NPT Monte Carlo test, using the supplied change in
     energy and supplied change in volume (no change in biasing factor) */
 bool MonteCarlo::test(double new_energy, double old_energy,
                       int nmolecules,
@@ -311,7 +310,7 @@ bool MonteCarlo::test(double new_energy, double old_energy,
     }
 }
 
-/** Perform the NPT Monte Carlo test, using the supplied change in 
+/** Perform the NPT Monte Carlo test, using the supplied change in
     energy and supplied change in volume (with a change in biasing factor) */
 bool MonteCarlo::test(double new_energy, double old_energy,
                       int nmolecules,
@@ -324,7 +323,7 @@ bool MonteCarlo::test(double new_energy, double old_energy,
 
     double beta = -1.0 / (k_boltz * ensmble.temperature().value());
 
-    double x =  (new_bias / old_bias) * 
+    double x =  (new_bias / old_bias) *
                     std::exp( beta * (new_energy - old_energy + p_deltav) + vratio );
 
     if ( x > 1 or x >= rangenerator.rand() )

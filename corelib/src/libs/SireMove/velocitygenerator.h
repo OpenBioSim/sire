@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -84,7 +83,7 @@ using SireMol::MoleculeView;
 
 /** This is the base class of generators that are used
     to get velocities for molecules
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT VelocityGenerator : public SireBase::Property
@@ -95,28 +94,28 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, VelocityGenerator
 
 public:
     VelocityGenerator();
-    
+
     VelocityGenerator(const VelocityGenerator &other);
-    
+
     virtual ~VelocityGenerator();
-    
+
     static const char* typeName()
     {
         return "SireMove::VelocityGenerator";
     }
-    
+
     virtual VelocityGenerator* clone() const=0;
-    
+
     virtual void setGenerator(const RanGenerator &generator);
 
-    virtual AtomVelocities generate(const MoleculeView &molview, 
+    virtual AtomVelocities generate(const MoleculeView &molview,
                                     const PropertyMap &map = PropertyMap()) const=0;
-    
+
     static const NullVelocityGenerator& null();
-    
+
 protected:
     VelocityGenerator& operator=(const VelocityGenerator &other);
-    
+
     bool operator==(const VelocityGenerator &other) const;
     bool operator!=(const VelocityGenerator &other) const;
 
@@ -135,25 +134,25 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullVelocityGener
 
 public:
     NullVelocityGenerator();
-    
+
     NullVelocityGenerator(const NullVelocityGenerator &other);
-    
+
     ~NullVelocityGenerator();
-    
+
     NullVelocityGenerator& operator=(const NullVelocityGenerator &other);
-    
+
     bool operator==(const NullVelocityGenerator &other) const;
     bool operator!=(const NullVelocityGenerator &other) const;
-    
-    AtomVelocities generate(const MoleculeView &molview, 
+
+    AtomVelocities generate(const MoleculeView &molview,
                             const PropertyMap &map = PropertyMap()) const;
-    
+
     static const char* typeName();
 };
 
-/** This is a velocity generator that extracts velocities from a 
+/** This is a velocity generator that extracts velocities from a
     specified molecular property
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT VelocitiesFromProperty
@@ -165,21 +164,21 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, VelocitiesFromPro
 
 public:
     VelocitiesFromProperty();
-    
+
     VelocitiesFromProperty(const SireBase::PropertyName &property);
-    
+
     VelocitiesFromProperty(const VelocitiesFromProperty &other);
-    
+
     ~VelocitiesFromProperty();
 
     VelocitiesFromProperty& operator=(const VelocitiesFromProperty &other);
-    
+
     bool operator==(const VelocitiesFromProperty &other) const;
     bool operator!=(const VelocitiesFromProperty &other) const;
-    
+
     static const char* typeName();
 
-    AtomVelocities generate(const MoleculeView &molview, 
+    AtomVelocities generate(const MoleculeView &molview,
                             const PropertyMap &map = PropertyMap()) const;
 
 private:
@@ -187,9 +186,9 @@ private:
     SireBase::PropertyName vel_property;
 };
 
-/** This is a velocity generator that generates random velocities 
+/** This is a velocity generator that generates random velocities
     according to the Maxwell-Boltzmann distribution
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT MaxwellBoltzmann
@@ -201,18 +200,18 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, MaxwellBoltzmann&
 
 public:
     MaxwellBoltzmann();
-    
+
     MaxwellBoltzmann(SireUnits::Dimension::Temperature temperature);
-    
+
     MaxwellBoltzmann(const MaxwellBoltzmann &other);
-    
+
     ~MaxwellBoltzmann();
-    
+
     MaxwellBoltzmann& operator=(const MaxwellBoltzmann &other);
-    
+
     bool operator==(const MaxwellBoltzmann &other) const;
     bool operator!=(const MaxwellBoltzmann &other) const;
-    
+
     static const char* typeName();
 
     SireUnits::Dimension::Temperature temperature() const;
@@ -221,7 +220,7 @@ public:
     void setGenerator(const RanGenerator &rangenerator);
     const RanGenerator& generator() const;
 
-    AtomVelocities generate(const MoleculeView &molview, 
+    AtomVelocities generate(const MoleculeView &molview,
                             const PropertyMap &map = PropertyMap()) const;
 
 private:

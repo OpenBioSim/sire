@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,7 +56,7 @@ using namespace SireMol;
 using namespace SireBase;
 using namespace SireStream;
 
-void SireFF::detail::throwForceFieldRestoreBug(const char *this_what, 
+void SireFF::detail::throwForceFieldRestoreBug(const char *this_what,
                                                              const char *ffield_what)
 {
     throw SireError::program_bug( QObject::tr(
@@ -72,13 +71,13 @@ static const RegisterMetaType<FF> r_ff( MAGIC_ONLY, FF::typeName() );
 QDataStream &operator<<(QDataStream &ds, const FF &ff)
 {
     writeHeader(ds, r_ff, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << ff.uid << ff.versn << ff.ffname << ff.nrg_components
         << ff.isdirty
         << static_cast<const MolGroupsBase&>(ff);
-        
+
     return ds;
 }
 
@@ -86,7 +85,7 @@ QDataStream &operator<<(QDataStream &ds, const FF &ff)
 QDataStream &operator>>(QDataStream &ds, FF &ff)
 {
     VersionID v = readHeader(ds, r_ff);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -96,12 +95,12 @@ QDataStream &operator>>(QDataStream &ds, FF &ff)
     }
     else
         throw version_error(v, "1", r_ff, CODELOC);
-        
+
     return ds;
 }
 
 /** Constructor */
-FF::FF() : MolGroupsBase(), versn(0), 
+FF::FF() : MolGroupsBase(), versn(0),
                             version_ptr( new Incremint(0) ),
                             ffname( QObject::tr("unnamed") ),
                             isdirty(true)
@@ -110,8 +109,8 @@ FF::FF() : MolGroupsBase(), versn(0),
 }
 
 /** Construct a forcefield, and also give it a name */
-FF::FF(const QString &name) : MolGroupsBase(), 
-                              versn(0), 
+FF::FF(const QString &name) : MolGroupsBase(),
+                              versn(0),
                               version_ptr( new Incremint(0) ),
                               ffname(name),
                               isdirty(true)
@@ -143,10 +142,10 @@ FF& FF::operator=(const FF &other)
         ffname = other.ffname;
         nrg_components = other.nrg_components;
         isdirty = other.isdirty;
-        
+
         MolGroupsBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -214,10 +213,10 @@ void FF::setName(const QString &name)
         if (ffname != FFName(name))
         {
             ffname = FFName(name);
-            
+
             uid = QUuid::createUuid();
             version_ptr.reset( new Incremint() );
-            
+
             this->_pvt_updateName();
 
             this->incrementVersion();
@@ -230,19 +229,19 @@ void FF::setName(const QString &name)
     }
 }
 
-/** Set the name of the forcefield groups identified by 'mgid' 
+/** Set the name of the forcefield groups identified by 'mgid'
 
     \throw SireMol::missing_group
 */
 void FF::setName(const MGID &mgid, const QString &name)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     foreach (MGNum mgnum, mgnums)
     {
         MGName old_name = this->group(mgnum).name();
         MGName new_name = MGName(name);
-        
+
         if (old_name != new_name)
         {
             this->changeNameIndex(mgnum, old_name, new_name);
@@ -253,7 +252,7 @@ void FF::setName(const MGID &mgid, const QString &name)
 
 /** Return the energy of the forcefield component represented
     by the passed symbol
-    
+
     \throw SireFF::missing_component
 */
 SireUnits::Dimension::MolarEnergy FF::energy(const Symbol &component)
@@ -262,7 +261,7 @@ SireUnits::Dimension::MolarEnergy FF::energy(const Symbol &component)
     {
         this->recalculateEnergy();
     }
-                  
+
     if (not nrg_components.values().contains(component.ID()))
         throw SireFF::missing_component( QObject::tr(
             "There is no component in this forcefield represented by "
@@ -284,9 +283,9 @@ Values FF::energies(const QSet<Symbol> &components)
 {
     if (this->isDirty())
         this->recalculateEnergy();
-        
+
     Values vals;
-    
+
     foreach (const Symbol &component, components)
     {
         if (not nrg_components.values().contains(component.ID()))
@@ -295,10 +294,10 @@ Values FF::energies(const QSet<Symbol> &components)
                 "the symbol %1. Available components are %2.")
                     .arg(component.toString())
                     .arg( Sire::toString( nrg_components.values().keys() ) ), CODELOC );
-    
+
         vals.set( component, nrg_components.value(component) );
     }
-    
+
     return vals;
 }
 
@@ -307,18 +306,18 @@ Values FF::energies()
 {
     if (this->isDirty())
         this->recalculateEnergy();
-        
+
     return nrg_components;
 }
 
 /** Add the molecule viewed in 'molview' to the forcefield groups
     identified by 'mgid' using the supplied map to find the properties
     of the molecule that contain the forcefield parameters
-  
+
     Note that if this molecule exists already in this forcefield, then
     the version of the molecule that is in this forcefield will be used,
     not the version of 'molview'
-      
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -329,21 +328,21 @@ void FF::add(const MoleculeView &molview, const MGID &mgid,
 {
     //get the numbers of the forcefield groups...
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return;
-    
-    //update the molecule so that it is at the same version as 
+
+    //update the molecule so that it is at the same version as
     //any existing copies
     PartialMolecule view(molview);
     view.update( this->matchToExistingVersion(view.data()) );
-                
+
     if (mgnums.count() == 1)
     {
         //no need to checkpoint as the order of operations can
         //be used to preserve state
         MGIdx mgidx = this->mgIdx( *(mgnums.constBegin()) );
-        
+
         this->group_add(mgidx, view, map);
         this->addToIndex( *(mgnums.constBegin()), view.number() );
     }
@@ -352,14 +351,14 @@ void FF::add(const MoleculeView &molview, const MGID &mgid,
         //we need to save state as an exception could be thrown
         //when adding to the nth group
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         try
         {
             //add the molecule to each group in turn...
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 this->group_add(mgidx, view, map);
                 this->addToIndex(mgnum, view.number());
             }
@@ -376,11 +375,11 @@ void FF::add(const MoleculeView &molview, const MGID &mgid,
 /** Add the views of the molecule viewed in 'molviews' to the forcefield groups
     identified by 'mgid' using the supplied map to find the properties
     of the molecule that contain the forcefield parameters
-  
+
     Note that if this molecule exists already in this forcefield, then
     the version of the molecule that is in this forcefield will be used,
     not the version of 'molview'
-      
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -390,25 +389,25 @@ void FF::add(const ViewsOfMol &molviews, const MGID &mgid,
              const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return;
-        
+
     ViewsOfMol views(molviews);
     views.update( this->matchToExistingVersion(views.data()) );
-    
+
     if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         this->group_add(mgidx, views, map);
         this->addToIndex(mgnum, views.number());
     }
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
@@ -429,11 +428,11 @@ void FF::add(const ViewsOfMol &molviews, const MGID &mgid,
 /** Add all of the molecules in 'molecules' to the forcefield groups
     identified by 'mgid' using the supplied map to find the properties
     of the molecule that contain the forcefield parameters
-  
+
     Note that if a molecule exists already in this forcefield, then
     the version of the molecule that is in this forcefield will be used,
     not the version in 'molecules'
-      
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -443,31 +442,31 @@ void FF::add(const Molecules &molecules, const MGID &mgid,
              const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return;
-    
+
     Molecules mols = this->matchToExistingVersion(molecules);
     QSet<MolNum> molnums = mols.molNums();
-    
+
     if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         this->group_add(mgidx, molecules, map);
         this->addToIndex(mgnum, molnums);
     }
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 this->group_add(mgidx, molecules, map);
                 this->addToIndex(mgnum, molnums);
             }
@@ -479,15 +478,15 @@ void FF::add(const Molecules &molecules, const MGID &mgid,
         }
     }
 }
-             
+
 /** Add all of the molecules in the group 'molgroup' to the forcefield groups
     identified by 'mgid' using the supplied map to find the properties
     of the molecule that contain the forcefield parameters
-  
+
     Note that if a molecule exists already in this forcefield, then
     the version of the molecule that is in this forcefield will be used,
     not the version in 'molecules'
-      
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -504,11 +503,11 @@ void FF::add(const MoleculeGroup &molgroup, const MGID &mgid,
     of the molecule that contain the forcefield parameters
 
     This only adds the view to groups that don't already contain it.
-  
+
     Note that if this molecule exists already in this forcefield, then
     the version of the molecule that is in this forcefield will be used,
     not the version of 'molview'
-      
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -518,31 +517,31 @@ void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid,
                      const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return;
-        
+
     PartialMolecule view(molview);
     view.update( this->matchToExistingVersion(view.data()) );
-    
+
     if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         this->group_addIfUnique(mgidx, view, map);
         this->addToIndex(mgnum, view.number());
     }
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 this->group_addIfUnique(mgidx, view, map);
                 this->addToIndex(mgnum, view.number());
             }
@@ -560,11 +559,11 @@ void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid,
     of the molecule that contain the forcefield parameters
 
     This only adds views to groups that don't already contain them.
-  
+
     Note that if this molecule exists already in this forcefield, then
     the version of the molecule that is in this forcefield will be used,
     not the version of 'molview'
-      
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -574,31 +573,31 @@ void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
                      const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return;
-        
+
     ViewsOfMol views(molviews);
     views.update( this->matchToExistingVersion(views.data()) );
-    
+
     if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         this->group_addIfUnique(mgidx, views, map);
         this->addToIndex(mgnum, views.number());
     }
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 this->group_addIfUnique(mgidx, views, map);
                 this->addToIndex(mgnum, views.number());
             }
@@ -620,7 +619,7 @@ void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
     Note that if a molecule exists already in this forcefield, then
     the version of the molecule that is in this forcefield will be used,
     not the version in 'molecules'
-      
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -630,31 +629,31 @@ void FF::addIfUnique(const Molecules &molecules, const MGID &mgid,
                      const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return;
-        
+
     Molecules mols = this->matchToExistingVersion(molecules);
     QSet<MolNum> molnums = mols.molNums();
-    
+
     if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         this->group_addIfUnique(mgidx, mols, map);
         this->addToIndex(mgnum, molnums);
     }
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 this->group_addIfUnique(mgidx, mols, map);
                 this->addToIndex(mgnum, molnums);
             }
@@ -672,11 +671,11 @@ void FF::addIfUnique(const Molecules &molecules, const MGID &mgid,
     of the molecule that contain the forcefield parameters
 
     This only adds molecules to groups that don't already contain them.
-  
+
     Note that if a molecule exists already in this forcefield, then
     the version of the molecule that is in this forcefield will be used,
     not the version in 'molecules'
-      
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -690,15 +689,15 @@ void FF::addIfUnique(const MoleculeGroup &molgroup, const MGID &mgid,
 
 /** Completely remove all of the molecules from the groups identified
     by 'mgid'
-    
+
     \throw SireMol::missing_group
 */
 bool FF::removeAll(const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     bool mols_removed = false;
-    
+
     foreach (MGNum mgnum, mgnums)
     {
         if (not mols_removed)
@@ -706,39 +705,39 @@ bool FF::removeAll(const MGID &mgid)
             if (not this->at(mgnum).isEmpty())
                 mols_removed = true;
         }
-        
+
         this->group_removeAll( this->mgIdx(mgnum) );
         this->clearIndex(mgnum);
     }
-    
+
     return mols_removed;
 }
 
 /** Remove the view 'molview' from the specified groups in this
     forcefield. Note that this only removes the specific view
-    (and indeed only the first copy of this view if there 
+    (and indeed only the first copy of this view if there
     are duplicates) - it does not remove the atoms in this
     view from all of the other views
-    
+
     \throw SireMol::missing_group
 */
 bool FF::remove(const MoleculeView &molview, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return false;
-        
+
     else if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         if (this->group_remove(mgidx, molview))
         {
             if (not this->group(mgnum).contains(molview.data().number()))
                 this->removeFromIndex(mgnum, molview.data().number());
-                
+
             return true;
         }
         else
@@ -749,17 +748,17 @@ bool FF::remove(const MoleculeView &molview, const MGID &mgid)
         boost::shared_ptr<FF> old_state( this->clone() );
 
         bool removed_mol = false;
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 if (this->group_remove(mgidx, molview))
                 {
                     removed_mol = true;
-                
+
                     if (not this->group(mgnum).contains(molview.data().number()))
                         this->removeFromIndex(mgnum, molview.data().number());
                 }
@@ -770,38 +769,38 @@ bool FF::remove(const MoleculeView &molview, const MGID &mgid)
             this->copy(*old_state);
             throw;
         }
-        
+
         return removed_mol;
     }
 }
 
-/** Remove the views of the molecule in 'molviews' from the specified 
+/** Remove the views of the molecule in 'molviews' from the specified
     groups in this forcefield. Note that this only removes the specific view
-    (and indeed only the first copy of this view if there 
+    (and indeed only the first copy of this view if there
     are duplicates) - it does not remove the atoms in these
     views from all of the other views
-    
+
     \throw SireMol::missing_group
 */
 bool FF::remove(const ViewsOfMol &molviews, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return false;
-        
+
     else if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         ViewsOfMol removed_views = this->group_remove(mgidx, molviews);
-        
+
         if (not removed_views.isEmpty())
         {
             if (not this->group(mgnum).contains(molviews.number()))
                 this->removeFromIndex(mgnum, molviews.number());
-                
+
             return true;
         }
         else
@@ -810,21 +809,21 @@ bool FF::remove(const ViewsOfMol &molviews, const MGID &mgid)
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         bool removed_mol = false;
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 ViewsOfMol removed_views = this->group_remove(mgidx, molviews);
-                
+
                 if (not removed_views.isEmpty())
                 {
                     removed_mol = true;
-                
+
                     if (not this->group(mgnum).contains(molviews.number()))
                         this->removeFromIndex(mgnum, molviews.number());
                 }
@@ -835,31 +834,31 @@ bool FF::remove(const ViewsOfMol &molviews, const MGID &mgid)
             this->copy(*old_state);
             throw;
         }
-        
+
         return removed_mol;
     }
 }
 
-/** Remove the views of the molecules in 'molecules' from the specified 
+/** Remove the views of the molecules in 'molecules' from the specified
     groups in this forcefield. Note that this only removes the specific view
-    (and indeed only the first copy of this view if there 
+    (and indeed only the first copy of this view if there
     are duplicates) - it does not remove the atoms in these
     views from all of the other views
-    
+
     \throw SireMol::missing_group
 */
 bool FF::remove(const Molecules &molecules, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return false;
-        
+
     else if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         QList<ViewsOfMol> removed_mols = this->group_remove(mgidx, molecules);
         QSet<MolNum> removed_molnums;
 
@@ -870,13 +869,13 @@ bool FF::remove(const Molecules &molecules, const MGID &mgid)
             if (not molgroup.contains(removed_mol.number()))
                 removed_molnums.insert(removed_mol.number());
         }
-        
+
         if (not removed_molnums.isEmpty())
         {
             this->removeFromIndex(mgnum, removed_molnums);
             return true;
         }
-        else 
+        else
             return false;
     }
     else
@@ -884,24 +883,24 @@ bool FF::remove(const Molecules &molecules, const MGID &mgid)
         boost::shared_ptr<FF> old_state( this->clone() );
 
         bool mols_removed = false;
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 QList<ViewsOfMol> removed_mols = this->group_remove(mgidx, molecules);
                 QSet<MolNum> removed_molnums;
-                
+
                 const MoleculeGroup &molgroup = this->group(mgnum);
-                
+
                 foreach (const ViewsOfMol &removed_mol, removed_mols)
                 {
                     if (not molgroup.contains(removed_mol.number()))
                         removed_molnums.insert(removed_mol.number());
                 }
-                
+
                 if (not removed_molnums.isEmpty())
                 {
                     this->removeFromIndex(mgnum, removed_molnums);
@@ -914,17 +913,17 @@ bool FF::remove(const Molecules &molecules, const MGID &mgid)
             this->copy(*old_state);
             throw;
         }
-        
+
         return mols_removed;
     }
 }
 
 /** Remove the views of the molecules in the molecule group 'molgroup' f
-    from the specified groups in this forcefield. Note that this only 
-    removes the specific view (and indeed only the first copy of this view 
+    from the specified groups in this forcefield. Note that this only
+    removes the specific view (and indeed only the first copy of this view
     if there are duplicates) - it does not remove the atoms in these
     views from all of the other views
-    
+
     \throw SireMol::missing_group
 */
 bool FF::remove(const MoleculeGroup &molgroup, const MGID &mgid)
@@ -934,29 +933,29 @@ bool FF::remove(const MoleculeGroup &molgroup, const MGID &mgid)
 
 /** Remove the view 'molview' from the specified groups in this
     forcefield. Note that this only removes the specific view
-    (and indeed all copies of this view if there 
+    (and indeed all copies of this view if there
     are duplicates) - it does not remove the atoms in this
     view from all of the other views
-    
+
     \throw SireMol::missing_group
 */
 bool FF::removeAll(const MoleculeView &molview, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return false;
-        
+
     else if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         if (this->group_removeAll(mgidx, molview))
         {
             if (not this->group(mgnum).contains(molview.data().number()))
                 this->removeFromIndex(mgnum, molview.data().number());
-                
+
             return true;
         }
         else
@@ -965,19 +964,19 @@ bool FF::removeAll(const MoleculeView &molview, const MGID &mgid)
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         bool mols_removed = false;
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 if (this->group_removeAll(mgidx, molview))
                 {
                     mols_removed = true;
-                
+
                     if (not this->group(mgnum).contains(molview.data().number()))
                         this->removeFromIndex(mgnum, molview.data().number());
                 }
@@ -988,38 +987,38 @@ bool FF::removeAll(const MoleculeView &molview, const MGID &mgid)
             this->copy(*old_state);
             throw;
         }
-        
+
         return mols_removed;
     }
 }
 
-/** Remove the views of the molecule in 'molviews' from the specified 
+/** Remove the views of the molecule in 'molviews' from the specified
     groups in this forcefield. Note that this only removes the specific view
-    (and indeed all copies of this view if there 
+    (and indeed all copies of this view if there
     are duplicates) - it does not remove the atoms in these
     views from all of the other views
-    
+
     \throw SireMol::missing_group
 */
 bool FF::removeAll(const ViewsOfMol &molviews, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return false;
-        
+
     else if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         ViewsOfMol removed_views = this->group_removeAll(mgidx, molviews);
-        
+
         if (not removed_views.isEmpty())
         {
             if (not this->group(mgnum).contains(molviews.number()))
                 this->removeFromIndex(mgnum, molviews.number());
-                
+
             return true;
         }
         else
@@ -1028,21 +1027,21 @@ bool FF::removeAll(const ViewsOfMol &molviews, const MGID &mgid)
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         bool mols_removed = false;
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 ViewsOfMol removed_views = this->group_removeAll(mgidx, molviews);
-                
+
                 if (not removed_views.isEmpty())
                 {
                     mols_removed = true;
-                
+
                     if (not this->group(mgnum).contains(molviews.number()))
                         this->removeFromIndex(mgnum, molviews.number());
                 }
@@ -1053,31 +1052,31 @@ bool FF::removeAll(const ViewsOfMol &molviews, const MGID &mgid)
             this->copy(*old_state);
             throw;
         }
-        
+
         return mols_removed;
     }
 }
 
-/** Remove the views of the molecules in 'molecules' from the specified 
+/** Remove the views of the molecules in 'molecules' from the specified
     groups in this forcefield. Note that this only removes the specific view
-    (and indeed all copies of this view if there 
+    (and indeed all copies of this view if there
     are duplicates) - it does not remove the atoms in these
     views from all of the other views
-    
+
     \throw SireMol::missing_group
 */
 bool FF::removeAll(const Molecules &molecules, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return false;
-    
+
     else if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         QList<ViewsOfMol> removed_mols = this->group_removeAll(mgidx, molecules);
         QSet<MolNum> removed_molnums;
 
@@ -1088,7 +1087,7 @@ bool FF::removeAll(const Molecules &molecules, const MGID &mgid)
             if (not molgroup.contains(removed_mol.number()))
                 removed_molnums.insert(removed_mol.number());
         }
-        
+
         if (not removed_molnums.isEmpty())
         {
             this->removeFromIndex(mgnum, removed_molnums);
@@ -1102,24 +1101,24 @@ bool FF::removeAll(const Molecules &molecules, const MGID &mgid)
         boost::shared_ptr<FF> old_state( this->clone() );
 
         bool mols_removed = false;
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 QList<ViewsOfMol> removed_mols = this->group_removeAll(mgidx, molecules);
                 QSet<MolNum> removed_molnums;
-                
+
                 const MoleculeGroup &molgroup = this->group(mgnum);
-                
+
                 foreach (const ViewsOfMol &removed_mol, removed_mols)
                 {
                     if (not molgroup.contains(removed_mol.number()))
                         removed_molnums.insert(removed_mol.number());
                 }
-                
+
                 if (not removed_molnums.isEmpty())
                 {
                     this->removeFromIndex(mgnum, removed_molnums);
@@ -1132,17 +1131,17 @@ bool FF::removeAll(const Molecules &molecules, const MGID &mgid)
             this->copy(*old_state);
             throw;
         }
-        
+
         return mols_removed;
     }
 }
 
 /** Remove the views of the molecules in the molecule group 'molgroup' f
-    from the specified groups in this forcefield. Note that this only 
-    removes the specific view (and indeed all copies of this view 
+    from the specified groups in this forcefield. Note that this only
+    removes the specific view (and indeed all copies of this view
     if there are duplicates) - it does not remove the atoms in these
     views from all of the other views
-    
+
     \throw SireMol::missing_group
 */
 bool FF::removeAll(const MoleculeGroup &molgroup, const MGID &mgid)
@@ -1150,23 +1149,23 @@ bool FF::removeAll(const MoleculeGroup &molgroup, const MGID &mgid)
     return this->removeAll(molgroup.molecules(), mgid);
 }
 
-/** Completely remove the molecule with number 'molnum' from the 
+/** Completely remove the molecule with number 'molnum' from the
     forcefield groups identified by 'mgid'
-    
+
     \throw SireMol::missing_group
 */
 bool FF::remove(MolNum molnum, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return false;
-        
+
     else if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         ViewsOfMol removed_views = this->group_remove(mgidx, molnum);
 
         if (not removed_views.isEmpty())
@@ -1180,17 +1179,17 @@ bool FF::remove(MolNum molnum, const MGID &mgid)
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         bool mols_removed = false;
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 ViewsOfMol removed_views = this->group_remove(mgidx, molnum);
-                
+
                 if (not removed_views.isEmpty())
                 {
                     this->removeFromIndex(mgnum, molnum);
@@ -1203,37 +1202,37 @@ bool FF::remove(MolNum molnum, const MGID &mgid)
             this->copy(*old_state);
             throw;
         }
-        
+
         return mols_removed;
     }
 }
 
 /** Remove all of the molecules whose numbers are in 'molnums'
     from all of the forcefield groups identified by 'mgid'
-    
+
     \throw SireMol::missing_group
 */
 bool FF::remove(const QSet<MolNum> &molnums, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return false;
-        
+
     else if (mgnums.count() == 1)
     {
         MGNum mgnum = *(mgnums.constBegin());
         MGIdx mgidx = this->mgIdx(mgnum);
-        
+
         QList<ViewsOfMol> removed_mols = this->group_remove(mgidx, molnums);
-        
+
         QSet<MolNum> removed_molnums;
-        
+
         foreach (const ViewsOfMol &removed_mol, removed_mols)
         {
             removed_molnums.insert( removed_mol.number() );
         }
-        
+
         if (not removed_molnums.isEmpty())
         {
             this->removeFromIndex(mgnum, removed_molnums);
@@ -1245,24 +1244,24 @@ bool FF::remove(const QSet<MolNum> &molnums, const MGID &mgid)
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-        
+
         bool mols_removed = false;
-        
+
         try
         {
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
-                
+
                 QList<ViewsOfMol> removed_mols = this->group_remove(mgidx, molnums);
-                
+
                 QSet<MolNum> removed_molnums;
-                
+
                 foreach (const ViewsOfMol &removed_mol, removed_mols)
                 {
                     removed_molnums.insert(removed_mol.number());
                 }
-                
+
                 if (not removed_molnums.isEmpty())
                 {
                     this->removeFromIndex(mgnum, removed_molnums);
@@ -1275,7 +1274,7 @@ bool FF::remove(const QSet<MolNum> &molnums, const MGID &mgid)
             this->copy(*old_state);
             throw;
         }
-        
+
         return mols_removed;
     }
 }
@@ -1286,7 +1285,7 @@ bool FF::remove(const QSet<MolNum> &molnums, const MGID &mgid)
     to find the updated properties that contain the forcefield parameters
     for this molecule. If you want to change the property names, then you
     must remove the molecule, then re-add it with the new names.
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1302,7 +1301,7 @@ void FF::update(const MoleculeData &moldata, bool auto_commit)
 
     if (auto_commit and this->needsAccepting())
         this->accept();
-    
+
     if (mgnums.count() == 1)
     {
         this->group_update( this->mgIdx(*(mgnums.constBegin())),
@@ -1315,7 +1314,7 @@ void FF::update(const MoleculeData &moldata, bool auto_commit)
             this->group_update( this->mgIdx(mgnum), moldata, auto_commit );
         }
     }
-    
+
     if (auto_commit and this->needsAccepting())
         this->accept();
 }
@@ -1327,12 +1326,12 @@ void FF::update(const MoleculeView &molview, bool auto_commit)
     this->update(molview.data(), auto_commit);
 }
 
-/** Update the molecules in this forcefield so that they have the 
+/** Update the molecules in this forcefield so that they have the
     same version as in 'molecules'. The molecules will use the existing
     property names to find the properties that contain the forcefield
     parameters. If you want to change the property names, then you
     must remove the molecule, then re-add it with the new names
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1341,7 +1340,7 @@ void FF::update(const Molecules &molecules, bool auto_commit)
 {
     if (molecules.isEmpty())
         return;
-    
+
     else if (molecules.count() == 1)
     {
         this->update( molecules.constBegin()->data(), auto_commit );
@@ -1353,7 +1352,7 @@ void FF::update(const Molecules &molecules, bool auto_commit)
 
     //get the numbers of the groups that contain these molecules...
     int ngroups = this->nGroups();
-    
+
     if (ngroups == 1)
     {
         this->group_update(0, molecules, auto_commit);
@@ -1369,23 +1368,23 @@ void FF::update(const Molecules &molecules, bool auto_commit)
             if (this->contains(it->number()))
             {
                 const QList<MGNum> &mol_mgnums = this->groupsContaining(it->number());
-            
+
                 foreach (MGNum mgnum, mol_mgnums)
                 {
                     mgnums.insert(mgnum);
                 }
-                
+
                 if (mgnums.count() == ngroups)
                     break;
             }
         }
-        
+
         if (mgnums.count() == 1)
         {
             //only one group needs to be updated
             MGNum mgnum = *(mgnums.constBegin());
             MGIdx mgidx = this->mgIdx(mgnum);
-            
+
             this->group_update(mgidx, molecules, auto_commit);
         }
         else
@@ -1397,14 +1396,14 @@ void FF::update(const Molecules &molecules, bool auto_commit)
             }
         }
     }
-    
+
     if (auto_commit and this->needsAccepting())
         this->accept();
 }
 
 /** Update this forcefield so that it has the same version molecules
-    as those contained in 'molgroup'. 
-    
+    as those contained in 'molgroup'.
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1418,20 +1417,20 @@ void FF::update(const MoleculeGroup &molgroup, bool auto_commit)
     so that they only contain the molecule viewed in 'molview'.
     This will use the version of the molecule that exists already
     in this forcefield, not the version in 'molview'
-    
+
     This will use the supplied map to find the property names
     of the parameters required by this forcefield
-    
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::setContents(const MGID &mgid, const MoleculeView &molview, 
+void FF::setContents(const MGID &mgid, const MoleculeView &molview,
                      const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return;
 
@@ -1439,7 +1438,7 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview,
     {
         //there is only one group and it is being updated
         MGNum mgnum = *(mgnums.constBegin());
-        
+
         if (this->group_setContents(0, molview, map))
         {
             this->clearIndex(mgnum);
@@ -1449,7 +1448,7 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview,
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-    
+
         try
         {
             //first clear any existing molecules
@@ -1458,16 +1457,16 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview,
                 this->group_removeAll(this->mgIdx(mgnum));
                 this->clearIndex(mgnum);
             }
-            
+
             //now get the current version of the molecule
             PartialMolecule view(molview);
             view.update( this->matchToExistingVersion(view.data()) );
-            
+
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
                 this->group_setContents(mgidx, view, map);
-                
+
                 this->addToIndex(mgnum, view.number());
             }
         }
@@ -1478,25 +1477,25 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview,
         }
     }
 }
-                     
+
 /** Set the contents of the forcefield groups identified by 'mgid'
     so that they only contain the molecule views in 'molviews'.
     This will use the version of the molecule that exists already
     in this forcefield, not the version in 'molview'
-    
+
     This will use the supplied map to find the property names
     of the parameters required by this forcefield
-    
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews, 
+void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
                      const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return;
 
@@ -1504,7 +1503,7 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
     {
         //there is only one group and it is being updated
         MGNum mgnum = *(mgnums.constBegin());
-        
+
         if (this->group_setContents(0, molviews, map))
         {
             this->clearIndex(mgnum);
@@ -1514,7 +1513,7 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-    
+
         try
         {
             //first clear any existing molecules
@@ -1523,16 +1522,16 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
                 this->group_removeAll(this->mgIdx(mgnum));
                 this->clearIndex(mgnum);
             }
-            
+
             //now get the current version of the molecule
             ViewsOfMol views(molviews);
             views.update( this->matchToExistingVersion(views.data()) );
-            
+
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
                 this->group_setContents(mgidx, views, map);
-                
+
                 this->addToIndex(mgnum, views.number());
             }
         }
@@ -1548,20 +1547,20 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
     so that they only contain the molecules in 'molecules'.
     This will use the version of the molecule that exists already
     in this forcefield, not the version in 'molview'
-    
+
     This will use the supplied map to find the property names
     of the parameters required by this forcefield
-    
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::setContents(const MGID &mgid, const Molecules &molecules, 
+void FF::setContents(const MGID &mgid, const Molecules &molecules,
                      const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
-    
+
     if (mgnums.isEmpty())
         return;
 
@@ -1569,7 +1568,7 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules,
     {
         //there is only one group and it is being updated
         MGNum mgnum = *(mgnums.constBegin());
-        
+
         if (this->group_setContents(0, molecules, map))
         {
             this->clearIndex(mgnum);
@@ -1579,7 +1578,7 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules,
     else
     {
         boost::shared_ptr<FF> old_state( this->clone() );
-    
+
         try
         {
             //first clear any existing molecules
@@ -1588,17 +1587,17 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules,
                 this->group_removeAll(this->mgIdx(mgnum));
                 this->clearIndex(mgnum);
             }
-            
+
             //now get the current version of the molecules
             Molecules mols = this->matchToExistingVersion(molecules);
-            
+
             QSet<MolNum> molnums = mols.molNums();
-            
+
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
                 this->group_setContents(mgidx, mols, map);
-                
+
                 this->addToIndex(mgnum, molnums);
             }
         }
@@ -1614,25 +1613,25 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules,
     so that they only contain the molecules contained in 'molgroup'.
     This will use the version of the molecule that exists already
     in this forcefield, not the version in 'molview'
-    
+
     This will use the supplied map to find the property names
     of the parameters required by this forcefield
-    
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::setContents(const MGID &mgid, const MoleculeGroup &molgroup, 
+void FF::setContents(const MGID &mgid, const MoleculeGroup &molgroup,
                      const PropertyMap &map)
 {
     this->setContents(mgid, molgroup.molecules(), map);
 }
 
-/** Add the passed view of the molecule to the molecule groups 
+/** Add the passed view of the molecule to the molecule groups
     identified by 'mgid' using the default properties to
     find the parameters needed by this forcefield
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1642,10 +1641,10 @@ void FF::add(const MoleculeView &molview, const MGID &mgid)
     this->add(molview, mgid, PropertyMap());
 }
 
-/** Add the passed views of the molecule to the molecule groups 
+/** Add the passed views of the molecule to the molecule groups
     identified by 'mgid' using the default properties to
     find the parameters needed by this forcefield
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1655,10 +1654,10 @@ void FF::add(const ViewsOfMol &molviews, const MGID &mgid)
     this->add(molviews, mgid, PropertyMap());
 }
 
-/** Add the passed molecules to the molecule groups 
+/** Add the passed molecules to the molecule groups
     identified by 'mgid' using the default properties to
     find the parameters needed by this forcefield
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1668,10 +1667,10 @@ void FF::add(const Molecules &molecules, const MGID &mgid)
     this->add(molecules, mgid, PropertyMap());
 }
 
-/** Add the molecules in the passed MoleculeGroup to the molecule groups 
+/** Add the molecules in the passed MoleculeGroup to the molecule groups
     identified by 'mgid' using the default properties to
     find the parameters needed by this forcefield
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1681,13 +1680,13 @@ void FF::add(const MoleculeGroup &molgroup, const MGID &mgid)
     this->add(molgroup, mgid, PropertyMap());
 }
 
-/** Add the passed view of the molecule to the molecule groups 
+/** Add the passed view of the molecule to the molecule groups
     identified by 'mgid' using the default properties to
     find the parameters needed by this forcefield
-    
+
     Only add this view to groups that don't already contain
     this view (the whole view, not part of it)
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1697,13 +1696,13 @@ void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid)
     this->addIfUnique(molview, mgid, PropertyMap());
 }
 
-/** Add the passed views of the molecule to the molecule groups 
+/** Add the passed views of the molecule to the molecule groups
     identified by 'mgid' using the default properties to
     find the parameters needed by this forcefield
-    
+
     Only add views to groups that don't already contain
     them (the whole view, not part of it, and can add some views)
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1713,13 +1712,13 @@ void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid)
     this->addIfUnique(molviews, mgid, PropertyMap());
 }
 
-/** Add the passed molecules to the molecule groups 
+/** Add the passed molecules to the molecule groups
     identified by 'mgid' using the default properties to
     find the parameters needed by this forcefield
-    
+
     Only add the views of molecules to groups that don't already contain
     them (the whole view, not part of it)
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1729,13 +1728,13 @@ void FF::addIfUnique(const Molecules &molecules, const MGID &mgid)
     this->addIfUnique(molecules, mgid, PropertyMap());
 }
 
-/** Add the molecules in the passed MoleculeGroup to the molecule groups 
+/** Add the molecules in the passed MoleculeGroup to the molecule groups
     identified by 'mgid' using the default properties to
     find the parameters needed by this forcefield
-    
+
     Only add the views of molecules to groups that don't already contain
     them (the whole view, not part of it)
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1745,10 +1744,10 @@ void FF::addIfUnique(const MoleculeGroup &molgroup, const MGID &mgid)
     this->addIfUnique(molgroup, mgid, PropertyMap());
 }
 
-/** Set the contents of this forcefield to just contain 'molview', 
+/** Set the contents of this forcefield to just contain 'molview',
     using the default locations to find the properties that contain
     the forcefield parameters for this molecule
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1758,10 +1757,10 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview)
     this->setContents(mgid, molview, PropertyMap());
 }
 
-/** Set the contents of this forcefield to the molecule views in 'molviews', 
+/** Set the contents of this forcefield to the molecule views in 'molviews',
     using the default locations to find the properties that contain
     the forcefield parameters for this molecule
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1771,10 +1770,10 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews)
     this->setContents(mgid, molviews, PropertyMap());
 }
 
-/** Set the contents of this forcefield to the molecules 'molecules', 
+/** Set the contents of this forcefield to the molecules 'molecules',
     using the default locations to find the properties that contain
     the forcefield parameters for this molecule
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -1783,11 +1782,11 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules)
 {
     this->setContents(mgid, molecules, PropertyMap());
 }
-                         
-/** Set the contents of this forcefield to contains the molecules in 'molgroup', 
+
+/** Set the contents of this forcefield to contains the molecules in 'molgroup',
     using the default locations to find the properties that contain
     the forcefield parameters for this molecule
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error

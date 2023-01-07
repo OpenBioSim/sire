@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,7 +53,7 @@ void sincos(const MultiDouble &val, MultiDouble &sinval, MultiDouble &cosval);
     4 doubles if we use SSE2, 8 doubles for AVX. This
     is so that it matches up with MultiFloat, with both
     vectors providing the same number of elements.
-    
+
     @author Christopher Woods
 */
 class SIREMATHS_EXPORT MultiDouble
@@ -69,87 +68,87 @@ friend void sincos(const MultiDouble &val, MultiDouble &sinval, MultiDouble &cos
 
 public:
     MultiDouble();
-    
+
     MultiDouble(double value);
-    
+
     MultiDouble(const double *array, int size);
     MultiDouble(const QVector<float> &array);
     MultiDouble(const QVector<double> &array);
-    
+
     MultiDouble(const MultiFloat &other);
-    
+
     MultiDouble(const MultiDouble &other);
-    
+
     #ifdef SIRE_HAS_CPP_11
         MultiDouble(const std::function<double ()> &func);
     #endif
-    
+
     ~MultiDouble();
-    
+
     bool isAligned() const;
-    
+
     static QVector<MultiDouble> fromArray(const QVector<double> &array);
     static QVector<MultiDouble> fromArray(const QVector<float> &array);
-    
+
     static QVector<MultiDouble> fromArray(const double *array, int size);
     static QVector<MultiDouble> fromArray(const float *array, int size);
-    
+
     static QVector<double> toArray(const QVector<MultiDouble> &array);
     static QVector<double> toDoubleArray(const QVector<MultiDouble> &array);
-    
+
     MultiDouble& operator=(const MultiDouble &other);
     MultiDouble& operator=(const MultiFloat &other);
     MultiDouble& operator=(double value);
-    
+
     bool operator==(const MultiDouble &other) const;
     bool operator!=(const MultiDouble &other) const;
-    
+
     bool operator<(const MultiDouble &other) const;
     bool operator>(const MultiDouble &other) const;
-    
+
     bool operator<=(const MultiDouble &other) const;
     bool operator>=(const MultiDouble &other) const;
-    
+
     MultiDouble compareEqual(const MultiDouble &other) const;
     MultiDouble compareNotEqual(const MultiDouble &other) const;
 
     MultiDouble compareLess(const MultiDouble &other) const;
     MultiDouble compareGreater(const MultiDouble &other) const;
-    
+
     MultiDouble compareLessEqual(const MultiDouble &other) const;
     MultiDouble compareGreaterEqual(const MultiDouble &other) const;
-    
+
     const char* what() const;
     static const char* typeName();
-    
+
     QString toString() const;
     QString toBinaryString() const;
-    
+
     static int size();
     static int count();
-    
+
     double operator[](int i) const;
-    
+
     void set(int i, double value);
     double get(int i) const;
-    
+
     void quickSet(int i, double value);
-    
+
     double at(int i) const;
     double getitem(int i) const;
-    
+
     MultiDouble operator-() const;
-    
+
     MultiDouble operator+(const MultiDouble &other) const;
     MultiDouble operator-(const MultiDouble &other) const;
     MultiDouble operator*(const MultiDouble &other) const;
     MultiDouble operator/(const MultiDouble &other) const;
-    
+
     MultiDouble& operator+=(const MultiDouble &other);
     MultiDouble& operator-=(const MultiDouble &other);
     MultiDouble& operator*=(const MultiDouble &other);
     MultiDouble& operator/=(const MultiDouble &other);
-    
+
     MultiDouble operator!() const;
     MultiDouble operator&(const MultiDouble &other) const;
     MultiDouble operator|(const MultiDouble &other) const;
@@ -160,27 +159,27 @@ public:
     MultiDouble& operator^=(const MultiDouble &other);
 
     MultiDouble logicalNot() const;
-    
+
     MultiDouble logicalAnd(const MultiDouble &other) const;
     MultiDouble logicalAndNot(const MultiDouble &other) const;
-    
+
     MultiDouble logicalOr(const MultiDouble &other) const;
     MultiDouble logicalXor(const MultiDouble &other) const;
-    
+
     MultiDouble& multiplyAdd(const MultiDouble &val0, const MultiDouble &val1);
-    
+
     MultiDouble max(const MultiDouble &other) const;
     MultiDouble min(const MultiDouble &other) const;
-    
+
     MultiDouble reciprocal() const;
-    
+
     MultiDouble sqrt() const;
     MultiDouble rsqrt() const;
     MultiDouble rsqrt_approx() const;
-    MultiDouble rsqrt_approx_nr() const;    
+    MultiDouble rsqrt_approx_nr() const;
 
     MultiDouble rotate() const;
-    
+
     double sum() const;
     double doubleSum() const;
 
@@ -216,7 +215,7 @@ private:
             {
        	       	const __m512d zero = _mm512_set1_pd(0.0);
                 const quint64 x = 0xFFFFFFFFFFFFFFFF;
-       	       	const __m512d one = _mm512_set1_pd( 
+       	       	const __m512d one = _mm512_set1_pd(
                                 *(reinterpret_cast<const double*>(&x)) );
 
                 v.x[0] = _mm512_mask_blend_pd( mask0, zero, one );
@@ -237,13 +236,13 @@ private:
                 __m256d x[2];
                 double a[8];
             } v;
-        
+
             MultiDouble(__m256d avx_val0, __m256d avx_val1)
             {
                 v.x[0] = avx_val0;
                 v.x[1] = avx_val1;
             }
-        
+
             #ifdef MULTIFLOAT_CHECK_ALIGNMENT
                 void assertAligned()
                 {
@@ -284,7 +283,7 @@ private:
                 const quint64 x = 0xFFFFFFFFFFFFFFFFULL;
                 return *(reinterpret_cast<const double*>(&x));
             }
-        
+
             #ifdef MULTIFLOAT_CHECK_ALIGNMENT
                 void assertAligned()
                 {
@@ -375,13 +374,13 @@ MultiDouble::MultiDouble(const MultiFloat &other)
 
     #ifdef MULTIFLOAT_AVX512F_IS_AVAILABLE
         const __m256 *o = (const __m256*)&(other.v.x);
-        
+
         v.x[0] = _mm512_cvtps_pd( o[0] );
         v.x[1] = _mm512_cvtps_pd( o[1] );
     #else
     #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
         const __m128 *o = (const __m128*)&(other.v.x);
-    
+
         v.x[0] = _mm256_cvtps_pd( o[0] );
         v.x[1] = _mm256_cvtps_pd( o[1] );
     #else
@@ -412,7 +411,7 @@ MultiFloat::MultiFloat(const MultiDouble &other)
     #else
     #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
         __m128 *o = (__m128*)&(v.x);
-    
+
         o[0] = _mm256_cvtpd_ps(other.v.x[0]);
         o[1] = _mm256_cvtpd_ps(other.v.x[1]);
     #else
@@ -491,7 +490,7 @@ MultiDouble& MultiDouble::operator=(const MultiDouble &other)
     #endif
     #endif
     #endif
-    
+
     return *this;
 }
 
@@ -507,7 +506,7 @@ MultiFloat& MultiFloat::operator=(const MultiDouble &other)
     #else
     #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
         __m128 *o = (__m128*)&(v.x);
-    
+
         o[0] = _mm256_cvtpd_ps(other.v.x[0]);
         o[1] = _mm256_cvtpd_ps(other.v.x[1]);
     #else
@@ -549,7 +548,7 @@ MultiDouble& MultiDouble::operator=(double value)
     #endif
     #endif
     #endif
-    
+
     return *this;
 }
 
@@ -565,7 +564,7 @@ MultiDouble& MultiDouble::operator=(const MultiFloat &other)
     #else
     #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
         const __m128 *o = (const __m128*)&(other.v.x);
-    
+
         v.x[0] = _mm256_cvtps_pd( o[0] );
         v.x[1] = _mm256_cvtps_pd( o[1] );
     #else
@@ -607,7 +606,7 @@ MultiDouble MultiDouble::compareEqual(const MultiDouble &other) const
         {
             ret.v.a[i] = (v.a[i] == other.v.a[i]) ? MULTIDOUBLE_BINONE : 0x0;
         }
-    
+
         return ret;
     #endif
     #endif
@@ -631,12 +630,12 @@ MultiDouble MultiDouble::compareNotEqual(const MultiDouble &other) const
                             _mm_cmpneq_pd(v.x[1], other.v.x[1]) );
     #else
         MultiDouble ret;
-    
+
         for (int i=0; i<MULTIFLOAT_SIZE; ++i)
         {
             ret.v.a[i] = (v.a[i] != other.v.a[i]) ? MULTIDOUBLE_BINONE : 0x0;
         }
-    
+
         return ret;
     #endif
     #endif
@@ -660,12 +659,12 @@ MultiDouble MultiDouble::compareLess(const MultiDouble &other) const
                             _mm_cmplt_pd(v.x[1], other.v.x[1]) );
     #else
         MultiDouble ret;
-    
+
         for (int i=0; i<MULTIFLOAT_SIZE; ++i)
         {
             ret.v.a[i] = (v.a[i] < other.v.a[i]) ? MULTIDOUBLE_BINONE : 0x0;
         }
-    
+
         return ret;
     #endif
     #endif
@@ -689,12 +688,12 @@ MultiDouble MultiDouble::compareGreater(const MultiDouble &other) const
                             _mm_cmpgt_pd(v.x[1], other.v.x[1]) );
     #else
         MultiDouble ret;
-    
+
         for (int i=0; i<MULTIFLOAT_SIZE; ++i)
         {
             ret.v.a[i] = (v.a[i] > other.v.a[i]) ? MULTIDOUBLE_BINONE : 0x0;
         }
-    
+
         return ret;
     #endif
     #endif
@@ -718,12 +717,12 @@ MultiDouble MultiDouble::compareLessEqual(const MultiDouble &other) const
                             _mm_cmple_pd(v.x[1], other.v.x[1]) );
     #else
         MultiDouble ret;
-    
+
         for (int i=0; i<MULTIFLOAT_SIZE; ++i)
         {
             ret.v.a[i] = (v.a[i] <= other.v.a[i]) ? MULTIDOUBLE_BINONE : 0x0;
         }
-    
+
         return ret;
     #endif
     #endif
@@ -747,12 +746,12 @@ MultiDouble MultiDouble::compareGreaterEqual(const MultiDouble &other) const
                             _mm_cmpge_pd(v.x[1], other.v.x[1]) );
     #else
         MultiDouble ret;
-    
+
         for (int i=0; i<MULTIFLOAT_SIZE; ++i)
         {
             ret.v.a[i] = (v.a[i] >= other.v.a[i]) ? MULTIDOUBLE_BINONE : 0x0;
         }
-    
+
         return ret;
     #endif
     #endif
@@ -1010,14 +1009,14 @@ MultiDouble MultiDouble::logicalAnd(const MultiDouble &other) const
                             _mm_and_pd(v.x[1], other.v.x[1]) );
     #else
         MultiDouble ret;
-    
+
         for (int i=0; i<MULTIFLOAT_SIZE; ++i)
         {
             reinterpret_cast<quint64*>(ret.v.a)[i] =
                 (~reinterpret_cast<const quint64*>(other.v.a)[i]) &
                 reinterpret_cast<const quint64*>(v.a)[i];
         }
-    
+
         return ret;
     #endif
     #endif
@@ -1045,14 +1044,14 @@ MultiDouble MultiDouble::logicalAndNot(const MultiDouble &other) const
                             _mm_andnot_pd(v.x[1], other.v.x[1]) );
     #else
         MultiDouble ret;
-    
+
         for (int i=0; i<MULTIFLOAT_SIZE; ++i)
         {
             reinterpret_cast<quint64*>(ret.v.a)[i] =
                 (~reinterpret_cast<const quint64*>(other.v.a)[i]) &
                 reinterpret_cast<const quint64*>(v.a)[i];
         }
-    
+
         return ret;
     #endif
     #endif
@@ -1076,14 +1075,14 @@ MultiDouble MultiDouble::logicalOr(const MultiDouble &other) const
                             _mm_or_pd(v.x[1], other.v.x[1]) );
     #else
         MultiDouble ret;
-    
+
         for (int i=0; i<MULTIFLOAT_SIZE; ++i)
         {
             reinterpret_cast<quint64*>(ret.v.a)[i] =
                 reinterpret_cast<const quint64*>(other.v.a)[i] |
                 reinterpret_cast<const quint64*>(v.a)[i];
         }
-    
+
         return ret;
     #endif
     #endif
@@ -1107,14 +1106,14 @@ MultiDouble MultiDouble::logicalXor(const MultiDouble &other) const
                             _mm_xor_pd(v.x[1], other.v.x[1]) );
     #else
         MultiDouble ret;
-    
+
         for (int i=0; i<MULTIFLOAT_SIZE; ++i)
         {
             reinterpret_cast<quint64*>(ret.v.a)[i] =
                 reinterpret_cast<const quint64*>(other.v.a)[i] ^
                 reinterpret_cast<const quint64*>(v.a)[i];
         }
-    
+
         return ret;
     #endif
     #endif
@@ -1407,7 +1406,7 @@ MultiDouble MultiDouble::rsqrt_approx_nr() const
         //repeat for the other double
         __m512d a1 = _mm512_rsqrt14_pd(v.x[1]);
         tmp = _mm512_mul_pd(a1, v.x[1]);
-        tmp = _mm512_mul_pd(a1, tmp); 
+        tmp = _mm512_mul_pd(a1, tmp);
         tmp = _mm512_sub_pd(three, tmp);
         a1 = _mm512_mul_pd(a1, tmp);
         a1 = _mm512_mul_pd(a1, half);
@@ -1440,14 +1439,14 @@ MultiDouble MultiDouble::rotate() const
         return ret;
     #else
         MultiDouble ret;
-    
+
         for (int i=1; i<MULTIFLOAT_SIZE; ++i)
         {
             ret.v.a[i-1] = v.a[i];
         }
-    
+
         ret.v.a[MULTIFLOAT_SIZE-1] = v.a[0];
- 
+
         return ret;
     #endif
 }

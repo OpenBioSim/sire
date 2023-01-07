@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -41,12 +40,12 @@ static const RegisterMetaType<LinkToProperty> r_link;
 QDataStream &operator<<(QDataStream &ds, const LinkToProperty &link)
 {
     writeHeader(ds, r_link, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << link.target_source << link.id_filter
         << static_cast<const Property&>(link);
-        
+
     return ds;
 }
 
@@ -54,11 +53,11 @@ QDataStream &operator<<(QDataStream &ds, const LinkToProperty &link)
 QDataStream &operator>>(QDataStream &ds, LinkToProperty &link)
 {
     VersionID v = readHeader(ds, r_link);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> link.target_source >> link.id_filter
             >> static_cast<Property&>(link);
     }
@@ -104,7 +103,7 @@ LinkToProperty& LinkToProperty::operator=(const LinkToProperty &other)
         id_filter = other.id_filter;
         Property::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -134,7 +133,7 @@ QString LinkToProperty::toString() const
 {
     if (target_source.hasSource())
         return QObject::tr("LinkTo( %1 )").arg(target_source.source());
-     
+
     else if (target_source.hasValue())
         return QObject::tr("LinkTo( %1 )").arg(target_source.value().toString());
 

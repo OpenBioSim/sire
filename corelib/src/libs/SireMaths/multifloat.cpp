@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -75,7 +74,7 @@ using namespace SireMaths;
     #else
       #include "ThirdParty/avx_mathfun.h" // CONDITIONAL_INCLUDE
       #define HAVE_AVX_MATHFUN 1
-    #endif  
+    #endif
 
     static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
     {
@@ -106,7 +105,7 @@ using namespace SireMaths;
               return ret;
             #endif
         }
-        
+
         MultiFloat sin(const MultiFloat &val)
         {
             #ifdef HAVE_AVX_MATHFUNC
@@ -121,7 +120,7 @@ using namespace SireMaths;
               return ret;
             #endif
         }
-        
+
         MultiFloat exp(const MultiFloat &val)
         {
             #ifndef AVX_MATHFUNC_BROKEN_EXP
@@ -136,7 +135,7 @@ using namespace SireMaths;
                 return ret;
             #endif
         }
-        
+
         MultiFloat log(const MultiFloat &val)
         {
             #ifndef AVX_MATHFUNC_BROKEN_LOG
@@ -151,7 +150,7 @@ using namespace SireMaths;
                 return ret;
             #endif
         }
-        
+
         void sincos(const MultiFloat &val, MultiFloat &sval, MultiFloat &cval)
         {
             #ifdef HAVE_AVX_MATHFUN
@@ -163,7 +162,7 @@ using namespace SireMaths;
                   sret.quickSet(i, std::sin(val.at(i)));
                   cret.quickSet(i, std::cos(val.at(i)));
               }
-            #endif        
+            #endif
         }
     }
 
@@ -190,22 +189,22 @@ using namespace SireMaths;
         {
             return MultiFloat( cos_ps(val.v.x) );
         }
-        
+
         MultiFloat sin(const MultiFloat &val)
         {
             return MultiFloat( sin_ps(val.v.x) );
         }
-        
+
         MultiFloat exp(const MultiFloat &val)
         {
             return MultiFloat( exp_ps(val.v.x) );
         }
-        
+
         MultiFloat log(const MultiFloat &val)
         {
             return MultiFloat( log_ps(val.v.x) );
         }
-        
+
         void sincos(const MultiFloat &val, MultiFloat &sval, MultiFloat &cval)
         {
             sincos_ps(val.v.x, &(sval.v.x), &(cval.v.x));
@@ -233,51 +232,51 @@ using namespace SireMaths;
         MultiFloat cos(const MultiFloat &val)
         {
             MultiFloat ret;
-            
+
             for (int i=0; i<MultiFloat::count(); ++i)
             {
                 ret.v.a[i] = std::cos(val.v.a[i]);
             }
-        
+
             return ret;
         }
-        
+
         MultiFloat sin(const MultiFloat &val)
         {
             MultiFloat ret;
-            
+
             for (int i=0; i<MultiFloat::count(); ++i)
             {
                 ret.v.a[i] = std::sin(val.v.a[i]);
             }
-        
+
             return ret;
         }
-        
+
         MultiFloat exp(const MultiFloat &val)
         {
             MultiFloat ret;
-            
+
             for (int i=0; i<MultiFloat::count(); ++i)
             {
                 ret.v.a[i] = std::exp(val.v.a[i]);
             }
-        
+
             return ret;
         }
-        
+
         MultiFloat log(const MultiFloat &val)
         {
             MultiFloat ret;
-            
+
             for (int i=0; i<MultiFloat::count(); ++i)
             {
                 ret.v.a[i] = std::log(val.v.a[i]);
             }
-        
+
             return ret;
         }
-        
+
         void sincos(const MultiFloat &val, MultiFloat &sval, MultiFloat &cval)
         {
             for (int i=0; i<MultiFloat::count(); ++i)
@@ -302,7 +301,7 @@ void MultiFloat::assertAligned(const void *ptr, size_t size)
 
 /** Construct from the passed array, taking the values of each element
     of the vector from the index in the associated MultiInt, e.g.
-    
+
     MultiFloat[i] = array[ MultiInt[i] ]
 */
 MultiFloat::MultiFloat(const float *array, const MultiInt &idxs)
@@ -371,17 +370,17 @@ MultiFloat::MultiFloat(const float *array, int size)
     else
     {
         float tmp[MULTIFLOAT_SIZE];
-        
+
         for (int i=0; i<size; ++i)
         {
             tmp[i] = array[i];
         }
-        
+
         for (int i=size; i<MULTIFLOAT_SIZE; ++i)
         {
             tmp[i] = 0;
         }
-        
+
         #ifdef MULTIFLOAT_AVX512F_IS_AVAILABLE
             v.x = _mm512_set_ps(tmp[15], tmp[14], tmp[13], tmp[12],
                                 tmp[11], tmp[10], tmp[9], tmp[8],
@@ -420,7 +419,7 @@ MultiFloat::MultiFloat(const QVector<double> &array)
 
     QVector<float> farray;
     farray.reserve(array.count());
-    
+
     for (int i=0; i<array.count(); ++i)
     {
         farray.append(array.constData()[i]);
@@ -445,7 +444,7 @@ MultiFloat& MultiFloat::operator=(const MultiInt &other)
     {
         v.a[i] = other.v.a[i];
     }
-    
+
     return *this;
 }
 
@@ -481,16 +480,16 @@ QVector<MultiFloat> MultiFloat::fromArray(const double *array, int size)
     #else
         float _ALIGNED(32) tmp[MULTIFLOAT_SIZE];
     #endif
-    #endif    
+    #endif
 
     int nvecs = size / MULTIFLOAT_SIZE;
     int nremain = size % MULTIFLOAT_SIZE;
 
     QVector<MultiFloat> marray(nvecs + ( (nremain > 0) ? 1 : 0 ));
     MultiFloat *a = marray.data();
-    
+
     int idx = 0;
-    
+
     for (int i=0; i<nvecs; ++i)
     {
         for (int j=0; j<MULTIFLOAT_SIZE; ++j)
@@ -498,10 +497,10 @@ QVector<MultiFloat> MultiFloat::fromArray(const double *array, int size)
             tmp[j] = array[idx];
             ++idx;
         }
-    
+
         a[i] = MultiFloat((float*)(&tmp), MULTIFLOAT_SIZE);
     }
-    
+
     if (nremain > 0)
     {
         for (int j=0; j<nremain; ++j)
@@ -509,10 +508,10 @@ QVector<MultiFloat> MultiFloat::fromArray(const double *array, int size)
             tmp[j] = array[idx];
             ++idx;
         }
-        
+
         a[marray.count()-1] = MultiFloat((float*)(&tmp), nremain);
     }
-    
+
     #ifdef MULTIFLOAT_AVX512F_IS_AVAILABLE
         assertAligned64(marray.constData(), CODELOC);
     #else
@@ -541,15 +540,15 @@ QVector<MultiFloat> MultiFloat::fromArray(const float *array, int size)
 {
     if (size == 0)
         return QVector<MultiFloat>();
-    
+
     int nvecs = size / MULTIFLOAT_SIZE;
     int nremain = size % MULTIFLOAT_SIZE;
-    
+
     QVector<MultiFloat> marray(nvecs + ( (nremain > 0) ? 1 : 0 ));
     MultiFloat *ma = marray.data();
-    
+
     int idx = 0;
-    
+
     #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
         if (isAligned16(array))
         {
@@ -558,7 +557,7 @@ QVector<MultiFloat> MultiFloat::fromArray(const float *array, int size)
                 ma[i] = MultiFloat(array+idx, MULTIFLOAT_SIZE);
                 idx += MULTIFLOAT_SIZE;
             }
-    
+
             if (nremain > 0)
             {
                 ma[marray.count()-1] = MultiFloat(array+idx, nremain);
@@ -575,10 +574,10 @@ QVector<MultiFloat> MultiFloat::fromArray(const float *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-            
+
                 ma[i] = MultiFloat((float*)(&tmp), MULTIFLOAT_SIZE);
             }
-            
+
             if (nremain > 0)
             {
                 for (int j=0; j<nremain; ++j)
@@ -586,7 +585,7 @@ QVector<MultiFloat> MultiFloat::fromArray(const float *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-                
+
                 ma[marray.count()-1] = MultiFloat((float*)(&tmp), nremain);
             }
         }
@@ -598,7 +597,7 @@ QVector<MultiFloat> MultiFloat::fromArray(const float *array, int size)
                 ma[i] = MultiFloat(array+idx, MULTIFLOAT_SIZE);
                 idx += MULTIFLOAT_SIZE;
             }
-    
+
             if (nremain > 0)
             {
                 ma[marray.count()-1] = MultiFloat(array+idx, nremain);
@@ -615,10 +614,10 @@ QVector<MultiFloat> MultiFloat::fromArray(const float *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-            
+
                 ma[i] = MultiFloat((float*)(&tmp), MULTIFLOAT_SIZE);
             }
-            
+
             if (nremain > 0)
             {
                 for (int j=0; j<nremain; ++j)
@@ -626,7 +625,7 @@ QVector<MultiFloat> MultiFloat::fromArray(const float *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-                
+
                 ma[marray.count()-1] = MultiFloat((float*)(&tmp), nremain);
             }
         }
@@ -644,7 +643,7 @@ QVector<MultiFloat> MultiFloat::fromArray(const float *array, int size)
         assertAligned32(marray.constData(), CODELOC);
     #endif
     #endif
-    #endif    
+    #endif
 
     return marray;
 }
@@ -661,20 +660,20 @@ QVector<float> MultiFloat::toArray(const QVector<MultiFloat> &array)
 {
     if (array.isEmpty())
         return QVector<float>();
-    
+
     QVector<float> ret;
     ret.reserve( array.count() * MULTIFLOAT_SIZE );
-    
+
     for (int i=0; i<array.count(); ++i)
     {
         const MultiFloat &f = array.constData()[i];
-        
+
         for (int j=0; j<MULTIFLOAT_SIZE; ++j)
         {
             ret.append(f[j]);
         }
     }
-    
+
     return ret;
 }
 
@@ -683,20 +682,20 @@ QVector<double> MultiFloat::toDoubleArray(const QVector<MultiFloat> &array)
 {
     if (array.isEmpty())
         return QVector<double>();
-    
+
     QVector<double> ret;
     ret.reserve( array.count() * MULTIFLOAT_SIZE );
-    
+
     for (int i=0; i<array.count(); ++i)
     {
         const MultiFloat &f = array.constData()[i];
-        
+
         for (int j=0; j<MULTIFLOAT_SIZE; ++j)
         {
             ret.append(f[j]);
         }
     }
-    
+
     return ret;
 }
 
@@ -724,18 +723,18 @@ bool MultiFloat::operator!=(const MultiFloat &other) const
     return true;
 }
 
-/** Return whether all of the elements of this MultiFloat are 
+/** Return whether all of the elements of this MultiFloat are
     equal to 0x00000000 (e.g. every bit in the entire vector is 0) */
 bool MultiFloat::isBinaryZero() const
 {
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_zero = 0x00000000;
-    
+
         if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) != bin_zero)
             return false;
     }
-    
+
     return true;
 }
 
@@ -753,26 +752,26 @@ bool MultiFloat::hasBinaryZero() const
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_zero = 0x00000000;
-    
+
         if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) == bin_zero)
             return true;
     }
-    
+
     return false;
 }
 
-/** Return whether all of the elements of this MultiFloat are 
+/** Return whether all of the elements of this MultiFloat are
     equal to 0xFFFFFFFF (e.g. every bit in the entire vector is 1) */
 bool MultiFloat::isBinaryOne() const
 {
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_one = 0xFFFFFFFF;
-    
+
         if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) != bin_one)
             return false;
     }
-    
+
     return true;
 }
 
@@ -790,11 +789,11 @@ bool MultiFloat::hasBinaryOne() const
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_one = 0xFFFFFFFF;
-    
+
         if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) == bin_one)
             return true;
     }
-    
+
     return false;
 }
 
@@ -851,7 +850,7 @@ void MultiFloat::set(int i, float value)
 {
     if (i < 0)
         i = MULTIFLOAT_SIZE + i;
-    
+
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
         throw SireError::invalid_index( QObject::tr(
@@ -867,14 +866,14 @@ float MultiFloat::get(int i) const
 {
     if (i < 0)
         i = MULTIFLOAT_SIZE + i;
-    
+
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
         throw SireError::invalid_index( QObject::tr(
                 "Cannot access element %1 of MultiFloat (holds only %2 values)")
                     .arg(i).arg(MULTIFLOAT_SIZE), CODELOC );
     }
-    
+
     return v.a[i];
 }
 
@@ -902,12 +901,12 @@ const char* MultiFloat::typeName()
 float MultiFloat::max() const
 {
     float m = v.a[0];
-    
+
     for (int i=1; i<MultiFloat::count(); ++i)
     {
         m = qMax(m, v.a[i]);
     }
-    
+
     return m;
 }
 
@@ -915,45 +914,45 @@ float MultiFloat::max() const
 float MultiFloat::min() const
 {
     float m = v.a[0];
-    
+
     for (int i=1; i<MultiFloat::count(); ++i)
     {
         m = qMin(m, v.a[i]);
     }
-    
+
     return m;
 }
 
 QString MultiFloat::toString() const
 {
     QStringList vals;
-    
+
     for (int i=0; i<this->count(); ++i)
     {
         vals.append( QString::number(v.a[i]) );
     }
-    
+
     return QObject::tr("{ %1 }").arg(vals.join(", "));
 }
 
 QString MultiFloat::toBinaryString() const
 {
     QStringList vals;
-    
+
     for (int i=0; i<this->count(); ++i)
     {
         const unsigned char *c = reinterpret_cast<const unsigned char*>(&(v.a[i]));
-        
+
         QString val("0x");
-        
+
         for (unsigned int j=0; j<sizeof(float); ++j)
         {
             val.append( QString("%1").arg((unsigned short)(c[j]), 2, 16, QChar('0')) );
         }
-        
+
         vals.append(val);
     }
-    
+
     return QObject::tr("{ %1 }").arg(vals.join(", "));
 }
 

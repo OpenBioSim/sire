@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -90,61 +89,61 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJAtom&);
 public:
     CLJAtom();
     CLJAtom(Vector coords, Charge charge, LJParameter ljparam, qint32 idnum=1);
-    
+
     CLJAtom(const CLJAtom &other);
-    
+
     ~CLJAtom();
-    
+
     CLJAtom& operator=(const CLJAtom &other);
-    
+
     bool operator==(const CLJAtom &other) const;
     bool operator!=(const CLJAtom &other) const;
 
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     static QVector<CLJAtom> buildFrom(const MoleculeView &molecule,
                                       const PropertyMap &map = PropertyMap());
 
     QString toString() const;
-    
+
     Vector coordinates() const;
     Charge charge() const;
     LJParameter ljParameter() const;
     qint32 ID() const;
-    
+
     bool isDummy() const;
     bool isNull() const;
-    
+
     CLJAtom negate() const;
-    
+
 private:
     /** The coordinates of the atom */
     float x;
     float y;
     float z;
-    
+
     /** The reduced charge of the atom */
     float chg;
-    
+
     /** The reduced sigma parameter for the atom */
     float sig;
-    
+
     /** The reduced epsilon parameter for the atom */
     float eps;
-    
+
     /** The ID number for the atom - atoms with ID 0 are dummies,
         while atoms with the same ID are in the same molecule */
     qint32 idnum;
 };
 
 /** This class holds vectorised arrays of the coordinates,
-    reduced charges and reduced Lennard Jones parameters of 
+    reduced charges and reduced Lennard Jones parameters of
     a set of atoms. This class is intended only to be used
     in the fast functions used to calculated coulomb and LJ
     energies, and is not intended for general use.
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJAtoms
@@ -165,7 +164,7 @@ public:
     CLJAtoms(const QVector<CLJAtom> &atoms);
     CLJAtoms(const QList<CLJAtom> &atoms);
     CLJAtoms(const CLJAtom *atoms, int natoms);
-    
+
     CLJAtoms(const QVector<Vector> &coordinates,
              const QVector<Charge> &charges,
              const QVector<LJParameter> &ljparams,
@@ -200,54 +199,54 @@ public:
     CLJAtoms(const CLJAtoms &other);
 
     ~CLJAtoms();
-    
+
     void reconstruct(const MoleculeView &molecule,
                      const PropertyMap &map = PropertyMap());
-    
+
     void reconstruct(const MoleculeView &molecule,
                      ID_SOURCE id_source,
                      const PropertyMap &map = PropertyMap());
-    
+
     CLJAtoms& operator=(const CLJAtoms &other);
-    
+
     bool operator==(const CLJAtoms &other) const;
     bool operator!=(const CLJAtoms &other) const;
-    
+
     static const char* typeName();
     const char* what() const;
-    
+
     QString toString() const;
 
     int count() const;
     int size() const;
-    
+
     int nAtoms() const;
-    
+
     bool isEmpty() const;
-    
+
     CLJAtom operator[](int i) const;
-    
+
     CLJAtom at(int i) const;
     CLJAtom getitem(int i) const;
-    
+
     void resize(int new_size);
     void copyIn(const CLJAtoms &other);
-    
+
     CLJAtoms operator+(const CLJAtoms &other) const;
-    
+
     CLJAtoms operator+(const CLJAtom &atom) const;
     CLJAtoms operator+(const QVector<CLJAtom> &atoms) const;
-    
+
     CLJAtoms& operator+=(const CLJAtoms &other);
-    
+
     CLJAtoms& operator+=(const CLJAtom &atom);
     CLJAtoms& operator+=(const QVector<CLJAtom> &atoms);
-    
+
     void append(const CLJAtom &atom);
     void append(const CLJAtoms &atoms, int n=-1);
-    
+
     void set(int i, const CLJAtom &atom);
-    
+
     void setCoordinates(int i, Vector coords);
     void setCharge(int i, Charge charge);
     void setLJParameter(int i, LJParameter ljparam);
@@ -257,33 +256,33 @@ public:
 
     void makeDummy(int i);
     bool isDummy(int i) const;
-    
+
     Vector minCoords() const;
     Vector maxCoords() const;
-    
+
     CLJAtoms negate() const;
-    
+
     QVector<CLJAtom> atoms() const;
-    
+
     QVector<Vector> coordinates() const;
     QVector<Charge> charges() const;
     QVector<LJParameter> ljParameters() const;
     QVector<qint32> IDs() const;
-    
+
     const QVector<MultiFloat>& x() const;
     const QVector<MultiFloat>& y() const;
     const QVector<MultiFloat>& z() const;
-    
+
     const QVector<MultiFloat>& q() const;
     const QVector<MultiFloat>& sigma() const;
     const QVector<MultiFloat>& epsilon() const;
-    
+
     const QVector<MultiInt>& ID() const;
-    
+
     static MultiInt idOfDummy();
-    
+
     CLJAtoms squeeze() const;
-    
+
     bool isPadded() const;
     int nPadded() const;
 
@@ -300,20 +299,20 @@ private:
 
     /** Vector of the x-coordinates of the atoms */
     QVector<MultiFloat> _x;
-    
+
     /** Vector of the y-coordinates of the atoms */
     QVector<MultiFloat> _y;
-    
+
     /** Vector of the z-coordinates of the atoms */
     QVector<MultiFloat> _z;
-    
-    /** Vector of the reduced partial charges of the 
+
+    /** Vector of the reduced partial charges of the
         atoms (charge divided by sqrt(4 pi epsilon0) ) */
     QVector<MultiFloat> _q;
-    
+
     /** Vector of the square root of the sigma LJ parameters */
     QVector<MultiFloat> _sig;
-    
+
     /** Vector of the square root of the epsilon LJ parameters */
     QVector<MultiFloat> _eps;
 
@@ -321,7 +320,7 @@ private:
         number are part of the same molecule. Also, if this number is
         zero, then this is a dummy atom */
     QVector<MultiInt> _id;
-    
+
     /** ID number given to all dummy atoms */
     static qint32 id_of_dummy;
 };
@@ -399,17 +398,17 @@ SIRE_ALWAYS_INLINE int CLJAtoms::nPadded() const
     else
     {
         const MultiInt &last = _id.constData()[ _id.count() - 1 ];
-        
+
         int n = 0;
-        
+
         for (int i=MultiInt::count()-1; i>=0; --i)
         {
             if (last[i] != id_of_dummy)
                 return n;
-            
+
             n += 1;
         }
-        
+
         return n;
     }
 }

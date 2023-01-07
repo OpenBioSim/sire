@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,24 +52,24 @@ class AmberFormat
 {
 public:
     AmberFormat();
-    
+
     AmberFormat(SireIO::AmberPrm::FLAG_TYPE flag, int num,
                 int field, int point=0);
-    
+
     AmberFormat(const QString &line);
-    
+
     ~AmberFormat();
-    
+
     QString toString() const;
-    
+
     QString toAmberString() const;
-    
+
     int width() const;
-    
+
     int numValues() const;
-    
+
     int pointWidth() const;
-    
+
     int numValues( const QString &line ) const;
 
     SireIO::AmberPrm::FLAG_TYPE flagType() const;
@@ -113,29 +112,29 @@ std::tuple< QVector<T>, QVector<U> > collapseTuples(
                    const QVector< std::tuple< QVector<T>,QVector<U> > > &arrays )
 {
     int nvals = 0;
-    
+
     for (const auto array : arrays)
     {
         nvals += std::get<0>(array).count();
     }
-    
+
     if (nvals == 0)
     {
         return std::make_tuple( QVector<T>(), QVector<U>() );
     }
-    
+
     QVector<T> tvals;
     QVector<U> uvals;
-    
+
     tvals.reserve(nvals);
     uvals.reserve(nvals);
-    
+
     for (const auto array : arrays)
     {
         tvals += std::get<0>(array);
         uvals += std::get<1>(array);
     }
-    
+
     return std::make_tuple(tvals, uvals);
 }
 
@@ -147,27 +146,27 @@ std::tuple< QVector<T>, QVector<U>, QVector<V>, QVector<W> > collapseTuples(
                                               QVector<V>,QVector<W> > > &arrays )
 {
     int nvals = 0;
-    
+
     for (const auto array : arrays)
     {
         nvals += std::get<0>(array).count();
     }
-    
+
     if (nvals == 0)
     {
         return std::make_tuple( QVector<T>(), QVector<U>(), QVector<V>(), QVector<W>() );
     }
-    
+
     QVector<T> tvals;
     QVector<U> uvals;
     QVector<V> vvals;
     QVector<W> wvals;
-    
+
     tvals.reserve(nvals);
     uvals.reserve(nvals);
     vvals.reserve(nvals);
     wvals.reserve(nvals);
-    
+
     for (const auto array : arrays)
     {
         tvals += std::get<0>(array);
@@ -175,7 +174,7 @@ std::tuple< QVector<T>, QVector<U>, QVector<V>, QVector<W> > collapseTuples(
         vvals += std::get<2>(array);
         wvals += std::get<3>(array);
     }
-    
+
     return std::make_tuple(tvals, uvals, vvals, wvals);
 }
 
@@ -185,25 +184,25 @@ template<class T>
 QVector<T> collapse(const QVector< QVector<T> > &arrays)
 {
     int nvals = 0;
-    
+
     for (const auto array : arrays)
     {
         nvals += array.count();
     }
-    
+
     if (nvals == 0)
     {
         return QVector<T>();
     }
-    
+
     QVector<T> values;
     values.reserve(nvals);
-    
+
     for (const auto array : arrays)
     {
         values += array;
     }
-    
+
     return values;
 }
 

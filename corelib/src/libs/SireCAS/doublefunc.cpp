@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,7 +45,7 @@ static const RegisterMetaType<DoubleFunc> r_doublefunc(MAGIC_ONLY, "SireCAS::Dou
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const DoubleFunc &func)
 {
-    writeHeader(ds, r_doublefunc, 1) 
+    writeHeader(ds, r_doublefunc, 1)
             << func.ex0 << func.ex1 << static_cast<const ExBase&>(func);
 
     return ds;
@@ -72,7 +71,7 @@ DoubleFunc::DoubleFunc() : ExBase()
 {}
 
 /** Construct a function that operates on the expressions 'x' and 'y' */
-DoubleFunc::DoubleFunc(const Expression &x, const Expression &y) 
+DoubleFunc::DoubleFunc(const Expression &x, const Expression &y)
            : ExBase(), ex0(x), ex1(y)
 {}
 
@@ -165,7 +164,7 @@ Expression DoubleFunc::differentiate(const Symbol &symbol) const
             "from \"DoubleFunc\" - so it can't differentiate %1 with respect "
             "to %2.")
                 .arg(this->toString(), symbol.toString()), CODELOC );
-                
+
     return Expression(0);
 }
 
@@ -194,7 +193,7 @@ QList<Factor> DoubleFunc::expand(const Symbol &symbol) const
 
     QList<Factor> ret;
     ret.append( Factor(symbol, *this, 0) );
-    
+
     return ret;
 }
 

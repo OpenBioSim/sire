@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,13 +51,13 @@ using namespace SireStream;
 static const RegisterMetaType<ResidueCutting> r_rescut;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                        const ResidueCutting &rescut)
 {
     writeHeader(ds, r_rescut, 1);
-    
+
     ds << static_cast<const CuttingFunction&>(rescut);
-    
+
     return ds;
 }
 
@@ -66,14 +65,14 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, ResidueCutting &rescut)
 {
     VersionID v = readHeader(ds, r_rescut);
-    
+
     if (v == 1)
     {
         ds >> static_cast<CuttingFunction&>(rescut);
     }
     else
         throw version_error(v, "1", r_rescut, CODELOC);
-        
+
     return ds;
 }
 
@@ -120,22 +119,22 @@ MolStructureEditor ResidueCutting::operator()(MolStructureEditor &moleditor) con
 
     //remove the existing CutGroups
     moleditor.removeAllCutGroups();
-    
+
     //now create one CutGroup for each residue, giving it the same
     //number as the residue index
     for (ResIdx i(0); i<moleditor.nResidues(); ++i)
     {
         moleditor.add( CGName(QString::number(i)) );
-        
+
         //now reparent all of the atoms into this CutGroup
         ResStructureEditor reseditor = moleditor.residue(i);
-        
+
         for (int j=0; j<reseditor.nAtoms(); ++j)
         {
             reseditor.atom(j).reparent( CGIdx(i) );
         }
     }
-    
+
     return moleditor;
 }
 

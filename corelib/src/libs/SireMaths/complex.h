@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -30,48 +29,48 @@
 #define SIRECAS_COMPLEX_H
 
 /**
-The documentation for a lot of these functions is copied directly from the 
-documentation of the gsl functions of the equivalent name. 
+The documentation for a lot of these functions is copied directly from the
+documentation of the gsl functions of the equivalent name.
 
 The copyright information for GSL is;
 
 ########################################################################
 GSL
 
-More information about GSL can be found at the project homepage, 
+More information about GSL can be found at the project homepage,
 http://www.gnu.org/software/gsl/.
 
 Printed copies of this manual can be purchased from Network Theory Ltd at
-http://www.network-theory.co.uk/gsl/manual/. The money raised from sales of the 
+http://www.network-theory.co.uk/gsl/manual/. The money raised from sales of the
 manual helps support the development of GSL.
 
 Copyright  1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 The GSL Team.
 
-Permission is granted to copy, distribute and/or modify this document 
-under the terms of the GNU Free Documentation License, Version 1.2 or any 
-later version published by the Free Software Foundation; with the Invariant 
-Sections being "GNU General Public License" and "Free Software Needs Free Documentation", 
-the Front-Cover text being "A GNU Manual", and with the Back-Cover Text 
-being (a) (see below). A copy of the license is included in the section 
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or any
+later version published by the Free Software Foundation; with the Invariant
+Sections being "GNU General Public License" and "Free Software Needs Free Documentation",
+the Front-Cover text being "A GNU Manual", and with the Back-Cover Text
+being (a) (see below). A copy of the license is included in the section
 entitled ?GNU Free Documentation License?.
 
-(a) The Back-Cover Text is: "You have freedom to copy and modify this GNU Manual, 
+(a) The Back-Cover Text is: "You have freedom to copy and modify this GNU Manual,
 like GNU software."
 
 GSL Complex
 
-The functions described in this chapter provide support for complex numbers. 
-The algorithms take care to avoid unnecessary intermediate underflows and overflows, 
+The functions described in this chapter provide support for complex numbers.
+The algorithms take care to avoid unnecessary intermediate underflows and overflows,
 allowing the functions to be evaluated over as much of the complex plane as possible.
 
-For multiple-valued functions the branch cuts have been chosen to follow the 
-conventions of Abramowitz and Stegun in the Handbook of Mathematical Functions. 
-The functions return principal values which are the same as those in GNU Calc, 
-which in turn are the same as those in Common Lisp, The Language (Second Edition)1 
+For multiple-valued functions the branch cuts have been chosen to follow the
+conventions of Abramowitz and Stegun in the Handbook of Mathematical Functions.
+The functions return principal values which are the same as those in GNU Calc,
+which in turn are the same as those in Common Lisp, The Language (Second Edition)1
 and the HP-28/48 series of calculators.
 
-The complex types are defined in the header file gsl_complex.h, while the 
-corresponding complex functions and arithmetic operations are defined 
+The complex types are defined in the header file gsl_complex.h, while the
+corresponding complex functions and arithmetic operations are defined
 in gsl_complex_math.h.
 
 #######################################################################
@@ -102,11 +101,11 @@ namespace SireMaths
 class Rational;
 
 /**
-This class represents a complex number to the same precision as 'double'. 
-This is merely a thin wrapper around the gsl_complex struct, and the 
+This class represents a complex number to the same precision as 'double'.
+This is merely a thin wrapper around the gsl_complex struct, and the
 gsl_complex functions.
 
-(indeed, this is publically derived from gsl_complex, so you can use 
+(indeed, this is publically derived from gsl_complex, so you can use
 this class whereever you would normally use a gsl_complex)
 
 @author Christopher Woods
@@ -126,7 +125,7 @@ public:
     ~Complex();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return Complex::typeName();
@@ -134,13 +133,13 @@ public:
 
     double real() const;
     double imag() const;
-    
+
     template<typename T>
     operator std::complex<T>() const;
 
     bool isReal() const;
     bool isPurelyComplex() const;
-    
+
     bool isZero() const;
 
     QString toString() const;

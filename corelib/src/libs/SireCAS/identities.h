@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,10 +49,10 @@ SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Identities&);
 namespace SireCAS
 {
 
-/** This class holds a collection of identities. 
-    These are symbols, and the expressions that they are equal to, 
-    e.g. x == y.squared() + sin(z). These identities can then be 
-    substituted into expressions, with all instances of the variable 
+/** This class holds a collection of identities.
+    These are symbols, and the expressions that they are equal to,
+    e.g. x == y.squared() + sin(z). These identities can then be
+    substituted into expressions, with all instances of the variable
     being replaced by the equivalent expression.
 
     @author Christopher Woods
@@ -104,7 +103,7 @@ public:
     ~Identities();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return Identities::typeName();
@@ -112,7 +111,7 @@ public:
 
     bool operator==(const Identities &other) const;
     bool operator!=(const Identities &other) const;
-    
+
     void add(const SymbolExpression &symex0);
     void add(const SymbolExpression &symex0, const SymbolExpression &symex1);
     void add(const SymbolExpression &symex0, const SymbolExpression &symex1,

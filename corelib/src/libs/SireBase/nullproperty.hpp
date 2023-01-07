@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ namespace SireBase
 
 /** This template simplifies the creation of a 'NullProperty' for each
     PropPtr<T> derived type
-    
+
     @author Christopher Woods
 */
 template<class T>
@@ -63,32 +62,32 @@ friend SIREBASE_EXPORT QDataStream& ::operator>><>(QDataStream&, NullProp<T>&);
 public:
     NullProp() : ConcreteProperty< NullProp<T>, T >()
     {}
-    
+
     NullProp(const NullProp<T> &other) : ConcreteProperty< NullProp<T>, T >(other)
     {}
-    
+
     ~NullProp();
-    
+
     NullProp<T>& operator=(const NullProp<T>&)
     {
         return *this;
     }
-    
+
     bool operator==(const NullProp<T>&) const
     {
         return true;
     }
-    
+
     bool operator!=(const NullProp<T>&) const
     {
         return false;
     }
-    
+
     static const char* typeName()
     {
         return QMetaType::typeName( qMetaTypeId< NullProp<T> >() );
     }
-    
+
     QString toString() const
     {
         return QObject::tr( "%1::null" ).arg(T::typeName());
@@ -128,10 +127,10 @@ SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator>>(QDataStream &ds, SireBase::NullProp<T>&)
 {
     SireStream::VersionID v = SireStream::readHeader(ds, SireBase::NullProp<T>::r_null);
-    
+
     if (v != 1)
         throw SireStream::version_error(v, "1", SireBase::NullProp<T>::r_null, CODELOC);
-    
+
     return ds;
 }
 

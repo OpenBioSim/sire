@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,14 +55,14 @@ using SireSystem::Constraints;
     and then testing whether the resulting configuration
     is suitable for inclusion in the ensemble generated
     using a slow Hamiltonian.
-    
+
     For an application of this method to enhance sampling
     in QM/MM simulations, see Woods, Manby and Mulholland,
     J. Chem. Phys. 2008.
-    
+
     @author Christopher Woods
 */
-class SIREMOVE_EXPORT MTSMC 
+class SIREMOVE_EXPORT MTSMC
             : public SireBase::ConcreteProperty<MTSMC,MonteCarlo>
 {
 
@@ -76,40 +75,40 @@ public:
     MTSMC(const Moves &fastmoves, const PropertyMap &map = PropertyMap());
     MTSMC(const Moves &fastmoves, int nfastmoves,
           const PropertyMap &map = PropertyMap());
-          
+
     MTSMC(const Moves &fastmoves, const Symbol &fastcomponent,
           const PropertyMap &map = PropertyMap());
-    MTSMC(const Moves &fastmoves, const Symbol &fastcomponent, 
+    MTSMC(const Moves &fastmoves, const Symbol &fastcomponent,
           int nfastmoves, const PropertyMap &map = PropertyMap());
-    
+
     MTSMC(const Moves &fastmoves, const Constraints &slow_constraints,
           const PropertyMap &map = PropertyMap());
     MTSMC(const Moves &fastmoves, const Constraints &slow_constraints,
           int nfastmoves, const PropertyMap &map = PropertyMap());
-          
+
     MTSMC(const Moves &fastmoves, const Symbol &fastcomponent,
           const Constraints &slow_constraints,
           const PropertyMap &map = PropertyMap());
     MTSMC(const Moves &fastmoves, const Symbol &fastcomponent,
           const Constraints &slow_constraints, int nfastmoves,
           const PropertyMap &map = PropertyMap());
-    
+
     MTSMC(const MTSMC &other);
-    
+
     ~MTSMC();
-    
+
     MTSMC& operator=(const MTSMC &other);
-    
+
     static const char* typeName();
 
     bool operator==(const MTSMC &other) const;
     bool operator!=(const MTSMC &other) const;
-    
+
     QString toString() const;
-    
+
     void setFastMoves(const Moves &fastmoves);
     void setNFastMoves(int nfast);
-    
+
     void setFastEnergyComponent(const Symbol &component);
     void setSlowEnergyComponent(const Symbol &component);
 
@@ -117,32 +116,32 @@ public:
     void setSlowConstraints(const Constraints &constraints);
 
     void removeSlowConstraints();
-    
+
     const Constraints& slowConstraints() const;
 
     const Moves& fastMoves() const;
     int nFastMoves() const;
-    
+
     const Symbol& fastEnergyComponent() const;
     const Symbol& slowEnergyComponent() const;
-    
+
     void clearStatistics();
-    
+
     void setGenerator(const RanGenerator &rangenerator);
-    
+
     void move(System &system, int nmoves, bool record_stats=true);
 
 private:
     /** The collection of fast moves that will be applied to the system */
     MovesPtr fastmoves;
-    
-    /** The constraints that are applied to the system after each 
+
+    /** The constraints that are applied to the system after each
         block of fast moves */
     Constraints slow_constraints;
-    
+
     /** The energy component on which the fast moves will operate */
     Symbol fastcomponent;
-    
+
     /** The number of fast moves to apply per slow move */
     quint32 nfastmoves;
 };

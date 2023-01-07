@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,29 +49,29 @@ namespace SireMM
 
 /** This is a simple internal class that holds the combined CLJ parameter
     as a reduced charge (charge / sqrt(4 pi epsilon_0)) and the LJ
-    parameter as an ID number for the LJParameterDB 
-    
+    parameter as an ID number for the LJParameterDB
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJParam
 {
 public:
     CLJParam();
-    
+
     CLJParam(const SireUnits::Dimension::Charge &charge,
              const LJParameter &ljparam, bool auto_lock=true);
-             
+
     CLJParam(const CLJParam &other);
-    
+
     ~CLJParam();
-    
+
     CLJParam& operator=(const CLJParam &other);
-    
+
     bool operator==(const CLJParam &other) const;
     bool operator!=(const CLJParam &other) const;
-    
+
     static const char* typeName();
-    
+
     double q() const;
     SireUnits::Dimension::Charge charge() const;
 
@@ -82,7 +81,7 @@ public:
 private:
     /** The reduced charge (q / sqrt(4 pi epsilon_0)) */
     double reduced_chg;
-    
+
     /** The ID of the LJ parameter in the global LJParameterDB */
     quint32 ljid;
 };

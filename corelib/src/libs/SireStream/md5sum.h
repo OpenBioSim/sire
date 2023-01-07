@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,7 +50,7 @@ namespace SireStream
 {
 
 /**
- * These functions are used to simplify the generation of md5sums of 
+ * These functions are used to simplify the generation of md5sums of
  * buffers and files
  *
  * @author Christopher Woods
@@ -72,26 +71,26 @@ public:
    * Construct an MD5Sum from a const char* buffer.
    * @param buffer The buffer containing the data.
    * @param sz This size of the buffer. Don't lie otherwise it will crash!
-   * @return A constructed, valid MD5Sum object. 
+   * @return A constructed, valid MD5Sum object.
    */
   MD5Sum(const char *buffer, unsigned int sz);
   /** Construct the MD5Sum for a file */
   MD5Sum(const QString &file);
   /** Copy constructor */
   MD5Sum(const MD5Sum &sum);
-  
+
   ~MD5Sum();
-  
+
   /** Assignment operator */
   const MD5Sum& operator=(const MD5Sum &other);
-  
+
   /** Equality operators */
   bool operator==(const MD5Sum &other) const;
   bool operator!=(const MD5Sum &other) const;
-  
+
   /** Return a pointer to the digest array (16 element array) */
   const md5_byte_t* digest() const;
-  
+
   /** Return a string representation of the digest */
   QString toString() const;
 
@@ -102,7 +101,7 @@ private:
    * @param sz The size of the buffer
    */
   void generate(const char *buffer, unsigned int sz);
-  
+
   /** Pointer to the storage of the md5 digest */
   md5_byte_t dgst[16];
 };

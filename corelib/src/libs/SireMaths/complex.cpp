@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -409,23 +408,23 @@ namespace SireMaths
         return Complex(x) / z;
     }
 
-    /** This function returns the square root of the complex number z, \sqrt z. 
-        The branch cut is the negative real axis. The result always lies in the 
+    /** This function returns the square root of the complex number z, \sqrt z.
+        The branch cut is the negative real axis. The result always lies in the
         right half of the complex plane. */
     Complex sqrt(const Complex &z)
     {
         return gsl_complex_sqrt(z);
     }
 
-    /** This function returns the complex square root of the real number x, 
+    /** This function returns the complex square root of the real number x,
         where x may be negative. */
     Complex sqrt_real(double x)
     {
         return gsl_complex_sqrt_real(x);
     }
 
-    /** The function returns the complex number z raised to the complex power a, 
-        z^a. This is computed as \exp(\log(z)*a) using complex logarithms and complex 
+    /** The function returns the complex number z raised to the complex power a,
+        z^a. This is computed as \exp(\log(z)*a) using complex logarithms and complex
         exponentials. */
     Complex pow(const Complex &z, const Complex &a)
     {
@@ -481,14 +480,14 @@ namespace SireMaths
         return gsl_complex_exp(z);
     }
 
-    /** This function returns the complex natural logarithm (base e) of the complex 
+    /** This function returns the complex natural logarithm (base e) of the complex
         number z, \log(z). The branch cut is the negative real axis. */
     Complex log(const Complex &z)
     {
         return gsl_complex_log(z);
     }
 
-    /** This function returns the complex base-10 logarithm of the complex number z, 
+    /** This function returns the complex base-10 logarithm of the complex number z,
         \log_10 (z). */
     Complex log10(const Complex &z)
     {
@@ -502,7 +501,7 @@ namespace SireMaths
         return gsl_complex_log_b(z,b);
     }
 
-    /** This function returns the complex sine of the complex number 
+    /** This function returns the complex sine of the complex number
         z, \sin(z) = (\exp(iz) - \exp(-iz))/(2i). */
     Complex sin(const Complex &z)
     {
@@ -512,7 +511,7 @@ namespace SireMaths
             return gsl_complex_sin(z);
     }
 
-    /** This function returns the complex cosine of the complex number 
+    /** This function returns the complex cosine of the complex number
         z, \cos(z) = (\exp(iz) + \exp(-iz))/2. */
     Complex cos(const Complex &z)
     {
@@ -522,7 +521,7 @@ namespace SireMaths
             return gsl_complex_cos(z);
     }
 
-    /** This function returns the complex tangent of the complex number z, 
+    /** This function returns the complex tangent of the complex number z,
         \tan(z) = \sin(z)/\cos(z). */
     Complex tan(const Complex &z)
     {
@@ -532,46 +531,46 @@ namespace SireMaths
             return gsl_complex_tan(z);
     }
 
-    /** This function returns the complex secant of the complex number z, 
+    /** This function returns the complex secant of the complex number z,
         \sec(z) = 1/\cos(z). */
     Complex sec(const Complex &z)
     {
         return gsl_complex_sec(z);
     }
 
-    /** This function returns the complex cosecant of the complex number z, 
+    /** This function returns the complex cosecant of the complex number z,
         \csc(z) = 1/\sin(z). */
     Complex csc(const Complex &z)
     {
         return gsl_complex_csc(z);
     }
 
-    /** This function returns the complex cotangent of the complex number z,  
+    /** This function returns the complex cotangent of the complex number z,
         \cot(z) = 1/\tan(z). */
     Complex cot(const Complex &z)
     {
         return gsl_complex_cot(z);
     }
 
-    /** This function returns the complex arcsine of the complex number z, 
-        \arcsin(z). The branch cuts are on the real axis, less than -1 and greater 
+    /** This function returns the complex arcsine of the complex number z,
+        \arcsin(z). The branch cuts are on the real axis, less than -1 and greater
         than 1. */
     Complex arcsin(const Complex &z)
     {
         return gsl_complex_arcsin(z);
     }
 
-    /** This function returns the complex arcsine of the real number z, 
-        \arcsin(z). For z between -1 and 1, the function returns a real 
-        value in the range [-\pi/2,\pi/2]. For z less than -1 the result 
-        has a real part of -\pi/2 and a positive imaginary part. For z greater 
+    /** This function returns the complex arcsine of the real number z,
+        \arcsin(z). For z between -1 and 1, the function returns a real
+        value in the range [-\pi/2,\pi/2]. For z less than -1 the result
+        has a real part of -\pi/2 and a positive imaginary part. For z greater
         than 1 the result has a real part of \pi/2 and a negative imaginary part. */
     Complex arcsin_real(double z)
     {
         return gsl_complex_arcsin_real(z);
     }
 
-    /** This function returns the complex arccosine of the complex number z, 
+    /** This function returns the complex arccosine of the complex number z,
         \arccos(z). The branch cuts are on the real axis, less than -1 and
          greater than 1. */
     Complex arccos(const Complex &z)
@@ -579,136 +578,136 @@ namespace SireMaths
         return gsl_complex_arccos(z);
     }
 
-    /** This function returns the complex arccosine of the real number z, 
-        \arccos(z). For z between -1 and 1, the function returns a real value in 
-        the range [0,\pi]. For z less than -1 the result has a real part of \pi 
-        and a negative imaginary part. For z greater than 1 the result is purely 
+    /** This function returns the complex arccosine of the real number z,
+        \arccos(z). For z between -1 and 1, the function returns a real value in
+        the range [0,\pi]. For z less than -1 the result has a real part of \pi
+        and a negative imaginary part. For z greater than 1 the result is purely
         imaginary and positive. */
     Complex arccos_real(double z)
     {
         return gsl_complex_arccos_real(z);
     }
 
-    /** This function returns the complex arctangent of the complex number z, 
+    /** This function returns the complex arctangent of the complex number z,
         \arctan(z). The branch cuts are on the imaginary axis, below -i and above i. */
     Complex arctan(const Complex &z)
     {
         return gsl_complex_arctan(z);
     }
 
-    /** This function returns the complex arcsecant of the complex number z, 
+    /** This function returns the complex arcsecant of the complex number z,
         \arcsec(z) = \arccos(1/z). */
     Complex arcsec(const Complex &z)
     {
         return gsl_complex_arcsec(z);
     }
 
-    /** This function returns the complex arcsecant of the real number z, 
+    /** This function returns the complex arcsecant of the real number z,
         \arcsec(z) = \arccos(1/z). */
     Complex arcsec_real(double z)
     {
         return gsl_complex_arcsec_real(z);
     }
 
-    /** This function returns the complex arccosecant of the complex number z, 
+    /** This function returns the complex arccosecant of the complex number z,
         \arccsc(z) = \arcsin(1/z). */
     Complex arccsc(const Complex &z)
     {
         return gsl_complex_arccsc(z);
     }
 
-    /** This function returns the complex arccosecant of the real number z, 
+    /** This function returns the complex arccosecant of the real number z,
         \arccsc(z) = \arcsin(1/z). */
     Complex arccsc_real(double z)
     {
         return gsl_complex_arccsc_real(z);
     }
 
-    /** This function returns the complex arccotangent of the complex number z, 
+    /** This function returns the complex arccotangent of the complex number z,
         \arccot(z) = \arctan(1/z). */
     Complex arccot(const Complex &z)
     {
         return gsl_complex_arccot(z);
     }
 
-    /** This function returns the complex hyperbolic sine of the complex number z, 
+    /** This function returns the complex hyperbolic sine of the complex number z,
         \sinh(z) = (\exp(z) - \exp(-z))/2. */
     Complex sinh(const Complex &z)
     {
         return gsl_complex_sinh(z);
     }
 
-    /** This function returns the complex hyperbolic cosine of the complex number z, 
+    /** This function returns the complex hyperbolic cosine of the complex number z,
         \cosh(z) = (\exp(z) + \exp(-z))/2.  */
     Complex cosh(const Complex &z)
     {
         return gsl_complex_cosh(z);
     }
 
-    /** This function returns the complex hyperbolic tangent of the complex number z, 
+    /** This function returns the complex hyperbolic tangent of the complex number z,
         \tanh(z) = \sinh(z)/\cosh(z). */
     Complex tanh(const Complex &z)
     {
         return gsl_complex_tanh(z);
     }
 
-    /** This function returns the complex hyperbolic secant of the complex number z, 
+    /** This function returns the complex hyperbolic secant of the complex number z,
         \sech(z) = 1/\cosh(z). */
     Complex sech(const Complex &z)
     {
         return gsl_complex_sech(z);
     }
 
-    /** This function returns the complex hyperbolic cosecant of the complex number z, 
+    /** This function returns the complex hyperbolic cosecant of the complex number z,
         \csch(z) = 1/\sinh(z). */
     Complex csch(const Complex &z)
     {
         return gsl_complex_csch(z);
     }
 
-    /** This function returns the complex hyperbolic cotangent of the complex number z, 
+    /** This function returns the complex hyperbolic cotangent of the complex number z,
         \coth(z) = 1/\tanh(z). */
     Complex coth(const Complex &z)
     {
         return gsl_complex_coth(z);
     }
 
-    /** This function returns the complex hyperbolic arcsine of the complex number z, 
+    /** This function returns the complex hyperbolic arcsine of the complex number z,
         \arcsinh(z). The branch cuts are on the imaginary axis, below -i and above i. */
     Complex arcsinh(const Complex &z)
     {
         return gsl_complex_arcsinh(z);
     }
 
-    /** This function returns the complex hyperbolic arccosine of the complex number z, 
+    /** This function returns the complex hyperbolic arccosine of the complex number z,
         \arccosh(z). The branch cut is on the real axis, less than 1. */
     Complex arccosh(const Complex &z)
     {
         return gsl_complex_arccosh(z);
     }
 
-    /** This function returns the complex hyperbolic arccosine of the real number z, 
+    /** This function returns the complex hyperbolic arccosine of the real number z,
         \arccosh(z). */
     Complex arccosh_real(double z)
     {
         return gsl_complex_arccosh_real(z);
     }
 
-    /** This function returns the complex hyperbolic arctangent of the complex number z, 
+    /** This function returns the complex hyperbolic arctangent of the complex number z,
         \arctanh(z). The branch cuts are on the real axis, less than -1 and greater than 1. */
     Complex arctanh(const Complex &z)
     {
         return gsl_complex_arctanh(z);
     }
 
-    /** This function returns the complex hyperbolic arctangent of the real number z, 
+    /** This function returns the complex hyperbolic arctangent of the real number z,
         \arctanh(z). */
     Complex arctanh_real(double z)
     {
         return gsl_complex_arctanh_real(z);
     }
 
-    /** This function returns the complex hyperbolic arcsecant of the complex number z, 
+    /** This function returns the complex hyperbolic arcsecant of the complex number z,
        \arcsech(z) = \arccosh(1/z). */
     Complex arcsech(const Complex &z)
     {
@@ -722,7 +721,7 @@ namespace SireMaths
         return gsl_complex_arccsch(z);
     }
 
-    /** This function returns the complex hyperbolic arccotangent of the complex number z, 
+    /** This function returns the complex hyperbolic arccotangent of the complex number z,
         \arccoth(z) = \arctanh(1/z). */
     Complex arccoth(const Complex &z)
     {

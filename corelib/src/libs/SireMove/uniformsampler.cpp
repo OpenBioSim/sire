@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -72,7 +71,7 @@ QDataStream &operator>>(QDataStream &ds, UniformSampler &sampler)
 }
 
 /** Constructor */
-UniformSampler::UniformSampler() 
+UniformSampler::UniformSampler()
                : ConcreteProperty<UniformSampler,Sampler>()
 {}
 
@@ -81,7 +80,7 @@ const UniformSampler& Sampler::null()
     return *(create_shared_null<UniformSampler>());
 }
 
-/** Constructor a sampler that chooses views at random from the 
+/** Constructor a sampler that chooses views at random from the
     passed molecule group */
 UniformSampler::UniformSampler(const MoleculeGroup &molgroup)
                : ConcreteProperty<UniformSampler,Sampler>(molgroup)
@@ -115,13 +114,13 @@ tuple<PartialMolecule,double> UniformSampler::sample() const
         throw SireMol::missing_molecule( QObject::tr(
             "The MoleculeGroup is empty, so we can't choose a molecule!"),
                 CODELOC );
-    
+
     else if (nviews == 1)
         return tuple<PartialMolecule,double>(group().viewAt(0), 1);
 
     //choose a random view
     quint32 i = generator().randInt(nviews-1);
-    
+
     //return the matching molecule
     return tuple<PartialMolecule,double>(group().viewAt(i), 1.0 / nviews);
 }
@@ -133,18 +132,18 @@ tuple<Molecule,double> UniformSampler::sampleMolecule() const
 {
     //how many molecules are there in the molecule group?
     int nmols = group().nMolecules();
-    
+
     if (nmols == 0)
         throw SireMol::missing_molecule( QObject::tr(
             "The MoleculeGroup is empty, so we can't choose a molecule!"),
                 CODELOC );
-    
+
     else if (nmols == 1)
         return tuple<Molecule,double>( Molecule(group().moleculeAt(0)) , 1);
 
     //choose a random molecule
     quint32 i = generator().randInt(nmols-1);
-    
+
     return tuple<Molecule,double>( Molecule(group().moleculeAt(i)), 1.0 / nmols );
 }
 
@@ -155,7 +154,7 @@ double UniformSampler::probabilityOf(const PartialMolecule &molecule) const
 {
     if (group().contains(molecule))
         return 1.0 / group().nViews();
-        
+
     else
         return 0;
 }
@@ -167,7 +166,7 @@ double UniformSampler::probabilityOfMolecule(const Molecule &molecule) const
 {
     if (group().contains(molecule.number()))
         return 1.0 / group().nMolecules();
-        
+
     else
         return 0;
 }

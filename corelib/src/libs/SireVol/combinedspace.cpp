@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,7 +55,7 @@ static const RegisterMetaType<CombinedSpace> r_combinedspace;
 QDataStream &operator<<(QDataStream &ds, const CombinedSpace &combined)
 {
     writeHeader(ds, r_combinedspace, 1);
-    
+
     SharedDataStream sds(ds);
 
     sds << combined.spces << static_cast<const Space&>(combined);
@@ -72,7 +71,7 @@ QDataStream &operator>>(QDataStream &ds, CombinedSpace &combined)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> combined.spces >> static_cast<Space&>(combined);
     }
     else
@@ -85,7 +84,7 @@ QDataStream &operator>>(QDataStream &ds, CombinedSpace &combined)
 CombinedSpace::CombinedSpace() : ConcreteProperty<CombinedSpace,Space>()
 {}
 
-/** Construct a combined space from just a single space */    
+/** Construct a combined space from just a single space */
 CombinedSpace::CombinedSpace(const Space &space)
               : ConcreteProperty<CombinedSpace,Space>()
 {
@@ -109,14 +108,14 @@ CombinedSpace::CombinedSpace(const QList<SpacePtr> &spaces)
     if (not spaces.isEmpty())
     {
         spces.reserve( spaces.count() );
-        
+
         for (QList<SpacePtr>::const_iterator it = spaces.constBegin();
              it != spaces.constEnd();
              ++it)
         {
             spces.append(*it);
         }
-   
+
         spces.squeeze();
     }
 }
@@ -130,7 +129,7 @@ CombinedSpace::CombinedSpace(const QVector<SpacePtr> &spaces)
 }
 
 /** Copy constructor */
-CombinedSpace::CombinedSpace(const CombinedSpace &other) 
+CombinedSpace::CombinedSpace(const CombinedSpace &other)
               : ConcreteProperty<CombinedSpace,Space>(other), spces(other.spces)
 {}
 
@@ -158,7 +157,7 @@ bool CombinedSpace::operator!=(const CombinedSpace &other) const
     return spces != other.spces and Space::operator!=(other);
 }
 
-/** Return the ith space that makes up this combined space 
+/** Return the ith space that makes up this combined space
 
     \throw SireError::invalid_index
 */
@@ -167,7 +166,7 @@ const Space& CombinedSpace::operator[](int i) const
     return spces.at( Index(i).map(spces.count()) );
 }
 
-/** Return the ith space that makes up this combined space 
+/** Return the ith space that makes up this combined space
 
     \throw SireError::invalid_index
 */
@@ -233,13 +232,13 @@ void CombinedSpace::assertSameSpace(const QString &text, const QString &codeloc)
     if (spces.isEmpty())
         throw SireVol::incompatible_space( QObject::tr(
                 "%1 as there are no spaces!").arg(text), codeloc );
-    
+
     else if (spces.count() > 1)
     {
         CombinedSpace::const_iterator it = this->constBegin();
-    
+
         const Space &first_space = it->read();
-    
+
         for (++it; it != this->constEnd(); ++it)
         {
             if ( not first_space.equals(it->read()) )
@@ -255,21 +254,21 @@ QString CombinedSpace::toString() const
 {
     if (spces.isEmpty())
         return QObject::tr( "CombinedSpace{ NULL }" );
-    
+
     else if (spces.count() == 1)
         return spces.at(0).read().toString();
-    
+
     else
     {
         QStringList space_strings;
-        
+
         for (CombinedSpace::const_iterator it = this->constBegin();
              it != this->constEnd();
              ++it)
         {
             space_strings.append( it->read().toString() );
         }
-        
+
         return QString( "CombinedSpace{ %1 }" )
                     .arg(space_strings.join(" : "));
     }
@@ -281,10 +280,10 @@ bool CombinedSpace::isPeriodic() const
 {
     if (spces.isEmpty())
         return false;
-    
+
     else if (spces.count() == 1)
         return spces.at(0).read().isPeriodic();
-     
+
     else
     {
         for (CombinedSpace::const_iterator it = this->constBegin();
@@ -294,7 +293,7 @@ bool CombinedSpace::isPeriodic() const
             if (not it->read().isPeriodic())
                 return false;
         }
-        
+
         return true;
     }
 }
@@ -305,10 +304,10 @@ bool CombinedSpace::isCartesian() const
 {
     if (spces.isEmpty())
         return false;
-    
+
     else if (spces.count() == 1)
         return spces.at(0).read().isCartesian();
-     
+
     else
     {
         for (CombinedSpace::const_iterator it = this->constBegin();
@@ -318,7 +317,7 @@ bool CombinedSpace::isCartesian() const
             if (not it->read().isCartesian())
                 return false;
         }
-        
+
         return true;
     }
 }
@@ -328,21 +327,21 @@ SireUnits::Dimension::Volume CombinedSpace::volume() const
 {
     if (spces.isEmpty())
         return Volume(0);
-    
+
     else if (spces.count() == 1)
         return spces.at(0).read().volume();
-     
+
     else
     {
         Volume total_volume(0);
-    
+
         for (CombinedSpace::const_iterator it = this->constBegin();
              it != this->constEnd();
              ++it)
         {
             total_volume += it->read().volume();
         }
-        
+
         return total_volume;
     }
 }
@@ -456,19 +455,19 @@ double CombinedSpace::calcInvDist2(const CoordGroup &group0, const CoordGroup &g
 }
 
 /** Calculate the distance vector between two points */
-DistVector CombinedSpace::calcDistVector(const Vector &point0, 
+DistVector CombinedSpace::calcDistVector(const Vector &point0,
                                          const Vector &point1) const
 {
     this->assertSameSpace("Cannot calculate distances", CODELOC);
     return spces.at(0).read().calcDistVector(point0, point1);
 }
-    
+
 /** Populate the matrix 'distmat' with all of the interpoint distance vectors
     between all points within the CoordGroup. This is *not* a symmetrical matrix,
-    as the direction from point A to point B is the negative of the 
+    as the direction from point A to point B is the negative of the
     direction from point B to point A. This returns the shortest distance
     between two points in the group (that is not the self-self distance) */
-double CombinedSpace::calcDistVectors(const CoordGroup &group, 
+double CombinedSpace::calcDistVectors(const CoordGroup &group,
                                       DistVectorMatrix &mat) const
 {
     this->assertSameSpace("Cannot calculate distances", CODELOC);
@@ -503,8 +502,8 @@ Angle CombinedSpace::calcAngle(const Vector &point0, const Vector &point1,
 }
 
 /** Calculate the torsion angle between the passed four points. This should
-    return the torsion angle measured clockwise when looking down the 
-    torsion from point0-point1-point2-point3. This will lie between 0 and 360 
+    return the torsion angle measured clockwise when looking down the
+    torsion from point0-point1-point2-point3. This will lie between 0 and 360
     degrees */
 Angle CombinedSpace::calcDihedral(const Vector &point0, const Vector &point1,
                               const Vector &point2, const Vector &point3) const
@@ -554,7 +553,7 @@ double CombinedSpace::minimumDistance(const CoordGroup &group) const
 /** Return the minimum image copy of 'group' with respect to 'center'.
     In this case, as this is not a periodic space, this just returns
     'group' */
-CoordGroup CombinedSpace::getMinimumImage(const CoordGroup &group, 
+CoordGroup CombinedSpace::getMinimumImage(const CoordGroup &group,
                                           const Vector &center) const
 {
     this->assertSameSpace("Cannot get minimum images", CODELOC);
@@ -598,7 +597,7 @@ Vector CombinedSpace::getRandomPoint(const Vector &center,
 {
     if (spces.isEmpty())
         return center;
-    
+
     else if (spces.count() == 1)
     {
         return spces.at(0).read().getRandomPoint(center, generator);
@@ -607,7 +606,7 @@ Vector CombinedSpace::getRandomPoint(const Vector &center,
     {
         //choose a space at random
         int idx = generator.randInt( spces.count() - 1 );
-        
+
         return spces.at(idx).read().getRandomPoint(center, generator);
     }
 }

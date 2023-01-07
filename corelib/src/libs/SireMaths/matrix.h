@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -96,7 +95,7 @@ public:
     ~Matrix();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return Matrix::typeName();
@@ -104,9 +103,9 @@ public:
 
     const double& operator()(int i, int j) const;
     double& operator()(int i, int j);
-    
+
     double* data();
-    
+
     const double* data() const;
     const double* constData() const;
 
@@ -133,11 +132,11 @@ public:
     double xx() const;
     double xy() const;
     double xz() const;
-    
+
     double yx() const;
     double yy() const;
     double yz() const;
-    
+
     double zx() const;
     double zy() const;
     double zz() const;

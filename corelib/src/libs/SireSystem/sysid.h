@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,12 +56,12 @@ class SIRESYSTEM_EXPORT Systems
 public:
     Systems()
     {}
-    
+
     ~Systems()
     {}
-    
+
     QList<SysIdx> getSystems() const;
-    
+
     QList<SysIdx> map(const SysID &sysid) const;
 };
 
@@ -81,30 +80,30 @@ public:
     SysID(const SysID &other);
 
     virtual ~SysID();
-    
+
     static const char* typeName()
     {
         return "SireSystem::SysID";
     }
-    
+
     virtual SysID* clone() const=0;
-    
+
     Specify<SysID> operator[](int i) const;
     Specify<SysID> operator()(int i) const;
     Specify<SysID> operator()(int i, int j) const;
-    
+
     IDAndSet<SysID> operator+(const SysID &other) const;
     IDAndSet<SysID> operator&&(const SysID &other) const;
     IDAndSet<SysID> operator&(const SysID &other) const;
-    
+
     IDOrSet<SysID> operator*(const SysID &other) const;
     IDOrSet<SysID> operator||(const SysID &other) const;
     IDOrSet<SysID> operator|(const SysID &other) const;
-    
+
     virtual QList<SysIdx> map(const Systems &systems) const=0;
 
 protected:
-    QList<SysIdx> processMatches(QList<SysIdx> &matches, 
+    QList<SysIdx> processMatches(QList<SysIdx> &matches,
                                  const Systems &systems) const;
 };
 

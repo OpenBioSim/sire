@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -55,7 +54,7 @@ using SireMaths::RanGenerator;
 
     @author Christopher Woods
 */
-class SIREMOVE_EXPORT WeightedMoves 
+class SIREMOVE_EXPORT WeightedMoves
           : public SireBase::ConcreteProperty<WeightedMoves,Moves>
 {
 
@@ -64,33 +63,33 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, WeightedMoves&);
 
 public:
     WeightedMoves();
-    
+
     WeightedMoves(const WeightedMoves &other);
-    
+
     ~WeightedMoves();
-    
+
     WeightedMoves& operator=(const WeightedMoves &other);
-    
+
     bool operator==(const WeightedMoves &other) const;
     bool operator!=(const WeightedMoves &other) const;
-    
+
     static const char* typeName();
-    
+
     QString toString() const;
-    
+
     void add(const Move &move, double weight=1);
-    
+
     using Moves::move;
-    
+
     void clearStatistics();
-    
+
     System move(const System &system, int nmoves, bool record_stats);
-    
+
     QList<MovePtr> moves() const;
 
     void setEnergyComponent(const Symbol &component);
-    void setSpaceProperty(const PropertyName &spaceproperty); 
-    
+    void setSpaceProperty(const PropertyName &spaceproperty);
+
     void setCombinedSpaceProperty(const PropertyName &spaceproperty);
 
     bool hasCombinedSpaceProperty() const;
@@ -99,11 +98,11 @@ public:
     const PropertyName& spaceProperty() const;
 
     void setGenerator(const RanGenerator &rangenerator);
-    
+
     const RanGenerator& generator() const;
 
     QList<SireUnits::Dimension::Time> timing() const;
-    
+
     void clearTiming();
 
 protected:
@@ -113,20 +112,20 @@ protected:
 
 private:
     void recalculateWeights();
-    
+
     /** The list of moves, together with their associated weights */
     QVector< boost::tuple<MovePtr,double> > mvs;
-    
+
     /** The list of average times for each move */
     QVector<SireMaths::Average> avgtimes;
-    
+
     /** The random number generator used to pick moves */
     RanGenerator rangenerator;
-    
-    /** If a combined space is used, this is the name of the 
+
+    /** If a combined space is used, this is the name of the
         combined space property */
     PropertyName combined_space;
-    
+
     /** The value of the maximum weight */
     double maxweight;
 };

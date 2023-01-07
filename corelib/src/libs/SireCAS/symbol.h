@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -164,32 +163,32 @@ class SIRECAS_EXPORT Factor
 {
 public:
     Factor();
-    
+
     Factor(const Symbol &symbol, double factor, double power);
     Factor(const Symbol &symbol,
            const Expression &factor, const Expression &power);
-    
+
     Factor(const Factor &other);
-    
+
     ~Factor();
-    
+
     Factor& operator=(const Factor &other);
-    
+
     bool operator==(const Factor &other) const;
     bool operator!=(const Factor &other) const;
-    
+
     QString toString() const;
-    
+
     const Symbol& symbol() const
     {
         return s;
     }
-    
+
     const Expression& factor() const
     {
         return f;
     }
-    
+
     const Expression& power() const
     {
         return p;

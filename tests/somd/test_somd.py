@@ -20,8 +20,7 @@ def test_parameters():
 
     # Load the test system.
     system = sr.load(
-        ["https://raw.githubusercontent.com/michellab/BioSimSpace/devel/demo/amber/ala/ala.crd",
-         "https://raw.githubusercontent.com/michellab/BioSimSpace/devel/demo/amber/ala/ala.top"],
+        sr.expand(sr.tutorial_url, "ala.top", "ala.crd"),
         directory=tmp_dir.name
     )
 

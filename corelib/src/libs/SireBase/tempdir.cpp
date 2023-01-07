@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -55,11 +54,11 @@ static QDir createDirectory(const QString &temp_root, int ntries)
     QString dirname = QString("%1/%2_sire_%3")
                             .arg(temp_root, getUserName(),
                                  QUuid::createUuid().toString());
-                                 
+
     QMutexLocker lkr(&tmpdir_mutex);
-    
+
     QDir tmpdir;
-    
+
     if (tmpdir.exists(dirname))
     {
         //this directory already exists - try again
@@ -80,7 +79,7 @@ static QDir createDirectory(const QString &temp_root, int ntries)
                 "permission to write to the directory \"%2\".")
                     .arg(dirname, temp_root), CODELOC );
     }
-    
+
     return QDir(dirname);
 }
 
@@ -107,17 +106,17 @@ static void removeDirectory(QDir &dir)
     //get the list of all files in this directory
     // ( cannot use NoDotAndDotDot as this doesn't work on my mac)
     QStringList files = dir.entryList();
-    
+
     foreach (const QString &filename, files)
     {
         if (filename == "." or filename == "..")
             continue;
-    
+
         if (not dir.exists(filename))
             continue;
-       
+
         QFileInfo fileinfo( dir.absoluteFilePath(filename) );
-    
+
         if ( fileinfo.isDir() )
         {
             //remove this directory
@@ -129,7 +128,7 @@ static void removeDirectory(QDir &dir)
             dir.remove(filename);
         }
     }
-    
+
     //now remove this directory
     dir.rmdir(dir.absolutePath());
 }

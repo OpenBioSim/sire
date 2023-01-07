@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,7 +60,7 @@ class FFBeadChange;
     patches of neighbouring groups). This allows the forcefield
     classes to optimise intermolecular energy evaluations by
     performing a domain decomposition.
-    
+
     This class is publically read-only, though can be modified
     by a Patches class (as the Patches class is designed to
     modify the Patch objects that it contains). This is because
@@ -69,10 +68,10 @@ class FFBeadChange;
     the geometric information about this patch, and also because
     the Patches object manages the bead ID numbers used to rapidly
     identify each bead in the set of patches.
-    
+
     @author Christopher Woods
 */
-class SIREFF_EXPORT Patch 
+class SIREFF_EXPORT Patch
         : public SireBase::ConcreteProperty<Patch,SireBase::Property>
 {
 
@@ -84,22 +83,22 @@ friend class Patches;
 public:
     Patch();
     Patch(const Patch &other);
-    
+
     ~Patch();
-    
+
     static const char* typeName();
-    
+
     Patch& operator=(const Patch &other);
-    
+
     bool operator==(const Patch &other) const;
     bool operator!=(const Patch &other) const;
-    
+
     QString toString() const;
-    
+
     bool isEmpty() const;
-    
+
     int nBeads() const;
-    
+
     const AABox& aaBox() const;
 
     const QVector<quint32> beadIDs() const;
@@ -113,23 +112,23 @@ protected:
     //Functions to modify the Patch, called only by the parent Patches class
 
     FFBead add(quint32 beadid, const CoordGroup &coords, const FFParameters &params);
-    QHash<quint32,FFBead> add(const QVarLengthArray<quint32> &beadids, 
+    QHash<quint32,FFBead> add(const QVarLengthArray<quint32> &beadids,
                               const CoordGroupArray &coords,
                               const FFParametersArray &params);
-             
+
     FFBeadChange update(quint32 beadid, const CoordGroup &coords);
     FFBeadChange update(quint32 beadid, const FFParameters &params);
-    FFBeadChange update(quint32 beadid, const CoordGroup &coords, 
+    FFBeadChange update(quint32 beadid, const CoordGroup &coords,
                                         const FFParameters &params);
-                
-    QHash<quint32,FFBeadChange> update(const QVarLengthArray<quint32> &beadids, 
+
+    QHash<quint32,FFBeadChange> update(const QVarLengthArray<quint32> &beadids,
                                        const CoordGroupArray &coords);
-    QHash<quint32,FFBeadChange> update(const QVarLengthArray<quint32> &beadids, 
+    QHash<quint32,FFBeadChange> update(const QVarLengthArray<quint32> &beadids,
                                        const FFParametersArray &params);
-    QHash<quint32,FFBeadChange> update(const QVarLengthArray<quint32> &beadids, 
+    QHash<quint32,FFBeadChange> update(const QVarLengthArray<quint32> &beadids,
                                        const CoordGroupArray &coords,
                                        const FFParametersArray &params);
-                
+
     FFBead remove(quint32 beadid);
     QHash<quint32,FFBead> remove(const QVarLengthArray<quint32> &beadids);
 
@@ -142,21 +141,21 @@ private:
 
     /** The coordinates of all of the atoms in the patch,
         arranged into beads (CoordGroups). This object also
-        contains the AABox that completely encompasses the 
+        contains the AABox that completely encompasses the
         beads in the patch */
     CoordGroupArray coords;
-    
+
     /** The parameters for all of the beads, in the same order
         as the coordinates */
     FFParametersArrayPtr params;
-    
+
     /** Internal ID number of each bead */
     QVector<quint32> idx_to_beadid;
-    
+
     /** Index of each bead in the arrays */
     QHash<quint32,int> beadid_to_idx;
-    
-    /** The AABox that completely encloses all of the 
+
+    /** The AABox that completely encloses all of the
         atoms in this patch */
     AABox aabox;
 };

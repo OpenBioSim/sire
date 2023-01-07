@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,12 +44,12 @@ SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::DihedralRestraint&);
 namespace SireMM
 {
 
-/** This is a restraint that operates on the dihedral angle between 
+/** This is a restraint that operates on the dihedral angle between
     four SireMM::Point objects (e.g. four atoms in a molecule)
-    
+
     @author Christopher Woods
 */
-class SIREMM_EXPORT DihedralRestraint 
+class SIREMM_EXPORT DihedralRestraint
             : public SireBase::ConcreteProperty<DihedralRestraint,ExpressionRestraint3D>
 {
 
@@ -59,40 +58,40 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, DihedralRestraint&)
 
 public:
     DihedralRestraint();
-    
+
     DihedralRestraint(const PointRef &point0, const PointRef &point1,
                       const PointRef &point2, const PointRef &point3,
                       const Expression &restraint);
-    
+
     DihedralRestraint(const PointRef &point0, const PointRef &point1,
                       const PointRef &point2, const PointRef &point3,
                       const Expression &restraint, const Values &values);
 
     DihedralRestraint(const DihedralRestraint &other);
-    
+
     ~DihedralRestraint();
-    
+
     DihedralRestraint& operator=(const DihedralRestraint &other);
-    
+
     bool operator==(const DihedralRestraint &other) const;
     bool operator!=(const DihedralRestraint &other) const;
-    
+
     static const char* typeName();
-    
+
     const Point& point(int i) const;
-    
+
     const Point& point0() const;
     const Point& point1() const;
     const Point& point2() const;
     const Point& point3() const;
-    
+
     int nPoints() const;
-    
+
     static const Symbol& phi();
 
     Symbols builtinSymbols() const;
     Values builtinValues() const;
-    
+
     RestraintPtr differentiate(const Symbol &symbol) const;
 
     void setSpace(const Space &space);
@@ -106,10 +105,10 @@ public:
     void update(const Molecules &molecules);
 
     Molecules molecules() const;
-    
+
     bool contains(MolNum molnum) const;
     bool contains(const MolID &molid) const;
-    
+
     bool usesMoleculesIn(const ForceTable &forcetable) const;
     bool usesMoleculesIn(const Molecules &molecules) const;
 
@@ -117,7 +116,7 @@ public:
                                    const PointRef &point0, const PointRef &point1,
                                    const PointRef &point2, const PointRef &point3,
                                    const HarmonicAngleForceConstant &force_constant);
-                                       
+
     static DihedralRestraint halfHarmonic(
                                        const PointRef &point0, const PointRef &point1,
                                        const PointRef &point2, const PointRef &point3,
@@ -135,10 +134,10 @@ private:
 
     /** The four points between which the restraint is calculated */
     SireFF::PointPtr p[4];
-    
+
     /** The expression used to calculate the force */
     Expression force_expression;
-    
+
     /** Whether or not all four points are within the same molecule */
     bool intra_molecule_points;
 };

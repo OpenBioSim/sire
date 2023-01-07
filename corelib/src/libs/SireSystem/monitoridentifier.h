@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,7 +43,7 @@ SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::MonitorIdent
 namespace SireSystem
 {
 
-/** This is a generic holder for any MonitorID class! 
+/** This is a generic holder for any MonitorID class!
 
     @author Christopher Woods
 */
@@ -58,35 +57,35 @@ public:
     MonitorIdentifier();
     MonitorIdentifier(const MonitorID &monid);
     MonitorIdentifier(const MonitorIdentifier &other);
-    
+
     ~MonitorIdentifier();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return MonitorIdentifier::typeName();
     }
-    
+
     bool isNull() const;
-    
+
     MonitorIdentifier* clone() const;
-    
+
     uint hash() const;
-                
+
     QString toString() const;
-    
+
     const MonitorID& base() const;
-    
+
     MonitorIdentifier& operator=(const MonitorIdentifier &other);
     MonitorIdentifier& operator=(const MonitorID &other);
-    
+
     bool operator==(const SireID::ID &other) const;
     using SireID::ID::operator!=;
-   
+
     bool operator==(const MonitorIdentifier &other) const;
     bool operator!=(const MonitorIdentifier &other) const;
-    
+
     bool operator==(const MonitorID &other) const;
     bool operator!=(const MonitorID &other) const;
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -37,19 +36,19 @@ namespace SireBase
 {
     SIREBASE_EXPORT QString getInstallDir();
     SIREBASE_EXPORT void setInstallDir(QString dir);
-    
+
     SIREBASE_EXPORT QString getBinDir();
     SIREBASE_EXPORT QString getLibDir();
     SIREBASE_EXPORT QString getBundledLibDir();
     SIREBASE_EXPORT QString getShareDir();
-    
+
     SIREBASE_EXPORT QString getSireDir(const QString &path, bool assert_exists=true);
-    
+
     SIREBASE_EXPORT QString getRepositoryURL();
     SIREBASE_EXPORT QString getRepositoryVersion();
     SIREBASE_EXPORT QString getRepositoryBranch();
     SIREBASE_EXPORT bool getRepositoryVersionIsClean();
-    
+
     SIREBASE_EXPORT QString getReleaseVersion();
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -102,12 +101,12 @@ QVector<MultiVector> MultiVector::fromArray(const Vector *array, int size)
 {
     if (size == 0)
         return QVector<MultiVector>();
-    
+
     int nvecs = size / count();
     int nremain = size % count();
-    
+
     QVector<MultiVector> marray(nvecs + ( (nremain > 0) ? 1 : 0 ));
-    
+
     MultiVector *ma = marray.data();
 
     int idx = 0;
@@ -122,7 +121,7 @@ QVector<MultiVector> MultiVector::fromArray(const Vector *array, int size)
     {
         ma[marray.count()-1] = MultiVector(array+idx, nremain);
     }
-    
+
     return marray;
 }
 
@@ -143,10 +142,10 @@ MultiDouble MultiVector::distance2(const MultiVector &v1, const MultiVector &v2)
 {
     MultiDouble del = v1.sc[0] - v2.sc[0];
     MultiDouble dist2( del * del );
-    
+
     del = v1.sc[1] - v2.sc[1];
     dist2.multiplyAdd( del, del );
-    
+
     del = v1.sc[2] - v2.sc[2];
     dist2.multiplyAdd( del, del );
 
@@ -197,7 +196,7 @@ MultiVector MultiVector::normalise() const
     MultiDouble mask = l.compareEqual( MultiDouble(0) );
 
     l = mask.logicalAnd( l.reciprocal() );
-    
+
     return MultiVector(sc[0]*l,sc[1]*l,sc[2]*l);
 }
 
@@ -248,7 +247,7 @@ MultiVector MultiVector::min(const MultiVector &other) const
 QString MultiVector::toString() const
 {
     QStringList parts;
-    
+
     for (int i=0; i<MultiDouble::count(); ++i)
     {
         parts.append( this->at(i).toString() );
@@ -352,7 +351,7 @@ MultiDouble MultiVector::magnitude() const
 MultiDouble MultiVector::bearing() const
 {
     MultiDouble result;
-    
+
     for (int i=0; i<MultiDouble::count(); ++i)
     {
         result.set(i, this->at(i).bearing());
@@ -390,7 +389,7 @@ MultiDouble MultiVector::bearingYZ(const MultiVector &v) const
 MultiDouble MultiVector::angle(const MultiVector &v0, const MultiVector &v1)
 {
     MultiDouble result;
-    
+
     for (int i=0; i<MultiDouble::count(); ++i)
     {
         result.set(i, Vector::angle(v0.at(i),v1.at(i)));
@@ -410,15 +409,15 @@ MultiDouble MultiVector::dihedral(const MultiVector &v0, const MultiVector &v1,
                                   const MultiVector &v2, const MultiVector &v3)
 {
     MultiDouble result;
-    
+
     for (int i=0; i<MultiDouble::count(); ++i)
     {
         result.set( i, Vector::dihedral(v0.at(i),v1.at(i),v2.at(i),v3.at(i)) );
     }
-    
+
     return result;
 }
-    
+
 /** Generate a vector, v0, that has distance 'dst' v0-v1, angle 'ang' v0-v1-v2,
     and dihedral 'dih' v0-v1-v2-v3 */
 MultiVector MultiVector::generate(
@@ -426,13 +425,13 @@ MultiVector MultiVector::generate(
                    const MultiVector &v2, const MultiDouble &dih, const MultiVector &v3)
 {
     MultiVector result;
-    
+
     for (int i=0; i<MultiDouble::count(); ++i)
     {
         result.set(i, Vector::generate(dst.at(i), v1.at(i), Angle(ang.at(i)),
                    v2.at(i), Angle(dih.at(i)), v3.at(i)));
     }
-    
+
     return result;
 }
 
@@ -452,7 +451,7 @@ MultiVector MultiVector::cross(const MultiVector &v0, const MultiVector &v1)
     length.multiplyAdd(ny, ny);
     length.multiplyAdd(nz, nz);
     length = length.sqrt();
-    
+
     MultiDouble near_parallel = length.compareLess( MultiDouble(0.01) );
 
     qDebug() << CODELOC;
@@ -461,11 +460,11 @@ MultiVector MultiVector::cross(const MultiVector &v0, const MultiVector &v1)
     {
         qDebug() << "NEAR PARALLEL" << near_parallel.toString()
                  << length.toString();
-    
+
         //at least one of the pairs of vectors is parallel (or near parallel)
         // - manually calculate each cross product
         int nfixed = 0;
-        
+
         for (int i=0; i<MultiDouble::count(); ++i)
         {
             if (near_parallel.at(i) > 0)
@@ -478,7 +477,7 @@ MultiVector MultiVector::cross(const MultiVector &v0, const MultiVector &v1)
                 nfixed += 1;
             }
         }
-        
+
         if (nfixed == MultiDouble::count())
         {
             //we have already made the vector
@@ -500,7 +499,7 @@ MultiVector MultiVector::cross(const MultiVector &v0, const MultiVector &v1)
     qDebug() << rec.toString();
 
     MultiDouble inv_length = mask.logicalAnd(rec); //length.reciprocal());
-    
+
     qDebug() << CODELOC;
 
     return MultiVector( nx*inv_length, ny*inv_length, nz*inv_length );
@@ -510,7 +509,7 @@ MultiVector MultiVector::cross(const MultiVector &v0, const MultiVector &v1)
 MultiDouble MultiVector::manhattanLength() const
 {
     MultiDouble result;
-    
+
     for (int i=0; i<MultiDouble::count(); ++i)
     {
         result.set(i, this->at(i).manhattanLength());

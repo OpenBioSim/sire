@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,7 +51,7 @@ class CGAtomIdx;
 
     @author Christopher Woods
 */
-class SIREMOL_EXPORT BeadIdx 
+class SIREMOL_EXPORT BeadIdx
        : public SireID::Index_T_<BeadIdx>, public BeadID
 {
 
@@ -61,34 +60,34 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, BeadIdx&);
 
 public:
     BeadIdx();
-    
+
     explicit BeadIdx(qint32 idx);
-    
+
     BeadIdx(const BeadIdx &other);
-    
+
     ~BeadIdx();
-    
+
     static const char* typeName();
 
     const char* what() const
     {
         return SireID::Index_T_<BeadIdx>::what();
     }
-    
+
     BeadIdx* clone() const;
-    
+
     static BeadIdx null();
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
 
     QString toString() const;
-    
+
     BeadIdx& operator=(const BeadIdx &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     using SireID::Index_T_<BeadIdx>::operator=;
 
     using SireID::Index_T_<BeadIdx>::operator==;
@@ -98,10 +97,10 @@ public:
     using SireID::Index_T_<BeadIdx>::operator++;
     using SireID::Index_T_<BeadIdx>::operator-=;
     using SireID::Index_T_<BeadIdx>::operator--;
-    
+
     using SireID::Index_T_<BeadIdx>::map;
 };
-    
+
 }
 
 Q_DECLARE_METATYPE(SireMol::BeadIdx);

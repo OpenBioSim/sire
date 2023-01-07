@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,13 +55,13 @@ QDataStream &operator<<(QDataStream &ds,
                                          const FreeEnergyAverage &avg)
 {
     writeHeader(ds, r_avg, 3);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << avg.hist
         << avg.is_forwards_free_energy
         << static_cast<const ExpAverage&>(avg);
-    
+
     return ds;
 }
 
@@ -70,19 +69,19 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, FreeEnergyAverage &avg)
 {
     VersionID v = readHeader(ds, r_avg);
-    
+
     if (v == 3)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> avg.hist >> avg.is_forwards_free_energy >> static_cast<ExpAverage&>(avg);
     }
     else if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> avg.hist >> static_cast<ExpAverage&>(avg);
-        
+
         avg.is_forwards_free_energy = true;
     }
     else if (v == 1)
@@ -93,7 +92,7 @@ QDataStream &operator>>(QDataStream &ds, FreeEnergyAverage &avg)
     }
     else
         throw version_error(v, "1-3", r_avg, CODELOC);
-        
+
     return ds;
 }
 
@@ -164,7 +163,7 @@ FreeEnergyAverage& FreeEnergyAverage::operator=(const FreeEnergyAverage &other)
         is_forwards_free_energy = other.is_forwards_free_energy;
         ExpAverage::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -194,7 +193,7 @@ FreeEnergyAverage& FreeEnergyAverage::operator+=(const FreeEnergyAverage &other)
 
     ExpAverage::operator+=(other);
     hist += other.hist;
- 
+
     return *this;
 }
 
@@ -269,10 +268,10 @@ double FreeEnergyAverage::taylorExpansion() const
 {
     double dg = hist.mean() - 0.5*k_boltz*temperature() *
                     ( hist.meanOfSquares() - (hist.mean()*hist.mean()) );
-    
+
     if (not is_forwards_free_energy)
         dg *= -1;
-    
+
     return dg;
 }
 
@@ -282,10 +281,10 @@ double FreeEnergyAverage::taylorExpansion() const
 double FreeEnergyAverage::fepFreeEnergy() const
 {
     double dg = ExpAverage::average();
-    
+
     if (not is_forwards_free_energy)
         dg *= -1;
-    
+
     return dg;
 }
 
@@ -304,10 +303,10 @@ double FreeEnergyAverage::average() const
 double FreeEnergyAverage::average2() const
 {
     double dg2 = ExpAverage::average2();
-    
+
     if (not is_forwards_free_energy)
         dg2 *= -1;
-    
+
     return dg2;
 }
 
@@ -326,24 +325,24 @@ QDataStream &operator<<(QDataStream &ds,
                                          const BennettsFreeEnergyAverage &bennetts)
 {
     writeHeader(ds, r_bennetts, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << bennetts.bennetts_avg << bennetts.bennetts_avg2
         << bennetts.const_offset
         << static_cast<const FreeEnergyAverage&>(bennetts);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, BennettsFreeEnergyAverage &bennetts)
 {
     VersionID v = readHeader(ds, r_bennetts);
-    
+
     if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> bennetts.bennetts_avg >> bennetts.bennetts_avg2
             >> bennetts.const_offset
             >> static_cast<FreeEnergyAverage&>(bennetts);
@@ -351,18 +350,18 @@ QDataStream &operator>>(QDataStream &ds, BennettsFreeEnergyAverage &bennetts)
     else if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         MolarEnergy tmp;
-        
+
         sds >> bennetts.bennetts_avg >> tmp
             >> bennetts.bennetts_avg2 >> tmp
             >> static_cast<FreeEnergyAverage&>(bennetts);
-        
+
         bennetts.const_offset = 0*kcal_per_mol;
     }
     else
         throw version_error(v, "1,2", r_bennetts, CODELOC);
-    
+
     return ds;
 }
 
@@ -440,7 +439,7 @@ BennettsFreeEnergyAverage::operator=(const BennettsFreeEnergyAverage &other)
         const_offset = other.const_offset;
         FreeEnergyAverage::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -491,15 +490,15 @@ BennettsFreeEnergyAverage::operator+=(const BennettsFreeEnergyAverage &other)
                 "%1 vs. %2").arg(this->toString()).arg(other.toString()), CODELOC );
 
     double nsteps = nSamples() + other.nSamples();
-        
+
     double my_ratio = nSamples() / nsteps;
     double other_ratio = other.nSamples() / nsteps;
 
     FreeEnergyAverage::operator+=(other);
-    
+
     bennetts_avg = bennetts_avg * my_ratio + other.bennetts_avg * other_ratio;
     bennetts_avg2 = bennetts_avg2 * my_ratio + other.bennetts_avg2 * other_ratio;
-    
+
     return *this;
 }
 
@@ -547,7 +546,7 @@ void BennettsFreeEnergyAverage::clear()
 void BennettsFreeEnergyAverage::accumulate(double value)
 {
     double nsteps = nSamples() + 1;
-        
+
     double my_ratio = nSamples() / nsteps;
     double other_ratio = 1.0 / nsteps;
 
@@ -557,7 +556,7 @@ void BennettsFreeEnergyAverage::accumulate(double value)
     //                                1 / { 1 + e^( beta dE + C) } for backwards
     //
     // (note that this->scaleFactor() is -beta)
-    
+
     if (isForwardsRatio())
     {
         val = 1.0 / (1.0 + std::exp(-this->scaleFactor()*(value-const_offset.value())));
@@ -569,7 +568,7 @@ void BennettsFreeEnergyAverage::accumulate(double value)
 
     bennetts_avg = my_ratio * bennetts_avg + other_ratio * val;
     bennetts_avg2 = my_ratio * bennetts_avg2 + other_ratio * (val*val);
-    
+
     FreeEnergyAverage::accumulate(value);
 }
 

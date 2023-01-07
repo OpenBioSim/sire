@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,8 +51,8 @@ using namespace SireFF::detail;
 using namespace SireStream;
 
 
-void 
-SireFF::detail::throwFFMoleculesIncompatibleParameterNames(const PropertyMap &old_map, 
+void
+SireFF::detail::throwFFMoleculesIncompatibleParameterNames(const PropertyMap &old_map,
                                                            const PropertyMap &new_map)
 {
     throw SireError::incompatible_error( QObject::tr(
@@ -64,7 +63,7 @@ SireFF::detail::throwFFMoleculesIncompatibleParameterNames(const PropertyMap &ol
             .arg(old_map.toString(), new_map.toString()), CODELOC );
 }
 
-void 
+void
 SireFF::detail::assertCompatible(const FFMoleculeBase &mol0,
                                  const FFMoleculeBase &mol1)
 {
@@ -88,11 +87,11 @@ QDataStream &operator<<(QDataStream &ds,
                                       const FFMoleculeBase &ffmol)
 {
     writeHeader(ds, r_ffmolbase, 1);
-    
+
     SharedDataStream sds(ds);
 
     sds << ffmol.mol << ffmol.idx_to_cgidx;
-    
+
     return ds;
 }
 
@@ -101,7 +100,7 @@ QDataStream &operator>>(QDataStream &ds,
                                       FFMoleculeBase &ffmol)
 {
     VersionID v = readHeader(ds, r_ffmolbase);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -110,7 +109,7 @@ QDataStream &operator>>(QDataStream &ds,
     }
     else
         throw version_error(v, "1", r_ffmolbase, CODELOC);
-        
+
     return ds;
 }
 
@@ -171,7 +170,7 @@ bool FFMoleculeBase::isEmpty() const
 
 /** Return the CGIdx of the ith CutGroup that is selected as
     part of this molecule
-    
+
     \throw SireError::invalid_index
 */
 CGIdx FFMoleculeBase::cgIdx(quint32 i) const
@@ -189,7 +188,7 @@ CGIdx FFMoleculeBase::cgIdx(quint32 i) const
                 "Invalid index (%1) as the number of CutGroups in "
                 "this molecule is only %2!")
                     .arg(i).arg(mol.data().info().nCutGroups()), CODELOC );
-                    
+
         return CGIdx(i);
     }
     else
@@ -199,7 +198,7 @@ CGIdx FFMoleculeBase::cgIdx(quint32 i) const
                 "Invalid index (%1) as the number of CutGroups "
                 "selected as part of this molecule is only %2!")
                     .arg(i).arg(idx_to_cgidx.count()), CODELOC );
-                    
+
         return idx_to_cgidx.at(i);
     }
 }
@@ -213,8 +212,8 @@ int FFMoleculeBase::nCutGroups() const
 }
 
 /** Change this view to use the same molecule data version
-    as the passed molecule. 
-    
+    as the passed molecule.
+
     Note that you can only change the molecule layout ID of the
     molecule if the entire molecule is included in this
     group. If only part of the molecule is included then
@@ -236,7 +235,7 @@ bool FFMoleculeBase::change(const SireMol::Molecule &molecule)
     {
         if (mol.selection().selectedAll())
             mol = molecule;
-            
+
         else if (mol.data().info().UID() != molecule.data().info().UID())
         {
             throw SireError::incompatible_error( QObject::tr(
@@ -246,7 +245,7 @@ bool FFMoleculeBase::change(const SireMol::Molecule &molecule)
                     .arg(mol.number()).arg(mol.data().info().UID().toString())
                     .arg(molecule.data().info().UID().toString()), CODELOC );
         }
-    
+
         mol = PartialMolecule(molecule.data(), mol.selection());
         return true;
     }
@@ -256,16 +255,16 @@ bool FFMoleculeBase::change(const SireMol::Molecule &molecule)
 
 /** Add the selected atoms 'added_atoms' to this view. This does
     nothing if these atoms are already part of the view.
-    
+
     Returns whether this changes the view.
-    
+
     \throw SireError::incompatible_error
 */
 bool FFMoleculeBase::add(const AtomSelection &added_atoms)
 {
     if (mol.selection().contains(added_atoms))
         return false;
-        
+
     mol = PartialMolecule(mol.data(), mol.selection() + added_atoms);
 
     if (mol.selection().selectedAllCutGroups())
@@ -278,7 +277,7 @@ bool FFMoleculeBase::add(const AtomSelection &added_atoms)
 
 /** Remove the selected atoms 'removed_atoms' from this view.
     This does nothing if none of these atoms are part of this view.
-    
+
     \throw SireError::incompatible_error
 */
 bool FFMoleculeBase::remove(const AtomSelection &removed_atoms)
@@ -288,7 +287,7 @@ bool FFMoleculeBase::remove(const AtomSelection &removed_atoms)
 
     else if (not mol.selection().intersects(removed_atoms))
         return false;
-    
+
     else if (removed_atoms.contains(mol.selection()))
     {
         //we are removing the entire molecule
@@ -309,7 +308,7 @@ bool FFMoleculeBase::remove(const AtomSelection &removed_atoms)
     }
 }
 
-/** Private function used to restore the old molecule in case of 
+/** Private function used to restore the old molecule in case of
     an exception being thrown (so to restore the original state) */
 void FFMoleculeBase::restore(const PartialMolecule &oldmol)
 {
@@ -322,17 +321,17 @@ void FFMoleculeBase::restore(const PartialMolecule &oldmol)
 
 static const RegisterMetaType<FFMoleculesBase> r_ffmolsbase( MAGIC_ONLY, NO_ROOT,
                                                 "SireFF::detail::FFMoleculesBase" );
-                                                
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds,
                                       const FFMoleculesBase &ffmols)
 {
     writeHeader(ds, r_ffmolsbase, 1);
-    
+
     SharedDataStream sds(ds);
     sds << ffmols.molnums_by_idx
         << ffmols.parameter_names;
-    
+
     return ds;
 }
 
@@ -341,18 +340,18 @@ QDataStream &operator>>(QDataStream &ds,
                                       FFMoleculesBase &ffmols)
 {
     VersionID v = readHeader(ds, r_ffmolsbase);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
         sds >> ffmols.molnums_by_idx
             >> ffmols.parameter_names;
-        
+
         ffmols._pvt_reindex();
     }
     else
         throw version_error(v, "1", r_ffmolsbase, CODELOC);
-        
+
     return ds;
 }
 
@@ -369,10 +368,10 @@ FFMoleculesBase::FFMoleculesBase(const MoleculeGroup &molgroup, const PropertyMa
 
     molnums_by_idx = QVector<MolNum>(nmols);
     idxs_by_molnum.reserve(nmols);
-    
+
     quint32 i = 0;
     MolNum *molnums_by_idx_array = molnums_by_idx.data();
-    
+
     for (MoleculeGroup::const_iterator it = molgroup.constBegin();
          it != molgroup.constEnd();
          ++it)
@@ -427,14 +426,14 @@ bool FFMoleculesBase::isEmpty() const
     return molnums_by_idx.isEmpty();
 }
 
-/** Return the array that maps the index in the group to the 
+/** Return the array that maps the index in the group to the
     molecule number */
 const QVector<MolNum> FFMoleculesBase::molNumsByIndex() const
 {
     return molnums_by_idx;
 }
 
-/** Return the hash that maps molecule numbers to their index 
+/** Return the hash that maps molecule numbers to their index
     in the array */
 const QHash<MolNum,quint32>& FFMoleculesBase::indexesByMolNum() const
 {
@@ -448,14 +447,14 @@ const QHash<MolNum,quint32>& FFMoleculesBase::indexesByMolNum() const
 quint32 FFMoleculesBase::indexOf(MolNum molnum) const
 {
     QHash<MolNum,quint32>::const_iterator it = idxs_by_molnum.constFind(molnum);
-    
+
     if (it == idxs_by_molnum.constEnd())
         throw SireMol::missing_molecule( QObject::tr(
             "There is no molecule with number %1 in this group. "
             "The available molecules are %2.")
                 .arg(molnum).arg( Sire::toString(idxs_by_molnum.keys()) ),
                     CODELOC );
-                    
+
     return *it;
 }
 
@@ -466,7 +465,7 @@ void FFMoleculesBase::clear()
     idxs_by_molnum.clear();
 }
 
-/** Return whether or not this group contains the molecule with 
+/** Return whether or not this group contains the molecule with
     number 'molnum' */
 bool FFMoleculesBase::contains(MolNum molnum) const
 {
@@ -491,19 +490,19 @@ void FFMoleculesBase::assertContains(MolNum molnum) const
 quint32 FFMoleculesBase::_pvt_add(MolNum molnum)
 {
     QHash<MolNum,quint32>::const_iterator it = idxs_by_molnum.constFind(molnum);
-    
+
     if (it == idxs_by_molnum.constEnd())
     {
         //this is a new molecule - add it onto the end of the array
         molnums_by_idx.append(molnum);
         idxs_by_molnum.insert(molnum, molnums_by_idx.count() - 1);
-        
+
         return molnums_by_idx.count() - 1;
     }
     else
         return *it;
 }
-    
+
 /** Return the array of the names of the properties used to get the parameters
     for each molecule, arranged in the order that the molecules appear
     in this group */
@@ -517,15 +516,15 @@ const QVector<PropertyMap>& FFMoleculesBase::parameterNamesByIndex() const
 void FFMoleculesBase::_pvt_reindex()
 {
     idxs_by_molnum.clear();
-    
+
     if (molnums_by_idx.isEmpty())
         return;
-        
+
     quint32 nmols = molnums_by_idx.count();
     const MolNum *molnums_array = molnums_by_idx.constData();
-    
+
     idxs_by_molnum.reserve(nmols);
-    
+
     for (quint32 i=0; i<nmols; ++i)
     {
         idxs_by_molnum.insert(molnums_array[i], i);
@@ -537,15 +536,15 @@ void FFMoleculesBase::_pvt_reindex()
 void FFMoleculesBase::_pvt_remove(MolNum molnum)
 {
     QHash<MolNum,quint32>::const_iterator it = idxs_by_molnum.constFind(molnum);
-    
+
     if (it != idxs_by_molnum.constEnd())
     {
         quint32 idx = *it;
-        
+
         idxs_by_molnum.remove(molnum);
-        
+
         molnums_by_idx.remove(idx);
-        
+
         if (molnums_by_idx.isEmpty())
         {
             molnums_by_idx.clear();
@@ -569,14 +568,14 @@ void FFMoleculesBase::_pvt_remove(const QList<MolNum> &molnums)
         this->_pvt_remove( *(molnums.begin()) );
         return;
     }
-    
+
     QHash<MolNum,quint32>::const_iterator it;
     bool removed_some = false;
-    
+
     foreach (MolNum molnum, molnums)
     {
         it = idxs_by_molnum.constFind(molnum);
-        
+
         if (it != idxs_by_molnum.constEnd())
         {
             molnums_by_idx.remove(*it);
@@ -584,7 +583,7 @@ void FFMoleculesBase::_pvt_remove(const QList<MolNum> &molnums)
             removed_some = true;
         }
     }
-    
+
     if (removed_some)
         this->_pvt_reindex();
 }

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ using SireMaths::Vector;
     for speed, and is used within the integral program (the dipole
     is held in internal units, and the point is mapped into the
     correct space for the QM program)
-    
+
     @author Christopher Woods
 */
 class SQUIRE_EXPORT PointDipole
@@ -62,25 +61,25 @@ friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, PointDipole&);
 public:
     PointDipole();
     PointDipole(const Vector &coords, const Vector &dipole);
-    
+
     PointDipole(const PointDipole &other);
-    
+
     ~PointDipole();
-    
+
     static const char* typeName();
-    
+
     PointDipole& operator=(const PointDipole &other);
-    
+
     bool operator==(const PointDipole &other) const;
     bool operator!=(const PointDipole &other) const;
-    
+
     const Vector& center() const;
     const Vector& dipole() const;
-    
+
 private:
     /** The location of this dipole, mapped into the correct space */
     Vector cent;
-    
+
     /** The dipole, in internal units */
     Vector dipol;
 };

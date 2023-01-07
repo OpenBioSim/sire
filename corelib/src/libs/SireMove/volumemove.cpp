@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,11 +61,11 @@ static const RegisterMetaType<VolumeMove> r_volmove;
 QDataStream &operator<<(QDataStream &ds, const VolumeMove &volmove)
 {
     writeHeader(ds, r_volmove, 2);
-    
+
     ds << volmove.volchanger
-       << double(volmove.maxchange.to(angstrom3)) 
+       << double(volmove.maxchange.to(angstrom3))
        << static_cast<const MonteCarlo&>(volmove);
-       
+
     return ds;
 }
 
@@ -74,26 +73,26 @@ QDataStream &operator<<(QDataStream &ds, const VolumeMove &volmove)
 QDataStream &operator>>(QDataStream &ds, VolumeMove &volmove)
 {
     VersionID v = readHeader(ds, r_volmove);
-    
+
     if (v == 2)
     {
         double maxchange;
         ds >> volmove.volchanger >> maxchange
            >> static_cast<MonteCarlo&>(volmove);
-           
+
         volmove.maxchange = maxchange * angstrom3;
     }
     else if (v == 1)
     {
         double maxchange;
         ds >> maxchange >> static_cast<MonteCarlo&>(volmove);
-        
+
         volmove.maxchange = maxchange * angstrom3;
         volmove.volchanger = ScaleVolumeFromCenter( MGIdentifier() );
     }
     else
         throw version_error( v, "1", r_volmove, CODELOC );
-        
+
     return ds;
 }
 
@@ -105,9 +104,9 @@ VolumeMove::VolumeMove(const PropertyMap &map)
 }
 
 /** Construct a volume move that can be used to generate the ensemble
-    for a temperature of 25 C, pressure of 1 atm, and with a maximum 
+    for a temperature of 25 C, pressure of 1 atm, and with a maximum
     change of 100 A^3 by moving the molecules in the
-    molecule groups that match the ID 'mgid' 
+    molecule groups that match the ID 'mgid'
     using a ScaleVolumeFromCenter centered on the origin */
 VolumeMove::VolumeMove(const MGID &mgid, const PropertyMap &map)
            : ConcreteProperty<VolumeMove,MonteCarlo>(map),
@@ -118,8 +117,8 @@ VolumeMove::VolumeMove(const MGID &mgid, const PropertyMap &map)
 }
 
 /** Construct a volume move that can be used to generate the ensemble
-    for a temperature of 25 C, pressure of 1 atm, and with a maximum 
-    change of 100 A^3 by moving the molecules in 'molgroup' 
+    for a temperature of 25 C, pressure of 1 atm, and with a maximum
+    change of 100 A^3 by moving the molecules in 'molgroup'
     using a ScaleVolumeFromCenter centered on the origin */
 VolumeMove::VolumeMove(const MoleculeGroup &molgroup,
                        const PropertyMap &map)
@@ -131,7 +130,7 @@ VolumeMove::VolumeMove(const MoleculeGroup &molgroup,
 }
 
 /** Construct a volume move that can be used to generate the ensemble
-    for a temperature of 25 C, pressure of 1 atm, and with a maximum 
+    for a temperature of 25 C, pressure of 1 atm, and with a maximum
     change of 100 A^3 using the passed volume changer */
 VolumeMove::VolumeMove(const VolumeChanger &volumechanger,
                        const PropertyMap &map)
@@ -159,7 +158,7 @@ VolumeMove& VolumeMove::operator=(const VolumeMove &other)
     volchanger = other.volchanger;
     maxchange = other.maxchange;
     MonteCarlo::operator=(other);
-    
+
     return *this;
 }
 
@@ -219,7 +218,7 @@ void VolumeMove::setVolumeChanger(const VolumeChanger &new_volchanger)
     volchanger = new_volchanger;
 }
 
-/** Set the volume changer used to change the volume to a 
+/** Set the volume changer used to change the volume to a
     ScaleVolumeFromCenter that scales the molecules in 'molgroup'
     from the center of a box centered at (0,0,0) */
 void VolumeMove::setVolumeChanger(const MoleculeGroup &molgroup)
@@ -257,7 +256,7 @@ void VolumeMove::move(System &system, int nmoves, bool record_stats)
     SaveState old_system_state = SaveState::save(system);
 
     VolumeMove old_state(*this);
-    
+
     try
     {
         const PropertyMap &map = this->propertyMap();
@@ -265,30 +264,30 @@ void VolumeMove::move(System &system, int nmoves, bool record_stats)
         for (int i=0; i<nmoves; ++i)
         {
             System old_system(system);
-        
+
             //calculate the old energy and volume
             double old_nrg = this->energy(system);
             Volume old_vol = this->volume(system);
-            
+
             double old_bias = 1;
             double new_bias = 1;
-            
+
             int nmols = this->volumeChanger()
-                            .randomChangeVolume(system, maxchange, 
+                            .randomChangeVolume(system, maxchange,
                                                 new_bias, old_bias, map);
-            
+
             //calculate the new energy and volume
             double new_nrg = this->energy(system);
             Volume new_vol = this->volume(system);
-            
-            if (not this->test(new_nrg, old_nrg, nmols, 
+
+            if (not this->test(new_nrg, old_nrg, nmols,
                                new_vol, old_vol,
                                new_bias, old_bias))
             {
                 //move failed - go back to the last step
                 system = old_system;
             }
-            
+
             if (record_stats)
             {
                 system.collectStats();
@@ -301,7 +300,7 @@ void VolumeMove::move(System &system, int nmoves, bool record_stats)
         this->operator=(old_state);
         throw;
     }
-    
+
 }
 
 const char* VolumeMove::typeName()

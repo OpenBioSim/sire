@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,14 +48,14 @@ QDataStream &operator<<(QDataStream &ds, const RestraintComponent &rest)
 QDataStream &operator>>(QDataStream &ds, RestraintComponent &rest)
 {
     VersionID v = readHeader(ds, r_rest);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(rest);
     }
     else
         throw version_error(v, "1", r_rest, CODELOC);
-        
+
     return ds;
 }
 
@@ -78,12 +77,12 @@ RestraintComponent::RestraintComponent(const SireCAS::Symbol &symbol)
                    : FFComponent(symbol, QLatin1String("restraint"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 RestraintComponent::RestraintComponent(const RestraintComponent &other)
                    : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 RestraintComponent::~RestraintComponent()
 {}
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -47,10 +46,10 @@ static const RegisterMetaType<SpecifyMol> r_specifymol;
 QDataStream &operator<<(QDataStream &ds, const SpecifyMol &specifymol)
 {
     writeHeader(ds, r_specifymol, 1);
-    
+
     SharedDataStream sds(ds);
     sds << specifymol.molid << specifymol.strt << specifymol.end;
-    
+
     return ds;
 }
 
@@ -58,7 +57,7 @@ QDataStream &operator<<(QDataStream &ds, const SpecifyMol &specifymol)
 QDataStream &operator>>(QDataStream &ds, SpecifyMol &specifymol)
 {
     VersionID v = readHeader(ds, r_specifymol);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -66,7 +65,7 @@ QDataStream &operator>>(QDataStream &ds, SpecifyMol &specifymol)
     }
     else
         throw version_error( v, "1", r_specifymol, CODELOC );
-        
+
     return ds;
 }
 
@@ -74,7 +73,7 @@ QDataStream &operator>>(QDataStream &ds, SpecifyMol &specifymol)
 SpecifyMol::SpecifyMol() : MolID(), strt(0), end(-1)
 {}
 
-/** Construct to match all of the molecules that match the 
+/** Construct to match all of the molecules that match the
     ID 'molid' */
 SpecifyMol::SpecifyMol(const MolID &mol_id)
            : MolID(), molid(mol_id), strt(0), end(-1)
@@ -108,7 +107,7 @@ SpecifyMol& SpecifyMol::operator=(const SpecifyMol &other)
     strt = other.strt;
     end = other.end;
     MolID::operator=(other);
-    
+
     return *this;
 }
 
@@ -168,21 +167,21 @@ static QList<MolNum> get(const QList<MolNum> &molnums,
 
     int sane_strt = strt.map(nmatches);
     int sane_end = end.map(nmatches);
-    
+
     if (sane_strt > sane_end)
         qSwap(sane_strt,sane_end);
-    
+
     if (sane_end - sane_strt == nmatches)
         return molnums;
     else
     {
         QList<MolNum> specified_molnums;
-    
+
         for (int i=strt; i<=end; ++i)
         {
             specified_molnums.append(molnums[i]);
         }
-        
+
         return specified_molnums;
     }
 }

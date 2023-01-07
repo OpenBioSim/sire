@@ -5,7 +5,7 @@ package:
   version: {{ GIT_DESCRIBE_TAG if GIT_DESCRIBE_TAG is not none else 'PR' }}
 
 source:
-  git_url: https://github.com/michellab/Sire.git
+  git_url: https://github.com/openbiosim/sire.git
   git_tag: SIRE_BRANCH
 
 build:
@@ -55,22 +55,19 @@ test:
     - pytest -vvv --color=yes tests
 
 about:
-  home: https://github.com/michellab/Sire
-  license: GPL-2.0-or-later
+  home: https://github.com/openbiosim/sire
+  license: GPL-3.0-or-later
   license_file: '{{ environ["RECIPE_DIR"] }}/LICENSE'
-  summary: "An advanced, multiscale, molecular-simulation framework."
-  dev_url: https://github.com/michellab/Sire
-  doc_url: https://siremol.org
+  summary: "An advanced molecular modelling framework."
+  dev_url: https://github.com/openbiosim/sire
+  doc_url: https://sire.openbiosim.org
   description: |
-                Sire is a free, open source, multiscale molecular-simulation framework,
-                written to allow computational modellers to quickly prototype and develop
-                new algorithms for molecular simulation and molecular design. Sire is written
-                as a collection of libraries, each of which contains self-contained and
-                robust C++/Python building blocks. These building blocks are vectorised
-                and thread-aware and can be streamed (saved/loaded) to and from a
-                version-controlled and tagged binary format, thereby allowing them to be
-                combined together easily to build custom multi-processor molecular
-                simulation applications.
+                Sire is a molecular modelling framework that provides
+                extensive functionality to manipulate representations
+                of biomolecular systems.
+                It is used as a key component of BioSimSpace, and is
+                distributed and supported as an open source community
+                project by OpenBioSim.
 
 extra:
   recipe-maintainers:

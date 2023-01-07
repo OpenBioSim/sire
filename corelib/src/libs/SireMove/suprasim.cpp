@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -80,30 +79,30 @@ SupraSim SupraSim::run(Node &node, const SupraSimPacket &simpacket)
     return SupraSim( node.startJob(simpacket) );
 }
 
-/** Run the supra-system simulation described in 'simpacket' in the 
+/** Run the supra-system simulation described in 'simpacket' in the
     current thread */
 SupraSim SupraSim::run(const SupraSimPacket &simpacket)
 {
     Nodes nodes;
-    
+
     ThisThread this_thread = nodes.borrowThisThread();
-    
+
     if (nodes.isEmpty())
         throw SireError::unavailable_resource( QObject::tr(
             "This thread is unavailable for running a simulation. It is already "
             "busy doing something else!"), CODELOC );
-            
+
     Node node = nodes.getNode();
-    
+
     SupraSim sim = SupraSim::run(node, simpacket);
-    
+
     sim.wait();
-    
+
     return sim;
 }
 
 /** Run the supra-system simulation applying 'nmoves' moves from 'moves'
-    on the supra-system 'system', recording statistics if 'record_stats' 
+    on the supra-system 'system', recording statistics if 'record_stats'
     is true. The simulation is run in the current thread */
 SupraSim SupraSim::run(const SupraSystem &system, const SupraMoves &moves,
                        int nmoves, bool record_stats)
@@ -111,8 +110,8 @@ SupraSim SupraSim::run(const SupraSystem &system, const SupraMoves &moves,
     return SupraSim::run( SupraSimPacket(system,moves,nmoves,record_stats) );
 }
 
-/** Run the supra-system simulation consisting of 'nmoves' move of the move 'move' 
-    on the supra-system 'system', recording statistics if 'record_stats' 
+/** Run the supra-system simulation consisting of 'nmoves' move of the move 'move'
+    on the supra-system 'system', recording statistics if 'record_stats'
     is true. The simulation is run in the current thread */
 SupraSim SupraSim::run(const SupraSystem &system, const SupraMove &move,
                        int nmoves, bool record_stats)
@@ -120,10 +119,10 @@ SupraSim SupraSim::run(const SupraSystem &system, const SupraMove &move,
     return SupraSim::run( SupraSimPacket(system,SameSupraMoves(move),
                                          nmoves,record_stats) );
 }
-                
+
 /** Run the supra-system simulation applying 'nmoves' moves from 'moves'
-    on the supra-system 'system', recording statistics if 'record_stats' 
-    is true. The simulation is run on the node 'node' and a handle is 
+    on the supra-system 'system', recording statistics if 'record_stats'
+    is true. The simulation is run on the node 'node' and a handle is
     returned to the running simulation */
 SupraSim SupraSim::run(Node &node,
                        const SupraSystem &system, const SupraMoves &moves,
@@ -131,9 +130,9 @@ SupraSim SupraSim::run(Node &node,
 {
     return SupraSim::run(node, SupraSimPacket(system,moves,nmoves,record_stats) );
 }
-                
-/** Run the supra-system simulation consisting of 'nmoves' move of the move 'move' 
-    on the supra-system 'system', recording statistics if 'record_stats' 
+
+/** Run the supra-system simulation consisting of 'nmoves' move of the move 'move'
+    on the supra-system 'system', recording statistics if 'record_stats'
     is true. The simulation is run on the node 'node' and a handle is
     returned to the running simulation */
 SupraSim SupraSim::run(Node &node,
@@ -207,17 +206,17 @@ bool SupraSim::hasFinished()
 {
     if (this->isRunning())
         return false;
-        
+
     else
     {
         //we aren't running any more - lets see what happened
         if (this->isError() or this->wasAborted())
             return false;
-            
+
         try
         {
             SupraSimPacket sim = this->result();
-            
+
             return sim.nCompleted() == sim.nMoves();
         }
         catch(...)
@@ -238,18 +237,18 @@ SupraSimPacket SupraSim::input()
 {
     if (sim_promise.isNull())
         return SupraSimPacket();
-        
+
     else
     {
         WorkPacket initial_packet = sim_promise.input();
-        
+
         if (initial_packet.isNull())
         {
             throw SireError::program_bug( QObject::tr(
                 "How could we lose the input simulation WorkPacket? How has "
                 "it become null?"), CODELOC );
         }
-        
+
         if (not initial_packet.isA<SupraSimPacket>())
         {
             throw SireError::program_bug( QObject::tr(
@@ -257,24 +256,24 @@ SupraSimPacket SupraSim::input()
                 "it turned into a %1?").arg(initial_packet.base().what()),
                     CODELOC );
         }
-    
+
         return initial_packet.asA<SupraSimPacket>();
     }
 }
 
 /** Return the simulation WorkPacket from an intermediate point along
     the simulation. This will throw an error if the simulation is in an
-    error state, and the initial packet if the simulation 
+    error state, and the initial packet if the simulation
     was aborted */
 SupraSimPacket SupraSim::interimResult()
 {
     if (sim_promise.isNull())
         return SupraSimPacket();
-        
+
     else
     {
         WorkPacket interim_packet = sim_promise.interimResult();
-        
+
         if (interim_packet.wasAborted())
         {
             return this->input();
@@ -283,14 +282,14 @@ SupraSimPacket SupraSim::interimResult()
         {
             interim_packet.throwError();
         }
-        
+
         if (interim_packet.isNull())
         {
             throw SireError::program_bug( QObject::tr(
                 "How could we lose the interim simulation WorkPacket? How has "
                 "it become null?"), CODELOC );
         }
-        
+
         if (not interim_packet.isA<SupraSimPacket>())
         {
             throw SireError::program_bug( QObject::tr(
@@ -298,7 +297,7 @@ SupraSimPacket SupraSim::interimResult()
                 "it turned into a %1?").arg(interim_packet.base().what()),
                     CODELOC );
         }
-    
+
         return interim_packet.asA<SupraSimPacket>();
     }
 }
@@ -311,11 +310,11 @@ SupraSimPacket SupraSim::result()
 {
     if (sim_promise.isNull())
         return SupraSimPacket();
-        
+
     else
     {
         WorkPacket result_packet = sim_promise.result();
-        
+
         if (result_packet.wasAborted())
         {
             return this->input();
@@ -324,14 +323,14 @@ SupraSimPacket SupraSim::result()
         {
             result_packet.throwError();
         }
-        
+
         if (result_packet.isNull())
         {
             throw SireError::program_bug( QObject::tr(
                 "How could we lose the simulation result WorkPacket? How has "
                 "it become null?"), CODELOC );
         }
-        
+
         if (not result_packet.isA<SupraSimPacket>())
         {
             throw SireError::program_bug( QObject::tr(
@@ -339,7 +338,7 @@ SupraSimPacket SupraSim::result()
                 "it turned into a %1?").arg(result_packet.base().what()),
                     CODELOC );
         }
-    
+
         return result_packet.asA<SupraSimPacket>();
     }
 }
@@ -357,7 +356,7 @@ SupraMovesPtr SupraSim::initialMoves()
 }
 
 /** Return the current state of the System (updated while the simulation
-    is running). This will throw an exception if the system hits an 
+    is running). This will throw an exception if the system hits an
     error state */
 SupraSystemPtr SupraSim::interimSystem()
 {
@@ -365,7 +364,7 @@ SupraSystemPtr SupraSim::interimSystem()
 }
 
 /** Return the current state of the moves (updated while the simulation
-    is running). This will throw an exception if the system hits an 
+    is running). This will throw an exception if the system hits an
     error state */
 SupraMovesPtr SupraSim::interimMoves()
 {
@@ -381,7 +380,7 @@ SupraSystemPtr SupraSim::system()
 }
 
 /** Return the final state of the moves after the simulation. This
-    blocks until the simulation has finished and will throw an 
+    blocks until the simulation has finished and will throw an
     exception if the system hits an error state */
 SupraMovesPtr SupraSim::moves()
 {

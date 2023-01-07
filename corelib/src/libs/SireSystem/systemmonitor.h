@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,29 +53,29 @@ class System;
     monitor is an object that monitors a system during a simulation,
     e.g. collecting the average energy, saving a radial distribution
     function etc.
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT SystemMonitor : public SireBase::Property
 {
 public:
     SystemMonitor();
-    
+
     SystemMonitor(const SystemMonitor &other);
-    
+
     virtual ~SystemMonitor();
-    
+
     static const char* typeName()
     {
         return "SireSystem::SystemMonitor";
     }
-    
+
     virtual SystemMonitor* clone() const=0;
-    
+
     virtual void clearStatistics()=0;
-    
+
     virtual void monitor(System &system)=0;
-    
+
     static const NullMonitor& null();
 };
 
@@ -86,20 +85,20 @@ class SIRESYSTEM_EXPORT NullMonitor
 {
 public:
     NullMonitor();
-    
+
     NullMonitor(const NullMonitor &other);
-    
+
     ~NullMonitor();
-    
+
     NullMonitor& operator=(const NullMonitor &other);
-    
+
     bool operator==(const NullMonitor &other) const;
     bool operator!=(const NullMonitor &other) const;
-    
+
     static const char *typeName();
-    
+
     void clearStatistics();
-    
+
     void monitor(System &system);
 };
 

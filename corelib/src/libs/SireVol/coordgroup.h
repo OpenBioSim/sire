@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -77,9 +76,9 @@ class CGArrayData;
 class CGData;
 class CGMemory;
 
-/** This is the implicitly shared pointer class that 
+/** This is the implicitly shared pointer class that
     is used to hold any of the CGMemory allocated objects
-    
+
     @author Christopher Woods
 */
 template<class T>
@@ -93,129 +92,129 @@ public:
     CGSharedPtr(const T *p)
     {
         ptr = const_cast<T*>(p);
-    
+
         if (ptr)
             ptr->incref();
     }
-    
+
     CGSharedPtr(const CGSharedPtr &other) : ptr(other.ptr)
     {
         if (ptr)
             ptr->incref();
     }
-    
+
     CGSharedPtr(CGSharedPtr &&other) : ptr(other.ptr)
     {
         other.ptr = 0;
     }
-    
+
     ~CGSharedPtr()
     {
         if (ptr)
             ptr->decref();
     }
-    
+
     CGSharedPtr<T>& operator=(const CGSharedPtr &other)
     {
         if (ptr != other.ptr)
         {
             T *new_ptr = other.ptr;
-            
+
             //increment the other reference count
             if (new_ptr)
                 new_ptr->incref();
-                
+
             //decrement our reference count
             if (ptr)
                 ptr->decref();
-                
+
             //set the new pointer
             ptr = new_ptr;
         }
-        
+
         return *this;
     }
-    
+
     CGSharedPtr<T>& operator=(CGSharedPtr &&other)
     {
         T *new_ptr = other.ptr;
         other.ptr = 0;
-        
+
         if (ptr)
             ptr->decref();
-        
+
         ptr = new_ptr;
-        
+
         return *this;
     }
-    
+
     const T& operator*() const
     {
         return *ptr;
     }
-    
+
     const T* operator->() const
     {
         return ptr;
     }
-    
+
     T& operator*()
     {
         if (ptr)
             ptr = ptr->detach();
-            
+
         return *ptr;
     }
-    
+
     T* operator->()
     {
         if (ptr)
             ptr = ptr->detach();
-            
+
         return ptr;
     }
-    
+
     const T* data() const
     {
         return ptr;
     }
-    
+
     const T* constData() const
     {
         return ptr;
     }
-    
+
     T* data()
     {
         if (ptr)
             ptr = ptr->detach();
-        
+
         return ptr;
     }
-    
-    /** Assign this pointer to point at 'weakptr' 
+
+    /** Assign this pointer to point at 'weakptr'
         but *without* changing the reference count.
-        You ABSOLUTELY MUST ensure that you call 
-        CGSharedPtr::weakRelease() before this 
-        pointer is deleted or reassigned, so 
+        You ABSOLUTELY MUST ensure that you call
+        CGSharedPtr::weakRelease() before this
+        pointer is deleted or reassigned, so
         as to not decrement the reference count incorrectly! */
     void weakAssign(T *weakptr)
     {
         if (ptr)
             ptr->decref();
-            
+
         ptr = weakptr;
     }
-    
+
     /** Release the pointer *without* decrementing the
         reference count. You should only call this
-        function if the pointer was assigned using 
+        function if the pointer was assigned using
         the 'weakAssign()' function */
     void weakRelease()
     {
         ptr = 0;
     }
-    
+
 private:
     /** Actual pointer */
     T *ptr;
@@ -255,7 +254,7 @@ public:
     {
         return "SireVol::CoordGroupBase";
     }
-    
+
     const char* what() const
     {
         return CoordGroupBase::typeName();
@@ -343,7 +342,7 @@ public:
     ~CoordGroup();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return CoordGroup::typeName();
@@ -399,7 +398,7 @@ public:
     ~CoordGroupEditor();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return CoordGroupEditor::typeName();
@@ -431,10 +430,10 @@ public:
 
     CoordGroupEditor& mapInto(const SireMaths::AxisSet &axes);
     CoordGroupEditor& mapInto(quint32 i, const SireMaths::AxisSet &axes);
-    
+
     CoordGroupEditor& changeFrame(const SireMaths::AxisSet &from_frame,
                                   const SireMaths::AxisSet &to_frame);
-                                  
+
     CoordGroupEditor& changeFrame(quint32 i,
                                   const SireMaths::AxisSet &from_frame,
                                   const SireMaths::AxisSet &to_frame);
@@ -451,23 +450,23 @@ private:
     bool needsupdate;
 };
 
-/** This class holds an array of CoordGroups. While you could  
+/** This class holds an array of CoordGroups. While you could
     of course just use a QVector<CoordGroup>, this array
     optimises the memory layout of all of the CoordGroups
     so that they all lie contiguously along the same piece
     of memory (and indeed, all of the AABoxes are grouped
     together, while all of the coordinates are grouped together).
-    
+
     The memory packing means that this array is much more
     limited than a QVector<CoordGroup>, i.e. you can't
     add or remove CoordGroups from the array, and you can't
-    do anything to the contained CoordGroups except for 
+    do anything to the contained CoordGroups except for
     change their coordinates.
-  
+
     This class is really meant to be used as a fast container
     that allow rapid iteration over all of the contained
     CoordGroups / coordinates
-        
+
     @author Christopher Woods
 */
 class SIREVOL_EXPORT CoordGroupArray
@@ -484,26 +483,26 @@ friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, CoordGroupArray&);
 public:
     CoordGroupArray();
     CoordGroupArray(const CoordGroup &cgroup);
-    
+
     CoordGroupArray(const QVector< QVector<Vector> > &points);
     CoordGroupArray(const QVector<CoordGroup> &cgroups);
-    
+
     CoordGroupArray(const CoordGroupArray &array0,
                     const CoordGroupArray &array1);
-    
+
     CoordGroupArray(const CoordGroupArray &other);
-    
+
     ~CoordGroupArray();
-    
+
     CoordGroupArray& operator=(const CoordGroupArray &other);
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return CoordGroupArray::typeName();
     }
-    
+
     bool operator==(const CoordGroupArray &other) const;
     bool operator!=(const CoordGroupArray &other) const;
 
@@ -514,7 +513,7 @@ public:
 
     int count() const;
     int size() const;
-    
+
     bool isEmpty() const;
 
     int nCoordGroups() const;
@@ -532,39 +531,39 @@ public:
     const AABox* constAABoxData() const;
 
     CoordGroup merge() const;
-    
+
     void append(const CoordGroup &cgroup);
     void append(const CoordGroupArray &cgroups);
-    
+
     void remove(quint32 i);
     void remove(quint32 i, int count);
     void remove(const QVarLengthArray<quint32> &idxs);
-    
+
     void update(quint32 i, const CoordGroup &cgroup);
     void update(quint32 i, const QVector<Vector> &coords);
     void update(quint32 i, const Vector *coords, int ncoords);
 
     void translate(const Vector &delta);
     void translate(quint32 i, const Vector &delta);
-    
+
     void rotate(const Quaternion &quat, const Vector &point);
     void rotate(const Matrix &rotmat, const Vector &point);
-    
+
     void rotate(quint32 i, const Quaternion &quat, const Vector &point);
     void rotate(quint32 i, const Matrix &rotmat, const Vector &point);
-    
+
     void transform(const Transform &t);
     void transform(quint32 i, const Transform &t);
-    
+
     void mapInto(const AxisSet &axes);
     void mapInto(quint32 i, const AxisSet &axes);
-    
+
     void changeFrame(const AxisSet &from_frame, const AxisSet &to_frame);
     void changeFrame(quint32 i,
                      const AxisSet &from_frame, const AxisSet &to_frame);
 
     void assertValidIndex(quint32 i) const;
-    
+
     void assertValidCoordGroup(quint32 i) const;
     void assertValidCoordinate(quint32 i) const;
 
@@ -578,14 +577,14 @@ private:
     void pvt_remove(const QVarLengthArray<bool> &to_remove);
 };
 
-/** This class holds an array of CoordGroupArrays. This is 
+/** This class holds an array of CoordGroupArrays. This is
     used to pack all of the CoordGroupArrays (and thus
     all contained CoordGroups) into a single contiguous
-    block of memory. This should improve efficiency of 
+    block of memory. This should improve efficiency of
     iterating over these groups/coordinates, but it does
     make this array less flexible than a simple
     QVector<CoordGroupArray>, or QVector< QVector<CoordGroup> >.
-    
+
     @author Christopher Woods
 */
 class SIREVOL_EXPORT CoordGroupArrayArray
@@ -596,27 +595,27 @@ friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, CoordGroupArrayArr
 
 public:
     CoordGroupArrayArray();
-    
+
     CoordGroupArrayArray(const CoordGroup &cgroup);
     CoordGroupArrayArray(const CoordGroupArray &cgarray);
-    
+
     CoordGroupArrayArray(const QVector<CoordGroupArray> &cgarrays);
     CoordGroupArrayArray(const QVector< QVector<CoordGroup> > &cgarrays);
     CoordGroupArrayArray(const QVector< QVector< QVector<Vector> > > &points);
-    
+
     CoordGroupArrayArray(const CoordGroupArrayArray &other);
-    
+
     ~CoordGroupArrayArray();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return CoordGroupArrayArray::typeName();
     }
-    
+
     CoordGroupArrayArray& operator=(const CoordGroupArrayArray &other);
-    
+
     bool operator==(const CoordGroupArrayArray &other) const;
     bool operator!=(const CoordGroupArrayArray &other) const;
 
@@ -647,17 +646,17 @@ public:
 
     const AABox* aaBoxData() const;
     const AABox* constAABoxData() const;
-    
+
     void update(quint32 i, const CoordGroupArray &array);
     void update(quint32 i, quint32 j, const CoordGroup &cgroup);
 
     void translate(const Vector &delta);
     void translate(quint32 i, const Vector &delta);
     void translate(quint32 i, quint32 j, const Vector &delta);
-    
+
     void rotate(const Quaternion &quat, const Vector &point);
     void rotate(const Matrix &rotmat, const Vector &point);
-    
+
     void rotate(quint32 i, const Quaternion &quat, const Vector &point);
     void rotate(quint32 i, const Matrix &rotmat, const Vector &point);
 
@@ -665,15 +664,15 @@ public:
                 const Quaternion &quat, const Vector &point);
     void rotate(quint32 i, quint32 j,
                 const Matrix &rotmat, const Vector &point);
-    
+
     void transform(const Transform &t);
     void transform(quint32 i, const Transform &t);
     void transform(quint32 i, quint32 j, const Transform &t);
-    
+
     void mapInto(const AxisSet &axes);
     void mapInto(quint32 i, const AxisSet &axes);
     void mapInto(quint32 i, quint32 j, const AxisSet &axes);
-    
+
     void changeFrame(const AxisSet &from_frame, const AxisSet &to_frame);
     void changeFrame(quint32 i,
                      const AxisSet &from_frame, const AxisSet &to_frame);
@@ -681,13 +680,13 @@ public:
                      const AxisSet &from_frame, const AxisSet &to_frame);
 
     void assertValidIndex(quint32 i) const;
-    
+
     void assertValidCoordGroupArray(quint32 i) const;
     void assertValidCoordGroup(quint32 i) const;
     void assertValidCoordinate(quint32 i) const;
-    
+
     void assertValidCoordGroup(quint32 i, quint32 j) const;
-    
+
 private:
     /** Implicitly shared pointer to the array data */
     detail::CGSharedPtr<detail::CGArrayArrayData> d;

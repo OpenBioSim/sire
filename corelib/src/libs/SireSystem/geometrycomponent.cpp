@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -43,39 +42,39 @@ using namespace SireStream;
 
 static const RegisterMetaType<GeometryComponent> r_geomcomp( MAGIC_ONLY,
                                                       GeometryComponent::typeName() );
-                                                      
+
 QDataStream &operator<<(QDataStream &ds,
                                           const GeometryComponent &geomcomp)
 {
     writeHeader(ds, r_geomcomp, 1);
-    
+
     SharedDataStream sds(ds);
 
     PropertyMap map;
     map["space"] = geomcomp.space_property;
-    
+
     sds << geomcomp.constrained_symbol << geomcomp.geometry_expression
         << map
         << static_cast<const Constraint&>(geomcomp);
-        
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, GeometryComponent &geomcomp)
 {
     VersionID v = readHeader(ds, r_geomcomp);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
 
         geomcomp.clearLastSystem();
-        
+
         PropertyMap map;
-        
+
         sds >> geomcomp.constrained_symbol >> geomcomp.geometry_expression
             >> map >> static_cast<Constraint&>(geomcomp);
-            
+
         geomcomp.expected_value = 0;
         geomcomp.current_values = Values();
         geomcomp.spce = Cartesian();
@@ -83,12 +82,12 @@ QDataStream &operator>>(QDataStream &ds, GeometryComponent &geomcomp)
     }
     else
         throw version_error(v, "1", r_geomcomp, CODELOC);
-        
+
     return ds;
 }
 
 /** Null constructor */
-GeometryComponent::GeometryComponent(const PropertyMap &map) 
+GeometryComponent::GeometryComponent(const PropertyMap &map)
                   : Constraint(), expected_value(0), space_property( map["space"] )
 {}
 
@@ -127,7 +126,7 @@ GeometryComponent& GeometryComponent::operator=(const GeometryComponent &other)
         space_property = other.space_property;
         spce = other.spce;
     }
-    
+
     return *this;
 }
 
@@ -136,7 +135,7 @@ bool GeometryComponent::operator==(const GeometryComponent &other) const
 {
     return this == &other or
            (Constraint::operator==(other) and
-            constrained_symbol == other.constrained_symbol and 
+            constrained_symbol == other.constrained_symbol and
             geometry_expression == other.geometry_expression and
             space_property == other.space_property);
 }
@@ -185,13 +184,13 @@ void GeometryComponent::setSystem(const System &system)
         this->setSpace( system.property(space_property).asA<Space>() );
     else
         this->setSpace( Cartesian() );
-    
+
     Values vals = this->getValues(system);
     expected_value = geometry_expression(vals);
-    
+
     if (system.hasConstantComponent(constrained_symbol))
     {
-        Constraint::setSatisfied( system, system.constant(constrained_symbol) == 
+        Constraint::setSatisfied( system, system.constant(constrained_symbol) ==
                                                                      expected_value );
     }
     else
@@ -208,7 +207,7 @@ bool GeometryComponent::mayChange(const Delta &delta, quint32 last_subversion) c
 bool GeometryComponent::fullApply(Delta &delta)
 {
     this->setSystem(delta.deltaSystem());
-    
+
     if (not Constraint::wasLastSatisfied())
     {
         return delta.update(constrained_symbol, expected_value);
@@ -229,7 +228,7 @@ bool GeometryComponent::deltaApply(Delta &delta, quint32 last_subversion)
     {
         Values vals = this->getValues( delta.deltaSystem() );
         expected_value = geometry_expression(vals);
-        
+
         return delta.update( constrained_symbol, expected_value );
     }
     else if ( delta.sinceChanged(constrained_symbol, last_subversion) )

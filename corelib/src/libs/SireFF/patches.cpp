@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,27 +48,27 @@ static const RegisterMetaType<FFBead> r_ffbead(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const FFBead &ffbead)
 {
     writeHeader(ds, r_ffbead, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << ffbead.coords << ffbead.params;
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, FFBead &ffbead)
 {
     VersionID v = readHeader(ds, r_ffbead);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> ffbead.coords >> ffbead.params;
     }
     else
         throw version_error(v, "1", r_ffbead, CODELOC);
-        
+
     return ds;
 }
 
@@ -127,27 +126,27 @@ static const RegisterMetaType<FFBeadChange> r_ffbeadchange(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const FFBeadChange &bead)
 {
     writeHeader(ds, r_ffbeadchange, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << bead.old_bead << bead.new_bead;
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, FFBeadChange &bead)
 {
     VersionID v = readHeader(ds, r_ffbeadchange);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> bead.old_bead >> bead.new_bead;
     }
     else
         throw version_error(v, "1", r_ffbeadchange, CODELOC);
-        
+
     return ds;
 }
 
@@ -216,31 +215,31 @@ static const RegisterMetaType<Patches> r_patches;
 QDataStream &operator<<(QDataStream &ds, const Patches &patches)
 {
     writeHeader(ds, r_patches, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << patches.ptchng << patches.ptchs
         << patches.beadid_to_patch << patches.last_beadid
         << static_cast<const Property&>(patches);
-        
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, Patches &patches)
 {
     VersionID v = readHeader(ds, r_patches);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> patches.ptchng >> patches.ptchs
             >> patches.beadid_to_patch >> patches.last_beadid
             >> static_cast<Property&>(patches);
     }
     else
         throw version_error(v, "1", r_patches, CODELOC);
-        
+
     return ds;
 }
 
@@ -269,7 +268,7 @@ Patches::Patches(const Patching &patchng)
     ptchs = QVector<Patch>(ptchng.read().nPatches());
     ptchs.squeeze();
 }
-      
+
 /** Copy constructor */
 Patches::Patches(const Patches &other)
         : ConcreteProperty<Patches,Property>(other),
@@ -292,7 +291,7 @@ Patches& Patches::operator=(const Patches &other)
         beadid_to_patch = other.beadid_to_patch;
         last_beadid = other.last_beadid;
     }
-    
+
     return *this;
 }
 
@@ -317,20 +316,20 @@ QString Patches::toString() const
 {
     if (this->isEmpty())
         return QObject::tr("Patches::null");
-        
+
     QStringList lines;
-    
+
     for (int i=0; i<this->nPatches(); ++i)
     {
         lines.append( this->constData()[i].toString() );
     }
-    
+
     return QObject::tr("Patches( patching == %1\n"
                        "         nBeads() == %2\n    %3\n        )")
                 .arg(ptchng.read().toString())
                 .arg(this->nBeads())
                 .arg(lines.join("\n    "));
-                       
+
 }
 
 /** Return the patching function used to divide the beads between patches */
@@ -353,12 +352,12 @@ void Patches::repatch(const Patching &patching)
 
     QVector<Patch> new_patches( patching.nPatches() );
     new_patches.squeeze();
-    
+
     QHash<quint32,quint32> new_beadid_to_patch;
     new_beadid_to_patch.reserve(beadid_to_patch.count());
-    
+
     const Space &space = patching.space();
-    
+
     for (int i=0; i<ptchs.count(); ++i)
     {
         const Patch &patch = ptchs.constData()[i];
@@ -368,19 +367,19 @@ void Patches::repatch(const Patching &patching)
             quint32 beadid = patch.beadIDs().constData()[j];
             const CoordGroup &coords = patch.coordinates().constData()[j];
             FFParametersPtr params = patch.parameters()[j];
-            
+
             QPair<int,Vector> idx = patching.patchIndexAndCenter(coords.aaBox().center());
-            
+
             BOOST_ASSERT(idx.first >= 0 and idx.first < new_patches.count());
-            
-            new_patches.data()[idx.first].add(beadid, 
+
+            new_patches.data()[idx.first].add(beadid,
                                               space.getMinimumImage(coords, idx.second),
                                               params.read());
-                                       
+
             new_beadid_to_patch.insert(beadid, idx.first);
         }
     }
-    
+
     ptchs = new_patches;
     beadid_to_patch = new_beadid_to_patch;
     ptchng = patching;
@@ -422,7 +421,7 @@ int Patches::nBeads() const
     return beadid_to_patch.count();
 }
 
-/** Return the ith patch 
+/** Return the ith patch
 
     \throw SireError::invalid_index
 */
@@ -432,11 +431,11 @@ const Patch& Patches::operator[](int i) const
         throw SireError::invalid_index( QObject::tr(
                 "There is no patch with index %1 - the number of patches is %2.")
                     .arg(i).arg(this->nPatches()), CODELOC );
-                    
+
     return ptchs.constData()[i];
 }
 
-/** Return the ith patch 
+/** Return the ith patch
 
     \throw SireError::invalid_index
 */
@@ -459,19 +458,19 @@ const Patch* Patches::constData() const
 
 /** Return the patch index, and index in that patch, of the bead
     with the passed beadid
-    
+
     \throw SireError::invalid_key
 */
 QPair<int,int> Patches::getLocation(quint32 beadid) const
 {
     int idx = beadid_to_patch.value(beadid, -1);
-    
+
     if (idx == -1)
         throw SireError::invalid_key( QObject::tr(
                 "There is no bead with ID == %1. Available IDs are %2.")
                     .arg(beadid).arg(Sire::toString(beadid_to_patch.keys())),
                         CODELOC );
-                        
+
     return QPair<int,int>(idx, ptchs.constData()[idx].getLocation(beadid));
 }
 
@@ -481,18 +480,18 @@ QPair<quint32,FFBead> Patches::add(const CoordGroup &coords, const FFParameters 
 {
     QPair<int,Vector> idx = ptchng.read().patchIndexAndCenter(
                                                 coords.aaBox().center() );
-                                                
+
     BOOST_ASSERT( idx.first >= 0 and idx.first < ptchs.count() );
-    
+
     FFBead bead = ptchs.data()[idx.first].add( last_beadid + 1,
                                                 ptchng.read().space()
                                                 .getMinimumImage(coords, idx.second),
                                                 params );
 
     ++last_beadid;
-    
+
     beadid_to_patch.insert(last_beadid, idx.first);
-    
+
     return QPair<quint32,FFBead>(last_beadid, bead);
 }
 
@@ -503,7 +502,7 @@ QPair<quint32,FFBead> Patches::add(const FFBead &bead)
 }
 
 /** Add the passed beads, returning the IDs of the beads in these patches */
-QHash<quint32,FFBead> Patches::add(const CoordGroupArray &coords, 
+QHash<quint32,FFBead> Patches::add(const CoordGroupArray &coords,
                                    const FFParametersArray &params)
 {
     if (coords.count() != params.count())
@@ -515,13 +514,13 @@ QHash<quint32,FFBead> Patches::add(const CoordGroupArray &coords,
     Patches new_patches(*this);
     QHash<quint32,FFBead> beads;
     beads.reserve(coords.count());
-    
+
     for (int i=0; i<coords.count(); ++i)
     {
         QPair<quint32,FFBead> bead = new_patches.add(coords.constData()[i], params[i]);
         beads.insert( bead.first, bead.second );
     }
-    
+
     this->operator=(new_patches);
     return beads;
 }
@@ -530,18 +529,18 @@ QHash<quint32,FFBead> Patches::add(const CoordGroupArray &coords,
 QHash<quint32,FFBead> Patches::add(const QVector<FFBead> &beads)
 {
     Patches new_patches(*this);
-        
+
     QHash<quint32,FFBead> new_beads;
     new_beads.reserve(beads.count());
-    
+
     for (int i=0; i<beads.count(); ++i)
     {
-        QPair<quint32,FFBead> bead = new_patches.add(beads[i].coordinates(), 
+        QPair<quint32,FFBead> bead = new_patches.add(beads[i].coordinates(),
                                                      beads[i].parameters());
-                                                     
+
         new_beads.insert(bead.first, bead.second);
     }
-    
+
     this->operator=(new_patches);
     return new_beads;
 }
@@ -560,15 +559,15 @@ QHash<quint32,FFBead> Patches::add(const QVector<CoordGroup> &coords,
 
     QHash<quint32,FFBead> beads;
     beads.reserve(coords.count());
-    
+
     for (int i=0; i<coords.count(); ++i)
     {
-        QPair<quint32,FFBead> bead = new_patches.add(coords.constData()[i], 
+        QPair<quint32,FFBead> bead = new_patches.add(coords.constData()[i],
                                                      params.constData()[i]);
-                                                    
+
         beads.insert(bead.first, bead.second);
     }
-    
+
     this->operator=(new_patches);
     return beads;
 }
@@ -576,20 +575,20 @@ QHash<quint32,FFBead> Patches::add(const QVector<CoordGroup> &coords,
 int Patches::getIdx(quint32 beadid) const
 {
     int idx = beadid_to_patch.value(beadid,-1);
-    
+
     if (idx == -1)
         throw SireError::invalid_key( QObject::tr(
                 "There is no bead with ID == %1 in these patches. "
                 "Available bead IDs are %2.")
-                    .arg(beadid).arg(Sire::toString(beadid_to_patch.keys())), 
+                    .arg(beadid).arg(Sire::toString(beadid_to_patch.keys())),
                         CODELOC );
-                        
+
     return idx;
 }
 
 /** Update the patch with bead ID 'beadid' with the new coordinates 'coords'.
     Note that the number of coordinates must now change!
-    
+
     \throw SireError::invalid_key
     \throw SireError::incompatible_error
 */
@@ -604,7 +603,7 @@ FFBeadChange Patches::update(quint32 beadid, const CoordGroup &coords)
     if (new_idx.first == old_idx)
     {
         //just update the coordinates
-        return ptchs.data()[old_idx].update(beadid, 
+        return ptchs.data()[old_idx].update(beadid,
                                  space().getMinimumImage(coords,new_idx.second));
     }
     else
@@ -612,11 +611,11 @@ FFBeadChange Patches::update(quint32 beadid, const CoordGroup &coords)
         FFParametersPtr old_params = ptchs.constData()[old_idx]
                                       .parameters()[ptchs.constData()[old_idx]
                                                          .getLocation(beadid)];
-    
+
         FFBead added = ptchs.data()[new_idx.first].add(beadid,
                                       space().getMinimumImage(coords,new_idx.second),
                                       old_params.read());
-                             
+
         return FFBeadChange(ptchs.data()[old_idx].remove(beadid), added);
     }
 }
@@ -641,14 +640,14 @@ FFBeadChange Patches::update(quint32 beadid, const CoordGroup &coords,
                              const FFParameters &params)
 {
     int old_idx = getIdx(beadid);
-    
+
     //is this changing patch?
     QPair<int,Vector> new_idx = patching().patchIndexAndCenter(coords.aaBox().center());
-    
+
     if (new_idx.first == old_idx)
     {
         //just update the coordinates and parameters in place
-        return ptchs.data()[old_idx].update(beadid, 
+        return ptchs.data()[old_idx].update(beadid,
                                      space().getMinimumImage(coords,new_idx.second),
                                      params);
     }
@@ -658,18 +657,18 @@ FFBeadChange Patches::update(quint32 beadid, const CoordGroup &coords,
         FFBead added = ptchs.data()[new_idx.first].add(beadid,
                                        space().getMinimumImage(coords,new_idx.second),
                                        params);
-                                 
+
         return FFBeadChange(ptchs.data()[old_idx].remove(beadid), added);
     }
 }
 
 /** Update the beads with the passed bead IDs with the coordinates in the
     passed array
-    
+
     \throw SireError:::invalid_key
     \throw SireError::incompatible_error
 */
-QHash<quint32,FFBeadChange> Patches::update(const QVector<quint32> &beadids, 
+QHash<quint32,FFBeadChange> Patches::update(const QVector<quint32> &beadids,
                                             const CoordGroupArray &coords)
 {
     if (beadids.count() != coords.count())
@@ -677,34 +676,34 @@ QHash<quint32,FFBeadChange> Patches::update(const QVector<quint32> &beadids,
                 "You must pass in the same number of coordinate groups (%1) "
                 "as you pass in bead IDs (%2).")
                     .arg(coords.count()).arg(beadids.count()), CODELOC );
-                
+
 
     Patches new_patches(*this);
-    
+
     QHash<quint32,FFBeadChange> deltas;
     deltas.reserve(beadids.count());
-    
+
     for (int i=0; i<beadids.count(); ++i)
     {
         FFBeadChange delta = new_patches
                             .update( beadids.constData()[i], coords.constData()[i] );
-                            
+
         if (not delta.isEmpty())
             deltas.insert(beadids.constData()[i], delta);
     }
-    
+
     this->operator=(new_patches);
-    
+
     return deltas;
 }
 
 /** Update the beads with the passed bead IDs with the parameters in the
     passed array
-    
+
     \throw SireError:::invalid_key
     \throw SireError::incompatible_error
 */
-QHash<quint32,FFBeadChange> Patches::update(const QVector<quint32> &beadids, 
+QHash<quint32,FFBeadChange> Patches::update(const QVector<quint32> &beadids,
                                             const FFParametersArray &params)
 {
     if (beadids.count() != params.count())
@@ -712,30 +711,30 @@ QHash<quint32,FFBeadChange> Patches::update(const QVector<quint32> &beadids,
                 "You must pass in the same number of parameter groups (%1) "
                 "as you pass in bead IDs (%2).")
                     .arg(params.count()).arg(beadids.count()), CODELOC );
-                
+
 
     Patches new_patches(*this);
-    
+
     QHash<quint32,FFBeadChange> deltas;
     deltas.reserve(beadids.count());
-    
+
     for (int i=0; i<beadids.count(); ++i)
     {
-        FFBeadChange delta = new_patches.update( beadids.constData()[i], 
+        FFBeadChange delta = new_patches.update( beadids.constData()[i],
                                                  params[i].read() );
-        
+
         if (not delta.isEmpty())
             deltas.insert(beadids.constData()[i], delta);
     }
-    
+
     this->operator=(new_patches);
-    
+
     return deltas;
 }
 
 /** Update the beads with the passed bead IDs with the new
     coordinates and parameters in the passed arrays
-    
+
     \throw SireError:::invalid_key
     \throw SireError::incompatible_error
 */
@@ -750,25 +749,25 @@ QHash<quint32,FFBeadChange> Patches::update(const QVector<quint32> &beadids,
                 "and coordinates groups (%2) as you pass in bead IDs (%3).")
                     .arg(params.count()).arg(coords.count())
                     .arg(beadids.count()), CODELOC );
-                
+
 
     Patches new_patches(*this);
-    
+
     QHash<quint32,FFBeadChange> deltas;
     deltas.reserve(beadids.count());
-    
+
     for (int i=0; i<beadids.count(); ++i)
     {
-        FFBeadChange delta = new_patches.update( beadids.constData()[i], 
+        FFBeadChange delta = new_patches.update( beadids.constData()[i],
                                                  coords.constData()[i],
                                                  params[i].read() );
-                                              
+
         if (not delta.isEmpty())
             deltas.insert(beadids.constData()[i], delta);
     }
-    
+
     this->operator=(new_patches);
-    
+
     return deltas;
 }
 
@@ -776,7 +775,7 @@ QHash<quint32,FFBeadChange> Patches::update(const QVector<quint32> &beadids,
 FFBeadChange Patches::remove(quint32 beadid)
 {
     int idx = beadid_to_patch.value(beadid, -1);
-    
+
     if (idx != -1)
     {
         FFBead old_bead = ptchs.data()[idx].remove(beadid);
@@ -791,18 +790,18 @@ FFBeadChange Patches::remove(quint32 beadid)
 QHash<quint32,FFBeadChange> Patches::remove(const QVector<quint32> &beadids)
 {
     Patches new_patches(*this);
-    
+
     QHash<quint32,FFBeadChange> deltas;
     deltas.reserve(beadids.count());
-    
+
     for (int i=0; i<beadids.count(); ++i)
     {
         FFBeadChange delta = new_patches.remove( beadids.constData()[i] );
-        
+
         if (not delta.isEmpty())
             deltas.insert(beadids.constData()[i], delta);
     }
-    
+
     return deltas;
 }
 
@@ -813,7 +812,7 @@ void Patches::removeAll()
     {
         ptchs.data()[i].removeAll();
     }
-    
+
     beadid_to_patch.clear();
     last_beadid = 0;
 }

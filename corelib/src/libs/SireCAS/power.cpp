@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -403,7 +402,7 @@ static QList<Factor> multiply(const QList<Factor> &f0s, const QList<Factor> &f1s
         return f0s;
 
     QHash<Expression,Expression> factors;
-    
+
     foreach (const Factor &f0, f0s)
     {
         foreach (const Factor &f1, f1s)
@@ -411,16 +410,16 @@ static QList<Factor> multiply(const QList<Factor> &f0s, const QList<Factor> &f1s
             factors[ f0.power() + f1.power() ] += (f0.factor() * f1.factor());
         }
     }
-    
+
     QList<Factor> ret;
-    
+
     for (QHash<Expression,Expression>::const_iterator it = factors.constBegin();
          it != factors.constEnd();
          ++it)
     {
         ret.append( Factor( f0s.at(0).symbol(), it.value(), it.key() ) );
     }
-    
+
     return ret;
 }
 
@@ -436,7 +435,7 @@ QList<Factor> PowerFunction::expand(const Symbol &symbol) const
 
     //get the core
     Expression ex = core();
-    
+
     //expand the core in powers of this symbol
     QList<Factor> core_factors = ex.expand(symbol);
 
@@ -457,7 +456,7 @@ QList<Factor> PowerFunction::expand(const Symbol &symbol) const
         core_factors[0] = Factor( core_factors[0].symbol(),
                                   core_factors[0].factor(),
                                   pwr * core_factors[0].power() );
-                                  
+
         return core_factors;
     }
 
@@ -489,22 +488,22 @@ QList<Factor> PowerFunction::expand(const Symbol &symbol) const
                     "The expression %1 cannot be rearranged in terms of powers of %2 "
                     "because multiple powers of %2 are raised to a negative power.")
                         .arg(this->toString(), symbol.toString()), CODELOC );
-                        
+
             core_factors[0] = Factor(  core_factors[0].symbol(),
-                                       core_factors[0].factor(), 
+                                       core_factors[0].factor(),
                                        int_power * core_factors[0].power() );
-                                      
+
             return core_factors;
         }
         else
         {
             QList<Factor> ret = core_factors;
-            
+
             for (int i=1; i<int_power; ++i)
             {
                 ret = ::multiply(ret, core_factors);
             }
-            
+
             return ret;
         }
     }
@@ -514,7 +513,7 @@ QList<Factor> PowerFunction::expand(const Symbol &symbol) const
             "because it involves a non-integer power of a compound expression "
             "involving %2.")
                 .arg(this->toString(), symbol.toString()), CODELOC );
-    
+
     return ret;
 }
 

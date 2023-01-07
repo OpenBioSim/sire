@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,17 +55,17 @@ namespace SireBase
 
 /** This provides a 2D symmetric matrix of objects of type T. All objects
     are packed together in memory, in packed format
-    
+
         j0   j1   j2
     i0   0    1    2
     i1   1    3    4
     i2   2    4    5
-    
+
     Arranged in memory as;
-    
+
     [ (i0,j0), (i0,j1), (i0,j2), (i1,j1), (i1,j2), (i2,j2) ]
     [    0   ,    1   ,    2   ,   3    ,    4,       5    ]
-    
+
     @author Christopher Woods
 */
 template<class T>
@@ -138,7 +137,7 @@ TrigArray2D<T>::TrigArray2D(int dimension) : TrigArray2DBase(dimension)
     }
 }
 
-/** Construct a TrigArray2D that holds a square symmetric matrix  
+/** Construct a TrigArray2D that holds a square symmetric matrix
     of dimension [dimension,dimension] */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -148,7 +147,7 @@ TrigArray2D<T>::TrigArray2D(int dimension, const T &default_value)
     if (TrigArray2DBase::nRows() > 0)
     {
         const int dim = TrigArray2D::nRows();
-    
+
         array = QVector<T>( (dim*dim + dim)/2, default_value );
         array.squeeze();
     }
@@ -167,7 +166,7 @@ SIRE_OUTOFLINE_TEMPLATE
 TrigArray2D<T>::~TrigArray2D()
 {}
 
-/** Copy assignment operator - fast as this class is implicitly 
+/** Copy assignment operator - fast as this class is implicitly
     shared */
 template<class T>
 SIRE_INLINE_TEMPLATE
@@ -195,8 +194,8 @@ bool TrigArray2D<T>::operator!=(const TrigArray2D<T> &other) const
 }
 
 /** Return a reference to the object in the ith row and
-    the jth column 
-    
+    the jth column
+
     \throw SireError::invalid_index
 */
 template<class T>
@@ -207,8 +206,8 @@ const T& TrigArray2D<T>::operator()(int i, int j) const
 }
 
 /** Return a reference to the object in the ith row and
-    the jth column 
-    
+    the jth column
+
     \throw SireError::invalid_index
 */
 template<class T>
@@ -219,8 +218,8 @@ T& TrigArray2D<T>::operator()(int i, int j)
 }
 
 /** Return a reference to the object in the ith row and
-    the jth column 
-    
+    the jth column
+
     \throw SireError::invalid_index
 */
 template<class T>
@@ -247,7 +246,7 @@ const T& TrigArray2D<T>::get(int i, int j) const
 /** Redimension this TrigArray2D to [dimension,dimension] objects.
     This will keep any existing data in the top left of the
     matrix if the matrix gets bigger, or it will crop any
-    extra data to the bottom right if the matrix gets smaller 
+    extra data to the bottom right if the matrix gets smaller
 */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -257,13 +256,13 @@ void TrigArray2D<T>::redimension(int dimension)
         return;
 
     TrigArray2D<T> new_array(dimension);
-    
+
     //copy the data...
     dimension = qMin(dimension, TrigArray2DBase::nRows());
-    
+
     T *data = new_array.data();
     const T *old_data = array.constData();
-    
+
     for (int i=0; i<TrigArray2DBase::nRows(); ++i)
     {
         for (int j=0; j<TrigArray2DBase::nRows(); ++j)
@@ -271,7 +270,7 @@ void TrigArray2D<T>::redimension(int dimension)
             data[this->map(i,j)] = old_data[this->map(i,j)];
         }
     }
-    
+
     this->operator=(new_array);
 }
 
@@ -317,7 +316,7 @@ void TrigArray2D<T>::setAll(const T &value)
 {
     T *array_data = this->array.data();
     int count = this->array.count();
-    
+
     for (int i=0; i<count; ++i)
         array_data[i] = value;
 }
@@ -329,7 +328,7 @@ QString TrigArray2D<T>::toString() const
 {
     if (this->nRows() == 0)
         return "( )";
-        
+
     else if (this->nRows() == 1)
     {
         QStringList row;
@@ -337,21 +336,21 @@ QString TrigArray2D<T>::toString() const
         {
             row.append( Sire::toString( this->operator()(0,j) ) );
         }
-        
+
         return QString("( %1 )").arg( row.join(", ") );
     }
 
     QStringList rows;
-    
+
     for (int i=0; i<this->nRows(); ++i)
     {
         QStringList row;
-        
+
         for (int j=0; j<this->nColumns(); ++j)
         {
             row.append( Sire::toString( this->operator()(i,j) ) );
         }
-        
+
         if (i == 0)
             rows.append( QString("/ %1 \\").arg( row.join(", ") ) );
         else if (i == this->nRows() - 1)
@@ -359,7 +358,7 @@ QString TrigArray2D<T>::toString() const
         else
             rows.append( QString("| %1 |").arg( row.join(", ") ) );
     }
-    
+
     return rows.join("\n");
 }
 
@@ -375,10 +374,10 @@ SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator<<(QDataStream &ds, const SireBase::TrigArray2D<T> &array)
 {
     SireStream::SharedDataStream sds(ds);
-    
+
     sds << static_cast<const SireBase::TrigArray2DBase&>(array)
         << array.array;
-        
+
     return ds;
 }
 
@@ -388,10 +387,10 @@ SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator>>(QDataStream &ds, SireBase::TrigArray2D<T> &array)
 {
     SireStream::SharedDataStream sds(ds);
-    
+
     sds >> static_cast<SireBase::TrigArray2DBase&>(array)
         >> array.array;
-        
+
     return ds;
 }
 

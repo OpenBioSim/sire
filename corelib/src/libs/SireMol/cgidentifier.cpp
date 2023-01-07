@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,9 +47,9 @@ static const RegisterMetaType<CGIdentifier> r_cgid;
 QDataStream &operator<<(QDataStream &ds, const CGIdentifier &cgid)
 {
     writeHeader(ds, r_cgid, 1);
-    
+
     SireStream::savePolyPointer(ds, cgid.d);
-    
+
     return ds;
 }
 
@@ -58,14 +57,14 @@ QDataStream &operator<<(QDataStream &ds, const CGIdentifier &cgid)
 QDataStream &operator>>(QDataStream &ds, CGIdentifier &cgid)
 {
     VersionID v = readHeader(ds, r_cgid);
-    
+
     if (v == 1)
     {
         SireStream::loadPolyPointer(ds, cgid.d);
     }
     else
         throw version_error( v, "1", r_cgid, CODELOC );
-        
+
     return ds;
 }
 
@@ -106,7 +105,7 @@ uint CGIdentifier::hash() const
     else
         return d->hash();
 }
-            
+
 /** Return a string representatio of this ID */
 QString CGIdentifier::toString() const
 {
@@ -141,7 +140,7 @@ CGIdentifier& CGIdentifier::operator=(const CGID &other)
         d.reset();
     else
         d.reset(other.clone());
-    
+
     return *this;
 }
 
@@ -219,9 +218,9 @@ static const RegisterMetaType<CGIdx> r_cgidx;
 QDataStream &operator<<(QDataStream &ds, const CGIdx &cgidx)
 {
     writeHeader(ds, r_cgidx, 1);
-    
+
     ds << static_cast<const SireID::Index_T_<CGIdx>&>(cgidx);
-    
+
     return ds;
 }
 
@@ -229,25 +228,25 @@ QDataStream &operator<<(QDataStream &ds, const CGIdx &cgidx)
 QDataStream &operator>>(QDataStream &ds, CGIdx &cgidx)
 {
     VersionID v = readHeader(ds, r_cgidx);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Index_T_<CGIdx>&>(cgidx);
     }
     else
         throw version_error( v, "1", r_cgidx, CODELOC );
-        
+
     return ds;
 }
 
 CGIdx::CGIdx() : SireID::Index_T_<CGIdx>(), CGID()
 {}
 
-CGIdx::CGIdx(qint32 idx) 
+CGIdx::CGIdx(qint32 idx)
           : SireID::Index_T_<CGIdx>(idx), CGID()
 {}
 
-CGIdx::CGIdx(const CGIdx &other) 
+CGIdx::CGIdx(const CGIdx &other)
           : SireID::Index_T_<CGIdx>(other), CGID(other)
 {}
 
@@ -306,9 +305,9 @@ static const RegisterMetaType<CGName> r_cgname;
 QDataStream &operator<<(QDataStream &ds, const CGName &cgname)
 {
     writeHeader(ds, r_cgname, 1);
-    
+
     ds << static_cast<const SireID::Name&>(cgname);
-    
+
     return ds;
 }
 
@@ -316,14 +315,14 @@ QDataStream &operator<<(QDataStream &ds, const CGName &cgname)
 QDataStream &operator>>(QDataStream &ds, CGName &cgname)
 {
     VersionID v = readHeader(ds, r_cgname);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Name&>(cgname);
     }
     else
         throw version_error( v, "1", r_cgname, CODELOC );
-        
+
     return ds;
 }
 

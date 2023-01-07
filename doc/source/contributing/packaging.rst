@@ -6,7 +6,7 @@ Sire is now fully tested and deployed using GitHub actions.
 The development process should be;
 
 * New features are developed on feature branches, called ``feature-{feature}``,
-  either in the `main Sire repository <https://github.com/michellab/Sire>`__
+  either in the `main Sire repository <https://github.com/openbiosim/sire>`__
   for authorised developers, or in personal forks for
   new developers.
 * Bug fixes or issue fixes are developed on fix branches, called
@@ -26,7 +26,7 @@ version should not be used for production runs.
 .. note::
 
   The group of developers authorised to have access to the
-  `main Sire repository <https://github.com/michellab/Sire>`__
+  `main Sire repository <https://github.com/openbiosim/sire>`__
   and to accept pull requests is not fixed,
   and will evolve over time. If you wish to join this group then
   please complete the tutorial and then demostrate your commitment

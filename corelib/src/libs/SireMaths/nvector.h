@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,86 +60,86 @@ friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, NVector&);
 
 public:
     NVector();
-    
+
     NVector(int nrows);
     NVector(int nrows, double initial_value);
-    
+
     NVector(const Vector &vector);
     NVector(const QVector<double> &vector);
-    
+
     NVector(const NVector &vector);
-    
+
     ~NVector();
-    
+
     static const char* typeName();
 
     const char* what() const;
-    
+
     NVector& operator=(const NVector &other);
-    
+
     bool operator==(const NVector &other) const;
     bool operator!=(const NVector &other) const;
-    
+
     double& operator[](int i);
 
     double& operator()(int i);
     double& operator()(int i, int j);
-    
+
     const double& operator[](int i) const;
 
     const double& operator()(int i) const;
     const double& operator()(int i, int j) const;
-    
+
     NVector& operator+=(const NVector &other);
     NVector& operator-=(const NVector &other);
-    
+
     NVector& operator*=(double scale);
     NVector& operator/=(double scale);
-    
+
     NVector operator-() const;
-    
+
     NVector operator+(const NVector &other) const;
     NVector operator-(const NVector &other) const;
 
     NVector operator*(double scale) const;
     NVector operator/(double scale) const;
-    
+
     double* data();
-    
+
     const double* data() const;
     const double* constData() const;
-    
+
     void set(int i, double value);
     void set(int i, int j, double value);
-    
+
     void setAll(double value);
-    
+
     int count() const;
     int size() const;
-    
+
     double length() const;
     double length2() const;
-    
+
     NVector normalise() const;
-    
+
     double sum() const;
-    
+
     int nRows() const;
     int nColumns() const;
-    
+
     bool isZero() const;
-    
+
     QString toString() const;
-    
+
     double dot(const NVector &other) const;
-    
+
     NVector cross(const NVector &other) const;
 
     NMatrix transpose() const;
 
     void assertValidIndex(int i) const;
     void assertValidIndex(int i, int j) const;
-    
+
     void assertNRows(int nrows) const;
     void assertNColumns(int ncolumns) const;
 

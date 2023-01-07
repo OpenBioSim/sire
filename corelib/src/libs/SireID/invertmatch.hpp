@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,7 +51,7 @@ namespace SireID
 /** This class is used to form the inverse or "not match"
     of any ID, e.g. ResName("GLY").inverse() will match
     any residue that is not GLY.
-    
+
     @author Christopher Woods
 */
 template<class ID>
@@ -65,32 +64,32 @@ friend SIREID_EXPORT QDataStream& ::operator>><>(QDataStream&, InvertMatch<ID>&)
 public:
     InvertMatch();
     InvertMatch(const ID &id);
-    
+
     InvertMatch(const InvertMatch<ID> &other);
-    
+
     ~InvertMatch();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     InvertMatch<ID>* clone() const;
 
     InvertMatch<ID>& operator=(const InvertMatch<ID> &other);
-    
+
     bool operator==(const InvertMatch<ID> &other) const;
     bool operator==(const SireID::ID &other) const;
 
     bool operator!=(const InvertMatch<ID> &other) const;
-    
+
     bool operator!=(const SireID::ID &other) const;
-    
+
     uint hash() const;
-    
+
     bool isNull() const;
-    
+
     QString toString() const;
-    
+
     QList<typename ID::Index> map(const typename ID::SearchObject &obj) const;
 
 private:
@@ -113,15 +112,15 @@ SIRE_OUTOFLINE_TEMPLATE
 InvertMatch<ID>::InvertMatch(const ID &idobj)
             : ID(), id(idobj)
 {}
-  
-/** Copy constructor */  
+
+/** Copy constructor */
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 InvertMatch<ID>::InvertMatch(const InvertMatch<ID> &other)
             : ID(other), id(other.id)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 InvertMatch<ID>::~InvertMatch()
@@ -137,7 +136,7 @@ InvertMatch<ID>& InvertMatch<ID>::operator=(const InvertMatch<ID> &other)
         ID::operator=(other);
         id = other.id;
     }
-    
+
     return *this;
 }
 
@@ -175,7 +174,7 @@ QList<typename ID::Index> InvertMatch<ID>::map(const typename ID::SearchObject &
 
     //now get all of the matches
     QList<typename ID::Index> idxs;
-    
+
     try
     {
         //try to map, as if there is no match, then this
@@ -184,25 +183,25 @@ QList<typename ID::Index> InvertMatch<ID>::map(const typename ID::SearchObject &
     }
     catch(...)
     {}
-    
+
     if (not idxs.isEmpty())
     {
         //now remove any match in all_idxs that is in 'idxs'
         QMutableListIterator<typename ID::Index> it(all_idxs);
-        
+
         while (it.hasNext())
         {
             typename ID::Index idx = it.next();
-        
+
             if (idxs.contains(idx))
             {
                 it.remove();
             }
         }
     }
-    
+
     this->processMatches(all_idxs, obj);
-    
+
     return all_idxs;
 }
 

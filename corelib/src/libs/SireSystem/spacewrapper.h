@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,14 +56,14 @@ using SireFF::Point;
 using SireVol::SpacePtr;
 
 /** This is a molecule constraint that constrains
-    a group of molecules to lie within the same 
+    a group of molecules to lie within the same
     periodic box as a specified point - the molecules
     are wrapped into the box (i.e. they are moved into
     the opposite side of the box that they leave)
-    
+
     @author Christopher Woods
 */
-class SIRESYSTEM_EXPORT SpaceWrapper 
+class SIRESYSTEM_EXPORT SpaceWrapper
         : public SireBase::ConcreteProperty<SpaceWrapper,MoleculeConstraint>
 {
 
@@ -76,16 +75,16 @@ public:
     SpaceWrapper(const SireFF::PointRef &point,
                  const MoleculeGroup &molgroup,
                  const PropertyMap &map = PropertyMap());
-    
+
     SpaceWrapper(const SpaceWrapper &other);
-    
+
     ~SpaceWrapper();
-    
+
     SpaceWrapper& operator=(const SpaceWrapper &other);
-    
+
     bool operator==(const SpaceWrapper &other) const;
     bool operator!=(const SpaceWrapper &other) const;
-    
+
     static const char* typeName();
 
     const Point& point() const;
@@ -105,20 +104,20 @@ private:
 
     /** The molecule group containing the molecules to be wrapped */
     SireMol::MolGroupPtr molgroup;
-    
+
     /** The property map specifying the locations of the space
         and coordinates properties */
     PropertyMap map;
-    
+
     /** The location of the space property */
     PropertyName space_property;
-    
+
     /** The location of the coordinates property */
     PropertyName coords_property;
-    
+
     /** The space property itself */
     SpacePtr spce;
-    
+
     /** The molecules that need to change */
     Molecules changed_mols;
 };

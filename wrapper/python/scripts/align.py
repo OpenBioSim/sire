@@ -38,7 +38,7 @@ import sys
 parser = argparse.ArgumentParser(description="Align ligands/small molecules/fragments against each other.",
                                  epilog="align is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/align",
+                                        "http://sire.openbiosim.org/align",
                                  prog="align")
 
 parser.add_argument('--description', action="store_true",

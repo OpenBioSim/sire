@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,7 +58,7 @@ QString get_string_representation(const T &obj)
     return obj.toString();
 }
 
-/** The function used to get a string representation of a non-POD type - 
+/** The function used to get a string representation of a non-POD type -
     the non-POD type must implement a QString conversion function */
 template<class T>
 struct __str__nonpod
@@ -70,7 +69,7 @@ struct __str__nonpod
     }
 };
 
-/** The function used to get a string representation of an object for 
+/** The function used to get a string representation of an object for
     a non-pod type - it returns the string representation in quotes
     unless the object is a container type */
 template<class T>
@@ -80,16 +79,16 @@ struct __str__nonpod_list
     {
         //convert 'obj' to an object
         object pyobj( obj );
-    
+
         //is this a container object?
         //how do I do this?
-      
+
         //add quotes to the string
         return "'" + str(pyobj) + "'";
     }
 };
 
-/** The function used to return a string representation 
+/** The function used to return a string representation
     of an object. */
 template<class T>
 object __str__(const T &object)
@@ -109,7 +108,7 @@ object get_list_string( const T &obj )
 }
 
 /** The function used to return a string representation of
-    a list of objects - the contents of the list must all have been 
+    a list of objects - the contents of the list must all have been
     exposed to python for this to work! */
 template<class C>
 object __str__list(const C &container)
@@ -118,10 +117,10 @@ object __str__list(const C &container)
         return str("[]");
     else
     {
-        //create a list to hold the string representations of the 
+        //create a list to hold the string representations of the
         //contents of this list
         list strlist;
-    
+
         //append a string version of the object to a python list...
         for (typename C::const_iterator it = container.begin();
              it != container.end();
@@ -129,14 +128,14 @@ object __str__list(const C &container)
         {
             strlist.append( get_list_string( *it ) );
         }
-    
+
         //now join the items together and bracket the resulting string
         return str("[") + str(", ").join(strlist) + str("]");
     }
 }
 
-/** The function used to return a string representation of 
-    a hash or map of objects - the contents and keys of the 
+/** The function used to return a string representation of
+    a hash or map of objects - the contents and keys of the
     hash or map must have been exposed to python for this to work! */
 template<class C>
 object __str__dict(const C &container)
@@ -145,19 +144,19 @@ object __str__dict(const C &container)
         return str("{}");
     else
     {
-        //create a list to hold the string representation of the 
+        //create a list to hold the string representation of the
         //key-value pairs
         list strlist;
-        
+
         //append a string version of the key-value pair to a python list...
         for (typename C::const_iterator it = container.begin();
              it != container.end();
              ++it)
         {
-            strlist.append( get_list_string(it.key()) + ": " + 
+            strlist.append( get_list_string(it.key()) + ": " +
                             get_list_string(it.value()) );
         }
-    
+
         //now join the items together and bracket the resulting string
         return str("{") + str(", ").join(strlist) + str("}");
     }

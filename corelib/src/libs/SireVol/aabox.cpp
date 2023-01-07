@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -163,7 +162,7 @@ AABox AABox::from(const CoordGroupArray &cgarray)
     return AABox(cgarray);
 }
 
-/** Return an AABox constructed to contain all of the CoordGroups in the 
+/** Return an AABox constructed to contain all of the CoordGroups in the
     arrays in 'cgarrays' */
 AABox AABox::from(const CoordGroupArrayArray &cgarrays)
 {
@@ -177,7 +176,7 @@ QString AABox::toString() const
                 .arg(this->minCoords().toString(), this->maxCoords().toString() );
 }
 
-/** Internal function used to recalculate the AABox from the passed 
+/** Internal function used to recalculate the AABox from the passed
     array of AABoxes */
 void AABox::recalculate(const AABox *aaboxes, int sz)
 {
@@ -312,7 +311,7 @@ bool AABox::intersects(const AABox &box) const
 bool AABox::contains(const AABox &other) const
 {
     const Vector mindelta = this->minCoords() - other.minCoords();
-    
+
     if (mindelta.x() > 0 or mindelta.y() > 0 or mindelta.z() > 0)
         return false;
 
@@ -327,10 +326,10 @@ bool AABox::contains(const AABox &other) const
 bool AABox::contains(const Vector &point) const
 {
     const Vector mindelta = this->minCoords() - point;
-    
+
     if (mindelta.x() > 0 or mindelta.y() > 0 or mindelta.z() > 0)
         return false;
-    
+
     else
     {
         const Vector maxdelta = this->maxCoords() - point;
@@ -465,13 +464,13 @@ AABox AABox::from(const Vector &mincoords, const Vector &maxcoords)
 {
     Vector min = mincoords;
     min.setMin(maxcoords);
-    
+
     Vector max = maxcoords;
     max.setMax(mincoords);
-    
+
     Vector halfextents = 0.5 * (max - min);
     Vector cent = min + halfextents;
-    
+
     return AABox(cent, halfextents);
 }
 

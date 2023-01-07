@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,23 +58,23 @@ class FF;
 
 /** This is the base class of all Symbols that represent forcefield
     components.
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT FFComponent : public SireCAS::Symbol
 {
 public:
     virtual ~FFComponent();
-    
+
     static const char* typeName()
     {
         return "SireFF::FFComponent";
     }
-    
+
     virtual const char* what() const=0;
-    
+
     virtual FFComponent* clone() const=0;
-    
+
     FFName forceFieldName() const;
 
     QString componentName() const;
@@ -87,12 +86,12 @@ public:
 protected:
     FFComponent(const FFName &ffname, const QString &name);
     FFComponent(const SireCAS::Symbol &symbol, const QString &name);
-    
+
     FFComponent(const FFComponent &other);
-    
+
     void setEnergy(FF &ff, const Symbol &symbol, double value) const;
     void changeEnergy(FF &ff, const Symbol &symbol, double delta) const;
-    
+
     static QString symbolName(const FFName &ffname, const QString &name)
     {
         return QString("E_{%1}^{%2}").arg(ffname).arg(name);
@@ -108,66 +107,66 @@ class ComponentEnergy
 {
 public:
     typedef T Components;
-    
+
     ComponentEnergy() : nrg(0)
     {}
-    
+
     explicit ComponentEnergy(double inrg) : nrg(inrg)
     {}
-    
+
     ComponentEnergy(const ComponentEnergy<T> &other) : nrg(other.nrg)
     {}
-    
+
     ~ComponentEnergy()
     {}
-    
+
     ComponentEnergy<T>& operator+=(const ComponentEnergy<T> &other)
     {
         nrg += other.nrg;
         return *this;
     }
-    
+
     ComponentEnergy<T>& operator-=(const ComponentEnergy<T> &other)
     {
         nrg -= other.nrg;
         return *this;
     }
-    
+
     ComponentEnergy<T> operator+(const ComponentEnergy<T> &other) const
     {
         return ComponentEnergy<T>(nrg + other.nrg);
     }
-    
+
     ComponentEnergy<T> operator-(const ComponentEnergy<T> &other) const
     {
         return ComponentEnergy<T>(nrg - other.nrg);
     }
-    
+
     Components components() const
     {
         return Components();
     }
-    
+
     double component(const T&) const
     {
         return nrg;
     }
-    
+
     double total() const
     {
         return nrg;
     }
-    
+
     operator double() const
     {
         return nrg;
     }
-    
+
     operator SireUnits::Dimension::MolarEnergy() const
     {
         return SireUnits::Dimension::MolarEnergy(nrg);
     }
-    
+
 private:
     /** The component of the energy */
     double nrg;
@@ -178,7 +177,7 @@ typedef ComponentEnergy<SingleComponent> SingleEnergy;
 /** This class represents the single component of a single component forcefield.
     This is provides a simple default class for simple, single-component
     forcefields
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT SingleComponent : public FFComponent
@@ -186,25 +185,25 @@ class SIREFF_EXPORT SingleComponent : public FFComponent
 public:
     SingleComponent(const FFName &ffname = FFName());
     SingleComponent(const FFName &ffname, const QString &suffix);
-    
+
     SingleComponent(const SireCAS::Symbol &symbol);
-    
+
     SingleComponent(const SingleComponent &other);
-    
+
     ~SingleComponent();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return SingleComponent::typeName();
     }
-    
+
     SingleComponent* clone() const
     {
         return new SingleComponent(*this);
     }
-    
+
     const SingleComponent& total() const
     {
         return *this;
@@ -212,7 +211,7 @@ public:
 
     void setEnergy(FF &ff, const SingleEnergy &nrg) const;
     void changeEnergy(FF &ff, const SingleEnergy &nrg) const;
-    
+
     SireCAS::Symbols symbols() const
     {
         return *this;

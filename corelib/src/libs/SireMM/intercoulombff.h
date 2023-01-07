@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,16 +43,16 @@ using SireFF::Inter2B3DFF;
 using SireFF::Inter2B2GFF;
 using SireFF::Inter2B2G3DFF;
 
-typedef Inter2BFF< CoulombPotentialInterface<InterCoulombPotential> > 
+typedef Inter2BFF< CoulombPotentialInterface<InterCoulombPotential> >
 InterCoulombFFBase;
 
-typedef Inter2B3DFF< CoulombPotentialInterface<InterCoulombPotential> > 
+typedef Inter2B3DFF< CoulombPotentialInterface<InterCoulombPotential> >
 InterCoulombFF;
 
-typedef Inter2B2GFF< CoulombPotentialInterface<InterCoulombPotential> > 
+typedef Inter2B2GFF< CoulombPotentialInterface<InterCoulombPotential> >
 InterGroupCoulombFFBase;
 
-typedef Inter2B2G3DFF< CoulombPotentialInterface<InterCoulombPotential> > 
+typedef Inter2B2G3DFF< CoulombPotentialInterface<InterCoulombPotential> >
 InterGroupCoulombFF;
 
 }
@@ -67,27 +66,27 @@ Q_DECLARE_METATYPE(SireMM::InterGroupCoulombFF);
 SIRE_EXPOSE_ALIAS(SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>,
                   SireMM::CoulombPotentialInterface_InterCoulombPotential_)
 
-SIRE_EXPOSE_ALIAS( 
+SIRE_EXPOSE_ALIAS(
     SireFF::Inter2BFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >,
     SireMM::InterCoulombFFBase )
-    
+
 SIRE_EXPOSE_ALIAS(
     SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >,
     SireMM::InterCoulombFF )
-    
+
 SIRE_EXPOSE_ALIAS(
     SireFF::Inter2B2GFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >,
     SireMM::InterGroupCoulombFFBase)
-    
+
 SIRE_EXPOSE_ALIAS(
     SireFF::Inter2B2G3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >,
     SireMM::InterGroupCoulombFF )
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
-template class 
+template class
 SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>;
 
-template class 
+template class
 SireFF::Inter2BFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >;
 
 template class

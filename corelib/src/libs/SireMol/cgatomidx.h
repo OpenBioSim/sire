@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ namespace SireMol
 /** This is the basic type used to ID atoms within a molecule. This
     provides the fastest way of indexing atoms and is the base
     type that all other AtomID classes map to.
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT CGAtomIdx : public AtomID
@@ -61,48 +60,48 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CGAtomIdx&);
 
 public:
     CGAtomIdx();
-    
+
     CGAtomIdx(CGIdx cgid, SireID::Index atomid);
-    
+
     CGAtomIdx(const CGAtomIdx &other);
-    
+
     ~CGAtomIdx();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return CGAtomIdx::typeName();
     }
-    
+
     CGAtomIdx* clone() const;
-    
+
     static CGAtomIdx null();
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-    
+
     QString toString() const;
-    
+
     CGAtomIdx& operator=(const CGAtomIdx &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     bool operator==(const CGAtomIdx &other) const;
-    
+
     bool operator!=(const CGAtomIdx &other) const;
-    
+
     QList<AtomIdx> map(const MolInfo &molinfo) const;
-    
+
     CGIdx cutGroup() const;
-    
+
     SireID::Index atom() const;
-    
+
 private:
     /** The index of the CutGroup that contains the atom */
     CGIdx _cgidx;
-    
+
     /** The index of the atom within the CutGroup */
     SireID::Index _atmidx;
 };

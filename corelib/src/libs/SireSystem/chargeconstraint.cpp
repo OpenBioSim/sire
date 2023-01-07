@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,13 +50,13 @@ QDataStream &operator<<(QDataStream &ds,
                                           const ChargeConstraint &chgconstraint)
 {
     writeHeader(ds, r_chgconstraint, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << chgconstraint.molgroup
         << chgconstraint.prop_map
         << static_cast<const MoleculeConstraint&>(chgconstraint);
-        
+
     return ds;
 }
 
@@ -66,18 +65,18 @@ QDataStream &operator>>(QDataStream &ds,
                                           ChargeConstraint &chgconstraint)
 {
     VersionID v = readHeader(ds, r_chgconstraint);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> chgconstraint.molgroup
             >> chgconstraint.prop_map
             >> static_cast<MoleculeConstraint&>(chgconstraint);
     }
     else
         throw version_error(v, "1", r_chgconstraint, CODELOC);
-        
+
     return ds;
 }
 
@@ -117,7 +116,7 @@ ChargeConstraint& ChargeConstraint::operator=(const ChargeConstraint &other)
         prop_map = other.prop_map;
         MoleculeConstraint::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -156,9 +155,9 @@ void ChargeConstraint::updateGroup(const System &system)
 {
     if (molgroup.isNull())
         return;
-        
+
     MGNum mgnum = molgroup.read().number();
-    
+
     if (system.contains(mgnum))
         molgroup = system[mgnum];
     else

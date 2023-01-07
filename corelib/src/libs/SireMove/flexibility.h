@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -81,9 +80,9 @@ using SireMol::MoleculeData;
 using SireMol::MoleculeInfoData;
 
 
-/** This class implements an unique label of degrees of freedom based 
+/** This class implements an unique label of degrees of freedom based
     on atomic indices. It is based on the IDQuad class from SireMM/fouratomfunctions.h
-    
+
     @author Julien Michel
 */
 class SIREMOVE_EXPORT DofID
@@ -97,21 +96,21 @@ public:
 
     DofID(const AtomIdx &atom0, const AtomIdx &atom1);
 
-    DofID(const AtomIdx &atom0, const AtomIdx &atom1, 
+    DofID(const AtomIdx &atom0, const AtomIdx &atom1,
           const AtomIdx &atom2);
 
-    DofID(const AtomIdx &atom0, const AtomIdx &atom1, 
+    DofID(const AtomIdx &atom0, const AtomIdx &atom1,
           const AtomIdx &atom2, const AtomIdx &atom3);
 
     DofID(const DofID &other);
-    
+
     ~DofID();
-    
+
     DofID& operator=(const DofID &other);
-    
+
     bool operator==(const DofID &other) const;
     bool operator!=(const DofID &other) const;
-    
+
     static const char* typeName();
 
     AtomIdx atom0() const;
@@ -130,14 +129,14 @@ private:
     qint32 idx0;
     qint32 idx1;
     qint32 idx2;
-    qint32 idx3; 
+    qint32 idx3;
 
 };
 
-/** This class holds a the list of bonds, angles and dihedrals of a molecule that 
-    can be moved by a MoverMove object, as well as the maximum rotations and 
+/** This class holds a the list of bonds, angles and dihedrals of a molecule that
+    can be moved by a MoverMove object, as well as the maximum rotations and
     translations that are applied to a molecule by a rigid body move object
-    
+
     @author Julien Michel
 */
 class SIREMOVE_EXPORT Flexibility
@@ -145,21 +144,21 @@ class SIREMOVE_EXPORT Flexibility
 {
     friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const Flexibility&);
     friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Flexibility&);
-      
+
 public:
     Flexibility();
     Flexibility(const MoleculeData &molecule);
     Flexibility(const Flexibility &other);
 
     ~Flexibility();
-    
+
     static const char* typeName();
-      
+
     Flexibility& operator=(const Flexibility &other);
-    
+
     bool operator==(const Flexibility &other) const;
     bool operator!=(const Flexibility &other) const;
-      
+
     const SireMol::MoleculeInfoData& info() const;
 
     QString toString() const;
@@ -176,16 +175,16 @@ public:
     Angle rotation() const;
     int maximumBondVar() const;
     int maximumAngleVar() const;
-    int maximumDihedralVar() const;   
+    int maximumDihedralVar() const;
 
     void add(const BondID &bond, const Length &delta);
     void add(const AngleID &angle, const Angle &delta);
     void add(const DihedralID &dihedral, const Angle &delta);
-      
+
     void remove(const BondID &bond);
     void remove(const AngleID &angle);
     void remove(const DihedralID &dihedral);
-      
+
     bool contains(const BondID &bond) const;
     bool contains(const AngleID &angle) const;
     bool contains(const DihedralID &dihedral) const;
@@ -220,7 +219,7 @@ private:
 
     /** The maximum number of dihedral dofs to sample in one move */
     qint32 maxdihedralvar;
-    
+
     /** The list of delta values for bonds*/
     QHash<DofID,Length> bond_deltas;
 
@@ -259,7 +258,7 @@ SIRE_ALWAYS_INLINE uint qHash(const DofID &dofid)
     return (dofid.atom0().value() << 24) |
            ( ( dofid.atom1().value() << 16) & 0x00FF0000) |
            ( ( dofid.atom2().value() << 8)  & 0x0000FF00) |
-           ( dofid.atom3().value() & 0x000000FF); 
+           ( dofid.atom3().value() & 0x000000FF);
 }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -76,10 +75,10 @@ using SireMol::Molecule;
     the actual forcefield to which this group belongs. This is
     the publicly available class that corresponds to the private
     SireFF::detail::FFMolGroupPvt class.
-    
+
     @author Christopher Woods
 */
-class SIREFF_EXPORT FFMolGroup 
+class SIREFF_EXPORT FFMolGroup
                 : public SireBase::ConcreteProperty<FFMolGroup,MoleculeGroup>
 {
 
@@ -88,29 +87,29 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFMolGroup&);
 
 public:
     FFMolGroup();
-    
+
     FFMolGroup(const detail::FFMolGroupPvt &ffmolgroup);
 
     FFMolGroup(const MoleculeGroup &other);
-    
+
     FFMolGroup(const FFMolGroup &other);
-    
+
     virtual ~FFMolGroup();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return FFMolGroup::typeName();
     }
-    
+
     FFMolGroup* clone() const;
-    
+
     FFMolGroup& operator=(const FFMolGroup &other);
     FFMolGroup& operator=(const MoleculeGroup &other);
 
     const FF& forceField() const;
-    
+
     MGIdx index() const;
 
     void setName(const QString &name);
@@ -119,12 +118,12 @@ public:
     void add(const ViewsOfMol &molviews);
     void add(const Molecules &molecules);
     void add(const MoleculeGroup &molgroup);
-    
+
     void add(const MoleculeView &molview, const PropertyMap &map);
     void add(const ViewsOfMol &molviews, const PropertyMap &map);
     void add(const Molecules &molecules, const PropertyMap &map);
     void add(const MoleculeGroup &molgroup, const PropertyMap &map);
-    
+
     bool addIfUnique(const MoleculeView &molview);
     ViewsOfMol addIfUnique(const ViewsOfMol &molviews);
     QList<ViewsOfMol> addIfUnique(const Molecules &molecules);
@@ -139,7 +138,7 @@ public:
     ViewsOfMol remove(const ViewsOfMol &molviews);
     QList<ViewsOfMol> remove(const Molecules &molecules);
     QList<ViewsOfMol> remove(const MoleculeGroup &molgroup);
-    
+
     bool removeAll(const MoleculeView &molview);
     ViewsOfMol removeAll(const ViewsOfMol &molviews);
     QList<ViewsOfMol> removeAll(const Molecules &molecules);
@@ -154,20 +153,20 @@ public:
 
     QList<Molecule> update(const Molecules &molecules, bool auto_commit=true);
     QList<Molecule> update(const MoleculeGroup &molgroup, bool auto_commit=true);
-    
+
     bool setContents(const MoleculeView &molview);
     bool setContents(const ViewsOfMol &molviews);
     bool setContents(const Molecules &molecules);
     bool setContents(const MoleculeGroup &molgroup);
-    
+
     bool setContents(const MoleculeView &molview, const PropertyMap &map);
     bool setContents(const ViewsOfMol &molviews, const PropertyMap &map);
     bool setContents(const Molecules &molecules, const PropertyMap &map);
     bool setContents(const MoleculeGroup &molgroup, const PropertyMap &map);
-    
+
     bool needsAccepting() const;
     void accept();
-    
+
 private:
     void assertNotNull() const;
     void updateGroup();
@@ -187,7 +186,7 @@ namespace detail
     should not be used in other code. The 'clone()' function of this
     class returns an FFMolGroup, as it is not possible to copy
     this class (as it is internal to the forcefield)
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT FFMolGroupPvt : public MoleculeGroup
@@ -198,18 +197,18 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFMolGroupPvt&);
 
 public:
     FFMolGroupPvt();
-    
+
     FFMolGroupPvt(const QString &name, quint32 i, FF *ff);
-    
+
     FFMolGroupPvt(const FFMolGroupPvt &other);
-    
+
     virtual ~FFMolGroupPvt();
 
     static const char* typeName()
     {
         return "SireFF::detail::FFMolGroupPvt";
     }
-    
+
     const char* what() const
     {
         return FFMolGroupPvt::typeName();
@@ -224,7 +223,7 @@ public:
         assertNotNull();
         return *ffield;
     }
-    
+
     FF& forceField()
     {
         assertNotNull();

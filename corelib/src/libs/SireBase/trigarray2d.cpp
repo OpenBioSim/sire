@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -38,14 +37,14 @@ using namespace SireStream;
 
 static const RegisterMetaType<TrigArray2DBase> r_array2d( MAGIC_ONLY, NO_ROOT,
                                                           "SireBase::TrigArray2D<T>" );
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds,
                                         const TrigArray2DBase &array2d)
 {
     writeHeader(ds, r_array2d, 1);
     ds << array2d.dim;
-    
+
     return ds;
 }
 
@@ -54,14 +53,14 @@ QDataStream &operator>>(QDataStream &ds,
                                         TrigArray2DBase &array2d)
 {
     VersionID v = readHeader(ds, r_array2d);
-    
+
     if (v == 1)
     {
         ds >> array2d.dim;
     }
     else
         throw version_error(v, "1", r_array2d, CODELOC);
-    
+
     return ds;
 }
 

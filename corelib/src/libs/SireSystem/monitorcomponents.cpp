@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,33 +50,33 @@ QDataStream &operator<<(QDataStream &ds,
                                           const MonitorComponents &moncomps)
 {
     writeHeader(ds, r_moncomps, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << moncomps.include_symbols << moncomps.exclude_symbols
         << moncomps.accumulator_template << moncomps.accumes
         << static_cast<const SystemMonitor&>(moncomps);
-        
+
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds, 
+QDataStream &operator>>(QDataStream &ds,
                                           MonitorComponents &moncomps)
 {
     VersionID v = readHeader(ds, r_moncomps);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> moncomps.include_symbols >> moncomps.exclude_symbols
             >> moncomps.accumulator_template >> moncomps.accumes
             >> static_cast<SystemMonitor&>(moncomps);
     }
     else
         throw version_error(v, "1", r_moncomps, CODELOC);
-        
+
     return ds;
 }
 
@@ -95,7 +94,7 @@ MonitorComponents::MonitorComponents(const Accumulator &accumulator)
 
 /** Construct a monitor to monitor the component 'component' using
     the accumulator 'accumulator' */
-MonitorComponents::MonitorComponents(const Symbol &component, 
+MonitorComponents::MonitorComponents(const Symbol &component,
                                      const Accumulator &accumulator)
                   : ConcreteProperty<MonitorComponents,SystemMonitor>(),
                     include_symbols(component),
@@ -104,7 +103,7 @@ MonitorComponents::MonitorComponents(const Symbol &component,
 
 /** Construct a monitor to monitor the components 'components'
     using the accumulator 'accumulator' */
-MonitorComponents::MonitorComponents(const Symbols &components, 
+MonitorComponents::MonitorComponents(const Symbols &components,
                                      const Accumulator &accumulator)
                   : ConcreteProperty<MonitorComponents,SystemMonitor>(),
                     include_symbols(components),
@@ -142,7 +141,7 @@ MonitorComponents& MonitorComponents::operator=(const MonitorComponents &other)
         accumulator_template = other.accumulator_template;
         accumes = other.accumes;
     }
-    
+
     return *this;
 }
 
@@ -150,8 +149,8 @@ MonitorComponents& MonitorComponents::operator=(const MonitorComponents &other)
 bool MonitorComponents::operator==(const MonitorComponents &other) const
 {
     return (this == &other) or
-           (include_symbols == other.include_symbols and 
-            exclude_symbols == other.exclude_symbols and 
+           (include_symbols == other.include_symbols and
+            exclude_symbols == other.exclude_symbols and
             accumulator_template == other.accumulator_template and
             accumes == other.accumes and
             SystemMonitor::operator==(other) );
@@ -210,7 +209,7 @@ const Accumulator& MonitorComponents::accumulatorTemplate() const
 const Accumulator& MonitorComponents::accumulator(const Symbol &component) const
 {
     QHash<Symbol,AccumulatorPtr>::const_iterator it = accumes.constFind(component);
-    
+
     if (it == accumes.constEnd())
         throw SireCAS::missing_symbol( QObject::tr(
             "There is no accumulator for the component represented by the symbol %1. "
@@ -248,7 +247,7 @@ void MonitorComponents::monitor(System &system)
         {
             Symbols available_components = include_symbols;
             available_components.intersect( system.componentSymbols() );
-            
+
             if (not available_components.isEmpty())
                 vals = system.componentValues(available_components);
         }
@@ -256,27 +255,27 @@ void MonitorComponents::monitor(System &system)
     else
     {
         Symbols available_components = system.componentSymbols();
-        
+
         if (not include_symbols.isEmpty())
             available_components.intersect(include_symbols);
-            
+
         available_components.subtract(exclude_symbols);
-        
+
         if (not available_components.isEmpty())
             vals = system.energies(available_components);
     }
-    
+
     const QHash<SymbolID,double> &values = vals.values();
-    
+
     for (QHash<SymbolID,double>::const_iterator it = values.constBegin();
          it != values.constEnd();
          ++it)
     {
         Symbol component(it.key());
-        
+
         if (not accumes.contains(component))
             accumes.insert(component, accumulator_template);
-            
+
         accumes[component].edit().accumulate(it.value());
     }
 }

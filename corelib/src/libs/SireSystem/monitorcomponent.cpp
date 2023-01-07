@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -41,17 +40,17 @@ using namespace SireStream;
 static const RegisterMetaType<MonitorComponent> r_moncomp;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                           const MonitorComponent &moncomp)
 {
     writeHeader(ds, r_moncomp, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << moncomp.monitored_component
         << moncomp.accume
         << static_cast<const SystemMonitor&>(moncomp);
-        
+
     return ds;
 }
 
@@ -59,18 +58,18 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, MonitorComponent &moncomp)
 {
     VersionID v = readHeader(ds, r_moncomp);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> moncomp.monitored_component
             >> moncomp.accume
             >> static_cast<SystemMonitor&>(moncomp);
     }
     else
         throw version_error( v, "1", r_moncomp, CODELOC );
-        
+
     return ds;
 }
 
@@ -90,14 +89,14 @@ MonitorComponent::MonitorComponent(const Symbol &component)
 /** Construct a monitor to accumulate the value of the component
     represented by the symbol 'component' using the accumulator
     in 'accumulator' */
-MonitorComponent::MonitorComponent(const Symbol &component, 
+MonitorComponent::MonitorComponent(const Symbol &component,
                                    const Accumulator &accumulator)
                  : ConcreteProperty<MonitorComponent,SystemMonitor>(),
                    monitored_component(component),
                    accume(accumulator)
 {}
 
-/** Copy constructor */                 
+/** Copy constructor */
 MonitorComponent::MonitorComponent(const MonitorComponent &other)
                  : ConcreteProperty<MonitorComponent,SystemMonitor>(other),
                    monitored_component(other.monitored_component),
@@ -117,7 +116,7 @@ MonitorComponent& MonitorComponent::operator=(const MonitorComponent &other)
         accume = other.accume;
         SystemMonitor::operator=(other);
     }
-    
+
     return *this;
 }
 

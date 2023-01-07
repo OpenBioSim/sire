@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,58 +58,58 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SupraSubSimPacket
 
 public:
     SupraSubSimPacket();
-    
+
     SupraSubSimPacket(const SupraSubSystem &system,
                       const SupraSubMoves &moves,
                       int nmoves, bool record_stats=true);
-                      
+
     SupraSubSimPacket(const SupraSubSimPacket &other);
-    
+
     ~SupraSubSimPacket();
-    
+
     SupraSubSimPacket& operator=(const SupraSubSimPacket &other);
-    
+
     bool operator==(const SupraSubSimPacket &other) const;
     bool operator!=(const SupraSubSimPacket &other) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return SupraSubSimPacket::typeName();
     }
-    
+
     SupraSubSimPacket* clone() const;
-    
+
     bool shouldPack() const;
     int approximatePacketSize() const;
 
     const SupraSubSystem& subSystem() const;
     const SupraSubMoves& subMoves() const;
-    
+
     int nSubMoves() const;
     int nSubCompleted() const;
 
     bool recordingSubStatistics() const;
-    
+
     bool hasFinished() const;
 
 protected:
     float chunk();
-    
+
 private:
     /** The subsystem being simulated */
     SupraSubSystemPtr sub_system;
-    
+
     /** The moves applied to the subsystem */
     SupraSubMovesPtr sub_moves;
-    
+
     /** The number of submoves to be run on the system */
     quint32 n_sub_moves;
-    
+
     /** The number of submoves already run on the system */
     quint32 ncompleted;
-    
+
     /** Whether or not to record sub statistics */
     bool record_stats;
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -110,7 +109,7 @@ QDataStream &operator<<(QDataStream &ds,
                                       const SoftCLJPotential &cljpot)
 {
     writeHeader(ds, r_cljpot, 2);
-    
+
     ds << static_cast<const CLJPotential&>(cljpot);
 
     return ds;
@@ -121,48 +120,48 @@ QDataStream &operator>>(QDataStream &ds,
                                       SoftCLJPotential &cljpot)
 {
     VersionID v = readHeader(ds, r_cljpot);
-    
+
     if (v == 1 or v == 2)
     {
         ds >> static_cast<CLJPotential&>(cljpot);
-    
+
         //extract all of the properties
         QVector<double> alpha_values;
         QVector<qint32> alpha_index(MAX_ALPHA_VALUES, -1);
-        
+
         for (int i=0; i<MAX_ALPHA_VALUES; ++i)
         {
             QString propname = QString( "alpha%1" ).arg(i);
-            
+
             if (cljpot.props.hasProperty(propname))
             {
                 const Property &prop = cljpot.props.property(propname);
-                
+
                 if (prop.isA<NullProperty>())
                     continue;
-            
+
                 double alpha = prop.asADouble();
-                                     
+
                 int idx = alpha_values.indexOf(alpha);
-                
+
                 if (idx == -1)
                 {
                     idx = alpha_values.count();
                     alpha_values.append(alpha);
                 }
-                
+
                 alpha_index[i] = idx;
             }
         }
-        
+
         if (cljpot.props.hasProperty("alpha"))
         {
             const Property &prop = cljpot.props.property("alpha");
-            
+
             if (not prop.isA<NullProperty>())
             {
                 double alpha = prop.asADouble();
-                                 
+
                 if (alpha_values.count() == 0)
                 {
                     alpha_values.append(alpha);
@@ -186,25 +185,25 @@ QDataStream &operator>>(QDataStream &ds,
                 }
             }
         }
-    
+
         cljpot.alpha_values = alpha_values;
         cljpot.alpha_index = alpha_index;
-        
+
         cljpot.clearOrphanedAlpha();
         cljpot.rebuildAlphaProperties();
-    
+
         cljpot.shift_delta = cljpot.props.property("shiftDelta")
                                          .asADouble();
-                
+
         cljpot.coul_power = cljpot.props.property("coulombPower")
                                         .asAnInteger();
 
         cljpot.lj_power = cljpot.props.property("ljPower")
                                       .asAnInteger();
     }
-    else 
+    else
         throw version_error(v, "1,2", r_cljpot, CODELOC);
-    
+
     return ds;
 }
 
@@ -217,7 +216,7 @@ SoftCLJPotential::SoftCLJPotential()
     alpha_values = QVector<double>(1, 0.0);
     alpha_index = QVector<qint32>(MAX_ALPHA_VALUES, -1);
     alpha_index[0] = 0;
-    
+
     this->rebuildAlphaProperties();
 
     //record the defaults
@@ -229,7 +228,7 @@ SoftCLJPotential::SoftCLJPotential()
 /** Copy constructor */
 SoftCLJPotential::SoftCLJPotential(const SoftCLJPotential &other)
                  : CLJPotential(other),
-                   alpha_values(other.alpha_values), 
+                   alpha_values(other.alpha_values),
                    alpha_index(other.alpha_index),
                    shift_delta(other.shift_delta),
                    coul_power(other.coul_power), lj_power(other.lj_power)
@@ -251,13 +250,13 @@ SoftCLJPotential& SoftCLJPotential::operator=(const SoftCLJPotential &other)
         coul_power = other.coul_power;
         lj_power = other.lj_power;
     }
-    
+
     return *this;
 }
 
 /** Return the value of alpha - this will raise an exception if this
     potential calculates multiple alpha values at the same time
-    
+
     \throw SireError::invalid_state
 */
 double SoftCLJPotential::alpha() const
@@ -267,13 +266,13 @@ double SoftCLJPotential::alpha() const
                 "This potential has multiple alpha values (%1), so it "
                 "is not possible to return just one.")
                     .arg(Sire::toString(alpha_values)), CODELOC );
-                    
+
     return alpha_values.at(0);
 }
 
-/** Return whether or not the ith alpha component has 
+/** Return whether or not the ith alpha component has
     an alpha value
-    
+
     \throw SireError::invalid_index
 */
 bool SoftCLJPotential::hasAlphaValue(int i) const
@@ -292,23 +291,23 @@ double SoftCLJPotential::alpha(int i) const
         throw SireError::invalid_state( QObject::tr(
             "There is no alpha value associated with the alpha component "
             "at index %1.").arg(i), CODELOC );
-            
+
     return alpha_values.at( alpha_index.at(Index(i).map(alpha_index.count())) );
 }
 
-/** Return the number of active alpha components (the number of 
+/** Return the number of active alpha components (the number of
     alpha components that have a value of alpha - those that don't
     will not contribute to this potential) */
 int SoftCLJPotential::nActiveAlphaComponents() const
 {
     int n = 0;
-    
+
     for (int i=0; i<alpha_index.count(); ++i)
     {
         if (alpha_index.at(i) != -1)
             ++n;
     }
-    
+
     return n;
 }
 
@@ -321,22 +320,22 @@ void SoftCLJPotential::clearOrphanedAlpha()
         {
             //this is an orphaned alpha value - remove it
             alpha_values.remove(i);
-            
+
             //update the alpha index
             for (int j=0; j<alpha_index.count(); ++j)
             {
                 if (alpha_index.at(j) > i)
                     alpha_index[j] -= 1;
             }
-            
+
             //use recursion to find other missing alpha values
             this->clearOrphanedAlpha();
             return;
-        } 
+        }
     }
 }
 
-/** Internal function used to rebuild the properties representing the 
+/** Internal function used to rebuild the properties representing the
     alpha components */
 void SoftCLJPotential::rebuildAlphaProperties()
 {
@@ -348,18 +347,18 @@ void SoftCLJPotential::rebuildAlphaProperties()
     {
         props.setProperty("alpha", NullProperty());
     }
-    
+
     for (int i=0; i<MAX_ALPHA_VALUES; ++i)
     {
         int idx = alpha_index.at(i);
-        
+
         if (idx == -1)
         {
             props.setProperty( QString("alpha%1").arg(i), NullProperty() );
         }
         else
         {
-            props.setProperty( QString("alpha%1").arg(i), 
+            props.setProperty( QString("alpha%1").arg(i),
                                wrap(alpha_values.at(idx)) );
         }
     }
@@ -376,15 +375,15 @@ bool SoftCLJPotential::setAlpha(double alpha)
         if (alpha_values.at(0) == alpha)
             return false;
     }
-    
+
     alpha_values = QVector<double>(1, alpha);
-    
+
     alpha_index = QVector<qint32>(MAX_ALPHA_VALUES, -1);
     alpha_index[0] = 0;
-    
+
     this->rebuildAlphaProperties();
     this->changedPotential();
-    
+
     return true;
 }
 
@@ -395,22 +394,22 @@ bool SoftCLJPotential::setAlpha(double alpha)
 bool SoftCLJPotential::setAlpha(int i, double alpha)
 {
     i = Index(i).map( MAX_ALPHA_VALUES );
-    
+
     int idx = alpha_values.indexOf(alpha);
-    
+
     if (idx == -1)
     {
         idx = alpha_values.count();
         alpha_values.append(alpha);
     }
-    
+
     if (alpha_index[i] != idx)
     {
         alpha_index[i] = idx;
         this->clearOrphanedAlpha();
         this->rebuildAlphaProperties();
         this->changedPotential();
-        
+
         return true;
     }
     else
@@ -424,14 +423,14 @@ bool SoftCLJPotential::setAlpha(int i, double alpha)
 bool SoftCLJPotential::removeAlpha(int i)
 {
     i = Index(i).map(MAX_ALPHA_VALUES);
-    
+
     if (alpha_index.at(i) != -1)
     {
         alpha_index[i] = -1;
         this->clearOrphanedAlpha();
         this->rebuildAlphaProperties();
         this->changedPotential();
-        
+
         return true;
     }
     else
@@ -440,21 +439,21 @@ bool SoftCLJPotential::removeAlpha(int i)
 
 /** Clear all of the alpha values - this removes the values of alpha
     for all of the alpha components, and then sets the alpha value
-    of the first component to 0 (as we need to have at least one 
+    of the first component to 0 (as we need to have at least one
     alpha value) */
 void SoftCLJPotential::clearAlphas()
 {
     QVector<double> new_alpha_values(1, 0.0);
     QVector<qint32> new_alpha_index(MAX_ALPHA_VALUES, -1);
-    
+
     new_alpha_index[0] = 0;
-        
-    if (alpha_values != new_alpha_values or 
+
+    if (alpha_values != new_alpha_values or
         alpha_index != new_alpha_index)
     {
         alpha_values = new_alpha_values;
         alpha_index = new_alpha_index;
-        
+
         this->rebuildAlphaProperties();
         this->changedPotential();
     }
@@ -482,9 +481,9 @@ bool SoftCLJPotential::setCoulombPower(int power)
         throw SireError::invalid_arg( QObject::tr(
             "You cannot use a negative Coulomb power (%1)").arg(power),
                 CODELOC );
-                
+
     quint32 new_power(power);
-    
+
     if (coul_power != new_power)
     {
         coul_power = new_power;
@@ -504,9 +503,9 @@ bool SoftCLJPotential::setLJPower(int power)
         throw SireError::invalid_arg( QObject::tr(
             "You cannot use a negative LJ power (%1)").arg(power),
                 CODELOC );
-                
+
     quint32 new_power(power);
-    
+
     if (lj_power != new_power)
     {
         lj_power = new_power;
@@ -548,13 +547,13 @@ bool SoftCLJPotential::setProperty(const QString &name, const Property &value)
         for (int i=0; i<alpha_index.count(); ++i)
         {
             QString propname = QString("alpha%1").arg(i);
-            
+
             if (name == propname)
             {
                 return this->setAlpha(i, value.asADouble());
             }
         }
-    
+
         //no it's not - see if the CLJPotential recognises this property
         return CLJPotential::setProperty(name, value);
     }
@@ -590,9 +589,9 @@ QDataStream &operator<<(QDataStream &ds,
                                       const InterSoftCLJPotential &interclj)
 {
     writeHeader(ds, r_interclj, 1);
-    
+
     ds << static_cast<const SoftCLJPotential&>(interclj);
-    
+
     return ds;
 }
 
@@ -601,14 +600,14 @@ QDataStream &operator>>(QDataStream &ds,
                                       InterSoftCLJPotential &interclj)
 {
     VersionID v = readHeader(ds, r_interclj);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SoftCLJPotential&>(interclj);
     }
     else
         throw version_error(v, "1", r_interclj, CODELOC);
-        
+
     return ds;
 }
 
@@ -626,7 +625,7 @@ InterSoftCLJPotential::~InterSoftCLJPotential()
 {}
 
 /** Copy assignment operator */
-InterSoftCLJPotential& 
+InterSoftCLJPotential&
 InterSoftCLJPotential::operator=(const InterSoftCLJPotential &other)
 {
     SoftCLJPotential::operator=(other);
@@ -666,27 +665,27 @@ void InterSoftCLJPotential::throwMissingPotentialComponent(const Symbol &symbol,
                  components.lj().toString()), CODELOC );
 }
 
-/** Return all of the parameters needed by this potential for 
+/** Return all of the parameters needed by this potential for
     the molecule 'molecule', using the supplied property map to
     find the properties that contain those parameters
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-InterSoftCLJPotential::Parameters 
+InterSoftCLJPotential::Parameters
 InterSoftCLJPotential::getParameters(const PartialMolecule &molecule,
                                      const PropertyMap &map)
 {
     return Parameters( molecule, map[parameters().coordinates()],
-                       CLJPotential::getCLJParameters(molecule, 
+                       CLJPotential::getCLJParameters(molecule,
                                                       map[parameters().charge()],
                                                       map[parameters().lj()]) );
 }
 
-/** Update the parameters for the molecule going from 'old_molecule' to 
+/** Update the parameters for the molecule going from 'old_molecule' to
     'new_molecule', with the parameters found using the property map 'map'
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -708,11 +707,11 @@ InterSoftCLJPotential::updateParameters(
     const PropertyName &coords_property = map[parameters().coordinates()];
     const PropertyName &chg_property = map[parameters().charge()];
     const PropertyName &lj_property = map[parameters().lj()];
-    
+
     //get what has changed
     bool new_coords = old_molecule.version(coords_property) !=
                          new_molecule.version(coords_property);
-                             
+
     bool new_clj = ( old_molecule.version(chg_property) !=
                          new_molecule.version(chg_property) ) or
                    ( old_molecule.version(lj_property) !=
@@ -720,7 +719,7 @@ InterSoftCLJPotential::updateParameters(
 
     if (new_coords)
     {
-        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule, 
+        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule,
                                                         coords_property) );
     }
 
@@ -732,11 +731,11 @@ InterSoftCLJPotential::updateParameters(
 
     return new_params;
 }
-                 
-/** Update the parameters for the molecule going from 'old_molecule' to 
+
+/** Update the parameters for the molecule going from 'old_molecule' to
     'new_molecule', also while the parameters of 'old_molecule'
     where found in 'old_map', now get the parameters using 'new_map'
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -746,7 +745,7 @@ InterSoftCLJPotential::updateParameters(
                                     const InterSoftCLJPotential::Parameters &old_params,
                                     const PartialMolecule &old_molecule,
                                     const PartialMolecule &new_molecule,
-                                    const PropertyMap &old_map, 
+                                    const PropertyMap &old_map,
                                     const PropertyMap &new_map)
 {
     if (old_molecule.selection() != new_molecule.selection())
@@ -759,16 +758,16 @@ InterSoftCLJPotential::updateParameters(
     const PropertyName &old_coords = old_map[parameters().coordinates()];
     const PropertyName &old_chg = old_map[parameters().charge()];
     const PropertyName &old_lj = old_map[parameters().lj()];
-    
+
     const PropertyName &new_coords = new_map[parameters().coordinates()];
     const PropertyName &new_chg = new_map[parameters().charge()];
     const PropertyName &new_lj = new_map[parameters().lj()];
-    
+
     //get what has changed
     bool changed_coords = (new_coords != old_coords) or
                            old_molecule.version(old_coords) !=
                            new_molecule.version(old_coords);
-                             
+
     bool changed_clj = (new_chg != old_chg or new_lj != old_lj) or
                        ( old_molecule.version(old_chg) !=
                          new_molecule.version(old_chg) ) or
@@ -776,7 +775,7 @@ InterSoftCLJPotential::updateParameters(
                          new_molecule.version(old_lj) );
 
     if (changed_coords)
-        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule, 
+        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule,
                                                         new_coords) );
 
     if (changed_clj)
@@ -789,7 +788,7 @@ InterSoftCLJPotential::updateParameters(
 /** Return the InterSoftCLJPotential::Molecule representation of 'molecule',
     using the supplied PropertyMap to find the properties that contain
     the necessary forcefield parameters
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -804,12 +803,12 @@ InterSoftCLJPotential::parameterise(const PartialMolecule &molecule,
 /** Convert the passed group of molecules into InterSoftCLJPotential::Molecules,
     using the supplied PropertyMap to find the properties that contain
     the necessary forcefield parameters in each molecule
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-InterSoftCLJPotential::Molecules 
+InterSoftCLJPotential::Molecules
 InterSoftCLJPotential::parameterise(const MoleculeGroup &molecules,
                                     const PropertyMap &map)
 {
@@ -822,14 +821,14 @@ double InterSoftCLJPotential::totalCharge(
 {
     int n = params.count();
     const Parameter *params_array = params.constData();
-    
+
     double chg = 0;
-    
+
     for (int i=0; i<n; ++i)
     {
         chg += params_array[i].reduced_charge;
     }
-    
+
     return chg;
 }
 
@@ -845,31 +844,31 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
 {
     const quint32 ngroups0 = mol0.coordinates().count();
     const quint32 ngroups1 = mol1.coordinates().count();
-    
+
     if (ngroups0 < ngroups1)
     {
         this->_pvt_calculateEnergy(mol1, mol0, energy, distmat, scale_energy);
         return;
     }
-    
+
     const CoordGroup *groups0_array = mol0.coordinates().constData();
     const CoordGroup *groups1_array = mol1.coordinates().constData();
-    
+
     BOOST_ASSERT( mol0.parameters().atomicParameters().count() == int(ngroups0) );
     BOOST_ASSERT( mol1.parameters().atomicParameters().count() == int(ngroups1) );
-    
-    const Parameters::Array *molparams0_array 
+
+    const Parameters::Array *molparams0_array
                                 = mol0.parameters().atomicParameters().constData();
-    const Parameters::Array *molparams1_array 
+    const Parameters::Array *molparams1_array
                                 = mol1.parameters().atomicParameters().constData();
 
     //the alpha_values array contains all of the unique alpha values
     const double *alfa = alpha_values.constData();
     int nalpha = alpha_values.count();
-    
+
     if (nalpha <= 0)
         return;
-    
+
     std::vector<double> cnrg(nalpha, 0);
     std::vector<double> ljnrg(nalpha, 0);
 
@@ -878,12 +877,12 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
     const double Rlj = qMax(1e-5,qMin(1e9, switchfunc->vdwCutoffDistance().to(angstrom)) );
     const double Rc = qMax(Rcoul,Rlj);
     const double Rlj2 = Rlj*Rlj;
-    
+
     //this uses the following potentials
     //           Zacharias and McCammon, J. Chem. Phys., 1994, and also,
     //           Michel et al., JCTC, 2007
     //
-    //  V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) - 
+    //  V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
     //                          ( sigma^6  / (delta*sigma + r^2)^3 ) ]
     //
     //  delta = shift_delta * alpha
@@ -902,18 +901,18 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
     //
     // This contrasts to Rich T's LJ softcore function, which was;
     //
-    //  V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) - 
+    //  V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
     //                          (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
 
     std::vector<double> one_minus_alfa_to_n(nalpha);
     std::vector<double> delta(nalpha);
-    
+
     for (int i=0; i<nalpha; ++i)
     {
         one_minus_alfa_to_n[i] = SireMaths::pow(1 - alfa[i], int(coul_power));
         delta[i] = shift_delta * alfa[i];
     }
-    
+
     #ifdef SIRE_TIME_ROUTINES
     int nflops = 0;
     #endif
@@ -923,14 +922,14 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
         std::vector<double> sRcoul(nalpha);
         std::vector<double> one_over_sRcoul(nalpha);
         std::vector<double> one_over_sRcoul2(nalpha);
-        
+
         for (int i=0; i<nalpha; ++i)
         {
             sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
             one_over_sRcoul[i] = double(1) / sRcoul[i];
             one_over_sRcoul2[i] = double(1) / (sRcoul[i]*sRcoul[i]);
         }
-    
+
         //loop over all pairs of CutGroups in the two molecules
         for (quint32 igroup=0; igroup<ngroups0; ++igroup)
         {
@@ -940,7 +939,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
             const AABox &aabox0 = group0.aaBox();
             const quint32 nats0 = group0.count();
             const Parameter *params0_array = params0.constData();
-        
+
             for (quint32 jgroup=0; jgroup<ngroups1; ++jgroup)
             {
                 const CoordGroup &group1 = groups1_array[jgroup];
@@ -951,20 +950,20 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                 //test has already been performed and passed)
                 const bool within_cutoff = (ngroups0 == 1 and ngroups1 == 1) or not
                                             spce->beyond(Rc,aabox0, group1.aaBox());
-                
+
                 if (not within_cutoff)
                     //this CutGroup is either the cutoff distance
                     continue;
-                
+
                 //calculate all of the interatomic distances^2
                 const double mindist = spce->calcDist2(group0, group1, distmat);
-                
+
                 if (mindist > Rc)
                 {
                     //all of the atoms are definitely beyond cutoff
                     continue;
                 }
-                   
+
                 std::vector<double> icnrg(nalpha, 0);
                 std::vector<double> iljnrg(nalpha, 0);
 
@@ -975,38 +974,38 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                 #ifdef SIRE_USE_SSE
                 {
                     const int remainder = nats1 % 2;
-                    
+
                     const __m128d sse_one = { 1.0, 1.0 };
-                    
+
                     __m128d sse_cnrg[nalpha];
                     __m128d sse_ljnrg[nalpha];
                     __m128d sse_alpha[nalpha];
                     __m128d sse_delta[nalpha];
-                    
+
                     __m128d sse_Rlj2 = _mm_set1_pd(Rlj2);
                     __m128d sse_sRcoul[nalpha];
                     __m128d sse_one_over_sRcoul[nalpha];
                     __m128d sse_one_over_sRcoul2[nalpha];
-                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         sse_cnrg[i] = _mm_set1_pd(0);
                         sse_ljnrg[i] = _mm_set1_pd(0);
-                        
+
                         sse_alpha[i] = _mm_set1_pd(alfa[i]);
                         sse_delta[i] = _mm_set1_pd(delta[i]);
-                        
+
                         sse_sRcoul[i] = _mm_set1_pd(sRcoul[i]);
                         sse_one_over_sRcoul[i] = _mm_set1_pd(one_over_sRcoul[i]);
                         sse_one_over_sRcoul2[i] = _mm_set1_pd(one_over_sRcoul2[i]);
                     }
-                    
+
                     for (quint32 i=0; i<nats0; ++i)
                     {
                         distmat.setOuterIndex(i);
                         const Parameter &param0 = params0_array[i];
-                        
-                        __m128d sse_chg0 = _mm_set_pd(param0.reduced_charge, 
+
+                        __m128d sse_chg0 = _mm_set_pd(param0.reduced_charge,
                                                       param0.reduced_charge);
 
                         //process atoms in pairs (so can then use SSE)
@@ -1014,33 +1013,33 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                         {
                             const Parameter &param10 = params1_array[j];
                             const Parameter &param11 = params1_array[j+1];
-                            
+
                             const __m128d sse_r2 = _mm_set_pd(distmat[j], distmat[j+1]);
-                                                       
+
                             const LJPair &ljpair0 = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param10.ljid)];
-                        
+
                             const LJPair &ljpair1 = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param11.ljid)];
-                        
-                            __m128d sse_sig = _mm_set_pd(ljpair0.sigma(), 
+
+                            __m128d sse_sig = _mm_set_pd(ljpair0.sigma(),
                                                          ljpair1.sigma());
-                            __m128d sse_eps = _mm_set_pd(ljpair0.epsilon(), 
+                            __m128d sse_eps = _mm_set_pd(ljpair0.epsilon(),
                                                          ljpair1.epsilon());
 
                             const __m128d sse_sig2 = _mm_mul_pd(sse_sig, sse_sig);
                             const __m128d sse_sig3 = _mm_mul_pd(sse_sig2, sse_sig);
                             const __m128d sse_sig6 = _mm_mul_pd(sse_sig3, sse_sig3);
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //coulomb energy
                                 {
                                     __m128d sse_sr = _mm_sqrt_pd( _mm_add_pd(sse_r2,sse_alpha[k]) );
                                     __m128d sse_one_over_sr = _mm_div_pd(sse_one, sse_sr);
-                            
+
                                     __m128d nrg = _mm_sub_pd(sse_sr, sse_sRcoul[k]);
                                     nrg = _mm_mul_pd(nrg, sse_one_over_sRcoul2[k]);
                                     nrg = _mm_add_pd(nrg, sse_one_over_sr);
@@ -1048,60 +1047,60 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
 
                                     __m128d sse_chg = _mm_set_pd( param10.reduced_charge,
                                                                   param11.reduced_charge );
-                        
+
                                     sse_chg = _mm_mul_pd(sse_chg, sse_chg0);
-                        
+
                                     nrg = _mm_mul_pd(sse_chg, nrg);
 
                                     const __m128d sse_in_cutoff = _mm_cmplt_pd(sse_sr,
                                                                                sse_sRcoul[k]);
                                     nrg = _mm_and_pd(nrg, sse_in_cutoff);
-                                
+
                                     sse_cnrg[k] = _mm_add_pd(sse_cnrg[k], nrg);
                                 }
-                                
+
                                 //lj energy
                                 {
                                     const __m128d sse_in_cutoff = _mm_cmplt_pd(sse_r2, sse_Rlj2);
-                                
+
                                     //calculate shift = alpha * sigma * shift_delta
                                     const __m128d sse_shift = _mm_mul_pd(sse_sig, sse_delta[k]);
 
                                     __m128d lj_denom = _mm_add_pd(sse_r2, sse_shift);
                                     __m128d lj_denom2 = _mm_mul_pd(lj_denom, lj_denom);
                                     lj_denom = _mm_mul_pd(lj_denom, lj_denom2);
-                            
+
                                     const __m128d sig6_over_denom = _mm_div_pd(sse_sig6,
                                                                                lj_denom);
-                                                                           
+
                                     const __m128d sig12_over_denom2 = _mm_mul_pd(sig6_over_denom,
                                                                                  sig6_over_denom);
-                                                  
+
                                     //calculate LJ energy (the factor of 4 is added later)
                                     __m128d nrg = _mm_sub_pd(sig12_over_denom2, sig6_over_denom);
-                                                         
+
                                     nrg = _mm_mul_pd(sse_eps, nrg);
                                     nrg = _mm_and_pd(nrg, sse_in_cutoff);
                                     sse_ljnrg[k] = _mm_add_pd(sse_ljnrg[k], nrg);
                                 }
                             }
                         }
-                              
+
                         if (remainder == 1)
                         {
                             const Parameter &param1 = params1_array[nats1-1];
 
                             const double r2 = distmat[nats1-1];
-                            
+
                             const double q2 = param0.reduced_charge * param1.reduced_charge;
 
                             const LJPair &ljpair = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //coulomb energy
@@ -1111,37 +1110,37 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                                     if (sr < sRcoul[k])
                                     {
                                         const double one_over_sr = double(1) / sr;
-                                
+
                                         icnrg[k] += q2 *
                                                 (one_over_sr - one_over_sRcoul[k] +
                                                  one_over_sRcoul2[k]*(sr-sRcoul[k]));
                                     }
                                 }
-                                
+
                                 //lj energy
                                 if (r2 < Rlj2)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-                                
+
                                     double lj_denom = r2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-                                
+
                                     const double sig6_over_denom = sig6 / lj_denom;
-                                    const double sig12_over_denom2 = sig6_over_denom * 
+                                    const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-                                
-                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 - 
+
+                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 -
                                                                      sig6_over_denom);
                                 }
                             }
                         }
                     }
-                    
+
                     for (int k=0; k<nalpha; ++k)
                     {
                         icnrg[k] += *((const double*)&(sse_cnrg[k])) +
                                     *( ((const double*)&(sse_cnrg[k])) + 1 );
-                             
+
                         iljnrg[k] += *((const double*)&(sse_ljnrg[k])) +
                                      *( ((const double*)&(sse_ljnrg[k])) + 1 );
                     }
@@ -1152,22 +1151,22 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                     {
                         distmat.setOuterIndex(i);
                         const Parameter &param0 = params0_array[i];
-                    
+
                         for (quint32 j=0; j<nats1; ++j)
                         {
                             const Parameter &param1 = params1_array[j];
 
                             const double r2 = distmat[j];
-                            
+
                             const double q2 = param0.reduced_charge * param1.reduced_charge;
 
                             const LJPair &ljpair = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //coulomb energy
@@ -1182,20 +1181,20 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                                                           one_over_sRcoul2[k]*(sr-sRcoul[k]));
                                     }
                                 }
-                                
+
                                 //lj energy
                                 if (r2 < Rlj2)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-                                
+
                                     double lj_denom = r2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-                                
+
                                     const double sig6_over_denom = sig6 / lj_denom;
                                     const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-            
-                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 - 
+
+                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 -
                                                                      sig6_over_denom);
                                 }
                             }
@@ -1203,7 +1202,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                     }
                 }
                 #endif
-                
+
                 //now add these energies onto the total for the molecule,
                 //scaled by any non-bonded feather factor
                 for (int i=0; i<nalpha; ++i)
@@ -1223,7 +1222,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
         std::vector<double> sRcoul(nalpha);
         std::vector<double> k_rf(nalpha);
         std::vector<double> c_rf(nalpha);
-        
+
         for (int i=0; i<nalpha; ++i)
         {
             sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
@@ -1232,7 +1231,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
             c_rf[i] = (1.0 / sRcoul[i]) * ( (3*rf_dielectric_constant) /
                                             (2*rf_dielectric_constant + 1) );
         }
-    
+
         //loop over all pairs of CutGroups in the two molecules
         for (quint32 igroup=0; igroup<ngroups0; ++igroup)
         {
@@ -1242,7 +1241,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
             const AABox &aabox0 = group0.aaBox();
             const quint32 nats0 = group0.count();
             const Parameter *params0_array = params0.constData();
-        
+
             for (quint32 jgroup=0; jgroup<ngroups1; ++jgroup)
             {
                 const CoordGroup &group1 = groups1_array[jgroup];
@@ -1253,23 +1252,23 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                 //test has already been performed and passed)
                 const bool within_cutoff = (ngroups0 == 1 and ngroups1 == 1) or not
                                             spce->beyond(Rc,aabox0, group1.aaBox());
-                
+
                 if (not within_cutoff)
                     //this CutGroup is either the cutoff distance
                     continue;
-                
+
                 //calculate all of the interatomic distances^2
                 const double mindist = spce->calcDist2(group0, group1, distmat);
-                
+
                 if (mindist > Rc)
                 {
                     //all of the atoms are definitely beyond cutoff
                     continue;
                 }
-                   
+
                 std::vector<double> icnrg(nalpha, 0);
                 std::vector<double> iljnrg(nalpha, 0);
-                
+
                 //loop over all interatomic pairs and calculate the energies
                 quint32 nats1 = group1.count();
                 const Parameter *params1_array = params1.constData();
@@ -1277,38 +1276,38 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                 #ifdef SIRE_USE_SSE
                 {
                     const int remainder = nats1 % 2;
-                    
+
                     const __m128d sse_one = { 1.0, 1.0 };
-                    
+
                     __m128d sse_cnrg[nalpha];
                     __m128d sse_ljnrg[nalpha];
                     __m128d sse_alpha[nalpha];
                     __m128d sse_delta[nalpha];
-                    
+
                     const __m128d sse_Rlj2 = _mm_set1_pd(Rlj2);
                     __m128d sse_sRcoul[nalpha];
                     __m128d sse_k_rf[nalpha];
                     __m128d sse_c_rf[nalpha];
-                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         sse_cnrg[i] = _mm_set_pd(0, 0);
                         sse_ljnrg[i] = _mm_set_pd(0, 0);
-                        
+
                         sse_alpha[i] = _mm_set_pd(alfa[i], alfa[i]);
                         sse_delta[i] = _mm_set_pd(delta[i], delta[i]);
-                        
+
                         sse_sRcoul[i] = _mm_set1_pd(sRcoul[i]);
                         sse_k_rf[i] = _mm_set1_pd(k_rf[i]);
                         sse_c_rf[i] = _mm_set1_pd(c_rf[i]);
                     }
-                    
+
                     for (quint32 i=0; i<nats0; ++i)
                     {
                         distmat.setOuterIndex(i);
                         const Parameter &param0 = params0_array[i];
-                        
-                        __m128d sse_chg0 = _mm_set_pd(param0.reduced_charge, 
+
+                        __m128d sse_chg0 = _mm_set_pd(param0.reduced_charge,
                                                       param0.reduced_charge);
 
                         //process atoms in pairs (so can then use SSE)
@@ -1316,27 +1315,27 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                         {
                             const Parameter &param10 = params1_array[j];
                             const Parameter &param11 = params1_array[j+1];
-                            
+
                             const __m128d sse_r2 = _mm_set_pd(distmat[j], distmat[j+1]);
 
-                                                       
+
                             const LJPair &ljpair0 = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param10.ljid)];
-                        
+
                             const LJPair &ljpair1 = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param11.ljid)];
-                        
-                            __m128d sse_sig = _mm_set_pd(ljpair0.sigma(), 
+
+                            __m128d sse_sig = _mm_set_pd(ljpair0.sigma(),
                                                          ljpair1.sigma());
-                            __m128d sse_eps = _mm_set_pd(ljpair0.epsilon(), 
+                            __m128d sse_eps = _mm_set_pd(ljpair0.epsilon(),
                                                          ljpair1.epsilon());
 
                             const __m128d sse_sig2 = _mm_mul_pd(sse_sig, sse_sig);
                             const __m128d sse_sig3 = _mm_mul_pd(sse_sig2, sse_sig);
                             const __m128d sse_sig6 = _mm_mul_pd(sse_sig3, sse_sig3);
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //coulomb energy
@@ -1346,7 +1345,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                                                                                sse_sRcoul[k]);
 
                                     __m128d sse_one_over_sr = _mm_div_pd(sse_one, sse_sr);
-                            
+
                                     __m128d nrg = _mm_mul_pd(sse_sr, sse_sr);
                                     nrg = _mm_mul_pd(nrg, sse_k_rf[k]);
                                     nrg = _mm_sub_pd(nrg, sse_c_rf[k]);
@@ -1354,16 +1353,16 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
 
                                     __m128d sse_chg = _mm_set_pd( param10.reduced_charge,
                                                                   param11.reduced_charge );
-                        
+
                                     sse_chg = _mm_mul_pd(sse_chg, sse_chg0);
-                        
+
                                     nrg = _mm_mul_pd(sse_chg, nrg);
 
                                     nrg = _mm_and_pd(nrg, sse_in_cutoff);
-                                
+
                                     sse_cnrg[k] = _mm_add_pd(sse_cnrg[k], nrg);
                                 }
-                                
+
                                 //lj energy
                                 {
                                     const __m128d sse_in_cutoff = _mm_cmplt_pd(sse_r2, sse_Rlj2);
@@ -1374,39 +1373,39 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                                     __m128d lj_denom = _mm_add_pd(sse_r2, sse_shift);
                                     __m128d lj_denom2 = _mm_mul_pd(lj_denom, lj_denom);
                                     lj_denom = _mm_mul_pd(lj_denom, lj_denom2);
-                            
+
                                     const __m128d sig6_over_denom = _mm_div_pd(sse_sig6,
                                                                                lj_denom);
-                                                                           
+
                                     const __m128d sig12_over_denom2 = _mm_mul_pd(sig6_over_denom,
                                                                                  sig6_over_denom);
-                                                  
+
                                     //calculate LJ energy (the factor of 4 is added later)
                                     __m128d tmp = _mm_sub_pd(sig12_over_denom2,
                                                              sig6_over_denom);
-                                                         
+
                                     tmp = _mm_mul_pd(sse_eps, tmp);
                                     tmp = _mm_and_pd(tmp, sse_in_cutoff);
                                     sse_ljnrg[k] = _mm_add_pd(sse_ljnrg[k], tmp);
                                 }
                             }
                         }
-                              
+
                         if (remainder == 1)
                         {
                             const Parameter &param1 = params1_array[nats1-1];
 
                             const double r2 = distmat[nats1-1];
-                            
+
                             const double q2 = param0.reduced_charge * param1.reduced_charge;
 
                             const LJPair &ljpair = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //coulomb energy
@@ -1416,35 +1415,35 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                                     if (sr < sRcoul[k])
                                     {
                                         const double one_over_sr = double(1) / sr;
-                                    
+
                                         icnrg[k] += q2 * (one_over_sr + sr*sr*k_rf[k] - c_rf[k]);
                                     }
                                 }
-                                
+
                                 //lj energy
                                 if (r2 < Rlj2)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-                                
+
                                     double lj_denom = r2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-                                
+
                                     const double sig6_over_denom = sig6 / lj_denom;
                                     const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-                                
+
                                     iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 -
                                                                      sig6_over_denom);
                                 }
                             }
                         }
                     }
-                    
+
                     for (int k=0; k<nalpha; ++k)
                     {
                         icnrg[k] += *((const double*)&(sse_cnrg[k])) +
                                     *( ((const double*)&(sse_cnrg[k])) + 1 );
-                             
+
                         iljnrg[k] += *((const double*)&(sse_ljnrg[k])) +
                                      *( ((const double*)&(sse_ljnrg[k])) + 1 );
                     }
@@ -1455,49 +1454,49 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                     {
                         distmat.setOuterIndex(i);
                         const Parameter &param0 = params0_array[i];
-                    
+
                         for (quint32 j=0; j<nats1; ++j)
                         {
                             const Parameter &param1 = params1_array[j];
 
                             const double r2 = distmat[j];
-                            
+
                             const double q2 = param0.reduced_charge * param1.reduced_charge;
 
                             const LJPair &ljpair = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //coulomb energy
                                 {
                                     const double sr = std::sqrt(alfa[k] + r2);
-                                    
+
                                     if (sr < sRcoul[k])
                                     {
                                         const double one_over_sr = double(1) / sr;
-                                
+
                                         icnrg[k] += q2 * (one_over_sr + sr*sr*k_rf[k] - c_rf[k]);
                                     }
                                 }
-                                
+
                                 //lj energy
                                 if (r2 < Rlj2)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-                                
+
                                     double lj_denom = r2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-                                
+
                                     const double sig6_over_denom = sig6 / lj_denom;
                                     const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-            
-                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 - 
+
+                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 -
                                                                      sig6_over_denom);
                                 }
                             }
@@ -1505,7 +1504,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                     }
                 }
                 #endif
-                
+
                 //now add these energies onto the total for the molecule,
                 //scaled by any non-bonded feather factor
                 for (int i=0; i<nalpha; ++i)
@@ -1528,7 +1527,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
             const AABox &aabox0 = group0.aaBox();
             const quint32 nats0 = group0.count();
             const Parameter *params0_array = params0.constData();
-        
+
             for (quint32 jgroup=0; jgroup<ngroups1; ++jgroup)
             {
                 const CoordGroup &group1 = groups1_array[jgroup];
@@ -1539,20 +1538,20 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                 //test has already been performed and passed)
                 const bool within_cutoff = (ngroups0 == 1 and ngroups1 == 1) or not
                                             spce->beyond(Rc, aabox0, group1.aaBox());
-                
+
                 if (not within_cutoff)
                     //this CutGroup is either the cutoff distance
                     continue;
-                
+
                 //calculate all of the interatomic distances^2
                 const double mindist = spce->calcDist2(group0, group1, distmat);
-                
+
                 if (mindist > Rc)
                 {
                     //all of the atoms are definitely beyond cutoff
                     continue;
                 }
-                   
+
                 std::vector<double> icnrg(nalpha, 0);
                 std::vector<double> iljnrg(nalpha, 0);
 
@@ -1563,32 +1562,32 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                 #ifdef SIRE_USE_SSE
                 {
                     const int remainder = nats1 % 2;
-                    
+
                     const __m128d sse_one = { 1.0, 1.0 };
-                    
+
                     __m128d sse_cnrg[nalpha];
                     __m128d sse_ljnrg[nalpha];
                     __m128d sse_alpha[nalpha];
                     __m128d sse_delta[nalpha];
-                    
+
                     const __m128d sse_Rcoul = _mm_set1_pd(Rcoul);
                     const __m128d sse_Rlj2 = _mm_set1_pd(Rlj2);
-                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         sse_cnrg[i] = _mm_set_pd(0, 0);
                         sse_ljnrg[i] = _mm_set_pd(0, 0);
-                        
+
                         sse_alpha[i] = _mm_set_pd(alfa[i], alfa[i]);
                         sse_delta[i] = _mm_set_pd(delta[i], delta[i]);
                     }
-                    
+
                     for (quint32 i=0; i<nats0; ++i)
                     {
                         distmat.setOuterIndex(i);
                         const Parameter &param0 = params0_array[i];
-                        
-                        __m128d sse_chg0 = _mm_set_pd(param0.reduced_charge, 
+
+                        __m128d sse_chg0 = _mm_set_pd(param0.reduced_charge,
                                                       param0.reduced_charge);
 
                         //process atoms in pairs (so can then use SSE)
@@ -1596,48 +1595,48 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                         {
                             const Parameter &param10 = params1_array[j];
                             const Parameter &param11 = params1_array[j+1];
-                            
+
                             const __m128d sse_r2 = _mm_set_pd(distmat[j], distmat[j+1]);
 
-                                                       
+
                             const LJPair &ljpair0 = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param10.ljid)];
-                        
+
                             const LJPair &ljpair1 = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param11.ljid)];
-                        
-                            __m128d sse_sig = _mm_set_pd(ljpair0.sigma(), 
+
+                            __m128d sse_sig = _mm_set_pd(ljpair0.sigma(),
                                                          ljpair1.sigma());
-                            __m128d sse_eps = _mm_set_pd(ljpair0.epsilon(), 
+                            __m128d sse_eps = _mm_set_pd(ljpair0.epsilon(),
                                                          ljpair1.epsilon());
 
                             const __m128d sse_sig2 = _mm_mul_pd(sse_sig, sse_sig);
                             const __m128d sse_sig3 = _mm_mul_pd(sse_sig2, sse_sig);
                             const __m128d sse_sig6 = _mm_mul_pd(sse_sig3, sse_sig3);
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //coulomb energy
                                 {
                                     __m128d sse_sr = _mm_sqrt_pd( _mm_add_pd(sse_r2,sse_alpha[k]) );
                                     const __m128d sse_in_cutoff = _mm_cmplt_pd(sse_sr, sse_Rcoul);
-                            
+
                                     __m128d nrg = _mm_div_pd(sse_one, sse_sr);
 
                                     __m128d sse_chg = _mm_set_pd( param10.reduced_charge,
                                                                   param11.reduced_charge );
-                        
+
                                     sse_chg = _mm_mul_pd(sse_chg, sse_chg0);
-                        
+
                                     nrg = _mm_mul_pd(sse_chg, nrg);
 
                                     nrg = _mm_and_pd(nrg, sse_in_cutoff);
-                                
+
                                     sse_cnrg[k] = _mm_add_pd(sse_cnrg[k], nrg);
                                 }
-                                
+
                                 //lj energy
                                 {
                                     const __m128d sse_in_cutoff = _mm_cmplt_pd(sse_r2, sse_Rlj2);
@@ -1648,78 +1647,78 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                                     __m128d lj_denom = _mm_add_pd(sse_r2, sse_shift);
                                     __m128d lj_denom2 = _mm_mul_pd(lj_denom, lj_denom);
                                     lj_denom = _mm_mul_pd(lj_denom, lj_denom2);
-                            
+
                                     const __m128d sig6_over_denom = _mm_div_pd(sse_sig6,
                                                                                lj_denom);
-                                                                           
+
                                     const __m128d sig12_over_denom2 = _mm_mul_pd(sig6_over_denom,
                                                                                  sig6_over_denom);
-                                                  
+
                                     //calculate LJ energy (the factor of 4 is added later)
                                     __m128d tmp = _mm_sub_pd(sig12_over_denom2,
                                                              sig6_over_denom);
-                                                         
+
                                     tmp = _mm_mul_pd(sse_eps, tmp);
                                     tmp = _mm_and_pd(tmp, sse_in_cutoff);
                                     sse_ljnrg[k] = _mm_add_pd(sse_ljnrg[k], tmp);
                                 }
                             }
                         }
-                              
+
                         if (remainder == 1)
                         {
                             const Parameter &param1 = params1_array[nats1-1];
 
                             const double r2 = distmat[nats1-1];
-                            
+
                             const double q2 = param0.reduced_charge * param1.reduced_charge;
 
 
                             const LJPair &ljpair = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //coulomb energy
                                 {
                                     const double sr = std::sqrt(alfa[k] + r2);
-                                    
+
                                     if (sr < Rcoul)
                                     {
                                         const double one_over_sr = double(1) / sr;
-                                    
+
                                         icnrg[k] += q2 * one_over_sr;
                                     }
                                 }
-                                
+
                                 //lj energy
                                 if (r2 < Rlj2)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-                                
+
                                     double lj_denom = r2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-                                
+
                                     const double sig6_over_denom = sig6 / lj_denom;
-                                    const double sig12_over_denom2 = sig6_over_denom * 
+                                    const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-                                
-                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 - 
+
+                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 -
                                                                      sig6_over_denom);
                                 }
                             }
                         }
                     }
-                    
+
                     for (int k=0; k<nalpha; ++k)
                     {
                         icnrg[k] += *((const double*)&(sse_cnrg[k])) +
                                     *( ((const double*)&(sse_cnrg[k])) + 1 );
-                             
+
                         iljnrg[k] += *((const double*)&(sse_ljnrg[k])) +
                                      *( ((const double*)&(sse_ljnrg[k])) + 1 );
                     }
@@ -1730,28 +1729,28 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                     {
                         distmat.setOuterIndex(i);
                         const Parameter &param0 = params0_array[i];
-                    
+
                         for (quint32 j=0; j<nats1; ++j)
                         {
                             const Parameter &param1 = params1_array[j];
 
                             const double r2 = distmat[j];
-                            
+
                             const double q2 = param0.reduced_charge * param1.reduced_charge;
 
                             const LJPair &ljpair = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //coulomb energy
                                 {
                                     const double sr = std::sqrt(alfa[k] + r2);
-                                    
+
                                     if (sr < Rcoul)
                                     {
                                         const double one_over_sr = double(1) / sr;
@@ -1759,20 +1758,20 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                                         icnrg[k] += q2 * one_over_sr;
                                     }
                                 }
-                                
+
                                 //lj energy
                                 if (r2 < Rlj2)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-                                
+
                                     double lj_denom = r2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-                                
+
                                     const double sig6_over_denom = sig6 / lj_denom;
                                     const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-            
-                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 - 
+
+                                    iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 -
                                                                      sig6_over_denom);
                                 }
                             }
@@ -1780,7 +1779,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                     }
                 }
                 #endif
-                
+
                 //now add these energies onto the total for the molecule,
                 //scaled by any non-bonded feather factor
                 for (int i=0; i<nalpha; ++i)
@@ -1802,7 +1801,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
             const AABox &aabox0 = group0.aaBox();
             const quint32 nats0 = group0.count();
             const Parameter *params0_array = params0.constData();
-        
+
             for (quint32 jgroup=0; jgroup<ngroups1; ++jgroup)
             {
                 const CoordGroup &group1 = groups1_array[jgroup];
@@ -1812,22 +1811,22 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                 //(if there is only one CutGroup in both molecules then this
                 //test has already been performed and passed)
                 const bool within_cutoff = (ngroups0 == 1 and ngroups1 == 1) or not
-                                            spce->beyond(switchfunc->cutoffDistance(), 
+                                            spce->beyond(switchfunc->cutoffDistance(),
                                                          aabox0, group1.aaBox());
-                
+
                 if (not within_cutoff)
                     //this CutGroup is either the cutoff distance
                     continue;
-                
+
                 //calculate all of the interatomic distances^2
                 const double mindist = spce->calcDist2(group0, group1, distmat);
-                
+
                 if (mindist > switchfunc->cutoffDistance())
                 {
                     //all of the atoms are definitely beyond cutoff
                     continue;
                 }
-                   
+
                 std::vector<double> icnrg(nalpha, 0);
                 std::vector<double> iljnrg(nalpha, 0);
 
@@ -1838,27 +1837,27 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                 #ifdef SIRE_USE_SSE
                 {
                     const int remainder = nats1 % 2;
-                    
+
                     __m128d sse_cnrg[nalpha];
                     __m128d sse_ljnrg[nalpha];
                     __m128d sse_alpha[nalpha];
                     __m128d sse_delta[nalpha];
-                                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         sse_cnrg[i] = _mm_set1_pd(0);
                         sse_ljnrg[i] = _mm_set1_pd(0);
-                        
+
                         sse_alpha[i] = _mm_set1_pd(alfa[i]);
                         sse_delta[i] = _mm_set1_pd(delta[i]);
                     }
-                    
+
                     for (quint32 i=0; i<nats0; ++i)
                     {
                         distmat.setOuterIndex(i);
                         const Parameter &param0 = params0_array[i];
-                        
-                        __m128d sse_chg0 = _mm_set_pd(param0.reduced_charge, 
+
+                        __m128d sse_chg0 = _mm_set_pd(param0.reduced_charge,
                                                       param0.reduced_charge);
 
                         //process atoms in pairs (so can then use SSE)
@@ -1866,41 +1865,41 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                         {
                             const Parameter &param10 = params1_array[j];
                             const Parameter &param11 = params1_array[j+1];
-                            
+
                             __m128d sse_dist2 = _mm_set_pd(distmat[j], distmat[j+1]);
                             __m128d sse_chg1 = _mm_set_pd(param10.reduced_charge,
                                                           param11.reduced_charge);
-                                               
+
                             const LJPair &ljpair0 = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param10.ljid)];
-                        
+
                             const LJPair &ljpair1 = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param11.ljid)];
-                        
-                            __m128d sse_sig = _mm_set_pd(ljpair0.sigma(), 
+
+                            __m128d sse_sig = _mm_set_pd(ljpair0.sigma(),
                                                          ljpair1.sigma());
-                            __m128d sse_eps = _mm_set_pd(ljpair0.epsilon(), 
+                            __m128d sse_eps = _mm_set_pd(ljpair0.epsilon(),
                                                          ljpair1.epsilon());
-                            
+
                             //calculate the coulomb energy
                             __m128d sse_q2 = _mm_mul_pd(sse_chg0, sse_chg1);
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 __m128d tmp = _mm_add_pd( sse_dist2, sse_alpha[k] );
                                 __m128d coul_denom = _mm_sqrt_pd( tmp );
-                            
+
                                 coul_denom = _mm_div_pd(sse_q2, coul_denom);
-                            
+
                                 sse_cnrg[k] = _mm_add_pd(sse_cnrg[k], coul_denom);
                             }
 
                             const __m128d sse_sig2 = _mm_mul_pd(sse_sig, sse_sig);
                             const __m128d sse_sig3 = _mm_mul_pd(sse_sig2, sse_sig);
                             const __m128d sse_sig6 = _mm_mul_pd(sse_sig3, sse_sig3);
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 //calculate shift = alpha * sigma * shift_delta
@@ -1909,30 +1908,30 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                                 __m128d lj_denom = _mm_add_pd(sse_dist2, sse_shift);
                                 __m128d lj_denom2 = _mm_mul_pd(lj_denom, lj_denom);
                                 lj_denom = _mm_mul_pd(lj_denom, lj_denom2);
-                            
-                                const __m128d sig6_over_denom = _mm_div_pd(sse_sig6, 
+
+                                const __m128d sig6_over_denom = _mm_div_pd(sse_sig6,
                                                                            lj_denom);
-                                                                           
-                                const __m128d sig12_over_denom2 = _mm_mul_pd(sig6_over_denom, 
+
+                                const __m128d sig12_over_denom2 = _mm_mul_pd(sig6_over_denom,
                                                                              sig6_over_denom);
-                                                  
+
                                 //calculate LJ energy (the factor of 4 is added later)
                                 __m128d tmp = _mm_sub_pd(sig12_over_denom2,
                                                          sig6_over_denom);
-                                                         
+
                                 tmp = _mm_mul_pd(sse_eps, tmp);
                                 sse_ljnrg[k] = _mm_add_pd(sse_ljnrg[k], tmp);
                             }
                         }
-                              
+
                         if (remainder == 1)
                         {
                             const Parameter &param1 = params1_array[nats1-1];
 
                             const double dist2 = distmat[nats1-1];
-                            
+
                             const double q2 = param0.reduced_charge * param1.reduced_charge;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 icnrg[k] += q2 / std::sqrt( alfa[k] + dist2 );
@@ -1941,32 +1940,32 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                             const LJPair &ljpair = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
 
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-                            
-                                double lj_denom = dist2 + shift; 
+
+                                double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-                            
+
                                 const double sig6_over_denom = sig6 / lj_denom;
-                                const double sig12_over_denom2 = sig6_over_denom * 
+                                const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-                            
-                                iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 - 
+
+                                iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 -
                                                                  sig6_over_denom);
                             }
                         }
                     }
-                    
+
                     for (int k=0; k<nalpha; ++k)
                     {
                         icnrg[k] += *((const double*)&(sse_cnrg[k])) +
                                     *( ((const double*)&(sse_cnrg[k])) + 1 );
-                             
+
                         iljnrg[k] += *((const double*)&(sse_ljnrg[k])) +
                                      *( ((const double*)&(sse_ljnrg[k])) + 1 );
                     }
@@ -1977,15 +1976,15 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                     {
                         distmat.setOuterIndex(i);
                         const Parameter &param0 = params0_array[i];
-                    
+
                         for (quint32 j=0; j<nats1; ++j)
                         {
                             const Parameter &param1 = params1_array[j];
 
                             const double dist2 = distmat[j];
-                            
+
                             const double q2 = param0.reduced_charge * param1.reduced_charge;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 icnrg[k] += q2 / std::sqrt(alfa[k] + dist2);
@@ -1994,35 +1993,35 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                             const LJPair &ljpair = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-                            
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-                            
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-        
-                                iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 - 
+
+                                iljnrg[k] += ljpair.epsilon() * (sig12_over_denom2 -
                                                                  sig6_over_denom);
                             }
                         }
                     }
                 }
                 #endif
-                
+
                 //now add these energies onto the total for the molecule,
                 //scaled by any non-bonded feather factor
                 if (mindist > switchfunc->electrostaticFeatherDistance())
                 {
                     const double cscl = switchfunc->electrostaticScaleFactor(Length(mindist));
-                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         cnrg[i] += cscl * icnrg[i];
@@ -2035,11 +2034,11 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
                         cnrg[i] += icnrg[i];
                     }
                 }
-                
+
                 if (mindist > switchfunc->vdwFeatherDistance())
                 {
                     const double ljscl = switchfunc->vdwScaleFactor(Length(mindist));
-                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         ljnrg[i] += ljscl * iljnrg[i];
@@ -2055,7 +2054,7 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
             }
         } // end of if use_electrostatic_shifting
     }
-    
+
     //add this molecule pair's energy onto the total
     //(also multiply LJ by 4 as it is 4 * epsilon ((sig/r)^12 - (sig/r)^6))
     //(also multiply COUL by (1-alpha)^n)
@@ -2067,24 +2066,24 @@ void InterSoftCLJPotential::_pvt_calculateEnergy(
 
     //now copy the calculated energies back to the Energy object
     Energy soft_energy;
-    
+
     for (int i=0; i<alpha_index.count(); ++i)
     {
         int idx = alpha_index.at(i);
-        
+
         if (idx >= 0)
             soft_energy.setEnergy(i, cnrg[idx], ljnrg[idx]);
     }
-    
+
     energy += soft_energy;
 }
 
 /** Add to the forces in 'forces0' the forces acting on 'mol0' caused
     by 'mol1' */
 void InterSoftCLJPotential::_pvt_calculateForce(
-                                         const InterSoftCLJPotential::Molecule &mol0, 
+                                         const InterSoftCLJPotential::Molecule &mol0,
                                          const InterSoftCLJPotential::Molecule &mol1,
-                                         MolForceTable &forces0, 
+                                         MolForceTable &forces0,
                                          InterSoftCLJPotential::ForceWorkspace &distmat,
                                          double scale_force) const
 {
@@ -2096,20 +2095,20 @@ void InterSoftCLJPotential::_pvt_calculateForce(
 
     const quint32 ngroups0 = mol0.nCutGroups();
     const quint32 ngroups1 = mol1.nCutGroups();
-    
+
     const CoordGroup *groups0_array = mol0.coordinates().constData();
     const CoordGroup *groups1_array = mol1.coordinates().constData();
-    
+
     BOOST_ASSERT(mol0.parameters().atomicParameters().count() == int(ngroups0));
     BOOST_ASSERT(mol1.parameters().atomicParameters().count() == int(ngroups1));
-    
-    const Parameters::Array *molparams0_array 
+
+    const Parameters::Array *molparams0_array
                                     = mol0.parameters().atomicParameters().constData();
     const Parameters::Array *molparams1_array
                                     = mol1.parameters().atomicParameters().constData();
-    
+
     const MolForceTable::Array *forces0_array = forces0.constData();
-    
+
     //loop over all pairs of CutGroups in the two molecules
     for (quint32 igroup=0; igroup<ngroups0; ++igroup)
     {
@@ -2118,9 +2117,9 @@ void InterSoftCLJPotential::_pvt_calculateForce(
 
         //get the index of this CutGroup in the forces array
         int force0_idx = forces0.map(cgidx_igroup);
-        
+
         if (force0_idx == -1)
-            //there is no space for the forces on this CutGroup in 
+            //there is no space for the forces on this CutGroup in
             //the forcetable - were are therefore not interested in
             //this CutGroup
             continue;
@@ -2131,16 +2130,16 @@ void InterSoftCLJPotential::_pvt_calculateForce(
         const AABox &aabox0 = group0.aaBox();
         const quint32 nats0 = group0.count();
         const Parameter *params0_array = params0.constData();
-    
+
         //get the table that holds the forces acting on all of the
         //atoms of this CutGroup (tables are indexed by CGIdx)
         BOOST_ASSERT(forces0_array[force0_idx].count() == int(nats0));
-    
+
         Vector *group_forces0_array = forces0.data(force0_idx);
 
         //ok, we are interested in the forces acting on this CutGroup
         // - calculate all of the forces on this group interacting
-        //   with all of the CutGroups in mol1 
+        //   with all of the CutGroups in mol1
         for (quint32 jgroup=0; jgroup<ngroups1; ++jgroup)
         {
             const CoordGroup &group1 = groups1_array[jgroup];
@@ -2150,22 +2149,22 @@ void InterSoftCLJPotential::_pvt_calculateForce(
             //(if there is only one CutGroup in both molecules then this
             //test has already been performed and passed)
             const bool within_cutoff = (ngroups0 == 1 and ngroups1 == 1) or not
-                                        spce->beyond(switchfunc->cutoffDistance(), 
+                                        spce->beyond(switchfunc->cutoffDistance(),
                                                      aabox0, group1.aaBox());
-            
+
             if (not within_cutoff)
                 //this CutGroup is beyond the cutoff distance
                 continue;
-            
+
             //calculate all of the interatomic distances
             const double mindist = spce->calcDistVectors(group0, group1, distmat);
-            
+
             if (mindist > switchfunc->cutoffDistance())
                 //all of the atoms are definitely beyond cutoff
                 continue;
 
             const quint32 nats1 = group1.count();
-            
+
             //loop over all interatomic pairs and calculate the energies
             const Parameter *params1_array = params1.constData();
 
@@ -2173,36 +2172,36 @@ void InterSoftCLJPotential::_pvt_calculateForce(
             {
                 //we need to calculate the forces taking into account
                 //the derivative of the switching function!
-                
-                //calculate the switching scale factors and their 
+
+                //calculate the switching scale factors and their
                 //derivatives
-                const double scl_coul = switchfunc->electrostaticScaleFactor( 
+                const double scl_coul = switchfunc->electrostaticScaleFactor(
                                                                         Length(mindist) );
                 const double scl_lj = switchfunc->vdwScaleFactor( Length(mindist) );
-                
+
                 Vector group_sep = (group1.aaBox().center() - aabox0.center())
                                         .normalise();
-                
-                Vector dscl_coul = switchfunc->dElectrostaticScaleFactor( 
-                                                                    Length(mindist) ) 
+
+                Vector dscl_coul = switchfunc->dElectrostaticScaleFactor(
+                                                                    Length(mindist) )
                                      * group_sep;
-                                     
+
                 Vector dscl_lj = switchfunc->dVDWScaleFactor( Length(mindist) )
                                      * group_sep;
-                
+
                 double shift_coul = 0;
 
                 if (use_electrostatic_shifting)
                     shift_coul = this->totalCharge(params0) * this->totalCharge(params1)
                                     / switchfunc->electrostaticCutoffDistance();
-                
+
                 for (quint32 i=0; i<nats0; ++i)
                 {
                     distmat.setOuterIndex(i);
                     const Parameter &param0 = params0_array[i];
-                
+
                     Vector total_force;
-                
+
                     if (param0.ljid == 0)
                     {
                         //null LJ parameter - only add on the coulomb energy
@@ -2210,18 +2209,18 @@ void InterSoftCLJPotential::_pvt_calculateForce(
                         {
                             const double q2 = param0.reduced_charge *
                                               params1_array[j].reduced_charge;
-                            
+
                             if (q2 != 0)
                             {
                                 //calculate the coulomb energy
                                 const double cnrg = q2 / distmat[j].length();
-                                               
+
                                 //calculate the coulomb force
                                 Vector cforce = (scl_coul * -cnrg / distmat[j].length() *
                                                  distmat[j].direction()) +
-                                             
+
                                                 ((cnrg-shift_coul) * dscl_coul);
-                        
+
                                 total_force -= cforce;
                             }
                         }
@@ -2232,32 +2231,32 @@ void InterSoftCLJPotential::_pvt_calculateForce(
                         {
                             //do both coulomb and LJ
                             const Parameter &param1 = params1_array[j];
-                        
+
                             const double invdist = double(1) / distmat[j].length();
-                        
+
                             Vector force;
-                            
+
                             const double q2 = param0.reduced_charge *
                                               param1.reduced_charge;
-                        
+
                             if (q2 != 0)
                             {
                                 //calculate the energy
                                 const double cnrg = q2 * invdist;
-                        
+
                                 //calculate the force
                                 force = (scl_coul * -cnrg / distmat[j].length() *
                                          distmat[j].direction()) +
-                                             
+
                                          ((cnrg-shift_coul) * dscl_coul);
                             }
-                              
+
                             if (param1.ljid != 0)
                             {
                                 const LJPair &ljpair = ljpairs.constData()[
                                                         ljpairs.map(param0.ljid,
                                                                     param1.ljid)];
-                        
+
                                 double sig_over_dist6 = pow_6(ljpair.sigma()*invdist);
                                 double sig_over_dist12 = pow_2(sig_over_dist6);
 
@@ -2269,17 +2268,17 @@ void InterSoftCLJPotential::_pvt_calculateForce(
                                 sig_over_dist6 *= invdist;
                                 sig_over_dist12 *= invdist;
 
-                                force += ((scl_lj * ljpair.epsilon() * 
+                                force += ((scl_lj * ljpair.epsilon() *
                                             (6.0*sig_over_dist6 - 12.0*sig_over_dist12))
                                             * distmat[j].direction())
-                                            
+
                                           + (ljnrg * dscl_lj);
                             }
 
                             total_force -= force;
                         }
                     }
-                    
+
                     //update the forces array
                     group_forces0_array[i] += scale_force * total_force;
                 }
@@ -2287,7 +2286,7 @@ void InterSoftCLJPotential::_pvt_calculateForce(
             else
             {
                 //not in the feather region, so can calculate the forces
-                //directly (also, no need to calculate shift, as 
+                //directly (also, no need to calculate shift, as
                 //the shifting function is constant, so does not
                 //affect the gradient)
                 for (quint32 i=0; i<nats0; ++i)
@@ -2296,21 +2295,21 @@ void InterSoftCLJPotential::_pvt_calculateForce(
                     const Parameter &param0 = params0_array[i];
 
                     Vector total_force;
-                
+
                     if (param0.ljid == 0)
                     {
                         //null LJ parameter - only add on the coulomb energy
                         for (quint32 j=0; j<nats1; ++j)
                         {
-                            const double q2 = param0.reduced_charge * 
+                            const double q2 = param0.reduced_charge *
                                               params1_array[j].reduced_charge;
-                        
+
                             //calculate the coulomb force
                             if (q2 != 0)
                             {
                                 Vector cforce = -(q2 / distmat[j].length2()) *
                                                     distmat[j].direction();
-                        
+
                                 total_force -= cforce;
                             }
                         }
@@ -2321,22 +2320,22 @@ void InterSoftCLJPotential::_pvt_calculateForce(
                         {
                             //do both coulomb and LJ
                             const Parameter &param1 = params1_array[j];
-                        
+
                             const double invdist = double(1) / distmat[j].length();
                             const double invdist2 = pow_2(invdist);
-                        
+
                             //calculate the force
-                            Vector force = -(param0.reduced_charge * 
-                                             param1.reduced_charge * invdist2) 
-                                            
+                            Vector force = -(param0.reduced_charge *
+                                             param1.reduced_charge * invdist2)
+
                                             * distmat[j].direction();
-                              
+
                             if (param1.ljid != 0)
                             {
                                 const LJPair &ljpair = ljpairs.constData()[
                                                         ljpairs.map(param0.ljid,
                                                                     param1.ljid)];
-                        
+
                                 double sig_over_dist6 = pow_6(ljpair.sigma()*invdist);
                                 double sig_over_dist12 = pow_2(sig_over_dist6);
 
@@ -2344,15 +2343,15 @@ void InterSoftCLJPotential::_pvt_calculateForce(
                                 sig_over_dist6 *= invdist;
                                 sig_over_dist12 *= invdist;
 
-                                force += (4 * ljpair.epsilon() * (6.0*sig_over_dist6 - 
+                                force += (4 * ljpair.epsilon() * (6.0*sig_over_dist6 -
                                                               12.0*sig_over_dist12))
                                         * distmat[j].direction();
                             }
-                        
+
                             total_force -= force;
                         }
                     }
-                    
+
                     group_forces0_array[i] += scale_force * total_force;
 
                 } // end of loop over i atoms
@@ -2367,9 +2366,9 @@ void InterSoftCLJPotential::_pvt_calculateForce(
 /** Add to the forces in 'forces0' the forces acting on 'mol0' caused
     by 'mol1' */
 void InterSoftCLJPotential::_pvt_calculateCoulombForce(
-                                         const InterSoftCLJPotential::Molecule &mol0, 
+                                         const InterSoftCLJPotential::Molecule &mol0,
                                          const InterSoftCLJPotential::Molecule &mol1,
-                                         MolForceTable &forces0, 
+                                         MolForceTable &forces0,
                                          InterSoftCLJPotential::ForceWorkspace &distmat,
                                          double scale_force) const
 {
@@ -2381,20 +2380,20 @@ void InterSoftCLJPotential::_pvt_calculateCoulombForce(
 
     const quint32 ngroups0 = mol0.nCutGroups();
     const quint32 ngroups1 = mol1.nCutGroups();
-    
+
     const CoordGroup *groups0_array = mol0.coordinates().constData();
     const CoordGroup *groups1_array = mol1.coordinates().constData();
-    
+
     BOOST_ASSERT(mol0.parameters().atomicParameters().count() == int(ngroups0));
     BOOST_ASSERT(mol1.parameters().atomicParameters().count() == int(ngroups1));
-    
-    const Parameters::Array *molparams0_array 
+
+    const Parameters::Array *molparams0_array
                                     = mol0.parameters().atomicParameters().constData();
     const Parameters::Array *molparams1_array
                                     = mol1.parameters().atomicParameters().constData();
-    
+
     const MolForceTable::Array *forces0_array = forces0.constData();
-    
+
     //loop over all pairs of CutGroups in the two molecules
     for (quint32 igroup=0; igroup<ngroups0; ++igroup)
     {
@@ -2403,9 +2402,9 @@ void InterSoftCLJPotential::_pvt_calculateCoulombForce(
 
         //get the index of this CutGroup in the forces array
         int force0_idx = forces0.map(cgidx_igroup);
-        
+
         if (force0_idx == -1)
-            //there is no space for the forces on this CutGroup in 
+            //there is no space for the forces on this CutGroup in
             //the forcetable - were are therefore not interested in
             //this CutGroup
             continue;
@@ -2416,16 +2415,16 @@ void InterSoftCLJPotential::_pvt_calculateCoulombForce(
         const AABox &aabox0 = group0.aaBox();
         const quint32 nats0 = group0.count();
         const Parameter *params0_array = params0.constData();
-    
+
         //get the table that holds the forces acting on all of the
         //atoms of this CutGroup (tables are indexed by CGIdx)
         BOOST_ASSERT(forces0_array[force0_idx].count() == int(nats0));
-    
+
         Vector *group_forces0_array = forces0.data(force0_idx);
 
         //ok, we are interested in the forces acting on this CutGroup
         // - calculate all of the forces on this group interacting
-        //   with all of the CutGroups in mol1 
+        //   with all of the CutGroups in mol1
         for (quint32 jgroup=0; jgroup<ngroups1; ++jgroup)
         {
             const CoordGroup &group1 = groups1_array[jgroup];
@@ -2435,22 +2434,22 @@ void InterSoftCLJPotential::_pvt_calculateCoulombForce(
             //(if there is only one CutGroup in both molecules then this
             //test has already been performed and passed)
             const bool within_cutoff = (ngroups0 == 1 and ngroups1 == 1) or not
-                                        spce->beyond(switchfunc->cutoffDistance(), 
+                                        spce->beyond(switchfunc->cutoffDistance(),
                                                      aabox0, group1.aaBox());
-            
+
             if (not within_cutoff)
                 //this CutGroup is beyond the cutoff distance
                 continue;
-            
+
             //calculate all of the interatomic distances
             const double mindist = spce->calcDistVectors(group0, group1, distmat);
-            
+
             if (mindist > switchfunc->cutoffDistance())
                 //all of the atoms are definitely beyond cutoff
                 continue;
 
             const quint32 nats1 = group1.count();
-            
+
             //loop over all interatomic pairs and calculate the energies
             const Parameter *params1_array = params1.constData();
 
@@ -2458,52 +2457,52 @@ void InterSoftCLJPotential::_pvt_calculateCoulombForce(
             {
                 //we need to calculate the forces taking into account
                 //the derivative of the switching function!
-                
-                //calculate the switching scale factors and their 
+
+                //calculate the switching scale factors and their
                 //derivatives
                 const double scl_coul = switchfunc->electrostaticScaleFactor(
                                                                     Length(mindist) );
-                
+
                 Vector group_sep = (group1.aaBox().center() - aabox0.center())
                                         .normalise();
-                
+
                 Vector dscl_coul = switchfunc->dElectrostaticScaleFactor(
-                                                                    Length(mindist) ) 
+                                                                    Length(mindist) )
                                      * group_sep;
-                
+
                 double shift_coul = 0;
 
                 if (use_electrostatic_shifting)
                     shift_coul = this->totalCharge(params0) * this->totalCharge(params1)
                                     / switchfunc->electrostaticCutoffDistance();
-                
+
                 for (quint32 i=0; i<nats0; ++i)
                 {
                     distmat.setOuterIndex(i);
                     const Parameter &param0 = params0_array[i];
-                
+
                     Vector total_force;
-                
+
                     for (quint32 j=0; j<nats1; ++j)
                     {
                         const double q2 = param0.reduced_charge *
                                           params1_array[j].reduced_charge;
-                          
+
                         if (q2 != 0)
                         {
                             //calculate the coulomb energy
                             const double cnrg = q2 / distmat[j].length();
-                                               
+
                             //calculate the coulomb force
                             Vector cforce = (scl_coul * -cnrg / distmat[j].length() *
                                              distmat[j].direction()) +
-                                             
+
                                             ((cnrg-shift_coul) * dscl_coul);
-                        
+
                             total_force -= cforce;
                         }
                     }
-                    
+
                     //update the forces array
                     group_forces0_array[i] += scale_force * total_force;
                 }
@@ -2511,7 +2510,7 @@ void InterSoftCLJPotential::_pvt_calculateCoulombForce(
             else
             {
                 //not in the feather region, so can calculate the forces
-                //directly (also, no need to calculate shift, as 
+                //directly (also, no need to calculate shift, as
                 //the shifting function is constant, so does not
                 //affect the gradient)
                 for (quint32 i=0; i<nats0; ++i)
@@ -2520,23 +2519,23 @@ void InterSoftCLJPotential::_pvt_calculateCoulombForce(
                     const Parameter &param0 = params0_array[i];
 
                     Vector total_force;
-                
+
                     //null LJ parameter - only add on the coulomb energy
                     for (quint32 j=0; j<nats1; ++j)
                     {
-                        const double q2 = param0.reduced_charge * 
+                        const double q2 = param0.reduced_charge *
                                           params1_array[j].reduced_charge;
-                        
+
                         //calculate the coulomb force
                         if (q2 != 0)
                         {
                             Vector cforce = -(q2 / distmat[j].length2()) *
                                                 distmat[j].direction();
-                        
+
                             total_force -= cforce;
                         }
                     }
-                    
+
                     group_forces0_array[i] += scale_force * total_force;
 
                 } // end of loop over i atoms
@@ -2551,9 +2550,9 @@ void InterSoftCLJPotential::_pvt_calculateCoulombForce(
 /** Add to the forces in 'forces0' the forces acting on 'mol0' caused
     by 'mol1' */
 void InterSoftCLJPotential::_pvt_calculateLJForce(
-                                         const InterSoftCLJPotential::Molecule &mol0, 
+                                         const InterSoftCLJPotential::Molecule &mol0,
                                          const InterSoftCLJPotential::Molecule &mol1,
-                                         MolForceTable &forces0, 
+                                         MolForceTable &forces0,
                                          InterSoftCLJPotential::ForceWorkspace &distmat,
                                          double scale_force) const
 {
@@ -2565,20 +2564,20 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
 
     const quint32 ngroups0 = mol0.nCutGroups();
     const quint32 ngroups1 = mol1.nCutGroups();
-    
+
     const CoordGroup *groups0_array = mol0.coordinates().constData();
     const CoordGroup *groups1_array = mol1.coordinates().constData();
-    
+
     BOOST_ASSERT(mol0.parameters().atomicParameters().count() == int(ngroups0));
     BOOST_ASSERT(mol1.parameters().atomicParameters().count() == int(ngroups1));
-    
-    const Parameters::Array *molparams0_array 
+
+    const Parameters::Array *molparams0_array
                                     = mol0.parameters().atomicParameters().constData();
     const Parameters::Array *molparams1_array
                                     = mol1.parameters().atomicParameters().constData();
-    
+
     const MolForceTable::Array *forces0_array = forces0.constData();
-    
+
     //loop over all pairs of CutGroups in the two molecules
     for (quint32 igroup=0; igroup<ngroups0; ++igroup)
     {
@@ -2587,9 +2586,9 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
 
         //get the index of this CutGroup in the forces array
         int force0_idx = forces0.map(cgidx_igroup);
-        
+
         if (force0_idx == -1)
-            //there is no space for the forces on this CutGroup in 
+            //there is no space for the forces on this CutGroup in
             //the forcetable - were are therefore not interested in
             //this CutGroup
             continue;
@@ -2600,16 +2599,16 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
         const AABox &aabox0 = group0.aaBox();
         const quint32 nats0 = group0.count();
         const Parameter *params0_array = params0.constData();
-    
+
         //get the table that holds the forces acting on all of the
         //atoms of this CutGroup (tables are indexed by CGIdx)
         BOOST_ASSERT(forces0_array[force0_idx].count() == int(nats0));
-    
+
         Vector *group_forces0_array = forces0.data(force0_idx);
 
         //ok, we are interested in the forces acting on this CutGroup
         // - calculate all of the forces on this group interacting
-        //   with all of the CutGroups in mol1 
+        //   with all of the CutGroups in mol1
         for (quint32 jgroup=0; jgroup<ngroups1; ++jgroup)
         {
             const CoordGroup &group1 = groups1_array[jgroup];
@@ -2619,22 +2618,22 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
             //(if there is only one CutGroup in both molecules then this
             //test has already been performed and passed)
             const bool within_cutoff = (ngroups0 == 1 and ngroups1 == 1) or not
-                                        spce->beyond(switchfunc->cutoffDistance(), 
+                                        spce->beyond(switchfunc->cutoffDistance(),
                                                      aabox0, group1.aaBox());
-            
+
             if (not within_cutoff)
                 //this CutGroup is beyond the cutoff distance
                 continue;
-            
+
             //calculate all of the interatomic distances
             const double mindist = spce->calcDistVectors(group0, group1, distmat);
-            
+
             if (mindist > switchfunc->cutoffDistance())
                 //all of the atoms are definitely beyond cutoff
                 continue;
 
             const quint32 nats1 = group1.count();
-            
+
             //loop over all interatomic pairs and calculate the energies
             const Parameter *params1_array = params1.constData();
 
@@ -2642,24 +2641,24 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
             {
                 //we need to calculate the forces taking into account
                 //the derivative of the switching function!
-                
-                //calculate the switching scale factors and their 
+
+                //calculate the switching scale factors and their
                 //derivatives
                 const double scl_lj = switchfunc->vdwScaleFactor( Length(mindist) );
-                
+
                 Vector group_sep = (group1.aaBox().center() - aabox0.center())
                                         .normalise();
-                
+
                 Vector dscl_lj = switchfunc->dVDWScaleFactor( Length(mindist) )
                                      * group_sep;
-                
+
                 for (quint32 i=0; i<nats0; ++i)
                 {
                     distmat.setOuterIndex(i);
                     const Parameter &param0 = params0_array[i];
-                
+
                     Vector total_force;
-                
+
                     if (param0.ljid != 0)
                     {
                         for (quint32 j=0; j<nats1; ++j)
@@ -2673,7 +2672,7 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
                                 const LJPair &ljpair = ljpairs.constData()[
                                                         ljpairs.map(param0.ljid,
                                                                     param1.ljid)];
-                        
+
                                 double sig_over_dist6 = pow_6(ljpair.sigma()*invdist);
                                 double sig_over_dist12 = pow_2(sig_over_dist6);
 
@@ -2685,17 +2684,17 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
                                 sig_over_dist6 *= invdist;
                                 sig_over_dist12 *= invdist;
 
-                                Vector force = ((scl_lj * 4 * ljpair.epsilon() * 
+                                Vector force = ((scl_lj * 4 * ljpair.epsilon() *
                                             (6.0*sig_over_dist6 - 12.0*sig_over_dist12))
                                                * distmat[j].direction())
-                                            
+
                                              + (ljnrg * dscl_lj);
 
                                 total_force -= force;
                             }
                         }
                     }
-                    
+
                     //update the forces array
                     group_forces0_array[i] += scale_force * total_force;
                 }
@@ -2710,14 +2709,14 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
                     const Parameter &param0 = params0_array[i];
 
                     Vector total_force;
-                
+
                     if (param0.ljid != 0)
                     {
                         for (quint32 j=0; j<nats1; ++j)
                         {
                             //do both coulomb and LJ
                             const Parameter &param1 = params1_array[j];
-                              
+
                             if (param1.ljid != 0)
                             {
                                 const double invdist = double(1) / distmat[j].length();
@@ -2725,7 +2724,7 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
                                 const LJPair &ljpair = ljpairs.constData()[
                                                         ljpairs.map(param0.ljid,
                                                                     param1.ljid)];
-                        
+
                                 double sig_over_dist6 = pow_6(ljpair.sigma()*invdist);
                                 double sig_over_dist12 = pow_2(sig_over_dist6);
 
@@ -2733,8 +2732,8 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
                                 sig_over_dist6 *= invdist;
                                 sig_over_dist12 *= invdist;
 
-                                Vector force = (4 * ljpair.epsilon() * 
-                                                               (6.0*sig_over_dist6 - 
+                                Vector force = (4 * ljpair.epsilon() *
+                                                               (6.0*sig_over_dist6 -
                                                                 12.0*sig_over_dist12))
                                                 * distmat[j].direction();
 
@@ -2742,7 +2741,7 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
                             }
                         }
                     }
-                    
+
                     group_forces0_array[i] += scale_force * total_force;
 
                 } // end of loop over i atoms
@@ -2755,10 +2754,10 @@ void InterSoftCLJPotential::_pvt_calculateLJForce(
 }
 
 void InterSoftCLJPotential::_pvt_calculateField(
-                         const InterSoftCLJPotential::Molecule &mol0, 
+                         const InterSoftCLJPotential::Molecule &mol0,
                          const InterSoftCLJPotential::Molecule &mol1,
                          const CLJProbe &probe,
-                         MolFieldTable &fields0, 
+                         MolFieldTable &fields0,
                          InterSoftCLJPotential::FieldWorkspace &workspace,
                          double scale_field) const
 {
@@ -2778,10 +2777,10 @@ void InterSoftCLJPotential::_pvt_calculateField(const InterSoftCLJPotential::Mol
                 "yet been written..."), CODELOC );
 }
 
-void InterSoftCLJPotential::_pvt_calculateCoulombField(const InterSoftCLJPotential::Molecule &mol0, 
+void InterSoftCLJPotential::_pvt_calculateCoulombField(const InterSoftCLJPotential::Molecule &mol0,
                                 const InterSoftCLJPotential::Molecule &mol1,
                                 const CLJProbe &probe,
-                                MolFieldTable &fields0, 
+                                MolFieldTable &fields0,
                                 InterSoftCLJPotential::FieldWorkspace &workspace,
                                 double scale_field) const
 {
@@ -2801,10 +2800,10 @@ void InterSoftCLJPotential::_pvt_calculateCoulombField(const InterSoftCLJPotenti
                 "yet been written..."), CODELOC );
 }
 
-void InterSoftCLJPotential::_pvt_calculateLJField(const InterSoftCLJPotential::Molecule &mol0, 
+void InterSoftCLJPotential::_pvt_calculateLJField(const InterSoftCLJPotential::Molecule &mol0,
                            const InterSoftCLJPotential::Molecule &mol1,
                            const CLJProbe &probe,
-                           MolFieldTable &fields0, 
+                           MolFieldTable &fields0,
                            InterSoftCLJPotential::FieldWorkspace &workspace,
                            double scale_field) const
 {
@@ -2824,10 +2823,10 @@ void InterSoftCLJPotential::_pvt_calculateLJField(const InterSoftCLJPotential::M
                 "yet been written..."), CODELOC );
 }
 
-void InterSoftCLJPotential::_pvt_calculatePotential(const InterSoftCLJPotential::Molecule &mol0, 
+void InterSoftCLJPotential::_pvt_calculatePotential(const InterSoftCLJPotential::Molecule &mol0,
                              const InterSoftCLJPotential::Molecule &mol1,
                              const CLJProbe &probe,
-                             MolPotentialTable &pots0, 
+                             MolPotentialTable &pots0,
                              InterSoftCLJPotential::PotentialWorkspace &workspace,
                              double scale_potential) const
 {
@@ -2847,10 +2846,10 @@ void InterSoftCLJPotential::_pvt_calculatePotential(const InterSoftCLJPotential:
                 "yet been written..."), CODELOC );
 }
 
-void InterSoftCLJPotential::_pvt_calculateCoulombPotential(const InterSoftCLJPotential::Molecule &mol0, 
+void InterSoftCLJPotential::_pvt_calculateCoulombPotential(const InterSoftCLJPotential::Molecule &mol0,
                                     const InterSoftCLJPotential::Molecule &mol1,
                                     const CLJProbe &probe,
-                                    MolPotentialTable &pots0, 
+                                    MolPotentialTable &pots0,
                                     InterSoftCLJPotential::PotentialWorkspace &workspace,
                                     double scale_potential) const
 {
@@ -2870,10 +2869,10 @@ void InterSoftCLJPotential::_pvt_calculateCoulombPotential(const InterSoftCLJPot
                 "yet been written..."), CODELOC );
 }
 
-void InterSoftCLJPotential::_pvt_calculateLJPotential(const InterSoftCLJPotential::Molecule &mol0, 
+void InterSoftCLJPotential::_pvt_calculateLJPotential(const InterSoftCLJPotential::Molecule &mol0,
                                const InterSoftCLJPotential::Molecule &mol1,
                                const CLJProbe &probe,
-                               MolPotentialTable &pots0, 
+                               MolPotentialTable &pots0,
                                InterSoftCLJPotential::PotentialWorkspace &workspace,
                                double scale_potential) const
 {
@@ -2905,9 +2904,9 @@ QDataStream &operator<<(QDataStream &ds,
                                       const IntraSoftCLJPotential &intraclj)
 {
     writeHeader(ds, r_intraclj, 1);
-    
+
     ds << static_cast<const SoftCLJPotential&>(intraclj);
-    
+
     return ds;
 }
 
@@ -2916,14 +2915,14 @@ QDataStream &operator>>(QDataStream &ds,
                                       IntraSoftCLJPotential &intraclj)
 {
     VersionID v = readHeader(ds, r_intraclj);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SoftCLJPotential&>(intraclj);
     }
     else
         throw version_error(v, "1", r_intraclj, CODELOC);
-        
+
     return ds;
 }
 
@@ -2941,22 +2940,22 @@ IntraSoftCLJPotential::~IntraSoftCLJPotential()
 {}
 
 /** Copy assignment operator */
-IntraSoftCLJPotential& 
+IntraSoftCLJPotential&
 IntraSoftCLJPotential::operator=(const IntraSoftCLJPotential &other)
 {
     SoftCLJPotential::operator=(other);
     return *this;
 }
 
-/** Return all of the parameters needed by this potential for 
+/** Return all of the parameters needed by this potential for
     the molecule 'molecule', using the supplied property map to
     find the properties that contain those parameters
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-IntraSoftCLJPotential::Parameters 
+IntraSoftCLJPotential::Parameters
 IntraSoftCLJPotential::getParameters(const PartialMolecule &molecule,
 				     const PropertyMap &map)
 {
@@ -2964,7 +2963,7 @@ IntraSoftCLJPotential::getParameters(const PartialMolecule &molecule,
 
     return Parameters( AtomicParameters3D<CLJParameter>(
                                molecule, map[parameters().coordinates()],
-                               CLJPotential::getCLJParameters(molecule, 
+                               CLJPotential::getCLJParameters(molecule,
 							      map[parameters().charge()],
 							      map[parameters().lj()]) ),
 		       IntraScaledParameters<CLJNBPairs>(
@@ -2972,9 +2971,9 @@ IntraSoftCLJPotential::getParameters(const PartialMolecule &molecule,
                      );
 }
 
-/** Update the parameters for the molecule going from 'old_molecule' to 
+/** Update the parameters for the molecule going from 'old_molecule' to
     'new_molecule', with the parameters found using the property map 'map'
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -2996,11 +2995,11 @@ IntraSoftCLJPotential::updateParameters(const IntraSoftCLJPotential::Parameters 
     const PropertyName &chg_property = map[parameters().charge()];
     const PropertyName &lj_property = map[parameters().lj()];
     const PropertyName &scl_property = map[parameters().intraScaleFactors()];
-    
+
     //get what has changed
     bool new_coords = old_molecule.version(coords_property) !=
                          new_molecule.version(coords_property);
-                             
+
     bool new_clj = ( old_molecule.version(chg_property) !=
                          new_molecule.version(chg_property) ) or
                    ( old_molecule.version(lj_property) !=
@@ -3010,7 +3009,7 @@ IntraSoftCLJPotential::updateParameters(const IntraSoftCLJPotential::Parameters 
                          new_molecule.version(scl_property) );
 
     if (new_coords)
-        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule, 
+        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule,
                                                         coords_property) );
 
     if (new_clj)
@@ -3022,16 +3021,16 @@ IntraSoftCLJPotential::updateParameters(const IntraSoftCLJPotential::Parameters 
     }
 
     if (new_scl)
-        new_params.setIntraScaleFactors( 
+        new_params.setIntraScaleFactors(
                 IntraScaledParameters<CLJNBPairs>(new_molecule, scl_property) );
 
     return new_params;
 }
-                 
-/** Update the parameters for the molecule going from 'old_molecule' to 
+
+/** Update the parameters for the molecule going from 'old_molecule' to
     'new_molecule', also while the parameters of 'old_molecule'
     where found in 'old_map', now get the parameters using 'new_map'
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -3040,7 +3039,7 @@ IntraSoftCLJPotential::Parameters
 IntraSoftCLJPotential::updateParameters(const IntraSoftCLJPotential::Parameters &old_params,
 					const PartialMolecule &old_molecule,
 					const PartialMolecule &new_molecule,
-					const PropertyMap &old_map, 
+					const PropertyMap &old_map,
 					const PropertyMap &new_map)
 {
     if (old_molecule.selection() != new_molecule.selection())
@@ -3054,17 +3053,17 @@ IntraSoftCLJPotential::updateParameters(const IntraSoftCLJPotential::Parameters 
     const PropertyName &old_chg = old_map[parameters().charge()];
     const PropertyName &old_lj = old_map[parameters().lj()];
     const PropertyName &old_scl = old_map[parameters().intraScaleFactors()];
-    
+
     const PropertyName &new_coords = new_map[parameters().coordinates()];
     const PropertyName &new_chg = new_map[parameters().charge()];
     const PropertyName &new_lj = new_map[parameters().lj()];
     const PropertyName &new_scl = new_map[parameters().intraScaleFactors()];
-    
+
     //get what has changed
     bool changed_coords = (new_coords != old_coords) or
                            old_molecule.version(old_coords) !=
                            new_molecule.version(old_coords);
-                             
+
     bool changed_clj = (new_chg != old_chg or new_lj != old_lj) or
                        ( old_molecule.version(old_chg) !=
                          new_molecule.version(old_chg) ) or
@@ -3082,12 +3081,12 @@ IntraSoftCLJPotential::updateParameters(const IntraSoftCLJPotential::Parameters 
     {
       new_params.setAtomicParameters( CLJPotential::getCLJParameters(new_molecule,
                                                          new_chg, new_lj) );
-                                                         
+
       //       need_update_ljpairs = true;
     }
 
     if (changed_scl)
-        new_params.setIntraScaleFactors( 
+        new_params.setIntraScaleFactors(
                         IntraScaledParameters<CLJNBPairs>(new_molecule, new_scl) );
 
     return new_params;
@@ -3096,7 +3095,7 @@ IntraSoftCLJPotential::updateParameters(const IntraSoftCLJPotential::Parameters 
 /** Return the IntraSoftCLJPotential::Molecule representation of 'molecule',
     using the supplied PropertyMap to find the properties that contain
     the necessary forcefield parameters
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
@@ -3111,12 +3110,12 @@ IntraSoftCLJPotential::parameterise(const PartialMolecule &molecule,
 /** Convert the passed group of molecules into IntraSoftCLJPotential::Molecules,
     using the supplied PropertyMap to find the properties that contain
     the necessary forcefield parameters in each molecule
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-IntraSoftCLJPotential::Molecules 
+IntraSoftCLJPotential::Molecules
 IntraSoftCLJPotential::parameterise(const MoleculeGroup &molecules,
                                     const PropertyMap &map)
 {
@@ -3124,17 +3123,17 @@ IntraSoftCLJPotential::parameterise(const MoleculeGroup &molecules,
 }
 
 
-/** Assert that 'rest_of_mol' is compatible with 'mol'. They are only 
+/** Assert that 'rest_of_mol' is compatible with 'mol'. They are only
     compatible if they are both part of the same molecule (not necessarily
     the same version) with the same layout UID.
-    
+
     \throw SireError::incompatible_error
 */
 void IntraSoftCLJPotential::assertCompatible(const IntraSoftCLJPotential::Molecule &mol,
 					     const IntraSoftCLJPotential::Molecule &rest_of_mol) const
 {
     if (mol.number() != rest_of_mol.number() or
-        mol.molecule().data().info().UID() 
+        mol.molecule().data().info().UID()
                         != rest_of_mol.molecule().data().info().UID())
     {
         throw SireError::incompatible_error( QObject::tr(
@@ -3145,7 +3144,7 @@ void IntraSoftCLJPotential::assertCompatible(const IntraSoftCLJPotential::Molecu
                 .arg(rest_of_mol.molecule().name()).arg(rest_of_mol.number()),
                     CODELOC );
     }
-    else if (mol.parameters().intraScaleFactors() != 
+    else if (mol.parameters().intraScaleFactors() !=
                 rest_of_mol.parameters().intraScaleFactors())
     {
         throw SireError::incompatible_error( QObject::tr(
@@ -3163,22 +3162,22 @@ double IntraSoftCLJPotential::totalCharge(
 {
     int n = params.count();
     const Parameter *params_array = params.constData();
-    
+
     double chg = 0;
-    
+
     for (int i=0; i<n; ++i)
     {
         chg += params_array[i].reduced_charge;
     }
-    
+
     return chg;
 }
 
-void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &group_pairs, 
+void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &group_pairs,
 						 IntraSoftCLJPotential::EnergyWorkspace &distmat,
-						 const IntraSoftCLJPotential::Parameter *params0_array, 
+						 const IntraSoftCLJPotential::Parameter *params0_array,
 						 const IntraSoftCLJPotential::Parameter *params1_array,
-						 const quint32 nats0, const quint32 nats1, 
+						 const quint32 nats0, const quint32 nats1,
 						 double icnrg[], double iljnrg[],
 						 const double alfa[], double delta[], const int nalpha) const
 {
@@ -3201,7 +3200,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             std::vector<double> sRcoul(nalpha);
             std::vector<double> one_over_sRcoul(nalpha);
             std::vector<double> one_over_sRcoul2(nalpha);
-        
+
             for (int i=0; i<nalpha; ++i)
             {
                 sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
@@ -3213,7 +3212,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-	    
+
                 if (param0.ljid == 0)
                 {
                     //null LJ parameter - only add on the coulomb energy
@@ -3227,7 +3226,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (sr < sRcoul[k])
                             {
@@ -3250,12 +3249,12 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         const double dist2 = distmat[j];
                         const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * param1.reduced_charge;
-                        
+
                         for (int k=0; k<nalpha; ++k)
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (sr < sRcoul[k])
                             {
@@ -3266,7 +3265,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                       one_over_sRcoul2[k]*(sr-sRcoul[k]));
                             }
                         }
-		    
+
                         if (param1.ljid != 0 and dist2 < Rlj2)
                         {
                             const LJPair &ljpair = ljpairs.constData()[
@@ -3274,18 +3273,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                                     param1.ljid)];
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			  
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			  
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			  
+
                                 iljnrg[k] += cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                 sig6_over_denom);
                             }
@@ -3299,7 +3298,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             std::vector<double> sRcoul(nalpha);
             std::vector<double> k_rf(nalpha);
             std::vector<double> c_rf(nalpha);
-        
+
             for (int i=0; i<nalpha; ++i)
             {
                 sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
@@ -3313,7 +3312,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-	    
+
                 if (param0.ljid == 0)
                 {
                     //null LJ parameter - only add on the coulomb energy
@@ -3327,7 +3326,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (sr < sRcoul[k])
                             {
@@ -3349,12 +3348,12 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         const double dist2 = distmat[j];
                         const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * param1.reduced_charge;
-                        
+
                         for (int k=0; k<nalpha; ++k)
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (sr < sRcoul[k])
                             {
@@ -3364,7 +3363,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                     icnrg[k] += q2 * (one_over_sr + sr*sr*k_rf[k] - c_rf[k]);
                             }
                         }
-		    
+
                         if (param1.ljid != 0 and dist2 < Rlj2)
                         {
                             const LJPair &ljpair = ljpairs.constData()[
@@ -3372,18 +3371,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                                     param1.ljid)];
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			  
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			  
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			  
+
                                 iljnrg[k] += cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                 sig6_over_denom);
                             }
@@ -3398,7 +3397,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-	    
+
                 if (param0.ljid == 0)
                 {
                     //null LJ parameter - only add on the coulomb energy
@@ -3412,7 +3411,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (dist2 < Rcoul2)
                             {
@@ -3431,19 +3430,19 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         const double dist2 = distmat[j];
                         const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * param1.reduced_charge;
-                        
+
                         for (int k=0; k<nalpha; ++k)
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (dist2 < Rcoul2)
                             {
                                 icnrg[k] += q2 * (one_over_sr);
                             }
                         }
-		    
+
                         if (param1.ljid != 0 and dist2 < Rlj2)
                         {
                             const LJPair &ljpair = ljpairs.constData()[
@@ -3451,18 +3450,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                                     param1.ljid)];
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-                            
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			  
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			  
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			  
+
                                 iljnrg[k] += cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                 sig6_over_denom);
                             }
@@ -3477,7 +3476,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-                
+
                 if (param0.ljid == 0)
                 {
                     //null LJ parameter - only add on the coulomb energy
@@ -3486,7 +3485,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         const double dist2 = distmat[j];
                         const double q2 = cljscl.coulomb() *
                             param0.reduced_charge * params1_array[j].reduced_charge;
-		  
+
                         for (int k=0; k<nalpha; ++k)
                         {
                             icnrg[k] += q2 / std::sqrt(alfa[k] + dist2);
@@ -3503,12 +3502,12 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         const double dist2 = distmat[j];
                         const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * param1.reduced_charge;
-                        
+
                         for (int k=0; k<nalpha; ++k)
                         {
                             icnrg[k] += q2 / std::sqrt(alfa[k] + dist2);
                         }
-		    
+
                         if (param1.ljid != 0)
                         {
                             const LJPair &ljpair = ljpairs.constData()[
@@ -3521,14 +3520,14 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			  
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			  
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			  
+
                                 iljnrg[k] += cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                                                sig6_over_denom);
                             }
@@ -3548,19 +3547,19 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             std::vector<double> sRcoul(nalpha);
             std::vector<double> one_over_sRcoul(nalpha);
             std::vector<double> one_over_sRcoul2(nalpha);
-        
+
             for (int i=0; i<nalpha; ++i)
             {
                 sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
                 one_over_sRcoul[i] = double(1) / sRcoul[i];
                 one_over_sRcoul2[i] = double(1) / (sRcoul[i]*sRcoul[i]);
             }
-	
+
             for (quint32 i=0; i<nats0; ++i)
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-                
+
                 for (quint32 j=0; j<nats1; ++j)
                 {
                     const CLJScaleFactor &cljscl = group_pairs(i,j);
@@ -3568,9 +3567,9 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                     if (cljscl.coulomb() != 0 or cljscl.lj() != 0)
                     {
                         const Parameter &param1 = params1_array[j];
-		    
+
                         const double dist2 = distmat[j];
-  		        
+
                         const double q2 = cljscl.coulomb() *
                             param0.reduced_charge * params1_array[j].reduced_charge;
 
@@ -3579,7 +3578,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (sr < sRcoul[k])
                             {
@@ -3590,27 +3589,27 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                       one_over_sRcoul2[k]*(sr-sRcoul[k]));
                             }
                         }
-		    
+
                         if (cljscl.lj() != 0 and param1.ljid != 0 and dist2 < Rlj2)
                         {
                             const LJPair &ljpair = ljpairs.constData()[
                                                         ljpairs.map(param0.ljid,
                                                                     param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-			  
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			        
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			        
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			        
+
                                 iljnrg[k] += cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                                                sig6_over_denom);
                             }
@@ -3624,7 +3623,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             std::vector<double> sRcoul(nalpha);
             std::vector<double> k_rf(nalpha);
             std::vector<double> c_rf(nalpha);
-        
+
             for (int i=0; i<nalpha; ++i)
             {
                 sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
@@ -3633,12 +3632,12 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                 c_rf[i] = (1.0 / sRcoul[i]) * ( (3*rf_dielectric_constant) /
                                                 (2*rf_dielectric_constant + 1) );
             }
-	
+
             for (quint32 i=0; i<nats0; ++i)
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-                
+
                 for (quint32 j=0; j<nats1; ++j)
                 {
                     const CLJScaleFactor &cljscl = group_pairs(i,j);
@@ -3646,9 +3645,9 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                     if (cljscl.coulomb() != 0 or cljscl.lj() != 0)
                     {
                         const Parameter &param1 = params1_array[j];
-		    
+
                         const double dist2 = distmat[j];
-  		        
+
                         const double q2 = cljscl.coulomb() *
                             param0.reduced_charge * params1_array[j].reduced_charge;
 
@@ -3657,7 +3656,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (sr < sRcoul[k])
                             {
@@ -3667,27 +3666,27 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                     icnrg[k] += q2 * (one_over_sr + sr*sr*k_rf[k] - c_rf[k]);
                             }
                         }
-		    
+
                         if (cljscl.lj() != 0 and param1.ljid != 0 and dist2 < Rlj2)
                         {
                             const LJPair &ljpair = ljpairs.constData()[
                                                         ljpairs.map(param0.ljid,
                                                                     param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-			  
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			        
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			        
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			        
+
                                 iljnrg[k] += cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                                                sig6_over_denom);
                             }
@@ -3702,7 +3701,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-                
+
                 for (quint32 j=0; j<nats1; ++j)
                 {
                     const CLJScaleFactor &cljscl = group_pairs(i,j);
@@ -3710,9 +3709,9 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                     if (cljscl.coulomb() != 0 or cljscl.lj() != 0)
                     {
                         const Parameter &param1 = params1_array[j];
-		    
+
                         const double dist2 = distmat[j];
-  		        
+
                         const double q2 = cljscl.coulomb() *
                             param0.reduced_charge * params1_array[j].reduced_charge;
 
@@ -3721,34 +3720,34 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (dist2 < Rcoul2)
                             {
                                 icnrg[k] += q2 * (one_over_sr);
                             }
                         }
-		    
+
                         if (cljscl.lj() != 0 and param1.ljid != 0 and dist2 < Rlj2)
                         {
                             const LJPair &ljpair = ljpairs.constData()[
                                                         ljpairs.map(param0.ljid,
                                                                     param1.ljid)];
-                            
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-			  
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			        
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			        
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			        
+
                                 iljnrg[k] += cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                                                sig6_over_denom);
                             }
@@ -3763,21 +3762,21 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-                
+
                 if (param0.ljid == 0)
                 {
                     //null LJ parameter - only add on the coulomb energy
                     for (quint32 j=0; j<nats1; ++j)
                     {
                         const CLJScaleFactor &cljscl = group_pairs(i,j);
-                            
+
                         if (cljscl.coulomb() != 0)
                         {
                             const double dist2 = distmat[j];
-		      
+
                             const double q2 = cljscl.coulomb() *
                                     param0.reduced_charge * params1_array[j].reduced_charge;
-		      
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 icnrg[k] += q2 / std::sqrt(alfa[k] + dist2);
@@ -3796,10 +3795,10 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         {
                             const Parameter &param1 = params1_array[j];
                             const double dist2 = distmat[j];
-  		        
+
                             const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * params1_array[j].reduced_charge;
-			
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 icnrg[k] += q2 / std::sqrt(alfa[k] + dist2);
@@ -3813,18 +3812,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
 
                                 const double sig2 = ljpair.sigma() * ljpair.sigma();
                                 const double sig6 = sig2 * sig2 * sig2;
-              
+
                                 for (int k=0; k<nalpha; ++k)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-			        
+
                                     double lj_denom = dist2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-			        
+
                                     const double sig6_over_denom = sig6 / lj_denom;
                                     const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-			        
+
                                     iljnrg[k] += cljscl.lj() * ljpair.epsilon() *
                                             (sig12_over_denom2 - sig6_over_denom);
                                 }
@@ -3837,12 +3836,12 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
     }
 }
 
-void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &group_pairs, 
+void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &group_pairs,
 						 const QSet<Index> &atoms0, const QSet<Index> &atoms1,
 						 IntraSoftCLJPotential::EnergyWorkspace &distmat,
-						 const IntraSoftCLJPotential::Parameter *params0_array, 
+						 const IntraSoftCLJPotential::Parameter *params0_array,
 						 const IntraSoftCLJPotential::Parameter *params1_array,
-						 const quint32 nats0, const quint32 nats1, 
+						 const quint32 nats0, const quint32 nats1,
 						 double icnrg[], double iljnrg[],
 						 const double alfa[], double delta[], const int nalpha) const
 {
@@ -3862,41 +3861,41 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
 
         if (cljscl.coulomb() == 0 and cljscl.lj() == 0)
             return;
-        
+
         if (use_electrostatic_shifting)
         {
             std::vector<double> sRcoul(nalpha);
             std::vector<double> one_over_sRcoul(nalpha);
             std::vector<double> one_over_sRcoul2(nalpha);
-        
+
             for (int i=0; i<nalpha; ++i)
             {
                 sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
                 one_over_sRcoul[i] = double(1) / sRcoul[i];
                 one_over_sRcoul2[i] = double(1) / (sRcoul[i]*sRcoul[i]);
             }
-	  
+
             foreach (Index i, atoms0)
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-	    
+
                 foreach (Index j, atoms1)
                 {
                     //do both coulomb and LJ
                     const Parameter &param1 = params1_array[j];
                     const double dist2 = distmat[j];
-                        
+
                     const double q2 = cljscl.coulomb() *
                     param0.reduced_charge * param1.reduced_charge;
-                        
+
                     for (int k=0; k<nalpha; ++k)
                     {
                         //coulomb calculation
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (sr < sRcoul[k])
                             {
@@ -3907,7 +3906,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                       one_over_sRcoul2[k]*(sr-sRcoul[k]));
                             }
                         }
-		  
+
                         //lj calculation
                         if (param1.ljid != 0 and dist2 < Rlj2)
                         {
@@ -3916,18 +3915,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                     param1.ljid)];
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-			                        
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			    
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			    
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			    
+
                                 iljnrg[k] +=  cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                                                 sig6_over_denom);
                             }
@@ -3941,7 +3940,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             std::vector<double> sRcoul(nalpha);
             std::vector<double> k_rf(nalpha);
             std::vector<double> c_rf(nalpha);
-        
+
             for (int i=0; i<nalpha; ++i)
             {
                 sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
@@ -3950,28 +3949,28 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                 c_rf[i] = (1.0 / sRcoul[i]) * ( (3*rf_dielectric_constant) /
                             (2*rf_dielectric_constant + 1) );
             }
-	  
+
             foreach (Index i, atoms0)
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-	    
+
                 foreach (Index j, atoms1)
                 {
                     //do both coulomb and LJ
                     const Parameter &param1 = params1_array[j];
                     const double dist2 = distmat[j];
-                        
+
                     const double q2 = cljscl.coulomb() *
                     param0.reduced_charge * param1.reduced_charge;
-                        
+
                     for (int k=0; k<nalpha; ++k)
                     {
                         //coulomb calculation
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (sr < sRcoul[k])
                             {
@@ -3981,7 +3980,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                     icnrg[k] += q2 * (one_over_sr + sr*sr*k_rf[k] - c_rf[k]);
                             }
                         }
-		  
+
                         //lj calculation
                         if (param1.ljid != 0 and dist2 < Rlj2)
                         {
@@ -3990,18 +3989,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                     param1.ljid)];
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-			                        
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			    
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			    
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			    
+
                                 iljnrg[k] +=  cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                                                 sig6_over_denom);
                             }
@@ -4016,30 +4015,30 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-	    
+
                 foreach (Index j, atoms1)
                 {
                     //do both coulomb and LJ
                     const Parameter &param1 = params1_array[j];
                     const double dist2 = distmat[j];
-                        
+
                     const double q2 = cljscl.coulomb() *
                     param0.reduced_charge * param1.reduced_charge;
-                        
+
                     for (int k=0; k<nalpha; ++k)
                     {
                         //coulomb calculation
                         {
                             const double sr = std::sqrt(alfa[k] + dist2);
                             const double one_over_sr = double(1) / sr;
- 
+
                             // JM Jan 13. No reaction field on 1,4 atoms?
                             if (dist2 < Rcoul2)
                             {
                                 icnrg[k] += q2 * (one_over_sr);
                             }
                         }
-		  
+
                         //lj calculation
                         if (param1.ljid != 0 and dist2 < Rlj2)
                         {
@@ -4048,18 +4047,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                     param1.ljid)];
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-			                        
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			    
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			    
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			    
+
                                 iljnrg[k] +=  cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                                                 sig6_over_denom);
                             }
@@ -4074,17 +4073,17 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-                
+
                 if (param0.ljid == 0)
                 {
                     //null LJ parameter - only add on the coulomb energy
                     foreach (Index j, atoms1)
                     {
                         const double dist2 = distmat[j];
-		    
+
                         const double q2 = cljscl.coulomb() *
                             param0.reduced_charge * params1_array[j].reduced_charge;
-		    
+
                         for (int k=0; k<nalpha; ++k)
                         {
                             icnrg[k] += q2 / std::sqrt(alfa[k] + dist2);
@@ -4098,10 +4097,10 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         //do both coulomb and LJ
                         const Parameter &param1 = params1_array[j];
                         const double dist2 = distmat[j];
-                        
+
                         const double q2 = cljscl.coulomb() *
                             param0.reduced_charge * param1.reduced_charge;
-                        
+
                         for (int k=0; k<nalpha; ++k)
                         {
                             icnrg[k] += q2 / std::sqrt(alfa[k] + dist2);
@@ -4112,21 +4111,21 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                             const LJPair &ljpair = ljpairs.constData()[
                                                     ljpairs.map(param0.ljid,
                                                                 param1.ljid)];
-                        
+
                             const double sig2 = ljpair.sigma() * ljpair.sigma();
                             const double sig6 = sig2 * sig2 * sig2;
-			                        
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double shift = ljpair.sigma() * delta[k];
-			    
+
                                 double lj_denom = dist2 + shift;
                                 lj_denom = lj_denom * lj_denom * lj_denom;
-			    
+
                                 const double sig6_over_denom = sig6 / lj_denom;
                                 const double sig12_over_denom2 = sig6_over_denom *
                                                                  sig6_over_denom;
-			    
+
                                 iljnrg[k] +=  cljscl.lj() * ljpair.epsilon() * (sig12_over_denom2 -
                                                                                 sig6_over_denom);
                             }
@@ -4134,7 +4133,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                     }
                 }
             }
-        } 
+        }
     }
     else
     {
@@ -4146,14 +4145,14 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             std::vector<double> sRcoul(nalpha);
             std::vector<double> one_over_sRcoul(nalpha);
             std::vector<double> one_over_sRcoul2(nalpha);
-        
+
             for (int i=0; i<nalpha; ++i)
             {
                 sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
                 one_over_sRcoul[i] = double(1) / sRcoul[i];
                 one_over_sRcoul2[i] = double(1) / (sRcoul[i]*sRcoul[i]);
             }
-	
+
             foreach (Index i, atoms0)
             {
                 distmat.setOuterIndex(i);
@@ -4164,19 +4163,19 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                     foreach (Index j, atoms1)
                     {
                         const CLJScaleFactor &cljscl = group_pairs(i,j);
-                            
+
                         if (cljscl.coulomb() != 0)
                         {
                             const double dist2 = distmat[j];
-			
+
                             const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * params1_array[j].reduced_charge;
-			
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double sr = std::sqrt(alfa[k] + dist2);
                                 const double one_over_sr = double(1) / sr;
- 
+
                                 // JM Jan 13. No reaction field on 1,4 atoms?
                                 if (sr < sRcoul[k])
                                 {
@@ -4200,17 +4199,17 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         if (cljscl.coulomb() != 0 or cljscl.lj() != 0)
                         {
                             const Parameter &param1 = params1_array[j];
-		    
+
                             const double dist2 = distmat[j];
-			
+
                             const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * params1_array[j].reduced_charge;
-			
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double sr = std::sqrt(alfa[k] + dist2);
                                 const double one_over_sr = double(1) / sr;
- 
+
                                 // JM Jan 13. No reaction field on 1,4 atoms?
                                 if (sr < sRcoul[k])
                                 {
@@ -4229,18 +4228,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                                     param1.ljid)];
                                 const double sig2 = ljpair.sigma() * ljpair.sigma();
                                 const double sig6 = sig2 * sig2 * sig2;
-			                            
+
                                 for (int k=0; k<nalpha; ++k)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-			    
+
                                     double lj_denom = dist2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-			    
+
                                     const double sig6_over_denom = sig6 / lj_denom;
                                     const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-			    
+
                                     iljnrg[k] +=  cljscl.lj() * ljpair.epsilon() *
                                                     (sig12_over_denom2 - sig6_over_denom);
                                 }
@@ -4255,7 +4254,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             std::vector<double> sRcoul(nalpha);
             std::vector<double> k_rf(nalpha);
             std::vector<double> c_rf(nalpha);
-        
+
             for (int i=0; i<nalpha; ++i)
             {
                 sRcoul[i] = std::sqrt(alfa[i] + Rcoul*Rcoul);
@@ -4264,7 +4263,7 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                 c_rf[i] = (1.0 / sRcoul[i]) * ( (3*rf_dielectric_constant) /
                                                 (2*rf_dielectric_constant + 1) );
             }
-	
+
             foreach (Index i, atoms0)
             {
                 distmat.setOuterIndex(i);
@@ -4275,19 +4274,19 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                     foreach (Index j, atoms1)
                     {
                         const CLJScaleFactor &cljscl = group_pairs(i,j);
-                            
+
                         if (cljscl.coulomb() != 0)
                         {
                             const double dist2 = distmat[j];
-			
+
                             const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * params1_array[j].reduced_charge;
-			
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double sr = std::sqrt(alfa[k] + dist2);
                                 const double one_over_sr = double(1) / sr;
- 
+
                                 // JM Jan 13. No reaction field on 1,4 atoms?
                                 if (sr < sRcoul[k])
                                 {
@@ -4310,17 +4309,17 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         if (cljscl.coulomb() != 0 or cljscl.lj() != 0)
                         {
                             const Parameter &param1 = params1_array[j];
-		    
+
                             const double dist2 = distmat[j];
-			
+
                             const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * params1_array[j].reduced_charge;
-			
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double sr = std::sqrt(alfa[k] + dist2);
                                 const double one_over_sr = double(1) / sr;
- 
+
                                 // JM Jan 13. No reaction field on 1,4 atoms?
                                 if (sr < sRcoul[k])
                                 {
@@ -4338,18 +4337,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                                     param1.ljid)];
                                 const double sig2 = ljpair.sigma() * ljpair.sigma();
                                 const double sig6 = sig2 * sig2 * sig2;
-			                            
+
                                 for (int k=0; k<nalpha; ++k)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-			    
+
                                     double lj_denom = dist2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-			    
+
                                     const double sig6_over_denom = sig6 / lj_denom;
                                     const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-			    
+
                                     iljnrg[k] +=  cljscl.lj() * ljpair.epsilon() *
                                                     (sig12_over_denom2 - sig6_over_denom);
                                 }
@@ -4371,19 +4370,19 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                     foreach (Index j, atoms1)
                     {
                         const CLJScaleFactor &cljscl = group_pairs(i,j);
-                            
+
                         if (cljscl.coulomb() != 0)
                         {
                             const double dist2 = distmat[j];
-			
+
                             const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * params1_array[j].reduced_charge;
-			
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double sr = std::sqrt(alfa[k] + dist2);
                                 const double one_over_sr = double(1) / sr;
- 
+
                                 // JM Jan 13. No reaction field on 1,4 atoms?
                                 if (dist2 < Rcoul2)
                                 {
@@ -4403,17 +4402,17 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                         if (cljscl.coulomb() != 0 or cljscl.lj() != 0)
                         {
                             const Parameter &param1 = params1_array[j];
-		    
+
                             const double dist2 = distmat[j];
-			
+
                             const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * params1_array[j].reduced_charge;
-			
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 const double sr = std::sqrt(alfa[k] + dist2);
                                 const double one_over_sr = double(1) / sr;
- 
+
                                 // JM Jan 13. No reaction field on 1,4 atoms?
                                 if (dist2 < Rcoul2)
                                 {
@@ -4428,18 +4427,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                                     param1.ljid)];
                                 const double sig2 = ljpair.sigma() * ljpair.sigma();
                                 const double sig6 = sig2 * sig2 * sig2;
-			                            
+
                                 for (int k=0; k<nalpha; ++k)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-			    
+
                                     double lj_denom = dist2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-			    
+
                                     const double sig6_over_denom = sig6 / lj_denom;
                                     const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-			    
+
                                     iljnrg[k] +=  cljscl.lj() * ljpair.epsilon() *
                                                     (sig12_over_denom2 - sig6_over_denom);
                                 }
@@ -4455,21 +4454,21 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
             {
                 distmat.setOuterIndex(i);
                 const Parameter &param0 = params0_array[i];
-                
+
                 if (param0.ljid == 0)
                 {
                     //null LJ parameter - only add on the coulomb energy
                     foreach (Index j, atoms1)
                     {
                         const CLJScaleFactor &cljscl = group_pairs(i,j);
-                            
+
                         if (cljscl.coulomb() != 0)
                         {
                             const double dist2 = distmat[j];
-			
+
                             const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * params1_array[j].reduced_charge;
-			
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 icnrg[k] += q2 / std::sqrt(alfa[k] + dist2);
@@ -4489,10 +4488,10 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                             const Parameter &param1 = params1_array[j];
 
                             const double dist2 = distmat[j];
-			
+
                             const double q2 = cljscl.coulomb() *
                                 param0.reduced_charge * params1_array[j].reduced_charge;
-			
+
                             for (int k=0; k<nalpha; ++k)
                             {
                                 icnrg[k] += q2 / std::sqrt(alfa[k] + dist2);
@@ -4505,18 +4504,18 @@ void IntraSoftCLJPotential::_pvt_calculateEnergy(const CLJNBPairs::CGPairs &grou
                                                                     param1.ljid)];
                                 const double sig2 = ljpair.sigma() * ljpair.sigma();
                                 const double sig6 = sig2 * sig2 * sig2;
-			                            
+
                                 for (int k=0; k<nalpha; ++k)
                                 {
                                     const double shift = ljpair.sigma() * delta[k];
-			        
+
                                     double lj_denom = dist2 + shift;
                                     lj_denom = lj_denom * lj_denom * lj_denom;
-			        
+
                                     const double sig6_over_denom = sig6 / lj_denom;
                                     const double sig12_over_denom2 = sig6_over_denom *
                                                                      sig6_over_denom;
-				
+
                                     iljnrg[k] +=  cljscl.lj() * ljpair.epsilon() *
                                                         (sig12_over_denom2 - sig6_over_denom);
                                 }
@@ -4541,11 +4540,11 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
         return;
 
     const quint32 ngroups = mol.nCutGroups();
-    
+
     const CoordGroup *groups_array = mol.coordinates().constData();
-    
+
     BOOST_ASSERT( mol.parameters().atomicParameters().count() == int(ngroups) );
-    const Parameters::Array *molparams_array 
+    const Parameters::Array *molparams_array
                             = mol.parameters().atomicParameters().constData();
 
     const CLJNBPairs &nbpairs = mol.parameters().intraScaleFactors();
@@ -4553,18 +4552,18 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
     //the alpha_values array contains all of the unique alpha values
     const double *alfa = alpha_values.constData();
     int nalpha = alpha_values.count();
-        
+
     if (nalpha <= 0)
         return;
-        
+
     std::vector<double> cnrg(nalpha, 0);
     std::vector<double> ljnrg(nalpha, 0);
-        
+
     //this uses the following potentials
     //           Zacharias and McCammon, J. Chem. Phys., 1994, and also,
     //           Michel et al., JCTC, 2007
     //
-    //  V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) - 
+    //  V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
     //                          ( sigma^6  / (delta*sigma + r^2)^3 ) ]
     //
     //  delta = shift_delta * alpha
@@ -4573,18 +4572,18 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
     //
     // This contrasts to Rich T's LJ softcore function, which was;
     //
-    //  V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) - 
+    //  V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
     //                          (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
-    
+
     std::vector<double> one_minus_alfa_to_n(nalpha);
     std::vector<double> delta(nalpha);
-        
+
     for (int i=0; i<nalpha; ++i)
     {
         one_minus_alfa_to_n[i] = SireMaths::pow(1 - alfa[i], int(coul_power));
         delta[i] = shift_delta * alfa[i];
     }
-      
+
     //loop over all pairs of CutGroups in the molecule
     for (quint32 igroup=0; igroup<ngroups; ++igroup)
     {
@@ -4594,9 +4593,9 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
         const AABox &aabox0 = group0.aaBox();
         const quint32 nats0 = group0.count();
         const Parameter *params0_array = params0.constData();
-    
+
         CGIdx cgidx_igroup = mol.cgIdx(igroup);
-    
+
         for (quint32 jgroup=igroup; jgroup<ngroups; ++jgroup)
         {
             const CoordGroup &group1 = groups_array[jgroup];
@@ -4606,22 +4605,22 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
             //(don't test igroup==jgroup as this is the same CutGroup
             // and definitely within cutoff!)
             const bool within_cutoff = (igroup == jgroup) or not
-                                        spce->beyond(switchfunc->cutoffDistance(), 
+                                        spce->beyond(switchfunc->cutoffDistance(),
                                                      aabox0, group1.aaBox());
-            
+
             if (not within_cutoff)
                 //this CutGroup is beyond the cutoff distance
                 continue;
-            
+
             //calculate all of the interatomic distances^2
             const double mindist = spce->calcDist2(group0, group1, distmat);
-            
+
             if (mindist > switchfunc->cutoffDistance())
                 //all of the atoms are definitely beyond cutoff
                 continue;
-                
+
             CGIdx cgidx_jgroup = mol.cgIdx(jgroup);
-                
+
             //get the non-bonded scale factors for all pairs of atoms
             //between these groups (or within this group, if igroup == jgroup)
             const CLJNBPairs::CGPairs &group_pairs = nbpairs(cgidx_igroup,
@@ -4633,11 +4632,11 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
             //loop over all intraatomic pairs and calculate the energies
             const quint32 nats1 = group1.count();
             const Parameter *params1_array = params1.constData();
-            
+
             _pvt_calculateEnergy(group_pairs, distmat, params0_array, params1_array,
                                  nats0, nats1, icnrg.data(), iljnrg.data(), alfa, delta.data(), nalpha);
-            
-            //if this is the same group then half the energies to 
+
+            //if this is the same group then half the energies to
             //correct for double-counting
             if (igroup == jgroup)
             {
@@ -4655,17 +4654,17 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
                 if (mindist > switchfunc->electrostaticFeatherDistance())
                 {
                     const double cscl = switchfunc->electrostaticScaleFactor(Length(mindist));
-                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         icnrg[i] *= cscl;
                     }
                 }
-                
+
                 if (mindist > switchfunc->vdwFeatherDistance())
                 {
                     const double ljscl = switchfunc->vdwScaleFactor(Length(mindist));
-                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         iljnrg[i] *= ljscl;
@@ -4680,7 +4679,7 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
             }
         }
     }
-    
+
     //add this molecule pair's energy onto the total
     //energy += Energy(scale_energy * cnrg, scale_energy * ljnrg);
     for (int i=0; i<nalpha; ++i)
@@ -4691,15 +4690,15 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
 
     //now copy the calculated energies back to the Energy object
     Energy soft_energy;
-    
+
     for (int i=0; i<alpha_index.count(); ++i)
     {
         int idx = alpha_index.at(i);
-      
+
         if (idx >= 0)
             soft_energy.setEnergy(i, cnrg[idx], ljnrg[idx]);
     }
-    
+
     energy += soft_energy;
 }
 
@@ -4710,7 +4709,7 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
     not contain any overlapping atoms, and that they should both be
     part of the same molecule (albeit potentially at different versions,
     but with the same layout UID)
-    
+
     \throw SireError::incompatible_error
 */
 void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecule &mol,
@@ -4727,14 +4726,14 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
 
     const quint32 ngroups0 = mol.nCutGroups();
     const CoordGroup *groups0_array = mol.coordinates().constData();
-    
+
     BOOST_ASSERT( mol.parameters().atomicParameters().count() == int(ngroups0) );
-    const Parameters::Array *molparams0_array 
+    const Parameters::Array *molparams0_array
                             = mol.parameters().atomicParameters().constData();
 
     const quint32 ngroups1 = rest_of_mol.nCutGroups();
     const CoordGroup *groups1_array = rest_of_mol.coordinates().constData();
-    
+
     BOOST_ASSERT( rest_of_mol.parameters().atomicParameters().count() == int(ngroups1) );
     const Parameters::Array *molparams1_array
                             = rest_of_mol.parameters().atomicParameters().constData();
@@ -4742,14 +4741,14 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
     //the CLJNBPairs must be the same in both molecules - this is checked
     //as part of assertCompatible(..)
     const CLJNBPairs &nbpairs = mol.parameters().intraScaleFactors();
-    
+
     //the alpha_values array contains all of the unique alpha values
     const double *alfa = alpha_values.constData();
     int nalpha = alpha_values.count();
-    
+
     if (nalpha <= 0)
         return;
-    
+
     std::vector<double> cnrg(nalpha, 0);
     std::vector<double> ljnrg(nalpha, 0);
 
@@ -4757,7 +4756,7 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
     //           Zacharias and McCammon, J. Chem. Phys., 1994, and also,
     //           Michel et al., JCTC, 2007
     //
-    //  V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) - 
+    //  V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
     //                          ( sigma^6  / (delta*sigma + r^2)^3 ) ]
     //
     //  delta = shift_delta * alpha
@@ -4766,13 +4765,13 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
     //
     // This contrasts to Rich T's LJ softcore function, which was;
     //
-    //  V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) - 
+    //  V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
     //                          (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
     //
 
     std::vector<double> one_minus_alfa_to_n(nalpha);
     std::vector<double> delta(nalpha);
-        
+
     for (int i=0; i<nalpha; ++i)
     {
         one_minus_alfa_to_n[i] = SireMaths::pow(1 - alfa[i], int(coul_power));
@@ -4789,10 +4788,10 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
         const AABox &aabox0 = group0.aaBox();
         const quint32 nats0 = group0.count();
         const Parameter *params0_array = params0.constData();
-    
+
         //get the CGIdx of this CutGroup
         CGIdx cgidx_igroup = mol.cgIdx(igroup);
-    
+
         for (quint32 jgroup=0; jgroup<ngroups1; ++jgroup)
         {
             const CoordGroup &group1 = groups1_array[jgroup];
@@ -4808,20 +4807,20 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
             //(don't test igroup==jgroup as this is the same CutGroup
             // and definitely within cutoff!)
             const bool within_cutoff = (cgidx_igroup == cgidx_jgroup) or not
-                                        spce->beyond(switchfunc->cutoffDistance(), 
+                                        spce->beyond(switchfunc->cutoffDistance(),
                                                      aabox0, group1.aaBox());
-            
+
             if (not within_cutoff)
                 //this CutGroup is beyond the cutoff distance
                 continue;
-            
+
             //calculate all of the interatomic distances^2
             const double mindist = spce->calcDist2(group0, group1, distmat);
-            
+
             if (mindist > switchfunc->cutoffDistance())
                 //all of the atoms are definitely beyond cutoff
                 continue;
-                
+
             //get the non-bonded scale factors for all pairs of atoms
             //between these groups (or within this group, if igroup == jgroup)
             const CLJNBPairs::CGPairs &group_pairs = nbpairs(cgidx_igroup,
@@ -4829,37 +4828,37 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
 
             std::vector<double> icnrg(nalpha, 0);
             std::vector<double> iljnrg(nalpha, 0);
-	                
+
             //loop over all intraatomic pairs and calculate the energies
             const quint32 nats1 = group1.count();
             const Parameter *params1_array = params1.constData();
-            
+
             if (cgidx_igroup == cgidx_jgroup
                 or mol.molecule().selection().selected(cgidx_jgroup))
             {
                 //this is the same CutGroup, or some of CutGroup jgroup
-                //is present in 'mol' - we must be careful not to 
+                //is present in 'mol' - we must be careful not to
                 //double-count the energy between atoms in both 'mol'
                 //and 'rest_of_mol'
-                
-                //get the atoms from this CutGroup that are contained in 
+
+                //get the atoms from this CutGroup that are contained in
                 //each part of the molecule
                 QSet<Index> atoms0 = mol.molecule()
                                         .selection().selectedAtoms(cgidx_igroup);
-                                      
+
                 QSet<Index> mol_atoms1 = atoms0;
-                
+
                 if (cgidx_igroup != cgidx_jgroup)
                     mol_atoms1 = mol.molecule().selection().selectedAtoms(cgidx_jgroup);
-                                            
+
                 QSet<Index> atoms1 = rest_of_mol.molecule()
                                         .selection().selectedAtoms(cgidx_jgroup);
-                                        
+
                 //remove from atoms1 atoms that are part of 'mol'
                 atoms1 -= mol_atoms1;
-                
+
                 _pvt_calculateEnergy(group_pairs, atoms0, atoms1, distmat,
-				     params0_array, params1_array, 
+				     params0_array, params1_array,
 				     nats0, nats1, icnrg.data(), iljnrg.data(), alfa, delta.data(), nalpha);
             }
             else
@@ -4878,17 +4877,17 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
                 if (mindist > switchfunc->electrostaticFeatherDistance())
                 {
                     const double cscl = switchfunc->electrostaticScaleFactor(Length(mindist));
-                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         icnrg[i] *= cscl;
                     }
                 }
-                
+
                 if (mindist > switchfunc->vdwFeatherDistance())
                 {
                     const double ljscl = switchfunc->vdwScaleFactor(Length(mindist));
-                    
+
                     for (int i=0; i<nalpha; ++i)
                     {
                         iljnrg[i] *= ljscl;
@@ -4903,7 +4902,7 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
             }
         }
     }
-    
+
     //add the molecule's energy onto the total
     //energy += Energy(scale_energy * cnrg, scale_energy * ljnrg);
     for (int i=0; i<nalpha; ++i)
@@ -4911,18 +4910,18 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
         cnrg[i] *= scale_energy * one_minus_alfa_to_n[i];
         ljnrg[i] *= 4 * scale_energy;
     }
-    
+
     //now copy the calculated energies back to the Energy object
     Energy soft_energy;
-        
+
     for (int i=0; i<alpha_index.count(); ++i)
     {
         int idx = alpha_index.at(i);
-        
+
         if (idx >= 0)
             soft_energy.setEnergy(i, cnrg[idx], ljnrg[idx]);
     }
-    
+
     energy += soft_energy;
 }
 
@@ -4930,7 +4929,7 @@ void IntraSoftCLJPotential::calculateEnergy(const IntraSoftCLJPotential::Molecul
     and add these forces onto 'forces'. This uses
     the passed workspace to perform the calculation */
 void IntraSoftCLJPotential::calculateForce(const IntraSoftCLJPotential::Molecule &mol,
-					   MolForceTable &forces, 
+					   MolForceTable &forces,
 					   IntraSoftCLJPotential::ForceWorkspace &distmat,
 					   double scale_force) const
 {
@@ -4939,11 +4938,11 @@ void IntraSoftCLJPotential::calculateForce(const IntraSoftCLJPotential::Molecule
                 "and LJ forces has not yet been written..."), CODELOC );
 }
 
-/** Calculate the total forces acting on the atoms in 'mol' caused by the 
+/** Calculate the total forces acting on the atoms in 'mol' caused by the
     other atoms in the same molecule contained in 'rest_of_mol'. This calculates
     the forces and adds them onto 'forces' (which are for 'mol'). Note that they must
     use the same layout UID and same intra-nonbonded scaling factors
-    
+
     \throw SireError::incompatible_error
 */
 void IntraSoftCLJPotential::calculateForce(const IntraSoftCLJPotential::Molecule &mol,
@@ -4957,7 +4956,7 @@ void IntraSoftCLJPotential::calculateForce(const IntraSoftCLJPotential::Molecule
                 "and LJ forces has not yet been written..."), CODELOC );
 }
 
-void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule &mol, 
+void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule &mol,
 					   const CLJProbe &probe,
 					   MolFieldTable &fields,
 					   IntraSoftCLJPotential::FieldWorkspace &workspace,
@@ -4980,7 +4979,7 @@ void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule
                 "and LJ fields has not yet been written..."), CODELOC );
 }
 
-void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule &mol, 
+void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule &mol,
 					   const CLJProbe &probe,
 					   MolFieldTable &fields,
 					   const Symbol &symbol,
@@ -5007,7 +5006,7 @@ void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule
                 "and LJ fields has not yet been written..."), CODELOC );
 }
 
-void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule &mol, 
+void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule &mol,
 					   const CLJProbe &probe,
 					   GridFieldTable &fields,
 					   IntraSoftCLJPotential::FieldWorkspace &workspace,
@@ -5018,7 +5017,7 @@ void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule
                 "and LJ fields has not yet been written..."), CODELOC );
 }
 
-void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule &mol, 
+void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule &mol,
 					   const CLJProbe &probe,
 					   GridFieldTable &fields,
 					   const Symbol &symbol,
@@ -5031,7 +5030,7 @@ void IntraSoftCLJPotential::calculateField(const IntraSoftCLJPotential::Molecule
                 "and LJ fields has not yet been written..."), CODELOC );
 }
 
-void IntraSoftCLJPotential::calculatePotential(const IntraSoftCLJPotential::Molecule &mol, 
+void IntraSoftCLJPotential::calculatePotential(const IntraSoftCLJPotential::Molecule &mol,
 					       const CLJProbe &probe,
 					       MolPotentialTable &potentials,
 					       IntraSoftCLJPotential::PotentialWorkspace &workspace,
@@ -5054,7 +5053,7 @@ void IntraSoftCLJPotential::calculatePotential(const IntraSoftCLJPotential::Mole
                 "and LJ fields has not yet been written..."), CODELOC );
 }
 
-void IntraSoftCLJPotential::calculatePotential(const IntraSoftCLJPotential::Molecule &mol, 
+void IntraSoftCLJPotential::calculatePotential(const IntraSoftCLJPotential::Molecule &mol,
 					       const CLJProbe &probe,
 					       MolPotentialTable &potentials,
 					       const Symbol &symbol,
@@ -5081,7 +5080,7 @@ void IntraSoftCLJPotential::calculatePotential(const IntraSoftCLJPotential::Mole
                 "and LJ potentials has not yet been written..."), CODELOC );
 }
 
-void IntraSoftCLJPotential::calculatePotential(const IntraSoftCLJPotential::Molecule &mol, 
+void IntraSoftCLJPotential::calculatePotential(const IntraSoftCLJPotential::Molecule &mol,
                         const CLJProbe &probe,
                         GridPotentialTable &potentials,
                         IntraSoftCLJPotential::PotentialWorkspace &workspace,

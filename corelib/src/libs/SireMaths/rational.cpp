@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -210,8 +209,8 @@ double pow_pvt(double x, const Rational &power)
 {
     if ( x == 0 )
         return 0;
-        
-    else if ( x > 0.0 or SireMaths::isEven(power.numerator()) or 
+
+    else if ( x > 0.0 or SireMaths::isEven(power.numerator()) or
               SireMaths::isOdd(power.denominator()) )
     {
         switch(power.denominator())
@@ -219,11 +218,11 @@ double pow_pvt(double x, const Rational &power)
             case 2:
                 return std::sqrt( SireMaths::pow(x, power.numerator()) );
             default:
-                return std::exp( std::log( SireMaths::pow(x, power.numerator()) ) 
+                return std::exp( std::log( SireMaths::pow(x, power.numerator()) )
                                               / power.denominator() );
         }
     }
-    else 
+    else
         throw SireMaths::domain_error(
             QObject::tr("Cannot raise the negative number '%1' to a fractional "
                         "power (%2)").arg(x).arg(toString(power)), CODELOC);
@@ -246,18 +245,18 @@ bool isRational(double val, int maxdenom)
     for (int i=1; i<=maxdenom; ++i)
     {
         int ival = int( val * double(i) );
-        
+
         double error = std::abs( val - (double(ival)/double(i)) );
-        
+
         if (error < std::numeric_limits<double>::epsilon())
             return true;
     }
-    
+
     return false;
 }
 
 /** Return 'val' converted into the best approximated rational number
-    with maximum denominator 'maxdenom'. A perfect conversion will only 
+    with maximum denominator 'maxdenom'. A perfect conversion will only
     result if 'isRational(val,maxdenom)' returned true. */
 Rational toRational(double val, int maxdenom)
 {
@@ -268,9 +267,9 @@ Rational toRational(double val, int maxdenom)
     for (int i=1; i<=maxdenom; ++i)
     {
         int ival = int( val * double(i) );
-        
+
         double error = std::abs( val - (double(ival)/double(i)) );
-        
+
         if (error < std::numeric_limits<double>::epsilon())
             return Rational(ival, i);
         else if (i == 1 or error < lowest_error)
@@ -279,7 +278,7 @@ Rational toRational(double val, int maxdenom)
             best_rational = Rational(ival, i);
         }
     }
-    
+
     return best_rational;
 }
 

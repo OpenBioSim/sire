@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -37,7 +36,7 @@
 
 #include "SireBase/savestate.h"
 
-#include "SireSystem/errors.h" 
+#include "SireSystem/errors.h"
 #include "SireError/errors.h"
 
 #include "SireStream/datastream.h"
@@ -54,16 +53,16 @@ using namespace SireStream;
 static const RegisterMetaType<Constraints> r_constraints;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                           const Constraints &constraints)
 {
     writeHeader(ds, r_constraints, 3);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << constraints.cons
         << static_cast<const Property&>(constraints);
-    
+
     return ds;
 }
 
@@ -71,22 +70,22 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, Constraints &constraints)
 {
     VersionID v = readHeader(ds, r_constraints);
-    
+
     if (v == 3)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> constraints.cons >> static_cast<Property&>(constraints);
     }
     else if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         QVector<ConstraintPtr> molcons;
-        
+
         sds >> constraints.cons >> molcons
             >> static_cast<Property&>(constraints);
-            
+
         constraints.cons += molcons;
     }
     else if (v == 1)
@@ -96,12 +95,12 @@ QDataStream &operator>>(QDataStream &ds, Constraints &constraints)
         QList<ConstraintPtr> cons;
 
         sds >> cons;
-        
+
         constraints.cons = cons.toVector();
     }
     else
         throw version_error(v, "1,2,3", r_constraints, CODELOC);
-        
+
     return ds;
 }
 
@@ -154,7 +153,7 @@ Constraints& Constraints::operator=(const Constraints &other)
         cons = other.cons;
         Property::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -177,7 +176,7 @@ bool Constraints::operator!=(const Constraints &other) const
 const Constraint& Constraints::operator[](int i) const
 {
     i = Index(i).map( this->nConstraints() );
-    
+
     return cons.at( i ).read();
 }
 
@@ -248,7 +247,7 @@ void Constraints::add(const Constraint &constraint)
         if (con->equals(constraint))
            return;
     }
-        
+
     cons.append(constraint);
     cons.squeeze();
 }
@@ -274,7 +273,7 @@ void Constraints::remove(const Constraint &constraint)
     while (it.hasNext())
     {
         it.next();
-    
+
         if (it.value()->equals(constraint))
             it.remove();
     }
@@ -298,7 +297,7 @@ void Constraints::remove(const Constraints &constraints)
 void Constraints::removeAt(int i)
 {
     i = Index(i).map( this->nConstraints() );
-    
+
     cons.remove(i);
     cons.squeeze();
 }
@@ -316,19 +315,19 @@ bool Constraints::areSatisfied(const System &system) const
             return false;
         }
     }
-    
+
     return true;
 }
 
 /** Assert that all of the constraints in this set are satisfied
     in the passed system
-    
+
     \throw SireSystem::constraint_error
 */
 void Constraints::assertSatisfied(const System &system) const
 {
     QStringList broken_constraints;
-    
+
     for (QVector<ConstraintPtr>::const_iterator it = cons.constBegin();
          it != cons.constEnd();
          ++it)
@@ -340,7 +339,7 @@ void Constraints::assertSatisfied(const System &system) const
                         .arg(it->read().toString()) );
         }
     }
-    
+
     if (not broken_constraints.isEmpty())
     {
         throw SireSystem::constraint_error( QObject::tr(
@@ -360,9 +359,9 @@ System Constraints::apply(const System &system)
         return system;
 
     Delta delta(system);
-    
+
     System new_system(system);
-    
+
     for (int i=0; i<10; ++i)
     {
         if (this->apply(delta))
@@ -370,24 +369,24 @@ System Constraints::apply(const System &system)
         else
             return new_system;
     }
-    
+
     throw SireSystem::constraint_error( QObject::tr(
             "The constraints %1 cannot be satisfied in connection with "
             "the constraints in the system %2, %3.")
-                .arg(this->toString(), system.toString(), 
+                .arg(this->toString(), system.toString(),
                      system.constraints().toString()), CODELOC );
-                     
+
     return System();
 }
 
-/** Internal function used to apply all of the constraints in this system to 
+/** Internal function used to apply all of the constraints in this system to
     the passed delta - this returns whether or not any of the constraints
     changed the system */
 bool Constraints::apply(Delta &delta)
 {
     if (cons.isEmpty())
         return false;
-        
+
     else if (cons.count() == 1)
     {
         if (cons.at(0).read().mayAffect(delta))
@@ -398,11 +397,11 @@ bool Constraints::apply(Delta &delta)
     else
     {
         bool system_changed = false;
-        
+
         for (int i=0; i<10; ++i)
         {
             bool something_changed = false;
-        
+
             for (int j=0; j<cons.count(); ++j)
             {
                 if (cons.at(j).read().mayAffect(delta))
@@ -413,11 +412,11 @@ bool Constraints::apply(Delta &delta)
                     system_changed = system_changed or this_changed;
                 }
             }
-            
+
             if (not something_changed)
             {
                 bool all_satisfied = true;
-            
+
                 for (int j=0; j<cons.count(); ++j)
                 {
                     if (not cons.at(j).read().isSatisfied(delta.deltaSystem()))
@@ -429,7 +428,7 @@ bool Constraints::apply(Delta &delta)
                         break;
                     }
                 }
-            
+
                 if (all_satisfied)
                     return system_changed;
             }
@@ -448,11 +447,11 @@ bool Constraints::apply(Delta &delta)
 
         if (all_satisfied)
             return system_changed;
-    
+
         //the constraints couldn't be satisfied - get the list
         //of unsatisfied constraints
         QStringList unsatisfied_constraints;
-        
+
         for (int j=0; j<cons.count(); ++j)
         {
             if (not cons.at(j).read().isSatisfied(delta.deltaSystem()))
@@ -460,14 +459,14 @@ bool Constraints::apply(Delta &delta)
                 unsatisfied_constraints.append(cons[j].read().toString());
             }
         }
-        
+
         throw SireSystem::constraint_error( QObject::tr(
                 "Cannot simultaneously satisfy the following constraints "
                 "on the system %1\n%2")
-                    .arg(delta.deltaSystem().toString(), 
+                    .arg(delta.deltaSystem().toString(),
                          unsatisfied_constraints.join("\n")),
                             CODELOC );
-    
+
         return true;
     }
 }
@@ -476,7 +475,7 @@ void Constraints::committed(const System &system)
 {
     if (cons.isEmpty())
         return;
-    
+
     else
     {
         for (int i=0; i<cons.count(); ++i)

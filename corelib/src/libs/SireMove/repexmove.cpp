@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -70,24 +69,24 @@ QDataStream &operator<<(QDataStream &ds,
                                         const RepExSubMove &repexsubmove)
 {
     writeHeader(ds, r_repexsubmove, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << repexsubmove.partner_properties
         << repexsubmove.have_new_vals;
-        
+
     if (repexsubmove.have_new_vals)
     {
         sds << repexsubmove.new_volume_i.to(angstrom3)
             << repexsubmove.new_energy_i.to(kcal_per_mol)
-            << repexsubmove.new_volume_j.to(angstrom3) 
+            << repexsubmove.new_volume_j.to(angstrom3)
             << repexsubmove.new_energy_j.to(kcal_per_mol);
     }
 
     sds << repexsubmove.need_volume;
-    
+
     sds << static_cast<const SupraSubMove&>(repexsubmove);
-    
+
     return ds;
 }
 
@@ -95,39 +94,39 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, RepExSubMove &repexsubmove)
 {
     VersionID v = readHeader(ds, r_repexsubmove);
-    
+
     if (v == 1 or v == 2)
     {
         RepExSubMove new_submove;
-    
+
         SharedDataStream sds(ds);
-        
+
         sds >> new_submove.partner_properties
             >> new_submove.have_new_vals;
-            
+
         if (new_submove.have_new_vals)
         {
             double new_volume_i, new_energy_i, new_volume_j, new_energy_j;
-            
+
             sds >> new_volume_i >> new_energy_i
                 >> new_volume_j >> new_energy_j;
 
             new_submove.new_volume_i = new_volume_i * angstrom3;
             new_submove.new_energy_i = new_energy_i * kcal_per_mol;
-            
+
             new_submove.new_volume_j = new_volume_j * angstrom3;
             new_submove.new_energy_j = new_energy_j * kcal_per_mol;
         }
-        
+
         if (v == 2)
             sds >> new_submove.need_volume;
         else
             new_submove.need_volume = true;
-        
+
         sds >> static_cast<SupraSubMove&>(new_submove);
-        
+
         //check that all of the partner properties are valid...
-        for (QList< QPair<quint32,QVariant> >::const_iterator 
+        for (QList< QPair<quint32,QVariant> >::const_iterator
                                 it = new_submove.partner_properties.constBegin();
              it != new_submove.partner_properties.constEnd();
              ++it)
@@ -138,7 +137,7 @@ QDataStream &operator>>(QDataStream &ds, RepExSubMove &repexsubmove)
                 case RepExSubMove::NRG_COMPONENT:
                 case RepExSubMove::SPACE_PROPERTY:
                     break;
-                    
+
                 default:
                     throw version_error( QObject::tr(
                         "Version 1 of SireMove::RepExSubMove does not support "
@@ -146,12 +145,12 @@ QDataStream &operator>>(QDataStream &ds, RepExSubMove &repexsubmove)
                             .arg(it->first), CODELOC );
             }
         }
-        
+
         repexsubmove = new_submove;
     }
     else
         throw version_error(v, "1,2", r_repexsubmove, CODELOC);
-        
+
     return ds;
 }
 
@@ -173,7 +172,7 @@ void RepExSubMove::addPartnerProperty(quint32 property, const T &value)
 }
 
 /** Construct the sub-move that will perform a move on 'replica_a', after
-    which it will then calculate the values necessary to test the 
+    which it will then calculate the values necessary to test the
     swap from 'replica_a' to 'replica_b' */
 RepExSubMove::RepExSubMove(const Replica &replica_a, const Replica &replica_b)
              : ConcreteProperty<RepExSubMove,SupraSubMove>(),
@@ -193,7 +192,7 @@ RepExSubMove::RepExSubMove(const Replica &replica_a, const Replica &replica_b)
     {
         addPartnerProperty( NRG_COMPONENT, replica_b.energyComponent() );
     }
-    
+
     if (need_volume)
     {
         if (replica_b.spaceProperty() != replica_a.spaceProperty())
@@ -225,16 +224,16 @@ RepExSubMove& RepExSubMove::operator=(const RepExSubMove &other)
 
         new_volume_i = other.new_volume_i;
         new_energy_i = other.new_energy_i;
-        
+
         new_volume_j = other.new_volume_j;
         new_energy_j = other.new_energy_j;
-        
+
         have_new_vals = other.have_new_vals;
         need_volume = other.need_volume;
-        
+
         SupraSubMove::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -297,13 +296,13 @@ static void throwNoVolume(const char *value, const QString &codeloc)
             .arg(value), codeloc );
 }
 
-/** Return the energy of the replica in its normal state at the 
+/** Return the energy of the replica in its normal state at the
     end of the block of moves */
 MolarEnergy RepExSubMove::energy_i() const
 {
     if (not have_new_vals)
         ::throwNoValues( "E_i", CODELOC );
-        
+
     return new_energy_i;
 }
 
@@ -313,20 +312,20 @@ Volume RepExSubMove::volume_i() const
 {
     if (not have_new_vals)
         ::throwNoValues( "V_i", CODELOC );
-    
+
     if (not need_volume)
         ::throwNoVolume( "V_i", CODELOC );
-                
+
     return new_volume_i;
 }
 
-/** Return the energy of the replica in its partner state 
+/** Return the energy of the replica in its partner state
     at the end of the block of moves */
 MolarEnergy RepExSubMove::energy_j() const
 {
     if (not have_new_vals)
         ::throwNoValues( "E_j", CODELOC );
-        
+
     return new_energy_j;
 }
 
@@ -336,16 +335,16 @@ Volume RepExSubMove::volume_j() const
 {
     if (not have_new_vals)
         ::throwNoValues( "V_j", CODELOC );
-    
+
     if (not need_volume)
         ::throwNoVolume( "V_j", CODELOC );
-        
+
     return new_volume_j;
 }
 
 /** Internal function used to extract a value of type 'T' from
     the passed QVariant, throwing an exception if this is not possible
-    
+
     \throw SireError::invalid_cast
 */
 template<class T>
@@ -357,7 +356,7 @@ static T convert(const QVariant &value)
             "cannot be cast to a value of type %2.")
                 .arg( typeid(T).name() )
                 .arg( QVariant::typeToName(value.type()) ), CODELOC );
-                
+
     return value.value<T>();
 }
 
@@ -387,11 +386,11 @@ void RepExSubMove::evaluateSwappedState(const Replica &replica)
     else
     {
         System state_j = state_i.subSystem();
-        
+
         Symbol nrg_component = state_i.energyComponent();
         PropertyName space_property = state_i.spaceProperty();
-        
-        for (QList< QPair<quint32,QVariant> >::const_iterator 
+
+        for (QList< QPair<quint32,QVariant> >::const_iterator
                                                 it = partner_properties.constBegin();
              it != partner_properties.constEnd();
              ++it)
@@ -404,22 +403,22 @@ void RepExSubMove::evaluateSwappedState(const Replica &replica)
                         throw SireError::incompatible_error( QObject::tr(
                             "Cannot set the lambda value for a replica that doesn't "
                             "have a lambda component!"), CODELOC );
-                
+
                     //set a new lambda value
                     state_j.setComponent( state_i.lambdaComponent(),
                                           ::convert<double>(it->second) );
                     break;
-                }   
+                }
                 case NRG_COMPONENT:
                     //set a new Hamiltonian (represented by the component)
                     nrg_component = ::convert<Symbol>(it->second);
                     break;
-                    
+
                 case SPACE_PROPERTY:
                     //set a new space property
                     space_property = ::convert<PropertyName>(it->second);
                     break;
-                    
+
                 default:
                     throw SireError::unsupported( QObject::tr(
                         "A request was made of an unsuppoted action in RepExSubMove. "
@@ -456,14 +455,14 @@ void RepExSubMove::move(SupraSubSystem &system, int n_supra_moves,
         {
             if (n_supra_moves_per_block <= 0)
                 this->evaluateSwappedState(replica);
-        
+
             return;
         }
 
         //unpack the system, if necessary
         bool replica_was_packed = replica.isPacked();
         replica.unpack();
-    
+
         //perform the moves
         for (int i=0; i<n_supra_moves; ++i)
         {
@@ -474,7 +473,7 @@ void RepExSubMove::move(SupraSubSystem &system, int n_supra_moves,
         //the information necessary to perform the replica exchange test
         if (n_supra_moves >= n_supra_moves_per_block)
             this->evaluateSwappedState(replica);
-        
+
         //repack the system, if necessary
         if (replica_was_packed)
             replica.pack();
@@ -483,7 +482,7 @@ void RepExSubMove::move(SupraSubSystem &system, int n_supra_moves,
     {
         replica.copy(*old_replica);
         this->copy(*old_state);
-        
+
         throw;
     }
 }
@@ -505,14 +504,14 @@ QDataStream &operator<<(QDataStream &ds, const RepExMove &repexmove)
     writeHeader(ds, r_repexmove, 3);
 
     SharedDataStream sds(ds);
-    
+
     sds << repexmove.rangenerator
         << repexmove.naccept
         << repexmove.nreject
         << repexmove.swap_monitors
         << repexmove.disable_swaps
         << static_cast<const SupraMove&>(repexmove);
-        
+
     return ds;
 }
 
@@ -526,7 +525,7 @@ QDataStream &operator>>(QDataStream &ds, RepExMove &repexmove)
     if (v == 3)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> repexmove.rangenerator
             >> repexmove.naccept
             >> repexmove.nreject
@@ -537,7 +536,7 @@ QDataStream &operator>>(QDataStream &ds, RepExMove &repexmove)
     else if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> repexmove.rangenerator
             >> repexmove.naccept
             >> repexmove.nreject
@@ -549,17 +548,17 @@ QDataStream &operator>>(QDataStream &ds, RepExMove &repexmove)
         SharedDataStream sds(ds);
 
         quint32 nmoves;
-        
+
         sds >> repexmove.rangenerator
             >> nmoves
             >> repexmove.naccept
             >> repexmove.nreject;
-            
+
         repexmove.swap_monitors = false;
     }
     else
         throw version_error(v, "1-3", r_repexmove, CODELOC);
-        
+
     return ds;
 }
 
@@ -587,13 +586,13 @@ RepExMove& RepExMove::operator=(const RepExMove &other)
     if (this != &other)
     {
         SupraMove::operator=(other);
-        
+
         naccept = other.naccept;
         nreject = other.nreject;
         swap_monitors = other.swap_monitors;
         disable_swaps = other.disable_swaps;
     }
-    
+
     return *this;
 }
 
@@ -699,7 +698,7 @@ static SupraSubSim submitSimulation(Nodes &nodes, const Replica &replica,
 }
 
 /** Internal function used to submit the two simulations for the replicas
-    'replica_a' and 'replica_b', telling each simulation to follow the 
+    'replica_a' and 'replica_b', telling each simulation to follow the
     simulation by evaluating the values necessary to perform a swap test
     between these two replicas */
 static QPair<SupraSubSim,SupraSubSim> submitSimulation(
@@ -712,12 +711,12 @@ static QPair<SupraSubSim,SupraSubSim> submitSimulation(
     //the node is released once the simulation has finished
     {
         Node node_a = nodes.getNode();
-        
+
         sims.first = SupraSubSim::run( node_a, replica_a,
                                        RepExSubMove(replica_a, replica_b),
                                        1, record_stats );
     }
-     
+
     Node node_b = nodes.getNode();
 
     sims.second = SupraSubSim::run( node_b, replica_b,
@@ -738,7 +737,7 @@ static QVector<SupraSubSim> submitSimulations(Nodes &nodes, Replicas &replicas,
     int nreplicas = replicas.nReplicas();
 
     QVector<SupraSubSim> subsims(nreplicas);
-    
+
     //pair the replicas up...
     //do we swap the even pairs or the odd pairs?
     int start = 1;
@@ -762,10 +761,10 @@ static QVector<SupraSubSim> submitSimulations(Nodes &nodes, Replicas &replicas,
     for (int i=start; i<nreplicas-1; i+=2)
     {
         //submit the simulations for replica i and replica i+1
-        QPair<SupraSubSim,SupraSubSim> sims = ::submitSimulation( nodes, replicas[i], 
+        QPair<SupraSubSim,SupraSubSim> sims = ::submitSimulation( nodes, replicas[i],
                                                                   replicas[i+1],
                                                                   record_stats );
-        
+
         subsims[i] = sims.first;
         subsims[i+1] = sims.second;
     }
@@ -780,44 +779,44 @@ static void waitUntilFinished(Nodes &nodes, QVector<SupraSubSim> &subsims, int m
 {
     bool all_finished = false;
     int ntries = 0;
-    
+
     int nreplicas = subsims.count();
-    
+
     while (not all_finished)
     {
         ++ntries;
-        
+
         if (ntries > max_tries)
             return;
-            
+
         all_finished = true;
-        
+
         for (int i=0; i<nreplicas; ++i)
         {
             SupraSubSim &subsim = subsims[i];
-        
+
             subsim.wait();
-            
+
             if (subsim.isError() or subsim.wasAborted())
             {
                 //resubmit this calculation
                 Node node = nodes.getNode();
                 subsim = SupraSubSim::run(node, subsim.input());
-            
+
                 all_finished = false;
             }
             else if (not subsim.hasFinished())
             {
                 //continue the calculation from where it finished
                 SupraSubSimPacket simpacket = subsim.result();
-                
+
                 Node node = nodes.getNode();
                 subsim = SupraSubSim::run( node, simpacket );
-                
+
                 all_finished = false;
             }
         }
-        
+
         if (not all_finished)
         {
             //wait for the resubmitted calculations to finish
@@ -829,69 +828,69 @@ static void waitUntilFinished(Nodes &nodes, QVector<SupraSubSim> &subsims, int m
     }
 }
 
-/** Internal function used to test the passed pair of replicas - 
+/** Internal function used to test the passed pair of replicas -
     this returns whether or not the test has passed */
-bool RepExMove::testPair(const Replica &replica_a, const RepExSubMove &move_a, 
+bool RepExMove::testPair(const Replica &replica_a, const RepExSubMove &move_a,
                          const Replica &replica_b, const RepExSubMove &move_b) const
 {
     //get the ensembles of the two replicas
     const Ensemble &ensemble_a = replica_a.ensemble();
     const Ensemble &ensemble_b = replica_b.ensemble();
-    
-    if ( (ensemble_a.isNVT() and ensemble_a.isNVT()) or 
+
+    if ( (ensemble_a.isNVT() and ensemble_a.isNVT()) or
          (ensemble_b.isNPT() and ensemble_b.isNPT()) )
     {
         bool need_pv = (ensemble_a.isNPT() and ensemble_b.isNPT());
-    
+
         //get the values of the thermodynamic parameters
         double beta_a = 1.0 / (k_boltz * ensemble_a.temperature()).value();
         double beta_b = 1.0 / (k_boltz * ensemble_b.temperature()).value();
-        
+
         Pressure p_a(0);
         Pressure p_b(0);
-        
+
         if (need_pv)
         {
             p_a = ensemble_a.pressure();
             p_b = ensemble_b.pressure();
         }
-        
+
         //now get the values of the system properties at their current state,
         //and at their swapped states
         MolarEnergy H_a_i = move_a.energy_i();
         MolarEnergy H_a_j = move_a.energy_j();
-        
+
         MolarEnergy H_b_i = move_b.energy_i();
         MolarEnergy H_b_j = move_b.energy_j();
-        
+
         Volume V_a_i(0);
         Volume V_a_j(0);
 
         Volume V_b_i(0);
         Volume V_b_j(0);
-        
+
         if (need_pv)
         {
             V_a_i = move_a.volume_i();
             V_a_j = move_a.volume_j();
-            
+
             V_b_i = move_b.volume_i();
             V_b_j = move_b.volume_j();
         }
-        
+
         //now calculate delta needed for the Monte Carlo test
         //
         //  For derivation see Appendix C of Christopher Woods' thesis
         //   (or original replica exchange literature of course!)
         //
-        //  delta = beta_b * [ H_b_i - H_b_j + P_b (V_b_i - V_b_j) ] + 
+        //  delta = beta_b * [ H_b_i - H_b_j + P_b (V_b_i - V_b_j) ] +
         //          beta_a * [ H_a_i - H_a_j + P_a (V_a_i - V_a_j) ]
-        
+
         double delta = beta_b * ( H_b_i - H_b_j + p_b*(V_b_i - V_b_j) ) +
                        beta_a * ( H_a_i - H_a_j + p_a*(V_a_i - V_a_j) );
-        
+
         bool move_passed = ( delta > 0 or (std::exp(delta) >= rangenerator.rand()) );
-        
+
         return move_passed;
     }
     else
@@ -900,7 +899,7 @@ bool RepExMove::testPair(const Replica &replica_a, const RepExSubMove &move_a,
             "There is no available replica exchange test that allows tests between "
             "replicas with ensembles %1 and %2.")
                 .arg(ensemble_a.toString(), ensemble_b.toString()), CODELOC );
-                
+
     }
 
     return false;
@@ -915,15 +914,15 @@ void RepExMove::testAndSwap(Replicas &replicas, const QVector<RepExSubMove> &sub
     if (nreplicas > 1)
     {
         int start = 1;
-        
+
         if (even_pairs)
             start = 0;
-            
+
         //loop over all pairs
         for (int i=start; i<nreplicas-1; i+=2)
         {
             qDebug() << "Test replicas" << i << (i+1);
-        
+
             if (this->testPair(replicas[i], submoves.at(i),
                                replicas[i+1], submoves.at(i+1) ))
             {
@@ -945,40 +944,40 @@ void RepExMove::performMove(Nodes &nodes, Replicas &replicas, bool record_stats)
 {
     //will we swap even pairs or odd pairs?
     bool even_pairs = true;
-    
+
     if (replicas.nReplicas() > 2)
         even_pairs = rangenerator.randBool();
 
     //submit all of the simulations
     QVector<SupraSubSim> subsims = ::submitSimulations(nodes, replicas,
                                                        even_pairs, record_stats);
-        
+
     //wait for all of the simulations to finish (retrying broken simulations
     //just five times)
     ::waitUntilFinished(nodes, subsims, 5);
-    
+
     //copy the results back into the replicas
     int nreplicas = replicas.count();
-    
+
     QVector<RepExSubMove> submoves(nreplicas);
     submoves.squeeze();
-    
+
     for (int i=0; i<nreplicas; ++i)
     {
         submoves[i] = subsims[i].result().subMoves().asA<SameSupraSubMoves>()[0]
                                          .asA<RepExSubMove>();
-        
+
         replicas.setReplica( i, subsims[i].result().subSystem() );
     }
-    
+
     //get rid of the simulation handles, as they are no longer needed
     //(and we need to save memory if we can)
     subsims = QVector<SupraSubSim>();
-    
+
     //now perform all of the replica exchange tests
     if (not disable_swaps)
         this->testAndSwap(replicas, submoves, even_pairs, record_stats);
-    
+
     //now collect any necessary statistics
     if (record_stats)
         replicas.collectSupraStats();
@@ -987,29 +986,29 @@ void RepExMove::performMove(Nodes &nodes, Replicas &replicas, bool record_stats)
 /** Perform 'nmoves' replica exchange moves (block of sampling for all
     replicas, then replica exchange test between all pairs),
     of the system 'system' (which must be a Replicas object), optionally
-    recording statistics if 'record_stats' is true 
-    
+    recording statistics if 'record_stats' is true
+
     \throw SireError::invalid_cast
 */
 void RepExMove::move(SupraSystem &system, int nmoves, bool record_stats)
 {
     Replicas &replicas = system.asA<Replicas>();
-    
+
     if (replicas.nReplicas() == 0 or nmoves <= 0)
         return;
-    
+
     SupraSystemPtr old_replicas = replicas.clone();
     SupraMovePtr old_state = this->clone();
-    
+
     try
     {
         //try to get as many nodes as possible to run the moves
         Nodes nodes = Cluster::getNodes( replicas.nReplicas() - 1, 5000 );
-        
+
         ///hold this_thread in a local scope to ensure it is deleted before 'nodes'
         {
             ThisThread this_thread = nodes.borrowThisThread();
-        
+
             for (int i=0; i<nmoves; ++i)
             {
                 this->performMove(nodes, replicas, record_stats);

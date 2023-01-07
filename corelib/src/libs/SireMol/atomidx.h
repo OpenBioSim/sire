@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,32 +61,32 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomIdx&);
 public:
     AtomIdx();
     explicit AtomIdx(qint32 idx);
-    
+
     AtomIdx(const AtomIdx &other);
-    
+
     ~AtomIdx();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return AtomIdx::typeName();
     }
-    
+
     AtomIdx* clone() const;
-    
+
     static AtomIdx null();
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
 
     QString toString() const;
-    
+
     AtomIdx& operator=(const AtomIdx &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     using SireID::Index_T_<AtomIdx>::operator=;
 
     using SireID::Index_T_<AtomIdx>::operator==;
@@ -97,12 +96,12 @@ public:
     using SireID::Index_T_<AtomIdx>::operator++;
     using SireID::Index_T_<AtomIdx>::operator-=;
     using SireID::Index_T_<AtomIdx>::operator--;
-    
+
     using SireID::Index_T_<AtomIdx>::map;
-    
+
     QList<AtomIdx> map(const MolInfo &molinfo) const;
 };
-    
+
 }
 
 Q_DECLARE_METATYPE(SireMol::AtomIdx);

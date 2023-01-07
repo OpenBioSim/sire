@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -94,7 +93,7 @@ typedef SireBase::PropPtr<Perturbation> PerturbationPtr;
     is a rule for changing a property of a molecule with respect
     to a driving (reaction) coordinate. Perturbations can be used
     to implement single topology free energy calculations
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT Perturbation : public SireBase::Property
@@ -108,36 +107,36 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, Perturbation&);
 public:
     Perturbation();
     Perturbation(const Perturbation &other);
-    
+
     virtual ~Perturbation();
-    
+
     static const char* typeName();
-    
+
     virtual Perturbation* clone() const=0;
-    
+
     virtual PerturbationPtr recreate() const;
     virtual PerturbationPtr recreate(const SireCAS::Expression &mapping_function) const;
     virtual PerturbationPtr recreate(const PropertyMap &map) const;
     virtual PerturbationPtr recreate(const SireCAS::Expression &mapping_function,
                                      const PropertyMap &map) const;
-    
+
     virtual PerturbationPtr substitute(const Symbol &old_symbol,
                                        const Symbol &new_symbol) const;
-    
+
     virtual PerturbationPtr substitute(const SireCAS::Identities &identities) const;
-    
+
     virtual QList<PerturbationPtr> children() const;
-    
+
     virtual QSet<Symbol> requiredSymbols() const;
     virtual QSet<QString> requiredProperties() const=0;
-    
+
     static const Expression& defaultFunction();
     static const PerturbationSymbols& symbols();
-    
+
     const Expression& mappingFunction() const;
-    
+
     const PropertyMap& propertyMap() const;
-    
+
     Molecule perturb(const Molecule &molecule, const Values &values) const;
 
     virtual bool wouldChange(const Molecule &molecule, const Values &values) const=0;
@@ -149,17 +148,17 @@ protected:
     Perturbation(const Expression &equation, const PropertyMap &map = PropertyMap());
 
     Perturbation& operator=(const Perturbation &other);
-    
+
     virtual void perturbMolecule(MolEditor &molecule, const Values &values) const=0;
-    
+
     bool operator==(const Perturbation &other) const;
     bool operator!=(const Perturbation &other) const;
 
 private:
     /** The equation used to control the perturbation */
     Expression mapping_eqn;
-    
-    /** The property map used to find the properties 
+
+    /** The property map used to find the properties
         used in this perturbation */
     PropertyMap map;
 };
@@ -174,31 +173,31 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, NullPerturbation&)
 public:
     NullPerturbation();
     NullPerturbation(const NullPerturbation &other);
-    
+
     ~NullPerturbation();
-    
+
     static const char* typeName();
-    
+
     NullPerturbation& operator=(const NullPerturbation &other);
-    
+
     bool operator==(const NullPerturbation &other) const;
     bool operator!=(const NullPerturbation &other) const;
-    
+
     QSet<Symbol> requiredSymbols() const;
     QSet<QString> requiredProperties() const;
-    
+
     bool wouldChange(const Molecule &molecule, const Values &values) const;
-    
+
 protected:
     void perturbMolecule(MolEditor &molecule, const Values &values) const;
 };
 
 /** This class holds a collection of perturbations that can
     be applied to a molecule
-    
+
     @author Christopher Woods
 */
-class SIREMOL_EXPORT Perturbations 
+class SIREMOL_EXPORT Perturbations
         : public SireBase::ConcreteProperty<Perturbations,Perturbation>
 {
 
@@ -209,20 +208,20 @@ public:
     Perturbations();
     Perturbations(const Perturbation &perturbation);
     Perturbations(const QList<PerturbationPtr> &perturbations);
-    
+
     Perturbations(const Perturbations &other);
-    
+
     ~Perturbations();
-    
+
     Perturbations& operator=(const Perturbations &other);
-    
+
     bool operator==(const Perturbations &other) const;
     bool operator!=(const Perturbations &other) const;
-    
+
     static const char* typeName();
-    
+
     QString toString() const;
-    
+
     QList<PerturbationPtr> perturbations() const;
 
     PerturbationPtr recreate(const SireCAS::Expression &mapping_function) const;
@@ -233,20 +232,20 @@ public:
     PerturbationPtr substitute(const SireCAS::Identities &identities) const;
     PerturbationPtr substitute(const SireCAS::Symbol &old_symbol,
                                const SireCAS::Symbol &new_symbol) const;
-    
+
     QList<PerturbationPtr> children() const;
-    
+
     QSet<Symbol> requiredSymbols() const;
     QSet<QString> requiredProperties() const;
 
     bool wouldChange(const Molecule &molecule, const Values &values) const;
 
-protected:    
+protected:
     void perturbMolecule(MolEditor &molecule, const Values &values) const;
 
 private:
     void makeSane();
-    
+
     /** All of the perturbations used in this object */
     QList<PerturbationPtr> perts;
 };

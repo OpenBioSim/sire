@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -47,7 +46,7 @@ namespace SireFF
 {
 
 /** This class holds the name of a forcefield
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT FFName : public SireID::Name, public FFID
@@ -59,36 +58,36 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFName&);
 public:
     FFName();
     explicit FFName(const QString &name);
-    
+
     FFName(const QString &name, SireID::CaseSensitivity case_sensitivity);
-    
+
     FFName(const FFName &other);
-    
+
     ~FFName();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return FFName::typeName();
     }
-    
+
     FFName* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-    
+
     QString toString() const;
-    
+
     FFName& operator=(const FFName &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     bool operator==(const FFName &other) const;
-    
+
     bool operator!=(const FFName &other) const;
-    
+
     QList<FFIdx> map(const ForceFields &ffields) const;
 };
 

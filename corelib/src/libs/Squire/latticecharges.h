@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,67 +52,67 @@ public:
     LatticeCharge();
     LatticeCharge(const Vector &v, double charge);
     LatticeCharge(const Vector &v, double charge, const SireMol::Element &element);
-    
+
     LatticeCharge(double x, double y, double z, double charge);
     LatticeCharge(double x, double y, double z, double charge,
                   const SireMol::Element &element);
 
     LatticeCharge(const LatticeCharge &other);
-    
+
     ~LatticeCharge();
 
     LatticeCharge& operator=(const LatticeCharge &other);
-    
+
     bool operator==(const LatticeCharge &other) const;
     bool operator!=(const LatticeCharge &other) const;
-    
+
     double x() const
     {
         return d[0];
     }
-    
+
     double y() const
     {
         return d[1];
     }
-    
+
     double z() const
     {
         return d[2];
     }
-    
+
     double charge() const
     {
         return d[3];
     }
-    
+
     SireMol::Element element() const;
-    
+
     quint32 nProtons() const
     {
         return nprotons;
     }
-    
+
 private:
     /** The lattice point charge data */
     double d[4];
-    
+
     /** The proton number */
     quint32 nprotons;
 };
 
 /** This is a small internal class that is used to pass information about
     lattice charges to the QM programs
-    
+
     @author Christopher Woods
 */
 class SQUIRE_EXPORT LatticeCharges
 {
 public:
     LatticeCharges();
-    
+
     LatticeCharges(const LatticeCharges &other);
-    
+
     ~LatticeCharges();
 
     void reserve(int n);
@@ -124,13 +123,13 @@ public:
 
     int nCharges() const;
     int count() const;
-    
+
     void set(int i, const LatticeCharge &charge);
-    
+
     void setElement(int i, const SireMol::Element &element);
     void setCoordinates(int i, const Vector &coords);
     void setCharge(int i, double charge);
-    
+
     const LatticeCharge& operator[](int i) const;
 
     const LatticeCharge* constData() const;

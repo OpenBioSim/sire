@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,7 +63,7 @@ SIREMATHS_EXPORT const Quaternion operator*(const Vector &p1, const Quaternion &
 
 /**
 This is a quaternion class that is used to handle 3D rotations and SLERP.
- 
+
 @author Christopher Woods
 */
 class SIREMATHS_EXPORT Quaternion
@@ -78,15 +77,15 @@ friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Quaternion&);
 public:
     Quaternion();
     Quaternion(const Quaternion& p1);
-    
+
     Quaternion(SireUnits::Dimension::Angle angle, const Vector &axis);
     Quaternion(const Matrix &m);
     Quaternion(double x, double y, double z, double w);
-    
+
     ~Quaternion();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return Quaternion::typeName();
@@ -118,7 +117,7 @@ public:
     Quaternion pow(double n) const;
 
     static Quaternion identity();
-    
+
     void renormalise();
 
     bool operator==(const Quaternion &p1) const;

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,16 +56,16 @@ using namespace SireStream;
 //////////// Implementation of Restraint
 ////////////
 
-static const RegisterMetaType<Restraint> r_restraint( MAGIC_ONLY, 
+static const RegisterMetaType<Restraint> r_restraint( MAGIC_ONLY,
                                                       Restraint::typeName() );
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Restraint &restraint)
 {
     writeHeader(ds, r_restraint, 1);
-    
+
     ds << static_cast<const Property&>(restraint);
-       
+
     return ds;
 }
 
@@ -74,14 +73,14 @@ QDataStream &operator<<(QDataStream &ds, const Restraint &restraint)
 QDataStream &operator>>(QDataStream &ds, Restraint &restraint)
 {
     VersionID v = readHeader(ds, r_restraint);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(restraint);
     }
     else
         throw version_error( v, "1", r_restraint, CODELOC );
-        
+
     return ds;
 }
 
@@ -104,7 +103,7 @@ Restraint& Restraint::operator=(const Restraint &other)
     {
         Property::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -145,7 +144,7 @@ QDataStream &operator<<(QDataStream &ds,
 
     sds << restraint3d.spce
         << static_cast<const Restraint&>(restraint3d);
-    
+
     return ds;
 }
 
@@ -153,7 +152,7 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, Restraint3D &restraint3d)
 {
     VersionID v = readHeader(ds, r_restraint3d);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -163,7 +162,7 @@ QDataStream &operator>>(QDataStream &ds, Restraint3D &restraint3d)
     }
     else
         throw version_error( v, "1", r_restraint3d, CODELOC );
-        
+
     return ds;
 }
 
@@ -185,7 +184,7 @@ Restraint3D& Restraint3D::operator=(const Restraint3D &other)
 {
     Restraint::operator=(other);
     spce = other.spce;
-    
+
     return *this;
 }
 
@@ -221,35 +220,35 @@ static const RegisterMetaType<ExpressionRestraint3D> r_exprestraint3d( MAGIC_ONL
                                                    ExpressionRestraint3D::typeName() );
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                       const ExpressionRestraint3D &exprestraint3d)
 {
     writeHeader(ds, r_exprestraint3d, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << exprestraint3d.nrg_expression << exprestraint3d.vals
         << static_cast<const Restraint3D&>(exprestraint3d);
-        
+
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds, 
+QDataStream &operator>>(QDataStream &ds,
                                       ExpressionRestraint3D &exprestraint3d)
 {
     VersionID v = readHeader(ds, r_exprestraint3d);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> exprestraint3d.nrg_expression >> exprestraint3d.vals
             >> static_cast<Restraint3D&>(exprestraint3d);
     }
     else
         throw version_error( v, "1", r_exprestraint3d, CODELOC );
-        
+
     return ds;
 }
 
@@ -257,7 +256,7 @@ QDataStream &operator>>(QDataStream &ds,
 ExpressionRestraint3D::ExpressionRestraint3D() : Restraint3D()
 {}
 
-/** Construct to use the passed energy expression, with the supplied  
+/** Construct to use the passed energy expression, with the supplied
     user values */
 ExpressionRestraint3D::ExpressionRestraint3D(const Expression &expression,
                                              const Values &values)
@@ -301,7 +300,7 @@ ExpressionRestraint3D& ExpressionRestraint3D::operator=(
         nrg_expression = other.nrg_expression;
         vals = other.vals;
     }
-    
+
     return *this;
 }
 
@@ -344,8 +343,8 @@ void ExpressionRestraint3D::_pvt_setValue(const Symbol &symbol, double value)
 }
 
 /** Set the value of 'symbol' to 'value'. Nothing is done if this
-    symbol is not in the passed expression. 
-    
+    symbol is not in the passed expression.
+
     \throw SireError::invalid_arg
 */
 void ExpressionRestraint3D::setValue(const Symbol &symbol, double value)
@@ -379,7 +378,7 @@ double ExpressionRestraint3D::getValue(const Symbol &symbol) const
                     .arg(symbol.toString(), this->toString())
                     .arg(Sire::toString(this->symbols())), CODELOC );
     }
-    
+
     return vals[symbol];
 }
 
@@ -411,12 +410,12 @@ Values ExpressionRestraint3D::values() const
 Values ExpressionRestraint3D::userValues() const
 {
     Values ret;
-    
+
     foreach (Symbol symbol, this->userSymbols())
     {
         ret.set( symbol, vals[symbol] );
     }
-    
+
     return ret;
 }
 
@@ -433,13 +432,13 @@ MolarEnergy ExpressionRestraint3D::energy() const
 static const RegisterMetaType<NullRestraint> r_nullrestraint;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                       const NullRestraint &nullrestraint)
 {
     writeHeader(ds, r_nullrestraint, 1);
-    
+
     ds << static_cast<const Restraint3D&>(nullrestraint);
-    
+
     return ds;
 }
 
@@ -447,14 +446,14 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, NullRestraint &nullrestraint)
 {
     VersionID v = readHeader(ds, r_nullrestraint);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Restraint3D&>(nullrestraint);
     }
     else
         throw version_error( v, "1", r_nullrestraint, CODELOC );
-        
+
     return ds;
 }
 
@@ -540,7 +539,7 @@ bool NullRestraint::contains(const MolID&) const
 {
     return false;
 }
-    
+
 /** There are no molecules in the NullRestraint */
 bool NullRestraint::usesMoleculesIn(const ForceTable &forcetable) const
 {
@@ -560,7 +559,7 @@ void NullRestraint::setValue(const Symbol&, double)
 
 /** Return the value of the symbol 'symbol' in this restraint. This
     raises an exception if this symbol is not used
-    
+
     \throw SireCAS::missing_symbol
 */
 double NullRestraint::getValue(const Symbol &symbol) const
@@ -568,7 +567,7 @@ double NullRestraint::getValue(const Symbol &symbol) const
     throw SireCAS::missing_symbol( QObject::tr(
             "The NullRestraint class does not use the symbol %1.")
                 .arg(symbol.toString()), CODELOC );
-                
+
     return 0;
 }
 
@@ -614,9 +613,9 @@ Values NullRestraint::builtinValues() const
     return Values();
 }
 
-/** Return the differential of this restraint with respect to the 
+/** Return the differential of this restraint with respect to the
     symbol 'symbol'
-    
+
     \throw SireCAS::unavailable_differential
 */
 RestraintPtr NullRestraint::differentiate(const Symbol&) const

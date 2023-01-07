@@ -17,7 +17,7 @@ for arg in sys.argv[1:]:
         print("                      and Sire will be compiled and installed. By default, the")
         print("                      current directory will be used.")
         print("    --no-execute      Only show the commands that will be run. Don't actually run anything.")
-        print("\nSire is released under the GPL. For more information see http://siremol.org")
+        print("\nSire is released under the GPL. For more information see http://sire.openbiosim.org")
         sys.exit(0)
 
 
@@ -112,7 +112,7 @@ if not os.path.exists("python"):
             sys.exit(-1)
 else:
     print("Updating the python wrappers...")
-    
+
     if no_execute:
         print("svn update ./python")
     elif os.system("svn update ./python") != 0:
@@ -126,7 +126,7 @@ if download_only:
 if rebuild:
     if os.path.exists("build"):
         print("Rebuilding from scratch so removing existing build directory...")
-        
+
         if no_execute:
             print("rm -rf ./build")
         else:

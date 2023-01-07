@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,20 +60,20 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, NullFF&);
 public:
     NullFF();
     NullFF(const NullFF &other);
-    
+
     ~NullFF();
-    
+
     static const char* typeName();
 
     const FFComponent& components() const;
-    
+
     NullFF& operator=(const NullFF &other);
-    
+
     bool operator==(const NullFF &other) const;
     bool operator!=(const NullFF &other) const;
-    
+
     const MoleculeGroup& at(MGNum mgnum) const;
-    
+
     QString toString() const;
 
     bool setProperty(const QString &name, const Property &value);
@@ -90,26 +89,26 @@ protected:
     void recalculateEnergy();
     void group_add(quint32 i, const MoleculeView &molview,
                    const PropertyMap &map);
-    void group_add(quint32 i, const ViewsOfMol &molviews, 
+    void group_add(quint32 i, const ViewsOfMol &molviews,
                    const PropertyMap &map);
-    void group_add(quint32 i, const Molecules &molecules, 
+    void group_add(quint32 i, const Molecules &molecules,
                    const PropertyMap &map);
-    void group_add(quint32 i, const MoleculeGroup &molgroup, 
+    void group_add(quint32 i, const MoleculeGroup &molgroup,
                    const PropertyMap &map);
-    bool group_addIfUnique(quint32 i, const MoleculeView &molview, 
+    bool group_addIfUnique(quint32 i, const MoleculeView &molview,
                            const PropertyMap &map);
-    ViewsOfMol group_addIfUnique(quint32 i, const ViewsOfMol &molviews, 
+    ViewsOfMol group_addIfUnique(quint32 i, const ViewsOfMol &molviews,
                                  const PropertyMap &map);
-    QList<ViewsOfMol> group_addIfUnique(quint32 i, const Molecules &molecules, 
+    QList<ViewsOfMol> group_addIfUnique(quint32 i, const Molecules &molecules,
                                         const PropertyMap &map);
-    QList<ViewsOfMol> group_addIfUnique(quint32 i, const MoleculeGroup &molgroup, 
+    QList<ViewsOfMol> group_addIfUnique(quint32 i, const MoleculeGroup &molgroup,
                                         const PropertyMap &map);
 
     bool group_remove(quint32 i, const MoleculeView &molview);
     ViewsOfMol group_remove(quint32 i, const ViewsOfMol &molviews);
     QList<ViewsOfMol> group_remove(quint32 i, const Molecules &molecules);
     QList<ViewsOfMol> group_remove(quint32 i, const MoleculeGroup &molgroup);
-    
+
     bool group_removeAll(quint32 i, const MoleculeView &molview);
     ViewsOfMol group_removeAll(quint32 i, const ViewsOfMol &molviews);
     QList<ViewsOfMol> group_removeAll(quint32 i, const Molecules &molecules);
@@ -124,32 +123,32 @@ protected:
 
     QList<Molecule> group_update(quint32 i, const Molecules &molecules, bool auto_commit);
     QList<Molecule> group_update(quint32 i, const MoleculeGroup &molgroup, bool auto_commit);
-    
-    bool group_setContents(quint32 i, const MoleculeView &molview, 
+
+    bool group_setContents(quint32 i, const MoleculeView &molview,
                            const PropertyMap &map);
-    bool group_setContents(quint32 i, const ViewsOfMol &molviews, 
+    bool group_setContents(quint32 i, const ViewsOfMol &molviews,
                            const PropertyMap &map);
-    bool group_setContents(quint32 i, const Molecules &molecules, 
+    bool group_setContents(quint32 i, const Molecules &molecules,
                            const PropertyMap &map);
-    bool group_setContents(quint32 i, const MoleculeGroup &molgroup, 
+    bool group_setContents(quint32 i, const MoleculeGroup &molgroup,
                            const PropertyMap &map);
 
     void _pvt_updateName();
 
     const MoleculeGroup& getGroup(MGNum mgnum) const;
-    
+
     void getGroups(const QList<MGNum> &mgnums,
                    QVarLengthArray<const MoleculeGroup*,10> &groups) const;
 
     QHash<MGNum,const MoleculeGroup*> getGroups() const;
-    
+
     void group_setName(quint32 i, const QString &new_name);
 
     void reindex();
 
 private:
     NullFF(bool);
-    
+
     static NullFF& getSharedNullFF();
 
     Properties props;

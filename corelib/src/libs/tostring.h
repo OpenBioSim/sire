@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -63,7 +62,7 @@ namespace Sire
     This file contains the functions necessary to implement a generic "toString"
     function that obtains a string representation of most objects (including
     containers)
-    
+
     @author Christopher Woods
 */
 
@@ -77,7 +76,7 @@ struct qstr_numtype
     }
 };
 
-/** Return a string representation of a class type (must have 
+/** Return a string representation of a class type (must have
     implemented a .toString() member function, or else you
     must supply a specific instantiation) */
 template<class T>
@@ -129,14 +128,14 @@ template<class T>
 QString qstr(const QList<T> &objs)
 {
     QStringList strngs;
-    
+
     for (typename QList<T>::const_iterator it = objs.begin();
          it != objs.end();
          ++it)
     {
         strngs.append( qstr(*it) );
     }
-    
+
     return QString("[ %1 ]").arg( strngs.join(","));
 }
 
@@ -145,14 +144,14 @@ template<class T>
 QString qstr(const QVector<T> &objs)
 {
     QStringList strngs;
-    
+
     for (typename QVector<T>::const_iterator it = objs.begin();
          it != objs.end();
          ++it)
     {
         strngs.append( qstr(*it) );
     }
-    
+
     return QString("[ %1 ]").arg( strngs.join(","));
 }
 
@@ -161,14 +160,14 @@ template<class T>
 QString qstr(const QSet<T> &objs)
 {
     QStringList strngs;
-    
+
     for (typename QSet<T>::const_iterator it = objs.begin();
          it != objs.end();
          ++it)
     {
         strngs.append( qstr(*it) );
     }
-    
+
     return QString("{ %1 }").arg( strngs.join(","));
 }
 
@@ -177,14 +176,14 @@ template<class S, class T>
 QString qstr(const QHash<S,T> &objs)
 {
     QStringList strngs;
-    
+
     for (typename QHash<S,T>::const_iterator it = objs.begin();
          it != objs.end();
          ++it)
     {
         strngs.append( QString(" %1 : %2").arg( qstr(it.key()), qstr(it.value()) ) );
     }
-    
+
     return QString("{ %1 }").arg( strngs.join(","));
 }
 
@@ -193,14 +192,14 @@ template<class S, class T>
 QString qstr(const QMultiHash<S,T> &objs)
 {
     QStringList strngs;
-    
+
     for (typename QMultiHash<S,T>::const_iterator it = objs.begin();
          it != objs.end();
          ++it)
     {
         strngs.append( QString(" %1 : %2").arg( qstr(it.key()), qstr(it.value()) ) );
     }
-    
+
     return QString("{ %1 }").arg( strngs.join(","));
 }
 
@@ -209,14 +208,14 @@ template<class S, class T>
 QString qstr(const QMap<S,T> &objs)
 {
     QStringList strngs;
-    
+
     for (typename QMap<S,T>::const_iterator it = objs.begin();
          it != objs.end();
          ++it)
     {
         strngs.append( QString(" %1 : %2").arg( qstr(it.key()), qstr(it.value()) ) );
     }
-    
+
     return QString("{ %1 }").arg( strngs.join(","));
 }
 

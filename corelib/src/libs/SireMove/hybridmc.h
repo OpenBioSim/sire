@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -55,11 +54,11 @@ SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::HMCGenerator&);
 namespace SireMove
 {
 
-/** This class provides the base class of an extension 
-    of the velocity generator that generates velocities 
+/** This class provides the base class of an extension
+    of the velocity generator that generates velocities
     in such a way that the bias can be
     calculated and accounted for within the hybrid MC move
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT HMCVelGen : public VelocityGenerator
@@ -72,7 +71,7 @@ public:
     HMCVelGen();
 
     HMCVelGen(const HMCVelGen &other);
-    
+
     ~HMCVelGen();
 
     void setGenerator(const RanGenerator &generator);
@@ -81,16 +80,16 @@ public:
 
     virtual void setTemperature(SireUnits::Dimension::Temperature temperature);
 
-    /** Generate the velocites in the passed MD object, 
+    /** Generate the velocites in the passed MD object,
         returning the biasing factor for the HMC algorithm */
     virtual double generate(const System &system, MolecularDynamics &md)=0;
-    
+
     /** Return the bias for the velocities in the passed MD object */
     virtual double getBias(const MolecularDynamics &md)=0;
 
 protected:
     HMCVelGen& operator=(const HMCVelGen &other);
-    
+
     bool operator==(const HMCVelGen &other) const;
     bool operator!=(const HMCVelGen &other) const;
 
@@ -101,7 +100,7 @@ private:
         numbers needed by the velocities */
     RanGenerator rangen;
 
-    /** The temperature used to control the generation of 
+    /** The temperature used to control the generation of
         the velocities - this is the temperature of the MC move */
     SireUnits::Dimension::Temperature temp;
 };
@@ -109,9 +108,9 @@ private:
 /** This is the velocity generator used for the standard
     Hybrid Monte Carlo move. This generates velocities such
     that the acceptance test is just based on the change
-    in total energy, which, for a good integrator, is 
+    in total energy, which, for a good integrator, is
     near zero, so nearly all moves should be accepted */
-class SIREMOVE_EXPORT HMCGenerator 
+class SIREMOVE_EXPORT HMCGenerator
         : public SireBase::ConcreteProperty<HMCGenerator,HMCVelGen>
 {
 
@@ -121,29 +120,29 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, HMCGenerator&);
 public:
     HMCGenerator();
     HMCGenerator(const HMCGenerator &other);
-    
+
     ~HMCGenerator();
-    
+
     static const char* typeName();
-    
+
     HMCGenerator& operator=(const HMCGenerator &other);
-    
+
     bool operator==(const HMCGenerator &other) const;
     bool operator!=(const HMCGenerator &other) const;
-    
+
     double generate(const System &system, MolecularDynamics &md);
     double getBias(const MolecularDynamics &md);
-    
-    AtomVelocities generate(const MoleculeView &molview, 
+
+    AtomVelocities generate(const MoleculeView &molview,
                             const PropertyMap &map = PropertyMap()) const;
 };
 
-/** This class implements a hybrid Monte Carlo move. This is a 
+/** This class implements a hybrid Monte Carlo move. This is a
     Monte Carlo move that uses a symplectic, time-reversible
     NVE integrator to run some molecular dynamics. The block
     of MD is accepted according to a Metropolis MC test
     on the change in total energy (kinetic+potential).
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT HybridMC : public SireBase::ConcreteProperty<HybridMC,MonteCarlo>
@@ -190,14 +189,14 @@ public:
     HybridMC(const HybridMC &other);
 
     ~HybridMC();
-    
+
     static const char* typeName();
-    
+
     HybridMC& operator=(const HybridMC &other);
-    
+
     bool operator==(const HybridMC &other) const;
     bool operator!=(const HybridMC &other) const;
-    
+
     QString toString() const;
 
     const MoleculeGroup& moleculeGroup() const;
@@ -206,17 +205,17 @@ public:
     void setSpaceProperty(const PropertyName &space_property);
 
     void setGenerator(const RanGenerator &rangenerator);
-    
+
     void setVelocityGenerator(const HMCVelGen &generator);
-    
+
     const HMCVelGen& velocityGenerator() const;
-    
+
     int nDynamicsSteps();
 
     void setNDynamicsSteps(int nsteps);
 
     SireUnits::Dimension::Time timeStep() const;
-    
+
     void setTimeStep(SireUnits::Dimension::Time timestep);
 
     void move(System &system, int nmoves, bool record_stats=true);
@@ -226,10 +225,10 @@ private:
 
     /** The MD object used to run the molecular dynamics moves */
     MolecularDynamics md;
-    
+
     /** The generator used to generate the random velocities for each move */
     VelGenPtr velgen;
-    
+
     /** The number of MD moves to perform per HybridMC move */
     quint32 nsteps;
 };

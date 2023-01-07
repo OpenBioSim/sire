@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -103,7 +102,7 @@ public:
     QString toString() const;
 
     QStringList propertyKeys() const;
-    
+
     QStringList metadataKeys() const;
     QStringList metadataKeys(const PropertyName &key) const;
 
@@ -112,16 +111,16 @@ public:
 
     template<class T>
     QStringList metadataKeysOfType() const;
-    
+
     template<class T>
     QStringList metadataKeysOfType(const PropertyName &key) const;
 
     const_iterator begin() const;
     const_iterator constBegin() const;
-    
+
     const_iterator find(const QString &key) const;
     const_iterator constFind(const QString &key) const;
-    
+
     const_iterator end() const;
     const_iterator constEnd() const;
 
@@ -132,11 +131,11 @@ public:
     const Property& property(const PropertyName &key) const;
     const Property& property(const PropertyName &key,
                              const Property &default_value) const;
-    
+
     const Property& metadata(const PropertyName &metakey) const;
     const Property& metadata(const PropertyName &metakey,
                              const Property &default_value) const;
-    
+
     const Property& metadata(const PropertyName &key,
                              const PropertyName &metakey) const;
     const Property& metadata(const PropertyName &key,
@@ -150,7 +149,7 @@ public:
 
     void setProperty(const QString &key, const Property &value,
                      bool clear_metadata);
-    
+
     void setMetadata(const QString &metakey, const Property &value);
     void setMetadata(const QString &key,
                      const QString &metakey, const Property &value);
@@ -159,39 +158,39 @@ public:
 
     void removeMetadata(const QString &metakey);
     void removeAllMetadata();
-    
+
     void removeMetadata(const QString &key, const QString &metakey);
     void removeAllMetadata(const QString &key);
 
     void clear();
 
     bool hasProperty(const PropertyName &key) const;
-    
+
     bool hasMetadata(const PropertyName &metakey) const;
-    
-    bool hasMetadata(const PropertyName &key, 
+
+    bool hasMetadata(const PropertyName &key,
                      const PropertyName &metakey) const;
-                     
+
     template<class T>
     bool hasPropertyOfType(const PropertyName &key) const;
-                     
+
     template<class T>
     bool hasMetadataOfType(const PropertyName &metakey) const;
-    
+
     template<class T>
     bool hasMetadataOfType(const PropertyName &key,
                            const PropertyName &metakey) const;
 
     const char* propertyType(const PropertyName &key) const;
-    
+
     const char* metadataType(const PropertyName &metakey) const;
     const char* metadataType(const PropertyName &key,
                              const PropertyName &metakey) const;
-    
+
     void assertContainsProperty(const PropertyName &key) const;
-    
+
     void assertContainsMetadata(const PropertyName &metakey) const;
-    void assertContainsMetadata(const PropertyName &key, 
+    void assertContainsMetadata(const PropertyName &key,
                                 const PropertyName &metakey) const;
 
 private:
@@ -217,7 +216,7 @@ QStringList Properties::propertyKeysOfType() const
         if (it.value()->isA<T>())
             keys.append(it.key());
     }
-    
+
     return keys;
 }
 
@@ -227,9 +226,9 @@ SIRE_OUTOFLINE_TEMPLATE
 QStringList Properties::metadataKeysOfType() const
 {
     QStringList metakeys;
-    
+
     const Properties &metadata = this->allMetadata();
-    
+
     for (Properties::const_iterator it = metadata.constBegin();
          it != metadata.constEnd();
          ++it)
@@ -237,13 +236,13 @@ QStringList Properties::metadataKeysOfType() const
         if (it.value()->isA<T>())
             metakeys.append(it.key());
     }
-    
+
     return metakeys;
 }
 
 /** Return the metakeys of all metadata of type T for the property
     with key 'key'
-    
+
     \throw SireBase::missing_property
 */
 template<class T>
@@ -252,7 +251,7 @@ QStringList Properties::metadataKeysOfType(const PropertyName &key) const
 {
     QStringList metakeys;
     const Properties &metadata = this->allMetadata(key);
-    
+
     for (Properties::const_iterator it = metadata.constBegin();
          it != metadata.constEnd();
          ++it)
@@ -260,7 +259,7 @@ QStringList Properties::metadataKeysOfType(const PropertyName &key) const
         if (it.value()->isA<T>())
             metakeys.append(it.key());
     }
-    
+
     return metakeys;
 }
 
@@ -270,10 +269,10 @@ template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 bool Properties::hasPropertyOfType(const PropertyName &key) const
 {
-    return this->hasProperty(key) and 
+    return this->hasProperty(key) and
            this->property(key).isA<T>();
 }
-                 
+
 /** Return whether or not this molecule has some metadata at metakey
     'metakey' that is of type 'T' */
 template<class T>
@@ -286,7 +285,7 @@ bool Properties::hasMetadataOfType(const PropertyName &metakey) const
 
 /** Return whether or not the property at key 'key' has some metadata
     at metakey 'metakey' that is of type 'T'
-    
+
     \throw SireBase::missing_property
 */
 template<class T>

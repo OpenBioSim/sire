@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,7 +47,7 @@ using namespace SireStream;
 ///////////// Implementation of MolDeleter
 /////////////
 
-static const RegisterMetaType<MolDeleter> r_moldeleter( MAGIC_ONLY, 
+static const RegisterMetaType<MolDeleter> r_moldeleter( MAGIC_ONLY,
                                                         MolDeleter::typeName() );
 
 /** Serialise to a binary datastream */
@@ -56,9 +55,9 @@ QDataStream &operator<<(QDataStream &ds,
                                         const MolDeleter &moldeleter)
 {
     writeHeader(ds, r_moldeleter, 1);
-    
+
     ds << static_cast<const Property&>(moldeleter);
-    
+
     return ds;
 }
 
@@ -66,14 +65,14 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, MolDeleter &moldeleter)
 {
     VersionID v = readHeader(ds, r_moldeleter);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(moldeleter);
     }
     else
         throw version_error(v, "1", r_moldeleter, CODELOC);
-        
+
     return ds;
 }
 
@@ -129,9 +128,9 @@ static const RegisterMetaType<NullDeleter> r_nulldeleter;
 QDataStream &operator<<(QDataStream &ds, const NullDeleter &nulldeleter)
 {
     writeHeader(ds, r_nulldeleter, 1);
-    
+
     ds << static_cast<const MolDeleter&>(nulldeleter);
-    
+
     return ds;
 }
 
@@ -139,7 +138,7 @@ QDataStream &operator<<(QDataStream &ds, const NullDeleter &nulldeleter)
 QDataStream &operator>>(QDataStream &ds, NullDeleter &nulldeleter)
 {
     VersionID v = readHeader(ds, r_nulldeleter);
-    
+
     if (v == 1)
     {
         ds >> static_cast<MolDeleter&>(nulldeleter);
@@ -187,7 +186,7 @@ bool NullDeleter::operator!=(const NullDeleter &other) const
     return MolDeleter::operator!=(other);
 }
 
-/** Set the generator used to select random molecules 
+/** Set the generator used to select random molecules
     (this does nothing!) */
 void NullDeleter::setGenerator(const RanGenerator&)
 {}
@@ -216,11 +215,11 @@ QDataStream &operator<<(QDataStream &ds,
                                         const SystemWideDeleter &syswide)
 {
     writeHeader(ds, r_syswide, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << syswide.smplr << static_cast<const MolDeleter&>(syswide);
-    
+
     return ds;
 }
 
@@ -229,16 +228,16 @@ QDataStream &operator>>(QDataStream &ds,
                                         SystemWideDeleter &syswide)
 {
     VersionID v = readHeader(ds, r_syswide);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> syswide.smplr >> static_cast<MolDeleter&>(syswide);
     }
     else
         throw version_error(v, "1", r_syswide, CODELOC);
-        
+
     return ds;
 }
 
@@ -254,7 +253,7 @@ SystemWideDeleter::SystemWideDeleter(const MoleculeGroup &molgroup)
                     smplr( UniformSampler(molgroup) )
 {}
 
-/** Construct a deleter that deletes molecules chosen using the 
+/** Construct a deleter that deletes molecules chosen using the
     passed sampler from the entire system */
 SystemWideDeleter::SystemWideDeleter(const Sampler &sampler)
                   : ConcreteProperty<SystemWideDeleter,MolDeleter>(),
@@ -284,7 +283,7 @@ SystemWideDeleter& SystemWideDeleter::operator=(const SystemWideDeleter &other)
         smplr = other.smplr;
         MolDeleter::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -318,7 +317,7 @@ const Sampler& SystemWideDeleter::sampler() const
     return smplr.read();
 }
 
-/** Return the molecule group from which molecules to be 
+/** Return the molecule group from which molecules to be
     deleted are chosen */
 const MoleculeGroup& SystemWideDeleter::group() const
 {
@@ -349,29 +348,29 @@ void SystemWideDeleter::setGroup(const MoleculeGroup &molgroup)
     (normalised so that a probability of 1 is returned if the molecule
      was picked purely randomly). This deleter deletes the molecule
      from the entire system. This returns an empty molecule if
-     the molecule was not contained in the system and nothing 
+     the molecule was not contained in the system and nothing
      was deleted */
 tuple<Molecule,double> SystemWideDeleter::deleteFrom(System &system)
 {
     smplr.edit().updateFrom(system);
-    
+
     tuple<Molecule,double> picked_mol = smplr.read().sampleMolecule();
-    
+
     if (picked_mol.get<1>() == 0)
         //nothing was picked
         return picked_mol;
-        
+
     else if ( system.remove(picked_mol.get<0>().number()) )
     {
         //now normalise the picking probability
         picked_mol.get<1>() /= group().nMolecules();
-        
+
         //update the sampler again, as it now has fewer molecules
         smplr.edit().updateFrom(system);
-        
+
         return picked_mol;
     }
-    else 
+    else
         //the picked molecule isn't in the system - this is an edge
         //case where the molecule group in the sampler is not actually
         //in the system either!
@@ -389,12 +388,12 @@ QDataStream &operator<<(QDataStream &ds,
                                         const SpecifiedGroupsDeleter &specgroups)
 {
     writeHeader(ds, r_specgroups, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << specgroups.smplr << specgroups.mgid
         << static_cast<const MolDeleter&>(specgroups);
-        
+
     return ds;
 }
 
@@ -403,17 +402,17 @@ QDataStream &operator>>(QDataStream &ds,
                                         SpecifiedGroupsDeleter &specgroups)
 {
     VersionID v = readHeader(ds, r_specgroups);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> specgroups.smplr >> specgroups.mgid
             >> static_cast<MolDeleter&>(specgroups);
     }
     else
         throw version_error(v, "1", r_specgroups, CODELOC);
-        
+
     return ds;
 }
 
@@ -422,20 +421,20 @@ SpecifiedGroupsDeleter::SpecifiedGroupsDeleter()
                        : ConcreteProperty<SpecifiedGroupsDeleter,MolDeleter>()
 {}
 
-/** Construct a deleter that deletes molecules selected at random from the 
+/** Construct a deleter that deletes molecules selected at random from the
     molecule group 'molgroup' from the molecule groups that are identified
     by the ID in 'mgid' */
-SpecifiedGroupsDeleter::SpecifiedGroupsDeleter(const MoleculeGroup &molgroup, 
+SpecifiedGroupsDeleter::SpecifiedGroupsDeleter(const MoleculeGroup &molgroup,
                                                const MGID &mgroup_id)
                        : ConcreteProperty<SpecifiedGroupsDeleter,MolDeleter>(),
                          smplr( UniformSampler(molgroup) ),
                          mgid(mgroup_id)
 {}
 
-/** Construct a deleter that deletes molecules selected at random using the 
-    passed sampler from the molecule groups that are identified by the 
+/** Construct a deleter that deletes molecules selected at random using the
+    passed sampler from the molecule groups that are identified by the
     ID in 'mgid' */
-SpecifiedGroupsDeleter::SpecifiedGroupsDeleter(const Sampler &sampler, 
+SpecifiedGroupsDeleter::SpecifiedGroupsDeleter(const Sampler &sampler,
                                                const MGID &mgroup_id)
                        : ConcreteProperty<SpecifiedGroupsDeleter,MolDeleter>(),
                          smplr(sampler), mgid(mgroup_id)
@@ -466,7 +465,7 @@ SpecifiedGroupsDeleter& SpecifiedGroupsDeleter::operator=(
         mgid = other.mgid;
         MolDeleter::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -546,29 +545,29 @@ void SpecifiedGroupsDeleter::setSpecifiedGroups(const MGID &mgroup_id)
     (normalised so that a probability of 1 is returned if the molecule
      was picked purely randomly). This deleter deletes the molecule
      from the entire system. This returns an empty molecule if
-     the molecule was not contained in the system and nothing 
+     the molecule was not contained in the system and nothing
      was deleted */
 tuple<Molecule,double> SpecifiedGroupsDeleter::deleteFrom(System &system)
 {
     smplr.edit().updateFrom(system);
-    
+
     tuple<Molecule,double> picked_mol = smplr.read().sampleMolecule();
-    
+
     if (picked_mol.get<1>() == 0)
         //nothing was picked
         return picked_mol;
-        
+
     else if ( system.remove(picked_mol.get<0>().number(), mgid) )
     {
         //now normalise the picking probability
         picked_mol.get<1>() /= group().nMolecules();
-        
+
         //update the sampler again, as it now has fewer molecules
         smplr.edit().updateFrom(system);
-        
+
         return picked_mol;
     }
-    else 
+    else
         //the picked molecule isn't in the system - this is an edge
         //case where the molecule group in the sampler is not actually
         //in the system either!

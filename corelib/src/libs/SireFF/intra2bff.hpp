@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,14 +56,14 @@ namespace SireFF
 using SireBase::ChunkedVector;
 
 /** This class provides an intramolecular non-bonded forcefield
-    that can work with an two-body potential (provided via the 
-    template type 'Potential'). 
-    
+    that can work with an two-body potential (provided via the
+    template type 'Potential').
+
     @author Christopher Woods
 */
 template<class Potential>
-class Intra2BFF 
-            : public SireBase::ConcreteProperty<Intra2BFF<Potential>, G1FF>, 
+class Intra2BFF
+            : public SireBase::ConcreteProperty<Intra2BFF<Potential>, G1FF>,
               public Potential
 {
 
@@ -76,17 +75,17 @@ public:
 
     Intra2BFF();
     Intra2BFF(const QString &name);
-    
+
     Intra2BFF(const Intra2BFF<Potential> &other);
-    
+
     ~Intra2BFF();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     Intra2BFF<Potential>& operator=(const Intra2BFF<Potential> &other);
-    
+
     bool operator==(const Intra2BFF<Potential> &other) const;
     bool operator!=(const Intra2BFF<Potential> &other) const;
 
@@ -99,7 +98,7 @@ public:
     bool containsProperty(const QString &name) const;
     const Properties& properties() const;
 
-    void mustNowRecalculateFromScratch();    
+    void mustNowRecalculateFromScratch();
 
 protected:
 
@@ -120,17 +119,17 @@ protected:
     void recalculateEnergy();
 
     void changedPotential();
-    
+
     void _pvt_added(const PartialMolecule &mol, const PropertyMap &map);
 
     void _pvt_removed(const PartialMolecule &mol);
 
     void _pvt_changed(const SireMol::Molecule &molecule, bool auto_commit);
     void _pvt_changed(const QList<SireMol::Molecule> &molecules, bool auto_commit);
-    
+
     void _pvt_removedAll();
-        
-    bool _pvt_wouldChangeProperties(MolNum molnum, 
+
+    bool _pvt_wouldChangeProperties(MolNum molnum,
                                     const PropertyMap &map) const;
 
     void _pvt_updateName();
@@ -153,8 +152,8 @@ protected:
 /** Constructor */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-Intra2BFF<Potential>::Intra2BFF() 
-                     : SireBase::ConcreteProperty<Intra2BFF<Potential>,G1FF>(), 
+Intra2BFF<Potential>::Intra2BFF()
+                     : SireBase::ConcreteProperty<Intra2BFF<Potential>,G1FF>(),
                        Potential()
 {
     this->_pvt_updateName();
@@ -164,7 +163,7 @@ Intra2BFF<Potential>::Intra2BFF()
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 Intra2BFF<Potential>::Intra2BFF(const QString &ffname)
-                     : SireBase::ConcreteProperty<Intra2BFF<Potential>,G1FF>(), 
+                     : SireBase::ConcreteProperty<Intra2BFF<Potential>,G1FF>(),
                        Potential()
 {
     FF::setName(ffname);
@@ -174,7 +173,7 @@ Intra2BFF<Potential>::Intra2BFF(const QString &ffname)
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 Intra2BFF<Potential>::Intra2BFF(const Intra2BFF<Potential> &other)
-                     : SireBase::ConcreteProperty<Intra2BFF<Potential>,G1FF>(other), 
+                     : SireBase::ConcreteProperty<Intra2BFF<Potential>,G1FF>(other),
                        Potential(other),
                        mols(other.mols), changed_mols(other.changed_mols),
                        ffcomponents(other.ffcomponents)
@@ -189,19 +188,19 @@ Intra2BFF<Potential>::~Intra2BFF()
 /** Copy assignment operator */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-Intra2BFF<Potential>& 
+Intra2BFF<Potential>&
 Intra2BFF<Potential>::operator=(const Intra2BFF<Potential> &other)
 {
     if (this != &other)
     {
         G1FF::operator=(other);
         Potential::operator=(other);
-        
+
         mols = other.mols;
         changed_mols = other.changed_mols;
         ffcomponents = other.ffcomponents;
     }
-    
+
     return *this;
 }
 
@@ -222,7 +221,7 @@ bool Intra2BFF<Potential>::operator!=(const Intra2BFF<Potential> &other) const
 {
     return G1FF::operator!=(other);
 }
-    
+
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 const char* Intra2BFF<Potential>::typeName()
@@ -252,7 +251,7 @@ const typename Potential::Components& Intra2BFF<Potential>::components() const
     return ffcomponents;
 }
 
-/** Function used to perform the work of changing the name of this 
+/** Function used to perform the work of changing the name of this
     forcefield - this renames the component symbols and the molecule group */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
@@ -301,10 +300,10 @@ const Properties& Intra2BFF<Potential>::properties() const
     return Potential::properties();
 }
 
-/** Tell the forcefield that everything now should be calculated 
+/** Tell the forcefield that everything now should be calculated
     from scratch (and thus to stop recording changes). This is a useful
     function to call if you are about to make many changes to this
-    forcefield (e.g. performing an MD move), as this prevents the 
+    forcefield (e.g. performing an MD move), as this prevents the
     potentially costly record keeping needed to calculate the change
     in energy associated with the move. */
 template<class Potential>
@@ -313,12 +312,12 @@ void Intra2BFF<Potential>::mustNowRecalculateFromScratch()
 {
     //record that this forcefield is dirty
     G1FF::setDirty();
-    
+
     //now clear any delta information
     changed_mols.clear();
 }
 
-/** Return whether or not we need to record the changes to this   
+/** Return whether or not we need to record the changes to this
     forcefield (not necessary if the energy has to be recalculated
     from scratch) */
 template<class Potential>
@@ -338,20 +337,20 @@ void Intra2BFF<Potential>::recordChange(
         return;
 
     MolNum molnum = change.number();
-    
+
     if (changed_mols.contains(molnum))
     {
         ChangedMolecule &old_change = changed_mols[molnum];
-        
+
         if (old_change.oldMolecule() == change.newMolecule())
         {
             //we have reverted the change!
             changed_mols.remove(molnum);
-            
+
             if (changed_mols.isEmpty())
                 //there are no changes
                 G1FF::setClean();
-            
+
             return;
         }
         else
@@ -364,7 +363,7 @@ void Intra2BFF<Potential>::recordChange(
     {
         changed_mols.insert(molnum, change);
     }
-    
+
     G1FF::setDirty();
 }
 
@@ -387,7 +386,7 @@ void Intra2BFF<Potential>::changedPotential()
     this->mustNowRecalculateFromScratch();
 }
 
-/** Record the fact that the molecule 'mol' has been added to this forcefield 
+/** Record the fact that the molecule 'mol' has been added to this forcefield
 
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -395,7 +394,7 @@ void Intra2BFF<Potential>::changedPotential()
 */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-void Intra2BFF<Potential>::_pvt_added(const PartialMolecule &molecule, 
+void Intra2BFF<Potential>::_pvt_added(const PartialMolecule &molecule,
                                       const PropertyMap &map)
 {
     if (this->recordingChanges())
@@ -449,7 +448,7 @@ void Intra2BFF<Potential>::_pvt_changed(const SireMol::Molecule &molecule, bool 
     }
 }
 
-/** Record that the provided list of molecules have changed 
+/** Record that the provided list of molecules have changed
 
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -466,7 +465,7 @@ void Intra2BFF<Potential>::_pvt_changed(const QList<SireMol::Molecule> &molecule
     try
     {
         if (this->recordingChanges())
-        {   
+        {
             for (QList<SireMol::Molecule>::const_iterator it = molecules.constBegin();
                  it != molecules.constEnd();
                  ++it)
@@ -494,7 +493,7 @@ void Intra2BFF<Potential>::_pvt_changed(const QList<SireMol::Molecule> &molecule
         throw;
     }
 }
-    
+
 /** Record that all of the molecules have been removed */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
@@ -503,12 +502,12 @@ void Intra2BFF<Potential>::_pvt_removedAll()
     mols.clear();
     this->mustNowRecalculateFromScratch();
 }
- 
+
 /** Return whether or not the supplied property map contains different
-    properties for the molecule with number 'molnum' */       
+    properties for the molecule with number 'molnum' */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-bool Intra2BFF<Potential>::_pvt_wouldChangeProperties(MolNum molnum, 
+bool Intra2BFF<Potential>::_pvt_wouldChangeProperties(MolNum molnum,
                                                       const PropertyMap &map) const
 {
     return mols.wouldChangeProperties(molnum, map);
@@ -523,7 +522,7 @@ SIRE_OUTOFLINE_TEMPLATE
 void Intra2BFF<Potential>::recalculateEnergy()
 {
     int nmols = mols.count();
-    const ChunkedVector<typename Potential::Molecule> &mols_array 
+    const ChunkedVector<typename Potential::Molecule> &mols_array
                             = mols.moleculesByIndex();
 
     //tell the potential that we are starting an evaluation
@@ -545,7 +544,7 @@ void Intra2BFF<Potential>::recalculateEnergy()
             const typename Potential::Molecule &mol = mols_array[i];
             Potential::calculateEnergy(mol, total_nrg, workspace);
         }
-        
+
         //set the energy
         this->components().setEnergy(*this, total_nrg);
     }
@@ -568,7 +567,7 @@ void Intra2BFF<Potential>::recalculateEnergy()
                 //calculate the change in energy of this whole molecule
                 Potential::calculateEnergy(it->oldMolecule(),
                                            old_nrg, old_workspace);
-                        
+
                 Potential::calculateEnergy(it->newMolecule(),
                                            new_nrg, new_workspace);
             }
@@ -580,25 +579,25 @@ void Intra2BFF<Potential>::recalculateEnergy()
 
                 Potential::calculateEnergy(it->oldParts(), it->oldMolecule(),
                                            old_nrg, old_workspace);
-                                           
+
                 Potential::calculateEnergy(it->newParts(), new_nrg, new_workspace);
-                                           
+
                 Potential::calculateEnergy(it->newParts(), it->newMolecule(),
                                            new_nrg, new_workspace);
             }
         }
-         
+
         //change the energy
         this->components().changeEnergy(*this, new_nrg - old_nrg);
-        
+
         //clear the changed molecules
         changed_mols.clear();
     }
 
     Potential::finishedEvaluation();
-    
+
     this->setClean();
-    
+
     }
     catch(...)
     {
@@ -623,7 +622,7 @@ struct Intra2BRMT
 };
 
 template<class Potential>
-const RegisterMetaType< SireFF::Intra2BFF<Potential> > 
+const RegisterMetaType< SireFF::Intra2BFF<Potential> >
 Intra2BRMT<Potential>::r_intra2bff;
 
 }
@@ -636,13 +635,13 @@ QDataStream& operator<<(QDataStream &ds,
                         const SireFF::Intra2BFF<Potential> &intra2bff)
 {
     SireStream::writeHeader(ds, SireFF::detail::Intra2BRMT<Potential>::r_intra2bff, 1);
-    
+
     SireStream::SharedDataStream sds(ds);
-    
+
     sds << intra2bff.mols << intra2bff.changed_mols
         << static_cast<const Potential&>(intra2bff)
         << static_cast<const SireFF::G1FF&>(intra2bff);
-        
+
     return ds;
 }
 
@@ -652,19 +651,19 @@ SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator>>(QDataStream &ds,
                         SireFF::Intra2BFF<Potential> &intra2bff)
 {
-    SireStream::VersionID v = SireStream::readHeader(ds, 
+    SireStream::VersionID v = SireStream::readHeader(ds,
                                 SireFF::detail::Intra2BRMT<Potential>::r_intra2bff);
-                                        
+
     if (v == 1)
     {
         SireStream::SharedDataStream sds(ds);
-        
+
         sds >> intra2bff.mols >> intra2bff.changed_mols
             >> static_cast<Potential&>(intra2bff)
             >> static_cast<SireFF::G1FF&>(intra2bff);
-            
+
         intra2bff._pvt_updateName();
-        
+
         return ds;
     }
     else

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -77,9 +76,9 @@ IOBase::IOBase(const IOBase &other) : Property(other)
 IOBase::~IOBase()
 {}
 
-/** Read all of the molecules contained in the data 'data', using 
-    the (optional) passed properties in 'map', and returning a 
-    molecule group containing the molecules in the same order as 
+/** Read all of the molecules contained in the data 'data', using
+    the (optional) passed properties in 'map', and returning a
+    molecule group containing the molecules in the same order as
     they appear in the file */
 MoleculeGroup IOBase::read(const QByteArray &data, const PropertyMap &map) const
 {
@@ -96,12 +95,12 @@ MoleculeGroup IOBase::read(const QByteArray &data, const PropertyMap &map) const
 MoleculeGroup IOBase::read(const QString &filename, const PropertyMap &map) const
 {
     //open the file for reading
-    QFile fle(filename); 
-    
+    QFile fle(filename);
+
     if (not fle.exists())
         throw SireError::file_error( QObject::tr(
             "Cannot find the file \"%1\".").arg(filename), CODELOC );
-    
+
     if (not fle.open(QIODevice::ReadOnly|QIODevice::Text))
     {
         throw SireError::file_error(fle, CODELOC);
@@ -115,7 +114,7 @@ MoleculeGroup IOBase::read(const QString &filename, const PropertyMap &map) cons
         return MoleculeGroup();
 
     MoleculeGroup molecules = this->readMols(contents, map);
-    
+
     molecules.setName(filename);
 
     return molecules;
@@ -185,9 +184,9 @@ Molecule IOBase::readMolecule(QIODevice &dev, const PropertyMap &map) const
 
 /** Write the molecules in the passed group to memory and return
     that data.
-    
+
     This writes the molecules in the same order as they appear in the
-    passed group. 
+    passed group.
 */
 QByteArray IOBase::write(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
@@ -205,12 +204,12 @@ void IOBase::write(const MoleculeGroup &molgroup, const QString &filename,
 
     //open a file into which to write the molecules
     QFile fle(filename);
-    
+
     if (not fle.open(QIODevice::WriteOnly|QIODevice::Text))
     {
         throw SireError::file_error(fle);
     }
-    
+
     //dump the blob into the file
     if (fle.write(data) == -1)
     {
@@ -233,12 +232,12 @@ void IOBase::write(const Molecules &molecules, const QString &filename,
 
     //open a file into which to write the molecules
     QFile fle(filename);
-    
+
     if (not fle.open(QIODevice::WriteOnly|QIODevice::Text))
     {
         throw SireError::file_error(fle);
     }
-    
+
     //dump the blob into the file
     if (fle.write(data) == -1)
     {
@@ -314,9 +313,9 @@ static const RegisterMetaType<NullIO> r_nullio;
 QDataStream &operator<<(QDataStream &ds, const NullIO &nullio)
 {
     writeHeader(ds, r_nullio, 1);
-    
+
     ds << static_cast<const IOBase&>(nullio);
-    
+
     return ds;
 }
 
@@ -324,14 +323,14 @@ QDataStream &operator<<(QDataStream &ds, const NullIO &nullio)
 QDataStream &operator>>(QDataStream &ds, NullIO &nullio)
 {
     VersionID v = readHeader(ds, r_nullio);
-    
+
     if (v == 1)
     {
         ds >> static_cast<IOBase&>(nullio);
     }
     else
         throw version_error(v, "1", r_nullio, CODELOC);
-        
+
     return ds;
 }
 

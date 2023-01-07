@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,67 +43,67 @@ namespace SireFF
 /** This class provides an intermolecular non-bonded potential
     that can work with an two-body, three-dimensional potential
     (provided by the template class 'Potential'). This is a
-    3D specific forcefield, so provides functions that can 
+    3D specific forcefield, so provides functions that can
     calculate the 3D forces acting on the atoms.
-    
+
     @author Christopher Woods
 */
 template<class Potential>
-class Inter2B3DFF 
+class Inter2B3DFF
               : public SireBase::ConcreteProperty< Inter2B3DFF<Potential>,
-                                                   Inter2BFF<Potential> >, 
+                                                   Inter2BFF<Potential> >,
                 public FF3D
 {
 public:
     Inter2B3DFF();
     Inter2B3DFF(const QString &name);
-    
+
     Inter2B3DFF(const Inter2B3DFF<Potential> &other);
-    
+
     ~Inter2B3DFF();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     Inter2B3DFF<Potential>& operator=(const Inter2B3DFF<Potential> &other);
-    
+
     bool operator==(const Inter2B3DFF<Potential> &other) const;
     bool operator!=(const Inter2B3DFF<Potential> &other) const;
-    
+
     Inter2B3DFF<Potential>* clone() const;
 
     SireUnits::Dimension::MolarEnergy energy();
     SireUnits::Dimension::MolarEnergy energy(const Symbol &component);
 
     void energy(EnergyTable &energytable, double scale_energy=1);
-    
+
     void energy(EnergyTable &energytable, const Symbol &symbol,
-		double scale_energy=1);    
+		double scale_energy=1);
 
     void force(ForceTable &forcetable, double scale_force=1);
-    
+
     void force(ForceTable &forcetable, const Symbol &symbol,
                double scale_force=1);
-               
+
     void field(FieldTable &fieldtable, double scale_field=1);
-    
+
     void field(FieldTable &fieldtable, const Symbol &component,
                double scale_field=1);
-               
+
     void potential(PotentialTable &potentialtable, double scale_potential=1);
-    
+
     void potential(PotentialTable &potentialtable, const Symbol &component,
                    double scale_potential=1);
 
     void field(FieldTable &fieldtable, const Probe &probe, double scale_field=1);
-    
+
     void field(FieldTable &fieldtable, const Symbol &component,
                const Probe &probe, double scale_field=1);
-               
+
     void potential(PotentialTable &potentialtable, const Probe &probe,
                    double scale_potential=1);
-    
+
     void potential(PotentialTable &potentialtable, const Symbol &component,
                    const Probe &probe, double scale_potential=1);
 
@@ -132,7 +131,7 @@ protected:
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 Inter2B3DFF<Potential>::Inter2B3DFF()
-  : SireBase::ConcreteProperty< Inter2B3DFF<Potential>,Inter2BFF<Potential> >(), 
+  : SireBase::ConcreteProperty< Inter2B3DFF<Potential>,Inter2BFF<Potential> >(),
     FF3D()
 {}
 
@@ -140,7 +139,7 @@ Inter2B3DFF<Potential>::Inter2B3DFF()
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 Inter2B3DFF<Potential>::Inter2B3DFF(const QString &name)
-  : SireBase::ConcreteProperty< Inter2B3DFF<Potential>,Inter2BFF<Potential> >(name), 
+  : SireBase::ConcreteProperty< Inter2B3DFF<Potential>,Inter2BFF<Potential> >(name),
     FF3D()
 {}
 
@@ -148,7 +147,7 @@ Inter2B3DFF<Potential>::Inter2B3DFF(const QString &name)
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 Inter2B3DFF<Potential>::Inter2B3DFF(const Inter2B3DFF<Potential> &other)
-  : SireBase::ConcreteProperty< Inter2B3DFF<Potential>,Inter2BFF<Potential> >(other), 
+  : SireBase::ConcreteProperty< Inter2B3DFF<Potential>,Inter2BFF<Potential> >(other),
     FF3D(other)
 {}
 
@@ -161,12 +160,12 @@ Inter2B3DFF<Potential>::~Inter2B3DFF()
 /** Copy assignment operator */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-Inter2B3DFF<Potential>& 
+Inter2B3DFF<Potential>&
 Inter2B3DFF<Potential>::operator=(const Inter2B3DFF<Potential> &other)
 {
     Inter2BFF<Potential>::operator=(other);
     FF3D::operator=(other);
-    
+
     return *this;
 }
 
@@ -207,7 +206,7 @@ Inter2B3DFF<Potential>* Inter2B3DFF<Potential>::clone() const
     return new Inter2B3DFF<Potential>(*this);
 }
 
-/** Pack the coordinates of the molecules so that they all lie 
+/** Pack the coordinates of the molecules so that they all lie
     contiguously in memory */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
@@ -225,7 +224,7 @@ SIRE_OUTOFLINE_TEMPLATE
 void Inter2B3DFF<Potential>::recalculateEnergy()
 {
     int nmols = this->mols.count();
-    const ChunkedVector<typename Potential::Molecule> mols_array 
+    const ChunkedVector<typename Potential::Molecule> mols_array
                             = this->mols.moleculesByIndex();
 
     if (this->changed_mols.count() == nmols)
@@ -249,7 +248,7 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
             Energy my_total_nrg;
 
             const ChunkedVector<typename Potential::Molecule> &my_mols_array = mols_array;
-            const ChunkedVector<SireVol::AABox> &aaboxes_array 
+            const ChunkedVector<SireVol::AABox> &aaboxes_array
                                                 = this->mols.aaBoxesByIndex();
             const int my_nmols = nmols;
 
@@ -261,7 +260,7 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
             {
                 const typename Potential::Molecule &mol0 = my_mols_array.at(i);
                 const SireVol::AABox &aabox0 = aaboxes_array.at(i);
-        
+
                 for (int j=i+1; j<my_nmols; ++j)
                 {
                     if (not spce.beyond(cutoff, aabox0, aaboxes_array.at(j)))
@@ -271,12 +270,12 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
                     }
                 }
             }
-              
+
             {
                 total_nrg += my_total_nrg;
             }
         }
-        
+
         //set the energy
         this->components().setEnergy(*this, total_nrg);
     }
@@ -295,7 +294,7 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
 
             const QHash<MolNum,ChangedMolecule> my_changed_mols = this->changed_mols;
             const ChunkedVector<typename Potential::Molecule> &my_mols_array = mols_array;
-            const ChunkedVector<SireVol::AABox> aaboxes_array 
+            const ChunkedVector<SireVol::AABox> aaboxes_array
                                                     = this->mols.aaBoxesByIndex();
             const int my_nmols = nmols;
 
@@ -304,9 +303,9 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
 
             if (my_changed_mols.count() == 1)
             {
-                const typename Potential::ChangedMolecule &changed_mol = 
+                const typename Potential::ChangedMolecule &changed_mol =
                                         *(my_changed_mols.constBegin());
-                         
+
                 int idx = this->mols.indexOf(changed_mol.number());
 
                 const SireVol::AABox &new_box = changed_mol.newMolecule().aaBox();
@@ -318,13 +317,13 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
                     {
                         const typename Potential::Molecule &mol = my_mols_array.at(i);
                         const SireVol::AABox &aabox = aaboxes_array.at(i);
-                    
+
                         if (not spce.beyond(cutoff, old_box, aabox))
                         {
                             Potential::calculateEnergy(mol, changed_mol.oldParts(),
                                                        my_old_nrg, old_workspace);
                         }
-                        
+
                         if (not spce.beyond(cutoff, new_box, aabox))
                         {
                             Potential::calculateEnergy(mol, changed_mol.newParts(),
@@ -338,13 +337,13 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
                 for (int i=0; i<my_nmols; ++i)
                 {
                     const typename Potential::Molecule &mol0 = my_mols_array.at(i);
-                
+
                     typename QHash<MolNum,ChangedMolecule>::const_iterator it
                                              = my_changed_mols.constFind(mol0.number());
-                    
+
                     //get the bounding box for this molecule
                     const SireVol::AABox &aabox0 = aaboxes_array.at(i);
-                                                                                                                 
+
                     if (it == my_changed_mols.constEnd())
                     {
                         //this molecule has not changed - just calculate its
@@ -362,7 +361,7 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
                                 Potential::calculateEnergy(mol0, it2->oldParts(),
                                                            my_old_nrg, old_workspace);
                             }
-                        
+
                             if (not spce.beyond(cutoff, aabox0, it2->newMolecule().aaBox()))
                             {
                                 Potential::calculateEnergy(mol0, it2->newParts(),
@@ -376,12 +375,12 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
                         //of the changed molecules that lie after it in the changed_mols
                         //hash (thus ensuring we don't double-count)
                         typename QHash<MolNum,ChangedMolecule>::const_iterator it2 = it;
-                    
+
                         bool this_changed_all = it->changedAll();
-                    
+
                         if (this_changed_all)
                         {
-                            //all of this molecule has changed - so we need to 
+                            //all of this molecule has changed - so we need to
                             //calculate the energy of this molecule with *all* of
                             //the parts of the other changed molecules
                             for (++it2; it2 != my_changed_mols.constEnd(); ++it2)
@@ -389,7 +388,7 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
                                 Potential::calculateEnergy(it->oldMolecule(),
                                                            it2->oldMolecule(),
                                                            my_old_nrg, old_workspace);
-                                                       
+
                                 Potential::calculateEnergy(it->newMolecule(),
                                                            it2->newMolecule(),
                                                            my_new_nrg, new_workspace);
@@ -407,42 +406,42 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
                                     Potential::calculateEnergy(it->oldMolecule(),
                                                                it2->oldMolecule(),
                                                                my_old_nrg, old_workspace);
-                                
+
                                     Potential::calculateEnergy(it->newMolecule(),
                                                                it2->newMolecule(),
                                                                my_new_nrg, new_workspace);
                                 }
                                 else
                                 {
-                                    //both a part of this molecule and a part of the 
+                                    //both a part of this molecule and a part of the
                                     //other molecule have changed
-                               
-                                    //the change in energy associated with changing 
+
+                                    //the change in energy associated with changing
                                     //the first molecule...
                                     Potential::calculateEnergy(it->oldParts(),
                                                                it2->oldMolecule(),
                                                                my_old_nrg, old_workspace);
-                                                           
+
                                     Potential::calculateEnergy(it->newParts(),
                                                                it2->newMolecule(),
                                                                my_new_nrg, new_workspace);
-                                                           
+
                                     //now the change in energy associated with changing
                                     //the second molecule...
                                     Potential::calculateEnergy(it2->oldParts(),
                                                                it->oldMolecule(),
                                                                my_old_nrg, old_workspace);
-                                                         
+
                                     Potential::calculateEnergy(it2->newParts(),
                                                                it->newMolecule(),
                                                                my_new_nrg, new_workspace);
-                                                          
+
                                     //now remove double counted changed in mol1 with
                                     //change in mol2
                                     Potential::calculateEnergy(it->oldParts(),
                                                                it2->oldParts(),
                                                                my_old_nrg, old_workspace, -1);
-                                                          
+
                                     Potential::calculateEnergy(it->newParts(),
                                                                it2->newParts(),
                                                                my_new_nrg, new_workspace, -1);
@@ -467,40 +466,40 @@ void Inter2B3DFF<Potential>::recalculateEnergy()
             //as has the energy of moved molecules that are before the removed molecules
             //in the moved list. We only now have to calculate the energy of the removed
             //molecules with all of the molecules that lie above us in the moved list
-            
+
             EnergyWorkspace workspace;
-            
-            for (typename QSet<MolNum>::const_iterator 
+
+            for (typename QSet<MolNum>::const_iterator
                                                 it = this->removed_mols.constBegin();
                  it != this->removed_mols.constEnd();
                  ++it)
             {
                 typename QSet<MolNum>::const_iterator it2 = it;
-            
+
                 const ChangedMolecule &mol0 = *(this->changed_mols.constFind(*it));
-            
+
                 for (++it2; it2 != this->removed_mols.constEnd(); ++it2)
                 {
                     const ChangedMolecule &mol1 = *(this->changed_mols.constFind(*it2));
-            
+
                     Potential::calculateEnergy(mol0.oldMolecule(),
                                                mol1.oldMolecule(),
                                                old_nrg, workspace);
-                                           
+
                     //molecule has been removed, so no new energy
                 }
             }
         }
-         
+
         //change the energy
         this->components().changeEnergy(*this, new_nrg - old_nrg);
-        
+
         //clear the changed molecules
         this->changed_mols.clear();
     }
 
     Potential::finishedEvaluation();
-    
+
     this->setClean();
 
     }
@@ -538,45 +537,45 @@ void Inter2B3DFF<Potential>::energy(EnergyTable &energytable, double scale_energ
 
     int nenergymols = energytable.count();
     int nmols = this->mols.count();
-    
+
     typename Potential::EnergyWorkspace workspace;
-    
+
     MolEnergyTable *energytable_array = energytable.data();
-    const ChunkedVector<typename Potential::Molecule> &mols_array 
+    const ChunkedVector<typename Potential::Molecule> &mols_array
                             = this->mols.moleculesByIndex();
-    
+
     typename Potential::Energy energy;
 
     for (int i=0; i<nenergymols; ++i)
     {
         MolEnergyTable &moltable = energytable_array[i];
-        
+
         MolNum molnum = moltable.molNum();
-        
+
         if (not this->mols.contains(molnum))
             //we don't contain this molecule, so no point
             //calculating the force
             continue;
-            
+
         //get the copy of this molecule from this forcefield
         int imol = this->mols.indexOf(molnum);
         const typename Potential::Molecule &mol0 = mols_array[imol];
-            
-        //calculate the force acting on this molecule caused by all of the 
+
+        //calculate the force acting on this molecule caused by all of the
         //other molecules in this forcefield
         for (int j=0; j<nmols; ++j)
         {
             if (j == imol)
                 continue;
-                
+
             const typename Potential::Molecule &mol1 = mols_array[j];
-            
+
             Potential::calculateEnergy(mol0, mol1, moltable, workspace, scale_energy);
         }
     }
 }
 
-/** Calculate the energies acting on the molecules in the passed energytable  
+/** Calculate the energies acting on the molecules in the passed energytable
     caused by the component of this forcefield represented by 'symbol',
     adding this energy onto the existing energies in the forcetable (optionally
     multiplied by 'scale_energy' */
@@ -589,37 +588,37 @@ void Inter2B3DFF<Potential>::energy(EnergyTable &energytable, const Symbol &symb
 
     int nenergymols = energytable.count();
     int nmols = this->mols.count();
-    
+
     typename Potential::EnergyWorkspace workspace;
-    
+
     MolEnergyTable *energytable_array = energytable.data();
-    const ChunkedVector<typename Potential::Molecule> mols_array 
+    const ChunkedVector<typename Potential::Molecule> mols_array
                             = this->mols.moleculesByIndex();
-    
+
     typename Potential::Energy energy;
 
     for (int i=0; i<nenergymols; ++i)
     {
         MolEnergyTable &moltable = energytable_array[i];
-        
+
         MolNum molnum = moltable.molNum();
-        
+
         if (not this->mols.contains(molnum))
             //we don't contain this molecule, so no point
             //calculating the force
             continue;
-            
+
         //get the copy of this molecule from this forcefield
         int imol = this->mols.indexOf(molnum);
         const typename Potential::Molecule &mol0 = mols_array[imol];
-            
-        //calculate the force acting on this molecule caused by all of the 
+
+        //calculate the force acting on this molecule caused by all of the
         //other molecules in this forcefield
         for (int j=0; j<nmols; ++j)
         {
             if (j == imol)
                 continue;
-                
+
             const typename Potential::Molecule &mol1 = mols_array[j];
 
             Potential::calculateEnergy(mol0, mol1, moltable, workspace, scale_energy);
@@ -641,43 +640,43 @@ void Inter2B3DFF<Potential>::force(ForceTable &forcetable, double scale_force)
 
     int nforcemols = forcetable.count();
     int nmols = this->mols.count();
-    
+
     typename Potential::ForceWorkspace workspace;
-    
+
     MolForceTable *forcetable_array = forcetable.data();
-    const ChunkedVector<typename Potential::Molecule> &mols_array 
+    const ChunkedVector<typename Potential::Molecule> &mols_array
                             = this->mols.moleculesByIndex();
-    
+
     for (int i=0; i<nforcemols; ++i)
     {
         MolForceTable &moltable = forcetable_array[i];
-        
+
         MolNum molnum = moltable.molNum();
-        
+
         if (not this->mols.contains(molnum))
             //we don't contain this molecule, so no point
             //calculating the force
             continue;
-            
+
         //get the copy of this molecule from this forcefield
         int imol = this->mols.indexOf(molnum);
         const typename Potential::Molecule &mol0 = mols_array[imol];
-            
-        //calculate the force acting on this molecule caused by all of the 
+
+        //calculate the force acting on this molecule caused by all of the
         //other molecules in this forcefield
         for (int j=0; j<nmols; ++j)
         {
             if (j == imol)
                 continue;
-                
+
             const typename Potential::Molecule &mol1 = mols_array[j];
-            
+
             Potential::calculateForce(mol0, mol1, moltable, workspace, scale_force);
         }
     }
 }
 
-/** Calculate the force acting on the molecules in the passed forcetable  
+/** Calculate the force acting on the molecules in the passed forcetable
     caused by the component of this forcefield represented by 'symbol',
     adding this force onto the existing forces in the forcetable (optionally
     multiplied by 'scale_force' */
@@ -691,37 +690,37 @@ void Inter2B3DFF<Potential>::force(ForceTable &forcetable, const Symbol &symbol,
 
     int nforcemols = forcetable.count();
     int nmols = this->mols.count();
-    
+
     typename Potential::ForceWorkspace workspace;
-    
+
     MolForceTable *forcetable_array = forcetable.data();
-    const ChunkedVector<typename Potential::Molecule> mols_array 
+    const ChunkedVector<typename Potential::Molecule> mols_array
                             = this->mols.moleculesByIndex();
-    
+
     for (int i=0; i<nforcemols; ++i)
     {
         MolForceTable &moltable = forcetable_array[i];
-        
+
         MolNum molnum = moltable.molNum();
-        
+
         if (not this->mols.contains(molnum))
             //we don't contain this molecule, so no point
             //calculating the force
             continue;
-            
+
         //get the copy of this molecule from this forcefield
         int imol = this->mols.indexOf(molnum);
         const typename Potential::Molecule &mol0 = mols_array[imol];
-            
-        //calculate the force acting on this molecule caused by all of the 
+
+        //calculate the force acting on this molecule caused by all of the
         //other molecules in this forcefield
         for (int j=0; j<nmols; ++j)
         {
             if (j == imol)
                 continue;
-                
+
             const typename Potential::Molecule &mol1 = mols_array[j];
-            
+
             Potential::calculateForce(mol0, mol1, moltable, symbol,
                                       this->components(), workspace, scale_force);
         }
@@ -733,7 +732,7 @@ void Inter2B3DFF<Potential>::force(ForceTable &forcetable, const Symbol &symbol,
     in the field table, multiplied by the passed (optional) scaling factor */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, const Probe &prob, 
+void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, const Probe &prob,
                                    double scale_field)
 {
     if (scale_field == 0)
@@ -744,38 +743,38 @@ void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, const Probe &prob,
     const int ngrids = fieldtable.nGrids();
     const int nfieldmols = fieldtable.nMolecules();
     const int nmols = this->mols.count();
-    
+
     typename Potential::FieldWorkspace workspace;
-    
+
     MolFieldTable *fieldtable_array = fieldtable.moleculeData();
-    const ChunkedVector<typename Potential::Molecule> &mols_array 
+    const ChunkedVector<typename Potential::Molecule> &mols_array
                             = this->mols.moleculesByIndex();
-    
+
     for (int i=0; i<nfieldmols; ++i)
     {
         MolFieldTable &moltable = fieldtable_array[i];
-        
+
         MolNum molnum = moltable.molNum();
-        
+
         if (not this->mols.contains(molnum))
             //we don't contain this molecule, so no point
             //calculating the force
             continue;
-            
+
         //get the copy of this molecule from this forcefield
         int imol = this->mols.indexOf(molnum);
         const typename Potential::Molecule &mol0 = mols_array[imol];
-            
-        //calculate the field acting on this molecule caused by all of the 
+
+        //calculate the field acting on this molecule caused by all of the
         //other molecules in this forcefield
         for (int j=0; j<nmols; ++j)
         {
             if (j == imol)
                 continue;
-                
+
             const typename Potential::Molecule &mol1 = mols_array[j];
-            
-            Potential::calculateField(mol0, mol1, probe, moltable, 
+
+            Potential::calculateField(mol0, mol1, probe, moltable,
                                       workspace, scale_field);
         }
     }
@@ -783,15 +782,15 @@ void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, const Probe &prob,
     if (ngrids > 0)
     {
         GridFieldTable *gridtable_array = fieldtable.gridData();
-        
+
         for (int i=0; i<ngrids; ++i)
         {
             GridFieldTable &gridtable = gridtable_array[i];
-            
+
             for (int j=0; j<nmols; ++j)
             {
                 const typename Potential::Molecule &mol = mols_array[j];
-                    
+
                 Potential::calculateField(mol, probe, gridtable,
                                           workspace, scale_field);
             }
@@ -799,7 +798,7 @@ void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, const Probe &prob,
     }
 }
 
-/** Calculate the field acting on the points in the passed forcetable  
+/** Calculate the field acting on the points in the passed forcetable
     caused by the component of this forcefield represented by 'component',
     adding this field onto the existing fields in the forcetable (optionally
     multiplied by 'scale_field' */
@@ -816,39 +815,39 @@ void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, const Symbol &compone
     const int ngrids = fieldtable.nGrids();
     const int nfieldmols = fieldtable.nMolecules();
     const int nmols = this->mols.count();
-    
+
     typename Potential::FieldWorkspace workspace;
-    
+
     MolFieldTable *fieldtable_array = fieldtable.moleculeData();
-    const ChunkedVector<typename Potential::Molecule> &mols_array 
+    const ChunkedVector<typename Potential::Molecule> &mols_array
                             = this->mols.moleculesByIndex();
-    
+
     for (int i=0; i<nfieldmols; ++i)
     {
         MolFieldTable &moltable = fieldtable_array[i];
-        
+
         MolNum molnum = moltable.molNum();
-        
+
         if (not this->mols.contains(molnum))
             //we don't contain this molecule, so no point
             //calculating the force
             continue;
-            
+
         //get the copy of this molecule from this forcefield
         int imol = this->mols.indexOf(molnum);
         const typename Potential::Molecule &mol0 = mols_array[imol];
-            
-        //calculate the field acting on this molecule caused by all of the 
+
+        //calculate the field acting on this molecule caused by all of the
         //other molecules in this forcefield
         for (int j=0; j<nmols; ++j)
         {
             if (j == imol)
                 continue;
-                
+
             const typename Potential::Molecule &mol1 = mols_array[j];
-            
+
             Potential::calculateField(mol0, mol1, probe, moltable,
-                                      component, this->components(), 
+                                      component, this->components(),
                                       workspace, scale_field);
         }
     }
@@ -856,15 +855,15 @@ void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, const Symbol &compone
     if (ngrids > 0)
     {
         GridFieldTable *gridtable_array = fieldtable.gridData();
-        
+
         for (int i=0; i<ngrids; ++i)
         {
             GridFieldTable &gridtable = gridtable_array[i];
-            
+
             for (int j=0; j<nmols; ++j)
             {
                 const typename Potential::Molecule &mol = mols_array[j];
-                    
+
                 Potential::calculateField(mol, probe, gridtable,
                                           component, this->components(),
                                           workspace, scale_field);
@@ -873,13 +872,13 @@ void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, const Symbol &compone
     }
 }
 
-/** Calculate the potential of the passed probe acting at the points in 
+/** Calculate the potential of the passed probe acting at the points in
     the passed potentialtable
     that arise from this forcefield, and add them onto the potentials present
     in the potential table, multiplied by the passed (optional) scaling factor */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable, 
+void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable,
                                        const Probe &prob, double scale_potential)
 {
     if (scale_potential == 0)
@@ -890,38 +889,38 @@ void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable,
     const int ngrids = potentialtable.nGrids();
     const int npotentialmols = potentialtable.nMolecules();
     const int nmols = this->mols.count();
-    
+
     typename Potential::PotentialWorkspace workspace;
-    
+
     MolPotentialTable *potentialtable_array = potentialtable.moleculeData();
-    const ChunkedVector<typename Potential::Molecule> &mols_array 
+    const ChunkedVector<typename Potential::Molecule> &mols_array
                             = this->mols.moleculesByIndex();
-    
+
     for (int i=0; i<npotentialmols; ++i)
     {
         MolPotentialTable &moltable = potentialtable_array[i];
-        
+
         MolNum molnum = moltable.molNum();
-        
+
         if (not this->mols.contains(molnum))
             //we don't contain this molecule, so no point
             //calculating the force
             continue;
-            
+
         //get the copy of this molecule from this forcefield
         int imol = this->mols.indexOf(molnum);
         const typename Potential::Molecule &mol0 = mols_array[imol];
-            
-        //calculate the field acting on this molecule caused by all of the 
+
+        //calculate the field acting on this molecule caused by all of the
         //other molecules in this forcefield
         for (int j=0; j<nmols; ++j)
         {
             if (j == imol)
                 continue;
-                
+
             const typename Potential::Molecule &mol1 = mols_array[j];
-            
-            Potential::calculatePotential(mol0, mol1, probe, moltable, 
+
+            Potential::calculatePotential(mol0, mol1, probe, moltable,
                                           workspace, scale_potential);
         }
     }
@@ -929,15 +928,15 @@ void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable,
     if (ngrids > 0)
     {
         GridPotentialTable *gridtable_array = potentialtable.gridData();
-        
+
         for (int i=0; i<ngrids; ++i)
         {
             GridPotentialTable &gridtable = gridtable_array[i];
-            
+
             for (int j=0; j<nmols; ++j)
             {
                 const typename Potential::Molecule &mol = mols_array[j];
-                    
+
                 Potential::calculatePotential(mol, probe, gridtable,
                                               workspace, scale_potential);
             }
@@ -945,14 +944,14 @@ void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable,
     }
 }
 
-/** Calculate the potential on the passed probe acting on the points in 
-    the passed potential table  
+/** Calculate the potential on the passed probe acting on the points in
+    the passed potential table
     caused by the component of this forcefield represented by 'component',
     adding this potential onto the existing potentials in the potential table (optionally
     multiplied by 'scale_potential' */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable, 
+void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable,
                                        const Symbol &component,
                                        const Probe &prob, double scale_potential)
 {
@@ -964,37 +963,37 @@ void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable,
     const int ngrids = potentialtable.nGrids();
     const int npotentialmols = potentialtable.nMolecules();
     const int nmols = this->mols.count();
-    
+
     typename Potential::PotentialWorkspace workspace;
-    
+
     MolPotentialTable *potentialtable_array = potentialtable.moleculeData();
-    const ChunkedVector<typename Potential::Molecule> &mols_array 
+    const ChunkedVector<typename Potential::Molecule> &mols_array
                             = this->mols.moleculesByIndex();
-    
+
     for (int i=0; i<npotentialmols; ++i)
     {
         MolPotentialTable &moltable = potentialtable_array[i];
-        
+
         MolNum molnum = moltable.molNum();
-        
+
         if (not this->mols.contains(molnum))
             //we don't contain this molecule, so no point
             //calculating the force
             continue;
-            
+
         //get the copy of this molecule from this forcefield
         int imol = this->mols.indexOf(molnum);
         const typename Potential::Molecule &mol0 = mols_array[imol];
-            
-        //calculate the field acting on this molecule caused by all of the 
+
+        //calculate the field acting on this molecule caused by all of the
         //other molecules in this forcefield
         for (int j=0; j<nmols; ++j)
         {
             if (j == imol)
                 continue;
-                
+
             const typename Potential::Molecule &mol1 = mols_array[j];
-            
+
             Potential::calculatePotential(mol0, mol1, probe, moltable,
                                           component, this->components(),
                                           workspace, scale_potential);
@@ -1004,15 +1003,15 @@ void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable,
     if (ngrids > 0)
     {
         GridPotentialTable *gridtable_array = potentialtable.gridData();
-        
+
         for (int i=0; i<ngrids; ++i)
         {
             GridPotentialTable &gridtable = gridtable_array[i];
-            
+
             for (int j=0; j<nmols; ++j)
             {
                 const typename Potential::Molecule &mol = mols_array[j];
-                    
+
                 Potential::calculatePotential(mol, probe, gridtable,
                                               component, this->components(),
                                               workspace, scale_potential);
@@ -1032,7 +1031,7 @@ void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, double scale_field)
     Inter2B3DFF<Potential>::field(fieldtable, default_probe, scale_field);
 }
 
-/** Calculate the field acting on the points in the passed forcetable  
+/** Calculate the field acting on the points in the passed forcetable
     caused by the component of this forcefield represented by 'component',
     adding this field onto the existing fields in the forcetable (optionally
     multiplied by 'scale_field' */
@@ -1050,25 +1049,25 @@ void Inter2B3DFF<Potential>::field(FieldTable &fieldtable, const Symbol &compone
     in the potential table, multiplied by the passed (optional) scaling factor */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable, 
+void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable,
                                        double scale_potential)
 {
     typename Potential::Probe default_probe;
     Inter2B3DFF<Potential>::potential(potentialtable, default_probe, scale_potential);
 }
 
-/** Calculate the potential acting on the points in the passed potential table  
+/** Calculate the potential acting on the points in the passed potential table
     caused by the component of this forcefield represented by 'component',
     adding this potential onto the existing potentials in the potential table (optionally
     multiplied by 'scale_potential' */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable, 
+void Inter2B3DFF<Potential>::potential(PotentialTable &potentialtable,
                                        const Symbol &component,
                                        double scale_potential)
 {
     typename Potential::Probe default_probe;
-    Inter2B3DFF<Potential>::potential(potentialtable, component, 
+    Inter2B3DFF<Potential>::potential(potentialtable, component,
                                       default_probe, scale_potential);
 }
 

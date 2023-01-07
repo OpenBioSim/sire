@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,14 +50,14 @@ namespace MPI
 
 /** This is a simple queue that listens for messages from MPI
     processes and adds them onto a queue in which they are read
-    (and processed). This ensures that only one message is 
+    (and processed). This ensures that only one message is
     processed at a time from the global MPI recv communicator, and
-    that only one message is received at a time (although the 
+    that only one message is received at a time (although the
     next message may be being received while the current
     message is being processed - also, this is just the global
-    communicator - point-to-point communicators can send and 
+    communicator - point-to-point communicators can send and
     receive whenever they want)
-    
+
     @author Christopher Woods
 */
 class ReceiveQueue : private QThread, public boost::noncopyable
@@ -72,21 +71,21 @@ friend class ReceiveQueue::SecondThread;
 public:
     ReceiveQueue(MPI_Comm recv_comm);
     ~ReceiveQueue();
-    
+
     void start();
-    
+
     void received(const Message &message);
-    
+
     void stop();
 
     void wait();
-    
+
     bool isRunning();
 
 protected:
     void run();
     void run2();
-    
+
     /** We need to have two background threads running to overlay
         computation with communication - one thread reads messages
         and adds them to the queue, while another thread reads and
@@ -96,16 +95,16 @@ protected:
     public:
         SecondThread(ReceiveQueue *parent) : QThread(), p(parent)
         {}
-        
+
         ~SecondThread()
         {}
-        
+
     protected:
         void run()
         {
             p->run2();
         }
-    
+
     private:
         ReceiveQueue *p;
     };
@@ -117,19 +116,19 @@ private:
 
     /** Mutex to protect access to the queue of received messages */
     QMutex datamutex;
-    
+
     /** Wait condition used to sleep until there is a received message to read */
     QWaitCondition waiter;
-    
+
     /** The communicator to use to receive messages */
     MPI_Comm recv_comm;
-    
+
     /** The list of received messages */
     QQueue<Message> message_queue;
 
     /** Whether or not to keep listening for messages */
     bool keep_listening;
-    
+
     /** Whether or not this has been stopped */
     bool been_stopped;
 };

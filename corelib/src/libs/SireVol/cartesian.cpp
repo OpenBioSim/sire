@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -89,7 +88,7 @@ Cartesian::Cartesian() : ConcreteProperty<Cartesian,Space>()
 {}
 
 /** Copy constructor */
-Cartesian::Cartesian(const Cartesian &other) 
+Cartesian::Cartesian(const Cartesian &other)
           : ConcreteProperty<Cartesian,Space>(other)
 {}
 
@@ -349,13 +348,13 @@ double Cartesian::calcDist(const CoordGroup &group0, const CoordGroup &group1,
         {
             const Vector& point0 = array0[i];
             mat.setOuterIndex(i);
-            
+
             const double *p0 = point0.constData();
-            
+
             __m128d sse_x0 = _mm_load1_pd( p0 );
             __m128d sse_y0 = _mm_load1_pd( p0 + 1 );
             __m128d sse_z0 = _mm_load1_pd( p0 + 2 );
-            
+
             __m128d sse_mindist = _mm_load1_pd(&mindist);
 
             // Process points in pairs
@@ -363,22 +362,22 @@ double Cartesian::calcDist(const CoordGroup &group0, const CoordGroup &group1,
             {
                 const Vector &point1 = array1[j];
                 const Vector &point2 = array1[j+1];
-                
+
                 __m128d sse_x1 = _mm_setr_pd( point1.x(), point2.x() );
                 __m128d sse_y1 = _mm_setr_pd( point1.y(), point2.y() );
                 __m128d sse_z1 = _mm_setr_pd( point1.z(), point2.z() );
-                
+
                 __m128d delta = _mm_sub_pd(sse_x0, sse_x1);      // 2 flops
                 __m128d tmpdist = _mm_mul_pd(delta, delta);      // 2 flops
 
                 delta = _mm_sub_pd(sse_y0, sse_y1);              // 2 flops
                 delta = _mm_mul_pd(delta, delta);                // 2 flops
                 tmpdist = _mm_add_pd(tmpdist, delta);            // 2 flops
-                
+
                 delta = _mm_sub_pd(sse_z0, sse_z1);              // 2 flops
                 delta = _mm_mul_pd(delta, delta);                // 2 flops
                 tmpdist = _mm_add_pd(tmpdist, delta);            // 2 flops
-                
+
                 tmpdist = _mm_sqrt_pd(tmpdist);       // 2 flops
 
                 #ifdef SIRE_TIME_ROUTINES
@@ -391,18 +390,18 @@ double Cartesian::calcDist(const CoordGroup &group0, const CoordGroup &group1,
                 mat[j]   = *((const double*)&tmpdist);
                 mat[j+1] = *( ((const double*)&tmpdist) + 1 );
             }
-            
+
             mindist = qMin( *((const double*)&sse_mindist),
                             *( ((const double*)&sse_mindist) + 1 ) );
-            
+
             if (remainder == 1)
             {
                 const double tmpdist = Vector::distance(point0, array1[n1-1]);
-                
+
                 #ifdef SIRE_TIME_ROUTINES
                 nflops += 9;
                 #endif
-                
+
                 mindist = qMin(tmpdist,mindist);
                 mat[n1-1] = tmpdist;
             }
@@ -415,17 +414,17 @@ double Cartesian::calcDist(const CoordGroup &group0, const CoordGroup &group1,
         {
             const Vector &point0 = array0[i];
             mat.setOuterIndex(i);
-            
+
             for (int j=0; j<n1; ++j)
             {
                 const double tmpdist = Vector::distance(point0, array1[j]);
-                
+
                 #ifdef SIRE_TIME_ROUTINES
                 nflops += 9;
                 #endif
-                
+
                 mindist = qMin(mindist, tmpdist);
-                
+
                 mat[j] = tmpdist;
             }
         }
@@ -465,13 +464,13 @@ double Cartesian::calcDist(const CoordGroup &group, const Vector &point,
         const int remainder = n % 2;
 
         mat.setOuterIndex(0);
-        
+
         const double *p = point.constData();
-        
+
         __m128d sse_x0 = _mm_load1_pd( p );
         __m128d sse_y0 = _mm_load1_pd( p + 1 );
         __m128d sse_z0 = _mm_load1_pd( p + 2 );
-            
+
         __m128d sse_mindist = _mm_load1_pd(&mindist);
 
         // Process points in pairs
@@ -479,22 +478,22 @@ double Cartesian::calcDist(const CoordGroup &group, const Vector &point,
         {
             const Vector &point1 = array[j];
             const Vector &point2 = array[j+1];
-                
+
             __m128d sse_x1 = _mm_setr_pd( point1.x(), point2.x() );
             __m128d sse_y1 = _mm_setr_pd( point1.y(), point2.y() );
             __m128d sse_z1 = _mm_setr_pd( point1.z(), point2.z() );
-                
+
             __m128d delta = _mm_sub_pd(sse_x0, sse_x1);      // 2 flops
             __m128d tmpdist = _mm_mul_pd(delta, delta);      // 2 flops
 
             delta = _mm_sub_pd(sse_y0, sse_y1);              // 2 flops
             delta = _mm_mul_pd(delta, delta);                // 2 flops
             tmpdist = _mm_add_pd(tmpdist, delta);            // 2 flops
-                
+
             delta = _mm_sub_pd(sse_z0, sse_z1);              // 2 flops
             delta = _mm_mul_pd(delta, delta);                // 2 flops
             tmpdist = _mm_add_pd(tmpdist, delta);            // 2 flops
-                
+
             tmpdist = _mm_sqrt_pd(tmpdist);       // 2 flops
 
             #ifdef SIRE_TIME_ROUTINES
@@ -507,18 +506,18 @@ double Cartesian::calcDist(const CoordGroup &group, const Vector &point,
             mat[j]   = *((const double*)&tmpdist);
             mat[j+1] = *( ((const double*)&tmpdist) + 1 );
         }
-            
+
         mindist = qMin( *((const double*)&sse_mindist),
                         *( ((const double*)&sse_mindist) + 1 ) );
-            
+
         if (remainder == 1)
         {
             const double tmpdist = Vector::distance(point, array[n-1]);
-                
+
             #ifdef SIRE_TIME_ROUTINES
             nflops += 9;
             #endif
-                
+
             mindist = qMin(tmpdist,mindist);
             mat[n-1] = tmpdist;
         }
@@ -527,17 +526,17 @@ double Cartesian::calcDist(const CoordGroup &group, const Vector &point,
     {
         //version suitable for all processors
         mat.setOuterIndex(0);
-            
+
         for (int j=0; j<n; ++j)
         {
             const double tmpdist = Vector::distance(point, array[j]);
-                
+
             #ifdef SIRE_TIME_ROUTINES
             nflops += 9;
             #endif
-                
+
             mindist = qMin(mindist, tmpdist);
-                
+
             mat[j] = tmpdist;
         }
     }
@@ -576,13 +575,13 @@ double Cartesian::calcDist2(const CoordGroup &group, const Vector &point,
         const int remainder = n % 2;
 
         mat.setOuterIndex(0);
-        
+
         const double *p = point.constData();
-        
+
         __m128d sse_x0 = _mm_load1_pd( p );
         __m128d sse_y0 = _mm_load1_pd( p + 1 );
         __m128d sse_z0 = _mm_load1_pd( p + 2 );
-            
+
         __m128d sse_mindist2 = _mm_load1_pd(&mindist2);
 
         // Process points in pairs
@@ -590,18 +589,18 @@ double Cartesian::calcDist2(const CoordGroup &group, const Vector &point,
         {
             const Vector &point1 = array[j];
             const Vector &point2 = array[j+1];
-                
+
             __m128d sse_x1 = _mm_setr_pd( point1.x(), point2.x() );
             __m128d sse_y1 = _mm_setr_pd( point1.y(), point2.y() );
             __m128d sse_z1 = _mm_setr_pd( point1.z(), point2.z() );
-                
+
             __m128d delta = _mm_sub_pd(sse_x0, sse_x1);      // 2 flops
             __m128d tmpdist2 = _mm_mul_pd(delta, delta);     // 2 flops
 
             delta = _mm_sub_pd(sse_y0, sse_y1);              // 2 flops
             delta = _mm_mul_pd(delta, delta);                // 2 flops
             tmpdist2 = _mm_add_pd(tmpdist2, delta);          // 2 flops
-                
+
             delta = _mm_sub_pd(sse_z0, sse_z1);              // 2 flops
             delta = _mm_mul_pd(delta, delta);                // 2 flops
             tmpdist2 = _mm_add_pd(tmpdist2, delta);          // 2 flops
@@ -616,18 +615,18 @@ double Cartesian::calcDist2(const CoordGroup &group, const Vector &point,
             mat[j]   = *((const double*)&tmpdist2);
             mat[j+1] = *( ((const double*)&tmpdist2) + 1 );
         }
-            
+
         mindist2 = qMin( *((const double*)&sse_mindist2),
                          *( ((const double*)&sse_mindist2) + 1 ) );
-            
+
         if (remainder == 1)
         {
             const double tmpdist2 = Vector::distance2(point, array[n-1]);
-                
+
             #ifdef SIRE_TIME_ROUTINES
             nflops += 9;
             #endif
-                
+
             mindist2 = qMin(tmpdist2,mindist2);
             mat[n-1] = tmpdist2;
         }
@@ -636,17 +635,17 @@ double Cartesian::calcDist2(const CoordGroup &group, const Vector &point,
     {
         //version suitable for all processors
         mat.setOuterIndex(0);
-            
+
         for (int j=0; j<n; ++j)
         {
             const double tmpdist2 = Vector::distance2(point, array[j]);
-                
+
             #ifdef SIRE_TIME_ROUTINES
             nflops += 8;
             #endif
-                
+
             mindist2 = qMin(mindist2, tmpdist2);
-                
+
             mat[j] = tmpdist2;
         }
     }
@@ -784,18 +783,18 @@ double Cartesian::calcInvDist2(const CoordGroup &group0, const CoordGroup &group
 }
 
 /** Calculate the distance vector between two points */
-DistVector Cartesian::calcDistVector(const Vector &point0, 
+DistVector Cartesian::calcDistVector(const Vector &point0,
                                      const Vector &point1) const
 {
     return point1 - point0;
 }
-    
+
 /** Populate the matrix 'distmat' with all of the interpoint distance vectors
     between all points within the CoordGroup. This is *not* a symmetrical matrix,
-    as the direction from point A to point B is the negative of the 
+    as the direction from point A to point B is the negative of the
     direction from point B to point A. This returns the shortest distance
     between two points in the group (that is not the self-self distance) */
-double Cartesian::calcDistVectors(const CoordGroup &group, 
+double Cartesian::calcDistVectors(const CoordGroup &group,
                                   DistVectorMatrix &mat) const
 {
     double mindist = std::numeric_limits<double>::max();
@@ -901,8 +900,8 @@ Angle Cartesian::calcAngle(const Vector &point0, const Vector &point1,
 }
 
 /** Calculate the torsion angle between the passed four points. This should
-    return the torsion angle measured clockwise when looking down the 
-    torsion from point0-point1-point2-point3. This will lie between 0 and 360 
+    return the torsion angle measured clockwise when looking down the
+    torsion from point0-point1-point2-point3. This will lie between 0 and 360
     degrees */
 Angle Cartesian::calcDihedral(const Vector &point0, const Vector &point1,
                               const Vector &point2, const Vector &point3) const
@@ -966,12 +965,12 @@ double Cartesian::minimumDistance(const AABox &box0, const AABox &box1) const
 {
     Vector delta = (box0.center() - box1.center());
     delta = Vector( std::abs(delta.x()), std::abs(delta.y()), std::abs(delta.z()) );
-    
+
     delta -= box0.halfExtents();
     delta -= box1.halfExtents();
-    
+
     delta = delta.max( Vector(0) );
-    
+
     return delta.length();
 }
 
@@ -980,11 +979,11 @@ double Cartesian::minimumDistance(const Vector &point, const AABox &box) const
 {
     Vector delta = point - box.center();
     delta = Vector( std::abs(delta.x()), std::abs(delta.y()), std::abs(delta.z()) );
-    
+
     delta -= box.halfExtents();
-    
+
     delta = delta.max( Vector(0) );
-    
+
     return delta.length();
 }
 
@@ -1053,7 +1052,7 @@ QVector<Vector> Cartesian::getImagesWithin(const Vector &point, const Vector &ce
     {
         points.append(point);
     }
-    
+
     return points;
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -72,7 +71,7 @@ using SireMol::Molecule;
 using SireMol::MoleculeData;
 using SireMol::MoleculeInfoData;
 
-/** This class stores AMBER bonded force field parameters for 
+/** This class stores AMBER bonded force field parameters for
     a collection of bonds, angles and dihedrals
 
     @author Julien Michel
@@ -94,7 +93,7 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SireMol::AmberPara
     static const char* typeName();
 
     AmberParameters& operator=(const AmberParameters &other);
-    
+
     bool operator==(const AmberParameters &other) const;
     bool operator!=(const AmberParameters &other) const;
 
@@ -126,7 +125,7 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SireMol::AmberPara
     void remove14Pair(const BondID &pair);
     QList<double> get14PairParams(const BondID &pair);
     QList<BondID> getAll14Pairs();
-  
+
  private:
     /** The molecule that this flexibility operates on */
     SireBase::SharedDataPointer<SireMol::MoleculeInfoData> molinfo;
@@ -141,7 +140,7 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SireMol::AmberPara
     QHash< DihedralID, QList<double> > dihedrals;
 
     /**A Hash of torsional parameters for impropers **/
-    QHash< ImproperID, QList<double> > impropers;    
+    QHash< ImproperID, QList<double> > impropers;
 
     /**A Hash of coulombic and lennard jones scale factors for 1,4 pairs**/
     QHash< BondID, QList<double> > nb14pairs;

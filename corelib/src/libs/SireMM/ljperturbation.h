@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,10 +49,10 @@ using SireBase::PropertyMap;
 
 /** This is a perturbation that maps LJ parameters for a molecule
     from an initial to a final state
-    
+
     @author Christopher Woods
 */
-class SIREMM_EXPORT LJPerturbation 
+class SIREMM_EXPORT LJPerturbation
          : public SireBase::ConcreteProperty<LJPerturbation,SireMol::Perturbation>
 {
 
@@ -67,31 +66,31 @@ public:
 
     LJPerturbation(const PropertyMap &map = PropertyMap());
     LJPerturbation(MapType maptype, const PropertyMap &map = PropertyMap());
-    
+
     LJPerturbation(const SireCAS::Expression &mapping_function,
                    const PropertyMap &map = PropertyMap());
-    
+
     LJPerturbation(const SireCAS::Expression &mapping_function,
                    MapType maptype,
                    const PropertyMap &map = PropertyMap());
-    
+
     LJPerturbation(const SireCAS::Expression &sigma_mapping_function,
                    const SireCAS::Expression &epsilon_mapping_function,
                    const PropertyMap &map = PropertyMap());
-    
+
     LJPerturbation(const SireCAS::Expression &sigma_mapping_function,
                    const SireCAS::Expression &epsilon_mapping_function,
                    MapType maptype,
                    const PropertyMap &map = PropertyMap());
-    
+
     LJPerturbation(const LJPerturbation &other);
-    
+
     ~LJPerturbation();
-    
+
     static const char* typeName();
-    
+
     LJPerturbation& operator=(const LJPerturbation &other);
-    
+
     bool operator==(const LJPerturbation &other) const;
     bool operator!=(const LJPerturbation &other) const;
 
@@ -108,27 +107,27 @@ public:
     const SireCAS::Expression& rMinMappingFunction() const;
     const SireCAS::Expression& sigmaMappingFunction() const;
     const SireCAS::Expression& epsilonMappingFunction() const;
-    
+
     const SireCAS::Expression& A_MappingFunction() const;
     const SireCAS::Expression& B_MappingFunction() const;
-    
+
     bool mapSigmaEpsilon() const;
     bool mapRMinEpsilon() const;
     bool mapAB() const;
 
     QSet<QString> requiredProperties() const;
-    
-    bool wouldChange(const SireMol::Molecule &molecule, 
+
+    bool wouldChange(const SireMol::Molecule &molecule,
                      const SireCAS::Values &values) const;
 
 protected:
-    void perturbMolecule(SireMol::MolEditor &molecule, 
+    void perturbMolecule(SireMol::MolEditor &molecule,
                          const SireCAS::Values &values) const;
 
 private:
     /** Mapping function for sigma or A value */
     SireCAS::Expression sigma_mapfunc;
-    
+
     /** How the LJ parameter is mapped */
     MapType maptype;
 };

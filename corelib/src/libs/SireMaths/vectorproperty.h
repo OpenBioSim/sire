@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,7 +53,7 @@ namespace SireMaths
 /** This class provides a simple Property wrapper around a Vector, thereby
     allowing the vector to be stored as a Property, e.g. for the center
     of a molecule
-    
+
     @author Christopher Woods
 */
 class SIREMATHS_EXPORT VectorProperty
@@ -69,22 +68,22 @@ public:
     VectorProperty();
     VectorProperty(const Vector &value);
     VectorProperty(const VectorProperty &value);
-    
+
     ~VectorProperty();
-    
+
     static const char* typeName();
     const char* what() const;
-    
+
     VectorProperty& operator=(const VectorProperty &other);
     VectorProperty& operator=(const Vector &other);
-    
+
     bool operator==(const VectorProperty &other) const;
     bool operator!=(const VectorProperty &other) const;
-    
+
     QString toString() const;
-    
+
     Vector value() const;
-    
+
     VectorProperty* clone() const;
 };
 
@@ -100,13 +99,13 @@ public:
     VectorArrayProperty(const QList<Vector> &array);
     VectorArrayProperty(const QVector<Vector> &array);
     VectorArrayProperty(const VectorArrayProperty &other);
-    
+
     ~VectorArrayProperty();
-    
+
     static const char* typeName();
-    
+
     VectorArrayProperty& operator=(const VectorArrayProperty &other);
-    
+
     bool operator==(const VectorArrayProperty &other) const;
     bool operator!=(const VectorArrayProperty &other) const;
 

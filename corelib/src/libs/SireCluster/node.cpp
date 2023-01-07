@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -55,13 +54,13 @@ public:
     NodePvt(const Frontend &f, const NodesPtr &n)
           : frontend(f), nodes(n)
     {}
-    
+
     ~NodePvt()
     {
         //abort any running jobs
         frontend.abortJob();
         frontend.wait();
-        
+
         //grab any results - this clears the frontend
         try
         {
@@ -69,19 +68,19 @@ public:
         }
         catch(...)
         {}
-    
+
         //now return the frontend back home
         nodes.returnFrontend(frontend);
     }
-    
+
     void forceRelease()
     {
         Frontend old_frontend = frontend;
         NodesPtr old_nodes = nodes;
-        
+
         frontend = Frontend();
         nodes = NodesPtr();
-    
+
         //abort any running jobs
         old_frontend.abortJob();
         old_frontend.wait();
@@ -93,16 +92,16 @@ public:
         }
         catch(...)
         {}
-    
+
         //return the frontend home
         old_nodes.returnFrontend(old_frontend);
     }
-    
+
     Frontend frontend;
     NodesPtr nodes;
 };
 
-} //end of namespace detail 
+} //end of namespace detail
 } //end of namespace SireCluster
 
 using namespace SireCluster::detail;
@@ -125,10 +124,10 @@ Node Node::create(const Nodes &nodes, const Frontend &frontend)
 {
     Node node;
     node.d.reset( new NodePvt(frontend, nodes) );
-    
+
     return node;
 }
-    
+
 /** Internal function called by 'Nodes' that tells this node that
     it is no longer part of its parent. This is called only after
     the Nodes object itself has removed the Node from it's registry */
@@ -148,17 +147,17 @@ void Node::rehome(const Nodes &nodes)
     if (not this->isNull())
     {
         Nodes old_nodes = d->nodes.lock();
-        
+
         if (not old_nodes.isEmpty())
         {
             old_nodes.remove(*this);
         }
-        
+
         d->nodes = nodes;
     }
 }
 
-/** Return the frontend of this node - this will be null if 
+/** Return the frontend of this node - this will be null if
     this is a null node */
 Frontend Node::frontend()
 {
@@ -195,10 +194,10 @@ QString Node::toString() const
     Node *nonconst_this = const_cast<Node*>(this);
 
     QUuid uid = nonconst_this->UID();
-    
+
     if (uid.isNull())
         return QObject::tr( "Node::null" );
-        
+
     else if (nonconst_this->isHomeless())
         return QObject::tr( "Node( %1  **HOMELESS** )" ).arg(uid.toString());
 
@@ -220,9 +219,9 @@ bool Node::isNull() const
 bool Node::release()
 {
     shared_ptr<NodePvt> my_d = d;
-    
+
     d.reset();
-    
+
     return my_d.unique();
 }
 
@@ -236,9 +235,9 @@ bool Node::release()
 void Node::forceRelease()
 {
     shared_ptr<NodePvt> my_d = d;
-    
+
     d.reset();
-    
+
     if (my_d.unique())
     {
         //just reset this pointer, and we are ok
@@ -247,7 +246,7 @@ void Node::forceRelease()
     else
     {
         //we need to go in and release the node manually
-        
+
     }
 }
 
@@ -282,7 +281,7 @@ QUuid Node::UID()
 }
 
 /** Return the nodes object that this node belongs to. In some rare
-    circumstances this node may be homeless, in which case 
+    circumstances this node may be homeless, in which case
     an empty set of nodes will be returned */
 Nodes Node::nodes()
 {
@@ -292,7 +291,7 @@ Nodes Node::nodes()
         return Nodes();
 }
 
-/** Start the job in the WorkPacket 'workpacket' on this node 
+/** Start the job in the WorkPacket 'workpacket' on this node
     and return a Promise that will contain the calculated
     result. This will autodelete the node if 'autodelete'
     is true. This is useful if this is the only workpacket
@@ -314,21 +313,21 @@ Promise Node::startJob(const WorkPacket &workpacket, bool autodelete)
             "Add this node to a Nodes scheduler object before you "
             "try to run this job again.")
                 .arg(this->UID().toString()), CODELOC );
-        
+
     //start the job
     d->frontend.startJob(workpacket);
-    
+
     //now return the promise
     Promise promise(*this, workpacket);
-    
+
     //autodelete the node?
     if (autodelete)
         d.reset();
-        
+
     return promise;
 }
 
-/** Start the job in the WorkPacket 'workpacket' on this node 
+/** Start the job in the WorkPacket 'workpacket' on this node
     and return a Promise that will contain the calculated
     result. This will autodelete the node.
     This is useful if this is the only workpacket
@@ -393,7 +392,7 @@ WorkPacket Node::interimResult()
         return Frontend().interimResult();
 }
 
-/** Return the final result - this blocks until the 
+/** Return the final result - this blocks until the
     result is ready */
 WorkPacket Node::result()
 {

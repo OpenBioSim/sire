@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,10 +52,10 @@ QDataStream &operator<<(QDataStream &ds,
                                           const QMChargeCalculator &chgcalc)
 {
     writeHeader(ds, r_chgcalc, 2);
-    
+
     ds << chgcalc.sclfac
        << static_cast<const Property&>(chgcalc);
-    
+
     return ds;
 }
 
@@ -65,7 +64,7 @@ QDataStream &operator>>(QDataStream &ds,
                                           QMChargeCalculator &chgcalc)
 {
     VersionID v = readHeader(ds, r_chgcalc);
-    
+
     if (v == 2)
     {
         ds >> chgcalc.sclfac >> static_cast<Property&>(chgcalc);
@@ -73,12 +72,12 @@ QDataStream &operator>>(QDataStream &ds,
     else if (v == 1)
     {
         ds >> static_cast<Property&>(chgcalc);
-        
+
         chgcalc.sclfac = 1;
     }
     else
         throw version_error(v, "1,2", r_chgcalc, CODELOC);
-        
+
     return ds;
 }
 
@@ -155,9 +154,9 @@ QDataStream &operator<<(QDataStream &ds,
                                           const NullQMChargeCalculator &nullchg)
 {
     writeHeader(ds, r_nullchg, 1);
-    
+
     ds << static_cast<const QMChargeCalculator&>(nullchg);
-    
+
     return ds;
 }
 
@@ -166,14 +165,14 @@ QDataStream &operator>>(QDataStream &ds,
                                           NullQMChargeCalculator &nullchg)
 {
     VersionID v = readHeader(ds, r_nullchg);
-    
+
     if (v == 1)
     {
         ds >> static_cast<QMChargeCalculator&>(nullchg);
     }
     else
         throw version_error(v, "1", r_nullchg, CODELOC);
-        
+
     return ds;
 }
 
@@ -214,19 +213,19 @@ bool NullQMChargeCalculator::operator!=(const NullQMChargeCalculator &other) con
 {
     return QMChargeCalculator::operator!=(other);
 }
-    
+
 /** Return the charges calculate for the passed molecule - this returns
     zero charges! */
 AtomCharges NullQMChargeCalculator::operator()(const PartialMolecule &molecule,
                                              const PropertyMap&) const
 {
     AtomCharges charges(molecule.data().info());
-    
+
     return charges;
 }
 
 /** Return whether or not the change from 'oldmol' to 'newmol'
-    may change the charges. Use this function to see if 
+    may change the charges. Use this function to see if
     a charge calculation is required */
 bool NullQMChargeCalculator::mayChangeCharges(const PartialMolecule&,
                                               const PartialMolecule&,

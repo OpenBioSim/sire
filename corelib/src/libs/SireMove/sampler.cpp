@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ static const RegisterMetaType<Sampler> r_sampler(MAGIC_ONLY,
                                                  "SireMove::Sampler");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                         const Sampler &sampler)
 {
     writeHeader(ds, r_sampler, 1);
@@ -63,7 +62,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds, 
+QDataStream &operator>>(QDataStream &ds,
                                         Sampler &sampler)
 {
     VersionID v = readHeader(ds, r_sampler);
@@ -84,14 +83,14 @@ QDataStream &operator>>(QDataStream &ds,
 Sampler::Sampler() : Property()
 {}
 
-/** Construct a sampler that picks molecules at random from the 
+/** Construct a sampler that picks molecules at random from the
     molecule group 'molgroup' */
 Sampler::Sampler(const MoleculeGroup &moleculegroup)
         : Property(), molgroup(moleculegroup)
 {}
 
 /** Copy constructor */
-Sampler::Sampler(const Sampler &other) 
+Sampler::Sampler(const Sampler &other)
         : Property(other), molgroup(other.molgroup), rangen(other.rangen)
 {}
 
@@ -128,7 +127,7 @@ void Sampler::setGenerator(const RanGenerator &generator)
     rangen = generator;
 }
 
-/** Return whether or not this sampler is biased, i.e. picks some 
+/** Return whether or not this sampler is biased, i.e. picks some
     molecules / views with a higher probability than others. If this
     is a biased sampler, then this will need to be accounted for in the
     MC acceptance test. If this is not a biased sampler, then every
@@ -138,20 +137,20 @@ bool Sampler::isBiased() const
     return false;
 }
 
-/** Set the molecule group from which random molecules will be sampled */    
+/** Set the molecule group from which random molecules will be sampled */
 void Sampler::setGroup(const MoleculeGroup &moleculegroup)
 {
     molgroup = moleculegroup;
 }
 
-/** Update this sampler so that it matches the state of the molecules 
+/** Update this sampler so that it matches the state of the molecules
     in the System 'system' */
 void Sampler::updateFrom(const System &system)
 {
     if (system.contains( molgroup.read().number() ))
     {
         const MoleculeGroup &new_group = system[molgroup.read().number()];
-        
+
         if (new_group.version() != molgroup.read().version())
             //the molecule group has changed - update it
             this->setGroup( system[molgroup.read().number()] );

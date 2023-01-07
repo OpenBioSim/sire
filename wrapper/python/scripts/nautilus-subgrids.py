@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description="Subgrids, subtracts grids in dx fo
                                              "gridl.dx=diff.dx.  Grids must be of identical dimensions and grid density ",
                                  epilog="nautilus-subgrids is built using Sire, Numpy and mdtraj and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/nautilus",
+                                        "http://sire.openbiosim.org/nautilus",
                                  prog="nautilus")
 
 parser.add_argument('--author', action="store_true",
@@ -51,7 +51,7 @@ if args.author:
 if args.version:
     print("nautilus-subgrids -- from Sire release version <%s>" %Sire.__version__)
     print("This particular release can be downloaded here: "
-          "https://github.com/michellab/Sire/releases/tag/v%s" %Sire.__version__)
+          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
     must_exit = True
 
 if must_exit:

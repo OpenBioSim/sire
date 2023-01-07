@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,15 +56,15 @@ static const RegisterMetaType<WorkPacketBase> r_workbase( MAGIC_ONLY,
                                                           WorkPacketBase::typeName() );
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                            const WorkPacketBase &workbase)
 {
     writeHeader(ds, r_workbase, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << workbase.current_progress;
-    
+
     return ds;
 }
 
@@ -73,21 +72,21 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, WorkPacketBase &workbase)
 {
     VersionID v = readHeader(ds, r_workbase);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> workbase.current_progress;
     }
     else
         throw version_error(v, "1", r_workbase, CODELOC);
-        
+
     return ds;
 }
 
 /** Constructor */
-WorkPacketBase::WorkPacketBase() 
+WorkPacketBase::WorkPacketBase()
                : RefCountData(), current_progress(0)
 {}
 
@@ -108,14 +107,14 @@ WorkPacketBase& WorkPacketBase::operator=(const WorkPacketBase &other)
     {
         current_progress = other.current_progress;
     }
-    
+
     return *this;
 }
 
-/** Return whether or not this work packet should be stored 
+/** Return whether or not this work packet should be stored
     as a binary array - this is used by Promise to work out
     how to store the initial WorkPacket state. Only large
-    packets should be binary packed (as they are then 
+    packets should be binary packed (as they are then
     compressed) */
 bool WorkPacketBase::shouldPack() const
 {
@@ -125,7 +124,7 @@ bool WorkPacketBase::shouldPack() const
 /** Return the approximate maximum size (in bytes) of the WorkPacket. This
     doesn't have to exact (or indeed accurate) - it is used
     to help the WorkPacket::pack() function reserve enough
-    space when serialising this packet to a binary array. 
+    space when serialising this packet to a binary array.
     The only penalty of getting this wrong is that you'll
     either allocate too much space, or be reallocating while
     the packet is being written */
@@ -178,16 +177,16 @@ void WorkPacketBase::runChunk()
 static const RegisterMetaType<ErrorPacket> r_errorpacket;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                            const ErrorPacket &errorpacket)
 {
     writeHeader(ds, r_errorpacket, 1);
-    
+
     SharedDataStream sds(ds);
 
     sds << errorpacket.error_data
         << static_cast<const WorkPacketBase&>(errorpacket);
-        
+
     return ds;
 }
 
@@ -195,17 +194,17 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, ErrorPacket &errorpacket)
 {
     VersionID v = readHeader(ds, r_errorpacket);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> errorpacket.error_data
             >> static_cast<WorkPacketBase&>(errorpacket);
     }
     else
         throw version_error(v, "1", r_errorpacket, CODELOC);
-        
+
     return ds;
 }
 
@@ -237,14 +236,14 @@ ErrorPacket& ErrorPacket::operator=(const ErrorPacket &other)
         error_data = other.error_data;
         WorkPacketBase::operator=(other);
     }
-    
+
     return *this;
 }
 
 /** Return the approximate maximum size (in bytes) of the WorkPacket. This
     doesn't have to exact (or indeed accurate) - it is used
     to help the WorkPacket::pack() function reserve enough
-    space when serialising this packet to a binary array. 
+    space when serialising this packet to a binary array.
     The only penalty of getting this wrong is that you'll
     either allocate too much space, or be reallocating while
     the packet is being written */
@@ -288,15 +287,15 @@ float ErrorPacket::chunk()
 static const RegisterMetaType<AbortPacket> r_abortpacket;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                            const AbortPacket &abortpacket)
 {
     writeHeader(ds, r_abortpacket, 1);
-    
+
     SharedDataStream sds(ds);
 
     sds << static_cast<const WorkPacketBase&>(abortpacket);
-        
+
     return ds;
 }
 
@@ -304,16 +303,16 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, AbortPacket &abortpacket)
 {
     VersionID v = readHeader(ds, r_abortpacket);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> static_cast<WorkPacketBase&>(abortpacket);
     }
     else
         throw version_error(v, "1", r_abortpacket, CODELOC);
-        
+
     return ds;
 }
 
@@ -362,15 +361,15 @@ float AbortPacket::chunk()
 static const RegisterMetaType<WorkPacket> r_workpacket(NO_ROOT);
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                            const WorkPacket &workpacket)
 {
     writeHeader(ds, r_workpacket, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << workpacket.d;
-    
+
     return ds;
 }
 
@@ -378,7 +377,7 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, WorkPacket &workpacket)
 {
     VersionID v = readHeader(ds, r_workpacket);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -386,7 +385,7 @@ QDataStream &operator>>(QDataStream &ds, WorkPacket &workpacket)
     }
     else
         throw version_error(v, "1", r_workpacket, CODELOC);
-        
+
     return ds;
 }
 
@@ -415,7 +414,7 @@ WorkPacket& WorkPacket::operator=(const WorkPacket &other)
     }
     else
         d = other.d;
-        
+
     return *this;
 }
 
@@ -431,7 +430,7 @@ bool WorkPacket::shouldPack() const
 {
     if (this->isNull())
         return false;
-        
+
     else
         return d->shouldPack();
 }
@@ -444,13 +443,13 @@ QByteArray WorkPacket::pack() const
 
     QByteArray data;
     data.reserve( d->approximatePacketSize() );
-    
+
     QDataStream ds(&data, QIODevice::WriteOnly);
-    
+
     ds << *this;
-    
+
     data = qCompress(data);
-    
+
     return data;
 }
 
@@ -460,15 +459,15 @@ WorkPacket WorkPacket::unpack(const QByteArray &data)
 {
     if (data.isEmpty())
         return WorkPacket();
-        
+
     WorkPacket workpacket;
-    
+
     QByteArray uncompressed_data = qUncompress(data);
-    
+
     QDataStream ds(uncompressed_data);
-    
+
     ds >> workpacket;
-    
+
     return workpacket;
 }
 
@@ -504,7 +503,7 @@ bool WorkPacket::wasAborted() const
         return false;
 }
 
-/** Return whether or not the work has finished (or is in an 
+/** Return whether or not the work has finished (or is in an
     error state, or was aborted) - essentially, is there any
     more of this work packet to run? */
 bool WorkPacket::hasFinished() const
@@ -526,7 +525,7 @@ void WorkPacket::abort()
     }
 }
 
-/** This sets the error state - this is done by replacing the 
+/** This sets the error state - this is done by replacing the
     existing WorkPacket with an ErrorPacket that describes
     the error */
 void WorkPacket::setError(const SireError::exception &e) throw()
@@ -557,7 +556,7 @@ void WorkPacket::runChunk() throw()
     {
         if (d->hasFinished() or d->wasAborted())
             return;
-    
+
         d->runChunk();
     }
     catch(const SireError::exception &e)
@@ -594,7 +593,7 @@ const WorkPacketBase& WorkPacket::base() const
     if (this->isNull())
         throw SireError::nullptr_error( QObject::tr(
             "The null WorkPacket has no base!"), CODELOC );
-        
+
     return *d;
 }
 
@@ -608,13 +607,13 @@ static const RegisterMetaType<WorkTest> r_worktest;
 QDataStream &operator<<(QDataStream &ds, const WorkTest &worktest)
 {
     writeHeader(ds, r_worktest, 1);
-    
+
     SharedDataStream sds(ds);
 
-    sds << worktest.current << worktest.start 
+    sds << worktest.current << worktest.start
         << worktest.end << worktest.step
         << static_cast<const WorkPacketBase&>(worktest);
-        
+
     return ds;
 }
 
@@ -622,17 +621,17 @@ QDataStream &operator<<(QDataStream &ds, const WorkTest &worktest)
 QDataStream &operator>>(QDataStream &ds, WorkTest &worktest)
 {
     VersionID v = readHeader(ds, r_worktest);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> worktest.current >> worktest.start >> worktest.end >> worktest.step
             >> static_cast<WorkPacketBase&>(worktest);
     }
     else
         throw version_error(v, "1", r_worktest, CODELOC);
-        
+
     return ds;
 }
 
@@ -643,7 +642,7 @@ WorkTest::WorkTest()
 
 /** Construct a work test that counts from start to end in steps of 'step' */
 WorkTest::WorkTest(int _start, int _end, int _step)
-         : WorkPacketBase(), 
+         : WorkPacketBase(),
            current(_start), start(_start), end(_end), step(_step)
 {}
 
@@ -668,14 +667,14 @@ WorkTest& WorkTest::operator=(const WorkTest &other)
         step = other.step;
         WorkPacketBase::operator=(other);
     }
-    
+
     return *this;
 }
 
 /** Return the approximate maximum size (in bytes) of the WorkPacket. This
     doesn't have to exact (or indeed accurate) - it is used
     to help the WorkPacket::pack() function reserve enough
-    space when serialising this packet to a binary array. 
+    space when serialising this packet to a binary array.
     The only penalty of getting this wrong is that you'll
     either allocate too much space, or be reallocating while
     the packet is being written */
@@ -704,9 +703,9 @@ float WorkTest::chunk()
             throw SireError::invalid_arg( QObject::tr(
                 "You cannot use a negative step size if start is less than end!"),
                     CODELOC );
-    
+
         current = qMin( current+step, end );
-        
+
         QTextStream ts(stdout);
         ts << "I've counted to " << current << "\n";
 
@@ -714,8 +713,8 @@ float WorkTest::chunk()
             Sleep(1);
         #else
             sleep(1);
-        #endif 
-       
+        #endif
+
         return 100.0 - ( 100.0 * double(end - current) / double(end - start) );
     }
     else
@@ -724,7 +723,7 @@ float WorkTest::chunk()
             throw SireError::invalid_arg( QObject::tr(
                 "You cannot use a positive step size if start is greater than end!"),
                     CODELOC );
-    
+
         current = qMax( current+step, end );
 
         QTextStream ts(stdout);

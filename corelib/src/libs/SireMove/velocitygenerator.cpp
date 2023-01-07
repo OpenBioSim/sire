@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,15 +58,15 @@ using namespace SireStream;
 
 static const RegisterMetaType<VelocityGenerator> r_velgen( MAGIC_ONLY,
                                                     VelocityGenerator::typeName() );
-                                                    
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds,
                                         const VelocityGenerator &velgen)
 {
     writeHeader(ds, r_velgen, 1);
-    
+
     ds << static_cast<const Property&>(velgen);
-    
+
     return ds;
 }
 
@@ -75,14 +74,14 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, VelocityGenerator &velgen)
 {
     VersionID v = readHeader(ds, r_velgen);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(velgen);
     }
     else
         throw version_error( v, "1", r_velgen, CODELOC );
-        
+
     return ds;
 }
 
@@ -138,29 +137,29 @@ const NullVelocityGenerator& VelocityGenerator::null()
 static const RegisterMetaType<NullVelocityGenerator> r_nullvelgen;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                         const NullVelocityGenerator &nullvelgen)
 {
     writeHeader(ds, r_nullvelgen, 1);
-    
+
     ds << static_cast<const VelocityGenerator&>(nullvelgen);
-    
+
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds, 
+QDataStream &operator>>(QDataStream &ds,
                                         NullVelocityGenerator &nullvelgen)
 {
     VersionID v = readHeader(ds, r_nullvelgen);
-    
+
     if (v == 1)
     {
         ds >> static_cast<VelocityGenerator&>(nullvelgen);
     }
     else
         throw version_error(v, "1", r_nullvelgen, CODELOC);
-        
+
     return ds;
 }
 
@@ -179,7 +178,7 @@ NullVelocityGenerator::~NullVelocityGenerator()
 {}
 
 /** Copy assignment operator */
-NullVelocityGenerator& 
+NullVelocityGenerator&
 NullVelocityGenerator::operator=(const NullVelocityGenerator &other)
 {
     VelocityGenerator::operator=(other);
@@ -217,16 +216,16 @@ const char* NullVelocityGenerator::typeName()
 static const RegisterMetaType<VelocitiesFromProperty> r_velfromprop;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                         const VelocitiesFromProperty &velfromprop)
 {
     writeHeader(ds, r_velfromprop, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << velfromprop.vel_property
         << static_cast<const VelocityGenerator&>(velfromprop);
-        
+
     return ds;
 }
 
@@ -235,7 +234,7 @@ QDataStream &operator>>(QDataStream &ds,
                                         VelocitiesFromProperty &velfromprop)
 {
     VersionID v = readHeader(ds, r_velfromprop);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -244,7 +243,7 @@ QDataStream &operator>>(QDataStream &ds,
     }
     else
         throw version_error(v, "1", r_velfromprop, CODELOC);
-        
+
     return ds;
 }
 
@@ -270,12 +269,12 @@ VelocitiesFromProperty::~VelocitiesFromProperty()
 {}
 
 /** Copy assignment operator */
-VelocitiesFromProperty& 
+VelocitiesFromProperty&
 VelocitiesFromProperty::operator=(const VelocitiesFromProperty &other)
 {
     VelocityGenerator::operator=(other);
     vel_property = other.vel_property;
-    
+
     return *this;
 }
 
@@ -312,16 +311,16 @@ const char* VelocitiesFromProperty::typeName()
 static const RegisterMetaType<MaxwellBoltzmann> r_maxboltz;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                         const MaxwellBoltzmann &maxboltz)
 {
     writeHeader(ds, r_maxboltz, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << maxboltz.ran_generator << maxboltz.temp.to(kelvin)
         << static_cast<const VelocityGenerator&>(maxboltz);
-        
+
     return ds;
 }
 
@@ -329,21 +328,21 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, MaxwellBoltzmann &maxboltz)
 {
     VersionID v = readHeader(ds, r_maxboltz);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         double temp;
-        
+
         sds >> maxboltz.ran_generator >> temp
             >> static_cast<VelocityGenerator&>(maxboltz);
-            
+
         maxboltz.temp = temp*kelvin;
     }
     else
         throw version_error(v, "1", r_maxboltz);
-        
+
     return ds;
 }
 
@@ -379,7 +378,7 @@ MaxwellBoltzmann& MaxwellBoltzmann::operator=(const MaxwellBoltzmann &other)
         ran_generator = other.ran_generator;
         temp = other.temp;
     }
-    
+
     return *this;
 }
 
@@ -425,40 +424,40 @@ static QVector<MolarMass> getMassesFromElements(const MoleculeView &molview,
 {
     const AtomElements &elements = molview.data().property(map["element"])
                                                  .asA<AtomElements>();
-                                                 
+
     QVector<Element> elms;
-    
+
     if (molview.selectedAll())
         elms = elements.toVector();
     else
         elms = elements.toVector(molview.selection());
-        
+
     int sz = elms.count();
-        
+
     QVector<MolarMass> masses(sz);
-    
+
     const Element *elm_array = elms.constData();
     MolarMass *masses_array = masses.data();
-    
+
     for (int i=0; i<sz; ++i)
     {
         masses_array[i] = elm_array[i].mass();
     }
-    
+
     return masses;
 }
 
-static QVector<MolarMass> getMasses(const MoleculeView &molview, 
+static QVector<MolarMass> getMasses(const MoleculeView &molview,
                                     const PropertyMap &map)
 {
     PropertyName mass_property = map["mass"];
-    
+
     if (not molview.data().hasProperty(mass_property))
         return ::getMassesFromElements(molview, map);
-        
+
     const AtomMasses &masses = molview.data().property(mass_property)
                                              .asA<AtomMasses>();
-                                             
+
     if (molview.selectedAll())
         return masses.toVector();
     else
@@ -472,22 +471,22 @@ AtomVelocities MaxwellBoltzmann::generate(const MoleculeView &molview,
     const double kT = temp.to(kelvin) * k_boltz;
 
     AtomVelocities molvels( molview.data().info() );
-    
+
     QVector<Velocity3D> vels;
-    
+
     if (molview.selectedAll())
         vels = molvels.toVector();
     else
         vels = molvels.toVector(molview.selection());
-        
+
     QVector<MolarMass> masses = ::getMasses(molview, map);
-    
+
     int sz = vels.count();
     BOOST_ASSERT( masses.count() == sz );
-    
+
     Velocity3D *vels_array = vels.data();
     const MolarMass *masses_array = masses.constData();
-    
+
     for (int i=0; i<sz; ++i)
     {
         //generate random velocities from a Maxwell-Boltzmann distribution.
@@ -497,12 +496,12 @@ AtomVelocities MaxwellBoltzmann::generate(const MoleculeView &molview,
         Vector norm_rand( ran_generator.randNorm(0, 1),
                           ran_generator.randNorm(0, 1),
                           ran_generator.randNorm(0, 1) );
-        
+
         // the velocity is this, multiplied by sqrt( kT / m )
         if (masses_array[i].value() == 0)
             vels_array[i] = Velocity3D(0*miles_per_hour);
         else
-            vels_array[i] = Velocity3D( std::sqrt(kT / masses_array[i].value()) 
+            vels_array[i] = Velocity3D( std::sqrt(kT / masses_array[i].value())
                                                             * norm_rand );
     }
 
@@ -510,7 +509,7 @@ AtomVelocities MaxwellBoltzmann::generate(const MoleculeView &molview,
         molvels.copyFrom(vels);
     else
         molvels.copyFrom(vels, molview.selection());
-        
+
     return molvels;
 }
 

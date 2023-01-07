@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,10 +58,10 @@ namespace SireMol
     information used to identify groups of molecule groups,
     together with the properties needed to manipulate those
     groups
-    
+
     @author Christopher Woods
 */
-class SIREMOL_EXPORT MGIDsAndMaps 
+class SIREMOL_EXPORT MGIDsAndMaps
         : public SireBase::ConcreteProperty<MGIDsAndMaps,SireBase::Property>
 {
 
@@ -82,44 +81,44 @@ public:
 
     MGIDsAndMaps(const QList<MolGroupPtr> &mgroups, const PropertyMap &map);
     MGIDsAndMaps(const boost::tuple<QList<MolGroupPtr>,PropertyMap> &groups_and_maps);
-    
+
     MGIDsAndMaps(const MGID &mgid);
     MGIDsAndMaps(const MGID &mgid, const PropertyMap &map);
-    
+
     MGIDsAndMaps(const boost::tuple<MGIdentifier,PropertyMap> mgid_and_map);
-    
+
     MGIDsAndMaps(const QList<MGIdentifier> &mgids);
     MGIDsAndMaps(const QList< boost::tuple<MGIdentifier,PropertyMap> > &mgids_and_maps);
 
     MGIDsAndMaps(const QList<MGIdentifier> &mgids, const PropertyMap &map);
     MGIDsAndMaps(const boost::tuple<QList<MGIdentifier>,PropertyMap> &mgids_and_maps);
-    
+
     MGIDsAndMaps(const QList<MGIDsAndMaps> &mgids_and_maps);
 
     MGIDsAndMaps(const MGIDsAndMaps &other);
 
     ~MGIDsAndMaps();
-    
+
     MGIDsAndMaps& operator=(const MGIDsAndMaps &other);
-    
+
     bool operator==(const MGIDsAndMaps &other) const;
     bool operator!=(const MGIDsAndMaps &other) const;
-    
+
     static const char* typeName();
-    
+
     bool isEmpty() const;
-    
+
     int count() const;
 
     QString toString() const;
-    
+
     const QVector<MGIdentifier>& mgIDs() const;
     const QVector<PropertyMap>& propertyMaps() const;
-    
+
 private:
     QVector<MGIdentifier> mgids;
     QVector<PropertyMap> maps;
-};    
+};
 
 }
 

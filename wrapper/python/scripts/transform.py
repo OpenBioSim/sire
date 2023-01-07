@@ -35,7 +35,7 @@ parser = argparse.ArgumentParser(description="Transform ligands/small molecules/
                                              "in a PDB file (e.g. translate/rotate)",
                                  epilog="This program is built using Sire, which is released "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/transform",
+                                        "http://sire.openbiosim.org/transform",
                                  prog="transform")
 
 parser.add_argument('--description', action="store_true",

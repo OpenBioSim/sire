@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,7 +60,7 @@ using SireMaths::Accumulator;
     molecule views in two groups. The coulomb and LJ energy of each pair
     of molecule views in the two groups is calculated and averaged
     using the contained accumulator
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT EnergyMonitor
@@ -73,47 +72,47 @@ friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, EnergyMonitor&)
 
 public:
     EnergyMonitor();
-    EnergyMonitor(const MoleculeGroup &group0, 
+    EnergyMonitor(const MoleculeGroup &group0,
                   const MoleculeGroup &group1);
-                  
-    EnergyMonitor(const MoleculeGroup &group0, 
+
+    EnergyMonitor(const MoleculeGroup &group0,
                   const MoleculeGroup &group1,
                   const SireMaths::Accumulator &accum);
 
     EnergyMonitor(const MoleculeGroup &group0,
                   const IDAssigner &group1);
-                  
+
     EnergyMonitor(const MoleculeGroup &group0,
                   const IDAssigner &group1,
                   const SireMaths::Accumulator &accum);
 
     EnergyMonitor(const IDAssigner &group0,
                   const MoleculeGroup &group1);
-                  
+
     EnergyMonitor(const IDAssigner &group0,
                   const MoleculeGroup &group1,
                   const SireMaths::Accumulator &accum);
-                  
+
     EnergyMonitor(const IDAssigner &group0,
                   const IDAssigner &group1);
-                  
+
     EnergyMonitor(const IDAssigner &group0,
                   const IDAssigner &group1,
                   const SireMaths::Accumulator &accum);
 
     EnergyMonitor(const EnergyMonitor &other);
-    
+
     ~EnergyMonitor();
-    
+
     EnergyMonitor& operator=(const EnergyMonitor &other);
-    
+
     bool operator==(const EnergyMonitor &other) const;
     bool operator!=(const EnergyMonitor &other) const;
-    
+
     static const char* typeName();
-    
+
     void clearStatistics();
-    
+
     void monitor(System &system);
 
     void setAlphaComponent(const SireCAS::Symbol &component);
@@ -133,7 +132,7 @@ public:
 
     const SireMol::MoleculeGroup& group0() const;
     const SireMol::MoleculeGroup& group1() const;
-    
+
     const IDAssigner& assigner0() const;
     const IDAssigner& assigner1() const;
 
@@ -144,17 +143,17 @@ private:
     /** The two molecule groups that contain the molecule views
         between which energies will be calculated */
     SireMol::MolGroupPtr grp0, grp1;
-    
+
     /** The two IDAssigners that will be used to assign molecules. These
         are null unless an assigner is being used */
     SireBase::PropertyPtr asgn0, asgn1;
-    
+
     /** Template for the accumulator used to accumulate the energy values */
     SireMaths::AccumulatorPtr accum;
-    
+
     /** The accumulated coulomb energies */
     SireBase::Array2D<SireMaths::AccumulatorPtr> coul_nrgs;
-    
+
     /** The accumulated LJ energies */
     SireBase::Array2D<SireMaths::AccumulatorPtr> lj_nrgs;
 

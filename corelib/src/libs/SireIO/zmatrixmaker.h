@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,9 +48,9 @@ namespace SireMol
 
 namespace SireIO
 {
-  /** 
+  /**
       This internal class is used to store information describing a ZmatrixLineTemplate.
-      
+
       @author Julien Michel
    */
   using SireMol::Molecule;
@@ -59,10 +58,10 @@ namespace SireIO
   class ZmatrixLineTemplate
   {
   public:
-    ZmatrixLineTemplate( const QString &atom = " ", const QString &bond = " ", const QString &angle = " ", 
-		 const QString &dihedral = " ", const double &bondDelta = 0.0, const double &angleDelta = 0.0, 
+    ZmatrixLineTemplate( const QString &atom = " ", const QString &bond = " ", const QString &angle = " ",
+		 const QString &dihedral = " ", const double &bondDelta = 0.0, const double &angleDelta = 0.0,
 		 const double &dihedralDelta = 0.0);
-    
+
     bool has(const QString &atom );
     const QString getAtom();
     const QString getBond();
@@ -84,10 +83,10 @@ namespace SireIO
     double angleDelta;
     double dihedralDelta;
   };
-  /** 
-      This internal class is used to store information describing a ZmatrixTemplate, which is 
+  /**
+      This internal class is used to store information describing a ZmatrixTemplate, which is
       an hash of ZmatrixLineTemplate with a name
-      
+
       @author Julien Michel
    */
   class ZmatrixTemplate
@@ -102,7 +101,7 @@ namespace SireIO
     void addZmatrixLineTemplate( const QString &atom, const ZmatrixLineTemplate &zmatline);
     void setBondDelta( const QString &atom, const QString &bond, double bondDelta  );
     void setAngleDelta( const QString &atom, const QString &bond, const QString &angle, double angleDelta);
-    void setDihedralDelta( const QString &atom, const QString &bond, 
+    void setDihedralDelta( const QString &atom, const QString &bond,
 			   const QString &angle, const QString &dihedral, double dihedralDelta);
 
   private:
@@ -110,8 +109,8 @@ namespace SireIO
     QHash< QString, ZmatrixLineTemplate > zmatrix;
   };
 
-  /** 
-      This internal class is used to store information describing a ZmatrixResidue template. It inherits 
+  /**
+      This internal class is used to store information describing a ZmatrixResidue template. It inherits
       from ZmatrixTemplate.
 
       @author Julien Michel
@@ -131,7 +130,7 @@ namespace SireIO
     const double getTranslation();
     QList<ZmatrixTemplate> getChains();
     const ZmatrixTemplate getChain(const QString &name);
-    
+
   private:
     double rotate;
     double translate;
@@ -141,7 +140,7 @@ namespace SireIO
   };
 
 
-  /** This class is used to read templates describing how a residue can be moved using zmatrix moves 
+  /** This class is used to read templates describing how a residue can be moved using zmatrix moves
    and to create a zmatrix property for residues whose template is available.
 
    @author Julien Michel
@@ -154,14 +153,14 @@ namespace SireIO
   public:
     ZmatrixMaker();
     ~ZmatrixMaker();
-    
+
     /** Read the contents of an input file to create a set of ZmatrixResidues */
     void loadTemplates( const QString &templatesfile);
     /** Add the property 'z-matrix' to molecule */
     Molecule applyTemplates( Molecule &molecule);
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
       return ZmatrixMaker::typeName();
@@ -171,7 +170,7 @@ namespace SireIO
     /** The hash of residues for which a template is available*/
     QHash< QString, ZmatrixResidue > residues;
   };
-  
+
 }
 
 Q_DECLARE_METATYPE( SireIO::ZmatrixMaker )

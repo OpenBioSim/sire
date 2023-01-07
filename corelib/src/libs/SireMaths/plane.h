@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -47,10 +46,10 @@ SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Plane&);
 namespace SireMaths
 {
 
-/** This class represents an infinite plane, represented by a normal vector 
-    perpendicular to the plane, and the distance from the origin 
+/** This class represents an infinite plane, represented by a normal vector
+    perpendicular to the plane, and the distance from the origin
     along that normal vector.
- 
+
     @author Christopher Woods
 */
 class SIREMATHS_EXPORT Plane
@@ -68,7 +67,7 @@ public:
     ~Plane();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return Plane::typeName();
@@ -76,7 +75,7 @@ public:
 
     const Vector& normal() const;
     const double& distanceFromOrigin() const;
-    
+
     double a() const;
     double b() const;
     double c() const;

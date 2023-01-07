@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,7 +50,7 @@ namespace SireMove
 
 /** This is the base class of the dynamics moves (e.g. all-atom
     molecular dynamics, or rigid body dynamics)
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT Dynamics : public Move
@@ -62,24 +61,24 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Dynamics&);
 
 public:
     Dynamics(const PropertyMap &map = PropertyMap());
-    
+
     Dynamics(const Dynamics &other);
-    
+
     ~Dynamics();
-    
+
     static const char* typeName()
     {
         return "SireMove::Dynamics";
     }
-    
+
     Ensemble ensemble() const;
 
 protected:
     Dynamics& operator=(const Dynamics &other);
-    
+
     bool operator==(const Dynamics &other) const;
     bool operator!=(const Dynamics &other) const;
-    
+
     void setEnsemble(const Ensemble &ensemble);
 
 private:

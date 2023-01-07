@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -65,17 +64,17 @@ using namespace SireStream;
 
 static const RegisterMetaType<VolumeChanger> r_volchanger( MAGIC_ONLY,
                                                            VolumeChanger::typeName() );
-                                                           
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const VolumeChanger &volchanger)
 {
     writeHeader(ds, r_volchanger, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << volchanger.rangen << volchanger.mgid
         << static_cast<const Property&>(volchanger);
-        
+
     return ds;
 }
 
@@ -83,18 +82,18 @@ QDataStream &operator<<(QDataStream &ds, const VolumeChanger &volchanger)
 QDataStream &operator>>(QDataStream &ds, VolumeChanger &volchanger)
 {
     VersionID v = readHeader(ds, r_volchanger);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> volchanger.rangen >> volchanger.mgid
             >> static_cast<Property&>(volchanger);
 
     }
     else
         throw version_error( v, "1", r_volchanger, CODELOC );
-        
+
     return ds;
 }
 
@@ -102,13 +101,13 @@ QDataStream &operator>>(QDataStream &ds, VolumeChanger &volchanger)
 VolumeChanger::VolumeChanger() : Property()
 {}
 
-/** Construct to operate on the molecule group(s) that 
+/** Construct to operate on the molecule group(s) that
     match the ID 'mgid' */
 VolumeChanger::VolumeChanger(const MGID &mg_id) : Property(), mgid(mg_id)
 {}
-  
+
 /** Construct to operate on the passed molecule group
-    (this matches the group based on its molecule group number) */            
+    (this matches the group based on its molecule group number) */
 VolumeChanger::VolumeChanger(const MoleculeGroup &molgroup)
               : Property(), mgid(molgroup.number())
 {}
@@ -131,7 +130,7 @@ VolumeChanger& VolumeChanger::operator=(const VolumeChanger &other)
         mgid = other.mgid;
         Property::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -183,12 +182,12 @@ void VolumeChanger::setGroup(const MoleculeGroup &molgroup)
 }
 
 /** Change the volume of the passed system 'system' by 'delta', using
-    the optionally supplied property map to find the names of the 
+    the optionally supplied property map to find the names of the
     necessary properties
-    
+
     This returns the number of molecules which were involved in
     the volume change
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::unsupported
@@ -198,13 +197,13 @@ int VolumeChanger::changeVolume(System &system, const Volume &delta,
                                 const PropertyMap &map) const
 {
     Volume current_volume = system.property( map["space"] ).asA<Space>().volume();
-    
+
     return this->setVolume(system, current_volume + delta, map);
 }
 
 /** Change the volume of the passed system 'system' by a random
     amount between -maxvolchange and maxvolchange, using
-    the optionally supplied property map to find the names of the 
+    the optionally supplied property map to find the names of the
     necessary properties.
 
     If this move is biased, then this sets old_bias to the
@@ -212,7 +211,7 @@ int VolumeChanger::changeVolume(System &system, const Volume &delta,
 
     This returns the number of molecules which were involved in
     the volume change
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::unsupported
@@ -244,13 +243,13 @@ const NullVolumeChanger& VolumeChanger::null()
 static const RegisterMetaType<NullVolumeChanger> r_nullvolchanger;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                         const NullVolumeChanger &nullvolchanger)
 {
     writeHeader(ds, r_nullvolchanger, 1);
-    
+
     ds << static_cast<const VolumeChanger&>(nullvolchanger);
-    
+
     return ds;
 }
 
@@ -259,19 +258,19 @@ QDataStream &operator>>(QDataStream &ds,
                                         NullVolumeChanger &nullvolchanger)
 {
     VersionID v = readHeader(ds, r_nullvolchanger);
-    
+
     if (v == 1)
     {
         ds >> static_cast<VolumeChanger&>(nullvolchanger);
     }
-    else 
+    else
         throw version_error( v, "1", r_nullvolchanger, CODELOC );
-        
+
     return ds;
 }
 
 /** Constructor */
-NullVolumeChanger::NullVolumeChanger() 
+NullVolumeChanger::NullVolumeChanger()
                   : ConcreteProperty<NullVolumeChanger,VolumeChanger>()
 {}
 
@@ -325,12 +324,12 @@ QDataStream &operator<<(QDataStream &ds,
                                         const ScaleVolumeFromCenter &scalevol)
 {
     writeHeader(ds, r_scalevol, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << scalevol.scale_point
         << static_cast<const VolumeChanger&>(scalevol);
-        
+
     return ds;
 }
 
@@ -339,17 +338,17 @@ QDataStream &operator>>(QDataStream &ds,
                                         ScaleVolumeFromCenter &scalevol)
 {
     VersionID v = readHeader(ds, r_scalevol);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
-        sds >> scalevol.scale_point 
+
+        sds >> scalevol.scale_point
             >> static_cast<VolumeChanger&>(scalevol);
     }
     else
         throw version_error( v, "1", r_scalevol, CODELOC );
-    
+
     return ds;
 }
 
@@ -381,7 +380,7 @@ ScaleVolumeFromCenter::ScaleVolumeFromCenter(const MGID &mgid, const PointRef &p
 
 /** Construct to scale the molecules in the group 'molgroup',
     scaling the molecules from the point 'point' */
-ScaleVolumeFromCenter::ScaleVolumeFromCenter(const MoleculeGroup &molgroup, 
+ScaleVolumeFromCenter::ScaleVolumeFromCenter(const MoleculeGroup &molgroup,
                                              const PointRef &point)
                       : ConcreteProperty<ScaleVolumeFromCenter,VolumeChanger>(molgroup),
                         scale_point(point)
@@ -403,21 +402,21 @@ ScaleVolumeFromCenter& ScaleVolumeFromCenter::operator=(
 {
     VolumeChanger::operator=(other);
     scale_point = other.scale_point;
-    
+
     return *this;
 }
 
 /** Comparison operator */
 bool ScaleVolumeFromCenter::operator==(const ScaleVolumeFromCenter &other) const
 {
-    return VolumeChanger::operator==(other) and 
+    return VolumeChanger::operator==(other) and
            scale_point == other.scale_point;
 }
 
 /** Comparison operator */
 bool ScaleVolumeFromCenter::operator!=(const ScaleVolumeFromCenter &other) const
 {
-    return VolumeChanger::operator!=(other) or 
+    return VolumeChanger::operator!=(other) or
            scale_point != other.scale_point;
 }
 
@@ -438,12 +437,12 @@ void ScaleVolumeFromCenter::setCenter(const PointRef &center)
     scale_point = center;
 }
 
-/** Set the volume of the system 'system' to 'volume', using the 
-    optionally supplied property map to find the names of the 
+/** Set the volume of the system 'system' to 'volume', using the
+    optionally supplied property map to find the names of the
     properties needed to change the system volume.
-    
+
     This returns the number of molecules involved in the volume change
-    
+
     \throw SireMol::missing_group
     \throw SireBase::missing_property
     \throw SireVol::incompatible_space
@@ -456,7 +455,7 @@ int ScaleVolumeFromCenter::setVolume(System &system, const Volume &volume,
                                      const PropertyMap &map) const
 {
     const PropertyName &space_property = map["space"];
-    
+
     //get the molecules to be scaled in the molecule groups
     Molecules old_molecules = system.molecules(this->groupID());
 
@@ -472,7 +471,7 @@ int ScaleVolumeFromCenter::setVolume(System &system, const Volume &volume,
                 .arg(volume.to(angstrom3))
                 .arg(old_space.toString())
                 .arg(old_volume.to(angstrom3)), CODELOC );
-    
+
     else if (old_volume == volume)
         //there is nothing to change - but we still need to return the
         //number of molecules that are part of this volume
@@ -480,25 +479,25 @@ int ScaleVolumeFromCenter::setVolume(System &system, const Volume &volume,
 
     //get the center point from which we will be scaling
     Vector center;
-    
+
     if (scale_point.read().usesMoleculesIn(system))
     {
         //need to do a update on a copy here as we are not allowed
         //to change this volume changer
         PointPtr new_point(scale_point);
-        
+
         new_point.edit().update(system);
         new_point.edit().setSpace(old_space);    //(could this violate detailed balance,
-                                                 // as the center could depend on the 
+                                                 // as the center could depend on the
                                                  // current space, so would change,
                                                  // meaning that reverse move probability
                                                  // would be hard to compute...)
-        
+
         center = new_point.read().point();
     }
     else
         center = scale_point.read().point();
-	
+
     //set the new volume of this space
     SpacePtr space = old_space.setVolume( volume );
 
@@ -510,9 +509,9 @@ int ScaleVolumeFromCenter::setVolume(System &system, const Volume &volume,
     #else
         const double scale_ratio = std::pow( volume / old_volume, 1.0/3.0 );
     #endif
-    
+
     Molecules molecules = old_molecules;
-    
+
     for (Molecules::const_iterator it = old_molecules.constBegin();
          it != old_molecules.constEnd();
          ++it)
@@ -523,7 +522,7 @@ int ScaleVolumeFromCenter::setVolume(System &system, const Volume &volume,
         Vector old_mol_center = mol.evaluate().center(map);
 
 		Vector delta = (scale_ratio - 1) * (old_mol_center - center);
-        
+
         if (not delta.isZero())
         {
             mol = mol.move().translate(delta, map).commit();
@@ -532,9 +531,9 @@ int ScaleVolumeFromCenter::setVolume(System &system, const Volume &volume,
     }
 
 	if (space_property.hasSource())
-	    system.setProperty(space_property.source(), space);    
+	    system.setProperty(space_property.source(), space);
 
     system.update(molecules);
-    
+
     return old_molecules.nMolecules();
 }

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,13 +52,13 @@ using SireBase::PropertyName;
 
 using SireMol::MoleculeGroup;
 
-/** This is the base class of constraints that are used to change 
-    the charges on a molecule to match those of an underlying function, 
+/** This is the base class of constraints that are used to change
+    the charges on a molecule to match those of an underlying function,
     e.g. this can be used to recalculate the atomic partial charges of a
     molecule every time it changes conformation, or it can
-    be used to modify the charges to correspond to 
+    be used to modify the charges to correspond to
     polarisation caused by the environment
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT ChargeConstraint : public MoleculeConstraint
@@ -72,20 +71,20 @@ public:
     ChargeConstraint();
     ChargeConstraint(const MoleculeGroup &molgroup,
                      const PropertyMap &map = PropertyMap());
-    
+
     ChargeConstraint(const ChargeConstraint &other);
-    
+
     ~ChargeConstraint();
 
     static const char* typeName();
-    
+
     const MoleculeGroup& moleculeGroup() const;
 
     const PropertyMap& propertyMap() const;
 
-protected:    
+protected:
     ChargeConstraint& operator=(const ChargeConstraint &other);
-    
+
     bool operator==(const ChargeConstraint &other) const;
     bool operator!=(const ChargeConstraint &other) const;
 

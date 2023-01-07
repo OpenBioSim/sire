@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -42,16 +41,16 @@ const DOUBLE64 double_magic = double(6755399441055744.0);  // 2^(52-16) * 1.5
 static QString toBinary(qint64 value)
 {
     QStringList vals;
-    
+
     const unsigned char *c = reinterpret_cast<const unsigned char*>(&(value));
-        
+
     QString val("0x");
-        
+
     for (unsigned int j=0; j<sizeof(qint64); ++j)
     {
         val.append( QString("%1").arg((unsigned short)(c[j]), 2, 16, QChar('0')) );
     }
-    
+
     return val;
 }
 
@@ -119,7 +118,7 @@ MultiFixed::MultiFixed(const double *array, int size)
         {
             v.a[i] = convertToFixed(array[i]);
         }
-        
+
         for (int i=size; i<MULTIFLOAT_SIZE; ++i)
         {
             v.a[i] = 0;
@@ -165,25 +164,25 @@ QVector<MultiFixed> MultiFixed::fromArray(const QVector<double> &array)
         return QVector<MultiFixed>();
 
     QVector<MultiFixed> marray;
-    
+
     int nvecs = array.count() / MULTIFLOAT_SIZE;
     int nremain = array.count() % MULTIFLOAT_SIZE;
-    
+
     marray.reserve(nvecs + ( (nremain == 1) ? 1 : 0 ));
-    
+
     int idx = 0;
-    
+
     for (int i=0; i<nvecs; ++i)
     {
         marray.append( MultiFixed((double*)(&(array.constData()[idx])), MULTIFLOAT_SIZE) );
         idx += MULTIFLOAT_SIZE;
     }
-    
+
     if (nremain > 0)
     {
         marray.append( MultiFixed((double*)(&(array.constData()[idx])), nremain) );
     }
-    
+
     return marray;
 }
 
@@ -192,20 +191,20 @@ QVector<double> MultiFixed::toArray(const QVector<MultiFixed> &array)
 {
     if (array.isEmpty())
         return QVector<double>();
-    
+
     QVector<double> ret;
     ret.reserve( array.count() * MULTIFLOAT_SIZE );
-    
+
     for (int i=0; i<array.count(); ++i)
     {
         const MultiFixed &f = array.constData()[i];
-        
+
         for (int j=0; j<MULTIFLOAT_SIZE; ++j)
         {
             ret.append(f[j]);
         }
     }
-    
+
     return ret;
 }
 
@@ -219,7 +218,7 @@ MultiFixed& MultiFixed::operator=(const MultiFixed &other)
             v.a[i] = other.v.a[i];
         }
     }
-    
+
     return *this;
 }
 
@@ -232,7 +231,7 @@ bool MultiFixed::operator==(const MultiFixed &other) const
         if (v.a[i] != other.v.a[i])
             return false;
     }
-    
+
     return true;
 }
 
@@ -244,7 +243,7 @@ bool MultiFixed::operator!=(const MultiFixed &other) const
         if (v.a[i] == other.v.a[i])
             return false;
     }
-    
+
     return true;
 }
 
@@ -256,7 +255,7 @@ bool MultiFixed::operator<(const MultiFixed &other) const
         if (v.a[i] >= other.v.a[i])
             return false;
     }
-    
+
     return true;
 }
 
@@ -268,7 +267,7 @@ bool MultiFixed::operator>(const MultiFixed &other) const
         if (v.a[i] <= other.v.a[i])
             return false;
     }
-    
+
     return true;
 }
 
@@ -280,7 +279,7 @@ bool MultiFixed::operator<=(const MultiFixed &other) const
         if (v.a[i] > other.v.a[i])
             return false;
     }
-    
+
     return true;
 }
 
@@ -292,7 +291,7 @@ bool MultiFixed::operator>=(const MultiFixed &other) const
         if (v.a[i] < other.v.a[i])
             return false;
     }
-    
+
     return true;
 }
 
@@ -309,12 +308,12 @@ static qint64 getBinaryOne()
 MultiFixed MultiFixed::compareEqual(const MultiFixed &other) const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = (v.a[i] == other.v.a[i]) ? MULTIFIXED_BINONE : 0x0;
     }
-    
+
     return ret;
 }
 
@@ -322,12 +321,12 @@ MultiFixed MultiFixed::compareEqual(const MultiFixed &other) const
 MultiFixed MultiFixed::compareNotEqual(const MultiFixed &other) const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = (v.a[i] != other.v.a[i]) ? MULTIFIXED_BINONE : 0x0;
     }
-    
+
     return ret;
 }
 
@@ -335,12 +334,12 @@ MultiFixed MultiFixed::compareNotEqual(const MultiFixed &other) const
 MultiFixed MultiFixed::compareLess(const MultiFixed &other) const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = (v.a[i] < other.v.a[i]) ? MULTIFIXED_BINONE : 0x0;
     }
-    
+
     return ret;
 }
 
@@ -348,12 +347,12 @@ MultiFixed MultiFixed::compareLess(const MultiFixed &other) const
 MultiFixed MultiFixed::compareGreater(const MultiFixed &other) const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = (v.a[i] > other.v.a[i]) ? MULTIFIXED_BINONE : 0x0;
     }
-    
+
     return ret;
 }
 
@@ -361,12 +360,12 @@ MultiFixed MultiFixed::compareGreater(const MultiFixed &other) const
 MultiFixed MultiFixed::compareLessEqual(const MultiFixed &other) const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = (v.a[i] <= other.v.a[i]) ? MULTIFIXED_BINONE : 0x0;
     }
-    
+
     return ret;
 }
 
@@ -374,12 +373,12 @@ MultiFixed MultiFixed::compareLessEqual(const MultiFixed &other) const
 MultiFixed MultiFixed::compareGreaterEqual(const MultiFixed &other) const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = (v.a[i] >= other.v.a[i]) ? MULTIFIXED_BINONE : 0x0;
     }
-    
+
     return ret;
 }
 
@@ -396,33 +395,33 @@ const char* MultiFixed::typeName()
 QString MultiFixed::toString() const
 {
     QStringList vals;
-    
+
     for (int i=0; i<this->count(); ++i)
     {
         vals.append( QString::number(this->get(i)) );
     }
-    
+
     return QObject::tr("{ %1 }").arg(vals.join(", "));
 }
 
 QString MultiFixed::toBinaryString() const
 {
     QStringList vals;
-    
+
     for (int i=0; i<this->count(); ++i)
     {
         const unsigned char *c = reinterpret_cast<const unsigned char*>(&(v.a[i]));
-        
+
         QString val("0x");
-        
+
         for (unsigned int j=0; j<sizeof(qint64); ++j)
         {
             val.append( QString("%1").arg((unsigned short)(c[j]), 2, 16, QChar('0')) );
         }
-        
+
         vals.append(val);
     }
-    
+
     return QObject::tr("{ %1 }").arg(vals.join(", "));
 }
 
@@ -443,14 +442,14 @@ double MultiFixed::operator[](int i) const
 {
     if (i < 0)
         i = MULTIFLOAT_SIZE + i;
-    
+
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
         throw SireError::invalid_index( QObject::tr(
                 "Cannot access element %1 of MultiFixed (holds only %2 values)")
                     .arg(i).arg(MULTIFLOAT_SIZE), CODELOC );
     }
-    
+
     return convertFromFixed(v.a[i]);
 }
 
@@ -459,7 +458,7 @@ void MultiFixed::set(int i, double value)
 {
     if (i < 0)
         i = MULTIFLOAT_SIZE + i;
-    
+
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
         throw SireError::invalid_index( QObject::tr(
@@ -480,12 +479,12 @@ double MultiFixed::get(int i) const
 MultiFixed MultiFixed::operator-() const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = -v.a[i];
     }
-    
+
     return ret;
 }
 
@@ -498,7 +497,7 @@ MultiFixed MultiFixed::operator+(const MultiFixed &other) const
     {
         ret.v.a[i] = v.a[i] + other.v.a[i];
     }
-    
+
     return ret;
 }
 
@@ -511,7 +510,7 @@ MultiFixed MultiFixed::operator-(const MultiFixed &other) const
     {
         ret.v.a[i] = v.a[i] - other.v.a[i];
     }
-    
+
     return ret;
 }
 
@@ -520,14 +519,14 @@ MultiFixed MultiFixed::operator*(const MultiFixed &other) const
 {
     //due to the high chance of overflow it is probably easier
     //to do this by back converting to a double
-    
+
     double ret[ MULTIFLOAT_SIZE ];
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret[i] = convertFromFixed(v.a[i]) * convertFromFixed(other.v.a[i]);
     }
-    
+
     return MultiFixed( (double*)(&ret), MULTIFLOAT_SIZE );
 }
 
@@ -536,14 +535,14 @@ MultiFixed MultiFixed::operator/(const MultiFixed &other) const
 {
     //due to the high chance of overflow it is probably easier
     //to do this by back converting to a double
-    
+
     double ret[ MULTIFLOAT_SIZE ];
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret[i] = convertFromFixed(v.a[i]) / convertFromFixed(other.v.a[i]);
     }
-    
+
     return MultiFixed( (double*)(&ret), MULTIFLOAT_SIZE );
 }
 
@@ -554,7 +553,7 @@ MultiFixed& MultiFixed::operator+=(const MultiFixed &other)
     {
         v.a[i] += other.v.a[i];
     }
-    
+
     return *this;
 }
 
@@ -565,7 +564,7 @@ MultiFixed& MultiFixed::operator-=(const MultiFixed &other)
     {
         v.a[i] -= other.v.a[i];
     }
-    
+
     return *this;
 }
 
@@ -573,7 +572,7 @@ MultiFixed& MultiFixed::operator-=(const MultiFixed &other)
 MultiFixed& MultiFixed::operator*=(const MultiFixed &other)
 {
     this->operator=( this->operator*(other) );
-    
+
     return *this;
 }
 
@@ -622,7 +621,7 @@ MultiFixed& MultiFixed::operator&=(const MultiFixed &other)
             char_v[j] &= other_char_v[j];
         }
     }
-    
+
     return *this;
 }
 
@@ -640,7 +639,7 @@ MultiFixed& MultiFixed::operator|=(const MultiFixed &other)
             char_v[j] |= other_char_v[j];
         }
     }
-    
+
     return *this;
 }
 
@@ -658,7 +657,7 @@ MultiFixed& MultiFixed::operator^=(const MultiFixed &other)
             char_v[j] ^= other_char_v[j];
         }
     }
-    
+
     return *this;
 }
 
@@ -775,12 +774,12 @@ MultiFixed& MultiFixed::multiplyAdd(const MultiFixed &val0, const MultiFixed &va
 MultiFixed MultiFixed::max(const MultiFixed &other) const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = ( v.a[i] >= other.v.a[i] ? v.a[i] : other.v.a[i] );
     }
-    
+
     return ret;
 }
 
@@ -788,12 +787,12 @@ MultiFixed MultiFixed::max(const MultiFixed &other) const
 MultiFixed MultiFixed::min(const MultiFixed &other) const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = ( v.a[i] <= other.v.a[i] ? v.a[i] : other.v.a[i] );
     }
-    
+
     return ret;
 }
 
@@ -801,12 +800,12 @@ MultiFixed MultiFixed::min(const MultiFixed &other) const
 MultiFixed MultiFixed::reciprocal() const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = convertToFixed( double(1) / convertFromFixed(v.a[i]) );
     }
-    
+
     return ret;
 }
 
@@ -814,12 +813,12 @@ MultiFixed MultiFixed::reciprocal() const
 MultiFixed MultiFixed::sqrt() const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = convertToFixed( std::sqrt(convertFromFixed(v.a[i])) );
     }
-    
+
     return ret;
 }
 
@@ -827,12 +826,12 @@ MultiFixed MultiFixed::sqrt() const
 MultiFixed MultiFixed::rsqrt() const
 {
     MultiFixed ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = convertToFixed( double(1) / std::sqrt(convertFromFixed(v.a[i])) );
     }
-    
+
     return ret;
 }
 
@@ -840,14 +839,14 @@ MultiFixed MultiFixed::rsqrt() const
 MultiFixed MultiFixed::rotate() const
 {
     MultiFixed ret;
-    
+
     for (int i=1; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i-1] = v.a[i];
     }
-    
+
     ret.v.a[MULTIFLOAT_SIZE-1] = v.a[0];
-    
+
     return ret;
 }
 
@@ -857,7 +856,7 @@ double MultiFixed::sum() const
     //form this sum in blocks of four. This should help preserve
     //the order of addition in case the size of MultiFloat changes...
     double total = 0;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; i+=4)
     {
         total += ( convertFromFixed(v.a[i]) +
@@ -865,6 +864,6 @@ double MultiFixed::sum() const
                    convertFromFixed(v.a[i+2]) +
                    convertFromFixed(v.a[i+3]) );
     }
-    
+
     return total;
 }

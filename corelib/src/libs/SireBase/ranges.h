@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,7 +47,7 @@ namespace SireBase
 
 /** This class represents a simple range from start to end in steps
     of increment
-    
+
     @author Christopher Woods
 */
 class SIREBASE_EXPORT SimpleRange : public SireBase::ConcreteProperty<SimpleRange,Range>
@@ -61,29 +60,29 @@ public:
     SimpleRange();
     SimpleRange(qint64 i);
     SimpleRange(qint64 start, qint64 end, qint64 increment=1);
-    
+
     SimpleRange(const SimpleRange &other);
-    
+
     ~SimpleRange();
-    
+
     SimpleRange& operator=(const SimpleRange &other);
-    
+
     bool operator==(const SimpleRange &other) const;
     bool operator!=(const SimpleRange &other) const;
-    
+
     QString toString() const;
-    
+
     SimpleRange* clone() const;
-    
+
     static const char* typeName();
     const char* what() const;
-    
+
     qint64 next();
-    
+
     bool atEnd() const;
-    
+
     RangePtr populate(int nvalues) const;
-    
+
 private:
     qint64 strtval, endval, incr;
 };

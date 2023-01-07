@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -33,7 +32,7 @@ using namespace SireMol;
 
 static const RegisterMetaType<CGAtomIdx> r_cgatomidx;
 
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                        const CGAtomIdx &cgatomidx)
 {
     ds << cgatomidx._cgidx << cgatomidx._atmidx;
@@ -64,7 +63,7 @@ CGAtomIdx::~CGAtomIdx()
 CGAtomIdx CGAtomIdx::null()
 {
     return CGAtomIdx( CGIdx::null(), SireID::Index::null() );
-} 
+}
 
 bool CGAtomIdx::isNull() const
 {
@@ -85,9 +84,9 @@ CGAtomIdx& CGAtomIdx::operator=(const CGAtomIdx &other)
 {
     _cgidx = other._cgidx;
     _atmidx = other._atmidx;
-    
+
     AtomID::operator=(other);
-    
+
     return *this;
 }
 

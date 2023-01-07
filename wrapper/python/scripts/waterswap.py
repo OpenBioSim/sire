@@ -57,7 +57,7 @@ parser = argparse.ArgumentParser(description="Calculate absolute binding free "
                                              "energies using waterswap",
                                  epilog="waterswap is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/waterswap.html, or type "
+                                        "http://sire.openbiosim.org/waterswap.html, or type "
                                         "'waterswap --description'",
                                  prog="waterswap")
 
@@ -118,7 +118,7 @@ if args.author:
 if args.version:
     print("waterswap -- from Sire release version <%s>" % Sire.__version__)
     print("This particular release can be downloaded here: "
-          "https://github.com/michellab/Sire/releases/tag/v%s" % Sire.__version__)
+          "https://github.com/openbiosim/sire/releases/tag/v%s" % Sire.__version__)
     must_exit = True
 
 if args.help_config:

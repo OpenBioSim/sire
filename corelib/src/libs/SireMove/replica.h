@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,10 +58,10 @@ using SireBase::PropertyName;
 using SireCAS::Symbol;
 
 /** This is a replica within a replica exchange simulation
-    
+
     @author Christopher Woods
 */
-class SIREMOVE_EXPORT Replica 
+class SIREMOVE_EXPORT Replica
         : public SireBase::ConcreteProperty<Replica,SupraSubSystem>
 {
 
@@ -75,28 +74,28 @@ friend class RepExSubMove; //so can call protected editing functions
 public:
     Replica();
     Replica(const SupraSubSystem &subsystem);
-    
+
     Replica(const Replica &other);
-    
+
     ~Replica();
-    
+
     Replica& operator=(const Replica &other);
-    
+
     bool operator==(const Replica &other) const;
     bool operator!=(const Replica &other) const;
-    
+
     static const char* typeName();
 
     const Ensemble& ensemble() const;
-    
+
     const Symbol& energyComponent() const;
-    
+
     const PropertyName& spaceProperty() const;
-    
+
     const Symbol& lambdaComponent() const;
-    
+
     double lambdaValue() const;
-    
+
     SireUnits::Dimension::Temperature temperature() const;
     SireUnits::Dimension::Pressure pressure() const;
     SireUnits::Dimension::Pressure fugacity() const;
@@ -113,7 +112,7 @@ public:
     bool isConstantFugacity() const;
     bool isConstantChemicalPotential() const;
     bool isConstantLambda(const Symbol &lam) const;
-    
+
 protected:
     void setEnergyComponent(const Symbol &symbol);
     void setSpaceProperty(const PropertyName &spaceproperty);
@@ -141,11 +140,11 @@ protected:
 
 private:
     void updatedMoves();
-    
+
     /** Identifiers for the list of actions that can be deferred
         until the replica is unpacked */
-    enum ReplicaCommand 
-         { 
+    enum ReplicaCommand
+         {
            ENERGY_COMPONENT = 1,  // calls this->setEnergyComponent
            SPACE_PROPERTY   = 2,  // calls this->setSpaceProperty
            LAMBDA_COMPONENT = 3,  // calls this->setLambdaComponent
@@ -163,27 +162,27 @@ private:
     template<class T>
     void deferCommand(ReplicaCommand command, const T &argument);
 
-    /** The values that need to be set when the replica is unpacked, 
+    /** The values that need to be set when the replica is unpacked,
         in the order in which they should be applied */
     QList< QPair<quint32,QVariant> > vars_to_be_set;
 
     /** The ensemble sampled by moves in this replica */
     Ensemble replica_ensemble;
-    
+
     /** The property used to get the simulation space (for volume)
         for this replica */
     PropertyName space_property;
-    
+
     /** The symbol that represents the component of the energy
         that is evaluate for this replica - it is this energy
         that is put into the replica exchange test */
     Symbol nrg_component;
-    
-    /** The symbol representing the lambda coordinate for 
+
+    /** The symbol representing the lambda coordinate for
         lambda-based Hamiltonian replica exchange. This is null
         if this type of replica-exchange is not being performed */
     Symbol lambda_component;
-    
+
     /** The value of lambda for this replica */
     double lambda_value;
 };

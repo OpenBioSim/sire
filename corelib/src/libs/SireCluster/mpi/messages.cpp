@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,17 +63,17 @@ using boost::tuple;
 ///////// Implementation of MessageBase
 /////////
 
-static const RegisterMetaType<MessageBase> r_msgbase( MAGIC_ONLY, 
+static const RegisterMetaType<MessageBase> r_msgbase( MAGIC_ONLY,
                                                       MessageBase::typeName() );
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream& operator<<(QDataStream &ds, const MessageBase &msgbase)
 {
     writeHeader(ds, r_msgbase, 1);
-    
+
     ds << msgbase.uid << msgbase.subject_uid
        << msgbase.sent_by << msgbase.dest;
-       
+
     return ds;
 }
 
@@ -82,7 +81,7 @@ QDataStream& operator<<(QDataStream &ds, const MessageBase &msgbase)
 QDataStream& operator>>(QDataStream &ds, MessageBase &msgbase)
 {
     VersionID v = readHeader(ds, r_msgbase);
-    
+
     if (v == 1)
     {
         ds >> msgbase.uid >> msgbase.subject_uid
@@ -90,7 +89,7 @@ QDataStream& operator>>(QDataStream &ds, MessageBase &msgbase)
     }
     else
         throw version_error( v, "1", r_msgbase, CODELOC );
-        
+
     return ds;
 }
 
@@ -113,8 +112,8 @@ static void assertValidDestination(int rank)
 
 /** Construct a message that is intended to go to the MPI process
     with rank 'destination' */
-MessageBase::MessageBase(int destination) 
-            : QSharedData(), 
+MessageBase::MessageBase(int destination)
+            : QSharedData(),
               uid( QUuid::createUuid() ),
               subject_uid( QUuid::createUuid() ),
               sent_by( MPICluster::getRank() ),
@@ -158,7 +157,7 @@ MessageBase& MessageBase::operator=(const MessageBase &other)
         sent_by = other.sent_by;
         dest = other.dest;
     }
-    
+
     return *this;
 }
 
@@ -186,7 +185,7 @@ const QUuid& MessageBase::UID() const
     return uid;
 }
 
-/** Return the unique ID of the subject to which this 
+/** Return the unique ID of the subject to which this
     message relates */
 const QUuid& MessageBase::subjectUID() const
 {
@@ -221,12 +220,12 @@ bool MessageBase::isRecipient(int rank) const
 QSet<int> MessageBase::recipients() const
 {
     QSet<int> ranks;
-    
+
     if (dest == -1)
     {
         int nprocs = MPICluster::getCount();
         ranks.reserve(nprocs);
-        
+
         for (int i=0; i<nprocs; ++i)
         {
             ranks.insert(i);
@@ -234,7 +233,7 @@ QSet<int> MessageBase::recipients() const
     }
     else
         ranks.insert(dest);
-        
+
     return ranks;
 }
 
@@ -243,15 +242,15 @@ QSet<int> MessageBase::recipients() const
 /////////
 
 static const RegisterMetaType<Message> r_message;
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream& operator<<(QDataStream &ds, const Message &message)
 {
     writeHeader(ds, r_message, 1);
-    
+
     SharedDataStream sds(ds);
     sds << message.d;
-       
+
     return ds;
 }
 
@@ -259,7 +258,7 @@ QDataStream& operator<<(QDataStream &ds, const Message &message)
 QDataStream& operator>>(QDataStream &ds, Message &message)
 {
     VersionID v = readHeader(ds, r_message);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -267,7 +266,7 @@ QDataStream& operator>>(QDataStream &ds, Message &message)
     }
     else
         throw version_error( v, "1", r_message, CODELOC );
-        
+
     return ds;
 }
 
@@ -323,7 +322,7 @@ QByteArray Message::pack() const
     QByteArray data;
     QDataStream ds(&data, QIODevice::WriteOnly);
     ds << *this;
-    
+
     return data;
 }
 
@@ -337,10 +336,10 @@ Message Message::unpack(const QByteArray &data)
     else
     {
         QDataStream ds(data);
-    
+
         Message message;
         ds >> message;
-    
+
         return message;
     }
 }
@@ -377,7 +376,7 @@ Message Message::reply() const
         return Message();
 }
 
-static QUuid null_uid;    
+static QUuid null_uid;
 
 /** Return the unique ID of this message */
 const QUuid& Message::UID() const
@@ -457,19 +456,19 @@ QSet<int> Message::recipients() const
 /////////
 
 static const RegisterMetaType<Broadcast> r_broadcast;
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream& operator<<(QDataStream &ds, const Broadcast &broadcast)
 {
     writeHeader(ds, r_broadcast, 1);
-    
+
     SharedDataStream sds(ds);
     sds << broadcast.destinations
         << broadcast.message_type
         << broadcast.message_data
         << broadcast.replymsg
         << static_cast<const MessageBase&>(broadcast);
-       
+
     return ds;
 }
 
@@ -477,7 +476,7 @@ QDataStream& operator<<(QDataStream &ds, const Broadcast &broadcast)
 QDataStream& operator>>(QDataStream &ds, Broadcast &broadcast)
 {
     VersionID v = readHeader(ds, r_broadcast);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -489,7 +488,7 @@ QDataStream& operator>>(QDataStream &ds, Broadcast &broadcast)
     }
     else
         throw version_error( v, "1", r_broadcast, CODELOC );
-        
+
     return ds;
 }
 
@@ -511,9 +510,9 @@ Broadcast::Broadcast(const Message &message)
         message_type = message.what();
         message_data = message.pack();
     }
-}       
+}
 
-/** Construct to broadcast this message to just the MPI 
+/** Construct to broadcast this message to just the MPI
     process with rank 'rank' */
 Broadcast::Broadcast(const Message &message, int rank)
           : MessageBase(rank),
@@ -525,7 +524,7 @@ Broadcast::Broadcast(const Message &message, int rank)
     {
         destinations.insert(rank);
     }
-    
+
     if (message.isA<Broadcast>())
     {
         message_data = message.asA<Broadcast>().message_data;
@@ -571,7 +570,7 @@ Broadcast::Broadcast(const Broadcast &other)
           : MessageBase(other),
             destinations(other.destinations),
             message_type(other.message_type),
-            message_data(other.message_data), 
+            message_data(other.message_data),
             replymsg(other.replymsg)
 {}
 
@@ -590,11 +589,11 @@ Broadcast& Broadcast::operator=(const Broadcast &other)
         replymsg = other.replymsg;
         MessageBase::operator=(other);
     }
-    
+
     return *this;
 }
 
-/** Return whether or not the process with MPI rank 'rank' 
+/** Return whether or not the process with MPI rank 'rank'
     is an intended recipient of this broadcast */
 bool Broadcast::isRecipient(int rank) const
 {
@@ -617,12 +616,12 @@ QSet<int> Broadcast::recipients() const
     {
         QSet<int> procs;
         procs.reserve(destinations.count());
-        
+
         foreach (qint32 dest, destinations)
         {
             procs.insert(dest);
         }
-        
+
         return procs;
     }
 }
@@ -648,10 +647,10 @@ void Broadcast::read()
     {
         //yes - we are an intended recipient
         Message message = Message::unpack(message_data);
-        
+
         //read the real message
         message.read();
-        
+
         //save any reply
         if (message.hasReply())
         {
@@ -677,15 +676,15 @@ Message Broadcast::reply() const
 /////////
 
 static const RegisterMetaType<RegisterBackend> r_regbackend;
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream& operator<<(QDataStream &ds, const RegisterBackend &regbackend)
 {
     writeHeader(ds, r_regbackend, 1);
-    
+
     ds << regbackend.node_uid << regbackend.node_rank
        << static_cast<const MessageBase&>(regbackend);
-       
+
     return ds;
 }
 
@@ -693,7 +692,7 @@ QDataStream& operator<<(QDataStream &ds, const RegisterBackend &regbackend)
 QDataStream& operator>>(QDataStream &ds, RegisterBackend &regbackend)
 {
     VersionID v = readHeader(ds, r_regbackend);
-    
+
     if (v == 1)
     {
         ds >> regbackend.node_uid >> regbackend.node_rank
@@ -701,7 +700,7 @@ QDataStream& operator>>(QDataStream &ds, RegisterBackend &regbackend)
     }
     else
         throw version_error( v, "1", r_regbackend, CODELOC );
-        
+
     return ds;
 }
 
@@ -737,7 +736,7 @@ RegisterBackend& RegisterBackend::operator=(const RegisterBackend &other)
         node_rank = other.node_rank;
         MessageBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -766,15 +765,15 @@ void RegisterBackend::read()
 /////////
 
 static const RegisterMetaType<ReserveBackend> r_reservebackend;
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream& operator<<(QDataStream &ds, const ReserveBackend &reservebackend)
 {
     writeHeader(ds, r_reservebackend, 1);
-    
+
     ds << reservebackend.backend_uid << reservebackend.nbackends
        << static_cast<const MessageBase&>(reservebackend);
-       
+
     return ds;
 }
 
@@ -782,7 +781,7 @@ QDataStream& operator<<(QDataStream &ds, const ReserveBackend &reservebackend)
 QDataStream& operator>>(QDataStream &ds, ReserveBackend &reservebackend)
 {
     VersionID v = readHeader(ds, r_reservebackend);
-    
+
     if (v == 1)
     {
         ds >> reservebackend.backend_uid >> reservebackend.nbackends
@@ -790,19 +789,19 @@ QDataStream& operator>>(QDataStream &ds, ReserveBackend &reservebackend)
     }
     else
         throw version_error( v, "1", r_reservebackend, CODELOC );
-        
+
     return ds;
 }
 
 /** Constructor */
-ReserveBackend::ReserveBackend() 
+ReserveBackend::ReserveBackend()
                : MessageBase( MPICluster::master() ), // must be sent to the master
                  nbackends(0)
 {}
 
 /** Construct the message to request that 'n' backends are reserved
     for use by this process */
-ReserveBackend::ReserveBackend(int n) 
+ReserveBackend::ReserveBackend(int n)
                : MessageBase( MPICluster::master() ),  // must be sent to the master
                  nbackends(n)
 {}
@@ -838,7 +837,7 @@ ReserveBackend& ReserveBackend::operator=(const ReserveBackend &other)
         nbackends = other.nbackends;
         MessageBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -876,17 +875,17 @@ void ReserveBackend::read()
 /////////
 
 static const RegisterMetaType<RequestAvailability> r_requestavail;
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream& operator<<(QDataStream &ds, const RequestAvailability &requestavail)
 {
     writeHeader(ds, r_requestavail, 1);
-    
+
     ds << requestavail.request
        << static_cast<const MessageBase&>(requestavail);
-       
+
     //no need to save available_backends
-       
+
     return ds;
 }
 
@@ -894,7 +893,7 @@ QDataStream& operator<<(QDataStream &ds, const RequestAvailability &requestavail
 QDataStream& operator>>(QDataStream &ds, RequestAvailability &requestavail)
 {
     VersionID v = readHeader(ds, r_requestavail);
-    
+
     if (v == 1)
     {
         ds >> requestavail.request
@@ -902,18 +901,18 @@ QDataStream& operator>>(QDataStream &ds, RequestAvailability &requestavail)
     }
     else
         throw version_error( v, "1", r_requestavail, CODELOC );
-        
+
     return ds;
 }
 
 /** Constructor */
-RequestAvailability::RequestAvailability() 
+RequestAvailability::RequestAvailability()
                     : MessageBase(-1) // will be broadcast to everyone
 {}
 
 /** Construct a request to find out what is available that matches the
     request 'request' */
-RequestAvailability::RequestAvailability(const ReserveBackend &reservation_request) 
+RequestAvailability::RequestAvailability(const ReserveBackend &reservation_request)
                     : MessageBase(-1),  // will be broadcast to everyone
                       request(reservation_request)
 {}
@@ -938,7 +937,7 @@ RequestAvailability& RequestAvailability::operator=(const RequestAvailability &o
         available_backends = other.available_backends;
         MessageBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -973,26 +972,26 @@ void RequestAvailability::read()
 /////////
 
 static const RegisterMetaType<Reservation> r_reservation;
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream& operator<<(QDataStream &ds, const Reservation &reservation)
 {
     writeHeader(ds, r_reservation, 1);
-    
+
     ds << reservation.request;
-    
+
     quint32 nbackends = reservation.details.count();
-    
+
     ds << nbackends;
-    
+
     for (quint32 i=0; i<nbackends; ++i)
     {
         ds << qint32(reservation.details[i].get<0>())
            << reservation.details[i].get<1>();
     }
-    
+
     ds << static_cast<const MessageBase&>(reservation);
-       
+
     return ds;
 }
 
@@ -1000,24 +999,24 @@ QDataStream& operator<<(QDataStream &ds, const Reservation &reservation)
 QDataStream& operator>>(QDataStream &ds, Reservation &reservation)
 {
     VersionID v = readHeader(ds, r_reservation);
-    
+
     if (v == 1)
     {
         ds >> reservation.request;
 
         quint32 nbackends;
-        
+
         ds >> nbackends;
-        
+
         reservation.details.clear();
-        
+
         for (quint32 i=0; i<nbackends; ++i)
         {
             qint32 rank;
             QUuid uid;
-            
+
             ds >> rank >> uid;
-            
+
             reservation.details.append( tuple<int,QUuid>(rank,uid) );
         }
 
@@ -1025,12 +1024,12 @@ QDataStream& operator>>(QDataStream &ds, Reservation &reservation)
     }
     else
         throw version_error( v, "1", r_reservation, CODELOC );
-        
+
     return ds;
 }
 
 /** Constructor */
-Reservation::Reservation() 
+Reservation::Reservation()
             : MessageBase(-1) // will be broadcast to everyone
 {}
 
@@ -1063,7 +1062,7 @@ Reservation& Reservation::operator=(const Reservation &other)
         details = other.details;
         MessageBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -1098,14 +1097,14 @@ void Reservation::read()
 /////////
 
 static const RegisterMetaType<Shutdown> r_shutdown;
-                                                      
+
 /** Serialise to a binary datastream */
 QDataStream& operator<<(QDataStream &ds, const Shutdown &shutdown)
 {
     writeHeader(ds, r_shutdown, 1);
-    
+
     ds << static_cast<const MessageBase&>(shutdown);
-       
+
     return ds;
 }
 
@@ -1113,14 +1112,14 @@ QDataStream& operator<<(QDataStream &ds, const Shutdown &shutdown)
 QDataStream& operator>>(QDataStream &ds, Shutdown &shutdown)
 {
     VersionID v = readHeader(ds, r_shutdown);
-    
+
     if (v == 1)
     {
         ds >> static_cast<MessageBase&>(shutdown);
     }
     else
         throw version_error( v, "1", r_shutdown, CODELOC );
-        
+
     return ds;
 }
 
@@ -1161,11 +1160,11 @@ public:
         lkr1.unlock();
         lkr.unlock();
     }
-    
+
 private:
     BG()
     {}
-    
+
     ~BG()
     {}
 
@@ -1173,17 +1172,17 @@ private:
     {
         SireError::setThreadString("BG");
         SireMaths::seed_qrand();
-    
+
         datamutex.lock();
         void (*f)() = func;
         runwaiter.wakeAll();
         datamutex.unlock();
-        
+
         (*f)();
     }
 
     void (*func)();
-    
+
     static QMutex runmutex;
     static QMutex datamutex;
     static QWaitCondition runwaiter;
@@ -1211,10 +1210,10 @@ static const RegisterMetaType<Error> r_error;
 QDataStream& operator<<(QDataStream &ds, const Error &error)
 {
     writeHeader(ds, r_error, 1);
-    
+
     ds << error.message_data << error.error_data
        << static_cast<const MessageBase&>(error);
-       
+
     return ds;
 }
 
@@ -1222,7 +1221,7 @@ QDataStream& operator<<(QDataStream &ds, const Error &error)
 QDataStream& operator>>(QDataStream &ds, Error &error)
 {
     VersionID v = readHeader(ds, r_error);
-    
+
     if (v == 1)
     {
         ds >> error.message_data >> error.error_data
@@ -1230,7 +1229,7 @@ QDataStream& operator>>(QDataStream &ds, Error &error)
     }
     else
         throw version_error(v, "1", r_error, CODELOC);
-        
+
     return ds;
 }
 
@@ -1250,14 +1249,14 @@ void Error::setError(const std::exception &e)
     this->setError( SireError::std_exception(e) );
 }
 
-/** Construct a message containing an unknown error 
+/** Construct a message containing an unknown error
     in response to an unknown sender */
 Error::Error() : MessageBase( MPICluster::master() )
 {
     this->setUnknownError(CODELOC);
 }
 
-/** Construct a message containing an unknown error that occured 
+/** Construct a message containing an unknown error that occured
     at the point 'code_loc' in response to an unknown sender */
 Error::Error(const QString &code_loc) : MessageBase( MPICluster::master() )
 {
@@ -1280,7 +1279,7 @@ Error::Error(const std::exception &e) : MessageBase( MPICluster::master() )
 
 /** Construct a message containing an unknown error
     in response to the sender that has rank 'sender' */
-Error::Error(int sender) 
+Error::Error(int sender)
       : MessageBase( sender )
 {
     this->setUnknownError(CODELOC);
@@ -1288,7 +1287,7 @@ Error::Error(int sender)
 
 /** Construct a message containing an unknown error that occured
     at the point 'code_loc' in response to the sender that has rank 'sender' */
-Error::Error(int sender, const QString &code_loc) 
+Error::Error(int sender, const QString &code_loc)
       : MessageBase( sender )
 {
     this->setUnknownError(code_loc);
@@ -1296,7 +1295,7 @@ Error::Error(int sender, const QString &code_loc)
 
 /** Construct a message containing the error 'e'
     in response to the sender that has rank 'sender' */
-Error::Error(int sender, const SireError::exception &e) 
+Error::Error(int sender, const SireError::exception &e)
       : MessageBase( sender )
 {
     this->setError(e);
@@ -1304,7 +1303,7 @@ Error::Error(int sender, const SireError::exception &e)
 
 /** Construct a message containing the error 'e'
     in response to the sender that has rank 'sender' */
-Error::Error(int sender, const std::exception &e) 
+Error::Error(int sender, const std::exception &e)
       : MessageBase( sender )
 {
     this->setError(e);
@@ -1312,7 +1311,7 @@ Error::Error(int sender, const std::exception &e)
 
 /** Construct a message containing an unknown error
     in response to the message 'message' */
-Error::Error(const Message &message) 
+Error::Error(const Message &message)
       : MessageBase( message.sender(), message.subjectUID() )
 {
     message_data = message.pack();
@@ -1321,7 +1320,7 @@ Error::Error(const Message &message)
 
 /** Construct a message containing an unknown error that occured at
     the point 'code_loc' in response to the message 'message' */
-Error::Error(const Message &message, const QString &code_loc) 
+Error::Error(const Message &message, const QString &code_loc)
       : MessageBase( message.sender(), message.subjectUID() )
 {
     message_data = message.pack();
@@ -1330,7 +1329,7 @@ Error::Error(const Message &message, const QString &code_loc)
 
 /** Construct a message containing the error 'e'
     in response to the message 'message' */
-Error::Error(const Message &message, const SireError::exception &e) 
+Error::Error(const Message &message, const SireError::exception &e)
       : MessageBase( message.sender(), message.subjectUID() )
 {
     message_data = message.pack();
@@ -1339,7 +1338,7 @@ Error::Error(const Message &message, const SireError::exception &e)
 
 /** Construct a message containing the error 'e'
     in response to the message 'message' */
-Error::Error(const Message &message, const std::exception &e) 
+Error::Error(const Message &message, const std::exception &e)
       : MessageBase( message.sender(), message.subjectUID() )
 {
     message_data = message.pack();
@@ -1347,7 +1346,7 @@ Error::Error(const Message &message, const std::exception &e)
 }
 
 /** Construct an error that will just pass the message and error
-    data on to the master - this is used when an error that can't 
+    data on to the master - this is used when an error that can't
     be handled is received */
 Error::Error(const QByteArray &message, const QByteArray &error)
       : MessageBase( MPICluster::master() ),
@@ -1355,7 +1354,7 @@ Error::Error(const QByteArray &message, const QByteArray &error)
 {}
 
 /** Copy constructor */
-Error::Error(const Error &other) 
+Error::Error(const Error &other)
              : MessageBase(other),
                message_data(other.message_data), error_data(other.error_data)
 {}
@@ -1373,7 +1372,7 @@ Error& Error::operator=(const Error &other)
         error_data = other.error_data;
         MessageBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -1394,10 +1393,10 @@ static const RegisterMetaType<Result> r_result;
 QDataStream& operator<<(QDataStream &ds, const Result &result)
 {
     writeHeader(ds, r_result, 1);
-    
+
     ds << result.result_data
        << static_cast<const MessageBase&>(result);
-       
+
     return ds;
 }
 
@@ -1405,7 +1404,7 @@ QDataStream& operator<<(QDataStream &ds, const Result &result)
 QDataStream& operator>>(QDataStream &ds, Result &result)
 {
     VersionID v = readHeader(ds, r_result);
-    
+
     if (v == 1)
     {
         ds >> result.result_data
@@ -1413,17 +1412,17 @@ QDataStream& operator>>(QDataStream &ds, Result &result)
     }
     else
         throw version_error(v, "1", r_result, CODELOC);
-        
+
     return ds;
 }
 
-/** Construct a message containing an unknown result 
+/** Construct a message containing an unknown result
     in response to an unknown sender */
 Result::Result() : MessageBase( MPICluster::master() )
 {}
 
 /** Copy constructor */
-Result::Result(const Result &other) 
+Result::Result(const Result &other)
              : MessageBase(other),
                result_data(other.result_data)
 {}
@@ -1440,7 +1439,7 @@ Result& Result::operator=(const Result &other)
         result_data = other.result_data;
         MessageBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -1461,9 +1460,9 @@ static const RegisterMetaType<GetUIDs> r_getuids;
 QDataStream& operator<<(QDataStream &ds, const GetUIDs &getuids)
 {
     writeHeader(ds, r_getuids, 1);
-    
+
     ds << static_cast<const MessageBase&>(getuids);
-       
+
     return ds;
 }
 
@@ -1471,14 +1470,14 @@ QDataStream& operator<<(QDataStream &ds, const GetUIDs &getuids)
 QDataStream& operator>>(QDataStream &ds, GetUIDs &getuids)
 {
     VersionID v = readHeader(ds, r_getuids);
-    
+
     if (v == 1)
     {
         ds >> static_cast<MessageBase&>(getuids);
     }
     else
         throw version_error(v, "1", r_getuids, CODELOC);
-        
+
     return ds;
 }
 

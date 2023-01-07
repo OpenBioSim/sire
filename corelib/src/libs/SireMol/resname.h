@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -47,7 +46,7 @@ namespace SireMol
 {
 
 /** This class holds the name of a CutGroup.
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT ResName : public SireID::Name, public ResID
@@ -58,36 +57,36 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ResName&);
 
 public:
     ResName();
-    
+
     explicit ResName(const QString &name);
-    
+
     ResName(const QString &name, SireID::CaseSensitivity case_sensitivity);
-    
+
     ResName(const ResName &other);
-    
+
     ~ResName();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return ResName::typeName();
     }
-    
+
     ResName* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-    
+
     QString toString() const;
-    
+
     ResName& operator=(const ResName &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     bool operator==(const ResName &other) const;
-    
+
     bool operator!=(const ResName &other) const;
 
     QList<ResIdx> map(const MolInfo &molinfo) const;

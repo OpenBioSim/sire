@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -75,13 +74,13 @@ public:
             _k = -1;
         }
     }
-    
+
     GridIndex(const GridIndex &other) : _i(other._i), _j(other._j), _k(other._k)
     {}
-    
+
     ~GridIndex()
     {}
-    
+
     GridIndex& operator=(const GridIndex &other)
     {
         _i = other._i;
@@ -89,48 +88,48 @@ public:
         _k = other._k;
         return *this;
     }
-    
+
     bool operator==(const GridIndex &other) const
     {
         return _i == other._i and _j == other._j and _k == other._k;
     }
-    
+
     bool operator!=(const GridIndex &other) const
     {
         return not operator==(other);
     }
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     QString toString() const;
-    
+
     bool isNull() const
     {
         return _k < 0;
     }
-    
+
     static GridIndex null()
     {
         return GridIndex(0,0,-1);
     }
-    
+
     qint32 i() const
     {
         return _i;
     }
-    
+
     qint32 j() const
     {
         return _j;
     }
-    
+
     qint32 k() const
     {
         return _k;
     }
-    
+
 private:
     qint32 _i, _j, _k;
 };
@@ -152,54 +151,54 @@ public:
     GridInfo(const GridInfo &other);
 
     ~GridInfo();
-    
+
     GridInfo& operator=(const GridInfo &other);
-    
+
     bool operator==(const GridInfo &other) const;
     bool operator!=(const GridInfo &other) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     QString toString() const;
-    
+
     GridIndex operator[](int i) const;
 
     int operator[](const GridIndex &idx) const;
     int operator[](const Vector &point) const;
-    
+
     GridIndex at(int i) const;
 
     int at(const GridIndex &idx) const;
     int at(int i, int j, int k) const;
     int at(const Vector &point) const;
-    
+
     GridIndex getitem(int i) const;
-    
+
     AABox box(int i) const;
     AABox box(const GridIndex &idx) const;
     AABox box(const Vector &point) const;
-    
+
     Vector point(int i) const;
     Vector point(const GridIndex &idx) const;
     Vector point(const Vector &point) const;
-    
+
     qint32 dimX() const;
     qint32 dimY() const;
     qint32 dimZ() const;
-    
+
     int nPoints() const;
     int count() const;
     int size() const;
-    
+
     bool isEmpty() const;
-    
+
     Length spacing() const;
     AABox dimensions() const;
 
     bool contains(const Vector &point) const;
-    
+
     GridIndex closestIndexTo(const Vector &point) const;
 
     int gridToArrayIndex(int i, int j, int k) const;
@@ -226,13 +225,13 @@ public:
 private:
     /** The origin of the grid */
     Vector grid_origin;
-    
+
     /** The spacing of the grid */
     float grid_spacing;
-    
+
     /** Inverse of the grid spacing */
     float inv_grid_spacing;
-    
+
     /** The number of grid points along x, y, and z */
     qint32 dimx, dimy, dimz;
 };
@@ -254,7 +253,7 @@ SIRE_ALWAYS_INLINE GridIndex GridInfo::arrayToGridIndex(int i) const
     return GridIndex(ix,iy,i);
 }
 
-/** Get the index into the 1D array for the point corresponding to grid 
+/** Get the index into the 1D array for the point corresponding to grid
     indicies i,j,k. */
 SIRE_ALWAYS_INLINE int GridInfo::gridToArrayIndex(int i, int j, int k) const
 {
@@ -264,7 +263,7 @@ SIRE_ALWAYS_INLINE int GridInfo::gridToArrayIndex(int i, int j, int k) const
         return i*(dimy*dimz) + j*dimz + k;
 }
 
-/** Get the index into the 1D array for the point corresponding to 
+/** Get the index into the 1D array for the point corresponding to
     the grid point with index 'idx'. Note that this returns '-1' if
     the passed GridIndex is null */
 SIRE_ALWAYS_INLINE int GridInfo::gridToArrayIndex(const GridIndex &idx) const

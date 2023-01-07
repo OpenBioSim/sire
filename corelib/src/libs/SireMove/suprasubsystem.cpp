@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -42,10 +41,10 @@ QDataStream &operator<<(QDataStream &ds,
                                         const SupraSubSystem &suprasubsystem)
 {
     writeHeader(ds, r_suprasubsystem, 1);
-    
+
     SharedDataStream sds(ds);
-    
-    sds << suprasubsystem.simstore 
+
+    sds << suprasubsystem.simstore
         << suprasubsystem.sys_monitors
         << suprasubsystem.nsubmoves
         << suprasubsystem.record_stats
@@ -53,7 +52,7 @@ QDataStream &operator<<(QDataStream &ds,
         << suprasubsystem.recalc_next_from_scratch
         << suprasubsystem.clear_subsys_stats
         << static_cast<const Property&>(suprasubsystem);
-        
+
     return ds;
 }
 
@@ -62,12 +61,12 @@ QDataStream &operator>>(QDataStream &ds,
                                         SupraSubSystem &suprasubsystem)
 {
     VersionID v = readHeader(ds, r_suprasubsystem);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
-        sds >> suprasubsystem.simstore 
+
+        sds >> suprasubsystem.simstore
             >> suprasubsystem.sys_monitors
             >> suprasubsystem.nsubmoves
             >> suprasubsystem.record_stats
@@ -78,12 +77,12 @@ QDataStream &operator>>(QDataStream &ds,
     }
     else
         throw version_error(v, "1", r_suprasubsystem, CODELOC);
-        
+
     return ds;
 }
 
 /** Constructor */
-SupraSubSystem::SupraSubSystem() 
+SupraSubSystem::SupraSubSystem()
                : ConcreteProperty<SupraSubSystem,Property>(),
                  record_stats(true),
                  record_sub_stats(true),
@@ -95,7 +94,7 @@ SupraSubSystem::SupraSubSystem()
 SupraSubSystem::SupraSubSystem(const SupraSubSystem &other)
                : ConcreteProperty<SupraSubSystem,Property>(other),
                  simstore(other.simstore), sys_monitors(other.sys_monitors),
-                 nsubmoves(other.nsubmoves), 
+                 nsubmoves(other.nsubmoves),
                  record_stats(other.record_stats),
                  record_sub_stats(other.record_sub_stats),
                  recalc_next_from_scratch(other.recalc_next_from_scratch),
@@ -110,7 +109,7 @@ SupraSubSystem::~SupraSubSystem()
 SupraSubSystem& SupraSubSystem::operator=(const SupraSubSystem &other)
 {
     Property::operator=(other);
-    
+
     simstore = other.simstore;
     sys_monitors = other.sys_monitors;
     nsubmoves = other.nsubmoves;
@@ -118,7 +117,7 @@ SupraSubSystem& SupraSubSystem::operator=(const SupraSubSystem &other)
     record_sub_stats = other.record_sub_stats;
     recalc_next_from_scratch = other.recalc_next_from_scratch;
     clear_subsys_stats = other.clear_subsys_stats;
-    
+
     return *this;
 }
 
@@ -126,7 +125,7 @@ SupraSubSystem& SupraSubSystem::operator=(const SupraSubSystem &other)
 bool SupraSubSystem::operator==(const SupraSubSystem &other) const
 {
     return (this == &other) or
-           (nsubmoves == other.nsubmoves and 
+           (nsubmoves == other.nsubmoves and
             record_stats == other.record_stats and
             record_sub_stats == other.record_sub_stats and
             recalc_next_from_scratch == other.recalc_next_from_scratch and
@@ -152,13 +151,13 @@ const SupraSubSystem& SupraSubSystem::null()
 /** Return the monitors that are applied to this sub-system. These
     are the monitors that are applied between blocks of sub-moves.
     e.g.
-    
+
     subsys.monitors()   // Monitors applied between blocks of sub-moves.
                         // These monitors stay with the SupraSubSystem, and
                         // are collected using "subsys.collectStats()" and
                         // are cleared using "subsys.clearStatistics()"
                         // These are collected if record_stats is true
-                        
+
     subsys.system().monitors()   // Monitors applied with each block of sub-moves.
                                  // These monitors stay with the System within each
                                  // SupraSubSystem, are collected within a block
@@ -171,7 +170,7 @@ const SystemMonitors& SupraSubSystem::monitors() const
     return sys_monitors;
 }
 
-/** Return the system that is part of this sub-system 
+/** Return the system that is part of this sub-system
 
     \throw SireError::invalid_state
 */
@@ -180,7 +179,7 @@ const System& SupraSubSystem::subSystem() const
     return simstore.system();
 }
 
-/** Return the moves that will be applied to the sub-system 
+/** Return the moves that will be applied to the sub-system
 
     \throw SireError::invalid_state
 */
@@ -201,14 +200,14 @@ int SupraSubSystem::nSubMoves() const
     return nsubmoves;
 }
 
-/** Return whether or not we are recording statistics 
+/** Return whether or not we are recording statistics
     between blocks of sub-moves */
 bool SupraSubSystem::recordingStatistics() const
 {
     return record_stats;
 }
 
-/** Return whether or not we are recording statistics within 
+/** Return whether or not we are recording statistics within
     the sub-system */
 bool SupraSubSystem::recordingSubStatistics() const
 {
@@ -245,22 +244,22 @@ void SupraSubSystem::_post_pack()
 void SupraSubSystem::_pre_unpack()
 {}
 
-/** This function is called just after whenever the 
+/** This function is called just after whenever the
     simstore is unpacked */
 void SupraSubSystem::_post_unpack()
 {
     if (clear_subsys_stats or recalc_next_from_scratch)
     {
         System sys = simstore.system();
-        
+
         if (clear_subsys_stats)
             sys.clearStatistics();
-            
+
         if (recalc_next_from_scratch)
             sys.mustNowRecalculateFromScratch();
-            
+
         simstore.setSystem(sys);
-        
+
         clear_subsys_stats = false;
         recalc_next_from_scratch = false;
     }
@@ -271,7 +270,7 @@ void SupraSubSystem::pack()
 {
     if (simstore.isPacked())
         return;
-        
+
     this->_pre_pack();
     simstore.pack();
     this->_post_pack();
@@ -282,7 +281,7 @@ void SupraSubSystem::unpack()
 {
     if (not simstore.isPacked())
         return;
-        
+
     this->_pre_unpack();
     simstore.unpack();
     this->_post_unpack();
@@ -294,7 +293,7 @@ void SupraSubSystem::packToDisk()
 {
     if (simstore.isPackedToDisk())
         return;
-   
+
     else if (not simstore.isPacked())
     {
         this->_pre_pack();
@@ -313,7 +312,7 @@ void SupraSubSystem::packToDisk(const QString &tempdir)
 {
     if (simstore.isPackedToDisk())
         return;
-        
+
     else if (not simstore.isPacked())
     {
         this->_pre_pack();
@@ -330,7 +329,7 @@ void SupraSubSystem::packToMemory()
 {
     if (simstore.isPackedToMemory())
         return;
-        
+
     else if (not simstore.isPacked())
     {
         this->_pre_pack();
@@ -347,12 +346,12 @@ void SupraSubSystem::collectStats()
 {
     if (sys_monitors.isEmpty() or not record_stats)
         return;
-        
+
     System system = simstore.system();
-    
+
     sys_monitors.monitor(system);
-    
-    //copy the system back - this is because some of 
+
+    //copy the system back - this is because some of
     //the monitors may change the system
     simstore.setSystem(system);
 }
@@ -361,9 +360,9 @@ void SupraSubSystem::collectStats()
     the moves in this->subMoves() on this->subSystem(), collecting
     statistics both during the block of sub-moves, and then after
     the block of sub-moves if 'recording_statistics' is true,
-    and if 'sysmon.recordingSubStatistics()' and 
+    and if 'sysmon.recordingSubStatistics()' and
     'sysmon.recordingStatistics()' are true respectively.
-    
+
     \throw SireError::invalid_state
 */
 void SupraSubSystem::subMove(bool recording_statistics)
@@ -373,12 +372,12 @@ void SupraSubSystem::subMove(bool recording_statistics)
 
     MovesPtr moves = simstore.moves();
     System system = simstore.system();
-    
-    system = moves.edit().move(system, nsubmoves, 
+
+    system = moves.edit().move(system, nsubmoves,
                                recording_statistics and record_sub_stats);
-    
+
     simstore.setSystemAndMoves(system, moves);
-    
+
     if (recording_statistics)
         this->collectStats();
 }
@@ -436,7 +435,7 @@ void SupraSubSystem::mustNowRecalculateFromScratch()
 void SupraSubSystem::setSubSystem(const System &subsystem)
 {
     simstore.setSystem(subsystem);
-    
+
     recalc_next_from_scratch = false;
     clear_subsys_stats = false;
 }
@@ -452,7 +451,7 @@ void SupraSubSystem::setSubMoves(const Moves &submoves)
 void SupraSubSystem::setSubSystemAndMoves(const SimStore &new_simstore)
 {
     simstore = new_simstore;
-    
+
     recalc_next_from_scratch = false;
     clear_subsys_stats = false;
 }

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,23 +49,23 @@ static RegisterMetaType<TitrationMove> r_titrationmove;
 QDataStream &operator<<(QDataStream &ds, const TitrationMove &move)
 {
     writeHeader(ds, r_titrationmove, 1);
-    
+
     ds << static_cast<const MonteCarlo&>(move);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, TitrationMove &move)
 {
     VersionID v = readHeader(ds, r_titrationmove);
-    
+
     if (v == 1)
     {
         ds >> static_cast<MonteCarlo&>(move);
     }
     else
         throw version_error(v, "1", r_titrationmove, CODELOC);
-    
+
     return ds;
 }
 
@@ -107,7 +106,7 @@ TitrationMove& TitrationMove::operator=(const TitrationMove &other)
     {
         MonteCarlo::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -135,11 +134,11 @@ void TitrationMove::move(System &system, int nmoves, bool record_stats)
 {
     if (nmoves <= 0)
         return;
- 
+
     //save our, and the system's, current state
     TitrationMove old_state(*this);
     System old_system_state(system);
-    
+
     try
     {
         const PropertyMap &map = Move::propertyMap();
@@ -148,11 +147,11 @@ void TitrationMove::move(System &system, int nmoves, bool record_stats)
         //all of the information about the titratable molecules, and the current
         //state of all of the titratable molecules
         Titrator titrator = system.property( map["titrator"] ).asA<Titrator>();
-        
+
         if (titrator.nIons() == 0 and titrator.nNeutrals() == 0)
             //there is nothing available to move
             return;
-        
+
         for (int i=0; i<nmoves; ++i)
         {
             //get the old total energy of the system
@@ -171,7 +170,7 @@ void TitrationMove::move(System &system, int nmoves, bool record_stats)
 
             //swap the charges of these two groups
             titrator.swapCharge(neutral_index, ion_index);
-    
+
             //apply the titrator to the system. This will update
             //the charges of the titratable groups and will update
             //the copy of titrator stored in the system. The return value
@@ -181,7 +180,7 @@ void TitrationMove::move(System &system, int nmoves, bool record_stats)
             //to an aspartic acid is not accounted for only by the change
             //in intramolecular energy from an MM forcefield
             double delta_zero = titrator.applyTo(system);
-    
+
             //calculate the energy of the system
             double new_nrg = system.energy( this->energyComponent() );
 

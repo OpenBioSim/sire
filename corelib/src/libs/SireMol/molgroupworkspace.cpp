@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,19 +53,19 @@ namespace SireMol
             {
                 //qDebug() << "MolGroupWorkspaceData::MolGroupWorkspaceData()" << quintptr(this);
             }
-            
+
             MolGroupWorkspaceData(const MolGroupWorkspaceData &other)
                     : ver(other.ver), mols(other.mols), views(other.views)
             {
                 //qDebug() << "MolGroupWorkspaceData::MolGroupWorkspaceData(copy)"
                 //         << quintptr(this) << quintptr(&other);
             }
-            
+
             ~MolGroupWorkspaceData()
             {
                 //qDebug() << "MolGroupWorkspaceData::~MolGroupWorkspaceData()" << quintptr(this);
             }
-            
+
             MolGroupWorkspaceData& operator=(const MolGroupWorkspaceData &other)
             {
                 ver = other.ver;
@@ -74,14 +73,14 @@ namespace SireMol
                 views = other.views;
                 return *this;
             }
-            
+
             void clear()
             {
                 mols.resize(0);
                 views.clear();
                 ver = MajorMinorVersion();
             }
-            
+
             bool contains(const MolNum &molnum) const
             {
                 for (int i=0; i<mols.count(); ++i)
@@ -89,36 +88,36 @@ namespace SireMol
                     if (mols.constData()[i].read().number() == molnum)
                         return true;
                 }
-                
+
                 return false;
             }
-            
+
             bool isEmpty() const
             {
                 return mols.isEmpty() and ver.majorVersion() == 0 and ver.minorVersion() == 0;
             }
-            
+
             const SharedDataPointer<MoleculeData>* data() const
             {
                 return mols.data();
             }
-            
+
             int count() const
             {
                 return mols.count();
             }
-            
+
             void push(const Molecule &molecule)
             {
                 mols.push_back(molecule.data());
             }
-            
+
             const ViewsOfMol& getUpdated(const ViewsOfMol &oldmol)
             {
                 for (int i=0; i<mols.count(); ++i)
                 {
                     const MoleculeData &newmol = mols.constData()[i].read();
-                    
+
                     if (newmol.number() == oldmol.number())
                     {
                         ViewsOfMol mol(oldmol);
@@ -128,33 +127,33 @@ namespace SireMol
                         return views.last();
                     }
                 }
-                
+
                 //qDebug() << "RETURNING ORIGINAL?";
                 return oldmol;
             }
-            
+
             void setVersion(const MajorMinorVersion &version)
             {
                 ver = version;
             }
-            
+
             const MajorMinorVersion& version() const
             {
                 return ver;
             }
-            
+
             void incrementMajor()
             {
                 if (not isEmpty())
                     ver.incrementMajor();
             }
-            
+
             void incrementMinor()
             {
                 if (not isEmpty())
                     ver.incrementMinor();
             }
-            
+
         private:
             MajorMinorVersion ver;
             QVarLengthArray<SireBase::SharedDataPointer<MoleculeData>,10> mols;
@@ -173,18 +172,18 @@ void MolGroupWorkspace::returnToMemoryPool()
 {
     if (d.get() == 0)
         return;
-    
+
     if (not d.unique())
     {
         d.reset();
         return;
     }
-    
+
     if (not cache.hasLocalData())
     {
         cache.setLocalData( new MolGroupWorkspaceCache() );
     }
-    
+
     if (cache.localData()->count() < 32)
     {
         d->clear();
@@ -193,7 +192,7 @@ void MolGroupWorkspace::returnToMemoryPool()
     }
     else
         qDebug() << "DELETING AS THE CACHE IS FULL";
-    
+
     d.reset();
 }
 
@@ -216,7 +215,7 @@ void MolGroupWorkspace::createFromMemoryPool()
                 return;
             }
         }
-        
+
         //no available value in the pool
         //qDebug() << "CREATING AS NOT AVAILABLE IN THE POOL";
         d.reset( new SireMol::detail::MolGroupWorkspaceData() );
@@ -230,7 +229,7 @@ void MolGroupWorkspace::detach()
         if (not d.unique())
         {
             boost::shared_ptr<detail::MolGroupWorkspaceData> d2 = d;
-            
+
             d.reset();
             createFromMemoryPool();
             d->operator=(*d2);
@@ -265,7 +264,7 @@ MolGroupWorkspace& MolGroupWorkspace::operator=(const MolGroupWorkspace &other)
         returnToMemoryPool();
         d = other.d;
     }
-    
+
     return *this;
 }
 
@@ -362,7 +361,7 @@ void MolGroupWorkspace::push(const MoleculeData &molecule)
     {
         this->createFromMemoryPool();
     }
-    
+
     d->push(molecule);
 }
 
@@ -395,7 +394,7 @@ PartialMolecule MolGroupWorkspace::getUpdated(const PartialMolecule &oldmol) con
             for (int i=0; i<d->count(); ++i)
             {
                 const MoleculeData &mol = data()[i].read();
-                
+
                 if (mol.number() == oldmol.number())
                 {
                     PartialMolecule newmol(oldmol);
@@ -405,7 +404,7 @@ PartialMolecule MolGroupWorkspace::getUpdated(const PartialMolecule &oldmol) con
             }
         }
     }
-    
+
     return oldmol;
 }
 

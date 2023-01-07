@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,7 +53,7 @@ namespace MPI
     This ensures that each node only sends one message at a time using
     the global Send communicator (other messages may be sent using
     point-to-point communicators).
-    
+
     @author Christopher Woods
 */
 class SendQueue : private QThread, public boost::noncopyable
@@ -62,33 +61,33 @@ class SendQueue : private QThread, public boost::noncopyable
 public:
     SendQueue(MPI_Comm send_comm);
     ~SendQueue();
-    
+
     void start();
-    
+
     void send(const Message &message);
-    
+
     void stop();
-    
+
     void wait();
-    
+
     bool isRunning();
-    
+
 protected:
     void run();
-    
+
 private:
     /** Mutex to protect access to the queue of messages to send */
     QMutex datamutex;
-    
+
     /** Wait condition used to sleep until there is a message to send */
     QWaitCondition waiter;
-    
+
     /** The communicator to use to send messages */
     MPI_Comm send_comm;
-    
+
     /** The list of messages to send */
     QQueue<Message> message_queue;
-    
+
     /** Whether or not the queue has been stopped */
     bool been_stopped;
 };

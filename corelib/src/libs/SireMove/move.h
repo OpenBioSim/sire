@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -95,24 +94,24 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Move&);
 
 public:
     Move(const PropertyMap &map = PropertyMap());
-    
+
     Move(const Move &other);
-    
+
     virtual ~Move();
-    
+
     static const char* typeName()
     {
         return "SireMove::Move";
     }
-    
+
     virtual Move* clone() const=0;
-    
+
     virtual void clearStatistics()=0;
-    
+
     virtual QString toString() const=0;
 
     virtual int nMoves() const=0;
-    
+
     virtual void move(System &system, int nmoves, bool record_stats)=0;
 
     void move(System &system);
@@ -142,7 +141,7 @@ public:
     bool isConstantPressure() const;
     bool isConstantChemicalPotential() const;
     bool isConstantFugacity() const;
-    
+
     virtual bool isConstantLambda(const Symbol &lam) const;
 
     SireUnits::Dimension::Temperature temperature() const;
@@ -163,15 +162,15 @@ protected:
 
     bool operator==(const Move &other) const;
     bool operator!=(const Move &other) const;
-    
+
     void setProperty(const QString &property, const PropertyName &value);
-    
+
     virtual void _pvt_setTemperature(
                             const SireUnits::Dimension::Temperature &temperature);
-                            
+
     virtual void _pvt_setPressure(
                             const SireUnits::Dimension::Pressure &pressure);
-                            
+
     virtual void _pvt_setFugacity(
                             const SireUnits::Dimension::Pressure &fugacity);
 
@@ -179,12 +178,12 @@ private:
     /** The component of the energy that describes the Hamiltonian
         that this move samples */
     Symbol nrgcomponent;
-    
+
     /** The name of the property that contains the Molecule coordinates
         property. This move will only affect the coordinates that are
         contained in this property */
     PropertyName coordsproperty;
-    
+
     /** The name of the property that contains the System space property.
         This is necessary as we may have to map the molecules back into
         the space at the end of the move */
@@ -200,28 +199,28 @@ class SIREMOVE_EXPORT NullMove : public SireBase::ConcreteProperty<NullMove,Move
 public:
     NullMove();
     NullMove(const NullMove &other);
-    
+
     ~NullMove();
-    
+
     NullMove& operator=(const NullMove &other);
-    
+
     bool operator==(const NullMove &other) const;
     bool operator!=(const NullMove &other) const;
-    
+
     static const char* typeName();
-    
+
     NullMove* clone() const;
-    
+
     QString toString() const;
-    
+
     int nMoves() const;
-    
+
     void clearStatistics();
-    
+
     void setGenerator(const RanGenerator &rangenerator);
-    
+
     void move(System &system, int nmoves, bool record_stats);
-    
+
     Ensemble ensemble() const;
 };
 

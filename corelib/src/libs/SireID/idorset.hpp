@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,8 +52,8 @@ namespace SireID
 {
 
 /** This class holds a set of IDs, thereby allowing for
-    "or" matching of IDs 
-    
+    "or" matching of IDs
+
     @author Christopher Woods
 */
 template<class ID>
@@ -72,42 +71,42 @@ public:
     IDOrSet();
     IDOrSet(const ID &id);
     IDOrSet(const ID &id0, const ID &id1);
-    
+
     IDOrSet(const QList<typename ID::Identifier> &ids);
-    
+
     template<class T>
     IDOrSet(const T &ids);
-    
+
     IDOrSet(const IDOrSet<ID> &other);
-    
+
     ~IDOrSet();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     IDOrSet<ID>* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-                
+
     QString toString() const;
 
     const QSet<Identifier>& IDs() const;
-    
+
     IDOrSet<ID>& operator=(const IDOrSet<ID> &other);
     IDOrSet<ID>& operator=(const ID &other);
-    
+
     bool operator==(const SireID::ID &other) const;
     bool operator!=(const SireID::ID &other) const;
-   
+
     bool operator==(const IDOrSet<ID> &other) const;
     bool operator!=(const IDOrSet<ID> &other) const;
-    
+
     bool operator==(const ID &other) const;
     bool operator!=(const ID &other) const;
-    
+
     QList<Index> map(const SearchObject &obj) const;
 
 private:
@@ -197,7 +196,7 @@ template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 IDOrSet<ID>::~IDOrSet()
 {}
-    
+
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 const char* IDOrSet<ID>::typeName()
@@ -233,17 +232,17 @@ SIRE_OUTOFLINE_TEMPLATE
 uint IDOrSet<ID>::hash() const
 {
     uint h = 0;
-    
+
     for (typename QSet<Identifier>::const_iterator it = ids.constBegin();
          it != ids.constEnd();
          ++it)
     {
         h += it->hash();
     }
-    
+
     return h;
 }
-            
+
 /** Return a string representatio of this ID */
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
@@ -254,14 +253,14 @@ QString IDOrSet<ID>::toString() const
     else
     {
         QStringList idstrings;
-        
+
         for (typename QSet<Identifier>::const_iterator it = ids.constBegin();
              it != ids.constEnd();
              ++it)
         {
             idstrings.append( it->toString() );
         }
-    
+
         return QString("[ %1 ]").arg(idstrings.join( QObject::tr(" or ") ));
     }
 }
@@ -290,7 +289,7 @@ IDOrSet<ID>& IDOrSet<ID>::operator=(const ID &other)
 {
     ids.clear();
     this->add(other);
-    
+
     return *this;
 }
 
@@ -349,9 +348,9 @@ QList<typename ID::Index> IDOrSet<ID>::map(const typename ID::SearchObject &obj)
 {
     if (ids.isEmpty())
         return Identifier().map(obj);
-        
+
     QList<Index> idxs;
-        
+
     for (typename QSet<Identifier>::const_iterator it = ids.constBegin();
          it != ids.constEnd();
          ++it)
@@ -365,16 +364,16 @@ QList<typename ID::Index> IDOrSet<ID>::map(const typename ID::SearchObject &obj)
             //no match
         }
     }
-    
+
     QSet<Index> set;
     set.reserve(idxs.count());
-    
+
     QMutableListIterator<Index> it(idxs);
-    
+
     while (it.hasNext())
     {
         it.next();
-    
+
         if (set.contains(it.value()))
             it.remove();
         else

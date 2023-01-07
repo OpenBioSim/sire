@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -55,7 +54,7 @@ class ThisThreadPvt;
 }
 
 /** This class holds, and schedules, a collection of Node objects.
-    
+
     @author Christopher Woods
 */
 class SIRECLUSTER_EXPORT Nodes
@@ -68,31 +67,31 @@ friend class detail::ThisThreadPvt;
 
 public:
     Nodes();
-    
+
     Nodes(const Nodes &other);
-    
+
     ~Nodes();
-    
+
     Nodes& operator=(const Nodes &other);
-    
+
     bool operator==(const Nodes &other) const;
     bool operator!=(const Nodes &other) const;
-    
+
     bool isEmpty();
-    
+
     QString toString() const;
-    
+
     Node getNode();
     QList<Node> getNodes(int n);
     QList<Node> getAllNodes();
-    
+
     Node getNode(int timeout);
     QList<Node> getNodes(int n, int timeout);
     QList<Node> getAllNodes(int timeout);
-    
+
     void waitUntilAllFree();
     bool waitUntilAllFree(int timeout);
-    
+
     int nFree();
     int nBusy();
     int nNodes();
@@ -105,7 +104,7 @@ public:
 
     void addNode();
     void addNode(int timeout);
-    
+
     void addNodes(int n);
     void addNodes(int n, int timeout);
 
@@ -138,20 +137,20 @@ friend class detail::NodePvt;
 public:
     NodesPtr();
     NodesPtr(const Nodes &nodes);
-    
+
     NodesPtr(const NodesPtr &other);
-    
+
     ~NodesPtr();
-    
+
     NodesPtr& operator=(const NodesPtr &other);
-    
+
     Nodes lock() const;
     Nodes operator*() const;
 
     bool expired() const;
 
     void reset();
-    
+
 protected:
     void returnFrontend(Frontend frontend);  // called by NodePvt
 
@@ -162,7 +161,7 @@ private:
 
 /** This simple class is used to allow the current thread
     to be made available to a Nodes object
-    
+
     @author Christopher Woods
 */
 class SIRECLUSTER_EXPORT ThisThread
@@ -170,13 +169,13 @@ class SIRECLUSTER_EXPORT ThisThread
 public:
     ThisThread();
     ThisThread(const ThisThread &other);
-    
+
     ThisThread(const Nodes &nodes);
-    
+
     ThisThread& operator=(const ThisThread &other);
-    
+
     ~ThisThread();
-    
+
     void reclaim();
 
 private:

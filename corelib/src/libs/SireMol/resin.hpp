@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,7 +53,7 @@ class MolInfo;
 /** This helper class is used to provide the '.residues()' functionality
     of the group ID classes. This allows the class to a residue, or
     range of residues by index from the group that has been identified.
-    
+
     @author Christopher Woods
 */
 template<class GROUP>
@@ -66,36 +65,36 @@ friend SIREMOL_EXPORT QDataStream& ::operator>><>(QDataStream&, ResIn<GROUP>&);
 
 public:
     ResIn();
-    
+
     ResIn(const GROUP &id);
     ResIn(const GROUP &id, qint32 i);
     ResIn(const GROUP &id, qint32 i, qint32 j);
-    
+
     ResIn(const ResIn<GROUP> &other);
-    
+
     ~ResIn();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     ResIn<GROUP>* clone() const;
-    
+
     ResIn<GROUP>& operator=(const ResIn<GROUP> &other);
 
     bool operator==(const ResIn<GROUP> &other) const;
     bool operator==(const SireID::ID &other) const;
-    
+
     bool operator!=(const ResIn<GROUP> &other) const;
-    
+
     bool operator!=(const SireID::ID &other) const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-    
+
     QString toString() const;
-    
+
     QList<ResIdx> map(const MolInfo &molinfo) const;
 
 private:
@@ -140,7 +139,7 @@ ResIn<GROUP>::ResIn(const GROUP &id, qint32 i, qint32 j)
 template<class GROUP>
 SIRE_OUTOFLINE_TEMPLATE
 ResIn<GROUP>::ResIn(const ResIn<GROUP> &other)
-            : ResID(other), groupid(other.groupid), 
+            : ResID(other), groupid(other.groupid),
               strt(other.strt), end(other.end)
 {}
 
@@ -149,7 +148,7 @@ template<class GROUP>
 SIRE_OUTOFLINE_TEMPLATE
 ResIn<GROUP>::~ResIn()
 {}
-    
+
 template<class GROUP>
 SIRE_OUTOFLINE_TEMPLATE
 const char* ResIn<GROUP>::typeName()
@@ -247,7 +246,7 @@ bool ResIn<GROUP>::operator==(const SireID::ID &other) const
 }
 
 /** Map this ID to the indicies of matching residues
-    
+
     \throw ???::missing_ID
     \throw SireError::invalid_index
 */
@@ -257,24 +256,24 @@ QList<ResIdx> ResIn<GROUP>::map(const MolInfo &molinfo) const
 {
     //first get the list of the indicies of the matching groups
     QList<typename GROUP::Index> idxs = groupid.map(molinfo);
-    
+
     //now get a list of the indicies of all of the residues in these groups
     QList<ResIdx> residxs;
-    
+
     foreach (typename GROUP::Index idx, idxs)
     {
         residxs += molinfo.getResiduesIn(idx);
     }
-    
+
     //now map _i and _j to the indicies...
     int nres = residxs.count();
-    
+
     int sane_strt = strt.map(nres);
     int sane_end = end.map(nres);
-    
+
     if (sane_strt > sane_end)
         qSwap(sane_strt, sane_end);
-    
+
     //now extract only the desired atom indicies
     if (sane_end - sane_strt == nres)
     {
@@ -283,12 +282,12 @@ QList<ResIdx> ResIn<GROUP>::map(const MolInfo &molinfo) const
     else
     {
         QList<ResIdx> specified_residxs;
-    
+
         for (int i=sane_strt; i<=sane_end; ++i)
         {
             specified_residxs.append( residxs[i] );
         }
-    
+
         return specified_residxs;
     }
 }

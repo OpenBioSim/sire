@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,16 +43,16 @@ using SireFF::Intra2B3DFF;
 using SireFF::Intra2B2GFF;
 using SireFF::Intra2B2G3DFF;
 
-typedef Intra2BFF< CoulombPotentialInterface<IntraCoulombPotential> > 
+typedef Intra2BFF< CoulombPotentialInterface<IntraCoulombPotential> >
 IntraCoulombFFBase;
 
-typedef Intra2B3DFF< CoulombPotentialInterface<IntraCoulombPotential> > 
+typedef Intra2B3DFF< CoulombPotentialInterface<IntraCoulombPotential> >
 IntraCoulombFF;
 
-typedef Intra2B2GFF< CoulombPotentialInterface<IntraCoulombPotential> > 
+typedef Intra2B2GFF< CoulombPotentialInterface<IntraCoulombPotential> >
 IntraGroupCoulombFFBase;
 
-typedef Intra2B2G3DFF< CoulombPotentialInterface<IntraCoulombPotential> > 
+typedef Intra2B2G3DFF< CoulombPotentialInterface<IntraCoulombPotential> >
 IntraGroupCoulombFF;
 
 }
@@ -74,7 +73,7 @@ SIRE_EXPOSE_ALIAS(
 SIRE_EXPOSE_ALIAS(
   SireFF::Intra2B3DFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> >,
   SireMM::IntraCoulombFF )
-  
+
 SIRE_EXPOSE_ALIAS(
   SireFF::Intra2B2GFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> >,
   SireMM::IntraGroupCoulombFFBase )
@@ -82,7 +81,7 @@ SIRE_EXPOSE_ALIAS(
 SIRE_EXPOSE_ALIAS(
   SireFF::Intra2B2G3DFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> >,
   SireMM::IntraGroupCoulombFF )
-  
+
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 
 template class SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential>;
