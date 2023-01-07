@@ -62,17 +62,17 @@ jobs:
         run: mamba install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
       #
       - name: Update Conda recipe
-        run: python ${{ github.workspace }}/Sire/actions/update_recipe.py
+        run: python ${{ github.workspace }}/sire/actions/update_recipe.py
       #
       - name: Prepare build location
         run: mkdir ${{ github.workspace }}/build
       #
       - name: Build Conda package using mamba build
-        run: conda mambabuild -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/Sire/recipes/sire
+        run: conda mambabuild -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
       #
       #      - name: Collect failed artifacts
       #        run:
-      #          python ${{ github.workspace }}/Sire/actions/collect_failed.py
+      #          python ${{ github.workspace }}/sire/actions/collect_failed.py
       #        env:
       #          BUILD_DIR: ${{ github.workspace }}/build
       #        if: ${{ failure() }}
@@ -92,7 +92,7 @@ jobs:
       #        if: ${{ failure() }}
       #
       - name: Upload Conda package
-        run: python ${{ github.workspace }}/Sire/actions/upload_package.py
+        run: python ${{ github.workspace }}/sire/actions/upload_package.py
         env:
           SRC_DIR: ${{ github.workspace }}/Sire
           BUILD_DIR: ${{ github.workspace }}/build
