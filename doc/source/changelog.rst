@@ -393,8 +393,8 @@ Local Subversion: February 5th 2005 - July 25th 2006
 
 Sire was developed against a local subversion repository.
 Here is a
-`svndump of the original repository <https://siremol.org/f/orig_sire_repository.dump.bz2>`__,
-and all of the `commit history <https://siremol.org/f/original_repository_comments.txt>`__.
+`svndump of the original repository <https://sire.openbiosim.org/f/orig_sire_repository.dump.bz2>`__,
+and all of the `commit history <https://sire.openbiosim.org/f/original_repository_comments.txt>`__.
 
 This comprised 831 commits from developer `@chryswoods <https://github.com/chryswoods>`__.
 

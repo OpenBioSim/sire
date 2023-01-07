@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,12 +47,12 @@ static const RegisterMetaType<N4Matrix> r_n4matrix(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const N4Matrix &matrix)
 {
     writeHeader(ds, r_n4matrix, 1);
-    
+
     SharedDataStream sds(ds);
-    
-    sds << matrix.array << matrix.nbigrows << matrix.nbigcolumns 
+
+    sds << matrix.array << matrix.nbigrows << matrix.nbigcolumns
         << matrix.nrows << matrix.ncolumns;
-    
+
     return ds;
 }
 
@@ -61,17 +60,17 @@ QDataStream &operator<<(QDataStream &ds, const N4Matrix &matrix)
 QDataStream &operator>>(QDataStream &ds, N4Matrix &matrix)
 {
     VersionID v = readHeader(ds, r_n4matrix);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
-        sds >> matrix.array >> matrix.nbigrows >> matrix.nbigcolumns 
+
+        sds >> matrix.array >> matrix.nbigrows >> matrix.nbigcolumns
             >> matrix.nrows >> matrix.nbigcolumns;
     }
     else
         throw version_error(v, "1", r_n4matrix, CODELOC);
-        
+
     return ds;
 }
 
@@ -121,19 +120,19 @@ N4Matrix::N4Matrix(int nbr, int nbc, int nr, int nc, double initial_value)
 /** Construct from the passed matrix - this creates a matrix
     of dimension [1, 1, matrix.nRows(), matrix.nColumns()] */
 N4Matrix::N4Matrix(const NMatrix &matrix)
-         : nbigrows(0), nbigcolumns(0), nrows(0), ncolumns(0) 
+         : nbigrows(0), nbigcolumns(0), nrows(0), ncolumns(0)
 {
     if (matrix.nRows() != 0)
     {
         nbigrows = 1;
         nbigcolumns = 1;
-    
+
         if (matrix.isTransposed())
         {
             NMatrix mat_t = matrix.transpose().fullTranspose();
-        
+
             array = mat_t.memory();
-            
+
             nrows = mat_t.nRows();
             ncolumns = mat_t.nColumns();
         }
@@ -157,32 +156,32 @@ N4Matrix::N4Matrix(const SireBase::Array2D<NMatrix> &array4d)
         //get the size of the largest 2D Matrix within the array
         int max_nrow = 0;
         int max_ncolumn = 0;
-        
+
         const NMatrix *array4d_data = array4d.constData();
-        
+
         for (uint i=0; i<array4d.nRows(); ++i)
         {
             for (uint j=0; j<array4d.nColumns(); ++j)
             {
                 int idx = array4d.map(i,j);
-            
+
                 max_nrow = qMax(max_nrow, array4d_data[idx].nRows());
                 max_ncolumn = qMax(max_ncolumn, array4d_data[idx].nColumns());
             }
         }
 
         sz *= (max_nrow*max_ncolumn);
-    
+
         array = QVector<double>(sz, 0);
         array.squeeze();
-        
+
         nbigrows = array4d.nRows();
         nbigcolumns = array4d.nColumns();
         nrows = max_nrow;
         ncolumns = max_ncolumn;
-        
+
         double *data = array.data();
-        
+
         for (int i=0; i<nbigrows; ++i)
         {
             for (int j=0; j<nbigcolumns; ++j)
@@ -190,9 +189,9 @@ N4Matrix::N4Matrix(const SireBase::Array2D<NMatrix> &array4d)
                 int idx = array4d.map(i,j);
 
                 const NMatrix &mat = array4d_data[idx];
-                
+
                 const double *mat_array = mat.constData();
-                
+
                 for (int k=0; k<mat.nRows(); ++k)
                 {
                     for (int l=0; l<mat.nColumns(); ++l)
@@ -210,19 +209,19 @@ N4Matrix::N4Matrix(const QVector< QVector< QVector< QVector<double> > > > &array
          : nbigrows(0), nbigcolumns(0), nrows(0), ncolumns(0)
 {
     const QVector< QVector< QVector<double> > > *array4d_data = array4d.constData();
-    
+
     nrows = array4d.count();
     ncolumns = 0;
-    
+
     for (int i=0; i<nrows; ++i)
     {
         ncolumns = qMax(ncolumns, array4d_data[i].count());
     }
-    
+
     if (ncolumns > 0)
     {
         Array2D<NMatrix> arrays(nrows, ncolumns);
-        
+
         for (int i=0; i<nrows; ++i)
         {
             for (int j=0; j<array4d_data[i].count(); ++j)
@@ -311,7 +310,7 @@ void N4Matrix::assertValidIndex(int i, int j, int k, int l) const
 double& N4Matrix::operator()(int i, int j, int k, int l)
 {
     this->assertValidIndex(i,j,k,l);
-    
+
     return array.data()[ this->offset(i,j,k,l) ];
 }
 
@@ -322,11 +321,11 @@ double& N4Matrix::operator()(int i, int j, int k, int l)
 const double& N4Matrix::operator()(int i, int j, int k, int l) const
 {
     this->assertValidIndex(i,j,k,l);
-    
+
     return array.data()[ this->offset(i,j,k,l) ];
 }
 
-/** Return the sub-matrix view at [i,j] 
+/** Return the sub-matrix view at [i,j]
 
     \throw SireError::invalid_index
 */
@@ -395,7 +394,7 @@ void N4Matrix::assertNColumns(int nc) const
                     .arg(nrows).arg(ncolumns).arg(nc), CODELOC );
 }
 
-/** Matrix addition 
+/** Matrix addition
 
     \throw SireError::incompatible_error
 */
@@ -405,20 +404,20 @@ N4Matrix& N4Matrix::operator+=(const N4Matrix &other)
     assertNBigColumns(other.nBigColumns());
     assertNRows(other.nRows());
     assertNColumns(other.nColumns());
-    
+
     double *data = array.data();
     const double *other_data = other.array.constData();
     const int sz = array.count();
-    
+
     for (int i=0; i<sz; ++i)
     {
         data[i] += other_data[i];
     }
-    
+
     return *this;
 }
 
-/** Matrix subtraction 
+/** Matrix subtraction
 
     \throw SireError::incompatible_error
 */
@@ -428,16 +427,16 @@ N4Matrix& N4Matrix::operator-=(const N4Matrix &other)
     assertNBigColumns(other.nBigColumns());
     assertNRows(other.nRows());
     assertNColumns(other.nColumns());
-    
+
     double *data = array.data();
     const double *other_data = other.array.constData();
     const int sz = array.count();
-    
+
     for (int i=0; i<sz; ++i)
     {
         data[i] -= other_data[i];
     }
-    
+
     return *this;
 }
 
@@ -461,7 +460,7 @@ N4Matrix& N4Matrix::operator*=(double scale)
             data[i] *= sz;
         }
     }
-    
+
     return *this;
 }
 
@@ -471,7 +470,7 @@ N4Matrix& N4Matrix::operator/=(double scale)
     if (scale == 0)
         throw SireMaths::domain_error( QObject::tr(
             "This code does not support dividing a matrix by zero!"), CODELOC );
-            
+
     return this->operator*=( 1/scale );
 }
 
@@ -482,16 +481,16 @@ N4Matrix N4Matrix::operator-() const
 
     const int sz = array.count();
     double *ret_data = ret.array.data();
-    
+
     for (int i=0; i<sz; ++i)
     {
         ret_data[i] = -ret_data[i];
     }
-    
+
     return ret;
 }
 
-/** Matrix addition 
+/** Matrix addition
 
     \throw SireError::incompatible_error
 */
@@ -499,11 +498,11 @@ N4Matrix N4Matrix::operator+(const N4Matrix &other) const
 {
     N4Matrix ret(*this);
     ret += other;
-    
+
     return ret;
 }
 
-/** Matrix subtraction 
+/** Matrix subtraction
 
     \throw SireError::incompatible_error
 */
@@ -511,7 +510,7 @@ N4Matrix N4Matrix::operator-(const N4Matrix &other) const
 {
     N4Matrix ret(*this);
     ret -= other;
-    
+
     return ret;
 }
 
@@ -519,9 +518,9 @@ N4Matrix N4Matrix::operator-(const N4Matrix &other) const
 N4Matrix N4Matrix::operator*(double scale) const
 {
     N4Matrix ret(*this);
-    
+
     ret *= scale;
-    
+
     return ret;
 }
 
@@ -529,9 +528,9 @@ N4Matrix N4Matrix::operator*(double scale) const
 N4Matrix N4Matrix::operator/(double scale) const
 {
     N4Matrix ret(*this);
-    
+
     ret /= scale;
-    
+
     return ret;
 }
 
@@ -559,8 +558,8 @@ int N4Matrix::nColumns() const
     return ncolumns;
 }
 
-/** Redimension this matrix to have 'nbigrows' big rows, 
-    'nbigcolumns' big columns, 'nrows' rows and 'ncolumns' 
+/** Redimension this matrix to have 'nbigrows' big rows,
+    'nbigcolumns' big columns, 'nrows' rows and 'ncolumns'
     columns. The contents of this matrix are undefined after
     this redimension. This function will only reallocate
     memory if there is not enough memory allocated to store
@@ -573,7 +572,7 @@ int N4Matrix::nColumns() const
 void N4Matrix::redimension(int nbr, int nbc, int nr, int nc)
 {
     const int sz = nbr * nbc * nr * nc;
-    
+
     if (sz <= 0)
     {
         nbigrows = 0;
@@ -585,7 +584,7 @@ void N4Matrix::redimension(int nbr, int nbc, int nr, int nc)
     {
         if (sz > array.count())
             array.resize(sz);
-            
+
         nbigrows = nbr;
         nbigcolumns = nbc;
         nrows = nr;
@@ -593,7 +592,7 @@ void N4Matrix::redimension(int nbr, int nbc, int nr, int nc)
     }
 }
 
-/** Assert that there is an ith big row! 
+/** Assert that there is an ith big row!
 
     \throw SireError::invalid_index
 */
@@ -607,7 +606,7 @@ void N4Matrix::assertValidBigRow(int i) const
                     .arg(nrows).arg(ncolumns).arg(i), CODELOC );
 }
 
-/** Assert that there is an jth big column! 
+/** Assert that there is an jth big column!
 
     \throw SireError::invalid_index
 */
@@ -621,7 +620,7 @@ void N4Matrix::assertValidBigColumn(int j) const
                     .arg(nrows).arg(ncolumns).arg(j), CODELOC );
 }
 
-/** Assert that there is an kth row! 
+/** Assert that there is an kth row!
 
     \throw SireError::invalid_index
 */
@@ -635,7 +634,7 @@ void N4Matrix::assertValidRow(int k) const
                     .arg(nrows).arg(ncolumns).arg(k), CODELOC );
 }
 
-/** Assert that there is an lth column! 
+/** Assert that there is an lth column!
 
     \throw SireError::invalid_index
 */
@@ -649,18 +648,18 @@ void N4Matrix::assertValidColumn(int l) const
                     .arg(nrows).arg(ncolumns).arg(l), CODELOC );
 }
 
-/** Return the sub-matrix view at [i,j,k,l] 
+/** Return the sub-matrix view at [i,j,k,l]
 
     \throw SireError::invalid_index
 */
 NMatrix N4Matrix::view(int i, int j) const
 {
     const double *ptr = array.constData() + checkedOffset(i,j,0,0);
-    
+
     NMatrix mat(nrows, ncolumns);
-    
+
     memcpy( mat.data(), ptr, nrows*ncolumns*sizeof(double) );
-    
+
     return mat;
 }
 
@@ -673,13 +672,13 @@ void N4Matrix::set(int i, int j, const NMatrix &matrix)
 {
     assertNRows(matrix.nRows());
     assertNColumns(matrix.nColumns());
-    
+
     double *ptr = array.data() + checkedOffset(i,j,0,0);
-    
+
     if (matrix.isTransposed())
     {
         NMatrix mat_c = matrix.transpose().fullTranspose();
-        
+
         memcpy( ptr, mat_c.constData(), nrows*ncolumns*sizeof(double) );
     }
     else
@@ -689,7 +688,7 @@ void N4Matrix::set(int i, int j, const NMatrix &matrix)
 }
 
 /** Add the contents of 'matrix' to the sub-matrix view at [i,j]
-    
+
     \throw SireError::invalid_index
     \throw SireError::incompatible_error
 */
@@ -697,20 +696,20 @@ void N4Matrix::add(int i, int j, const NMatrix &matrix)
 {
     assertNRows(matrix.nRows());
     assertNColumns(matrix.nColumns());
-    
+
     assertValidIndex(i,j,0,0);
-    
+
     if (matrix.isTransposed())
     {
         this->add( i, j, matrix.transpose().fullTranspose() );
         return;
     }
-    
+
     double *ptr = array.data() + checkedOffset(i,j,0,0);
-    
+
     const double *data = matrix.constData();
     const int sz = nrows * ncolumns;
-    
+
     for (int i=0; i<sz; ++i)
     {
         ptr[i] += data[i];
@@ -718,7 +717,7 @@ void N4Matrix::add(int i, int j, const NMatrix &matrix)
 }
 
 /** Subtract the contents of 'matrix' from the sub-matrix view at [i,j]
-    
+
     \throw SireError::invalid_index
     \throw SireError::incompatible_error
 */
@@ -726,20 +725,20 @@ void N4Matrix::subtract(int i, int j, const NMatrix &matrix)
 {
     assertNRows(matrix.nRows());
     assertNColumns(matrix.nColumns());
-    
+
     assertValidIndex(i,j,0,0);
-    
+
     if (matrix.isTransposed())
     {
         this->subtract( i, j, matrix.transpose().fullTranspose() );
         return;
     }
-    
+
     double *ptr = array.data() + checkedOffset(i,j,0,0);
-    
+
     const double *data = matrix.constData();
     const int sz = nrows * ncolumns;
-    
+
     for (int i=0; i<sz; ++i)
     {
         ptr[i] -= data[i];
@@ -760,7 +759,7 @@ void N4Matrix::setAll(double value)
 {
     double *d = array.data();
     int sz = array.count();
-    
+
     for (int i=0; i<sz; ++i)
     {
         d[i] = value;
@@ -769,7 +768,7 @@ void N4Matrix::setAll(double value)
 
 /** Return a raw pointer to the data of this matrix. The data is
     stored in column-major order (same as Fortran - not same as C++ or C).
-    To be safe, use the 'offset' function to get the offset of 
+    To be safe, use the 'offset' function to get the offset of
     the value at [i,j] in this array */
 double* N4Matrix::data()
 {
@@ -778,7 +777,7 @@ double* N4Matrix::data()
 
 /** Return a raw pointer to the data of this matrix. The data is
     stored in column-major order (same as Fortran - not same as C++ or C).
-    To be safe, use the 'offset' function to get the offset of 
+    To be safe, use the 'offset' function to get the offset of
     the value at [i,j] in this array */
 const double* N4Matrix::data() const
 {
@@ -787,7 +786,7 @@ const double* N4Matrix::data() const
 
 /** Return a raw pointer to the data of this matrix. The data is
     stored in column-major order (same as Fortran - not same as C++ or C).
-    To be safe, use the 'offset' function to get the offset of 
+    To be safe, use the 'offset' function to get the offset of
     the value at [i,j] in this array */
 const double* N4Matrix::constData() const
 {
@@ -802,7 +801,7 @@ QVector<double> N4Matrix::memory() const
 
 /** Calculate the offset in the 1D array of the value
     at index [i,j,k,l]
-    
+
     \throw SireError::invalid_index
 */
 int N4Matrix::checkedOffset(int i, int j, int k, int l) const

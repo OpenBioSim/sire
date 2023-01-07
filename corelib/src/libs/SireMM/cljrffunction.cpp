@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,23 +63,23 @@ static const RegisterMetaType<CLJRFFunction> r_shift;
 QDataStream &operator<<(QDataStream &ds, const CLJRFFunction &func)
 {
     writeHeader(ds, r_shift, 1);
-    
+
     ds << func.diel << static_cast<const CLJCutoffFunction&>(func);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, CLJRFFunction &func)
 {
     VersionID v = readHeader(ds, r_shift);
-    
+
     if (v == 1)
     {
         ds >> func.diel >> static_cast<CLJCutoffFunction&>(func);
     }
     else
         throw version_error(v, "1", r_shift, CODELOC);
-    
+
     return ds;
 }
 
@@ -289,7 +288,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -300,11 +299,11 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                 const MultiFloat x( xa[i][ii] );
                 const MultiFloat y( ya[i][ii] );
                 const MultiFloat z( za[i][ii] );
-                
+
                 if (qa[i][ii] != 0)
                 {
                     const MultiFloat q( qa[i][ii] );
-                    
+
                     if (epsa[i][ii] == 0)
                     {
                         //coulomb calculation only
@@ -313,7 +312,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance between the fixed and mobile atoms
                             tmp = xa[j] - x;
                             r2 = tmp * tmp;
@@ -324,14 +323,14 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             r = r2.sqrt();
 
                             one_over_r = r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_r + (k_rf * r2) - c_rf;
                             tmp *= q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -341,7 +340,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
                         }
                     }
@@ -356,7 +355,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance between the fixed and mobile atoms
                             tmp = xa[j] - x;
                             r2 = tmp * tmp;
@@ -367,14 +366,14 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             r = r2.sqrt();
 
                             one_over_r = r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_r + k_rf * r2 - c_rf;
                             tmp *= q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -384,7 +383,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
 
                             //now the LJ energy
@@ -397,7 +396,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             tmp -= sig6_over_r6;
                             tmp *= eps;
                             tmp *= epsa[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -417,7 +416,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                         // if i == j then we double-calculate the energies, so must
                         // scale them by 0.5
                         const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                    
+
                         //calculate the distance between the fixed and mobile atoms
                         tmp = xa[j] - x;
                         r = tmp * tmp;
@@ -438,7 +437,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= epsa[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -449,7 +448,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -474,7 +473,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
     const MultiFloat *sig1 = atoms1.sigma().constData();
     const MultiFloat *eps1 = atoms1.epsilon().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj(lj_cutoff);
 
@@ -501,7 +500,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
             if (id0[i][ii] != dummy_int)
             {
                 const MultiInt id(id0[i][ii]);
-            
+
                 if (q0[i][ii] != 0)
                 {
                     const MultiFloat x(x0[i][ii]);
@@ -524,14 +523,14 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                             r = r2.sqrt();
 
                             one_over_r = r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_r + k_rf * r2 - c_rf;
                             tmp *= q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -541,7 +540,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
                         }
                     }
@@ -562,14 +561,14 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                             r = r2.sqrt();
 
                             one_over_r = r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_r + k_rf * r2 - c_rf;
                             tmp *= q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -582,7 +581,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                             itmp |= id1[j].compareEqual(id);
 
                             icnrg += tmp.logicalAndNot(itmp);
-                            
+
                             //Now do the LJ energy
 
                             //arithmetic combining rules
@@ -595,7 +594,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                             tmp -= sig6_over_r6;
                             tmp *= eps;
                             tmp *= eps1[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -625,7 +624,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                         r = r.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         //geometric combining rules
                         sig2_over_r2 = sig * sig1[j] * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
@@ -636,7 +635,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -650,7 +649,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -688,13 +687,13 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_di
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -714,7 +713,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_di
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     tmp = xa[j] - x;
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                     tmp -= box_x.logicalAnd( half_box_x.compareLess(tmp) );
@@ -733,14 +732,14 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_di
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * qa[j];
-                
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -750,7 +749,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_di
                     //also not the same as the atoms0.
                     itmp = ida[j].compareEqual(dummy_id);
                     itmp |= ida[j].compareEqual(id);
-                    
+
                     icnrg += scale * tmp.logicalAndNot(itmp);
 
                     //now the LJ energy
@@ -763,7 +762,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_di
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= epsa[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -773,7 +772,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_di
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -800,7 +799,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
     const MultiFloat *sig1 = atoms1.sigma().constData();
     const MultiFloat *eps1 = atoms1.epsilon().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj(lj_cutoff);
 
@@ -820,7 +819,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
@@ -859,18 +858,18 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                     tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                     r2.multiplyAdd(tmp, tmp);
-                    
+
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * q1[j];
-                    
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -883,7 +882,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                     itmp |= id1[j].compareEqual(id);
 
                     icnrg += tmp.logicalAndNot(itmp);
-                    
+
                     //Now do the LJ energy
 
                     //arithmetic combining rules
@@ -896,7 +895,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= eps1[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -906,7 +905,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -941,7 +940,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -952,11 +951,11 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                 const MultiFloat x( xa[i][ii] );
                 const MultiFloat y( ya[i][ii] );
                 const MultiFloat z( za[i][ii] );
-                
+
                 if (qa[i][ii] != 0)
                 {
                     const MultiFloat q( qa[i][ii] );
-                    
+
                     if (epsa[i][ii] == 0)
                     {
                         //coulomb calculation only
@@ -965,7 +964,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance between the fixed and mobile atoms
                             tmp = xa[j] - x;
                             r2 = tmp * tmp;
@@ -976,14 +975,14 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             r = r2.sqrt();
 
                             one_over_r = r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_r + k_rf * r2 - c_rf;
                             tmp *= q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -993,7 +992,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
                         }
                     }
@@ -1008,7 +1007,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance between the fixed and mobile atoms
                             tmp = xa[j] - x;
                             r2 = tmp * tmp;
@@ -1019,14 +1018,14 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             r = r2.sqrt();
 
                             one_over_r = r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_r + k_rf * r2 - c_rf;
                             tmp *= q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -1036,13 +1035,13 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
 
                             //now the LJ energy
                             tmp = sig + (siga[j]*siga[j]);
                             tmp *= half;
-                        
+
                             sig2_over_r2 = tmp * one_over_r;
                             sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                             sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -1052,7 +1051,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             tmp -= sig6_over_r6;
                             tmp *= eps;
                             tmp *= epsa[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -1072,7 +1071,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                         // if i == j then we double-calculate the energies, so must
                         // scale them by 0.5
                         const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                    
+
                         //calculate the distance between the fixed and mobile atoms
                         tmp = xa[j] - x;
                         r = tmp * tmp;
@@ -1086,7 +1085,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
 
                         tmp = sig + (siga[j]*siga[j]);
                         tmp *= half;
-                    
+
                         sig2_over_r2 = tmp * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                         sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -1096,7 +1095,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= epsa[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -1107,7 +1106,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -1132,7 +1131,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
     const MultiFloat *sig1 = atoms1.sigma().constData();
     const MultiFloat *eps1 = atoms1.epsilon().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj(lj_cutoff);
 
@@ -1159,7 +1158,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
             if (id0[i][ii] != dummy_int)
             {
                 const MultiInt id(id0[i][ii]);
-            
+
                 if (q0[i][ii] != 0)
                 {
                     const MultiFloat x(x0[i][ii]);
@@ -1182,14 +1181,14 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                             r = r2.sqrt();
 
                             one_over_r = r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_r + k_rf * r2 - c_rf;
                             tmp *= q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -1199,7 +1198,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
                         }
                     }
@@ -1220,14 +1219,14 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                             r = r2.sqrt();
 
                             one_over_r = r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_r + k_rf * r2 - c_rf;
                             tmp *= q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -1240,13 +1239,13 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                             itmp |= id1[j].compareEqual(id);
 
                             icnrg += tmp.logicalAndNot(itmp);
-                            
+
                             //Now do the LJ energy
 
                             //arithmetic combining rules
                             tmp = sig + (sig1[j]*sig1[j]);
                             tmp *= half;
-                        
+
                             sig2_over_r2 = tmp * one_over_r;
                             sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                             sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -1256,7 +1255,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                             tmp -= sig6_over_r6;
                             tmp *= eps;
                             tmp *= eps1[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -1286,11 +1285,11 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                         r = r.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         //arithmetic combining rules
                         tmp = sig + (sig1[j]*sig1[j]);
                         tmp *= half;
-                    
+
                         sig2_over_r2 = tmp * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                         sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -1300,7 +1299,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -1314,7 +1313,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -1344,7 +1343,7 @@ double CLJRFFunction::calcVacCoulombEnergyAri(const CLJAtoms &atoms) const
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -1356,14 +1355,14 @@ double CLJRFFunction::calcVacCoulombEnergyAri(const CLJAtoms &atoms) const
                 const MultiFloat y( ya[i][ii] );
                 const MultiFloat z( za[i][ii] );
                 const MultiFloat q( qa[i][ii] );
-                
+
                 //coulomb calculation only
                 for (int j=i; j<n; ++j)
                 {
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //calculate the distance between the fixed and mobile atoms
                     tmp = xa[j] - x;
                     r2 = tmp * tmp;
@@ -1374,14 +1373,14 @@ double CLJRFFunction::calcVacCoulombEnergyAri(const CLJAtoms &atoms) const
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * qa[j];
-                
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -1391,13 +1390,13 @@ double CLJRFFunction::calcVacCoulombEnergyAri(const CLJAtoms &atoms) const
                     //also not the same as the atoms0.
                     itmp = ida[j].compareEqual(dummy_id);
                     itmp |= ida[j].compareEqual(id);
-                    
+
                     icnrg += scale * tmp.logicalAndNot(itmp);
                 }
             }
         }
     }
-    
+
     return icnrg.sum();
 }
 
@@ -1417,7 +1416,7 @@ double CLJRFFunction::calcVacCoulombEnergyAri(const CLJAtoms &atoms0, const CLJA
     const MultiFloat *z1 = atoms1.z().constData();
     const MultiFloat *q1 = atoms1.q().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rc(coul_cutoff);
 
     const MultiFloat k_rf( (1.0 / pow_3(coul_cutoff)) * ( (dielectric()-1) /
@@ -1461,14 +1460,14 @@ double CLJRFFunction::calcVacCoulombEnergyAri(const CLJAtoms &atoms0, const CLJA
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * q1[j];
-                
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -1478,16 +1477,16 @@ double CLJRFFunction::calcVacCoulombEnergyAri(const CLJAtoms &atoms0, const CLJA
                     //also not the same as the atoms0.
                     itmp = id1[j].compareEqual(dummy_id);
                     itmp |= id1[j].compareEqual(id);
-                    
+
                     icnrg += tmp.logicalAndNot(itmp);
                 }
             }
         }
     }
-    
+
     return icnrg.sum();
 }
-    
+
 /** Calculate the LJ intermolecular energy of all atoms in 'atoms' */
 double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms) const
 {
@@ -1509,7 +1508,7 @@ double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms) const
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -1529,7 +1528,7 @@ double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms) const
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //calculate the distance between the fixed and mobile atoms
                     tmp = xa[j] - x;
                     r = tmp * tmp;
@@ -1543,7 +1542,7 @@ double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms) const
 
                     tmp = sig + (siga[j]*siga[j]);
                     tmp *= half;
-                
+
                     sig2_over_r2 = tmp * one_over_r;
                     sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                     sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -1553,7 +1552,7 @@ double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms) const
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= epsa[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -1563,7 +1562,7 @@ double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms) const
             }
         }
     }
-    
+
     return iljnrg.sum();
 }
 
@@ -1585,7 +1584,7 @@ double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
     const MultiFloat *sig1 = atoms1.sigma().constData();
     const MultiFloat *eps1 = atoms1.epsilon().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rlj(lj_cutoff);
     const MultiFloat half(0.5);
     const MultiInt dummy_id = CLJAtoms::idOfDummy();
@@ -1624,11 +1623,11 @@ double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                     r = r.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     //arithmetic combining rules
                     tmp = sig + (sig1[j]*sig1[j]);
                     tmp *= half;
-                
+
                     sig2_over_r2 = tmp * one_over_r;
                     sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                     sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -1638,7 +1637,7 @@ double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= eps1[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -1651,7 +1650,7 @@ double CLJRFFunction::calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
             }
         }
     }
-    
+
     return iljnrg.sum();
 }
 
@@ -1688,13 +1687,13 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_di
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -1714,7 +1713,7 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_di
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     tmp = xa[j] - x;
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                     tmp -= box_x.logicalAnd( half_box_x.compareLess(tmp) );
@@ -1733,14 +1732,14 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_di
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * qa[j];
-                
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -1750,13 +1749,13 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_di
                     //also not the same as the atoms0.
                     itmp = ida[j].compareEqual(dummy_id);
                     itmp |= ida[j].compareEqual(id);
-                    
+
                     icnrg += scale * tmp.logicalAndNot(itmp);
 
                     //now the LJ energy
                     tmp = sig + (siga[j]*siga[j]);
                     tmp *= half;
-                
+
                     sig2_over_r2 = tmp * one_over_r;
                     sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                     sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -1766,7 +1765,7 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_di
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= epsa[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -1776,7 +1775,7 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_di
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -1803,7 +1802,7 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
     const MultiFloat *sig1 = atoms1.sigma().constData();
     const MultiFloat *eps1 = atoms1.epsilon().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj(lj_cutoff);
 
@@ -1823,7 +1822,7 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
@@ -1862,18 +1861,18 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                     tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                     r2.multiplyAdd(tmp, tmp);
-                    
+
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * q1[j];
-                    
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -1886,13 +1885,13 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                     itmp |= id1[j].compareEqual(id);
 
                     icnrg += tmp.logicalAndNot(itmp);
-                    
+
                     //Now do the LJ energy
 
                     //arithmetic combining rules
                     tmp = sig + (sig1[j]*sig1[j]);
                     tmp *= half;
-                
+
                     sig2_over_r2 = tmp * one_over_r;
                     sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                     sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -1902,7 +1901,7 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= eps1[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -1912,7 +1911,7 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -1932,7 +1931,7 @@ void CLJRFFunction::calcVacGrid(const CLJAtoms &atoms, const GridInfo &grid_info
     const MultiFloat* const z = atoms.z().constData();
     const MultiFloat* const q = atoms.q().constData();
     const MultiInt* const id = atoms.ID().constData();
-    
+
     const MultiFloat Rc( coul_cutoff );
 
     const MultiFloat k_rf( (1.0 / pow_3(coul_cutoff)) * ( (dielectric()-1) /
@@ -1949,13 +1948,13 @@ void CLJRFFunction::calcVacGrid(const CLJAtoms &atoms, const GridInfo &grid_info
     for (int i = start; i < end; ++i)
     {
         const Vector grid_point = grid_info.point(i);
-        
+
         const MultiFloat px(grid_point.x());
         const MultiFloat py(grid_point.y());
         const MultiFloat pz(grid_point.z());
-        
+
         MultiDouble pot(0);
-        
+
         for (int j=0; j<nats; ++j)
         {
             //calculate the distance between the atom and grid point
@@ -1969,22 +1968,22 @@ void CLJRFFunction::calcVacGrid(const CLJAtoms &atoms, const GridInfo &grid_info
             r = r2.sqrt();
 
             one_over_r = r.reciprocal();
-    
+
             // calculate the coulomb energy using
             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
             // c = (1/r_c) * (3 eps)/(2 eps + 1)
             tmp = one_over_r + k_rf * r2 - c_rf;
-            
+
             //exclude dummy atoms when building the grid
             tmp *= q[j].logicalAndNot( id[j].compareEqual(dummy_id) );
-        
+
             //apply the cutoff - compare r against Rc. This will
             //return 1 if r is less than Rc, or 0 otherwise. Logical
             //and will then remove all energies where r >= Rc
             pot += tmp.logicalAnd( r.compareLess(Rc) );
         }
-        
+
         *gridpot_array = pot.sum();
         ++gridpot_array;
     }
@@ -2000,7 +1999,7 @@ void CLJRFFunction::calcBoxGrid(const CLJAtoms &atoms, const GridInfo &grid_info
     const MultiFloat* const z = atoms.z().constData();
     const MultiFloat* const q = atoms.q().constData();
     const MultiInt* const id = atoms.ID().constData();
-    
+
     const MultiFloat Rc( coul_cutoff );
 
     const MultiFloat k_rf( (1.0 / pow_3(coul_cutoff)) * ( (dielectric()-1) /
@@ -2013,7 +2012,7 @@ void CLJRFFunction::calcBoxGrid(const CLJAtoms &atoms, const GridInfo &grid_info
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
@@ -2025,13 +2024,13 @@ void CLJRFFunction::calcBoxGrid(const CLJAtoms &atoms, const GridInfo &grid_info
     for (int i = start; i < end; ++i)
     {
         const Vector grid_point = grid_info.point(i);
-        
+
         const MultiFloat px(grid_point.x());
         const MultiFloat py(grid_point.y());
         const MultiFloat pz(grid_point.z());
-        
+
         MultiDouble pot(0);
-        
+
         for (int j=0; j<nats; ++j)
         {
             //calculate the distance between the atom and grid point
@@ -2053,22 +2052,22 @@ void CLJRFFunction::calcBoxGrid(const CLJAtoms &atoms, const GridInfo &grid_info
             r = r2.sqrt();
 
             one_over_r = r.reciprocal();
-    
+
             // calculate the coulomb energy using
             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
             // c = (1/r_c) * (3 eps)/(2 eps + 1)
             tmp = one_over_r + k_rf * r2 - c_rf;
-            
+
             //exclude dummy atoms when building the grid
             tmp *= q[j].logicalAndNot( id[j].compareEqual(dummy_id) );
-        
+
             //apply the cutoff - compare r against Rc. This will
             //return 1 if r is less than Rc, or 0 otherwise. Logical
             //and will then remove all energies where r >= Rc
             pot += tmp.logicalAnd( r.compareLess(Rc) );
         }
-        
+
         *gridpot_array = pot.sum();
         ++gridpot_array;
     }
@@ -2084,23 +2083,23 @@ static const RegisterMetaType<CLJSoftRFFunction> r_softshift;
 QDataStream &operator<<(QDataStream &ds, const CLJSoftRFFunction &func)
 {
     writeHeader(ds, r_softshift, 1);
-    
+
     ds << func.diel << static_cast<const CLJSoftFunction&>(func);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, CLJSoftRFFunction &func)
 {
     VersionID v = readHeader(ds, r_softshift);
-    
+
     if (v == 1)
     {
         ds >> func.diel >> static_cast<CLJSoftFunction&>(func);
     }
     else
         throw version_error(v, "1", r_softshift, CODELOC);
-    
+
     return ds;
 }
 
@@ -2316,7 +2315,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -2327,11 +2326,11 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                 const MultiFloat x( xa[i][ii] );
                 const MultiFloat y( ya[i][ii] );
                 const MultiFloat z( za[i][ii] );
-                
+
                 if (qa[i][ii] != 0)
                 {
                     const MultiFloat q( qa[i][ii] );
-                    
+
                     if (epsa[i][ii] == 0)
                     {
                         //coulomb calculation only
@@ -2340,7 +2339,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance^2 between the fixed and mobile atoms
                             tmp = xa[j] - x;
                             r2 = tmp * tmp;
@@ -2348,7 +2347,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             r2.multiplyAdd(tmp, tmp);
                             tmp = za[j] - z;
                             r2.multiplyAdd(tmp, tmp);
-                            
+
                             soft_r2 = r2 + alfa;
                             soft_r = soft_r2.sqrt();
 
@@ -2360,7 +2359,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -2370,7 +2369,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
                         }
                     }
@@ -2385,7 +2384,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance between the fixed and mobile atoms
                             tmp = xa[j] - x;
                             r2 = tmp * tmp;
@@ -2393,19 +2392,19 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             r2.multiplyAdd(tmp, tmp);
                             tmp = za[j] - z;
                             r2.multiplyAdd(tmp, tmp);
-                            
+
                             soft_r2 = r2 + alfa;
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -2415,13 +2414,13 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
 
                             //now the LJ energy
                             sigma = sig * siga[j];
                             delta_sigma_r2 = delta * sigma + r2;
-                            
+
                             sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                             sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -2429,7 +2428,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                             tmp -= sig6_over_delta3;
                             tmp *= eps;
                             tmp *= epsa[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -2449,7 +2448,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                         // if i == j then we double-calculate the energies, so must
                         // scale them by 0.5
                         const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                    
+
                         //calculate the distance between the fixed and mobile atoms
                         tmp = xa[j] - x;
                         r2 = tmp * tmp;
@@ -2460,7 +2459,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
 
                         sigma = sig * siga[j];
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -2468,7 +2467,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= epsa[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -2479,7 +2478,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -2507,7 +2506,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
 
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj2(lj_cutoff*lj_cutoff);
-    
+
     const float soft_coul_cutoff = std::sqrt(alpha() + coul_cutoff*coul_cutoff);
 
     const MultiFloat soft_Rc(soft_coul_cutoff);
@@ -2539,7 +2538,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
             if (id0[i][ii] != dummy_int)
             {
                 const MultiInt id(id0[i][ii]);
-            
+
                 if (q0[i][ii] != 0)
                 {
                     const MultiFloat x(x0[i][ii]);
@@ -2564,14 +2563,14 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -2581,7 +2580,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
                         }
                     }
@@ -2604,14 +2603,14 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -2621,13 +2620,13 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
-                            
+
                             //now the LJ energy
                             sigma = sig * sig1[j];
                             delta_sigma_r2 = delta * sigma + r2;
-                            
+
                             sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                             sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -2635,7 +2634,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             tmp -= sig6_over_delta3;
                             tmp *= eps;
                             tmp *= eps1[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -2665,7 +2664,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
 
                         sigma = sig * sig1[j];
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -2673,7 +2672,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -2684,7 +2683,7 @@ void CLJSoftRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -2724,7 +2723,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
@@ -2735,7 +2734,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -2746,11 +2745,11 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                 const MultiFloat x( xa[i][ii] );
                 const MultiFloat y( ya[i][ii] );
                 const MultiFloat z( za[i][ii] );
-                
+
                 if (qa[i][ii] != 0)
                 {
                     const MultiFloat q( qa[i][ii] );
-                    
+
                     if (epsa[i][ii] == 0)
                     {
                         //coulomb calculation only
@@ -2759,7 +2758,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance^2
                             tmp = xa[j] - x;
                             tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -2775,19 +2774,19 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                             tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                             tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                             r2.multiplyAdd(tmp, tmp);
-                            
+
                             soft_r2 = r2 + alfa;
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -2797,7 +2796,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
                         }
                     }
@@ -2812,7 +2811,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance^2
                             tmp = xa[j] - x;
                             tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -2828,19 +2827,19 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                             tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                             tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                             r2.multiplyAdd(tmp, tmp);
-                            
+
                             soft_r2 = r2 + alfa;
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -2850,13 +2849,13 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
 
                             //now the LJ energy
                             sigma = sig * siga[j];
                             delta_sigma_r2 = delta * sigma + r2;
-                            
+
                             sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                             sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -2864,7 +2863,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                             tmp -= sig6_over_delta3;
                             tmp *= eps;
                             tmp *= epsa[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -2884,7 +2883,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                         // if i == j then we double-calculate the energies, so must
                         // scale them by 0.5
                         const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                    
+
                         //calculate the distance^2
                         tmp = xa[j] - x;
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -2903,7 +2902,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
 
                         sigma = sig * siga[j];
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -2911,7 +2910,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= epsa[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -2922,7 +2921,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &bo
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -2952,7 +2951,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
 
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj2(lj_cutoff*lj_cutoff);
-    
+
     const float soft_coul_cutoff = std::sqrt(alpha() + coul_cutoff*coul_cutoff);
 
     const MultiFloat soft_Rc(soft_coul_cutoff);
@@ -2976,7 +2975,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
@@ -2991,7 +2990,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
             if (id0[i][ii] != dummy_int)
             {
                 const MultiInt id(id0[i][ii]);
-            
+
                 if (q0[i][ii] != 0)
                 {
                     const MultiFloat x(x0[i][ii]);
@@ -3024,14 +3023,14 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3041,7 +3040,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
                         }
                     }
@@ -3072,14 +3071,14 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3089,13 +3088,13 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
-                            
+
                             //now the LJ energy
                             sigma = sig * sig1[j];
                             delta_sigma_r2 = delta * sigma + r2;
-                            
+
                             sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                             sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -3103,7 +3102,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                             tmp -= sig6_over_delta3;
                             tmp *= eps;
                             tmp *= eps1[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -3141,7 +3140,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
 
                         sigma = sig * sig1[j];
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -3149,7 +3148,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -3160,7 +3159,7 @@ void CLJSoftRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms 
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -3202,7 +3201,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -3213,11 +3212,11 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                 const MultiFloat x( xa[i][ii] );
                 const MultiFloat y( ya[i][ii] );
                 const MultiFloat z( za[i][ii] );
-                
+
                 if (qa[i][ii] != 0)
                 {
                     const MultiFloat q( qa[i][ii] );
-                    
+
                     if (epsa[i][ii] == 0)
                     {
                         //coulomb calculation only
@@ -3226,7 +3225,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance^2 between the fixed and mobile atoms
                             tmp = xa[j] - x;
                             r2 = tmp * tmp;
@@ -3234,19 +3233,19 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             r2.multiplyAdd(tmp, tmp);
                             tmp = za[j] - z;
                             r2.multiplyAdd(tmp, tmp);
-                            
+
                             soft_r2 = r2 + alfa;
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3256,7 +3255,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
                         }
                     }
@@ -3271,7 +3270,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance between the fixed and mobile atoms
                             tmp = xa[j] - x;
                             r2 = tmp * tmp;
@@ -3279,19 +3278,19 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             r2.multiplyAdd(tmp, tmp);
                             tmp = za[j] - z;
                             r2.multiplyAdd(tmp, tmp);
-                            
+
                             soft_r2 = r2 + alfa;
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3301,7 +3300,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
 
                             //now the LJ energy
@@ -3311,7 +3310,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             sigma *= half;
 
                             delta_sigma_r2 = delta * sigma + r2;
-                            
+
                             sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                             sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -3319,7 +3318,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                             tmp -= sig6_over_delta3;
                             tmp *= eps;
                             tmp *= epsa[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -3339,7 +3338,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                         // if i == j then we double-calculate the energies, so must
                         // scale them by 0.5
                         const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                    
+
                         //calculate the distance between the fixed and mobile atoms
                         tmp = xa[j] - x;
                         r2 = tmp * tmp;
@@ -3353,7 +3352,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                         sigma *= half;
 
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -3361,7 +3360,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= epsa[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -3372,7 +3371,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -3400,7 +3399,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
 
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj2(lj_cutoff*lj_cutoff);
-    
+
     const float soft_coul_cutoff = std::sqrt(alpha() + coul_cutoff*coul_cutoff);
 
     const MultiFloat soft_Rc(soft_coul_cutoff);
@@ -3431,7 +3430,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
             if (id0[i][ii] != dummy_int)
             {
                 const MultiInt id(id0[i][ii]);
-            
+
                 if (q0[i][ii] != 0)
                 {
                     const MultiFloat x(x0[i][ii]);
@@ -3456,14 +3455,14 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3473,7 +3472,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
                         }
                     }
@@ -3496,14 +3495,14 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3513,9 +3512,9 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
-                            
+
                             //now the LJ energy
 
                             //arithmetic combining rules
@@ -3523,7 +3522,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             sigma *= half;
 
                             delta_sigma_r2 = delta * sigma + r2;
-                            
+
                             sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                             sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -3531,7 +3530,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             tmp -= sig6_over_delta3;
                             tmp *= eps;
                             tmp *= eps1[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -3562,7 +3561,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                         //arithmetic combining rules
                         sigma = sig + (sig1[j]*sig1[j]);
                         sigma *= half;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -3570,7 +3569,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -3581,7 +3580,7 @@ void CLJSoftRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -3627,13 +3626,13 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -3644,11 +3643,11 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                 const MultiFloat x( xa[i][ii] );
                 const MultiFloat y( ya[i][ii] );
                 const MultiFloat z( za[i][ii] );
-                
+
                 if (qa[i][ii] != 0)
                 {
                     const MultiFloat q( qa[i][ii] );
-                    
+
                     if (epsa[i][ii] == 0)
                     {
                         //coulomb calculation only
@@ -3657,7 +3656,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance^2
                             tmp = xa[j] - x;
                             tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -3673,19 +3672,19 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                             tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                             tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                             r2.multiplyAdd(tmp, tmp);
-                            
+
                             soft_r2 = r2 + alfa;
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3695,7 +3694,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
                         }
                     }
@@ -3710,7 +3709,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                             // if i == j then we double-calculate the energies, so must
                             // scale them by 0.5
                             const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                        
+
                             //calculate the distance^2
                             tmp = xa[j] - x;
                             tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -3726,19 +3725,19 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                             tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                             tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                             r2.multiplyAdd(tmp, tmp);
-                            
+
                             soft_r2 = r2 + alfa;
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * qa[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3748,7 +3747,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                             //also not the same as the atoms0.
                             itmp = ida[j].compareEqual(dummy_id);
                             itmp |= ida[j].compareEqual(id);
-                            
+
                             icnrg += scale * tmp.logicalAndNot(itmp);
 
                             //now the LJ energy
@@ -3758,7 +3757,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                             sigma *= half;
 
                             delta_sigma_r2 = delta * sigma + r2;
-                            
+
                             sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                             sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -3766,7 +3765,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                             tmp -= sig6_over_delta3;
                             tmp *= eps;
                             tmp *= epsa[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -3786,7 +3785,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                         // if i == j then we double-calculate the energies, so must
                         // scale them by 0.5
                         const MultiFloat scale( i == j ? 0.5 : 1.0 );
-                    
+
                         //calculate the distance^2
                         tmp = xa[j] - x;
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -3808,7 +3807,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                         sigma *= half;
 
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -3816,7 +3815,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= epsa[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -3827,7 +3826,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -3857,7 +3856,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
 
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj2(lj_cutoff*lj_cutoff);
-    
+
     const float soft_coul_cutoff = std::sqrt(alpha() + coul_cutoff*coul_cutoff);
 
     const MultiFloat soft_Rc(soft_coul_cutoff);
@@ -3881,7 +3880,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
@@ -3896,7 +3895,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
             if (id0[i][ii] != dummy_int)
             {
                 const MultiInt id(id0[i][ii]);
-            
+
                 if (q0[i][ii] != 0)
                 {
                     const MultiFloat x(x0[i][ii]);
@@ -3929,14 +3928,14 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3946,7 +3945,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
                         }
                     }
@@ -3977,14 +3976,14 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             soft_r = soft_r2.sqrt();
 
                             one_over_soft_r = soft_r.reciprocal();
-                    
+
                             // calculate the coulomb energy using
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
                             tmp = one_over_soft_r + k_rf * soft_r2 - c_rf;
                             tmp *= one_minus_alpha_to_n * q * q1[j];
-                        
+
                             //apply the cutoff - compare r against Rc. This will
                             //return 1 if r is less than Rc, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rc
@@ -3994,9 +3993,9 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             //also not the same as the atoms0.
                             itmp = id1[j].compareEqual(dummy_id);
                             itmp |= id1[j].compareEqual(id);
-                            
+
                             icnrg += tmp.logicalAndNot(itmp);
-                            
+
                             //now the LJ energy
 
                             //arithmetic combining rules
@@ -4004,7 +4003,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             sigma *= half;
 
                             delta_sigma_r2 = delta * sigma + r2;
-                            
+
                             sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                             sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -4012,7 +4011,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                             tmp -= sig6_over_delta3;
                             tmp *= eps;
                             tmp *= eps1[j];
-                        
+
                             //apply the cutoff - compare r against Rlj. This will
                             //return 1 if r is less than Rlj, or 0 otherwise. Logical
                             //and will then remove all energies where r >= Rlj
@@ -4053,7 +4052,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                         sigma *= half;
 
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -4061,7 +4060,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -4072,7 +4071,7 @@ void CLJSoftRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms 
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -4086,23 +4085,23 @@ static const RegisterMetaType<CLJIntraRFFunction> r_intra;
 QDataStream &operator<<(QDataStream &ds, const CLJIntraRFFunction &intra)
 {
     writeHeader(ds, r_intra, 1);
-    
+
     ds << intra.diel << static_cast<const CLJIntraFunction&>(intra);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, CLJIntraRFFunction &intra)
 {
     VersionID v = readHeader(ds, r_intra);
-    
+
     if (v == 1)
     {
         ds >> intra.diel >> static_cast<CLJIntraFunction&>(intra);
     }
     else
         throw version_error(v, "1", r_intra, CODELOC);
-    
+
     return ds;
 }
 
@@ -4305,7 +4304,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -4327,15 +4326,15 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //get the bond mask to screen out bonded interactions
                     for (int k=0; k<MultiFloat::count(); ++k)
                     {
                         bond_mask.quickSet(k, row[ida[j][k]] ? 0.0 : 1.0);
                     }
-                
+
                     scale *= bond_mask;
-                
+
                     //calculate the distance between the fixed and mobile atoms
                     tmp = xa[j] - x;
                     r2 = tmp * tmp;
@@ -4346,14 +4345,14 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * qa[j];
-                
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -4377,7 +4376,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= epsa[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -4387,7 +4386,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -4414,7 +4413,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
     const MultiFloat *sig1 = atoms1.sigma().constData();
     const MultiFloat *eps1 = atoms1.epsilon().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj(lj_cutoff);
 
@@ -4432,14 +4431,14 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
 
     const int n0 = atoms0.x().count();
     const int n1 = atoms1.x().count();
-    
+
     bool not_bonded = true;
-    
+
     if (min_distance < 5.5)
     {
         not_bonded = isNotBonded(atoms0.ID(), atoms1.ID());
     }
-    
+
     if ( Q_LIKELY(not_bonded) )
     {
         for (int i=0; i<n0; ++i)
@@ -4469,14 +4468,14 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         r = r2.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         // calculate the coulomb energy using
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
                         tmp = one_over_r + k_rf * r2 - c_rf;
                         tmp *= q * q1[j];
-                    
+
                         //apply the cutoff - compare r against Rc. This will
                         //return 1 if r is less than Rc, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rc
@@ -4486,7 +4485,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         itmp = id1[j].compareEqual(dummy_id);
 
                         icnrg += tmp.logicalAndNot(itmp);
-                        
+
                         //Now do the LJ energy
 
                         sig2_over_r2 = sig * sig1[j] * one_over_r;
@@ -4498,7 +4497,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -4512,7 +4511,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
     else
     {
         MultiFloat bonded_mask(0);
-    
+
         for (int i=0; i<n0; ++i)
         {
             for (int ii=0; ii<MultiFloat::count(); ++ii)
@@ -4548,14 +4547,14 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         r = r2.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         // calculate the coulomb energy using
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
                         tmp = one_over_r + k_rf * r2 - c_rf;
                         tmp *= q * q1[j];
-                    
+
                         //apply the cutoff - compare r against Rc. This will
                         //return 1 if r is less than Rc, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rc
@@ -4565,7 +4564,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         itmp = id1[j].compareEqual(dummy_id);
 
                         icnrg += bonded_mask * tmp.logicalAndNot(itmp);
-                        
+
                         //Now do the LJ energy
                         sig2_over_r2 = sig * sig1[j] * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
@@ -4576,7 +4575,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -4587,7 +4586,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -4627,13 +4626,13 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &b
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -4655,15 +4654,15 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &b
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //get the bond mask to screen out bonded interactions
                     for (int k=0; k<MultiFloat::count(); ++k)
                     {
                         bond_mask.quickSet(k, row[ida[j][k]] ? 0.0 : 1.0);
                     }
-                
+
                     scale *= bond_mask;
-                
+
                     //calculate the distance between the fixed and mobile atoms
                     tmp = xa[j] - x;
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -4683,14 +4682,14 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &b
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * qa[j];
-                
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -4714,7 +4713,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &b
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= epsa[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -4724,7 +4723,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &b
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -4753,7 +4752,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
     const MultiFloat *sig1 = atoms1.sigma().constData();
     const MultiFloat *eps1 = atoms1.epsilon().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj(lj_cutoff);
 
@@ -4772,21 +4771,21 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     const int n0 = atoms0.x().count();
     const int n1 = atoms1.x().count();
-    
+
     bool not_bonded = true;
-    
+
     if (min_distance < 5.5)
     {
         not_bonded = isNotBonded(atoms0.ID(), atoms1.ID());
     }
-    
+
     if ( Q_LIKELY(not_bonded) )
     {
         for (int i=0; i<n0; ++i)
@@ -4821,18 +4820,18 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                         tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         r = r2.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         // calculate the coulomb energy using
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
                         tmp = one_over_r + k_rf * r2 - c_rf;
                         tmp *= q * q1[j];
-                    
+
                         //apply the cutoff - compare r against Rc. This will
                         //return 1 if r is less than Rc, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rc
@@ -4842,7 +4841,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         itmp = id1[j].compareEqual(dummy_id);
 
                         icnrg += tmp.logicalAndNot(itmp);
-                        
+
                         //Now do the LJ energy
                         sig2_over_r2 = sig * sig1[j] * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
@@ -4853,7 +4852,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -4867,7 +4866,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
     else
     {
         MultiFloat bonded_mask(0);
-    
+
         for (int i=0; i<n0; ++i)
         {
             for (int ii=0; ii<MultiFloat::count(); ++ii)
@@ -4908,18 +4907,18 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                         tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         r = r2.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         // calculate the coulomb energy using
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
                         tmp = one_over_r + k_rf * r2 - c_rf;
                         tmp *= q * q1[j];
-                    
+
                         //apply the cutoff - compare r against Rc. This will
                         //return 1 if r is less than Rc, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rc
@@ -4929,7 +4928,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         itmp = id1[j].compareEqual(dummy_id);
 
                         icnrg += bonded_mask * tmp.logicalAndNot(itmp);
-                        
+
                         //Now do the LJ energy
                         sig2_over_r2 = sig * sig1[j] * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
@@ -4940,7 +4939,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -4951,7 +4950,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -4988,7 +4987,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -5010,15 +5009,15 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //get the bond mask to screen out bonded interactions
                     for (int k=0; k<MultiFloat::count(); ++k)
                     {
                         bond_mask.quickSet(k, row[ida[j][k]] ? 0.0 : 1.0);
                     }
-                
+
                     scale *= bond_mask;
-                
+
                     //calculate the distance between the fixed and mobile atoms
                     tmp = xa[j] - x;
                     r2 = tmp * tmp;
@@ -5029,14 +5028,14 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * qa[j];
-                
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -5053,7 +5052,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                     //now the LJ energy
                     tmp = sig + (siga[j]*siga[j]);
                     tmp *= half;
-                
+
                     sig2_over_r2 = tmp * one_over_r;
                     sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                     sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -5063,7 +5062,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= epsa[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -5073,7 +5072,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -5100,7 +5099,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
     const MultiFloat *sig1 = atoms1.sigma().constData();
     const MultiFloat *eps1 = atoms1.epsilon().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj(lj_cutoff);
 
@@ -5118,14 +5117,14 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
 
     const int n0 = atoms0.x().count();
     const int n1 = atoms1.x().count();
-    
+
     bool not_bonded = true;
-    
+
     if (min_distance < 5.5)
     {
         not_bonded = isNotBonded(atoms0.ID(), atoms1.ID());
     }
-    
+
     if ( Q_LIKELY(not_bonded) )
     {
         for (int i=0; i<n0; ++i)
@@ -5155,14 +5154,14 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         r = r2.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         // calculate the coulomb energy using
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
                         tmp = one_over_r + k_rf * r2 - c_rf;
                         tmp *= q * q1[j];
-                    
+
                         //apply the cutoff - compare r against Rc. This will
                         //return 1 if r is less than Rc, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rc
@@ -5172,13 +5171,13 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         itmp = id1[j].compareEqual(dummy_id);
 
                         icnrg += tmp.logicalAndNot(itmp);
-                        
+
                         //Now do the LJ energy
 
                         //arithmetic combining rules
                         tmp = sig + (sig1[j]*sig1[j]);
                         tmp *= half;
-                    
+
                         sig2_over_r2 = tmp * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                         sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -5188,7 +5187,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -5202,7 +5201,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
     else
     {
         MultiFloat bonded_mask(0);
-    
+
         for (int i=0; i<n0; ++i)
         {
             for (int ii=0; ii<MultiFloat::count(); ++ii)
@@ -5238,14 +5237,14 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         r = r2.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         // calculate the coulomb energy using
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
                         tmp = one_over_r + k_rf * r2 - c_rf;
                         tmp *= q * q1[j];
-                    
+
                         //apply the cutoff - compare r against Rc. This will
                         //return 1 if r is less than Rc, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rc
@@ -5255,13 +5254,13 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         itmp = id1[j].compareEqual(dummy_id);
 
                         icnrg += bonded_mask * tmp.logicalAndNot(itmp);
-                        
+
                         //Now do the LJ energy
 
                         //arithmetic combining rules
                         tmp = sig + (sig1[j]*sig1[j]);
                         tmp *= half;
-                    
+
                         sig2_over_r2 = tmp * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                         sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -5271,7 +5270,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -5282,7 +5281,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -5322,13 +5321,13 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &b
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -5350,15 +5349,15 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &b
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //get the bond mask to screen out bonded interactions
                     for (int k=0; k<MultiFloat::count(); ++k)
                     {
                         bond_mask.quickSet(k, row[ida[j][k]] ? 0.0 : 1.0);
                     }
-                
+
                     scale *= bond_mask;
-                
+
                     //calculate the distance between the fixed and mobile atoms
                     tmp = xa[j] - x;
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -5378,14 +5377,14 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &b
                     r = r2.sqrt();
 
                     one_over_r = r.reciprocal();
-            
+
                     // calculate the coulomb energy using
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
                     tmp = one_over_r + k_rf * r2 - c_rf;
                     tmp *= q * qa[j];
-                
+
                     //apply the cutoff - compare r against Rc. This will
                     //return 1 if r is less than Rc, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rc
@@ -5402,7 +5401,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &b
                     //now the LJ energy
                     tmp = sig + (siga[j]*siga[j]);
                     tmp *= half;
-                
+
                     sig2_over_r2 = tmp * one_over_r;
                     sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                     sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -5412,7 +5411,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &b
                     tmp -= sig6_over_r6;
                     tmp *= eps;
                     tmp *= epsa[j];
-                
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -5422,7 +5421,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &b
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -5451,7 +5450,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
     const MultiFloat *sig1 = atoms1.sigma().constData();
     const MultiFloat *eps1 = atoms1.epsilon().constData();
     const MultiInt *id1 = atoms1.ID().constData();
-    
+
     const MultiFloat Rc(coul_cutoff);
     const MultiFloat Rlj(lj_cutoff);
 
@@ -5470,21 +5469,21 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     const int n0 = atoms0.x().count();
     const int n1 = atoms1.x().count();
-    
+
     bool not_bonded = true;
-    
+
     if (min_distance < 5.5)
     {
         not_bonded = isNotBonded(atoms0.ID(), atoms1.ID());
     }
-    
+
     if ( Q_LIKELY(not_bonded) )
     {
         for (int i=0; i<n0; ++i)
@@ -5519,18 +5518,18 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                         tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         r = r2.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         // calculate the coulomb energy using
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
                         tmp = one_over_r + k_rf * r2 - c_rf;
                         tmp *= q * q1[j];
-                    
+
                         //apply the cutoff - compare r against Rc. This will
                         //return 1 if r is less than Rc, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rc
@@ -5540,13 +5539,13 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         itmp = id1[j].compareEqual(dummy_id);
 
                         icnrg += tmp.logicalAndNot(itmp);
-                        
+
                         //Now do the LJ energy
 
                         //arithmetic combining rules
                         tmp = sig + (sig1[j]*sig1[j]);
                         tmp *= half;
-                    
+
                         sig2_over_r2 = tmp * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                         sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -5556,7 +5555,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -5570,7 +5569,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
     else
     {
         MultiFloat bonded_mask(0);
-    
+
         for (int i=0; i<n0; ++i)
         {
             for (int ii=0; ii<MultiFloat::count(); ++ii)
@@ -5611,18 +5610,18 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                         tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         r = r2.sqrt();
 
                         one_over_r = r.reciprocal();
-                
+
                         // calculate the coulomb energy using
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
                         tmp = one_over_r + k_rf * r2 - c_rf;
                         tmp *= q * q1[j];
-                    
+
                         //apply the cutoff - compare r against Rc. This will
                         //return 1 if r is less than Rc, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rc
@@ -5632,13 +5631,13 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         itmp = id1[j].compareEqual(dummy_id);
 
                         icnrg += bonded_mask * tmp.logicalAndNot(itmp);
-                        
+
                         //Now do the LJ energy
 
                         //arithmetic combining rules
                         tmp = sig + (sig1[j]*sig1[j]);
                         tmp *= half;
-                    
+
                         sig2_over_r2 = tmp * one_over_r;
                         sig2_over_r2 = sig2_over_r2*sig2_over_r2;
                         sig6_over_r6 = sig2_over_r2*sig2_over_r2;
@@ -5648,7 +5647,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         tmp -= sig6_over_r6;
                         tmp *= eps;
                         tmp *= eps1[j];
-                    
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -5659,7 +5658,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -5673,23 +5672,23 @@ static const RegisterMetaType<CLJSoftIntraRFFunction> r_softintra;
 QDataStream &operator<<(QDataStream &ds, const CLJSoftIntraRFFunction &intra)
 {
     writeHeader(ds, r_softintra, 1);
-    
+
     ds << intra.diel << static_cast<const CLJSoftIntraFunction&>(intra);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, CLJSoftIntraRFFunction &intra)
 {
     VersionID v = readHeader(ds, r_softintra);
-    
+
     if (v == 1)
     {
         ds >> intra.diel >> static_cast<CLJSoftIntraFunction&>(intra);
     }
     else
         throw version_error(v, "1", r_softintra, CODELOC);
-    
+
     return ds;
 }
 
@@ -5895,7 +5894,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
     const MultiFloat one_minus_alpha_to_n( this->oneMinusAlphaToN() );
     const MultiFloat delta( this->alphaTimesShiftDelta() );
     const MultiFloat alfa( this->alpha() );
-    
+
     MultiFloat tmp, r2, soft_r, soft_r2, one_over_soft_r, sigma, delta_sigma_r2;
     MultiFloat sig2_over_delta, sig6_over_delta3;
     MultiFloat bond_mask;
@@ -5903,7 +5902,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -5925,15 +5924,15 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //get the bond mask to screen out bonded interactions
                     for (int k=0; k<MultiFloat::count(); ++k)
                     {
                         bond_mask.quickSet(k, row[ida[j][k]] ? 0.0 : 1.0);
                     }
-                
+
                     scale *= bond_mask;
-                
+
                     //calculate the distance^2 between the fixed and mobile atoms
                     tmp = xa[j] - x;
                     r2 = tmp * tmp;
@@ -5941,7 +5940,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                     r2.multiplyAdd(tmp, tmp);
                     tmp = za[j] - z;
                     r2.multiplyAdd(tmp, tmp);
-                    
+
                     soft_r2 = r2 + alfa;
                     soft_r = soft_r2.sqrt();
 
@@ -5970,7 +5969,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                     //now the LJ energy
                     sigma = sig * siga[j];
                     delta_sigma_r2 = delta * sigma + r2;
-                    
+
                     sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                     sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -5978,7 +5977,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
                     tmp -= sig6_over_delta3;
                     tmp *= eps;
                     tmp *= epsa[j];
-                    
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -5988,7 +5987,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -6034,7 +6033,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
     const MultiFloat one_minus_alpha_to_n( this->oneMinusAlphaToN() );
     const MultiFloat delta( this->alphaTimesShiftDelta() );
     const MultiFloat alfa( this->alpha() );
-    
+
     MultiFloat tmp, r2, soft_r, soft_r2, one_over_soft_r, sigma, delta_sigma_r2;
     MultiFloat sig2_over_delta, sig6_over_delta3;
     MultiFloat bond_mask;
@@ -6043,14 +6042,14 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
 
     const int n0 = atoms0.x().count();
     const int n1 = atoms1.x().count();
-    
+
     bool not_bonded = true;
-    
+
     if (min_distance < 5.5)
     {
         not_bonded = isNotBonded(atoms0.ID(), atoms1.ID());
     }
-    
+
     if ( Q_LIKELY(not_bonded) )
     {
         for (int i=0; i<n0; ++i)
@@ -6077,7 +6076,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         r2.multiplyAdd(tmp, tmp);
                         tmp = z1[j] - z;
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         soft_r2 = r2 + alfa;
                         soft_r = soft_r2.sqrt();
 
@@ -6106,7 +6105,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         //now the LJ energy
                         sigma = sig * sig1[j];
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -6114,7 +6113,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                        
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -6128,7 +6127,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
     else
     {
         MultiFloat bonded_mask(0);
-    
+
         for (int i=0; i<n0; ++i)
         {
             for (int ii=0; ii<MultiFloat::count(); ++ii)
@@ -6161,7 +6160,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         r2.multiplyAdd(tmp, tmp);
                         tmp = z1[j] - z;
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         soft_r2 = r2 + alfa;
                         soft_r = soft_r2.sqrt();
 
@@ -6190,7 +6189,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         //now the LJ energy
                         sigma = sig * sig1[j];
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -6198,7 +6197,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                        
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -6209,7 +6208,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJA
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -6248,7 +6247,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms,
     const MultiFloat one_minus_alpha_to_n( this->oneMinusAlphaToN() );
     const MultiFloat delta( this->alphaTimesShiftDelta() );
     const MultiFloat alfa( this->alpha() );
-    
+
     MultiFloat tmp, r2, soft_r, soft_r2, one_over_soft_r, sigma, delta_sigma_r2;
     MultiFloat sig2_over_delta, sig6_over_delta3;
     MultiFloat bond_mask;
@@ -6258,13 +6257,13 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms,
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -6286,15 +6285,15 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms,
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //get the bond mask to screen out bonded interactions
                     for (int k=0; k<MultiFloat::count(); ++k)
                     {
                         bond_mask.quickSet(k, row[ida[j][k]] ? 0.0 : 1.0);
                     }
-                
+
                     scale *= bond_mask;
-                
+
                     //calculate the distance^2
                     tmp = xa[j] - x;
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -6310,7 +6309,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms,
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                     tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                     r2.multiplyAdd(tmp, tmp);
-                    
+
                     soft_r2 = r2 + alfa;
                     soft_r = soft_r2.sqrt();
 
@@ -6339,7 +6338,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms,
                     //now the LJ energy
                     sigma = sig * siga[j];
                     delta_sigma_r2 = delta * sigma + r2;
-                    
+
                     sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                     sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -6347,7 +6346,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms,
                     tmp -= sig6_over_delta3;
                     tmp *= eps;
                     tmp *= epsa[j];
-                    
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -6357,7 +6356,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -6405,7 +6404,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
     const MultiFloat one_minus_alpha_to_n( this->oneMinusAlphaToN() );
     const MultiFloat delta( this->alphaTimesShiftDelta() );
     const MultiFloat alfa( this->alpha() );
-    
+
     MultiFloat tmp, r2, soft_r, soft_r2, one_over_soft_r, sigma, delta_sigma_r2;
     MultiFloat sig2_over_delta, sig6_over_delta3;
     MultiFloat bond_mask;
@@ -6415,21 +6414,21 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     const int n0 = atoms0.x().count();
     const int n1 = atoms1.x().count();
-    
+
     bool not_bonded = true;
-    
+
     if (min_distance < 5.5)
     {
         not_bonded = isNotBonded(atoms0.ID(), atoms1.ID());
     }
-    
+
     if ( Q_LIKELY(not_bonded) )
     {
         for (int i=0; i<n0; ++i)
@@ -6464,7 +6463,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                         tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         soft_r2 = r2 + alfa;
                         soft_r = soft_r2.sqrt();
 
@@ -6493,7 +6492,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         //now the LJ energy
                         sigma = sig * sig1[j];
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -6501,7 +6500,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                        
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -6515,7 +6514,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
     else
     {
         MultiFloat bonded_mask(0);
-    
+
         for (int i=0; i<n0; ++i)
         {
             for (int ii=0; ii<MultiFloat::count(); ++ii)
@@ -6556,7 +6555,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                         tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         soft_r2 = r2 + alfa;
                         soft_r = soft_r2.sqrt();
 
@@ -6585,7 +6584,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         //now the LJ energy
                         sigma = sig * sig1[j];
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -6593,7 +6592,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                        
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -6604,7 +6603,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJA
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -6642,7 +6641,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
     const MultiFloat one_minus_alpha_to_n( this->oneMinusAlphaToN() );
     const MultiFloat delta( this->alphaTimesShiftDelta() );
     const MultiFloat alfa( this->alpha() );
-    
+
     MultiFloat tmp, r2, soft_r, soft_r2, one_over_soft_r, sigma, delta_sigma_r2;
     MultiFloat sig2_over_delta, sig6_over_delta3;
     MultiFloat bond_mask;
@@ -6650,7 +6649,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
     MultiInt itmp;
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -6672,15 +6671,15 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //get the bond mask to screen out bonded interactions
                     for (int k=0; k<MultiFloat::count(); ++k)
                     {
                         bond_mask.quickSet(k, row[ida[j][k]] ? 0.0 : 1.0);
                     }
-                
+
                     scale *= bond_mask;
-                
+
                     //calculate the distance^2 between the fixed and mobile atoms
                     tmp = xa[j] - x;
                     r2 = tmp * tmp;
@@ -6688,7 +6687,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                     r2.multiplyAdd(tmp, tmp);
                     tmp = za[j] - z;
                     r2.multiplyAdd(tmp, tmp);
-                    
+
                     soft_r2 = r2 + alfa;
                     soft_r = soft_r2.sqrt();
 
@@ -6717,7 +6716,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                     //now the LJ energy
                     sigma = half * (sig + (siga[j]*siga[j]));
                     delta_sigma_r2 = delta * sigma + r2;
-                    
+
                     sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                     sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -6725,7 +6724,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
                     tmp -= sig6_over_delta3;
                     tmp *= eps;
                     tmp *= epsa[j];
-                    
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -6735,7 +6734,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -6781,7 +6780,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
     const MultiFloat one_minus_alpha_to_n( this->oneMinusAlphaToN() );
     const MultiFloat delta( this->alphaTimesShiftDelta() );
     const MultiFloat alfa( this->alpha() );
-    
+
     MultiFloat tmp, r2, soft_r, soft_r2, one_over_soft_r, sigma, delta_sigma_r2;
     MultiFloat sig2_over_delta, sig6_over_delta3;
     MultiFloat bond_mask;
@@ -6790,14 +6789,14 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
 
     const int n0 = atoms0.x().count();
     const int n1 = atoms1.x().count();
-    
+
     bool not_bonded = true;
-    
+
     if (min_distance < 5.5)
     {
         not_bonded = isNotBonded(atoms0.ID(), atoms1.ID());
     }
-    
+
     if ( Q_LIKELY(not_bonded) )
     {
         for (int i=0; i<n0; ++i)
@@ -6824,7 +6823,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
                         r2.multiplyAdd(tmp, tmp);
                         tmp = z1[j] - z;
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         soft_r2 = r2 + alfa;
                         soft_r = soft_r2.sqrt();
 
@@ -6853,7 +6852,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
                         //now the LJ energy
                         sigma = half * (sig + (sig1[j]*sig1[j]));
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -6861,7 +6860,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                        
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -6875,7 +6874,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
     else
     {
         MultiFloat bonded_mask(0);
-    
+
         for (int i=0; i<n0; ++i)
         {
             for (int ii=0; ii<MultiFloat::count(); ++ii)
@@ -6908,7 +6907,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
                         r2.multiplyAdd(tmp, tmp);
                         tmp = z1[j] - z;
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         soft_r2 = r2 + alfa;
                         soft_r = soft_r2.sqrt();
 
@@ -6937,7 +6936,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
                         //now the LJ energy
                         sigma = half * (sig + (sig1[j]*sig1[j]));
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -6945,7 +6944,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                        
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -6956,7 +6955,7 @@ void CLJSoftIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJA
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -6995,7 +6994,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
     const MultiFloat one_minus_alpha_to_n( this->oneMinusAlphaToN() );
     const MultiFloat delta( this->alphaTimesShiftDelta() );
     const MultiFloat alfa( this->alpha() );
-    
+
     MultiFloat tmp, r2, soft_r, soft_r2, one_over_soft_r, sigma, delta_sigma_r2;
     MultiFloat sig2_over_delta, sig6_over_delta3;
     MultiFloat bond_mask;
@@ -7005,13 +7004,13 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     int n = atoms.x().count();
-    
+
     for (int i=0; i<n; ++i)
     {
         for (int ii=0; ii<MultiFloat::size(); ++ii)
@@ -7033,15 +7032,15 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                     // if i == j then we double-calculate the energies, so must
                     // scale them by 0.5
                     MultiFloat scale( i == j ? 0.5 : 1.0 );
-                
+
                     //get the bond mask to screen out bonded interactions
                     for (int k=0; k<MultiFloat::count(); ++k)
                     {
                         bond_mask.quickSet(k, row[ida[j][k]] ? 0.0 : 1.0);
                     }
-                
+
                     scale *= bond_mask;
-                
+
                     //calculate the distance^2
                     tmp = xa[j] - x;
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
@@ -7057,7 +7056,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                     tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                     tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                     r2.multiplyAdd(tmp, tmp);
-                    
+
                     soft_r2 = r2 + alfa;
                     soft_r = soft_r2.sqrt();
 
@@ -7086,7 +7085,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                     //now the LJ energy
                     sigma = half * (sig + (siga[j]*siga[j]));
                     delta_sigma_r2 = delta * sigma + r2;
-                    
+
                     sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                     sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -7094,7 +7093,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
                     tmp -= sig6_over_delta3;
                     tmp *= eps;
                     tmp *= epsa[j];
-                    
+
                     //apply the cutoff - compare r against Rlj. This will
                     //return 1 if r is less than Rlj, or 0 otherwise. Logical
                     //and will then remove all energies where r >= Rlj
@@ -7104,7 +7103,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms,
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }
@@ -7152,7 +7151,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
     const MultiFloat one_minus_alpha_to_n( this->oneMinusAlphaToN() );
     const MultiFloat delta( this->alphaTimesShiftDelta() );
     const MultiFloat alfa( this->alpha() );
-    
+
     MultiFloat tmp, r2, soft_r, soft_r2, one_over_soft_r, sigma, delta_sigma_r2;
     MultiFloat sig2_over_delta, sig6_over_delta3;
     MultiFloat bond_mask;
@@ -7162,21 +7161,21 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
     const MultiFloat box_x( box_dimensions.x() );
     const MultiFloat box_y( box_dimensions.y() );
     const MultiFloat box_z( box_dimensions.z() );
-    
+
     const MultiFloat half_box_x( 0.5 * box_dimensions.x() );
     const MultiFloat half_box_y( 0.5 * box_dimensions.y() );
     const MultiFloat half_box_z( 0.5 * box_dimensions.z() );
 
     const int n0 = atoms0.x().count();
     const int n1 = atoms1.x().count();
-    
+
     bool not_bonded = true;
-    
+
     if (min_distance < 5.5)
     {
         not_bonded = isNotBonded(atoms0.ID(), atoms1.ID());
     }
-    
+
     if ( Q_LIKELY(not_bonded) )
     {
         for (int i=0; i<n0; ++i)
@@ -7211,7 +7210,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                         tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         soft_r2 = r2 + alfa;
                         soft_r = soft_r2.sqrt();
 
@@ -7240,7 +7239,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
                         //now the LJ energy
                         sigma = half * (sig + (sig1[j]*sig1[j]));
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -7248,7 +7247,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                        
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -7262,7 +7261,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
     else
     {
         MultiFloat bonded_mask(0);
-    
+
         for (int i=0; i<n0; ++i)
         {
             for (int ii=0; ii<MultiFloat::count(); ++ii)
@@ -7303,7 +7302,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
                         tmp &= MULTIFLOAT_POS_MASK;  // this creates the absolute value :-)
                         tmp -= box_z.logicalAnd( half_box_z.compareLess(tmp) );
                         r2.multiplyAdd(tmp, tmp);
-                        
+
                         soft_r2 = r2 + alfa;
                         soft_r = soft_r2.sqrt();
 
@@ -7332,7 +7331,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
                         //now the LJ energy
                         sigma = half * (sig + (sig1[j]*sig1[j]));
                         delta_sigma_r2 = delta * sigma + r2;
-                        
+
                         sig2_over_delta = (sigma*sigma) / delta_sigma_r2;
                         sig6_over_delta3 = sig2_over_delta * sig2_over_delta * sig2_over_delta;
 
@@ -7340,7 +7339,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
                         tmp -= sig6_over_delta3;
                         tmp *= eps;
                         tmp *= eps1[j];
-                        
+
                         //apply the cutoff - compare r against Rlj. This will
                         //return 1 if r is less than Rlj, or 0 otherwise. Logical
                         //and will then remove all energies where r >= Rlj
@@ -7351,7 +7350,7 @@ void CLJSoftIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJA
             }
         }
     }
-    
+
     cnrg = icnrg.sum();
     ljnrg = iljnrg.sum();
 }

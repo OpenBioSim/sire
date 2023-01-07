@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -82,20 +81,20 @@ friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, P_GTO&);
 public:
     P_GTO();
     P_GTO(double alpha, double scale=1);
-    
+
     P_GTO(const P_GTO &other);
-    
+
     ~P_GTO();
-    
+
     static const char* typeName();
-    
+
     P_GTO& operator=(const P_GTO &other);
-    
+
     bool operator==(const P_GTO &other) const;
     bool operator!=(const P_GTO &other) const;
-    
+
     QString toString() const;
-    
+
     int angularMomentum() const;
     int nOrbitals() const;
 };
@@ -113,21 +112,21 @@ public:
            const Vector &B, const P_GTO &b);
     PS_GTO(const Vector &A, const P_GTO &a,
            const Vector &B, const S_GTO &b);
-           
+
     PS_GTO(const PS_GTO &other);
-    
+
     ~PS_GTO();
-    
+
     static const char* typeName();
-    
+
     PS_GTO& operator=(const PS_GTO &other);
-    
+
     bool operator==(const PS_GTO &other) const;
     bool operator!=(const PS_GTO &other) const;
-    
+
     const Vector& P_minus_A() const;
     const Vector& P_minus_B() const;
-    
+
     const Vector& Q_minus_C() const;
     const Vector& Q_minus_D() const;
 
@@ -135,7 +134,7 @@ public:
 
     int angularMomentum0() const;
     int angularMomentum1() const;
-    
+
     int nOrbitals0() const;
     int nOrbitals1() const;
 
@@ -143,7 +142,7 @@ private:
     /** The vector from the center of the P-orbital to
         the 'center of mass' of the shell-pair */
     Vector p_minus_a;
-    
+
     /** The extra factor for the scaling constant */
     double norm_scl;
 };
@@ -159,15 +158,15 @@ public:
     PP_GTO();
     PP_GTO(const Vector &A, const P_GTO &a,
            const Vector &B, const P_GTO &b);
-           
+
     PP_GTO(const PP_GTO &other);
-    
+
     ~PP_GTO();
-    
+
     static const char* typeName();
-    
+
     PP_GTO& operator=(const PP_GTO &other);
-    
+
     bool operator==(const PP_GTO &other) const;
     bool operator!=(const PP_GTO &other) const;
 
@@ -181,26 +180,26 @@ public:
 
     int angularMomentum0() const;
     int angularMomentum1() const;
-    
+
     int nOrbitals0() const;
     int nOrbitals1() const;
 
 private:
-    /** The vector from the center of the first P orbital to the 
+    /** The vector from the center of the first P orbital to the
         center of mass of the gaussian */
     Vector p_minus_a;
-    
+
     /** The vector from the center of the second P orbital to the
         center of mass of the gaussian */
     Vector p_minus_b;
-    
+
     /** The extra factor for the scaling constant */
     double norm_scl;
 };
 
 /** This class is used to calculate integrals involving PS orbital
     pairs
-    
+
     @author Christopher Woods
 */
 class SQUIRE_EXPORT PS_GTOs
@@ -217,19 +216,19 @@ public:
             const QVector<Vector> &p_centers,
             const QVector<S_GTO> &s_gtos,
             const QVector<Vector> &s_centers);
-            
+
     PS_GTOs(const PS_GTOs &other);
-    
+
     ~PS_GTOs();
-    
+
     PS_GTOs& operator=(const PS_GTOs &other);
-    
+
     bool operator==(const PS_GTOs &other) const;
     bool operator!=(const PS_GTOs &other) const;
-    
+
     NMatrix overlap_integral() const;
     NMatrix kinetic_integral() const;
-    
+
     NMatrix potential_integral(const QVector<PointCharge> &C) const;
     NMatrix potential_integral(const QVector<PointCharge> &C, int m) const;
 
@@ -251,19 +250,19 @@ public:
 
     PP_GTOs(const QVector<P_GTO> &p_gtos,
             const QVector<Vector> &p_centers);
-            
+
     PP_GTOs(const PP_GTOs &other);
-    
+
     ~PP_GTOs();
-    
+
     PP_GTOs& operator=(const PP_GTOs &other);
-    
+
     bool operator==(const PP_GTOs &other) const;
     bool operator!=(const PP_GTOs &other) const;
-    
+
     TrigMatrix overlap_integral() const;
     TrigMatrix kinetic_integral() const;
-    
+
     TrigMatrix potential_integral(const QVector<PointCharge> &C) const;
     TrigMatrix potential_integral(const QVector<PointCharge> &C, int m) const;
 
@@ -357,13 +356,13 @@ SQUIRE_EXPORT SireBase::Array2D<Vector> electron_integral(const PS_GTO &P, const
 
 SQUIRE_EXPORT void electron_integral(const PP_GTO &P, const PS_GTO &Q,
                        SireBase::Array2D<Vector> &matrix);
-                       
+
 SQUIRE_EXPORT void electron_integral(const PS_GTO &P, const PP_GTO &Q,
                        SireBase::Array2D<Vector> &matrix);
 
 SQUIRE_EXPORT SireBase::Array2D<Matrix> electron_integral(const PP_GTO &P, const PP_GTO &Q);
 
-SQUIRE_EXPORT void electron_integral(const PP_GTO &P, const PP_GTO &Q, 
+SQUIRE_EXPORT void electron_integral(const PP_GTO &P, const PP_GTO &Q,
                        SireBase::Array2D<Matrix> &matrix);
 
 SQUIRE_EXPORT Vector electron_integral(const PS_GTO &P, const SS_GTO &Q, int m);
@@ -374,21 +373,21 @@ SQUIRE_EXPORT Matrix electron_integral(const PS_GTO &P, const PS_GTO &Q, int m);
 SQUIRE_EXPORT Matrix electron_integral(const PP_GTO &P, const SS_GTO &Q, int m);
 SQUIRE_EXPORT Matrix electron_integral(const SS_GTO &P, const PP_GTO &Q, int m);
 
-SQUIRE_EXPORT SireBase::Array2D<Vector> 
+SQUIRE_EXPORT SireBase::Array2D<Vector>
 electron_integral(const PP_GTO &P, const PS_GTO &Q, int m);
-SQUIRE_EXPORT SireBase::Array2D<Vector> 
+SQUIRE_EXPORT SireBase::Array2D<Vector>
 electron_integral(const PS_GTO &P, const PP_GTO &Q, int m);
 
 SQUIRE_EXPORT void electron_integral(const PP_GTO &P, const PS_GTO &Q, int m,
                        SireBase::Array2D<Vector> &matrix);
-                       
+
 SQUIRE_EXPORT void electron_integral(const PS_GTO &P, const PP_GTO &Q, int m,
                        SireBase::Array2D<Vector> &matrix);
 
-SQUIRE_EXPORT SireBase::Array2D<Matrix> 
+SQUIRE_EXPORT SireBase::Array2D<Matrix>
 electron_integral(const PP_GTO &P, const PP_GTO &Q, int m);
 
-SQUIRE_EXPORT void electron_integral(const PP_GTO &P, const PP_GTO &Q, int m, 
+SQUIRE_EXPORT void electron_integral(const PP_GTO &P, const PP_GTO &Q, int m,
                        SireBase::Array2D<Matrix> &matrix);
 
 }

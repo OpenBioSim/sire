@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -47,10 +46,10 @@ using SireFF::Inter2B2G3DFF;
 typedef Inter2BFF< SoftCLJPotentialInterface<InterSoftCLJPotential> > InterSoftCLJFFBase;
 typedef Inter2B3DFF< SoftCLJPotentialInterface<InterSoftCLJPotential> > InterSoftCLJFF;
 
-typedef Inter2B2GFF< SoftCLJPotentialInterface<InterSoftCLJPotential> > 
+typedef Inter2B2GFF< SoftCLJPotentialInterface<InterSoftCLJPotential> >
                                                                 InterGroupSoftCLJFFBase;
-                                                                
-typedef Inter2B2G3DFF< SoftCLJPotentialInterface<InterSoftCLJPotential> > 
+
+typedef Inter2B2G3DFF< SoftCLJPotentialInterface<InterSoftCLJPotential> >
                                                                 InterGroupSoftCLJFF;
 
 }
@@ -67,27 +66,27 @@ SIRE_EXPOSE_ALIAS(SireMM::CLJPotentialInterface<SireMM::InterSoftCLJPotential>,
 SIRE_EXPOSE_ALIAS(SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>,
                   SireMM::SoftCLJPotentialInterface_InterSoftCLJPotential_)
 
-SIRE_EXPOSE_ALIAS( 
+SIRE_EXPOSE_ALIAS(
     SireFF::Inter2BFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >,
     SireMM::InterSoftCLJFFBase )
-    
+
 SIRE_EXPOSE_ALIAS(
     SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >,
     SireMM::InterSoftCLJFF )
-    
+
 SIRE_EXPOSE_ALIAS(
  SireFF::Inter2B2GFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >,
  SireMM::InterGroupSoftCLJFFBase)
-    
+
 SIRE_EXPOSE_ALIAS(
  SireFF::Inter2B2G3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >,
  SireMM::InterGroupSoftCLJFF )
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
-template class 
+template class
 SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>;
 
-template class 
+template class
 SireFF::Inter2BFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >;
 
 template class

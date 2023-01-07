@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -72,12 +71,12 @@ using SireBase::PropertyName;
 
 /** This is a sampler that is used to select molecules
     using the distance-based preferential sampling algorithm.
-    
+
     This sampler can be used to bias the choice of molecules
     such that those closest to a target molecule are chosen
     with a higher probability than those that are further
     away
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT PrefSampler
@@ -92,7 +91,7 @@ public:
     PrefSampler(SireUnits::Dimension::Area k);
     PrefSampler(const SireCAS::Expression &f);
     PrefSampler(const SireCAS::Expression &f, SireUnits::Dimension::Area k);
-    
+
     PrefSampler(const Vector &point);
     PrefSampler(const Vector &point, SireUnits::Dimension::Area k);
     PrefSampler(const Vector &point, const SireCAS::Expression &f);
@@ -106,13 +105,13 @@ public:
                 const SireCAS::Expression &f);
     PrefSampler(const Vector &point, const MoleculeGroup &molgroup,
                 const SireCAS::Expression &f, SireUnits::Dimension::Area k);
-    
+
     PrefSampler(const MoleculeView &molview);
     PrefSampler(const MoleculeView &molview, SireUnits::Dimension::Area k);
     PrefSampler(const MoleculeView &molview, const SireCAS::Expression &f);
     PrefSampler(const MoleculeView &molview, const SireCAS::Expression &f,
                 SireUnits::Dimension::Area k);
-    
+
     PrefSampler(const MoleculeView &molview, const MoleculeGroup &molgroup);
     PrefSampler(const MoleculeView &molview, const MoleculeGroup &molgroup,
                 SireUnits::Dimension::Area k);
@@ -120,25 +119,25 @@ public:
                 const SireCAS::Expression &f);
     PrefSampler(const MoleculeView &molview, const MoleculeGroup &molgroup,
                 const SireCAS::Expression &f, SireUnits::Dimension::Area k);
-    
+
     PrefSampler(const PrefSampler &other);
-    
+
     ~PrefSampler();
-    
+
     PrefSampler& operator=(const PrefSampler &other);
-    
+
     static const char* typeName();
-    
+
     bool operator==(const PrefSampler &other) const;
     bool operator!=(const PrefSampler &other) const;
-    
+
     static SireCAS::Symbol r();
     static SireCAS::Symbol k();
-    
+
     void setGroup(const MoleculeGroup &molgroup);
 
     void updateFrom(const System &system);
-    
+
     tuple<PartialMolecule,double> sample() const;
     tuple<Molecule,double> sampleMolecule() const;
 
@@ -147,19 +146,19 @@ public:
 
     void setFocalMolecule(const MoleculeView &molview);
     void setFocalPoint(const Vector &point);
-    
+
     void setCoordinatesProperty(const PropertyName &coords_property);
     void setSpaceProperty(const PropertyName &space_property);
-    
+
     void setSamplingConstant(SireUnits::Dimension::Area k);
     void setBiasingFunction(const SireCAS::Expression &f);
 
     SireCAS::Expression biasingFunction() const;
     SireUnits::Dimension::Area samplingConstant() const;
-    
+
     bool usingFocalMolecule() const;
     bool usingFocalPoint() const;
-    
+
     const Vector& focalPoint() const;
     const PartialMolecule& focalMolecule() const;
 
@@ -175,20 +174,20 @@ private:
     /** The view of the molecule, the center of which is used
         as the focal point for the preferential sampling algorithm */
     PartialMolecule focal_molecule;
-    
+
     /** The actual focal point of the preferential sampling algorithm */
     Vector focal_point;
-    
+
     /** The coordinates property used to find the coordinates
         of the molecules */
     PropertyName coords_property;
-    
+
     /** The property used to find the system space */
     PropertyName space_property;
-    
+
     /** The preferential sampling expression */
     SireCAS::Expression sampling_expression;
-    
+
     /** The preferential sampling constant */
     double sampling_constant;
 
@@ -204,7 +203,7 @@ private:
 
     /** The current space that is used to calculate distances */
     SpacePtr current_space;
-    
+
     /** Whether or not this is dirty (requires a complete recalculation
         of the weights) */
     bool is_dirty;

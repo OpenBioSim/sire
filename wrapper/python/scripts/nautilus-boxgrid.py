@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(description=   " With given center and length o
                                                 " Defined by a cube of grid points ",
                                  epilog="nautilus-boxgrid is built using Sire, Numpy and mdtraj and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/nautilus",
+                                        "http://sire.openbiosim.org/nautilus",
                                  prog="nautilus")
 
 parser.add_argument('-C', '--config', nargs="?",
@@ -57,7 +57,7 @@ if args.author:
 if args.version:
     print("nautilus-boxgrid -- from Sire release version <%s>" %Sire.__version__)
     print("This particular release can be downloaded here: "
-          "https://github.com/michellab/Sire/releases/tag/v%s" %Sire.__version__)
+          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
     must_exit = True
 
 if must_exit:

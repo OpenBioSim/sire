@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -66,7 +65,7 @@ namespace detail{ class VolumeMapData; }
     with the average occupancy at each grid point recorded. Grid
     points are considered occupied if they are covered by at least
     one atom
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT VolumeMap : public SireBase::ConcreteProperty<VolumeMap,SireBase::Property>
@@ -93,67 +92,67 @@ public:
 
     VolumeMap();
     VolumeMap(bool skip_light_atoms);
-    
+
     VolumeMap(const Length &grid_spacing, bool skip_light_atoms=false);
     VolumeMap(MapType map_type, bool skip_light_atoms=false);
     VolumeMap(FillType fill_type, bool skip_light_atoms=false);
-    
+
     VolumeMap(const Length &grid_spacing, MapType map_type, bool skip_light_atoms=false);
     VolumeMap(const Length &grid_spacing, FillType fill_type, bool skip_light_atoms=false);
     VolumeMap(FillType fill_type, MapType map_type, bool skip_light_atoms=false);
     VolumeMap(const Length &grid_spacing, FillType fill_type, MapType map_type,
               bool skip_light_atoms=false);
-    
+
     VolumeMap(const VolumeMap &other);
-    
+
     ~VolumeMap();
-    
+
     VolumeMap& operator=(const VolumeMap &other);
-    
+
     bool operator==(const VolumeMap &other) const;
     bool operator!=(const VolumeMap &other) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     QString toString() const;
-    
+
     bool isEmpty() const;
-    
+
     int nGridPoints() const;
     int nMaxGridPoints() const;
-    
+
     void setNMaxGridPoints(int nmax);
-    
+
     Length gridSpacing() const;
     void setGridSpacing(Length grid_spacing);
-    
+
     MapType mapType() const;
     void setMapType(MapType map_type);
-    
+
     FillType fillType() const;
     void setFillType(FillType fill_type);
-    
+
     void setSkipLightAtoms(bool on);
     bool skipLightAtoms() const;
-    
+
     const GridInfo& gridInfo() const;
-    
+
     qint64 nSamples() const;
-    
+
     const QVector<float>& occupancy() const;
-    
+
     void add(const MoleculeView &molecule, const PropertyMap &map = PropertyMap());
     void add(const MoleculeView &mol0, const MoleculeView &mol1,
              const PropertyMap &map = PropertyMap());
     void add(const QList<PartialMolecule> &molecules, const PropertyMap &map = PropertyMap());
-    
+
     void add(const Molecules &molecules, const PropertyMap &map = PropertyMap());
     void add(const Molecules &mols0, const Molecules &mols1,
              const PropertyMap &map = PropertyMap());
     void add(const QList<Molecules> &molecules, const PropertyMap &map = PropertyMap());
-    
+
     void add(const MoleculeGroup &molecules, const PropertyMap &map = PropertyMap());
     void add(const MoleculeGroup &mols0, const MoleculeGroup &mols1,
              const PropertyMap &map = PropertyMap());
@@ -161,7 +160,7 @@ public:
 
     void add(const VolumeMap &other);
     void add(const GridInfo &gridinfo, const QVector<float> &values);
-    
+
     void clear();
 
     bool isMasked() const;
@@ -196,32 +195,32 @@ private:
 
     /** Information about the grid */
     GridInfo grid_info;
-    
+
     /** The grid spacing desired by the user */
     Length grid_spacing;
-    
+
     /** The method used to build the map */
     MapType map_type;
-    
+
     /** The method used to assign atoms to points */
     FillType fill_type;
-    
+
     /** The actual occupancy map */
     QVector<float> occ;
-    
+
     /** Pointer to the data object used during grid updates */
     detail::VolumeMapData *d;
-    
+
     /** The number of samples in this map */
     qint64 nsamples;
-    
+
     /** The maximum number of grid points - this limits the memory
         used by this map */
     qint32 max_grid_points;
 
     /** The set of points used to provide a distance mask */
     QVector<Vector> mask_points;
-    
+
     /** The distance used for the distance mask */
     float mask_dist;
 

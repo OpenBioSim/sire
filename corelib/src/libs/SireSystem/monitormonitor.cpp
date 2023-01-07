@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -47,13 +46,13 @@ QDataStream &operator<<(QDataStream &ds,
                                           const MonitorMonitor &monmon)
 {
     writeHeader(ds, r_monmon, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << monmon.monitor_states << monmon.monitor_id
         << monmon.clear_original << monmon.remove_original
         << static_cast<const SystemMonitor&>(monmon);
-        
+
     return ds;
 }
 
@@ -62,7 +61,7 @@ QDataStream &operator>>(QDataStream &ds,
                                           MonitorMonitor &monmon)
 {
     VersionID v = readHeader(ds, r_monmon);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -72,17 +71,17 @@ QDataStream &operator>>(QDataStream &ds,
     }
     else
         throw version_error(v, "1", r_monmon, CODELOC);
-        
+
     return ds;
 }
 
 /** Null constructor */
-MonitorMonitor::MonitorMonitor() 
+MonitorMonitor::MonitorMonitor()
                : ConcreteProperty<MonitorMonitor,SystemMonitor>(),
                  clear_original(false), remove_original(false)
 {}
-               
-/** Construct to monitor the SystemMonitor identified by 'id', 
+
+/** Construct to monitor the SystemMonitor identified by 'id',
     optionally clearing the original monitor if 'clear_original' is
     true, and optionally removing the original monitor
     if 'remove_original' is true */
@@ -110,13 +109,13 @@ MonitorMonitor& MonitorMonitor::operator=(const MonitorMonitor &other)
     if (this != &other)
     {
         SystemMonitor::operator=(other);
-        
+
         monitor_states = other.monitor_states;
         monitor_id = other.monitor_id;
         clear_original = other.clear_original;
         remove_original = other.remove_original;
     }
-    
+
     return *this;
 }
 
@@ -187,7 +186,7 @@ void MonitorMonitor::setClearOriginal(bool clear)
 }
 
 /** Set whether or not to remove the original monitor when
-    this monitor takes a copy (effectively thus moving 
+    this monitor takes a copy (effectively thus moving
     the monitor from the system to this MonitorMonitor) */
 void MonitorMonitor::setRemoveOriginal(bool remove)
 {
@@ -219,10 +218,10 @@ void MonitorMonitor::clearStatistics()
 void MonitorMonitor::monitor(System &system)
 {
     monitor_states.append( system.monitor(monitor_id) );
-    
+
     if (remove_original)
         system.remove(monitor_id);
-        
+
     else if (clear_original)
         system.clearStatistics(monitor_id);
 }

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,7 +63,7 @@ Delta::Delta(const Delta &other)
       : delta_system(other.delta_system), changed_mols(other.changed_mols),
         changed_comps(other.changed_comps), changed_props(other.changed_props),
         last_change(other.last_change), last_mol_change(other.last_mol_change),
-        last_comp_change(other.last_comp_change), 
+        last_comp_change(other.last_comp_change),
         last_prop_change(other.last_prop_change),
         auto_commit(other.auto_commit)
 {}
@@ -88,7 +87,7 @@ Delta& Delta::operator=(const Delta &other)
         last_prop_change = other.last_prop_change;
         auto_commit = other.auto_commit;
     }
-    
+
     return *this;
 }
 
@@ -142,7 +141,7 @@ bool Delta::isNull() const
     return isEmpty();
 }
 
-/** Return the system in its current in-between state. 
+/** Return the system in its current in-between state.
     Note that this system is not likely to be in a sensible
     state! */
 const System& Delta::deltaSystem() const
@@ -185,56 +184,56 @@ bool Delta::hasComponentChange() const
     return last_comp_change != 0;
 }
 
-/** Return whether or not this delta has a change in 
+/** Return whether or not this delta has a change in
     system property */
 bool Delta::hasPropertyChange() const
 {
     return last_prop_change != 0;
 }
 
-/** Return whether or not this delta has a change in 
+/** Return whether or not this delta has a change in
     the system since subversion 'subversion' */
 bool Delta::hasChangeSince(quint32 subversion) const
 {
     return last_change > subversion;
 }
 
-/** Return whether or not this delta has a major change in 
+/** Return whether or not this delta has a major change in
     the system since subversion 'subversion' */
 bool Delta::hasMajorChangeSince(quint32 subversion) const
 {
     return last_comp_change > subversion or last_prop_change > subversion;
 }
 
-/** Return whether or not this delta has a minor change in 
+/** Return whether or not this delta has a minor change in
     the system since subversion 'subversion' */
 bool Delta::hasMinorChangeSince(quint32 subversion) const
 {
     return last_mol_change > subversion;
 }
 
-/** Return whether or not this delta has a change in 
+/** Return whether or not this delta has a change in
     molecules since subversion 'subversion' */
 bool Delta::hasMoleculeChangeSince(quint32 subversion) const
 {
     return last_mol_change > subversion;
 }
 
-/** Return whether or not this delta has a change in 
+/** Return whether or not this delta has a change in
     the system components since subversion 'subversion' */
 bool Delta::hasComponentChangeSince(quint32 subversion) const
 {
     return last_comp_change > subversion;
 }
 
-/** Return whether or not this delta has a change in 
+/** Return whether or not this delta has a change in
     the system properties since subversion 'subversion' */
 bool Delta::hasPropertyChangeSince(quint32 subversion) const
 {
     return last_prop_change > subversion;
 }
 
-/** Return whether or not this delta has a change in 
+/** Return whether or not this delta has a change in
     the molecule with number 'molnum' */
 bool Delta::changed(MolNum molnum) const
 {
@@ -248,7 +247,7 @@ bool Delta::changed(const MoleculeView &molview) const
     return changed_mols.contains(molview.data().number());
 }
 
-/** Return whether or not any of the molecules in 'molecules' 
+/** Return whether or not any of the molecules in 'molecules'
     have been changed */
 bool Delta::changed(const Molecules &molecules) const
 {
@@ -264,7 +263,7 @@ bool Delta::changed(const Molecules &molecules) const
             if (changed_mols.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
     else
@@ -274,11 +273,11 @@ bool Delta::changed(const Molecules &molecules) const
              ++it)
         {
             Molecules::const_iterator it2 = molecules.constFind(it.key());
-            
+
             if (it2 != molecules.constEnd())
                 return true;
         }
-        
+
         return false;
     }
 }
@@ -303,7 +302,7 @@ bool Delta::changed(const QSet<Symbol> &components) const
             if (changed_comps.contains(component))
                 return true;
         }
-        
+
         return false;
     }
     else
@@ -315,7 +314,7 @@ bool Delta::changed(const QSet<Symbol> &components) const
             if (components.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
@@ -326,7 +325,7 @@ bool Delta::changed(const Values &values) const
 {
     if (changed_comps.isEmpty())
         return false;
-    
+
     else if (values.count() <= changed_comps.count())
     {
         for (Values::const_iterator it = values.constBegin();
@@ -336,7 +335,7 @@ bool Delta::changed(const Values &values) const
             if (changed_comps.contains( Symbol(it.key()) ))
                 return true;
         }
-        
+
         return false;
     }
     else
@@ -348,7 +347,7 @@ bool Delta::changed(const Values &values) const
             if (values.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
@@ -364,7 +363,7 @@ bool Delta::changed(const PropertyName &property) const
 {
     if (property.hasValue())
         return false;
-    else 
+    else
         return this->changed(property.source());
 }
 
@@ -373,7 +372,7 @@ bool Delta::changed(const QSet<QString> &properties) const
 {
     if (changed_props.isEmpty())
         return false;
-        
+
     else if (properties.count() <= changed_props.count())
     {
         foreach (const QString &property, properties)
@@ -381,7 +380,7 @@ bool Delta::changed(const QSet<QString> &properties) const
             if (changed_props.contains(property))
                 return true;
         }
-        
+
         return false;
     }
     else
@@ -393,7 +392,7 @@ bool Delta::changed(const QSet<QString> &properties) const
             if (properties.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
@@ -403,7 +402,7 @@ bool Delta::changed(const QList<PropertyName> &properties) const
 {
     if (changed_props.isEmpty())
         return false;
-        
+
     else
     {
         foreach (const PropertyName &property, properties)
@@ -411,7 +410,7 @@ bool Delta::changed(const QList<PropertyName> &properties) const
             if ( (not property.hasValue()) and changed_props.contains(property.source()) )
                 return true;
         }
-        
+
         return false;
     }
 }
@@ -421,7 +420,7 @@ bool Delta::changed(const Properties &properties) const
 {
     if (changed_props.isEmpty())
         return false;
-        
+
     else if (properties.count() <= changed_props.count())
     {
         for (Properties::const_iterator it = properties.constBegin();
@@ -431,7 +430,7 @@ bool Delta::changed(const Properties &properties) const
             if (changed_props.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
     else
@@ -443,7 +442,7 @@ bool Delta::changed(const Properties &properties) const
             if (properties.hasProperty(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
@@ -453,7 +452,7 @@ bool Delta::changed(const Point &point) const
 {
     if (point.nMolecules() == 0)
         return false;
-    
+
     else
     {
         for (QHash<MolNum,quint32>::const_iterator it = changed_mols.constBegin();
@@ -463,7 +462,7 @@ bool Delta::changed(const Point &point) const
             if (point.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
@@ -477,7 +476,7 @@ bool Delta::sinceChanged(MolNum molnum, quint32 subversion) const
 
     else if (changed_mols.isEmpty() or subversion <= last_mol_change)
         return false;
-    
+
     else
         return changed_mols.value(molnum, 0) > subversion;
 }
@@ -495,10 +494,10 @@ bool Delta::sinceChanged(const Molecules &molecules, quint32 subversion) const
 {
     if (subversion == 0)
         return this->changed(molecules);
-    
+
     else if (changed_mols.isEmpty() or subversion <= last_mol_change)
         return false;
-    
+
     else if (molecules.nMolecules() <= changed_mols.count())
     {
         for (Molecules::const_iterator it = molecules.constBegin();
@@ -508,7 +507,7 @@ bool Delta::sinceChanged(const Molecules &molecules, quint32 subversion) const
             if (changed_mols.value(it.key(), 0) > subversion)
                 return true;
         }
-        
+
         return false;
     }
     else
@@ -520,7 +519,7 @@ bool Delta::sinceChanged(const Molecules &molecules, quint32 subversion) const
             if (it.value() > subversion and molecules.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
@@ -534,7 +533,7 @@ bool Delta::sinceChanged(const Symbol &component, quint32 subversion) const
 
     else if (changed_comps.isEmpty() or last_comp_change <= subversion)
         return false;
-    
+
     else
         return changed_comps.value(component, 0) > subversion;
 }
@@ -548,7 +547,7 @@ bool Delta::sinceChanged(const QSet<Symbol> &symbols, quint32 subversion) const
 
     else if (changed_comps.isEmpty() or last_comp_change <= subversion)
         return false;
-        
+
     else if (symbols.count() <= changed_comps.count())
     {
         foreach (const Symbol &symbol, symbols)
@@ -556,33 +555,33 @@ bool Delta::sinceChanged(const QSet<Symbol> &symbols, quint32 subversion) const
             if (changed_comps.value(symbol, 0) > subversion)
                 return true;
         }
-        
+
         return false;
     }
     else
     {
-        for (QHash<Symbol,quint32>::const_iterator it = changed_comps.constBegin(); 
+        for (QHash<Symbol,quint32>::const_iterator it = changed_comps.constBegin();
              it != changed_comps.constEnd();
              ++it)
         {
             if (it.value() > subversion and symbols.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
 
-/** Return whether or not the system constant components from 'values' 
+/** Return whether or not the system constant components from 'values'
     have changed since subversion number 'subversion' */
 bool Delta::sinceChanged(const Values &values, quint32 subversion) const
 {
     if (subversion == 0)
         return this->changed(values);
-    
+
     else if (changed_comps.isEmpty() or last_comp_change <= subversion)
         return false;
-    
+
     else if (values.count() <= changed_comps.count())
     {
         for (Values::const_iterator it = values.constBegin();
@@ -592,7 +591,7 @@ bool Delta::sinceChanged(const Values &values, quint32 subversion) const
             if (changed_comps.value(Symbol(it.key()), 0) > subversion)
                 return true;
         }
-        
+
         return false;
     }
     else
@@ -604,12 +603,12 @@ bool Delta::sinceChanged(const Values &values, quint32 subversion) const
             if (it.value() > subversion and values.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
 
-/** Return whether or not the property 'property' has changed since 
+/** Return whether or not the property 'property' has changed since
     subversion number 'subversion' */
 bool Delta::sinceChanged(const QString &property, quint32 subversion) const
 {
@@ -618,12 +617,12 @@ bool Delta::sinceChanged(const QString &property, quint32 subversion) const
 
     else if (changed_props.isEmpty() or last_prop_change <= subversion)
         return false;
-    
+
     else
         return changed_props.value(property, 0) > subversion;
 }
 
-/** Return whether or not the property 'property' has changed since 
+/** Return whether or not the property 'property' has changed since
     subversion number 'subversion' */
 bool Delta::sinceChanged(const PropertyName &property, quint32 subversion) const
 {
@@ -650,7 +649,7 @@ bool Delta::sinceChanged(const QSet<QString> &properties, quint32 subversion) co
             if (changed_props.value(property, 0) > subversion)
                 return true;
         }
-        
+
         return false;
     }
     else
@@ -662,7 +661,7 @@ bool Delta::sinceChanged(const QSet<QString> &properties, quint32 subversion) co
             if (it.value() > subversion and properties.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
@@ -681,13 +680,13 @@ bool Delta::sinceChanged(const QList<PropertyName> &properties, quint32 subversi
     {
         foreach (const PropertyName &property, properties)
         {
-            if ( (not property.hasValue()) and 
+            if ( (not property.hasValue()) and
                         changed_props.value(property.source(), 0) > subversion )
             {
                 return true;
             }
         }
-        
+
         return false;
     }
 }
@@ -701,7 +700,7 @@ bool Delta::sinceChanged(const Properties &properties, quint32 subversion) const
 
     else if (changed_props.isEmpty() or last_prop_change <= subversion)
         return false;
-        
+
     else if (properties.count() <= changed_props.count())
     {
         for (Properties::const_iterator it = properties.constBegin();
@@ -711,7 +710,7 @@ bool Delta::sinceChanged(const Properties &properties, quint32 subversion) const
             if (changed_props.value(it.key(), 0) > subversion)
                 return true;
         }
-        
+
         return false;
     }
     else
@@ -723,21 +722,21 @@ bool Delta::sinceChanged(const Properties &properties, quint32 subversion) const
             if (it.value() > subversion and properties.hasProperty(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
 
-/** Return whether or not the passed point will have been changed by this delta 
+/** Return whether or not the passed point will have been changed by this delta
     since version 'subversion' */
 bool Delta::sinceChanged(const Point &point, quint32 subversion) const
 {
     if (point.nMolecules() == 0 or last_mol_change <= subversion)
         return false;
-    
+
     else if (subversion == 0)
         return this->changed(point);
-    
+
     else
     {
         for (QHash<MolNum,quint32>::const_iterator it = changed_mols.constBegin();
@@ -747,18 +746,18 @@ bool Delta::sinceChanged(const Point &point, quint32 subversion) const
             if (it.value() > subversion and point.contains(it.key()))
                 return true;
         }
-        
+
         return false;
     }
 }
-    
+
 /** Return the numbers of the molecules that have changed in this delta */
 QList<MolNum> Delta::changedMolecules() const
 {
     return changed_mols.keys();
 }
 
-/** Return the numbers of the molecules that have changed 
+/** Return the numbers of the molecules that have changed
     in this delta since subversion 'subversion' */
 QList<MolNum> Delta::changedMoleculesSince(quint32 subversion) const
 {
@@ -766,7 +765,7 @@ QList<MolNum> Delta::changedMoleculesSince(quint32 subversion) const
         return this->changedMolecules();
 
     QList<MolNum> molnums;
-    
+
     if (last_mol_change > subversion)
     {
         for (QHash<MolNum,quint32>::const_iterator it = changed_mols.constBegin();
@@ -777,21 +776,21 @@ QList<MolNum> Delta::changedMoleculesSince(quint32 subversion) const
                 molnums.append( it.key() );
         }
     }
-    
+
     return molnums;
 }
 
-/** Return the numbers of the molecules from 'molecules' that have 
+/** Return the numbers of the molecules from 'molecules' that have
     been changed by this delta */
 QList<MolNum> Delta::changedMolecules(const Molecules &molecules) const
 {
     if (changed_mols.isEmpty() or molecules.isEmpty())
         return QList<MolNum>();
-    
+
     else if (changed_mols.count() <= molecules.count())
     {
         QList<MolNum> molnums;
-        
+
         for (QHash<MolNum,quint32>::const_iterator it = changed_mols.constBegin();
              it != changed_mols.constEnd();
              ++it)
@@ -799,13 +798,13 @@ QList<MolNum> Delta::changedMolecules(const Molecules &molecules) const
             if (molecules.contains(it.key()))
                 molnums.append(it.key());
         }
-        
+
         return molnums;
     }
     else
     {
         QList<MolNum> molnums;
-        
+
         for (Molecules::const_iterator it = molecules.constBegin();
              it != molecules.constEnd();
              ++it)
@@ -813,7 +812,7 @@ QList<MolNum> Delta::changedMolecules(const Molecules &molecules) const
             if (changed_mols.contains(it.key()))
                 molnums.append(it.key());
         }
-        
+
         return molnums;
     }
 }
@@ -825,9 +824,9 @@ QList<MolNum> Delta::changedMoleculesSince(const Molecules &molecules,
 {
     if (subversion == 0)
         return this->changedMolecules(molecules);
-    
+
     QList<MolNum> molnums;
-    
+
     if (last_mol_change > subversion)
     {
         if (changed_mols.count() <= molecules.count())
@@ -867,12 +866,12 @@ QList<Symbol> Delta::changedComponentsSince(quint32 subversion) const
 {
     if (subversion == 0)
         return this->changedComponents();
-    
+
     QList<Symbol> comps;
-    
+
     if (last_comp_change > subversion)
     {
-        for (QHash<Symbol,quint32>::const_iterator it = changed_comps.constBegin(); 
+        for (QHash<Symbol,quint32>::const_iterator it = changed_comps.constBegin();
              it != changed_comps.constEnd();
              ++it)
         {
@@ -880,7 +879,7 @@ QList<Symbol> Delta::changedComponentsSince(quint32 subversion) const
                 comps.append( it.key() );
         }
     }
-    
+
     return comps;
 }
 
@@ -896,9 +895,9 @@ QList<QString> Delta::changedPropertiesSince(quint32 subversion) const
 {
     if (subversion == 0)
         return this->changedProperties();
-    
+
     QList<QString> props;
-    
+
     if (last_prop_change > subversion)
     {
         for (QHash<QString,quint32>::const_iterator it = changed_props.constBegin();
@@ -909,7 +908,7 @@ QList<QString> Delta::changedPropertiesSince(quint32 subversion) const
                 props.append( it.key() );
         }
     }
-    
+
     return props;
 }
 
@@ -922,7 +921,7 @@ bool Delta::update(const MoleculeData &moldata)
         last_change = delta_system.subVersion();
         last_mol_change = last_change;
         changed_mols.insert(moldata.number(), last_mol_change);
-        
+
         return true;
     }
     else
@@ -938,7 +937,7 @@ bool Delta::update(const MoleculeView &molview)
         last_change = delta_system.subVersion();
         last_mol_change = last_change;
         changed_mols.insert(molview.data().number(), last_mol_change);
-        
+
         return true;
     }
     else
@@ -950,20 +949,20 @@ bool Delta::update(const MoleculeView &molview)
 bool Delta::update(const Molecules &molecules)
 {
     QList<MolNum> molnums = delta_system.deltaUpdate(molecules,auto_commit);
-    
+
     if (not molnums.isEmpty())
     {
         last_change = delta_system.subVersion();
         last_mol_change = last_change;
-        
+
         if (changed_mols.count() < molnums.count())
             changed_mols.reserve(molnums.count());
-        
+
         foreach (const MolNum &molnum, molnums)
         {
             changed_mols.insert(molnum, last_mol_change);
         }
-        
+
         return true;
     }
     else
@@ -980,13 +979,13 @@ bool Delta::update(const Symbol &component, double value)
         {
             last_change = delta_system.subVersion();
             last_comp_change = last_change;
-            
+
             changed_comps.insert(component, last_comp_change);
-            
+
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -998,9 +997,9 @@ bool Delta::update(const QString &property, const Property &value)
     {
         last_change = delta_system.subVersion();
         last_prop_change = last_change;
-        
+
         changed_props.insert(property, last_prop_change);
-        
+
         return true;
     }
     else
@@ -1025,9 +1024,9 @@ bool Delta::update(const QString &property, const FFID &ffid, const Property &va
     {
         last_change = delta_system.subVersion();
         last_prop_change = last_change;
-        
+
         changed_props.insert(property, last_prop_change);
-        
+
         return true;
     }
     else
@@ -1047,12 +1046,12 @@ bool Delta::update(const QString &property, const QList<FFIdx> &ffidxs,
         {
             last_change = delta_system.subVersion();
             last_prop_change = last_change;
-        
+
             changed_props.insert(property, last_prop_change);
             changed_prop = true;
         }
     }
-    
+
     return changed_prop;
 }
 
@@ -1093,11 +1092,11 @@ System Delta::apply()
         last_mol_change = 0;
         last_comp_change = 0;
         last_prop_change = 0;
-    
+
         changed_mols = QHash<MolNum,quint32>();
         changed_comps = QHash<Symbol,quint32>();
         changed_props = QHash<QString,quint32>();
     }
-    
+
     return delta_system;
 }

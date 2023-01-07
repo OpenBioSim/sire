@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,7 +44,7 @@ namespace SireMM
 /** This is a simple forcefield that is designed to let me test new
     ways of calculating energies before rolling out the new design
     to the rest of Sire
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT TestFF
@@ -54,16 +53,16 @@ public:
     TestFF();
     TestFF(const TestFF &other);
     ~TestFF();
-    
+
     TestFF& operator=(const TestFF &other);
-    
+
     void add(const Molecules &molecules);
     void addFixedAtoms(const Molecules &molecules);
-    
+
     void calculateEnergy();
-    
+
     void setCutoff(Length coul_cutoff, Length lj_cutoff);
-    
+
 private:
     CLJAtoms atoms0;
     CLJAtoms atoms1;

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -35,75 +34,75 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class Molecule;
+  class Molecule;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::Molecule&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::Molecule&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Molecule &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Molecule &);
 
 namespace SireMol
 {
 
-class MolID;
-class MolName;
-class MolNum;
+  class MolID;
+  class MolName;
+  class MolNum;
 
-class Evaluator;
-class MolEditor;
+  class Evaluator;
+  class MolEditor;
 
-template<class T>
-class Mover;
+  template <class T>
+  class Mover;
 
-template<class T>
-class Selector;
+  template <class T>
+  class Selector;
 
-class SelectorMol;
+  class SelectorMol;
 
-class Atom;
-class CutGroup;
-class Residue;
-class Chain;
-class Segment;
+  class Atom;
+  class CutGroup;
+  class Residue;
+  class Chain;
+  class Segment;
 
-/** A Molecule represents a complete molecule.
+  /** A Molecule represents a complete molecule.
 
-    Most of the manipulation of a molecule is handled by the 'or/er' classes,
-    e.g. Mover, Selector, Editer, Evaluator.
+      Most of the manipulation of a molecule is handled by the 'or/er' classes,
+      e.g. Mover, Selector, Editer, Evaluator.
 
-    These classes provide additional member functions, thereby allowing me
-    to keep the API of Molecule small.
+      These classes provide additional member functions, thereby allowing me
+      to keep the API of Molecule small.
 
-    Examples of use include;
+      Examples of use include;
 
-    mol = mol.move().translate( Vector(1,2,3) )
-    point = mol.evaluate().center()
-    mass = mol.evaluate().mass()
+      mol = mol.move().translate( Vector(1,2,3) )
+      point = mol.evaluate().center()
+      mass = mol.evaluate().mass()
 
-    mol = mol.edit().rename( ResNum(43)[0], "ALA" ).commit()
+      mol = mol.edit().rename( ResNum(43)[0], "ALA" ).commit()
 
-    Equally, we can quickly select well-defined subgroups within the
-    molecule, e.g. atom(s), residue(e), chain(s), CutGroup(s) and
-    segment(s), via the 'select' functions, e.g.
+      Equally, we can quickly select well-defined subgroups within the
+      molecule, e.g. atom(s), residue(e), chain(s), CutGroup(s) and
+      segment(s), via the 'select' functions, e.g.
 
-    ala49 = mol.select( ResName("ala") + ResNum(49) );
+      ala49 = mol.select( ResName("ala") + ResNum(49) );
 
-    or if there is more than one residue designate ALA:49
+      or if there is more than one residue designate ALA:49
 
-    ala49_0 = mol.select( (ResName("ala")+ResNum(49))[0] );
+      ala49_0 = mol.select( (ResName("ala")+ResNum(49))[0] );
 
-    or to get all of these residues, do
+      or to get all of these residues, do
 
-    all_ala49 = mol.selectAll( ResName("ala") + ResNum(49) );
+      all_ala49 = mol.selectAll( ResName("ala") + ResNum(49) );
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT Molecule : public SireBase::ConcreteProperty<Molecule,MoleculeView>
-{
+      @author Christopher Woods
+  */
+  class SIREMOL_EXPORT Molecule : public SireBase::ConcreteProperty<Molecule, MoleculeView>
+  {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const Molecule&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, Molecule&);
+    friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Molecule &);
+    friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, Molecule &);
 
-public:
+  public:
     Molecule();
     Molecule(const QString &molname);
 
@@ -113,14 +112,14 @@ public:
 
     ~Molecule();
 
-    Molecule& operator=(const Molecule &other);
+    Molecule &operator=(const Molecule &other);
 
     bool operator==(const Molecule &other) const;
     bool operator!=(const Molecule &other) const;
 
-    static const char* typeName();
+    static const char *typeName();
 
-    Molecule* clone() const;
+    Molecule *clone() const;
 
     QString toString() const;
 
@@ -134,7 +133,7 @@ public:
 
     AtomSelection selection() const;
 
-    const MolName& name() const;
+    const MolName &name() const;
     MolNum number() const;
 
     quint64 version() const;
@@ -171,13 +170,13 @@ public:
     QStringList metadataKeys() const;
     QStringList metadataKeys(const PropertyName &key) const;
 
-    const Properties& properties() const;
+    const Properties &properties() const;
 
-    const Property& property(const PropertyName &key) const;
+    const Property &property(const PropertyName &key) const;
 
-    const Property& metadata(const PropertyName &metakey) const;
+    const Property &metadata(const PropertyName &metakey) const;
 
-    const Property& metadata(const PropertyName &key,
+    const Property &metadata(const PropertyName &key,
                              const PropertyName &metakey) const;
 
     void assertContainsProperty(const PropertyName &key) const;
@@ -186,7 +185,7 @@ public:
     void assertContainsMetadata(const PropertyName &key,
                                 const PropertyName &metakey) const;
 
-protected:
+  protected:
     void setProperty(const QString &key, const Property &value);
 
     void setMetadata(const QString &metakey,
@@ -194,16 +193,16 @@ protected:
 
     void setMetadata(const QString &key, const QString &metakey,
                      const Property &value);
-};
+  };
 
 }
 
 Q_DECLARE_METATYPE(SireMol::Molecule);
 Q_DECLARE_METATYPE(SireMol::Mover<SireMol::Molecule>);
 
-SIRE_EXPOSE_CLASS( SireMol::Molecule )
+SIRE_EXPOSE_CLASS(SireMol::Molecule)
 
-SIRE_EXPOSE_ALIAS( SireMol::Mover<SireMol::Molecule>, SireMol::Mover_Molecule_ )
+SIRE_EXPOSE_ALIAS(SireMol::Mover<SireMol::Molecule>, SireMol::Mover_Molecule_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 
@@ -211,7 +210,7 @@ SIRE_EXPOSE_ALIAS( SireMol::Mover<SireMol::Molecule>, SireMol::Mover_Molecule_ )
 
 template class SireMol::Mover<SireMol::Molecule>;
 
-#endif //SIRE_INSTANTIATE_TEMPLATES
+#endif // SIRE_INSTANTIATE_TEMPLATES
 
 SIRE_END_HEADER
 

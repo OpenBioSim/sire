@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,27 +60,27 @@ Q_DECLARE_METATYPE(SireMM::InterGroupCLJFF);
 SIRE_EXPOSE_ALIAS(SireMM::CLJPotentialInterface<SireMM::InterCLJPotential>,
                   SireMM::CLJPotentialInterface_InterCLJPotential_)
 
-SIRE_EXPOSE_ALIAS( 
+SIRE_EXPOSE_ALIAS(
     SireFF::Inter2BFF<SireMM::CLJPotentialInterface<SireMM::InterCLJPotential> >,
     SireMM::InterCLJFFBase )
-    
+
 SIRE_EXPOSE_ALIAS(
     SireFF::Inter2B3DFF<SireMM::CLJPotentialInterface<SireMM::InterCLJPotential> >,
     SireMM::InterCLJFF )
-    
+
 SIRE_EXPOSE_ALIAS(
     SireFF::Inter2B2GFF<SireMM::CLJPotentialInterface<SireMM::InterCLJPotential> >,
     SireMM::InterGroupCLJFFBase)
-    
+
 SIRE_EXPOSE_ALIAS(
     SireFF::Inter2B2G3DFF<SireMM::CLJPotentialInterface<SireMM::InterCLJPotential> >,
     SireMM::InterGroupCLJFF )
 
 #if defined(SIRE_INSTANTIATE_TEMPLATES) || defined(PYWRAP_SireMM_REGISTRARS_H)
-template class 
+template class
 SireMM::CLJPotentialInterface<SireMM::InterCLJPotential>;
 
-template class 
+template class
 SireFF::Inter2BFF<SireMM::CLJPotentialInterface<SireMM::InterCLJPotential> >;
 
 template class

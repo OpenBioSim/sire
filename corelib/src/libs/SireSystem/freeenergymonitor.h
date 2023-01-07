@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -75,50 +74,50 @@ public:
     AssignerGroup();
     AssignerGroup(const MoleculeGroup &molgroup);
     AssignerGroup(const IDAssigner &assigner);
-    
+
     AssignerGroup(const AssignerGroup &other);
-    
+
     ~AssignerGroup();
-    
+
     AssignerGroup& operator=(const AssignerGroup &other);
-    
+
     bool operator==(const AssignerGroup &other) const;
     bool operator!=(const AssignerGroup &other) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     bool isEmpty() const;
     bool isMoleculeGroup() const;
     bool isAssigner() const;
-    
+
     bool isCompatible(const AssignerGroup &other) const;
-    
+
     const MoleculeGroup &group() const;
     const IDAssigner &assigner() const;
 
     QVector<PartialMolecule> views() const;
-    
+
     void update(const System &system);
 
 private:
     /** MoleculeGroup pointer, if this contains a molecule group */
     SireMol::MolGroupPtr molgroup;
-    
+
     /** Pointer to the IDAssigner, if this contains one */
     SireBase::PropertyPtr assgnr;
 };
 
 /** This monitor is used to monitor the free energy difference of two
-    molecule groups against every molecule view in the third. 
+    molecule groups against every molecule view in the third.
     This uses dual topology to calculate
     the free energy difference between the interaction of each view in the
     reference molecule group, and the group A and group B groups. This is intended
     to complement free energy calculations by letting you decompose
     the free energy difference into per-residue components. The coulomb
     and LJ components are also separately calculated and accumulated.
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT FreeEnergyMonitor
@@ -134,34 +133,34 @@ public:
                       const AssignerGroup &groupA, const AssignerGroup &groupB);
 
     FreeEnergyMonitor(const FreeEnergyMonitor &other);
-    
+
     ~FreeEnergyMonitor();
-    
+
     FreeEnergyMonitor& operator=(const FreeEnergyMonitor &other);
-    
+
     bool operator==(const FreeEnergyMonitor &other) const;
     bool operator!=(const FreeEnergyMonitor &other) const;
-    
+
     FreeEnergyMonitor& operator+=(const FreeEnergyMonitor &other);
-    
+
     FreeEnergyMonitor operator+(const FreeEnergyMonitor &other) const;
 
     static FreeEnergyMonitor merge(const QList<FreeEnergyMonitor> &monitors);
-    
+
     static const char* typeName();
-    
+
     bool isEmpty() const;
     bool isCompatible(const FreeEnergyMonitor &other) const;
     bool isCompatibleExceptLambda(const FreeEnergyMonitor &other) const;
-    
+
     void clearStatistics();
-    
+
     int nSamples() const;
-    
+
     void monitor(System &system);
 
     void setLambdaComponent(const SireCAS::Symbol &component);
-    
+
     void setShiftDelta(double delta);
     void setCoulombPower(int power);
 
@@ -179,7 +178,7 @@ public:
     double deltaLambda() const;
 
     bool usesSoftCore() const;
-    
+
     SireCAS::Symbol lambdaComponent() const;
     double lambdaValue() const;
 
@@ -199,19 +198,19 @@ private:
     /** The reference group that contains the groups against which
         the free energy will be calculated */
     AssignerGroup refgroup;
-    
+
     /** The two groups over which the free energy will be calculated.
-        The free energy difference of group A interacting with the 
+        The free energy difference of group A interacting with the
         reference group, and group B interacting with the reference
         group will be evaluated */
     AssignerGroup group_a, group_b;
-    
+
     /** The accumulated total free energy differences */
     QVector<SireMaths::FreeEnergyAverage> total_nrgs;
-    
+
     /** The accumulated coulomb free energies */
     QVector<SireMaths::FreeEnergyAverage> coul_nrgs;
-    
+
     /** The accumulated LJ free energies */
     QVector<SireMaths::FreeEnergyAverage> lj_nrgs;
 

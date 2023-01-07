@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,70 +49,70 @@ SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Transform&);
 namespace SireMaths
 {
     SIREMATHS_EXPORT Vector getCentroid(const QVector<Vector> &p, int n=-1);
-    
+
     SIREMATHS_EXPORT double getRMSD(const QVector<Vector> &p, const QVector<Vector> &q, int n=-1);
 
     /** This class holds everything needed to apply a transformation on a set
         of points. This holds the amount by which to translate the points, together
         with the center of rotation and amount by which to rotate
-        
+
         @author Christopher Woods
     */
     class SIREMATHS_EXPORT Transform
     {
-    
+
     friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Transform&);
     friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Transform&);
-    
+
     public:
         Transform();
         Transform(const Vector &delta);
-        
+
         Transform(const Quaternion &rotmat, const Vector &center);
         Transform(const Matrix &rotmat, const Vector &center);
-        
+
         Transform(const Vector &delta, const Quaternion &rotmat, const Vector &center);
         Transform(const Vector &delta, const Matrix &rotmat, const Vector &center);
-        
+
         Transform(const Transform &other);
-        
+
         ~Transform();
-        
+
         Transform& operator=(const Transform &other);
-        
+
         bool operator==(const Transform &other) const;
         bool operator!=(const Transform &other) const;
-        
+
         static const char* typeName();
         const char* what() const;
-        
+
         QString toString() const;
-        
+
         bool isNull() const;
         bool isZero() const;
-        
+
         Vector operator()(const Vector &point) const;
         QVector<Vector> operator()(const QVector<Vector> &point) const;
-        
+
         Vector apply(const Vector &point) const;
         QVector<Vector> apply(const QVector<Vector> &points) const;
-        
+
         Vector* apply(Vector *coords, int sz) const;
-        
+
         Vector translationDelta() const;
-        
+
         Vector rotationCenter() const;
-        
+
         Quaternion rotationQuaternion() const;
         Matrix rotationMatrix() const;
-        
+
     private:
         /** Amount by which to translate */
         Vector delta;
-        
+
         /** The center of rotation */
         Vector rotcent;
-        
+
         /** The rotation matrix (as a quaternion) */
         Quaternion rotmat;
     };
@@ -127,7 +126,7 @@ namespace SireMaths
     SIREMATHS_EXPORT Transform getAlignment(const QVector<Vector> &p,
                            const QVector<Vector> &q,
                            bool fit=true);
-    
+
     SIREMATHS_EXPORT QVector<Vector> align(const QVector<Vector> &p,
                           const QVector<Vector> &q,
                           bool fit=true);

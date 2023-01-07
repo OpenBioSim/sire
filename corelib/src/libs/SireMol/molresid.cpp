@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,11 +53,11 @@ static const RegisterMetaType<MolResID> r_molresid;
 QDataStream &operator<<(QDataStream &ds, const MolResID &molresid)
 {
     writeHeader(ds, r_molresid, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << molresid.molid << molresid.resid;
-    
+
     return ds;
 }
 
@@ -66,7 +65,7 @@ QDataStream &operator<<(QDataStream &ds, const MolResID &molresid)
 QDataStream &operator>>(QDataStream &ds, MolResID &molresid)
 {
     VersionID v = readHeader(ds, r_molresid);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -74,7 +73,7 @@ QDataStream &operator>>(QDataStream &ds, MolResID &molresid)
     }
     else
         throw version_error( v, "1", r_molresid, CODELOC );
-        
+
     return ds;
 }
 
@@ -89,11 +88,11 @@ void MolResID::collapse()
         {
             if (molid.isNull())
                 molid = molresid->molID();
-                
+
             else
                 molid = IDAndSet<MolID>( molid, molresid->molID() );
         }
-        
+
         resid = molresid->resID();
     }
 }
@@ -146,16 +145,16 @@ uint MolResID::hash() const
 {
     return (molid.hash() << 16) | (resid.hash() & 0x0000FFFF);
 }
-            
+
 /** Return a string representation of this ID */
 QString MolResID::toString() const
 {
     if (resid.isNull())
         return QObject::tr("Residues in %1").arg(molid.toString());
-    
+
     else if (molid.isNull())
         return resid.toString();
-        
+
     else
         return QObject::tr("%1 and %2")
                             .arg(molid.toString(), resid.toString());
@@ -215,9 +214,9 @@ QHash< MolNum,Selector<Residue> >
 MolResID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 {
     QHash< MolNum,Selector<Residue> > selected_res;
-    
+
     QList<MolNum> molnums = molid.map(molecules);
-    
+
     foreach (MolNum molnum, molnums)
     {
         const ViewsOfMol &mol = molecules[molnum];
@@ -245,9 +244,9 @@ QHash< MolNum,Selector<Residue> >
 MolResID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     QHash< MolNum,Selector<Residue> > selected_res;
-    
+
     QList<MolNum> molnums = molid.map(molgroup);
-    
+
     foreach (MolNum molnum, molnums)
     {
         const ViewsOfMol &mol = molgroup[molnum];
@@ -275,9 +274,9 @@ QHash< MolNum,Selector<Residue> >
 MolResID::selectAllFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     QHash< MolNum,Selector<Residue> > selected_res;
-    
+
     QList<MolNum> molnums = molid.map(molgroups);
-    
+
     foreach (MolNum molnum, molnums)
     {
         ViewsOfMol mol = molgroups[molnum];
@@ -321,9 +320,9 @@ static const RegisterMetaType<MolResNum> r_molresnum;
 QDataStream &operator<<(QDataStream &ds, const MolResNum &molresnum)
 {
     writeHeader(ds, r_molresnum, 1);
-    
+
     ds << molresnum.molnum << molresnum.resnum;
-    
+
     return ds;
 }
 
@@ -331,14 +330,14 @@ QDataStream &operator<<(QDataStream &ds, const MolResNum &molresnum)
 QDataStream &operator>>(QDataStream &ds, MolResNum &molresnum)
 {
     VersionID v = readHeader(ds, r_molresnum);
-    
+
     if (v == 1)
     {
         ds >> molresnum.molnum >> molresnum.resnum;
     }
     else
         throw version_error( v, "1", r_molresnum, CODELOC );
-        
+
     return ds;
 }
 
@@ -380,16 +379,16 @@ uint MolResNum::hash() const
 {
     return (molnum.hash() << 16) | (resnum.hash() & 0x0000FFFF);
 }
-            
+
 /** Return a string representation of this ID */
 QString MolResNum::toString() const
 {
     if (resnum.isNull())
         return QObject::tr("Residues in %1").arg(molnum.toString());
-    
+
     else if (molnum.isNull())
         return resnum.toString();
-        
+
     else
         return QObject::tr("%1 and %2")
                             .arg(molnum.toString(), resnum.toString());

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,8 +63,8 @@ namespace SireCluster
 /** This is the base class of all WorkPackets. A WorkPacket
     contains all of the code and input data for a piece of work,
     and also contains space to return the output and current
-    progress 
-    
+    progress
+
     @author Christopher Woods
 */
 class SIRECLUSTER_EXPORT WorkPacketBase : public SireBase::RefCountData
@@ -79,30 +78,30 @@ public:
 
     WorkPacketBase();
     WorkPacketBase(const WorkPacketBase &other);
-    
+
     virtual ~WorkPacketBase();
-    
+
     virtual bool shouldPack() const;
     virtual int approximatePacketSize() const;
-    
+
     void runChunk();
-    
+
     float progress() const;
-    
+
     virtual bool hasFinished() const=0;
-    
+
     virtual bool isError() const;
     virtual void throwError() const;
-    
+
     virtual bool wasAborted() const;
-    
+
     virtual WorkPacketBase* clone() const=0;
-    
+
     static const char* typeName()
     {
         return "SireCluster::WorkPacketBase";
     }
-    
+
     virtual const char* what() const=0;
 
     template<class T>
@@ -110,7 +109,7 @@ public:
     {
         return dynamic_cast<const T*>(this) != 0;
     }
-    
+
     template<class T>
     const T& asA() const
     {
@@ -121,14 +120,14 @@ protected:
     virtual float chunk()=0;
 
     WorkPacketBase& operator=(const WorkPacketBase&);
-    
+
 private:
     /** The current progress of the work */
     float current_progress;
 };
 
 /** This class is the generic holder for all work packets.
-    
+
     @author Christopher Woods
 */
 class SIRECLUSTER_EXPORT WorkPacket
@@ -141,20 +140,20 @@ public:
     WorkPacket();
     WorkPacket(const WorkPacketBase &work);
     WorkPacket(const WorkPacket &other);
-    
+
     ~WorkPacket();
-    
+
     WorkPacket& operator=(const WorkPacket &other);
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return WorkPacket::typeName();
     }
 
     QByteArray pack() const;
-    
+
     static WorkPacket unpack(const QByteArray &data);
 
     bool shouldPack() const;
@@ -164,11 +163,11 @@ public:
     void abort();
 
     void runChunk() throw();
-    
+
     float progress() const;
-    
+
     bool wasAborted() const;
-    
+
     bool hasFinished() const;
 
     bool isError() const;
@@ -178,7 +177,7 @@ public:
 
     template<class T>
     bool isA() const;
-    
+
     template<class T>
     const T& asA() const;
 
@@ -203,22 +202,22 @@ public:
     AbortPacket();
 
     AbortPacket(const AbortPacket &other);
-    
+
     ~AbortPacket();
-    
+
     AbortPacket& operator=(const AbortPacket &other);
-    
+
     AbortPacket* clone() const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return AbortPacket::typeName();
     }
-    
+
     bool hasFinished() const;
-    
+
     virtual bool wasAborted() const;
 
 protected:
@@ -227,7 +226,7 @@ protected:
 
 /** This is a packet that contains an error. This is returned
     if something went wrong while running a WorkPacket
-    
+
     @author Christopher Woods
 */
 class SIRECLUSTER_EXPORT ErrorPacket : public WorkPacketBase
@@ -241,30 +240,30 @@ public:
     ErrorPacket(const SireError::exception &e);
 
     ErrorPacket(const ErrorPacket &other);
-    
+
     ~ErrorPacket();
-    
+
     ErrorPacket& operator=(const ErrorPacket &other);
-    
+
     ErrorPacket* clone() const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return ErrorPacket::typeName();
     }
-    
+
     int approximatePacketSize() const;
-    
+
     bool isError() const;
     void throwError() const;
-    
+
     bool hasFinished() const;
 
 protected:
     float chunk();
-    
+
 private:
     /** A binary representation of the error */
     QByteArray error_data;
@@ -282,27 +281,27 @@ public:
     WorkTest();
     WorkTest(int start, int end, int step=1);
     WorkTest(const WorkTest &other);
-    
+
     ~WorkTest();
-    
+
     WorkTest& operator=(const WorkTest &other);
-    
+
     WorkTest* clone() const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return WorkTest::typeName();
     }
-    
+
     int approximatePacketSize() const;
-    
+
     bool hasFinished() const;
 
 protected:
     float chunk();
-    
+
 private:
     /** The range to loop over */
     qint32 current, start, end, step;
@@ -319,7 +318,7 @@ bool WorkPacket::isA() const
     else
         return this->base().isA<T>();
 }
-    
+
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 const T& WorkPacket::asA() const

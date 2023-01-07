@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser(description="Perform molecular dynamics single 
                                              "using OpenMM",
                                  epilog="somd-freenrg is built using Sire and OpenMM and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org",
+                                        "http://sire.openbiosim.org",
                                  prog="somd-freenrg")
 
 parser.add_argument('-C', '--config', nargs="?",
@@ -82,7 +82,7 @@ if args.author:
 if args.version:
     print("somd-freenrg -- from Sire release version <%s>" %Sire.__version__)
     print("This particular release can be downloaded here: "
-          "https://github.com/michellab/Sire/releases/tag/v%s" %Sire.__version__)
+          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
     must_exit = True
 
 if args.help_config:

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -69,7 +68,7 @@ class QMMMElecEmbedPotential;
 /** This is the base class of all QM programs. These are wrappers that
     provide the functionality to calculate QM energies and forces
     by calling separate QM programs
-    
+
     @author Christopher Woods
 */
 class SQUIRE_EXPORT QMProgram : public SireBase::Property
@@ -85,44 +84,44 @@ public:
     QMProgram();
 
     QMProgram(const QMProgram &other);
-    
+
     virtual ~QMProgram();
-    
+
     static const char* typeName()
     {
         return "Squire::QMProgram";
     }
-    
+
     virtual QMProgram* clone() const=0;
-    
+
     /** Return whether or not this QM program supports the use
         of point lattice charges (which can polarise the QM wavefunction) */
     virtual bool supportsLatticeCharges() const
     {
         return false;
     }
-    
+
     /** Return whether or not this QM program supports the use
         of gaussian lattice charges (which can polarise the QM wavefunction) */
     virtual bool supportsGaussianCharges() const
     {
         return false;
     }
-    
+
     virtual int numberOfMMAtomsLimit() const;
     virtual int numberOfMMAtomsLimit(int num_qm_atoms) const;
-    
+
     virtual AtomCharges calculateCharges(const Molecule &molecule,
                                          const PropertyMap &map) const;
 
     virtual AtomCharges calculateCharges(const Molecule &molecule) const;
-    
+
     virtual QString chargeCommandFile(const Molecule &molecule) const;
     virtual QString chargeCommandFile(const Molecule &molecule,
                                       const PropertyMap &map) const;
-    
+
     static const NullQM& null();
-    
+
 protected:
     /** Calculate and return the QM energy of all of the molecules
         in 'molecules' */
@@ -163,21 +162,21 @@ protected:
                                     double scale_potential,
                                     int ntries=5) const;
 
-    virtual QVector<SireUnits::Dimension::MolarEnergy> 
+    virtual QVector<SireUnits::Dimension::MolarEnergy>
                             calculatePotential(const QMPotential::Molecules &molecules,
                                                const LatticeCharges &lattice_charges,
                                                PotentialTable &pottable,
                                                const SireFF::Probe &probe,
                                                double scale_potential,
                                                int ntries=5) const;
-    
+
     /** Return the contents of the command file that would be used
         to run the QM program to calculate energies */
     virtual QString energyCommandFile(const QMPotential::Molecules &molecules) const=0;
 
     virtual QString energyCommandFile(const QMPotential::Molecules &molecules,
                                       const LatticeCharges &lattice_charges) const;
-    
+
     /** Return the contents of the command file that would be used
         to run the QM program to calculate forces */
     virtual QString forceCommandFile(const QMPotential::Molecules &molecules,
@@ -211,7 +210,7 @@ protected:
 };
 
 /** This is the null QM program that returns zero energy and force */
-class SQUIRE_EXPORT NullQM 
+class SQUIRE_EXPORT NullQM
         : public SireBase::ConcreteProperty<NullQM,QMProgram>
 {
 
@@ -220,15 +219,15 @@ friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, NullQM&);
 
 public:
     NullQM();
-    
+
     NullQM(const NullQM &other);
-    
+
     ~NullQM();
-    
+
     static const char* typeName();
-    
+
     NullQM& operator=(const NullQM &other);
-    
+
     bool operator==(const NullQM &other) const;
     bool operator!=(const NullQM &other) const;
 
@@ -238,7 +237,7 @@ public:
     {
         return true;
     }
-    
+
 protected:
     double calculateEnergy(const QMPotential::Molecules &molecules,
                            int ntries=5) const;
@@ -246,7 +245,7 @@ protected:
     double calculateEnergy(const QMPotential::Molecules &molecules,
                            const LatticeCharges &lattice_charges,
                            int ntries=5) const;
-    
+
     QString energyCommandFile(const QMPotential::Molecules &molecules) const;
     QString forceCommandFile(const QMPotential::Molecules &molecules,
                              const ForceTable &forcetable) const;

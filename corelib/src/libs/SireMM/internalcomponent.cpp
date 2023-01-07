@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,7 +47,7 @@ QDataStream &operator<<(QDataStream &ds, const BondComponent &bond)
 {
     writeHeader(ds, r_bond, 1);
     ds << static_cast<const FFComponent&>(bond);
-    
+
     return ds;
 }
 
@@ -56,14 +55,14 @@ QDataStream &operator<<(QDataStream &ds, const BondComponent &bond)
 QDataStream &operator>>(QDataStream &ds, BondComponent &bond)
 {
     VersionID v = readHeader(ds, r_bond);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(bond);
     }
     else
         throw version_error(v, "1", r_bond, CODELOC);
-        
+
     return ds;
 }
 
@@ -80,12 +79,12 @@ BondComponent::BondComponent(const SireCAS::Symbol &symbol)
               : FFComponent(symbol, QLatin1String("bond"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 BondComponent::BondComponent(const BondComponent &other)
               : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 BondComponent::~BondComponent()
 {}
 
@@ -114,7 +113,7 @@ QDataStream &operator<<(QDataStream &ds, const AngleComponent &angle)
 {
     writeHeader(ds, r_angle, 1);
     ds << static_cast<const FFComponent&>(angle);
-    
+
     return ds;
 }
 
@@ -122,14 +121,14 @@ QDataStream &operator<<(QDataStream &ds, const AngleComponent &angle)
 QDataStream &operator>>(QDataStream &ds, AngleComponent &angle)
 {
     VersionID v = readHeader(ds, r_angle);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(angle);
     }
     else
         throw version_error(v, "1", r_angle, CODELOC);
-        
+
     return ds;
 }
 
@@ -146,12 +145,12 @@ AngleComponent::AngleComponent(const SireCAS::Symbol &symbol)
                : FFComponent(symbol, QLatin1String("angle"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 AngleComponent::AngleComponent(const AngleComponent &other)
               : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 AngleComponent::~AngleComponent()
 {}
 
@@ -180,7 +179,7 @@ QDataStream &operator<<(QDataStream &ds, const DihedralComponent &dihedral)
 {
     writeHeader(ds, r_dihedral, 1);
     ds << static_cast<const FFComponent&>(dihedral);
-    
+
     return ds;
 }
 
@@ -188,14 +187,14 @@ QDataStream &operator<<(QDataStream &ds, const DihedralComponent &dihedral)
 QDataStream &operator>>(QDataStream &ds, DihedralComponent &dihedral)
 {
     VersionID v = readHeader(ds, r_dihedral);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(dihedral);
     }
     else
         throw version_error(v, "1", r_dihedral, CODELOC);
-        
+
     return ds;
 }
 
@@ -212,12 +211,12 @@ DihedralComponent::DihedralComponent(const SireCAS::Symbol &symbol)
                   : FFComponent(symbol, QLatin1String("dihedral"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 DihedralComponent::DihedralComponent(const DihedralComponent &other)
               : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 DihedralComponent::~DihedralComponent()
 {}
 
@@ -246,7 +245,7 @@ QDataStream &operator<<(QDataStream &ds, const ImproperComponent &improper)
 {
     writeHeader(ds, r_improper, 1);
     ds << static_cast<const FFComponent&>(improper);
-    
+
     return ds;
 }
 
@@ -254,14 +253,14 @@ QDataStream &operator<<(QDataStream &ds, const ImproperComponent &improper)
 QDataStream &operator>>(QDataStream &ds, ImproperComponent &improper)
 {
     VersionID v = readHeader(ds, r_improper);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(improper);
     }
     else
         throw version_error(v, "1", r_improper, CODELOC);
-        
+
     return ds;
 }
 
@@ -278,12 +277,12 @@ ImproperComponent::ImproperComponent(const SireCAS::Symbol &symbol)
                   : FFComponent(symbol, QLatin1String("improper"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 ImproperComponent::ImproperComponent(const ImproperComponent &other)
                   : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 ImproperComponent::~ImproperComponent()
 {}
 
@@ -312,7 +311,7 @@ QDataStream &operator<<(QDataStream &ds, const UreyBradleyComponent &ub)
 {
     writeHeader(ds, r_ub, 1);
     ds << static_cast<const FFComponent&>(ub);
-    
+
     return ds;
 }
 
@@ -320,14 +319,14 @@ QDataStream &operator<<(QDataStream &ds, const UreyBradleyComponent &ub)
 QDataStream &operator>>(QDataStream &ds, UreyBradleyComponent &ub)
 {
     VersionID v = readHeader(ds, r_ub);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(ub);
     }
     else
         throw version_error(v, "1", r_ub, CODELOC);
-        
+
     return ds;
 }
 
@@ -344,12 +343,12 @@ UreyBradleyComponent::UreyBradleyComponent(const SireCAS::Symbol &symbol)
                      : FFComponent(symbol, QLatin1String("urey_bradley"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 UreyBradleyComponent::UreyBradleyComponent(const UreyBradleyComponent &other)
                      : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 UreyBradleyComponent::~UreyBradleyComponent()
 {}
 
@@ -378,7 +377,7 @@ QDataStream &operator<<(QDataStream &ds, const StretchStretchComponent &ss)
 {
     writeHeader(ds, r_ss, 1);
     ds << static_cast<const FFComponent&>(ss);
-    
+
     return ds;
 }
 
@@ -386,14 +385,14 @@ QDataStream &operator<<(QDataStream &ds, const StretchStretchComponent &ss)
 QDataStream &operator>>(QDataStream &ds, StretchStretchComponent &ss)
 {
     VersionID v = readHeader(ds, r_ss);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(ss);
     }
     else
         throw version_error(v, "1", r_ss, CODELOC);
-        
+
     return ds;
 }
 
@@ -410,12 +409,12 @@ StretchStretchComponent::StretchStretchComponent(const SireCAS::Symbol &symbol)
                         : FFComponent(symbol, QLatin1String("stretch-stretch"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 StretchStretchComponent::StretchStretchComponent(const StretchStretchComponent &other)
                         : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 StretchStretchComponent::~StretchStretchComponent()
 {}
 
@@ -428,7 +427,7 @@ void StretchStretchComponent::setEnergy(FF &ff, const StretchStretchEnergy &nrg)
 
 /** Change the component of the energy in the forcefield 'ff'
     by 'delta' */
-void StretchStretchComponent::changeEnergy(FF &ff, 
+void StretchStretchComponent::changeEnergy(FF &ff,
                                            const StretchStretchEnergy &delta) const
 {
     FFComponent::changeEnergy(ff, this->total(), delta);
@@ -445,7 +444,7 @@ QDataStream &operator<<(QDataStream &ds, const StretchBendComponent &sb)
 {
     writeHeader(ds, r_sb, 1);
     ds << static_cast<const FFComponent&>(sb);
-    
+
     return ds;
 }
 
@@ -453,14 +452,14 @@ QDataStream &operator<<(QDataStream &ds, const StretchBendComponent &sb)
 QDataStream &operator>>(QDataStream &ds, StretchBendComponent &sb)
 {
     VersionID v = readHeader(ds, r_sb);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(sb);
     }
     else
         throw version_error(v, "1", r_sb, CODELOC);
-        
+
     return ds;
 }
 
@@ -477,12 +476,12 @@ StretchBendComponent::StretchBendComponent(const SireCAS::Symbol &symbol)
                      : FFComponent(symbol, QLatin1String("stretch-bend"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 StretchBendComponent::StretchBendComponent(const StretchBendComponent &other)
                      : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 StretchBendComponent::~StretchBendComponent()
 {}
 
@@ -511,7 +510,7 @@ QDataStream &operator<<(QDataStream &ds, const BendBendComponent &bb)
 {
     writeHeader(ds, r_bb, 1);
     ds << static_cast<const FFComponent&>(bb);
-    
+
     return ds;
 }
 
@@ -519,14 +518,14 @@ QDataStream &operator<<(QDataStream &ds, const BendBendComponent &bb)
 QDataStream &operator>>(QDataStream &ds, BendBendComponent &bb)
 {
     VersionID v = readHeader(ds, r_bb);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(bb);
     }
     else
         throw version_error(v, "1", r_bb, CODELOC);
-        
+
     return ds;
 }
 
@@ -543,12 +542,12 @@ BendBendComponent::BendBendComponent(const SireCAS::Symbol &symbol)
                   : FFComponent(symbol, QLatin1String("bend-bend"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 BendBendComponent::BendBendComponent(const BendBendComponent &other)
                   : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 BendBendComponent::~BendBendComponent()
 {}
 
@@ -573,12 +572,12 @@ void BendBendComponent::changeEnergy(FF &ff, const BendBendEnergy &delta) const
 static const RegisterMetaType<StretchBendTorsionComponent> r_sbt;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                       const StretchBendTorsionComponent &sbt)
 {
     writeHeader(ds, r_sbt, 1);
     ds << static_cast<const FFComponent&>(sbt);
-    
+
     return ds;
 }
 
@@ -586,14 +585,14 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, StretchBendTorsionComponent &sbt)
 {
     VersionID v = readHeader(ds, r_sbt);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(sbt);
     }
     else
         throw version_error(v, "1", r_bond, CODELOC);
-        
+
     return ds;
 }
 
@@ -610,19 +609,19 @@ StretchBendTorsionComponent::StretchBendTorsionComponent(const SireCAS::Symbol &
                   : FFComponent(symbol, QLatin1String("stretch-bend-torsion"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 StretchBendTorsionComponent::StretchBendTorsionComponent(
                                         const StretchBendTorsionComponent &other)
               : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 StretchBendTorsionComponent::~StretchBendTorsionComponent()
 {}
 
 /** Set the component of the energy in the forcefield 'ff'
     to be equal to the passed energy */
-void StretchBendTorsionComponent::setEnergy(FF &ff, 
+void StretchBendTorsionComponent::setEnergy(FF &ff,
                                         const StretchBendTorsionEnergy &nrg) const
 {
     FFComponent::setEnergy(ff, this->total(), nrg);
@@ -630,7 +629,7 @@ void StretchBendTorsionComponent::setEnergy(FF &ff,
 
 /** Change the component of the energy in the forcefield 'ff'
     by 'delta' */
-void StretchBendTorsionComponent::changeEnergy(FF &ff, 
+void StretchBendTorsionComponent::changeEnergy(FF &ff,
                                         const StretchBendTorsionEnergy &delta) const
 {
     FFComponent::changeEnergy(ff, this->total(), delta);
@@ -647,7 +646,7 @@ QDataStream &operator<<(QDataStream &ds, const Intra14CoulombComponent &comp)
 {
     writeHeader(ds, r_14coul, 1);
     ds << static_cast<const FFComponent&>(comp);
-    
+
     return ds;
 }
 
@@ -655,14 +654,14 @@ QDataStream &operator<<(QDataStream &ds, const Intra14CoulombComponent &comp)
 QDataStream &operator>>(QDataStream &ds, Intra14CoulombComponent &comp)
 {
     VersionID v = readHeader(ds, r_14coul);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(comp);
     }
     else
         throw version_error(v, "1", r_14coul, CODELOC);
-        
+
     return ds;
 }
 
@@ -679,12 +678,12 @@ Intra14CoulombComponent::Intra14CoulombComponent(const SireCAS::Symbol &symbol)
                         : FFComponent(symbol, QLatin1String("1-4[coulomb]"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 Intra14CoulombComponent::Intra14CoulombComponent(const Intra14CoulombComponent &other)
                         : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 Intra14CoulombComponent::~Intra14CoulombComponent()
 {}
 
@@ -713,7 +712,7 @@ QDataStream &operator<<(QDataStream &ds, const Intra14LJComponent &comp)
 {
     writeHeader(ds, r_14lj, 1);
     ds << static_cast<const FFComponent&>(comp);
-    
+
     return ds;
 }
 
@@ -721,14 +720,14 @@ QDataStream &operator<<(QDataStream &ds, const Intra14LJComponent &comp)
 QDataStream &operator>>(QDataStream &ds, Intra14LJComponent &comp)
 {
     VersionID v = readHeader(ds, r_14lj);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(comp);
     }
     else
         throw version_error(v, "1", r_14lj, CODELOC);
-        
+
     return ds;
 }
 
@@ -745,12 +744,12 @@ Intra14LJComponent::Intra14LJComponent(const SireCAS::Symbol &symbol)
                    : FFComponent(symbol, QLatin1String("1-4[LJ]"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 Intra14LJComponent::Intra14LJComponent(const Intra14LJComponent &other)
                    : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 Intra14LJComponent::~Intra14LJComponent()
 {}
 
@@ -778,10 +777,10 @@ static const RegisterMetaType<Intra14Component> r_14;
 QDataStream &operator<<(QDataStream &ds, const Intra14Component &comp)
 {
     writeHeader(ds, r_14, 1);
-    
+
     ds << static_cast<const FFComponent&>(comp)
        << comp.coul_component << comp.lj_component;
-    
+
     return ds;
 }
 
@@ -789,7 +788,7 @@ QDataStream &operator<<(QDataStream &ds, const Intra14Component &comp)
 QDataStream &operator>>(QDataStream &ds, Intra14Component &comp)
 {
     VersionID v = readHeader(ds, r_14);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(comp)
@@ -797,7 +796,7 @@ QDataStream &operator>>(QDataStream &ds, Intra14Component &comp)
     }
     else
         throw version_error(v, "1", r_14, CODELOC);
-        
+
     return ds;
 }
 
@@ -818,14 +817,14 @@ Intra14Component::Intra14Component(const SireCAS::Symbol &symbol)
     lj_component = Intra14LJComponent(this->forceFieldName());
 }
 
-/** Copy constructor */  
+/** Copy constructor */
 Intra14Component::Intra14Component(const Intra14Component &other)
                  : FFComponent(other),
                    coul_component(other.coul_component),
                    lj_component(other.lj_component)
 {}
 
-/** Destructor */  
+/** Destructor */
 Intra14Component::~Intra14Component()
 {}
 
@@ -833,13 +832,13 @@ Intra14Component::~Intra14Component()
 Symbols Intra14Component::symbols() const
 {
     Symbols symbls;
-    
+
     symbls.reserve(3);
-    
+
     symbls.insert(*this);
     symbls.insert(coul_component);
     symbls.insert(lj_component);
-    
+
     return symbls;
 }
 
@@ -869,7 +868,7 @@ static const RegisterMetaType<InternalComponent> r_internal;
 QDataStream &operator<<(QDataStream &ds, const InternalComponent &internal)
 {
     writeHeader(ds, r_internal, 2);
-    
+
     ds << static_cast<const FFComponent&>(internal)
        << internal.bond_component
        << internal.angle_component
@@ -881,7 +880,7 @@ QDataStream &operator<<(QDataStream &ds, const InternalComponent &internal)
        << internal.bb_component
        << internal.sbt_component
        << internal.nb_component;
-    
+
     return ds;
 }
 
@@ -889,7 +888,7 @@ QDataStream &operator<<(QDataStream &ds, const InternalComponent &internal)
 QDataStream &operator>>(QDataStream &ds, InternalComponent &internal)
 {
     VersionID v = readHeader(ds, r_internal);
-    
+
     if (v == 2)
     {
         ds >> static_cast<FFComponent&>(internal)
@@ -916,12 +915,12 @@ QDataStream &operator>>(QDataStream &ds, InternalComponent &internal)
            >> internal.sb_component
            >> internal.bb_component
            >> internal.sbt_component;
-        
+
         internal.nb_component = Intra14Component( internal.forceFieldName() );
     }
     else
         throw version_error(v, "1,2", r_internal, CODELOC);
-        
+
     return ds;
 }
 
@@ -929,7 +928,7 @@ QDataStream &operator>>(QDataStream &ds, InternalComponent &internal)
 InternalComponent::InternalComponent(const FFName &ffname)
                   : FFComponent(ffname, QLatin1String("internal")),
                     bond_component(ffname), angle_component(ffname),
-                    dihedral_component(ffname), 
+                    dihedral_component(ffname),
                     improper_component(ffname), ub_component(ffname),
                     ss_component(ffname), sb_component(ffname),
                     bb_component(ffname), sbt_component(ffname),
@@ -946,21 +945,21 @@ InternalComponent::InternalComponent(const SireCAS::Symbol &symbol)
     bond_component = BondComponent( this->forceFieldName() );
     angle_component = AngleComponent( this->forceFieldName() );
     dihedral_component = DihedralComponent( this->forceFieldName() );
-    
+
     improper_component = ImproperComponent( this->forceFieldName() );
     ub_component = UreyBradleyComponent( this->forceFieldName() );
-    
+
     ss_component = StretchStretchComponent( this->forceFieldName() );
     sb_component = StretchBendComponent( this->forceFieldName() );
     bb_component = BendBendComponent( this->forceFieldName() );
     sbt_component = StretchBendTorsionComponent( this->forceFieldName() );
-    
+
     nb_component = Intra14Component( this->forceFieldName() );
 }
 
-/** Copy constructor */  
+/** Copy constructor */
 InternalComponent::InternalComponent(const InternalComponent &other)
-                  : FFComponent(other), 
+                  : FFComponent(other),
                     bond_component(other.bond_component),
                     angle_component(other.angle_component),
                     dihedral_component(other.dihedral_component),
@@ -972,8 +971,8 @@ InternalComponent::InternalComponent(const InternalComponent &other)
                     sbt_component(other.sbt_component),
                     nb_component(other.nb_component)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 InternalComponent::~InternalComponent()
 {}
 
@@ -981,27 +980,27 @@ InternalComponent::~InternalComponent()
 Symbols InternalComponent::symbols() const
 {
     Symbols symbls;
-    
+
     symbls.reserve(13);
-    
+
     symbls.insert(*this);
-    
+
     symbls.insert(bond_component);
     symbls.insert(angle_component);
     symbls.insert(dihedral_component);
-    
+
     symbls.insert(improper_component);
     symbls.insert(ub_component);
-    
+
     symbls.insert(ss_component);
     symbls.insert(sb_component);
     symbls.insert(bb_component);
     symbls.insert(sbt_component);
-    
+
     symbls.insert(nb_component);
     symbls.insert(nb_component.coulomb());
     symbls.insert(nb_component.lj());
-    
+
     return symbls;
 }
 
@@ -1012,15 +1011,15 @@ void InternalComponent::setEnergy(FF &ff, const InternalEnergy &value) const
     FFComponent::setEnergy(ff, this->bond(), value.bond());
     FFComponent::setEnergy(ff, this->angle(), value.angle());
     FFComponent::setEnergy(ff, this->dihedral(), value.dihedral());
-    
+
     FFComponent::setEnergy(ff, this->improper(), value.improper());
     FFComponent::setEnergy(ff, this->ureyBradley(), value.ureyBradley());
-    
+
     FFComponent::setEnergy(ff, this->stretchStretch(), value.stretchStretch());
     FFComponent::setEnergy(ff, this->stretchBend(), value.stretchBend());
     FFComponent::setEnergy(ff, this->bendBend(), value.bendBend());
     FFComponent::setEnergy(ff, this->stretchBendTorsion(), value.stretchBendTorsion());
-    
+
     FFComponent::setEnergy(ff, this->intra14(), value.intra14());
     FFComponent::setEnergy(ff, this->intra14Coulomb(), value.intra14Coulomb());
     FFComponent::setEnergy(ff, this->intra14LJ(), value.intra14LJ());
@@ -1033,14 +1032,14 @@ void InternalComponent::changeEnergy(FF &ff, const InternalEnergy &delta) const
     FFComponent::changeEnergy(ff, this->bond(), delta.bond());
     FFComponent::changeEnergy(ff, this->angle(), delta.angle());
     FFComponent::changeEnergy(ff, this->dihedral(), delta.dihedral());
-    
+
     FFComponent::changeEnergy(ff, this->improper(), delta.improper());
     FFComponent::changeEnergy(ff, this->ureyBradley(), delta.ureyBradley());
-    
+
     FFComponent::changeEnergy(ff, this->stretchStretch(), delta.stretchStretch());
     FFComponent::changeEnergy(ff, this->stretchBend(), delta.stretchBend());
     FFComponent::changeEnergy(ff, this->bendBend(), delta.bendBend());
-    FFComponent::changeEnergy(ff, this->stretchBendTorsion(), 
+    FFComponent::changeEnergy(ff, this->stretchBendTorsion(),
                               delta.stretchBendTorsion());
 
     FFComponent::changeEnergy(ff, this->intra14(), delta.intra14());
@@ -1054,30 +1053,30 @@ void InternalComponent::changeEnergy(FF &ff, const InternalEnergy &delta) const
 
 /** Constructor */
 InternalEnergy::InternalEnergy(double bondnrg, double anglenrg,
-                               double dihedralnrg, 
+                               double dihedralnrg,
                                double impropernrg, double ubnrg,
                                double ssnrg, double sbnrg,
                                double bbnrg, double sbtnrg,
                                Intra14Energy inrg)
                : i14nrg(inrg),
                  ibndnrg(bondnrg), iangnrg(anglenrg),
-                 idihnrg(dihedralnrg), 
+                 idihnrg(dihedralnrg),
                  iimpnrg(impropernrg), iubnrg(ubnrg),
                  issnrg(ssnrg), isbnrg(sbnrg),
                  ibbnrg(bbnrg), isbtnrg(sbtnrg)
 {}
-  
-/** Copy constructor */  
+
+/** Copy constructor */
 InternalEnergy::InternalEnergy(const InternalEnergy &other)
                : i14nrg(other.i14nrg),
                  ibndnrg(other.ibndnrg), iangnrg(other.iangnrg),
-                 idihnrg(other.idihnrg), 
+                 idihnrg(other.idihnrg),
                  iimpnrg(other.iimpnrg), iubnrg(other.iubnrg),
                  issnrg(other.issnrg), isbnrg(other.isbnrg),
                  ibbnrg(other.ibbnrg), isbtnrg(other.isbtnrg)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 InternalEnergy::~InternalEnergy()
 {}
 
@@ -1089,13 +1088,13 @@ InternalEnergy::~InternalEnergy()
 Intra14Energy::Intra14Energy(double coul_nrg, double lj_nrg)
                : cnrg(coul_nrg), ljnrg(lj_nrg)
 {}
-  
-/** Copy constructor */  
+
+/** Copy constructor */
 Intra14Energy::Intra14Energy(const Intra14Energy &other)
               : cnrg(other.cnrg), ljnrg(other.ljnrg)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 Intra14Energy::~Intra14Energy()
 {}
 

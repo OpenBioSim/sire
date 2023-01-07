@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,7 +44,7 @@
 namespace SireBase
 {
 
-/** This class is used to register a unit test 
+/** This class is used to register a unit test
 
     @author Christopher Woods
 */
@@ -55,18 +54,18 @@ public:
     UnitTest();
     UnitTest(const QString &name, void (*test_func)(bool));
     UnitTest(const UnitTest &other);
-    
+
     ~UnitTest();
-    
+
     bool run(int nrepeats=1, bool verbose=false);
 
     bool wasSuccessful();
     bool wasError();
-    
+
     QString name() const;
-    
+
     QString errorString();
-    
+
     quint64 runTime();
 
     static QList< boost::shared_ptr<UnitTest> > tests();
@@ -82,14 +81,14 @@ private:
 
     /** Pointer to the function to run */
     void (*test_function)(bool);
-    
+
     /** The error string. This is empty if the test has
         not been run or was successful */
     QString error_string;
-    
+
     /** How long the test took to run (on average across all runs) */
     quint64 run_time;
-    
+
     /** The set of all tests that have been registered */
     static QList< boost::shared_ptr<UnitTest> > all_tests;
 };
@@ -123,7 +122,7 @@ template<class T>
 void assert_nearly_equal( const T &a, const T &b, const T &range, const QString &code_location )
 {
     if ((a - b < -range) or (a - b > range))
-    {                                    
+    {
         throw SireError::assertation_failed( QObject::tr("NOT NEARLY EQUAL\n\n%1\n\n!=\n\n%2\n\n"
                                                          "TO WITHIN %3")
                         .arg(Sire::toString(a)).arg(Sire::toString(b))
@@ -164,7 +163,7 @@ SIRE_ALWAYS_INLINE void assert_false( bool result, const QString &code_location 
                         "The expected exception %1 was not thrown. Instead the exception "
                         "%2 was thrown.").arg(e.what()).arg(thrown.what()), code_location );
             }
-            
+
             return;
         }
         catch(const std::exception &thrown)
@@ -179,7 +178,7 @@ SIRE_ALWAYS_INLINE void assert_false( bool result, const QString &code_location 
                         "The expected exception %1 was not thrown. Instead an unknown exception "
                         "was thrown.").arg(e.what()), code_location );
         }
-        
+
         throw SireError::assertation_failed( QObject::tr(
                     "The expected exception %1 was not thrown, as no exception was thrown!")
                         .arg(e.what()), code_location );

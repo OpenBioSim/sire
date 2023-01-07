@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser(description="Analyse Sire restart files to get 
                                              "about the replica exchange moves performed during the simulation.",
                                  epilog="analyse_reti is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/analyse_reti",
+                                        "http://sire.openbiosim.org/analyse_reti",
                                  prog="analyse_reti")
 
 parser.add_argument('--description', action="store_true",
@@ -80,7 +80,7 @@ if args.author:
 if args.version:
     print("analyse_reti -- from Sire release version <%s>" %Sire.__version__)
     print("This particular release can be downloaded here: "
-          "https://github.com/michellab/Sire/releases/tag/v%s" %Sire.__version__)
+          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
     must_exit = True
 
 if must_exit:

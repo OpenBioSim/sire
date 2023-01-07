@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,7 +51,7 @@ using SireUnits::Dimension::Angle;
 
 /**
 This class represents a triangle in three-dimensional space. (or three points)
- 
+
 @author Christopher Woods
 */
 class SIREMATHS_EXPORT Triangle
@@ -63,15 +62,15 @@ friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Triangle&);
 
 public:
     Triangle();
-    Triangle(const Vector &point0, const Vector &point1, 
+    Triangle(const Vector &point0, const Vector &point1,
              const Vector &point2);
-    
+
     Triangle(const Triangle &other);
-    
+
     ~Triangle();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return Triangle::typeName();
@@ -80,11 +79,11 @@ public:
     QString toString() const;
 
     Angle angle() const;
-    
+
     Angle angle0() const;
     Angle angle1() const;
     Angle angle2() const;
-    
+
     Vector vector() const;
 
     Line line0() const;
@@ -96,7 +95,7 @@ public:
     Vector vector2() const;
 
     int count() const;
-    
+
     const Vector& point(int i) const;
     const Vector& operator[](int i) const;
     const Vector& at(int i) const;

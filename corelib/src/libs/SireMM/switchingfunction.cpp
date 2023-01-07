@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -75,7 +74,7 @@ QDataStream &operator>>(QDataStream &ds, SwitchingFunction &switchfunc)
         ds >> static_cast<Property&>(switchfunc)
            >> switchfunc.cut_elec >> switchfunc.feather_elec
            >> switchfunc.cut_vdw >> switchfunc.feather_vdw;
-           
+
         switchfunc.cutdist = qMax(switchfunc.cut_elec, switchfunc.cut_vdw);
         switchfunc.featherdist = qMax(switchfunc.feather_elec,
                                       switchfunc.feather_vdw);
@@ -109,7 +108,7 @@ SwitchingFunction::SwitchingFunction(Length cutdistance)
                     feather_vdw(cutdist)
 {}
 
-/** Construct placing the cutoff distance at 'cutdistance' and 
+/** Construct placing the cutoff distance at 'cutdistance' and
     start feathering at 'featherdistance' */
 SwitchingFunction::SwitchingFunction(Length cutdistance, Length featherdistance)
                   : Property(),
@@ -121,7 +120,7 @@ SwitchingFunction::SwitchingFunction(Length cutdistance, Length featherdistance)
                     feather_vdw(featherdist)
 {}
 
-/** Construct placing the electrostatic cutoff at 'eleccut' with 
+/** Construct placing the electrostatic cutoff at 'eleccut' with
     the feather at 'elecfeather', while the vdw cutoff is at
     'vdwcut' with the feather at 'vdwfeather' */
 SwitchingFunction::SwitchingFunction(Length eleccut, Length elecfeather,
@@ -130,18 +129,18 @@ SwitchingFunction::SwitchingFunction(Length eleccut, Length elecfeather,
 {
     cut_elec = std::abs(eleccut);
     cut_vdw = std::abs(vdwcut);
-    
+
     cutdist = qMax(cut_elec, cut_vdw);
-    
+
     feather_elec = qMin( cut_elec, std::abs(elecfeather) );
     feather_vdw = qMin( cut_vdw, std::abs(vdwfeather) );
-    
+
     featherdist = qMax(feather_elec, feather_vdw);
 }
 
 /** Copy constructor */
 SwitchingFunction::SwitchingFunction(const SwitchingFunction &other)
-                  : Property(other), 
+                  : Property(other),
                     cutdist(other.cutdist),
                     featherdist(other.featherdist),
                     cut_elec(other.cut_elec),
@@ -160,17 +159,17 @@ SwitchingFunction& SwitchingFunction::operator=(const SwitchingFunction &other)
     if (this != &other)
     {
         Property::operator=(other);
-    
+
         cutdist = other.cutdist;
         featherdist = other.featherdist;
-        
+
         cut_elec = other.cut_elec;
         feather_elec = other.feather_elec;
-        
+
         cut_vdw = other.cut_vdw;
         feather_vdw = other.feather_vdw;
     }
-    
+
     return *this;
 }
 
@@ -221,7 +220,7 @@ QDataStream &operator>>(QDataStream &ds, NoCutoff &nocutoff)
 }
 
 /** Constructor */
-NoCutoff::NoCutoff() 
+NoCutoff::NoCutoff()
          : ConcreteProperty<NoCutoff,SwitchingFunction>(
                                 Length(std::numeric_limits<double>::max()) )
 {}
@@ -274,7 +273,7 @@ double NoCutoff::vdwScaleFactor(Length) const
     return 1;
 }
 
-/** Return the derivative of the electrostatic scale factor - this 
+/** Return the derivative of the electrostatic scale factor - this
     will always be 0 as there is no cutoff! */
 double NoCutoff::dElectrostaticScaleFactor(Length) const
 {
@@ -325,7 +324,7 @@ void HarmonicSwitchingFunction::set(double cutelec, double featherelec,
         norm_vdw = 1.0 / (cut_vdw2 - SireMaths::pow_2(feather_vdw));
     else
         norm_vdw = 0;
-        
+
     cutdist = qMax( cut_elec, cut_vdw );
     featherdist = qMax( feather_elec, feather_vdw );
 }
@@ -365,7 +364,7 @@ HarmonicSwitchingFunction::HarmonicSwitchingFunction()
 {
     cut_elec2 = cut_elec;
     cut_vdw2 = cut_vdw;
-    
+
     norm_elec = 0;
     norm_vdw = 0;
 }
@@ -443,7 +442,7 @@ HarmonicSwitchingFunction& HarmonicSwitchingFunction::operator=(
         norm_elec = other.norm_elec;
         cut_vdw2 = other.cut_vdw2;
         norm_vdw = other.norm_vdw;
-        
+
         SwitchingFunction::operator=(other);
     }
 
@@ -460,7 +459,7 @@ bool HarmonicSwitchingFunction::operator==(const HarmonicSwitchingFunction &othe
 bool HarmonicSwitchingFunction::operator!=(const HarmonicSwitchingFunction &other) const
 {
     return SwitchingFunction::operator!=(other);
-}                                      
+}
 
 /** Return a string representation of this switching function */
 QString HarmonicSwitchingFunction::toString() const
@@ -513,7 +512,7 @@ double HarmonicSwitchingFunction::vdwScaleFactor(Length dist) const
 
 /** This throws an exception as the harmonic switching function has
     a discontinuous first derivative, so is not suitable for force evaluations
-    
+
     \throw SireFF::missing_derivative
 */
 double HarmonicSwitchingFunction::dElectrostaticScaleFactor(Length) const
@@ -527,7 +526,7 @@ double HarmonicSwitchingFunction::dElectrostaticScaleFactor(Length) const
 
 /** This throws an exception as the harmonic switching function has
     a discontinuous first derivative, so is not suitable for force evaluations
-    
+
     \throw SireFF::missing_derivative
 */
 double HarmonicSwitchingFunction::dVDWScaleFactor(Length) const
@@ -577,7 +576,7 @@ void CHARMMSwitchingFunction::set(double cutelec, double featherelec,
         norm_vdw = 1.0 / SireMaths::pow_3( cut_vdw2 - feather_vdw2 );
     else
         norm_vdw = 0;
-        
+
     cutdist = qMax( cut_elec, cut_vdw );
     featherdist = qMax( feather_elec, feather_vdw );
 }
@@ -620,7 +619,7 @@ CHARMMSwitchingFunction::CHARMMSwitchingFunction()
 
     cut_vdw2 = cut_vdw;
     feather_vdw2 = feather_vdw;
-    
+
     norm_elec = 0;
     norm_vdw = 0;
 }
@@ -680,7 +679,7 @@ CHARMMSwitchingFunction::CHARMMSwitchingFunction(Length eleccutoff,
 CHARMMSwitchingFunction::CHARMMSwitchingFunction(
                                 const CHARMMSwitchingFunction &other)
     : ConcreteProperty<CHARMMSwitchingFunction,SwitchingFunction>(other),
-      cut_elec2(other.cut_elec2), feather_elec2(other.feather_elec2), 
+      cut_elec2(other.cut_elec2), feather_elec2(other.feather_elec2),
       norm_elec(other.norm_elec),
       cut_vdw2(other.cut_vdw2), feather_vdw2(other.feather_vdw2),
       norm_vdw(other.norm_vdw)
@@ -702,7 +701,7 @@ CHARMMSwitchingFunction& CHARMMSwitchingFunction::operator=(
         cut_vdw2 = other.cut_vdw2;
         feather_vdw2 = other.feather_vdw2;
         norm_vdw = other.norm_vdw;
-        
+
         SwitchingFunction::operator=(other);
     }
 
@@ -719,7 +718,7 @@ bool CHARMMSwitchingFunction::operator==(const CHARMMSwitchingFunction &other) c
 bool CHARMMSwitchingFunction::operator!=(const CHARMMSwitchingFunction &other) const
 {
     return SwitchingFunction::operator!=(other);
-}                                      
+}
 
 /** Return a string representation of this switching function */
 QString CHARMMSwitchingFunction::toString() const
@@ -755,7 +754,7 @@ double CHARMMSwitchingFunction::electrostaticScaleFactor(Length dist) const
     else
     {
         double dist2 = SireMaths::pow_2( double(dist) );
-        
+
 	//return SireMaths::pow_3(cut_elec2 - dist2) *
 	return SireMaths::pow_2(cut_elec2 - dist2) *
                  (cut_elec2 + 2*dist2 - 3*feather_elec2) * norm_elec;
@@ -780,7 +779,7 @@ double CHARMMSwitchingFunction::vdwScaleFactor(Length dist) const
     else
     {
         double dist2 = SireMaths::pow_2( double(dist) );
-        
+
         //return SireMaths::pow_3(cut_vdw2 - dist2) *
 	return SireMaths::pow_2(cut_vdw2 - dist2) *
                  (cut_vdw2 + 2*dist2 - 3*feather_vdw2) * norm_vdw;
@@ -789,12 +788,12 @@ double CHARMMSwitchingFunction::vdwScaleFactor(Length dist) const
 
 /** Return the derivative of the electrostatic scaling factor as
     a function of distance. This returns;
-    
+
     dist <= feather_elec           : 0
     feather_elec < dist < cut_elec : 12 r (cut_elec^2 - r^2)(feather_elec^2 - r^2) /
                                             (cut_elec^2 - feather_elec^2)^3
     dist >= cut_elec               : 0
-    
+
     The derivative is continuous in distance, but the second derivative
     is discontinuous.
 */
@@ -807,19 +806,19 @@ double CHARMMSwitchingFunction::dElectrostaticScaleFactor(Length dist) const
     else
     {
         double dist2 = SireMaths::pow_2( double(dist) );
-        
+
         return 12 * dist * (cut_elec2 - dist2) * (feather_elec2 - dist2) * norm_elec;
     }
 }
 
 /** Return the derivative of the vdw scaling factor as
     a function of distance. This returns;
-    
+
     dist <= feather_vdw           : 0
     feather_vdw < dist < cut_vdw  : 12 r (cut_vdw^2 - r^2)(feather_vdw^2 - r^2) /
                                             (cut_vdw^2 - feather_vdw^2)^3
     dist >= cut_vdw               : 0
-    
+
     The derivative is continuous in distance, but the second derivative
     is discontinuous.
 */
@@ -832,7 +831,7 @@ double CHARMMSwitchingFunction::dVDWScaleFactor(Length dist) const
     else
     {
         double dist2 = SireMaths::pow_2( double(dist) );
-        
+
         return 12 * dist * (cut_vdw2 - dist2) * (feather_vdw2 - dist2) * norm_vdw;
     }
 }

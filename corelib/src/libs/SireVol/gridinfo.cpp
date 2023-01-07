@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -58,7 +57,7 @@ QDataStream &operator<<(QDataStream &ds, const GridIndex &idx)
 QDataStream &operator>>(QDataStream &ds, GridIndex &idx)
 {
     VersionID v = readHeader(ds, r_index);
-    
+
     if (v == 1)
     {
         qint32 i,j,k;
@@ -67,7 +66,7 @@ QDataStream &operator>>(QDataStream &ds, GridIndex &idx)
     }
     else
         throw version_error( v, "1", r_index, CODELOC );
-    
+
     return ds;
 }
 
@@ -99,7 +98,7 @@ static const RegisterMetaType<GridInfo> r_info(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const GridInfo &info)
 {
     writeHeader(ds, r_info, 1);
-    
+
     ds << info.grid_origin << info.grid_spacing
        << info.dimx << info.dimy << info.dimz;
 
@@ -109,17 +108,17 @@ QDataStream &operator<<(QDataStream &ds, const GridInfo &info)
 QDataStream &operator>>(QDataStream &ds, GridInfo &info)
 {
     VersionID v = readHeader(ds, r_info);
-    
+
     if (v == 1)
     {
         ds >> info.grid_origin >> info.grid_spacing
            >> info.dimx >> info.dimy >> info.dimz;
-        
+
         info.inv_grid_spacing = 1.0f / info.grid_spacing;
     }
     else
         throw version_error(v, "1", r_info, CODELOC);
-    
+
     return ds;
 }
 
@@ -138,14 +137,14 @@ GridInfo::GridInfo(const AABox &dimensions, Length spacing)
                 "You cannot construct a grid with zero or negative grid spacing! "
                 "(%1 A)").arg(grid_spacing), CODELOC );
     }
-    
+
     inv_grid_spacing = 1.0f / grid_spacing;
     Vector nboxes = (2.0f * inv_grid_spacing) * dimensions.halfExtents();
-    
+
     dimx = 1 + quint32( std::ceil(nboxes.x()) );
     dimy = 1 + quint32( std::ceil(nboxes.y()) );
     dimz = 1 + quint32( std::ceil(nboxes.z()) );
-    
+
     grid_origin = dimensions.minCoords();
 }
 
@@ -172,7 +171,7 @@ GridInfo& GridInfo::operator=(const GridInfo &other)
         dimy = other.dimy;
         dimz = other.dimz;
     }
-    
+
     return *this;
 }
 
@@ -219,7 +218,7 @@ GridIndex GridInfo::pointToGridIndex(const Vector &point) const
     const qint32 i = qint32( (point.x() - grid_origin.x()) * inv_grid_spacing );
     const qint32 j = qint32( (point.y() - grid_origin.y()) * inv_grid_spacing );
     const qint32 k = qint32( (point.z() - grid_origin.z()) * inv_grid_spacing );
-    
+
     if (i < 0 or i >= (dimx-1) or
         j < 0 or j >= (dimy-1) or
         k < 0 or k >= (dimz-1))
@@ -233,19 +232,19 @@ GridIndex GridInfo::pointToGridIndex(const Vector &point) const
     }
 }
 
-/** Return array indicies of the eight grid points that are on the corners of the 
-    box that contains the point 'point'. This returns eight '-1' values if the 
+/** Return array indicies of the eight grid points that are on the corners of the
+    box that contains the point 'point'. This returns eight '-1' values if the
     point does not lie in the grid */
 void GridInfo::pointToGridCorners(const Vector &point, QVector<int> &indicies) const
 {
     indicies.resize(8);
-    
+
     int *ia = indicies.data();
-    
+
     const qint32 r = qint32( (point.x() - grid_origin.x()) * inv_grid_spacing );
     const qint32 s = qint32( (point.y() - grid_origin.y()) * inv_grid_spacing );
     const qint32 t = qint32( (point.z() - grid_origin.z()) * inv_grid_spacing );
-    
+
     if (r < 0 or r >= (dimx-1) or
         s < 0 or s >= (dimy-1) or
         t < 0 or t >= (dimz-1))
@@ -258,9 +257,9 @@ void GridInfo::pointToGridCorners(const Vector &point, QVector<int> &indicies) c
     else
     {
         //i*(dimy*dimz) + j*dimz + k;
-        
+
         const qint32 dimyz = dimz * dimy;
-        
+
         ia[0] = (r  )*dimyz + (s  )*dimz + (t  );
         ia[1] = (r  )*dimyz + (s  )*dimz + (t+1);
         ia[2] = (r  )*dimyz + (s+1)*dimz + (t  );
@@ -272,36 +271,36 @@ void GridInfo::pointToGridCorners(const Vector &point, QVector<int> &indicies) c
     }
 }
 
-/** Return array indicies of the eight grid points that are on the corners of the 
-    box that contains the point 'point'. This returns eight '-1' values if the 
+/** Return array indicies of the eight grid points that are on the corners of the
+    box that contains the point 'point'. This returns eight '-1' values if the
     point does not lie in the grid. This also returns the weights of the eight
-    points, using tri-linear interpolation based on the distance between the 
+    points, using tri-linear interpolation based on the distance between the
     point and each corner of the box */
 void GridInfo::pointToGridCorners(const Vector &point, QVector<int> &indicies,
                                   QVector<float> &weights) const
 {
     indicies.resize(8);
     weights.resize(8);
-    
+
     int *ia = indicies.data();
     float *wa = weights.data();
-    
+
     float dx = (point.x() - grid_origin.x()) * inv_grid_spacing;
     float dy = (point.y() - grid_origin.y()) * inv_grid_spacing;
     float dz = (point.z() - grid_origin.z()) * inv_grid_spacing;
-    
+
     const qint32 r = qint32(dx);
     const qint32 s = qint32(dy);
     const qint32 t = qint32(dz);
-    
+
     dx -= r;
     dy -= s;
     dz -= t;
-    
+
     const float one_minus_dx = 1.0f - dx;
     const float one_minus_dy = 1.0f - dy;
     const float one_minus_dz = 1.0f - dz;
-    
+
     if (r < 0 or r >= (dimx-1) or
         s < 0 or s >= (dimy-1) or
         t < 0 or t >= (dimz-1))
@@ -316,7 +315,7 @@ void GridInfo::pointToGridCorners(const Vector &point, QVector<int> &indicies,
     {
         //use tri-linear interpolation to get the weights
         //
-        // This is described in 
+        // This is described in
         //
         // Davis, Madura and McCammon, Comp. Phys. Comm., 62, 187-197, 1991
         //
@@ -329,14 +328,14 @@ void GridInfo::pointToGridCorners(const Vector &point, QVector<int> &indicies,
         //              phi(i  ,j+1,k+1)*(1-R)(  S)(  T) +
         //              phi(i+1,j+1,k+1)*(  R)(  S)(  T) +
         //
-        // where R, S and T are the coordinates of the atom in 
+        // where R, S and T are the coordinates of the atom in
         // fractional grid coordinates from the point (i,j,k), e.g.
         // (0,0,0) is (i,j,k) and (1,1,1) is (i+1,j+1,k+1)
 
         //i*(dimy*dimz) + j*dimz + k;
-        
+
         const qint32 dimyz = dimz * dimy;
-        
+
         ia[0] = (r  )*dimyz + (s  )*dimz + (t  );
         ia[1] = (r  )*dimyz + (s  )*dimz + (t+1);
         ia[2] = (r  )*dimyz + (s+1)*dimz + (t  );
@@ -345,7 +344,7 @@ void GridInfo::pointToGridCorners(const Vector &point, QVector<int> &indicies,
         ia[5] = (r+1)*dimyz + (s  )*dimz + (t+1);
         ia[6] = (r+1)*dimyz + (s+1)*dimz + (t  );
         ia[7] = (r+1)*dimyz + (s+1)*dimz + (t+1);
-        
+
         wa[0] = (one_minus_dx) * (one_minus_dy) * (one_minus_dz);
         wa[1] = (one_minus_dx) * (one_minus_dy) * (    dz      );
         wa[2] = (one_minus_dx) * (    dy      ) * (one_minus_dz);
@@ -357,32 +356,32 @@ void GridInfo::pointToGridCorners(const Vector &point, QVector<int> &indicies,
     }
 }
 
-/** Return array indicies of the eight grid points that are on the corners of the 
-    box that contains the point 'point'. This returns eight '-1' values if the 
+/** Return array indicies of the eight grid points that are on the corners of the
+    box that contains the point 'point'. This returns eight '-1' values if the
     point does not lie in the grid. The return value is the number of points
     that are in the box */
 int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
                                  const MultiFloat &z, QVector<MultiInt> &indicies) const
 {
     indicies.resize(8);
-    
+
     MultiInt *ia = indicies.data();
-    
+
     const MultiFloat ox( grid_origin.x() );
     const MultiFloat oy( grid_origin.y() );
     const MultiFloat oz( grid_origin.z() );
     const MultiFloat inv_spacing( inv_grid_spacing );
-    
+
     const MultiInt r = (x - ox) * inv_spacing;
     const MultiInt s = (y - oy) * inv_spacing;
     const MultiInt t = (z - oz) * inv_spacing;
-    
+
     const MultiInt one(1);
-    
+
     //i*(dimy*dimz) + j*dimz + k;
     const MultiInt idz(dimz);
     const MultiInt idyz(dimz * dimy);
-    
+
     ia[0] = (r    )*idyz + (s    )*idz + (t    );
     ia[1] = (r    )*idyz + (s    )*idz + (t+one);
     ia[2] = (r    )*idyz + (s+one)*idz + (t    );
@@ -394,7 +393,7 @@ int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
 
     //now check that the points are in the box
     int n_in_box = MultiFloat::count();
-    
+
     for (int i=0; i<MultiInt::count(); ++i)
     {
         if (r[i] < 0 or r[i] >= (dimx-1) or
@@ -405,18 +404,18 @@ int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
             {
                 ia[j].set(i, -1);
             }
-            
+
             n_in_box -= 1;
         }
     }
-    
+
     return n_in_box;
 }
 
-/** Return array indicies of the eight grid points that are on the corners of the 
-    box that contains the point 'point'. This returns eight '-1' values if the 
+/** Return array indicies of the eight grid points that are on the corners of the
+    box that contains the point 'point'. This returns eight '-1' values if the
     point does not lie in the grid. This also returns the weights of the eight
-    points, using tri-linear interpolation based on the distance between the 
+    points, using tri-linear interpolation based on the distance between the
     point and each corner of the box */
 int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
                                  const MultiFloat &z, QVector<MultiInt> &indicies,
@@ -424,24 +423,24 @@ int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
 {
     indicies.resize(8);
     weights.resize(8);
-    
+
     MultiInt *ia = indicies.data();
     MultiFloat *wa = weights.data();
-    
+
     const MultiFloat ox(grid_origin.x());
     const MultiFloat oy(grid_origin.y());
     const MultiFloat oz(grid_origin.z());
-    
+
     const MultiFloat inv_spacing(inv_grid_spacing);
-    
+
     MultiFloat dx = (x - ox) * inv_spacing;
     MultiFloat dy = (y - oy) * inv_spacing;
     MultiFloat dz = (z - oz) * inv_spacing;
-    
+
     const MultiInt r = dx;
     const MultiInt s = dy;
     const MultiInt t = dz;
-    
+
     dx -= r;
     dy -= s;
     dz -= t;
@@ -452,7 +451,7 @@ int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
 
     //use tri-linear interpolation to get the weights
     //
-    // This is described in 
+    // This is described in
     //
     // Davis, Madura and McCammon, Comp. Phys. Comm., 62, 187-197, 1991
     //
@@ -465,18 +464,18 @@ int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
     //              phi(i  ,j+1,k+1)*(1-R)(  S)(  T) +
     //              phi(i+1,j+1,k+1)*(  R)(  S)(  T) +
     //
-    // where R, S and T are the coordinates of the atom in 
+    // where R, S and T are the coordinates of the atom in
     // fractional grid coordinates from the point (i,j,k), e.g.
     // (0,0,0) is (i,j,k) and (1,1,1) is (i+1,j+1,k+1)
 
     //i*(dimy*dimz) + j*dimz + k;
-    
+
     const MultiInt one(1);
-    
+
     //i*(dimy*dimz) + j*dimz + k;
     const MultiInt idz(dimz);
     const MultiInt idyz(dimz * dimy);
-    
+
     ia[0] = (r    )*idyz + (s    )*idz + (t    );
     ia[1] = (r    )*idyz + (s    )*idz + (t+one);
     ia[2] = (r    )*idyz + (s+one)*idz + (t    );
@@ -485,7 +484,7 @@ int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
     ia[5] = (r+one)*idyz + (s    )*idz + (t+one);
     ia[6] = (r+one)*idyz + (s+one)*idz + (t    );
     ia[7] = (r+one)*idyz + (s+one)*idz + (t+one);
-    
+
     wa[0] = (one_minus_dx) * (one_minus_dy) * (one_minus_dz);
     wa[1] = (one_minus_dx) * (one_minus_dy) * (    dz      );
     wa[2] = (one_minus_dx) * (    dy      ) * (one_minus_dz);
@@ -494,10 +493,10 @@ int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
     wa[5] = (    dx      ) * (one_minus_dy) * (    dz      );
     wa[6] = (    dx      ) * (    dy      ) * (one_minus_dz);
     wa[7] = (    dx      ) * (    dy      ) * (    dz      );
-    
+
     //now check that the points are in the box
     int n_in_box = MultiFloat::count();
-    
+
     for (int i=0; i<MultiInt::count(); ++i)
     {
         if (r[i] < 0 or r[i] >= (dimx-1) or
@@ -509,15 +508,15 @@ int GridInfo::pointToGridCorners(const MultiFloat &x, const MultiFloat &y,
                 ia[j].set(i, -1);
                 wa[j].set(i, 0);
             }
-            
+
             n_in_box -= 1;
         }
     }
-    
+
     return n_in_box;
 }
 
-/** Return the array index of the grid box that contains the point 'point'. 
+/** Return the array index of the grid box that contains the point 'point'.
     Note that this returns -1 if the point is not in the grid */
 int GridInfo::pointToArrayIndex(const Vector &point) const
 {
@@ -590,46 +589,46 @@ bool GridInfo::contains(const Vector &point) const
 {
     if (this->isEmpty())
         return false;
-    
+
     const Vector mincoords = dimensions().minCoords();
     const Vector maxcoords = dimensions().maxCoords();
-    
+
     for (int i=0; i<3; ++i)
     {
         if (point[i] < mincoords[i] or point[i] > maxcoords[i])
             return false;
     }
-    
+
     return true;
 }
 
 /** Return the grid index that is closest to the point 'point'. Note that
-    if 'point' lies outside the grid, then the closest grid index will 
+    if 'point' lies outside the grid, then the closest grid index will
     still be returned (it may just lie a long way from the point!) */
 GridIndex GridInfo::closestIndexTo(const Vector &point) const
 {
     if (isEmpty())
         return GridIndex::null();
-    
+
     float i = (point.x() - grid_origin.x()) * inv_grid_spacing;
     float j = (point.y() - grid_origin.y()) * inv_grid_spacing;
     float k = (point.z() - grid_origin.z()) * inv_grid_spacing;
-    
+
     if (i < 0)
         i = 0;
-    
+
     if (j < 0)
         j = 0;
-    
+
     if (k < 0)
         k = 0;
-    
+
     if (i >= dimx-1)
         i = dimx-1;
-    
+
     if (j >= dimy-1)
         j = dimy-1;
-    
+
     if (k >= dimz-1)
         k = dimz-1;
 
@@ -639,15 +638,15 @@ GridIndex GridInfo::closestIndexTo(const Vector &point) const
 
 /** Return the index in grid 'grid' of point 'idx' in this grid. This returns
     a null index if this index does not exist in either grid. Note that this
-    returns the index of the closest grid point if the grids do not exactly 
+    returns the index of the closest grid point if the grids do not exactly
     line up */
 GridIndex GridInfo::indexOf(const GridIndex &idx, const GridInfo &grid) const
 {
     if (idx.isNull())
         return GridIndex::null();
-    
+
     const Vector point = this->point(idx);
-    
+
     if (grid.contains(point))
         return grid.closestIndexTo(point);
     else
@@ -656,7 +655,7 @@ GridIndex GridInfo::indexOf(const GridIndex &idx, const GridInfo &grid) const
 
 /** Return the index in grid 'grid' of point 'i' in this grid. This returns
     a null index if this index does not exist in either grid. Note that this
-    returns the index of the closest grid point if the grids do not exactly 
+    returns the index of the closest grid point if the grids do not exactly
     line up */
 GridIndex GridInfo::indexOf(int i, const GridInfo &grid) const
 {
@@ -672,21 +671,21 @@ QVector<float> GridInfo::redimension(const QVector<float> &vals, const GridInfo 
                 "Cannot redimension the passed values as the number of grid points (%1) "
                 "does not agree with the number of elements in the values array (%2).")
                     .arg(nPoints()).arg(vals.count()), CODELOC );
-    
+
     if (this->operator==(new_grid))
         //no change in grid
         return vals;
-    
+
     if (this->isEmpty() or new_grid.isEmpty())
         return QVector<float>();
 
     //create space to hold the expanded grid
     QVector<float> new_vals(new_grid.nPoints(), 0.0);
-        
+
     for (int i=0; i<this->nPoints(); ++i)
     {
         int new_idx = new_grid.gridToArrayIndex( this->indexOf(i, new_grid) );
-        
+
         if (new_idx >= 0 and new_idx < new_grid.nPoints())
         {
             new_vals.data()[new_idx] += vals.constData()[i];

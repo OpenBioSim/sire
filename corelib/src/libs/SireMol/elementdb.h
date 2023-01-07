@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -41,7 +40,7 @@ namespace SireMol
 
 /**
 This singleton class holds a database of element properties and information indexed by atomic number or element symbol. You must initialise this database before you can create any Element objects.
- 
+
 @author Christopher Woods
 */
 class ElementDB
@@ -54,7 +53,7 @@ public:
 protected:
     ElementDB();
     ~ElementDB();
-    
+
     /** Populate this database with data. This function is defined
         in element-data.h, which is automatically generated from the
         openbabel data. */
@@ -62,22 +61,22 @@ protected:
 
     /** Import an individual element to the database */
     void import(ElementData *element);
-      
+
     /** Return the ElementData for the string 'element'. See the QString
-        constructor for Element for a description of how 'element' is 
+        constructor for Element for a description of how 'element' is
         interpreted. This will never return a null pointer. */
     ElementData* element(const QString &element) const;
-    
+
     /** Return the element with proton number 'nprotons'. This will
         never return a null pointer. */
     ElementData* element(int nprotons) const;
-    
+
     /** Pointer to the single instance of this class */
     static ElementDB *db;
 
     /** A hash indexing the elements by proton number */
     QHash<int, ElementData*> protonindex;
-    
+
     /** A hash indexing the elements by symbol */
     QHash<QString, ElementData*> symbolindex;
     /** A hash indexing the elements by their name */

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -68,7 +67,7 @@ public:
         is_master = true;
         is_slave = true;
     }
-    
+
     P2PCommPvt(MPI_Comm comm, int master, int slave)
             : private_comm(comm), master_rank(master), slave_rank(slave),
               keep_running(false)
@@ -78,29 +77,29 @@ public:
         if (private_comm == MPI_COMM_NULL)
         {
             throw SireError::program_bug( QObject::tr(
-                "You cannot create a P2PComm with a null communicator!"),   
+                "You cannot create a P2PComm with a null communicator!"),
                     CODELOC );
         }
-        
+
         //private_comm.Barrier();
-        
+
         is_master = (my_rank == master_rank);
         is_slave = (my_rank == slave_rank);
     }
-    
+
     ~P2PCommPvt()
     {
         datamutex.lock();
         keep_running = false;
         datamutex.unlock();
-        
+
         //wait until the background thread has stopped
         this->wait();
-    
+
         //free the communicator
         int finalized;
         MPI_Finalized(&finalized);
-        
+
         if (not finalized)
         {
             if (private_comm != MPI_COMM_NULL)
@@ -111,61 +110,61 @@ public:
                     int envelope[2];
                     envelope[0] = P2PComm::EXIT;
                     envelope[1] = 0;
-                    
+
                     MPI_Send(envelope, 2, MPI_INT, P2PComm::SLAVE, 1, private_comm);
                 }
-            
+
                 //private_comm.Barrier();
                 MPI_Comm_free(&private_comm);
             }
         }
     }
-    
+
     void waitForResponse(int rank, int tag)
     {
         MPI_Status status;
-        
+
         int received_message;
         MPI_Iprobe(rank, tag, private_comm, &received_message, &status);
-        
+
         while (not received_message)
         {
             QThread::msleep(5);
             MPI_Iprobe(rank, tag, private_comm, &received_message, &status);
         }
     }
-    
+
     /** Mutex to protect access to this communicator */
     QMutex datamutex;
 
     /** A local frontend to the backend that sits behind
         this communicator (this is only non-null on the slave) */
     Frontend local_backend;
-    
+
     /** The private MPI communicator for this backend */
     MPI_Comm private_comm;
-    
+
     /** The rank of the master process in this communicator */
     int master_rank;
-    
+
     /** The rank of the slave process in this communicator */
     int slave_rank;
-    
+
     /** Whether this is the master process */
     bool is_master;
-    
+
     /** Whether this is the slave process */
     bool is_slave;
-    
+
     /** Whether or not to keep looping */
     bool keep_running;
 
 protected:
     void run();
-    
+
     void sendIntegerResponse(int response);
     void sendFloatResponse(float response);
-    
+
     template<class T>
     void sendResponse(const T &response);
 };
@@ -183,16 +182,16 @@ SIRE_OUTOFLINE_TEMPLATE
 void P2PCommPvt::sendResponse(const T &response)
 {
     QByteArray data;
-    
+
     QDataStream ds( &data, QIODevice::WriteOnly );
-    
+
     ds << response;
-    
+
     //send this to the master
     int size = data.count();
-    
+
     MPI_Send(&size, 1, MPI_INT, P2PComm::MASTER, 1, private_comm);
-    
+
     if (size > 0)
     {
         MPI_Send(data.data(), size, MPI_BYTE, P2PComm::MASTER, 1, private_comm);
@@ -217,7 +216,7 @@ static T decode(const QByteArray &data)
     T obj;
     QDataStream ds(data);
     ds >> obj;
-    
+
     return obj;
 }
 
@@ -228,23 +227,23 @@ void P2PCommPvt::run()
     SireMaths::seed_qrand();
 
     QMutexLocker lkr( &datamutex );
-    
+
     if (not is_slave)
         return;
-    
+
     int envelope[2];
     int message;
     QByteArray message_data;
-    
+
     MPI_Status status;
-    
+
     while (keep_running)
     {
         lkr.unlock();
 
         //wait for a message from the master
         this->waitForResponse(P2PComm::MASTER, 1);
-        
+
         MPI_Recv(envelope, 2, MPI_INT, P2PComm::MASTER, 1, private_comm, &status);
 
         if (envelope[1] > 0)
@@ -253,14 +252,14 @@ void P2PCommPvt::run()
             MPI_Recv(message_data.data(), envelope[1], MPI_BYTE,
                      P2PComm::MASTER, 1, private_comm, &status);
         }
-        
+
         lkr.relock();
-        
+
         message = envelope[0];
-        
+
         if (message == P2PComm::EXIT)
                 break;
-    
+
         else if (message == P2PComm::GETUID)
         {
             this->sendResponse( local_backend.UID() );
@@ -305,7 +304,7 @@ void P2PCommPvt::run()
         }
         else
         {
-            qDebug() << SireError::getPIDString() 
+            qDebug() << SireError::getPIDString()
                      << "Unrecognised message!" << message;
         }
     }
@@ -313,7 +312,7 @@ void P2PCommPvt::run()
     //private_comm.Barrier();
     MPI_Comm_free(&private_comm);
     private_comm = MPI_COMM_NULL;
-    
+
     //return the backend to the pool
     local_backend = Frontend();
 }
@@ -322,8 +321,8 @@ void P2PCommPvt::run()
 P2PComm::P2PComm()
 {}
 
-/** Construct the point-to-point communicator between the 
-    processes with ranks 'master_rank' and 'slave_rank' in 
+/** Construct the point-to-point communicator between the
+    processes with ranks 'master_rank' and 'slave_rank' in
     the global MPICluster::communicator(). Note that this
     is a collective operation, so *must* be called on all
     processes in the MPI cluster at the same time. */
@@ -353,16 +352,16 @@ bool P2PComm::isNull() const
     return d.get() == 0;
 }
 
-/** Return whether or not this is the master side of the 
+/** Return whether or not this is the master side of the
     communicator (the process holding the frontend)
-    
+
     This can be both, if this is an intra-process communicator
 */
 bool P2PComm::isMaster()
 {
     if (this->isNull())
         return false;
-        
+
     else
     {
         QMutexLocker lkr( &(d->datamutex) );
@@ -370,16 +369,16 @@ bool P2PComm::isMaster()
     }
 }
 
-/** Return whether or not this is the slave side of the 
+/** Return whether or not this is the slave side of the
     communicator (the process holding the backend)
-    
+
     This can be both, if this is an intra-process communicator
 */
 bool P2PComm::isSlave()
 {
     if (this->isNull())
         return false;
-        
+
     else
     {
         QMutexLocker lkr( &(d->datamutex) );
@@ -393,7 +392,7 @@ bool P2PComm::isLocal()
 {
     if (this->isNull())
         return true;
-        
+
     else
     {
         QMutexLocker lkr( &(d->datamutex) );
@@ -401,18 +400,18 @@ bool P2PComm::isLocal()
     }
 }
 
-/** Internal function called by MPICluster used to create a 
+/** Internal function called by MPICluster used to create a
     point-to-point communicator that works for just this process */
 P2PComm P2PComm::createLocal()
 {
     P2PComm p2p;
-    
+
     p2p.d.reset( new P2PCommPvt() );
-    
+
     return p2p;
 }
 
-/** Internal function called by MPICluster used to create a 
+/** Internal function called by MPICluster used to create a
     point-to-point communicator that works using the provided
     communicator, with this as the master process if 'is_master'
     is true */
@@ -420,9 +419,9 @@ P2PComm P2PComm::create(MPI_Comm private_comm,
                         int master_rank, int slave_rank)
 {
     P2PComm p2p;
-    
+
     int my_rank = MPICluster::getRank();
-    
+
     if (my_rank == master_rank or my_rank == slave_rank)
     {
         p2p.d.reset( new P2PCommPvt(private_comm, master_rank, slave_rank) );
@@ -437,7 +436,7 @@ P2PComm P2PComm::create(MPI_Comm private_comm,
             private_comm = MPI_COMM_NULL;
         }
     }
-    
+
     return p2p;
 }
 
@@ -447,14 +446,14 @@ bool P2PComm::involves(int rank)
 {
     if (this->isNull())
         return false;
-        
+
     else
     {
         int my_rank = MPICluster::getRank();
-    
+
         QMutexLocker lkr( &(d->datamutex) );
-        
-        return (my_rank == d->master_rank) or 
+
+        return (my_rank == d->master_rank) or
                (my_rank == d->slave_rank);
     }
 }
@@ -476,22 +475,22 @@ void P2PComm::_pvt_sendMessage(int message, const QByteArray &data)
         return;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (not d->is_master)
         return;
-    
+
     if (d->private_comm == MPI_COMM_NULL)
         return;
-        
+
     int envelope[2];
     envelope[0] = message;
     envelope[1] = data.count();
-    
+
     MPI_Send(envelope, 2, MPI_INT, P2PComm::SLAVE, 1, d->private_comm);
 
     if (not data.isEmpty())
     {
-        MPI_Send(const_cast<char*>(data.data()), data.count(), 
+        MPI_Send(const_cast<char*>(data.data()), data.count(),
                  MPI_BYTE, P2PComm::SLAVE, 1, d->private_comm);
     }
 }
@@ -506,15 +505,15 @@ int P2PComm::awaitIntegerResponse(bool urgent)
         return -1;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (not d->is_master)
         return -1;
-    
+
     if (d->private_comm == MPI_COMM_NULL)
         return -1;
 
     int message;
-    
+
     if (not urgent)
         d->waitForResponse(P2PComm::SLAVE, 1);
 
@@ -534,15 +533,15 @@ float P2PComm::awaitFloatResponse(bool urgent)
         return 0;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (not d->is_master)
         return 0;
-    
+
     if (d->private_comm == MPI_COMM_NULL)
         return 0;
 
     float message;
-    
+
     if (not urgent)
         d->waitForResponse(P2PComm::SLAVE, 1);
 
@@ -562,28 +561,28 @@ QByteArray P2PComm::_pvt_awaitResponse(bool urgent)
         return QByteArray();
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (not d->is_master)
         return QByteArray();
-    
+
     if (d->private_comm == MPI_COMM_NULL)
         return QByteArray();
 
     int size;
-    
+
     if (not urgent)
         d->waitForResponse(P2PComm::SLAVE, 1);
 
     MPI_Status status;
     MPI_Recv(&size, 1, MPI_INT, P2PComm::SLAVE, 1, d->private_comm, &status);
-    
+
     if (size <= 0)
         return QByteArray();
-        
+
     QByteArray data( size+1, ' ' );
 
     MPI_Recv(data.data(), size, MPI_BYTE, P2PComm::SLAVE, 1, d->private_comm, &status);
-    
+
     return data;
 }
 
@@ -596,14 +595,14 @@ void P2PComm::setBackend(const Frontend &backend)
             "Only the slave P2PComm holds the backends..."), CODELOC );
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (not d->local_backend.isNull())
         throw SireError::program_bug( QObject::tr(
             "You cannot give a second backend to a P2PComm!"), CODELOC );
-            
+
     d->local_backend = backend;
-    
-    //start the background thread that listens for communication 
+
+    //start the background thread that listens for communication
     //from the master
     d->keep_running = true;
     d->start();

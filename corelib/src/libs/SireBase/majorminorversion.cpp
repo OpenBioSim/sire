@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,14 +48,14 @@ QDataStream &operator<<(QDataStream &ds, const Version &version)
 QDataStream &operator>>(QDataStream &ds, Version &version)
 {
     VersionID v = readHeader(ds, r_version);
-    
+
     if (v == 1)
     {
         ds >> version.maj >> version.min;
     }
     else
         throw version_error(v, "1", r_version, CODELOC);
-    
+
     return ds;
 }
 
@@ -86,18 +85,18 @@ QString Version::toString() const
 }
 
 /** Null constructor */
-MajorMinorVersion::MajorMinorVersion() 
+MajorMinorVersion::MajorMinorVersion()
                   : d( create_not_refcounted_shared_null<MajorMinorVersionData>() ), v(0,0)
 {}
 
-/** Construct from a raw data object - this should only be called by 
+/** Construct from a raw data object - this should only be called by
     the registry function */
 MajorMinorVersion::MajorMinorVersion(
                         const boost::shared_ptr<MajorMinorVersionData> &ptr)
                   : d(ptr)
 {
     QMutexLocker lkr( &(d->version_mutex) );
-    
+
     v = Version(d->last_major_version, d->last_minor_version);
 }
 
@@ -121,15 +120,15 @@ const char* MajorMinorVersion::typeName()
     return QMetaType::typeName( qMetaTypeId<MajorMinorVersion>() );
 }
 
-/** Increment the major version number - this resets the 
+/** Increment the major version number - this resets the
     minor version number to 0 */
 void MajorMinorVersion::incrementMajor()
 {
     QMutexLocker lkr( &(d->version_mutex) );
-    
+
     ++(d->last_major_version);
     d->last_minor_version = 0;
-    
+
     v = Version(d->last_major_version, 0);
 }
 
@@ -137,8 +136,8 @@ void MajorMinorVersion::incrementMajor()
 void MajorMinorVersion::incrementMinor()
 {
     QMutexLocker lkr( &(d->version_mutex) );
-    
+
     ++(d->last_minor_version);
-    
+
     v = Version(v.majorVersion(), d->last_minor_version);
 }

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -40,18 +39,18 @@ using namespace SireStream;
 
 static const RegisterMetaType<CombineProperties> r_combineprops( MAGIC_ONLY,
                                                     CombineProperties::typeName() );
-                                                    
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds,
                                         const CombineProperties &combineprops)
 {
     writeHeader(ds, r_combineprops, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << combineprops.property_sources << combineprops.combined_property
         << static_cast<const Property&>(combineprops);
-        
+
     return ds;
 }
 
@@ -60,17 +59,17 @@ QDataStream &operator>>(QDataStream &ds,
                                         CombineProperties &combineprops)
 {
     VersionID v = readHeader(ds, r_combineprops);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> combineprops.property_sources >> combineprops.combined_property
             >> static_cast<Property&>(combineprops);
     }
     else
         throw version_error( v, "1", r_combineprops, CODELOC );
-        
+
     return ds;
 }
 
@@ -113,7 +112,7 @@ template<class T>
 QVector<PropertyName> combine_properties(const T &props)
 {
     QHash<QString,PropertyName> properties;
-    
+
     for (typename T::const_iterator it = props.constBegin();
          it != props.constEnd();
          ++it)
@@ -124,12 +123,12 @@ QVector<PropertyName> combine_properties(const T &props)
                 properties.insert( ::getSource(*it), *it );
         }
     }
-    
+
     QVector<PropertyName> p = properties.values().toVector();
-    
+
     if (not p.isEmpty())
         p.squeeze();
-    
+
     return p;
 }
 
@@ -141,10 +140,10 @@ CombineProperties::CombineProperties(const PropertyName &property0,
     QVector<PropertyName> props(2);
     props[0] = property0;
     props[1] = property1;
-    
+
     property_sources = ::combine_properties(props);
 }
-                  
+
 /** Construct to combine together the list of passed properties */
 CombineProperties::CombineProperties(const QList<PropertyName> &properties)
                   : Property(), property_sources( ::combine_properties(properties) )
@@ -167,7 +166,7 @@ CombineProperties::CombineProperties(const QVector<QString> &properties)
 
 /** Copy constructor */
 CombineProperties::CombineProperties(const CombineProperties &other)
-                  : Property(other), 
+                  : Property(other),
                     property_sources(other.property_sources),
                     combined_property(other.combined_property)
 {}
@@ -185,7 +184,7 @@ CombineProperties& CombineProperties::operator=(const CombineProperties &other)
         combined_property = other.combined_property;
         Property::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -204,7 +203,7 @@ bool CombineProperties::operator!=(const CombineProperties &other) const
     return not this->operator==(other);
 }
 
-/** Return the ith property source 
+/** Return the ith property source
 
     \throw SireID::invalid_index
 */
@@ -213,7 +212,7 @@ const PropertyName& CombineProperties::operator[](int i) const
     return property_sources.constData()[ Index(i).map(property_sources.count()) ];
 }
 
-/** Return the ith property source 
+/** Return the ith property source
 
     \throw SireID::invalid_index
 */

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -71,14 +70,14 @@ using SireMol::BondID;
 using SireMol::AngleID;
 using SireMol::DihedralID;
 
-/** This class implements an intramolecular Monte Carlo move that uses 
-    the move() method to perturb intramolecular degrees of freedom and 
+/** This class implements an intramolecular Monte Carlo move that uses
+    the move() method to perturb intramolecular degrees of freedom and
     that may be applied to a random molecule (or part of a molecule)
     within a MoleculeGroup. It is based on the ZMatMove class.
-    
+
     @author Julien Michel
 */
-class SIREMOVE_EXPORT InternalMove 
+class SIREMOVE_EXPORT InternalMove
             : public SireBase::ConcreteProperty<InternalMove,MonteCarlo>
 {
 
@@ -87,19 +86,19 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, InternalMove&);
 
 public:
     InternalMove(const PropertyMap &map = PropertyMap() );
-    
+
     InternalMove(const MoleculeGroup &molgroup,
                  const PropertyMap &map = PropertyMap() );
 
-    InternalMove(const Sampler &sampler, 
+    InternalMove(const Sampler &sampler,
                  const PropertyMap &map = PropertyMap() );
-    
+
     InternalMove(const InternalMove &other);
-    
+
     ~InternalMove();
-    
+
     InternalMove& operator=(const InternalMove &other);
-    
+
     static const char* typeName();
 
     bool operator==(const InternalMove &other) const;
@@ -112,7 +111,7 @@ public:
 
     const Sampler& sampler() const;
     const MoleculeGroup& moleculeGroup() const;
-    
+
     const PropertyName& flexibilityProperty() const;
 
     void setFlexibilityProperty(const PropertyName &property);

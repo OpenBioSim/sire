@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,28 +51,28 @@ static const RegisterMetaType<DLMRigidBody> r_dlmrb;
 QDataStream &operator<<(QDataStream &ds, const DLMRigidBody &dlmrb)
 {
     writeHeader(ds, r_dlmrb, 1);
-    
+
     ds << dlmrb.frequent_save_velocities << static_cast<const Integrator&>(dlmrb);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, DLMRigidBody &dlmrb)
 {
     VersionID v = readHeader(ds, r_dlmrb);
-    
+
     if (v == 1)
     {
         ds >> dlmrb.frequent_save_velocities >> static_cast<Integrator&>(dlmrb);
     }
     else
         throw version_error( v, "1", r_dlmrb, CODELOC );
-        
+
     return ds;
 }
 
 /** Constructor */
-DLMRigidBody::DLMRigidBody(bool frequent_save) 
+DLMRigidBody::DLMRigidBody(bool frequent_save)
              : ConcreteProperty<DLMRigidBody,Integrator>(),
                frequent_save_velocities(frequent_save)
 {}
@@ -96,14 +95,14 @@ DLMRigidBody& DLMRigidBody::operator=(const DLMRigidBody &other)
         Integrator::operator=(other);
         frequent_save_velocities = other.frequent_save_velocities;
     }
-        
+
     return *this;
 }
 
 /** Comparison operator */
 bool DLMRigidBody::operator==(const DLMRigidBody &other) const
 {
-    return frequent_save_velocities == other.frequent_save_velocities and 
+    return frequent_save_velocities == other.frequent_save_velocities and
            Integrator::operator==(other);
 }
 
@@ -139,30 +138,30 @@ bool DLMRigidBody::isTimeReversible() const
     performing 'nmoves' moves using the specified timestep, recording
     statistics of every move if 'record_stats' is true */
 void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
-                             const Symbol &nrg_component, 
+                             const Symbol &nrg_component,
                              Time timestep, int nmoves, bool record_stats)
 {
     RBWorkspace &ws = workspace.asA<RBWorkspace>();
-    
+
     const double dt = timestep.value();
     const double half_dt = 0.5 * dt;
 
     const int nbeads = ws.nBeads();
-    
+
     for (int imove=0; imove<nmoves; ++imove)
     {
         ws.calculateForces(nrg_component);
-        
+
         Vector *bead_coords = ws.beadCoordsArray();
         Quaternion *bead_orient = ws.beadOrientationArray();
         Vector *bead_lin_momenta = ws.beadLinearMomentaArray();
         Vector *bead_ang_momenta = ws.beadAngularMomentaArray();
         const double *bead_masses = ws.beadMassesArray();
         const Vector *bead_inertia = ws.beadInertiasArray();
-        
+
         const Vector *bead_forces = ws.beadForcesArray();
         const Vector *bead_torques = ws.beadTorquesArray();
-        
+
         //first integrate the coordinates - loop over all beads
         for (int i=0; i<nbeads; ++i)
         {
@@ -185,48 +184,48 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
 
             // r(t + dt) = r(t) + v(t + dt/2) dt
             x += (dt / mass) * p;
-            
+
             //now update the orientation / angular momenta using the DLM algorithm
             ap += (half_dt * torque);
-            
+
             if (not ap.isZero())
             {
                 if (ap[0] != 0 and inertia[0] != 0)
                 {
                     Quaternion R1( (half_dt*ap[0] / inertia[0]) * radian, Vector(1,0,0) );
-            
+
                     ap = R1.rotate(ap);
                     q = q * R1.conjugate();
                 }
-            
+
                 if (ap[1] != 0 and inertia[1] != 0)
                 {
                     Quaternion R2( (half_dt*ap[1] / inertia[1]) * radian, Vector(0,1,0) );
-                                          
+
                     ap = R2.rotate(ap);
                     q = q * R2.conjugate();
                 }
-            
+
                 if (ap[2] != 0 and inertia[2] != 0)
                 {
                     Quaternion R3( (dt*ap[2] / inertia[2]) * radian, Vector(0,0,1) );
-            
+
                     ap = R3.rotate(ap);
                     q = q * R3.conjugate();
                 }
-                
+
                 if (ap[1] != 0 and inertia[1] != 0)
                 {
                     Quaternion R4( (half_dt*ap[1] / inertia[1]) * radian, Vector(0,1,0) );
-            
+
                     ap = R4.rotate(ap);
                     q = q * R4.conjugate();
                 }
-            
+
                 if (ap[0] != 0 and inertia[0] != 0)
                 {
                     Quaternion R5( (half_dt*ap[0] / inertia[0]) * radian, Vector(1,0,0) );
-                                  
+
                     ap = R5.rotate(ap);
                     q = q * R5.conjugate();
                 }
@@ -240,16 +239,16 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
         bead_ang_momenta = ws.beadAngularMomentaArray();
         bead_masses = ws.beadMassesArray();
         bead_inertia = ws.beadInertiasArray();
-        
+
         bead_forces = ws.beadForcesArray();
         bead_torques = ws.beadTorquesArray();
-        
+
         //now need to integrate the momenta
         for (int i=0; i<nbeads; ++i)
         {
             if (bead_masses[i] == 0)
                 continue;
-        
+
             Vector &p = bead_lin_momenta[i];
             Vector &ap = bead_ang_momenta[i];
             const Vector &force = bead_forces[i];
@@ -258,14 +257,14 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
             p += ( half_dt * force );
             ap += ( half_dt * torque );
         }
-        
+
         if (frequent_save_velocities)
             ws.commitVelocities();
-        
+
         if (record_stats)
             ws.collectStatistics();
     }
-    
+
     if (not frequent_save_velocities)
         ws.commitVelocities();
 }

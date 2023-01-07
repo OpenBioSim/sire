@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,9 +51,9 @@ namespace SireBase
     a combination of existing properties. Use this to build
     properties that don't exist independently, but are
     rather built by combining together other properties.
-    
+
     For a good example, see SireVol::CombineSpaces
-    
+
     @author Christopher Woods
 */
 class SIREBASE_EXPORT CombineProperties : public Property
@@ -73,15 +72,15 @@ public:
 
     CombineProperties(const PropertyName &property0,
                       const PropertyName &property1);
-                      
+
     CombineProperties(const QList<PropertyName> &properties);
     CombineProperties(const QList<QString> &properties);
-                      
+
     CombineProperties(const QVector<PropertyName> &properties);
     CombineProperties(const QVector<QString> &properties);
 
     CombineProperties(const CombineProperties &other);
-    
+
     ~CombineProperties();
 
     static const char* typeName()
@@ -103,24 +102,24 @@ public:
 
     const_iterator constBegin() const;
     const_iterator begin() const;
-    
+
     const_iterator constEnd() const;
     const_iterator end() const;
-    
+
     const Property& combinedProperty() const;
-    
+
     /** Update this combined property by fetching the necessary
         properties to combine from 'properties'
-        
+
         \throw SireBase::missing_property
         \throw SireError::invalid_cast
         \throw SireError::incompatible_error
     */
     virtual void updateFrom(const Properties &properties)=0;
-    
+
 protected:
     CombineProperties& operator=(const CombineProperties &other);
-    
+
     bool operator==(const CombineProperties &other) const;
     bool operator!=(const CombineProperties &other) const;
 

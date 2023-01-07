@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,11 +61,11 @@ using SireMol::Molecules;
 using SireMol::MoleculeGroup;
 using SireMol::MoleculeGroup;
 
-/** This is the base class of the object that contains the 
+/** This is the base class of the object that contains the
     default sources of the properties into which this molecule
     reader/writer will place data, and the default values of
     the parameters that control how this reader/writer works.
-    
+
     @author Christopher Woods
 */
 class SIREIO_EXPORT IOParametersBase
@@ -74,30 +73,30 @@ class SIREIO_EXPORT IOParametersBase
 public:
     IOParametersBase();
     ~IOParametersBase();
-    
+
     /** Return the default name of the property into which
-        the coordinates of the atoms will be placed 
-        
+        the coordinates of the atoms will be placed
+
         default == "coordinates"
     */
     const PropertyName& coordinates() const
     {
         return coords_property;
     }
-    
+
     /** Return the default source of the property into which
-        the chemical elements of each atom will be placed 
-        
+        the chemical elements of each atom will be placed
+
         default == "element"
     */
     const PropertyName& element() const
     {
         return elements_property;
     }
-    
+
     /** Return the function used to split the molecule
         into CutGroups (must be an object of type CuttingFunction)
-        
+
         source  == "cutting-function"
         default == ResidueCutting()
     */
@@ -105,7 +104,7 @@ public:
     {
         return cutting_function;
     }
-    
+
 private:
     ///////
     /////// Properties that hold the data of the molecule
@@ -113,14 +112,14 @@ private:
 
     /** The default property in which to store the coordinates */
     static PropertyName coords_property;
-    
+
     /** The default property in which to store the elements */
     static PropertyName elements_property;
-    
+
     ///////
     /////// Parameters that control how the reader works
     ///////
-    
+
     /** The function used to split a molecule into CutGroups
          - by default a ResidueCutting() function is used that
            places each residue into its own CutGroup */
@@ -136,7 +135,7 @@ class SIREIO_EXPORT IOBase : public SireBase::Property
 public:
     IOBase();
     IOBase(const IOBase &other);
-    
+
     virtual ~IOBase();
 
     static const char* typeName()
@@ -151,10 +150,10 @@ public:
 
     Molecule readMolecule(const char *filename,
                           const PropertyMap &map = PropertyMap()) const;
-                          
+
     Molecule readMolecule(QIODevice &dev,
                           const PropertyMap &map = PropertyMap()) const;
-                          
+
     Molecule readMolecule(const QByteArray &data,
                           const PropertyMap &map = PropertyMap()) const;
 
@@ -232,18 +231,18 @@ friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, NullIO&);
 
 public:
     NullIO();
-    
+
     NullIO(const NullIO &other);
-    
+
     ~NullIO();
-    
+
     NullIO& operator=(const NullIO &other);
-    
+
     bool operator==(const NullIO &other) const;
     bool operator!=(const NullIO &other) const;
-    
+
     static const char* typeName();
-    
+
 protected:
     MoleculeGroup readMols(const QByteArray &data, const PropertyMap &map) const;
     QByteArray writeMols(const MoleculeGroup &molecules, const PropertyMap &map) const;

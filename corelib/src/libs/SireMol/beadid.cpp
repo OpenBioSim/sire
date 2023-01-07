@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -55,9 +54,9 @@ static const RegisterMetaType<BeadIdx> r_beadidx;
 QDataStream &operator<<(QDataStream &ds, const BeadIdx &beadidx)
 {
     writeHeader(ds, r_beadidx, 1);
-    
+
     ds << static_cast<const SireID::Index_T_<BeadIdx>&>(beadidx);
-    
+
     return ds;
 }
 
@@ -65,25 +64,25 @@ QDataStream &operator<<(QDataStream &ds, const BeadIdx &beadidx)
 QDataStream &operator>>(QDataStream &ds, BeadIdx &beadidx)
 {
     VersionID v = readHeader(ds, r_beadidx);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Index_T_<BeadIdx>&>(beadidx);
     }
     else
         throw version_error( v, "1", r_beadidx, CODELOC );
-        
+
     return ds;
 }
 
 BeadIdx::BeadIdx() : SireID::Index_T_<BeadIdx>(), BeadID()
 {}
 
-BeadIdx::BeadIdx(qint32 idx) 
+BeadIdx::BeadIdx(qint32 idx)
           : SireID::Index_T_<BeadIdx>(idx), BeadID()
 {}
 
-BeadIdx::BeadIdx(const BeadIdx &other) 
+BeadIdx::BeadIdx(const BeadIdx &other)
           : SireID::Index_T_<BeadIdx>(other), BeadID(other)
 {}
 
@@ -142,9 +141,9 @@ static const RegisterMetaType<BeadNum> r_beadnum;
 QDataStream &operator<<(QDataStream &ds, const BeadNum &beadnum)
 {
     writeHeader(ds, r_beadnum, 1);
-    
+
     ds << static_cast<const SireID::Number&>(beadnum);
-    
+
     return ds;
 }
 
@@ -152,14 +151,14 @@ QDataStream &operator<<(QDataStream &ds, const BeadNum &beadnum)
 QDataStream &operator>>(QDataStream &ds, BeadNum &beadnum)
 {
     VersionID v = readHeader(ds, r_beadnum);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Number&>(beadnum);
     }
     else
         throw version_error( v, "1", r_beadnum, CODELOC );
-        
+
     return ds;
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,9 +44,9 @@ QDataStream &operator<<(QDataStream &ds,
                                         const SupraSubSimPacket &suprasubsimpacket)
 {
     writeHeader(ds, r_suprasubsimpacket, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     if (suprasubsimpacket.sub_system_was_packed)
     {
         SupraSubSystemPtr packed_sub_system = suprasubsimpacket.sub_system;
@@ -57,12 +56,12 @@ QDataStream &operator<<(QDataStream &ds,
     }
     else
         sds << suprasubsimpacket.sub_system;
-    
+
     sds << suprasubsimpacket.sub_moves
         << suprasubsimpacket.n_sub_moves << suprasubsimpacket.ncompleted
         << suprasubsimpacket.record_stats
         << static_cast<const WorkPacketBase&>(suprasubsimpacket);
-        
+
     return ds;
 }
 
@@ -71,42 +70,42 @@ QDataStream &operator>>(QDataStream &ds,
                                         SupraSubSimPacket &suprasubsimpacket)
 {
     VersionID v = readHeader(ds, r_suprasubsimpacket);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> suprasubsimpacket.sub_system >> suprasubsimpacket.sub_moves
             >> suprasubsimpacket.n_sub_moves >> suprasubsimpacket.ncompleted
             >> suprasubsimpacket.record_stats
             >> static_cast<WorkPacketBase&>(suprasubsimpacket);
-            
+
         suprasubsimpacket.sub_system_was_packed = false;
     }
     else
         throw version_error(v, "1", r_suprasubsimpacket, CODELOC);
-        
+
     return ds;
 }
 
 /** Constructor */
-SupraSubSimPacket::SupraSubSimPacket() 
-                  : WorkPacketBase(), n_sub_moves(0), ncompleted(0), 
+SupraSubSimPacket::SupraSubSimPacket()
+                  : WorkPacketBase(), n_sub_moves(0), ncompleted(0),
                     record_stats(false), sub_system_was_packed(false)
 {}
 
-/** Construct a work packet to perform 'nmoves' sub-moves (in 'moves') on 
+/** Construct a work packet to perform 'nmoves' sub-moves (in 'moves') on
     the sub-system 'system', recording statistics if 'record_stats' is true */
 SupraSubSimPacket::SupraSubSimPacket(const SupraSubSystem &system,
                                      const SupraSubMoves &moves,
                                      int nmoves, bool record_statistics)
                   : WorkPacketBase(),
                     sub_system(system), sub_moves(moves),
-                    n_sub_moves(nmoves), ncompleted(0), 
+                    n_sub_moves(nmoves), ncompleted(0),
                     record_stats(record_statistics), sub_system_was_packed(false)
 {}
-  
-/** Copy constructor */                
+
+/** Copy constructor */
 SupraSubSimPacket::SupraSubSimPacket(const SupraSubSimPacket &other)
                   : WorkPacketBase(other),
                     sub_system(other.sub_system), sub_moves(other.sub_moves),
@@ -130,10 +129,10 @@ SupraSubSimPacket& SupraSubSimPacket::operator=(const SupraSubSimPacket &other)
         ncompleted = other.ncompleted;
         record_stats = other.record_stats;
         sub_system_was_packed = other.sub_system_was_packed;
-        
+
         WorkPacketBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -219,12 +218,12 @@ float SupraSubSimPacket::chunk()
         sub_system_was_packed = true;
         sub_system.edit().unpack();
     }
-        
+
     sub_moves.edit().move( sub_system.edit(), 1, n_sub_moves - ncompleted,
                            record_stats );
-    
+
     ++ncompleted;
-    
+
     if (ncompleted >= n_sub_moves)
     {
         if (sub_system_was_packed)
@@ -233,7 +232,7 @@ float SupraSubSimPacket::chunk()
             sub_system_was_packed = false;
         }
     }
-    
+
     return 100.0 * ( float(ncompleted) / float(n_sub_moves) );
 }
 

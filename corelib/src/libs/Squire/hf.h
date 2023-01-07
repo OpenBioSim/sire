@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,9 +51,9 @@ class SQUIRE_EXPORT HF
 {
 public:
     HF();
-    
+
     ~HF();
-    
+
     void solve();
 
     void add(const Orbital &orbital);
@@ -68,16 +67,16 @@ private:
 
     /** All of the S-basis functions */
     QVector<S_GTO> s_orbs;
-    
+
     /** All of the coordinates of the p_orbital centers */
     QVector<Vector> p_centers;
-    
+
     /** All of the P-basis functions */
     QVector<P_GTO> p_orbs;
-    
+
     /** All of the point charges (nuclei) */
     QVector<PointCharge> chgs;
-    
+
     /** All of the point dipoles */
     QVector<PointDipole> dipols;
 };

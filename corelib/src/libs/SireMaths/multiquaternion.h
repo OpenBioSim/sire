@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,7 +45,7 @@ SIREMATHS_EXPORT MultiQuaternion operator*(const MultiQuaternion &p1, const Mult
 
 /**
 This is the MultiX version of Quaternion
- 
+
 @author Christopher Woods
 */
 class SIREMATHS_EXPORT MultiQuaternion
@@ -54,16 +53,16 @@ class SIREMATHS_EXPORT MultiQuaternion
 public:
     MultiQuaternion();
     MultiQuaternion(const MultiQuaternion& p1);
-    
+
     MultiQuaternion(const MultiDouble &angle, const MultiVector &axis);
     MultiQuaternion(const MultiFloat &angle, const MultiVector &axis);
     MultiQuaternion(const MultiDouble &x, const MultiDouble &y,
                     const MultiDouble &z, const MultiDouble &w);
-    
+
     ~MultiQuaternion();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return MultiQuaternion::typeName();
@@ -89,7 +88,7 @@ public:
     MultiQuaternion pow(const MultiDouble &n) const;
 
     static MultiQuaternion identity();
-    
+
     void renormalise();
 
     bool operator==(const MultiQuaternion &p1) const;

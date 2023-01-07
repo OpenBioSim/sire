@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -60,9 +59,9 @@ static const RegisterMetaType<GetPoint> r_getpoint( MAGIC_ONLY,
 QDataStream &operator<<(QDataStream &ds, const GetPoint &getpoint)
 {
     writeHeader(ds, r_getpoint, 1);
-    
+
     ds << static_cast<const Property&>(getpoint);
-    
+
     return ds;
 }
 
@@ -76,7 +75,7 @@ QDataStream &operator>>(QDataStream &ds, GetPoint &getpoint)
     }
     else
         throw version_error(v, "1", r_getpoint, CODELOC);
-        
+
     return ds;
 }
 
@@ -144,23 +143,23 @@ QDataStream &operator<<(QDataStream &ds,
                                         const NullGetPoint &getpoint)
 {
     writeHeader(ds, r_nullgetpoint, 1);
-    
+
     ds << static_cast<const GetPoint&>(getpoint);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, NullGetPoint &getpoint)
 {
     VersionID v = readHeader(ds, r_nullgetpoint);
-    
+
     if (v == 1)
     {
         ds >> static_cast<GetPoint&>(getpoint);
     }
     else
         throw version_error(v, "1", r_nullgetpoint, CODELOC);
-        
+
     return ds;
 }
 
@@ -217,27 +216,27 @@ QDataStream &operator<<(QDataStream &ds,
                                         const GetCOGPoint &getpoint)
 {
     writeHeader(ds, r_getcogpoint, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << getpoint.atomids << static_cast<const GetPoint&>(getpoint);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, GetCOGPoint &getpoint)
 {
     VersionID v = readHeader(ds, r_getcogpoint);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> getpoint.atomids >> static_cast<GetPoint&>(getpoint);
     }
     else
         throw version_error(v, "1", r_getcogpoint, CODELOC);
-        
+
     return ds;
 }
 
@@ -286,7 +285,7 @@ GetCOGPoint& GetCOGPoint::operator=(const GetCOGPoint &other)
 {
     GetPoint::operator=(other);
     atomids = other.atomids;
-    
+
     return *this;
 }
 
@@ -328,27 +327,27 @@ QDataStream &operator<<(QDataStream &ds,
                                         const GetCOMPoint &getpoint)
 {
     writeHeader(ds, r_getcompoint, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << getpoint.atomids << static_cast<const GetPoint&>(getpoint);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, GetCOMPoint &getpoint)
 {
     VersionID v = readHeader(ds, r_getcompoint);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> getpoint.atomids >> static_cast<GetPoint&>(getpoint);
     }
     else
         throw version_error(v, "1", r_getcompoint, CODELOC);
-        
+
     return ds;
 }
 
@@ -438,27 +437,27 @@ QDataStream &operator<<(QDataStream &ds,
                                         const GetCentroidPoint &getpoint)
 {
     writeHeader(ds, r_getcentroidpoint, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << getpoint.atomids << static_cast<const GetPoint&>(getpoint);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, GetCentroidPoint &getpoint)
 {
     VersionID v = readHeader(ds, r_getcentroidpoint);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> getpoint.atomids >> static_cast<GetPoint&>(getpoint);
     }
     else
         throw version_error(v, "1", r_getcentroidpoint, CODELOC);
-        
+
     return ds;
 }
 

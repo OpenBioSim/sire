@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,46 +44,46 @@ using namespace SireStream;
 
 static const RegisterMetaType<CoulombProbe> r_cprobe;
 
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                       const CoulombProbe &cprobe)
 {
     writeHeader(ds, r_cprobe, 1);
-    
+
     ds << cprobe.chg.to( mod_electron )
        << static_cast<const Probe&>(cprobe);
-       
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, CoulombProbe &cprobe)
 {
     VersionID v = readHeader(ds, r_cprobe);
-    
+
     if (v == 1)
     {
         double chg;
-        
+
         ds >> chg;
-        
+
         cprobe = CoulombProbe( chg*mod_electron );
-        
+
         ds >> static_cast<Probe&>(cprobe);
     }
     else
         throw version_error(v, "1", r_cprobe, CODELOC);
-        
+
     return ds;
 }
 
 static double getCharge(const Charge &charge)
 {
     const double sqrt_4pieps0 = std::sqrt(SireUnits::one_over_four_pi_eps0);
-    
+
     return charge.value() * sqrt_4pieps0;
 }
 
 /** Construct a default probe (+1 unit charge) */
-CoulombProbe::CoulombProbe() 
+CoulombProbe::CoulombProbe()
              : ConcreteProperty<CoulombProbe,Probe>(), chg(1 * mod_electron)
 {
     reduced_chg = ::getCharge(chg);
@@ -113,7 +112,7 @@ CoulombProbe::CoulombProbe(const Probe &probe)
 
     else if (probe.isA<CLJProbe>())
         chg = probe.asA<CLJProbe>().charge();
-        
+
     reduced_chg = ::getCharge(chg);
 }
 
@@ -136,7 +135,7 @@ CoulombProbe& CoulombProbe::operator=(const CoulombProbe &other)
         chg = other.chg;
         reduced_chg = other.reduced_chg;
     }
-    
+
     return *this;
 }
 
@@ -166,23 +165,23 @@ static const RegisterMetaType<LJProbe> r_ljprobe;
 QDataStream &operator<<(QDataStream &ds, const LJProbe &ljprobe)
 {
     writeHeader(ds, r_ljprobe, 1);
-    
+
     ds << ljprobe.ljparam << static_cast<const Probe&>(ljprobe);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, LJProbe &ljprobe)
 {
     VersionID v = readHeader(ds, r_ljprobe);
-    
+
     if (v == 1)
     {
         ds >> ljprobe.ljparam >> static_cast<Probe&>(ljprobe);
     }
     else
         throw version_error(v, "1", r_ljprobe, CODELOC);
-        
+
     return ds;
 }
 
@@ -231,7 +230,7 @@ LJProbe& LJProbe::operator=(const LJProbe &other)
         ljparam = other.ljparam;
         Probe::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -261,29 +260,29 @@ static const RegisterMetaType<CLJProbe> r_cljprobe;
 QDataStream &operator<<(QDataStream &ds, const CLJProbe &cljprobe)
 {
     writeHeader(ds, r_cljprobe, 1);
-    
+
     ds << cljprobe.chg.to(mod_electron) << cljprobe.ljparam
        << static_cast<const Probe&>(cljprobe);
-       
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, CLJProbe &cljprobe)
 {
     VersionID v = readHeader(ds, r_cljprobe);
-    
+
     if (v == 1)
     {
         double chg;
         ds >> chg;
-        
+
         cljprobe = CLJProbe(chg*mod_electron);
-        
+
         ds >> cljprobe.ljparam >> static_cast<Probe&>(cljprobe);
     }
     else
         throw version_error(v, "1", r_cljprobe, CODELOC);
-        
+
     return ds;
 }
 
@@ -348,10 +347,10 @@ CLJProbe::CLJProbe(const Probe &other)
 {
     if (other.isA<CLJProbe>())
         this->operator=(other.asA<CLJProbe>());
-        
+
     else if (other.isA<CoulombProbe>())
         this->operator=(other.asA<CoulombProbe>());
-        
+
     else if (other.isA<LJProbe>())
         this->operator=(other.asA<LJProbe>());
 }
@@ -366,14 +365,14 @@ CLJProbe& CLJProbe::operator=(const CLJProbe &other)
         chg = other.chg;
         reduced_chg = other.reduced_chg;
     }
-    
+
     return *this;
 }
 
 /** Comparison operator */
 bool CLJProbe::operator==(const CLJProbe &other) const
 {
-    return reduced_chg == other.reduced_chg and 
+    return reduced_chg == other.reduced_chg and
            ljparam == other.ljparam and Probe::operator==(other);
 }
 

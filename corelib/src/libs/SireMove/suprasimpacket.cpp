@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -39,30 +38,30 @@ using namespace SireStream;
 static const RegisterMetaType<SupraSimPacket> r_suprasimpacket;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                         const SupraSimPacket &suprasimpacket)
 {
     writeHeader(ds, r_suprasimpacket, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << suprasimpacket.supra_system << suprasimpacket.supra_moves
         << suprasimpacket.n_supra_moves << suprasimpacket.ncompleted
         << suprasimpacket.record_stats
         << static_cast<const WorkPacketBase&>(suprasimpacket);
-        
-    return ds; 
+
+    return ds;
 }
 
 /** Extract from a binary datastream */
 QDataStream &operator>>(QDataStream &ds, SupraSimPacket &suprasimpacket)
 {
     VersionID v = readHeader(ds, r_suprasimpacket);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> suprasimpacket.supra_system >> suprasimpacket.supra_moves
             >> suprasimpacket.n_supra_moves >> suprasimpacket.ncompleted
             >> suprasimpacket.record_stats
@@ -70,12 +69,12 @@ QDataStream &operator>>(QDataStream &ds, SupraSimPacket &suprasimpacket)
     }
     else
         throw version_error(v, "1", r_suprasimpacket, CODELOC);
-        
+
     return ds;
 }
 
 /** Null constructor */
-SupraSimPacket::SupraSimPacket() 
+SupraSimPacket::SupraSimPacket()
                : WorkPacketBase(), n_supra_moves(0), ncompleted(0), record_stats(false)
 {}
 
@@ -85,15 +84,15 @@ SupraSimPacket::SupraSimPacket()
 SupraSimPacket::SupraSimPacket(const SupraSystem &suprasystem,
                                const SupraMoves &supramoves,
                                int nmoves, bool recording_stats)
-               : WorkPacketBase(), 
+               : WorkPacketBase(),
                  supra_system(suprasystem), supra_moves(supramoves),
                  n_supra_moves(nmoves), ncompleted(0), record_stats(recording_stats)
 {}
 
-/** Copy constructor */               
+/** Copy constructor */
 SupraSimPacket::SupraSimPacket(const SupraSimPacket &other)
                : WorkPacketBase(other),
-                 supra_system(other.supra_system), 
+                 supra_system(other.supra_system),
                  supra_moves(other.supra_moves),
                  n_supra_moves(other.n_supra_moves),
                  ncompleted(other.ncompleted),
@@ -114,10 +113,10 @@ SupraSimPacket& SupraSimPacket::operator=(const SupraSimPacket &other)
         n_supra_moves = other.n_supra_moves;
         ncompleted = other.ncompleted;
         record_stats = other.record_stats;
-        
+
         WorkPacketBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -138,7 +137,7 @@ bool SupraSimPacket::operator!=(const SupraSimPacket &other) const
     return not this->operator==(other);
 }
 
-/** This probably shouldn't be packed to disk, as there will be a lot 
+/** This probably shouldn't be packed to disk, as there will be a lot
     of data sharing between this packet and other copies at different
     stages of the simulation (I think) - it is also already heavily
     packed (e.g. to disk) and I don't want that data to be pulled
@@ -197,11 +196,11 @@ float SupraSimPacket::chunk()
 {
     if (ncompleted >= n_supra_moves)
         return 100.0;
-        
+
     supra_moves.edit().move( supra_system.edit(), 1, record_stats );
-    
+
     ++ncompleted;
-    
+
     return 100.0 * ( float(ncompleted) / float(n_supra_moves) );
 }
 

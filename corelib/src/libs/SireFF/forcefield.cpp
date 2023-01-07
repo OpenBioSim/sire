@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -66,10 +65,10 @@ QDataStream &operator<<(QDataStream &ds, const NullFF &nullff)
 QDataStream &operator>>(QDataStream &ds, NullFF &nullff)
 {
     VersionID v = readHeader(ds, r_nullff);
-    
+
     if (v != 0)
         throw version_error(v, "0", r_nullff, CODELOC);
-        
+
     return ds;
 }
 
@@ -168,46 +167,46 @@ void NullFF::group_add(quint32 i, const MoleculeView &molview,
     throwNoAdd();
 }
 
-void NullFF::group_add(quint32 i, const ViewsOfMol &molviews, 
+void NullFF::group_add(quint32 i, const ViewsOfMol &molviews,
                        const PropertyMap &map)
 {
     throwNoAdd();
 }
 
-void NullFF::group_add(quint32 i, const Molecules &molecules, 
+void NullFF::group_add(quint32 i, const Molecules &molecules,
                        const PropertyMap &map)
 {
     throwNoAdd();
 }
 
-void NullFF::group_add(quint32 i, const MoleculeGroup &molgroup, 
+void NullFF::group_add(quint32 i, const MoleculeGroup &molgroup,
                        const PropertyMap &map)
 {
     throwNoAdd();
 }
 
-bool NullFF::group_addIfUnique(quint32 i, const MoleculeView &molview, 
+bool NullFF::group_addIfUnique(quint32 i, const MoleculeView &molview,
                                const PropertyMap &map)
 {
     throwNoAdd();
     return false;
 }
 
-ViewsOfMol NullFF::group_addIfUnique(quint32 i, const ViewsOfMol &molviews, 
+ViewsOfMol NullFF::group_addIfUnique(quint32 i, const ViewsOfMol &molviews,
                                      const PropertyMap &map)
 {
     throwNoAdd();
     return ViewsOfMol();
 }
 
-QList<ViewsOfMol> NullFF::group_addIfUnique(quint32 i, const Molecules &molecules, 
+QList<ViewsOfMol> NullFF::group_addIfUnique(quint32 i, const Molecules &molecules,
                                             const PropertyMap &map)
 {
     throwNoAdd();
     throw QList<ViewsOfMol>();
 }
 
-QList<ViewsOfMol> NullFF::group_addIfUnique(quint32 i, const MoleculeGroup &molgroup, 
+QList<ViewsOfMol> NullFF::group_addIfUnique(quint32 i, const MoleculeGroup &molgroup,
                                             const PropertyMap &map)
 {
     throwNoAdd();
@@ -306,28 +305,28 @@ static void throwNoSetContents()
         "You cannot set the contents of a null forcefield!"), CODELOC );
 }
 
-bool NullFF::group_setContents(quint32 i, const MoleculeView &molview, 
+bool NullFF::group_setContents(quint32 i, const MoleculeView &molview,
                                const PropertyMap &map)
 {
     throwNoSetContents();
     return false;
 }
 
-bool NullFF::group_setContents(quint32 i, const ViewsOfMol &molviews, 
+bool NullFF::group_setContents(quint32 i, const ViewsOfMol &molviews,
                                const PropertyMap &map)
 {
     throwNoSetContents();
     return false;
 }
 
-bool NullFF::group_setContents(quint32 i, const Molecules &molecules, 
+bool NullFF::group_setContents(quint32 i, const Molecules &molecules,
                                const PropertyMap &map)
 {
     throwNoSetContents();
     return false;
 }
 
-bool NullFF::group_setContents(quint32 i, const MoleculeGroup &molgroup, 
+bool NullFF::group_setContents(quint32 i, const MoleculeGroup &molgroup,
                                const PropertyMap &map)
 {
     throwNoSetContents();

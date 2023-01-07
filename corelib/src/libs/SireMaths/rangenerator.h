@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -81,7 +80,7 @@ public:
     ~RanGenerator();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return RanGenerator::typeName();
@@ -110,7 +109,7 @@ public:
     QVector<double> nrand(int n) const;
     QVector<double> nrand(int n, double maxval) const;
     QVector<double> nrand(int n, double minval, double maxval) const;
-    
+
     void nrand(QVector<double> &result) const;
     void nrand(QVector<double> &result, double maxval) const;
     void nrand(QVector<double> &result, double minval, double maxval) const;
@@ -136,7 +135,7 @@ public:
 
     void nvectorOnSphere(QVector<Vector> &result) const;
     void nvectorOnSphere(QVector<Vector> &result, double radius) const;
-    
+
     QVector<Vector> nvectorOnSphere(int n) const;
     QVector<Vector> nvectorOnSphere(int n, double radius) const;
 
@@ -152,12 +151,12 @@ public:
 
     QVector<quint32> getState() const;
     void setState(const QVector<quint32> &state);
-    
+
     void lock() const;
     void unlock() const;
-    
+
     static const RanGenerator& global();
-    
+
     static void seedGlobal();
     static void seedGlobal(quint32 seed);
     static void seedGlobal(const QVector<quint32> &seed);
@@ -178,13 +177,13 @@ class RanGeneratorLocker : boost::noncopyable
 public:
     RanGeneratorLocker() : boost::noncopyable(), rangen(0)
     {}
-    
+
     RanGeneratorLocker(const RanGenerator *r) : boost::noncopyable(), rangen(r)
     {
         if (rangen)
             rangen->lock();
     }
-    
+
     ~RanGeneratorLocker()
     {
         if (rangen)
@@ -193,7 +192,7 @@ public:
             rangen = 0;
         }
     }
-    
+
     void unlock()
     {
         if (rangen)
@@ -202,7 +201,7 @@ public:
             rangen = 0;
         }
     }
-    
+
 private:
     const RanGenerator *rangen;
 };

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,16 +47,16 @@ namespace SireID
 
 /** This is the base class of all Number ID objects. A Number
     is used to provide an object with an identifying number.
-    This could be the number of a residue in a molecule, a 
+    This could be the number of a residue in a molecule, a
     user-supplied number of a CutGroup in a molecule, or
-    perhaps the automatic unique ID numbers of molecules, 
+    perhaps the automatic unique ID numbers of molecules,
     forcefields or molecule groups that are assigned by the
     program. The key point of a Number is to provide an ID
-    that can be queried and compared rapidly, and that 
+    that can be queried and compared rapidly, and that
     does not change as the object is moved between different
     containers. Generally an object should keep its number
     throughout its lifetime.
-    
+
     @author Christopher Woods
 */
 class SIREID_EXPORT Number
@@ -68,22 +67,22 @@ friend SIREID_EXPORT QDataStream& ::operator>>(QDataStream&, Number&);
 
 public:
     ~Number();
-    
+
     operator qint32() const;
-    
+
     static qint32 null();
-    
+
     bool isNull() const;
 
     uint hash() const;
-    
+
     qint32 value() const;
-    
+
 protected:
     Number(qint32 num=0);
-    
+
     Number(const Number &other);
-    
+
     /** The actual number */
     qint32 _num;
 };

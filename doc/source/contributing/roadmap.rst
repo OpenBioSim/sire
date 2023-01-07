@@ -25,9 +25,9 @@ useful companion tool to BioSimSpace.
 
 If you would like to suggest features that should be
 added to the roadmap then please
-`raise a feature request here <https://github.com/michellab/Sire/issues/new?assignees=chryswoods&labels=enhancement&template=feature_request.md&title=%5BFEATURE+REQUEST%5D+-+I%27d+like+Sire+to>`_.
+`raise a feature request here <https://github.com/openbiosim/sire/issues/new?assignees=chryswoods&labels=enhancement&template=feature_request.md&title=%5BFEATURE+REQUEST%5D+-+I%27d+like+Sire+to>`_.
 
 More details about individual feature branches, which contain the new
 features being actively worked on, is available on the
-`GitHub issues <https://github.com/michellab/Sire/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-branch>`_
+`GitHub issues <https://github.com/openbiosim/sire/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-branch>`_
 page.

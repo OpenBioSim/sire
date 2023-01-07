@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -63,9 +62,9 @@ const void* get_shared_container_pointer(const SireBase::ChunkedVector<T,N>&);
 /** This class provides a vector that is expected to hold a large
     number of objects, and which is expected to have individual
     objects changed (and so would need to be reallocated a lot)
-    
+
     This breaks up the big vector into chunks of size 'N'
-    
+
     @author Christopher Woods
 */
 template<class T, int N=100>
@@ -75,7 +74,7 @@ class ChunkedVector
 friend SIREBASE_EXPORT QDataStream& ::operator<<<>(QDataStream&, const ChunkedVector<T,N>&);
 friend SIREBASE_EXPORT QDataStream& ::operator>><>(QDataStream&, ChunkedVector<T,N>&);
 
-friend const void* 
+friend const void*
 SireBase::detail::get_shared_container_pointer<>(const ChunkedVector<T,N>&);
 
 public:
@@ -85,15 +84,15 @@ public:
         iterator() : end_chunk(0), current_chunk(0),
                      end_item(0), current_item(0)
         {}
-        
+
         iterator(const iterator &other)
              : end_chunk(other.end_chunk), current_chunk(other.current_chunk),
                end_item(other.end_item), current_item(other.current_item)
         {}
-        
+
         ~iterator()
         {}
-        
+
         iterator& operator=(const iterator &other)
         {
             if (this != &other)
@@ -103,21 +102,21 @@ public:
                 end_item = other.end_item;
                 current_item = other.current_item;
             }
-            
+
             return *this;
         }
-        
+
         iterator& operator++()
         {
             if (current_item != 0)
             {
                 ++current_item;
-                
+
                 if (current_item == end_item)
                 {
                     //move to the next chunk
                     ++current_chunk;
-                    
+
                     if (current_chunk == end_chunk)
                     {
                         //we've reached the end
@@ -133,40 +132,40 @@ public:
                     }
                 }
             }
-            
+
             return *this;
         }
-        
+
         iterator& operator+=(int val)
         {
             for (int i=0; i<val; ++i)
             {
                 this->operator++();
             }
-            
+
             return *this;
         }
-        
+
         bool operator==(const iterator &other) const
         {
             return current_item == other.current_item;
         }
-        
+
         bool operator!=(const iterator &other) const
         {
             return not iterator::operator==(other);
         }
-        
+
         T& operator*()
         {
             return *current_item;
         }
-        
+
         const T& operator*() const
         {
             return *current_item;
         }
-        
+
     private:
         friend class ChunkedVector;
 
@@ -176,40 +175,40 @@ public:
             {
                 current_chunk = chunks;
                 end_chunk = chunks + nchunks;
-                
+
                 current_item = current_chunk->data();
                 end_item = current_item + current_chunk->count();
             }
         }
-    
+
         /** Pointer to one past the last chunk */
         const QVector<T> *end_chunk;
-            
+
         /** Pointer to the current chunk */
         QVector<T> *current_chunk;
-        
+
         /** Pointer to one past the last item of this chunk */
         const T *end_item;
-        
+
         /** Pointer to the current item */
         T *current_item;
     };
-    
+
     class const_iterator
     {
     public:
         const_iterator() : end_chunk(0), current_chunk(0),
                            end_item(0), current_item(0)
         {}
-        
+
         const_iterator(const const_iterator &other)
              : end_chunk(other.end_chunk), current_chunk(other.current_chunk),
                end_item(other.end_item), current_item(other.current_item)
         {}
-        
+
         ~const_iterator()
         {}
-        
+
         const_iterator& operator=(const const_iterator &other)
         {
             if (this != &other)
@@ -219,21 +218,21 @@ public:
                 end_item = other.end_item;
                 current_item = other.current_item;
             }
-            
+
             return *this;
         }
-        
+
         const_iterator& operator++()
         {
             if (current_item != 0)
             {
                 ++current_item;
-                
+
                 if (current_item == end_item)
                 {
                     //move to the next chunk
                     ++current_chunk;
-                    
+
                     if (current_chunk == end_chunk)
                     {
                         //we've reached the end
@@ -249,35 +248,35 @@ public:
                     }
                 }
             }
-            
+
             return *this;
         }
-        
+
         const_iterator& operator+=(int val)
         {
             for (int i=0; i<val; ++i)
             {
                 this->operator++();
             }
-            
+
             return *this;
         }
-        
+
         bool operator==(const const_iterator &other) const
         {
             return current_item == other.current_item;
         }
-        
+
         bool operator!=(const const_iterator &other) const
         {
             return not const_iterator::operator==(other);
         }
-        
+
         const T& operator*() const
         {
             return *current_item;
         }
-        
+
     private:
         friend class ChunkedVector;
 
@@ -287,7 +286,7 @@ public:
             {
                 current_chunk = chunks;
                 end_chunk = chunks + nchunks;
-                
+
                 current_item = current_chunk->constData();
                 end_item = current_item + current_chunk->count();
             }
@@ -295,13 +294,13 @@ public:
 
         /** Pointer to one past the last chunk */
         const QVector<T> *end_chunk;
-            
+
         /** Pointer to the current chunk */
         const QVector<T> *current_chunk;
-        
+
         /** Pointer to one past the last item of this chunk */
         const T *end_item;
-        
+
         /** Pointer to the current item */
         const T *current_item;
     };
@@ -309,39 +308,39 @@ public:
     ChunkedVector();
     ChunkedVector(int size);
     ChunkedVector(int size, const T &value);
-    
+
     ChunkedVector(const ChunkedVector<T,N> &other);
-    
+
     ~ChunkedVector();
 
     ChunkedVector<T,N>& operator=(const ChunkedVector<T,N> &other);
-    
+
     bool operator==(const ChunkedVector<T,N> &other) const;
     bool operator!=(const ChunkedVector<T,N> &other) const;
 
     T& operator[](int i);
     const T& operator[](int i) const;
-    
+
     const T& at(int i) const;
-    
+
     T value(int i) const;
     T value(int i, const T &default_value) const;
-    
+
     iterator begin()
     {
         return iterator(_chunks.data(), _chunks.count());
     }
-    
+
     iterator end()
     {
         return iterator();
     }
-    
+
     const_iterator begin() const
     {
         return const_iterator(_chunks.constData(), _chunks.count());
     }
-    
+
     const_iterator end() const
     {
         return const_iterator();
@@ -351,26 +350,26 @@ public:
     {
         return this->begin();
     }
-    
+
     const_iterator constEnd() const
     {
         return this->end();
     }
-    
+
     void append(const T &value);
 
     void remove(int i);
     void remove(int i, int count);
-    
+
     int count() const;
     int count(const T &value) const;
-    
+
     bool isEmpty() const;
-    
+
     int size() const;
-    
+
     int capacity() const;
-    
+
     void resize(int count);
 
     void clear();
@@ -416,10 +415,10 @@ ChunkedVector<T,N>::ChunkedVector(int size)
 
     int nchunks = size / N;
     int nremainder = size % N;
-    
+
     QVector<T> full_chunk(N);
     full_chunk.squeeze();
-    
+
     if (nremainder > 0)
     {
         this->_chunks = QVector< QVector<T> >(nchunks+1, full_chunk);
@@ -439,16 +438,16 @@ ChunkedVector<T,N>::ChunkedVector(int size, const T &value)
 {
     if (size <= 0)
         return;
-        
+
     int nchunks = size / N;
     int nremainder = size % N;
 
     QVector<T> full_chunk(N, value);
-    
+
     if (nremainder > 0)
     {
         full_chunk.squeeze();
-    
+
         this->_chunks = QVector< QVector<T> >(nchunks+1, full_chunk);
         this->_chunks[nchunks].resize(nremainder);
     }
@@ -527,7 +526,7 @@ const T& ChunkedVector<T,N>::operator[](int i) const
     return this->_chunks[ i / N ][ i % N ];
 }
 
-/** Return a const reference to the ith element. This performs 
+/** Return a const reference to the ith element. This performs
     no bounds checking and is optimised for speed */
 template<class T, int N>
 SIRE_INLINE_TEMPLATE
@@ -545,7 +544,7 @@ T ChunkedVector<T,N>::value(int i) const
     return this->_chunks.value( i / N ).value( i % N );
 }
 
-/** Return the ith element - if i is out of bounds, then it 
+/** Return the ith element - if i is out of bounds, then it
     returns 'default_value' */
 template<class T, int N>
 SIRE_OUTOFLINE_TEMPLATE
@@ -562,7 +561,7 @@ int ChunkedVector<T,N>::nChunks() const
     return this->_chunks.count();
 }
 
-/** Internal class used to get the number of full chunks 
+/** Internal class used to get the number of full chunks
     (chunks that contain 'N' elements) */
 template<class T, int N>
 SIRE_OUTOFLINE_TEMPLATE
@@ -570,7 +569,7 @@ int ChunkedVector<T,N>::nFullChunks() const
 {
     int nchunks = this->_chunks.count();
     const QVector<T> *chunks_array = this->_chunks.constData();
-    
+
     for (int i=nchunks-1; i>=0; --i)
     {
         if (chunks_array[i].count() == N)
@@ -587,7 +586,7 @@ int ChunkedVector<T,N>::nRemainder() const
 {
     int nchunks = this->nChunks();
     int nfullchunks = this->nFullChunks();
-    
+
     if (nfullchunks < nchunks)
         return this->_chunks[nfullchunks].count();
     else
@@ -601,7 +600,7 @@ void ChunkedVector<T,N>::append(const T &value)
 {
     int nchunks = this->nChunks();
     int nfullchunks = this->nFullChunks();
-    
+
     if (nfullchunks < nchunks)
     {
         //there is some space left in the last chunk
@@ -628,9 +627,9 @@ void ChunkedVector<T,N>::remove(int i)
 
     //get the chunk index of this object
     int chunk_idx = i / N;
-    
+
     int nfullchunks = this->nFullChunks();
-    
+
     if (chunk_idx == nfullchunks)
     {
         //we are removing an item from the last chunk - this is easy
@@ -641,10 +640,10 @@ void ChunkedVector<T,N>::remove(int i)
         //we are removing from a middle chunk, so have to shift
         //everything along by one...
         int nchunks = this->nChunks();
-        
+
         //remove the object
         this->_chunks[chunk_idx].remove( i % N );
-        
+
         //now go through each chunk moving the first object from the next
         //chunk to the last object of this chunk
         for (int i=chunk_idx; i<nchunks-1; ++i)
@@ -652,7 +651,7 @@ void ChunkedVector<T,N>::remove(int i)
             this->_chunks[i].append( this->_chunks[i+1][0] );
             this->_chunks[i+1].remove(0);
         }
-        
+
         //clear out the last chunk if it is now empty
         if (this->_chunks[nchunks-1].isEmpty())
             this->_chunks.remove(nchunks-1);
@@ -678,7 +677,7 @@ int ChunkedVector<T,N>::count() const
 {
     int nfullchunks = this->nFullChunks();
     int nremainder = this->nRemainder();
-    
+
     return (nfullchunks * N) + nremainder;
 }
 
@@ -698,12 +697,12 @@ int ChunkedVector<T,N>::count(const T &value) const
     int size = 0;
     int nchunks = this->_chunks.count();
     const QVector<T> *chunks_array = this->_chunks.constData();
-    
+
     for (int i=0; i<nchunks; ++i)
     {
         size += chunks_array[i].count(value);
     }
-    
+
     return size;
 }
 
@@ -723,14 +722,14 @@ int ChunkedVector<T,N>::capacity() const
 {
     int nfullchunks = this->nFullChunks();
     int nchunks = this->nChunks();
-    
+
     int c = nfullchunks * N;
-    
+
     for (int i=nfullchunks; i<nchunks; ++i)
     {
         c += qMin( this->_chunks.constData()[i].capacity(), N );
     }
-    
+
     return c;
 }
 
@@ -771,7 +770,7 @@ void ChunkedVector<T,N>::resize(int new_count)
     //get the dimensions of the new chunked vector
     int new_nchunks = 1 + ((new_count-1) / N);
     int new_nremainder = new_count % N;
-        
+
     if (new_nchunks < old_nchunks)
     {
         this->_chunks.resize(new_nchunks);
@@ -780,16 +779,16 @@ void ChunkedVector<T,N>::resize(int new_count)
     {
         if (old_nremainder != 0)
             this->_chunks[old_nchunks-1].resize(N);
-            
+
         this->_chunks.resize(new_nchunks);
-        
+
         for (int i=old_nchunks; i<new_nchunks; ++i)
         {
             this->_chunks[i].resize( N );
             this->_chunks[i].squeeze();
         }
     }
-    
+
     //resize the last chunk to the right size
     if (new_nremainder == 0)
         this->_chunks[new_nchunks-1].resize(N);
@@ -826,17 +825,17 @@ void ChunkedVector<T,N>::reserve(int count)
     if (count > this->capacity())
     {
         int current_nchunks = this->nChunks();
-        
+
         int new_nchunks = count / N;
         int new_nremainder = count % N;
-        
+
         if (new_nremainder > 0)
         {
             new_nchunks += 1;
         }
-        
+
         this->_chunks.resize( new_nchunks );
-        
+
         for (int i=current_nchunks; i<new_nchunks; ++i)
         {
             this->_chunks[i].reserve(N);
@@ -850,32 +849,32 @@ SIRE_OUTOFLINE_TEMPLATE
 QVector<T> ChunkedVector<T,N>::toVector() const
 {
     int size = this->count();
-    
+
     if (size == 0)
         return QVector<T>();
 
     QVector<T> vector(size);
-    
+
     T *vector_array = vector.data();
-    
+
     int k = 0;
-    
+
     int nchunks = this->_chunks.count();
     const QVector<T> *chunks_array = this->_chunks.constData();
-    
+
     for (int i=0; i<nchunks; ++i)
     {
         int n_to_copy = qMin( N, size - k );
-        
+
         const T *old_array = chunks_array[i].constData();
-        
+
         for (int j=0; j<n_to_copy; ++j)
         {
             vector_array[k] = old_array[j];
             ++k;
         }
     }
-    
+
     return vector;
 }
 
@@ -907,12 +906,12 @@ ChunkedVector<T,N> ChunkedVector<T,N>::fromVector(const QVector<T> &vector)
     const T *vector_array = vector.constData();
 
     ChunkedVector<T,N> ret(nvals);
-    
+
     for (int i=0; i<nvals; ++i)
     {
         ret[i] = vector_array[i];
     }
-    
+
     return ret;
 }
 
@@ -962,7 +961,7 @@ struct GetChunkedVectorPointer
     {
         ds >> vector;
     }
-    
+
     static void save(QDataStream &ds, const ChunkedVector<T,N> &vector)
     {
         ds << vector;
@@ -996,7 +995,7 @@ QDataStream &operator<<(QDataStream &ds,
     {
         ds << *it;
     }
-    
+
     //for (quint32 i=0; i<count; ++i)
     //{
     //    ds << vec[i];
@@ -1013,11 +1012,11 @@ QDataStream  &operator>>(QDataStream &ds,
 {
     //read the data in a format that is compatible with QVector
     quint32 count;
-    
+
     ds >> count;
-    
+
     vec.resize(count);
-    
+
     for (quint32 i=0; i<count; ++i)
     {
         ds >> vec[i];
@@ -1029,31 +1028,31 @@ QDataStream  &operator>>(QDataStream &ds,
 /** Serialise to a binary datastream */
 template<class T, int N>
 SIRE_OUTOFLINE_TEMPLATE
-SireStream::SharedDataStream& 
+SireStream::SharedDataStream&
 operator<<(SireStream::SharedDataStream &sds, const SireBase::ChunkedVector<T,N> &vector)
 {
-    sds.sharedSaveContainer< SireBase::ChunkedVector<T,N>, 
+    sds.sharedSaveContainer< SireBase::ChunkedVector<T,N>,
                              SireBase::detail::GetChunkedVectorPointer<T,N> >(vector);
-                            
+
     return sds;
 }
 
 /** Extract from a binary datastream */
 template<class T, int N>
 SIRE_OUTOFLINE_TEMPLATE
-SireStream::SharedDataStream& 
+SireStream::SharedDataStream&
 operator>>(SireStream::SharedDataStream &sds, SireBase::ChunkedVector<T,N> &vector)
 {
-    sds.sharedLoadContainer< SireBase::ChunkedVector<T,N>, 
+    sds.sharedLoadContainer< SireBase::ChunkedVector<T,N>,
                              SireBase::detail::GetChunkedVectorPointer<T,N> >(vector);
-                            
+
     return sds;
 }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
-template class 
+template class
 SireBase::ChunkedVector<double,100>;
 #endif
 

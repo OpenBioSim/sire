@@ -252,7 +252,7 @@ where ``feat_name`` should be replaced by the name of the feature
 branch you want to compile.
 
 Compilation and installation of ``sire`` is managed via the
-`setup.py <https://github.com/michellab/Sire/blob/devel/setup.py>`__
+`setup.py <https://github.com/openbiosim/sire/blob/devel/setup.py>`__
 script.
 
 Run
@@ -279,8 +279,8 @@ as compilation can take quite a while!
 
    You need to have Visual Studio 2017 C++ compiler installed to compile on Windows.
    The easiest way to do this is to `install chocolatey <https://chocolatey.org/install>`__
-   and then install the compilers using the command 
-   ``choco install visualstudio2017-workload-vctools``. This is all free, but 
+   and then install the compilers using the command
+   ``choco install visualstudio2017-workload-vctools``. This is all free, but
    you will need admin access to install chocolatey.
 
 If you plan to install `BioSimSpace <https://biosimspace.org>`__ on

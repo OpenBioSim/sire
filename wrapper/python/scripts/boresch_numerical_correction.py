@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(description="An app to calculate the correction
                                               "can result in substantial errors in certain regimes.",
                                 epilog="boresch_numerical_correction is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org",
+                                        "http://sire.openbiosim.org",
                                  prog="boresch_numerical_correction")
 
 parser.add_argument('-C', '--config', nargs="?",
@@ -54,7 +54,7 @@ if args.author:
 if args.version:
     print("boresch_numerical_correction -- from Sire release version <%s>" %Sire.__version__)
     print("This particular release can be downloaded here: "
-          "https://github.com/michellab/Sire/releases/tag/v%s" %Sire.__version__)
+          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
     must_exit = True
 
 if must_exit:

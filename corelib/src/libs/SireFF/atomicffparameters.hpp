@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -65,7 +64,7 @@ namespace SireFF
 
 /** This template class holds the FFParameters of type T, where
     there is a parameter for each atom in the bead
-    
+
     @author Christopher Woods
 */
 template<class T>
@@ -82,34 +81,34 @@ public:
     AtomicFFParameters();
     AtomicFFParameters(const QVector<T> &params);
     AtomicFFParameters(const typename SireBase::PackedArray2D<T>::Array &params);
-    
+
     AtomicFFParameters(const AtomicFFParameters<T> &other);
-    
+
     ~AtomicFFParameters();
-    
+
     static const char* typeName();
-    
+
     AtomicFFParameters<T>& operator=(const AtomicFFParameters<T> &other);
-    
+
     bool operator==(const AtomicFFParameters<T> &other) const;
     bool operator!=(const AtomicFFParameters<T> &other) const;
-    
+
     FFParametersArrayPtr toArray() const;
-    
+
     const T* constData() const;
-    
+
     int count() const;
-    
+
     const typename SireBase::PackedArray2D<T>::Array& array() const;
-    
+
     operator typename SireBase::PackedArray2D<T>::Array() const;
-    
+
 private:
     /** The actual parameters */
     typename SireBase::PackedArray2D<T>::Array params;
 };
 
-/** This class holds the array of AtomicFFParameters<T> 
+/** This class holds the array of AtomicFFParameters<T>
 
     @author Christopher Woods
 */
@@ -129,54 +128,54 @@ public:
     AtomicFFParametersArray(const QVector<T> &params);
     AtomicFFParametersArray(const QVector< QVector<T> > &params);
     AtomicFFParametersArray(const AtomicFFParameters<T> &params);
-    
+
     AtomicFFParametersArray(const AtomicFFParametersArray<T> &other);
-    
+
     ~AtomicFFParametersArray();
-    
+
     static const char* typeName();
-    
+
     AtomicFFParametersArray<T>& operator=(const AtomicFFParametersArray<T> &other);
-    
+
     bool operator==(const AtomicFFParametersArray<T> &other) const;
     bool operator!=(const AtomicFFParametersArray<T> &other) const;
-    
+
     FFParametersPtr operator[](int i) const;
-    
+
     int count() const;
-    
+
     bool isEmpty() const;
-    
+
     const SireBase::PackedArray2D<T>& array() const;
-    
+
     operator SireBase::PackedArray2D<T>() const;
-    
+
     const Array* constData() const;
-    
+
     void append(const QVector<T> &params);
     void append(const QVector< QVector<T> > &params);
-    
+
     void append(const AtomicFFParameters<T> &params);
     void append(const AtomicFFParametersArray<T> &params);
-    
+
     void append(const FFParameters &params);
     void append(const FFParametersArray &params);
-    
+
     void update(int idx, const QVector<T> &params);
     void update(const QVarLengthArray<int> &idxs, const QVector< QVector<T> > &params);
-    
+
     void update(int idx, const AtomicFFParameters<T> &params);
-    void update(const QVarLengthArray<int> &idxs, 
+    void update(const QVarLengthArray<int> &idxs,
                 const AtomicFFParametersArray<T> &params);
-    
+
     void update(int idx, const FFParameters &params);
     void update(const QVarLengthArray<int> &idxs, const FFParametersArray &params);
-    
+
     void remove(int idx);
     void remove(const QVarLengthArray<int> &idxs);
-    
+
     void removeAll();
-    
+
 private:
     /** The packed array of all of the bead's parameters */
     SireBase::PackedArray2D<T> params;
@@ -209,7 +208,7 @@ AtomicFFParameters<T>::AtomicFFParameters(
                       : SireBase::ConcreteProperty<AtomicFFParameters<T>,FFParameters>(),
                         params(parameters)
 {}
-                        
+
 /** Copy constructor */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -516,7 +515,7 @@ void AtomicFFParametersArray<T>::update(int idx, const QVector<T> &parameters)
 */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
-void AtomicFFParametersArray<T>::update(const QVarLengthArray<int> &idxs, 
+void AtomicFFParametersArray<T>::update(const QVarLengthArray<int> &idxs,
                                         const QVector< QVector<T> > &parameters)
 {
     params.updateAll(idxs, AtomicFFParametersArray<T>(parameters));
@@ -541,7 +540,7 @@ void AtomicFFParametersArray<T>::update(int idx, const AtomicFFParameters<T> &pa
 */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
-void AtomicFFParametersArray<T>::update(const QVarLengthArray<int> &idxs, 
+void AtomicFFParametersArray<T>::update(const QVarLengthArray<int> &idxs,
                                         const AtomicFFParametersArray<T> &parameters)
 {
     params.updateAll(idxs, parameters.array());
@@ -568,10 +567,10 @@ void AtomicFFParametersArray<T>::update(int idx, const FFParameters &parameters)
 */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
-void AtomicFFParametersArray<T>::update(const QVarLengthArray<int> &idxs, 
+void AtomicFFParametersArray<T>::update(const QVarLengthArray<int> &idxs,
                                         const FFParametersArray &parameters)
 {
-    AtomicFFParametersArray<T>::update(idxs, 
+    AtomicFFParametersArray<T>::update(idxs,
                                        parameters.asA< AtomicFFParametersArray<T> >());
 }
 
@@ -625,7 +624,7 @@ struct AtomicFFParametersArrayMT
 };
 
 template<class T>
-const RegisterMetaType< SireFF::AtomicFFParameters<T> > 
+const RegisterMetaType< SireFF::AtomicFFParameters<T> >
                                 AtomicFFParametersMT<T>::r_atomffparams;
 
 template<class T>
@@ -640,14 +639,14 @@ template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator<<(QDataStream &ds, const SireFF::AtomicFFParameters<T> &ffparams)
 {
-    SireStream::writeHeader(ds, 
+    SireStream::writeHeader(ds,
                             SireFF::detail::AtomicFFParametersMT<T>::r_atomffparams,
                             1);
-                            
+
     SireStream::SharedDataStream sds(ds);
-    
+
     sds << ffparams.params;
-    
+
     return ds;
 }
 
@@ -657,33 +656,33 @@ QDataStream& operator>>(QDataStream &ds, SireFF::AtomicFFParameters<T> &ffparams
 {
     SireStream::VersionID v = SireStream::readHeader(ds,
                                 SireFF::detail::AtomicFFParametersMT<T>::r_atomffparams);
-                                
+
     if (v == 1)
     {
         SireStream::SharedDataStream sds(ds);
         sds >> ffparams.params;
     }
     else
-        throw SireStream::version_error(v, "1", 
+        throw SireStream::version_error(v, "1",
                                SireFF::detail::AtomicFFParametersMT<T>::r_atomffparams,
                                CODELOC);
-                               
+
     return ds;
 }
 
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator<<(QDataStream &ds, 
+QDataStream& operator<<(QDataStream &ds,
                         const SireFF::AtomicFFParametersArray<T> &ffparams)
 {
-    SireStream::writeHeader(ds, 
+    SireStream::writeHeader(ds,
                             SireFF::detail::AtomicFFParametersArrayMT<T>::r_atomffparams,
                             1);
-                            
+
     SireStream::SharedDataStream sds(ds);
-    
+
     sds << ffparams.params;
-    
+
     return ds;
 }
 
@@ -693,17 +692,17 @@ QDataStream& operator>>(QDataStream &ds, SireFF::AtomicFFParametersArray<T> &ffp
 {
     SireStream::VersionID v = SireStream::readHeader(ds,
                     SireFF::detail::AtomicFFParametersArrayMT<T>::r_atomffparams);
-                                
+
     if (v == 1)
     {
         SireStream::SharedDataStream sds(ds);
         sds >> ffparams.params;
     }
     else
-        throw SireStream::version_error(v, "1", 
+        throw SireStream::version_error(v, "1",
                             SireFF::detail::AtomicFFParametersArrayMT<T>::r_atomffparams,
                             CODELOC);
-                               
+
     return ds;
 }
 

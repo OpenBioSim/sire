@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,27 +51,27 @@ using namespace SireStream;
 
 static const RegisterMetaType<Beading> r_beading( MAGIC_ONLY,
                                                   Beading::typeName() );
-                                                  
+
 QDataStream &operator<<(QDataStream &ds, const Beading &beading)
 {
     writeHeader(ds, r_beading, 1);
-    
+
     ds << static_cast<const MolViewProperty&>(beading);
-    
-    return ds; 
+
+    return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, Beading &beading)
 {
     VersionID v = readHeader(ds, r_beading);
-    
+
     if (v == 1)
     {
         ds >> static_cast<MolViewProperty&>(beading);
     }
     else
         throw version_error(v, "1", r_beading, CODELOC);
-        
+
     return ds;
 }
 
@@ -144,23 +143,23 @@ static const RegisterMetaType<MoleculeBeading> r_molbeading;
 QDataStream &operator<<(QDataStream &ds, const MoleculeBeading &molbeading)
 {
     writeHeader(ds, r_molbeading, 1);
-    
+
     ds << static_cast<const Beading&>(molbeading);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, MoleculeBeading &molbeading)
 {
     VersionID v = readHeader(ds, r_molbeading);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Beading&>(molbeading);
     }
     else
         throw version_error(v, "1", r_molbeading, CODELOC);
-        
+
     return ds;
 }
 
@@ -215,25 +214,25 @@ AtomIdx MoleculeBeading::atomIdx(const MoleculeInfoData &moldata,
                                  const BeadIdx &bead, int i) const
 {
     bead.map( MoleculeBeading::nBeads(moldata) );
-    
+
     return AtomIdx( AtomIdx(i).map(moldata.nAtoms()) );
 }
 
-/** Return the values of the atom property 'key' for all beads, 
+/** Return the values of the atom property 'key' for all beads,
     arranged in bead:index order */
 PropertyPtr MoleculeBeading::atomProperty(const MoleculeData &moldata,
                                           const SireBase::PropertyName &key) const
 {
     return moldata.property(key).asA<AtomProp>().merge(moldata.info());
 }
-                         
+
 /** Return all of the atoms that are selected in the beads */
 AtomSelection MoleculeBeading::selection(const MoleculeInfoData &moldata) const
 {
     return AtomSelection(moldata);
 }
 
-/** Return the atoms that are part of the bead with index 'bead' 
+/** Return the atoms that are part of the bead with index 'bead'
 
     \throw SireError::invalid_index
 */
@@ -248,12 +247,12 @@ AtomSelection MoleculeBeading::selection(const MoleculeInfoData &moldata,
 QList<AtomIdx> MoleculeBeading::atomIdxs(const MoleculeInfoData &moldata) const
 {
     QList<AtomIdx> atoms;
-    
+
     for (int i=0; i<moldata.nAtoms(); ++i)
     {
         atoms.append( AtomIdx(i) );
     }
-    
+
     return atoms;
 }
 
@@ -277,23 +276,23 @@ static const RegisterMetaType<ResidueBeading> r_resbeading;
 QDataStream &operator<<(QDataStream &ds, const ResidueBeading &resbeading)
 {
     writeHeader(ds, r_resbeading, 1);
-    
+
     ds << static_cast<const Beading&>(resbeading);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, ResidueBeading &resbeading)
 {
     VersionID v = readHeader(ds, r_resbeading);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Beading&>(resbeading);
     }
     else
         throw version_error(v, "1", r_resbeading, CODELOC);
-        
+
     return ds;
 }
 
@@ -361,17 +360,17 @@ PropertyPtr ResidueBeading::atomProperty(const MoleculeData &moldata,
 {
     return moldata.property(key).asA<AtomProp>().divideByResidue(moldata.info());
 }
-                         
+
 /** Return the atoms that are in all of the beads */
 AtomSelection ResidueBeading::selection(const MoleculeInfoData &moldata) const
 {
     return AtomSelection(moldata);
 }
 
-/** Return the atoms that are in the bead with index 'bead' 
+/** Return the atoms that are in the bead with index 'bead'
 
     \throw SireError::invalid_index
-*/                         
+*/
 AtomSelection ResidueBeading::selection(const MoleculeInfoData &moldata,
                                         const BeadIdx &bead) const
 {
@@ -383,12 +382,12 @@ AtomSelection ResidueBeading::selection(const MoleculeInfoData &moldata,
 QList<AtomIdx> ResidueBeading::atomIdxs(const MoleculeInfoData &moldata) const
 {
     QList<AtomIdx> atoms;
-    
+
     for (int i=0; i<moldata.nAtoms(); ++i)
     {
         atoms.append( AtomIdx(i) );
     }
-    
+
     return atoms;
 }
 
@@ -414,10 +413,10 @@ namespace SireMol{ namespace detail {
     {
     public:
         UserBeadingInfo();
-    
+
         UserBeadingInfo(const AtomBeads &beads,
                         const MoleculeInfoData &molinfo);
-                        
+
         ~UserBeadingInfo();
 
         int nBeads() const;
@@ -428,9 +427,9 @@ namespace SireMol{ namespace detail {
 
         PropertyPtr atomProperty(const MoleculeData &moldata,
                                  const SireBase::PropertyName &key) const;
-                                 
+
         AtomSelection selection() const;
-                                 
+
         AtomSelection selection(const BeadIdx &bead) const;
 
         QList<AtomIdx> atomIdxs() const;
@@ -439,17 +438,17 @@ namespace SireMol{ namespace detail {
     private:
         /** The atoms selected in each bead */
         QVector<AtomSelection> bead_atoms;
-        
+
         /** All of the atoms in the beads */
         AtomSelection all_atoms;
 
         /** The map of bead index to number */
         QVector<BeadNum> beadidx_to_num;
-        
+
         /** The indicies of the atoms in each bead */
         QVector< QVector<AtomIdx> > bead_atomidxs;
     };
-    
+
     /** This internal class holds the cache of UserBeadInfos
         for each MoleculeInfoData object */
     class UserBeadingInfoRegistry : public boost::noncopyable
@@ -457,18 +456,18 @@ namespace SireMol{ namespace detail {
     public:
         UserBeadingInfoRegistry(const AtomBeads &beads);
         ~UserBeadingInfoRegistry();
-        
+
         const AtomBeads& atomBeads() const;
-        
+
         const UserBeadingInfo& getInfoFor(const MoleculeInfoData &moldata);
-        
+
     private:
         /** The AtomBeads to use to bead up the molecule */
         AtomBeads atom_beads;
-    
+
         /** The actual database of beading infos */
         QHash< QUuid,boost::shared_ptr<UserBeadingInfo> > reg;
-        
+
         /** Lock to protect access to the database */
         QMutex datamutex;
     };
@@ -491,7 +490,7 @@ const AtomBeads& UserBeadingInfoRegistry::atomBeads() const
 {
     return atom_beads;
 }
-        
+
 const UserBeadingInfo& UserBeadingInfoRegistry::getInfoFor(
                                         const MoleculeInfoData &moldata)
 {
@@ -502,20 +501,20 @@ const UserBeadingInfo& UserBeadingInfoRegistry::getInfoFor(
     }
 
     QMutexLocker lkr(&datamutex);
-    
+
     if (not reg.contains(moldata.UID()))
     {
         lkr.unlock();
-        
+
         boost::shared_ptr<UserBeadingInfo> info(
                                 new UserBeadingInfo(atom_beads, moldata) );
-                                
+
         lkr.relock();
-        
+
         if (not reg.contains(moldata.UID()))
             reg.insert(moldata.UID(), info);
     }
-    
+
     return *(reg.value(moldata.UID()));
 }
 
@@ -532,7 +531,7 @@ UserBeadingInfo::UserBeadingInfo(const AtomBeads &beads,
     throw SireError::incomplete_code( "TODO", CODELOC );
 }
 
-/** Destructor */                
+/** Destructor */
 UserBeadingInfo::~UserBeadingInfo()
 {}
 
@@ -542,7 +541,7 @@ int UserBeadingInfo::nBeads() const
     return beadidx_to_num.count();
 }
 
-/** Return the number of the bead with index 'bead' 
+/** Return the number of the bead with index 'bead'
 
     \throw SireError::invalid_index
 */
@@ -559,7 +558,7 @@ AtomIdx UserBeadingInfo::atomIdx(const BeadIdx &bead, int i) const
 {
     const QVector<AtomIdx> &atoms = bead_atomidxs.constData()
                                             [ bead.map(bead_atomidxs.count()) ];
-                                            
+
     return atoms.constData()[ Index(i).map(atoms.count()) ];
 }
 
@@ -570,17 +569,17 @@ PropertyPtr UserBeadingInfo::atomProperty(const MoleculeData &moldata,
 {
     return moldata.property(key).asA<AtomProp>().divide(bead_atoms);
 }
-                         
+
 /** Return the selection of all of the atoms that are
     in all of the beads */
 AtomSelection UserBeadingInfo::selection() const
 {
     return all_atoms;
 }
-                     
+
 /** Return the selection of the atoms that are in the bead with
     index 'bead'
-    
+
     \throw SireError::invalid_index
 */
 AtomSelection UserBeadingInfo::selection(const BeadIdx &bead) const
@@ -592,18 +591,18 @@ AtomSelection UserBeadingInfo::selection(const BeadIdx &bead) const
 QList<AtomIdx> UserBeadingInfo::atomIdxs() const
 {
     QList<AtomIdx> atoms;
-    
+
     for (int i=0; i<bead_atomidxs.count(); ++i)
     {
         atoms += bead_atomidxs.constData()[i].toList();
     }
-    
+
     return atoms;
 }
 
-/** Return the indicies of the atoms that are in the bead 
+/** Return the indicies of the atoms that are in the bead
     with index 'bead'
-    
+
     \throw SireError::invalid_index
 */
 QList<AtomIdx> UserBeadingInfo::atomIdxs(const BeadIdx &bead) const
@@ -616,9 +615,9 @@ static const RegisterMetaType<UserBeading> r_userbeading;
 QDataStream &operator<<(QDataStream &ds, const UserBeading &userbeading)
 {
     writeHeader(ds, r_userbeading, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     if (userbeading.registry.get() == 0)
     {
         sds << AtomBeads();
@@ -627,31 +626,31 @@ QDataStream &operator<<(QDataStream &ds, const UserBeading &userbeading)
     {
         sds << userbeading.registry->atomBeads();
     }
-    
+
     sds << static_cast<const Beading&>(userbeading);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, UserBeading &userbeading)
 {
     VersionID v = readHeader(ds, r_userbeading);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         AtomBeads atom_beads;
-        
+
         sds >> atom_beads;
-        
+
         userbeading = UserBeading(atom_beads);
-        
+
         sds >> static_cast<Beading&>(userbeading);
     }
     else
         throw version_error(v, "1", r_userbeading, CODELOC);
-        
+
     return ds;
 }
 
@@ -688,7 +687,7 @@ UserBeading& UserBeading::operator=(const UserBeading &other)
         registry = other.registry;
         Beading::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -776,13 +775,13 @@ PropertyPtr UserBeading::atomProperty(const MoleculeData &moldata,
 {
     return getUserBeadingInfo(moldata.info()).atomProperty(moldata, key);
 }
-                         
+
 /** Return the selection of all of the atoms in all of the beads */
 AtomSelection UserBeading::selection(const MoleculeInfoData &moldata) const
 {
     return getUserBeadingInfo(moldata).selection();
 }
-                         
+
 /** Return the selection of atoms in the bead with index 'bead'
 
     \throw SireError::invalid_index
@@ -818,23 +817,23 @@ static const RegisterMetaType<NullBeading> r_nullbeading;
 QDataStream &operator<<(QDataStream &ds, const NullBeading &nullbeading)
 {
     writeHeader(ds, r_nullbeading, 1);
-    
+
     ds << static_cast<const Beading&>(nullbeading);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, NullBeading &nullbeading)
 {
     VersionID v = readHeader(ds, r_nullbeading);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Beading&>(nullbeading);
     }
     else
         throw version_error(v, "1", r_nullbeading, CODELOC);
-        
+
     return ds;
 }
 
@@ -888,7 +887,7 @@ AtomIdx NullBeading::atomIdx(const MoleculeInfoData &moldata,
     throw SireError::invalid_index( QObject::tr(
             "NullBeading creates zero beads, so there are no atoms in any bead!"),
                 CODELOC );
-                
+
     return AtomIdx();
 }
 
@@ -899,16 +898,16 @@ PropertyPtr NullBeading::atomProperty(const MoleculeData &moldata,
     throw SireBase::missing_property( QObject::tr(
             "There are no Beads using a NullBeading, so no property with "
             "key %1.").arg(key.toString()), CODELOC );
-            
+
     return PropertyPtr();
 }
-                         
+
 /** Return the atoms from the molecule that are part of the beads */
 AtomSelection NullBeading::selection(const MoleculeInfoData &moldata) const
 {
     return AtomSelection();
 }
-                         
+
 /** Return the atoms from the molecule that in the bead with index 'bead'
 
     \throw SireError::invalid_index
@@ -919,7 +918,7 @@ AtomSelection NullBeading::selection(const MoleculeInfoData &moldata,
     throw SireError::invalid_index( QObject::tr(
             "The NullBeading beader creates no beads, so there is no bead with "
             "index %1.").arg(bead.value()), CODELOC );
-            
+
     return AtomSelection();
 }
 

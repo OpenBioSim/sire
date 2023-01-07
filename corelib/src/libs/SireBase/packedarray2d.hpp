@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -67,10 +66,10 @@ template<class T>
 QDataStream& operator>>(QDataStream&, SireBase::PackedArray2D<T>&);
 
 template<class T>
-QDataStream& operator<<(QDataStream&, 
+QDataStream& operator<<(QDataStream&,
                         const SireBase::detail::PackedArray2D_Array<T>&);
 template<class T>
-QDataStream& operator>>(QDataStream&, 
+QDataStream& operator>>(QDataStream&,
                         SireBase::detail::PackedArray2D_Array<T>&);
 
 namespace SireBase
@@ -94,7 +93,7 @@ class PackedArray2D_ArrayData;
 template<class T>
 class PackedArray2D_Array;
 
-/** This is a simple class that is used to manage the memory and 
+/** This is a simple class that is used to manage the memory and
     reference counting for the PackedArray2D */
 template<class T>
 class PackedArray2DMemory : public PackedArray2DMemoryBase
@@ -103,16 +102,16 @@ public:
     static char* create(quint32 narrays, quint32 nvalues);
     static char* detach(char *this_ptr, quint32 this_idx);
     static void destroy(PackedArray2DData<T> *arrays);
-    
+
     static void incref(char *this_ptr, quint32 this_idx);
     static void decref(char *this_ptr, quint32 this_idx);
 
     static SharedArray2DPtr< PackedArray2DData<T> > shared_null;
 };
 
-/** This is the implicitly shared pointer class that 
+/** This is the implicitly shared pointer class that
     is used to hold any of the PackedArray2DMemory allocated objects
-    
+
     @author Christopher Woods
 */
 template<class T>
@@ -126,142 +125,142 @@ public:
     SharedArray2DPtr(const T *p)
     {
         ptr = const_cast<T*>(p);
-    
+
         if (ptr)
             ptr->incref();
     }
-    
+
     SharedArray2DPtr(const SharedArray2DPtr &other) : ptr(other.ptr)
     {
         if (ptr)
             ptr->incref();
     }
-    
+
     SharedArray2DPtr(SharedArray2DPtr &&other) : ptr(other.ptr)
     {
         other.ptr = 0;
     }
-    
+
     ~SharedArray2DPtr()
     {
         if (ptr)
             ptr->decref();
     }
-    
+
     SharedArray2DPtr<T>& operator=(const SharedArray2DPtr &other)
     {
         if (ptr != other.ptr)
         {
             T *new_ptr = other.ptr;
-            
+
             //increment the other reference count
             if (new_ptr)
                 new_ptr->incref();
-                
+
             //decrement our reference count
             if (ptr)
                 ptr->decref();
-                
+
             //set the new pointer
             ptr = new_ptr;
         }
-        
+
         return *this;
     }
-    
+
     SharedArray2DPtr<T>& operator=(SharedArray2DPtr<T> &&other)
     {
         T *new_ptr = other.ptr;
         other.ptr = 0;
-        
+
         if (ptr)
             ptr->decref();
-        
+
         ptr = new_ptr;
-        
+
         return *this;
     }
-    
+
     const T& operator*() const
     {
         return *ptr;
     }
-    
+
     const T* operator->() const
     {
         return ptr;
     }
-    
+
     T& operator*()
     {
         if (ptr)
             ptr = ptr->detach();
-            
+
         return *ptr;
     }
-    
+
     T* operator->()
     {
         if (ptr)
             ptr = ptr->detach();
-            
+
         return ptr;
     }
-    
+
     const T* data() const
     {
         return ptr;
     }
-    
+
     const T* constData() const
     {
         return ptr;
     }
-    
+
     T* data()
     {
         if (ptr)
             ptr = ptr->detach();
-        
+
         return ptr;
     }
-    
+
     /** Detach this pointer */
     void detach()
     {
         if (ptr)
             ptr = ptr->detach();
     }
-    
-    /** Assign this pointer to point at 'weakptr' 
+
+    /** Assign this pointer to point at 'weakptr'
         but *without* changing the reference count.
-        You ABSOLUTELY MUST ensure that you call 
-        SharedArray2DPtr::weakRelease() before this 
-        pointer is deleted or reassigned, so 
+        You ABSOLUTELY MUST ensure that you call
+        SharedArray2DPtr::weakRelease() before this
+        pointer is deleted or reassigned, so
         as to not decrement the reference count incorrectly! */
     void weakAssign(T *weakptr)
     {
         if (ptr)
             ptr->decref();
-            
+
         ptr = weakptr;
     }
-    
+
     /** Release the pointer *without* decrementing the
         reference count. You should only call this
-        function if the pointer was assigned using 
+        function if the pointer was assigned using
         the 'weakAssign()' function */
     void weakRelease()
     {
         ptr = 0;
     }
-    
+
 private:
     /** Actual pointer */
     T *ptr;
 };
 
-/** This class is used to hold all of the metadata about the 
+/** This class is used to hold all of the metadata about the
     packed array of arrays
 */
 template<class T>
@@ -273,17 +272,17 @@ friend class PackedArray2DMemory<T>;
 public:
     PackedArray2DData();
     PackedArray2DData(quint32 narrays, quint32 nvalues);
-    
+
     PackedArray2DData(const PackedArray2DData &other);
-    
+
     ~PackedArray2DData();
 
     void decref();
-    
+
     PackedArray2DData* detach();
-    
+
     const PackedArray2D_ArrayData<T>* nullArray() const;
-    
+
     const PackedArray2D_ArrayData<T>* arrayDataData() const;
     const PackedArray2D_Array<T>* arrayData() const;
 
@@ -293,9 +292,9 @@ public:
     PackedArray2D_Array<T>* arrayData();
 
     T* valueData();
-    
+
     void setNValuesInArray(quint32 i, quint32 nvalues);
-    
+
     void close();
 };
 
@@ -312,18 +311,18 @@ friend class PackedArray2DMemory<T>;
 public:
     PackedArray2D_ArrayData();
     PackedArray2D_ArrayData(quint32 this_idx);
-    
+
     PackedArray2D_ArrayData(const PackedArray2D_ArrayData &other);
-    
+
     ~PackedArray2D_ArrayData();
-    
+
     void incref();
     void decref();
-    
+
     PackedArray2D_ArrayData<T>* detach();
-    
+
     PackedArray2DData<T>* extract() const;
-    
+
     const T* valueData() const;
     T* valueData();
 };
@@ -334,7 +333,7 @@ public:
     of a PackedArray2D<T>::Array is fixed at construction. You
     cannot change the size as this array is packed contiguously
     in memory with other arrays.
-    
+
     @author Christopher Woods
 */
 template<class T>
@@ -349,49 +348,49 @@ friend SIREBASE_EXPORT QDataStream& ::operator>><>(QDataStream&, PackedArray2D_A
 
 public:
     PackedArray2D_Array();
-    
+
     PackedArray2D_Array(quint32 sz);
     PackedArray2D_Array(quint32 sz, const T &value);
-    
+
     PackedArray2D_Array(const QVector<T> &values);
-    
+
     PackedArray2D_Array(const PackedArray2D_Array<T> &other);
-    
+
     ~PackedArray2D_Array();
-    
+
     PackedArray2D_Array<T>& operator=(const PackedArray2D_Array<T> &other);
-    
+
     bool operator==(const PackedArray2D_Array<T> &other) const;
     bool operator!=(const PackedArray2D_Array<T> &other) const;
 
     const T& operator[](quint32 i) const;
     T& operator[](quint32 i);
-    
+
     const T& at(quint32 i) const;
 
     QString toString() const;
 
     int count() const;
     int size() const;
-    
+
     int nValues() const;
-    
+
     bool isEmpty() const;
-    
+
     const T* data() const;
     T* data();
-    
+
     const T* constData() const;
-    
+
     void update(const PackedArray2D_Array<T> &other);
-    
+
     QVector<T> toQVector() const;
-    
+
     void assertValidIndex(quint32 i) const;
 
 protected:
     PackedArray2D_Array(detail::PackedArray2D_ArrayData<T> *data);
-    
+
 private:
     /** Implicitly shared pointer to the array */
     detail::SharedArray2DPtr< detail::PackedArray2D_ArrayData<T> > d;
@@ -403,7 +402,7 @@ private:
     each array is packed in memory so that each object of type
     T is contiguous. This allows rapid indexing over each
     object in each array, or over all objects in all arrays.
-    
+
     @author Christopher Woods
 */
 template<class T>
@@ -420,56 +419,56 @@ public:
     typedef T value_type;
 
     PackedArray2D();
-    
+
     PackedArray2D(const Array &array);
     PackedArray2D(const QVector<Array> &arrays);
-    
+
     PackedArray2D(const QVector<T> &values);
     PackedArray2D(const QVector< QVector<T> > &values);
-    
+
     PackedArray2D(const PackedArray2D<T> &array0, const PackedArray2D<T> &array1);
-    
+
     PackedArray2D(const PackedArray2D<T> &other);
-    
+
     ~PackedArray2D();
-    
+
     PackedArray2D<T>& operator=(const PackedArray2D<T> &other);
-    
+
     bool operator==(const PackedArray2D<T> &other) const;
     bool operator!=(const PackedArray2D<T> &other) const;
-    
+
     const Array& operator[](quint32 i) const;
-    
+
     const T& operator()(quint32 i, quint32 j) const;
     T& operator()(quint32 i, quint32 j);
-    
+
     const Array& at(quint32 i) const;
     const T& at(quint32 i, quint32 j) const;
-    
+
     int count() const;
     int size() const;
-    
+
     int nArrays() const;
     int nValues() const;
     int nValues(quint32 i) const;
 
     bool isEmpty() const;
-    
+
     QString toString() const;
 
     void detach();
 
     const Array* data() const;
     const Array* constData() const;
-    
+
     const T* data(quint32 i) const;
     T* data(quint32 i);
-    
+
     const T* constData(quint32 i) const;
-    
+
     const T* valueData() const;
     T* valueData();
-    
+
     const T* constValueData() const;
 
     QVector<T> toQVector() const;
@@ -480,21 +479,21 @@ public:
 
     template<class C>
     void updateAll(const C &idxs, const PackedArray2D<T> &arrays);
-    
-    void updateAll(const QVarLengthArray<int> &idxs,    
+
+    void updateAll(const QVarLengthArray<int> &idxs,
                    const PackedArray2D<T> &arrays);
-    
+
     template<class C>
     void updateAll(const C &idxs, const QVector< QVector<T> > &arrays);
-    
+
     void append(const Array &array);
     void append(const PackedArray2D<T> &arrays);
-    
+
     void append(const QVector<T> &array);
     void append(const QVector< QVector<T> > &arrays);
-    
+
     void remove(quint32 i);
-    
+
     template<class C>
     void removeAll(const C &idxs);
 
@@ -503,7 +502,7 @@ public:
     void assertValidIndex(quint32 i) const;
 
     PackedArray2D<QVariant> toVariant() const;
-    
+
     static PackedArray2D<T> fromVariant(const PackedArray2D<QVariant> &variant);
 
 private:
@@ -545,87 +544,87 @@ SIRE_OUTOFLINE_TEMPLATE
 char* PackedArray2DMemory<T>::create(quint32 narrays, quint32 nvalues)
 {
     //create space for the data
-    char *storage = PackedArray2DMemoryBase::create(narrays, nvalues, 
+    char *storage = PackedArray2DMemoryBase::create(narrays, nvalues,
                                             sizeof(PackedArray2DData<T>),
                                             sizeof(PackedArray2D_Array<T>),
                                             sizeof(PackedArray2D_ArrayData<T>),
                                             sizeof(T));
-    
+
     try
     {
-        quint32 sz = PackedArray2DMemoryBase::getSize(narrays, nvalues,   
+        quint32 sz = PackedArray2DMemoryBase::getSize(narrays, nvalues,
                                             sizeof(PackedArray2DData<T>),
                                             sizeof(PackedArray2D_Array<T>),
                                             sizeof(PackedArray2D_ArrayData<T>),
                                             sizeof(T));
-    
+
         //now we need to construct each object in turn at its correct
         //location in this space
-        PackedArray2DData<T> *arraydata 
+        PackedArray2DData<T> *arraydata
                     = new (storage) PackedArray2DData<T>(narrays, nvalues);
-                    
+
         //advance the index into the storage array so that we are now
         //pointing just after the PackedArray2DData
         quint32 idx = sizeof(PackedArray2DData<T>);
-                    
+
         //this is the location of the first PackedArray2D_Array<T> :-)
         PackedArray2DMemoryBase::setArray0(arraydata, idx);
         quint32 array0_idx = idx;
-        
-        //the first PackedArray2D_ArrayData lies at this 
+
+        //the first PackedArray2D_ArrayData lies at this
         //index + narrays*sizeof(PackedArray2D_Array<T>)
         quint32 dataidx = idx + narrays * sizeof(PackedArray2D_Array<T>);
-        
+
         PackedArray2DMemoryBase::setArrayData0(arraydata, dataidx);
 
         if (narrays > 0)
         {
             //loop over each array and create it in its place
             for (quint32 i=0; i<narrays; ++i)
-            {   
+            {
                 //assert that there is sufficient space in the array
                 BOOST_ASSERT(idx + sizeof(PackedArray2D_Array<T>) < sz);
                 BOOST_ASSERT(dataidx + sizeof(PackedArray2D_ArrayData<T>) < sz);
-            
+
                 //create the ArrayData, letting it know where it
                 //is relative to the beginning of the storage array
-                PackedArray2D_ArrayData<T> *data 
+                PackedArray2D_ArrayData<T> *data
                         = new (storage + dataidx) PackedArray2D_ArrayData<T>(dataidx);
-                
+
                 //now create the PackedArray2D_Array<T> that uses this data
                 new (storage + idx) PackedArray2D_Array<T>(data);
-        
+
                 //advance the index into the storage array to point
                 //just after the just-created PackedArray2D_ArrayData
                 idx += sizeof(PackedArray2D_Array<T>);
                 dataidx += sizeof(PackedArray2D_ArrayData<T>);
             }
-            
+
             //make idx point just after all of the PackedArray2D_ArrayDatas...
-            BOOST_ASSERT( idx == array0_idx 
+            BOOST_ASSERT( idx == array0_idx
                                 + narrays*sizeof(PackedArray2D_Array<T>) );
-                                
+
             idx = dataidx;
         }
         else
         {
             //we need to create space for the null PackedArray2D_Array<T>
             quint32 data_idx = idx + sizeof(PackedArray2D_Array<T>);
-            PackedArray2D_ArrayData<T> *array_arraydata 
+            PackedArray2D_ArrayData<T> *array_arraydata
                         = new (storage + data_idx) PackedArray2D_ArrayData<T>(data_idx);
-            
+
             new (storage + idx) PackedArray2D_Array<T>(array_arraydata);
-            
+
             PackedArray2DMemoryBase::setNValues(array_arraydata, 0);
             PackedArray2DMemoryBase::setValue0(array_arraydata, 0);
-            
-            idx += sizeof(PackedArray2D_Array<T>) 
+
+            idx += sizeof(PackedArray2D_Array<T>)
                     + sizeof(PackedArray2D_ArrayData<T>);
         }
-        
+
         //we are now at the location of the first item in the array
         PackedArray2DMemoryBase::setValue0(arraydata, idx);
-        
+
         //only call constructors if this is a complex type
         //if (QTypeInfo<T>::isComplex)
         //{
@@ -635,16 +634,16 @@ char* PackedArray2DMemory<T>::create(quint32 narrays, quint32 nvalues)
                 BOOST_ASSERT(idx + sizeof(T) <= sz);
 
                 new (storage + idx) T();
-                    
+
                 idx += sizeof(T);
             }
         //}
         //else
         //    idx += nvalues * sizeof(T);
-        
+
         //we should now be at the end of the storage
         BOOST_ASSERT( idx == sz );
-                
+
         return storage;
     }
     catch(...)
@@ -682,44 +681,44 @@ void PackedArray2DMemory<T>::destroy(PackedArray2DData<T> *array)
     quint32 nvalues = array->nValues();
 
     char *storage = (char*)array;
-        
+
     //only call destructors if this is a complex type
     if (nvalues > 0) // and QTypeInfo<T>::isComplex)
     {
         T *values = array->valueData();
-        
+
         for (qint32 i=nvalues-1; i>=0; --i)
         {
             values[i].~T();
         }
     }
-        
+
     //now delete all of the arrays
     quint32 narrays = array->nArrays();
-        
+
     if (narrays > 0)
     {
         PackedArray2D_Array<T> *arrays = array->arrayData();
-            
+
         for (qint32 i=narrays-1; i>=0; --i)
         {
-            PackedArray2D_ArrayData<T> *arraydata 
+            PackedArray2D_ArrayData<T> *arraydata
                  = const_cast<PackedArray2D_ArrayData<T>*>( arrays[i].d.constData() );
-            
+
             //delete the PackedArray2D_ArrayData
             arraydata->~PackedArray2D_ArrayData<T>();
-            
+
             //remove the shared pointer
             arrays[i].d.weakRelease();
-            
+
             //delete the PackedArray2D_Array<T>
             arrays[i].~PackedArray2D_Array<T>();
         }
     }
-        
+
     //delete the PackedArray2DData object itself
     array->~PackedArray2DData<T>();
-        
+
     //finally release the memory
     delete[] storage;
 }
@@ -731,23 +730,23 @@ char* PackedArray2DMemory<T>::detach(char *this_ptr, quint32 this_idx)
 {
     //get a pointer to the start of the storage for this container
     char *storage = getRoot(this_ptr, this_idx);
-    
+
     //The PackedArray2DData object is at the beginning of this storage array
     PackedArray2DData<T> *arraydata = (PackedArray2DData<T>*) storage;
-    
+
     if (not arraydata->ref.hasSingleReference())
     {
-        //there is more than one reference to this data - it will have to 
+        //there is more than one reference to this data - it will have to
         //be cloned - get the size of memory to be cloned
         int sz = getSize(arraydata->nArrays(), arraydata->nValues(),
-                         sizeof(PackedArray2DData<T>), 
+                         sizeof(PackedArray2DData<T>),
                          sizeof(PackedArray2D_Array<T>),
                          sizeof(PackedArray2D_ArrayData<T>),
                          sizeof(T));
-                         
+
         //create space for the copy
         char *new_storage = new char[sz];
-        
+
         //copy the data
         quickCopy<char>( new_storage, storage, sz );
 
@@ -759,34 +758,34 @@ char* PackedArray2DMemory<T>::detach(char *this_ptr, quint32 this_idx)
         //{
             T *new_array = new_arraydata->valueData();
             const T *old_array = arraydata->valueData();
-            
+
             int nvals = arraydata->nValues();
-            
+
             for (int i=0; i<nvals; ++i)
             {
                 new (new_array) T(*old_array);
-                
+
                 ++new_array;
                 ++old_array;
             }
         //}
-        
+
         //set the reference count of this copy to 1
         new_arraydata->ref.reset();
         new_arraydata->ref.ref();
 
         //now loose a reference to the original
         PackedArray2DMemory<T>::decref(this_ptr, this_idx);
-        
+
         //the final step is to update all of the PackedArray2D_Array<T>
         //pointers that exist in this array (otherwise they will all
         //point to the original!)
-        
+
         if (new_arraydata->nArrays() > 0)
         {
             PackedArray2D_Array<T> *arrays = new_arraydata->arrayData();
             PackedArray2D_ArrayData<T> *arrays_data = new_arraydata->arrayDataData();
-        
+
             for (quint32 i=0; i < new_arraydata->nArrays(); ++i)
             {
                 arrays[i].d.weakRelease();
@@ -852,7 +851,7 @@ void PackedArray2DData<T>::decref()
         PackedArray2DMemory<T>::destroy(this);
 }
 
-/** Return a pointer to a copy of this array that has been 
+/** Return a pointer to a copy of this array that has been
     detached from shared storage */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -868,7 +867,7 @@ const PackedArray2D_ArrayData<T>* PackedArray2DData<T>::nullArray() const
 {
     BOOST_ASSERT( this->nArrays() == 0 );
     BOOST_ASSERT( this->getArrayData0() != 0 );
-    
+
     return (const PackedArray2D_ArrayData<T>*)
                     ( this->memory() + this->getArrayData0() );
 }
@@ -957,20 +956,20 @@ SIRE_OUTOFLINE_TEMPLATE
 void PackedArray2DData<T>::close()
 {
     PackedArray2D_ArrayData<T> *arraydata = this->arrayDataData();
-    
+
     //ensure that everything adds up
     quint32 n_assigned_vals = 0;
-    
+
     quint32 value0 = this->getValue0();
-    
+
     //close out each array
     for (quint32 i=0; i<this->nArrays(); ++i)
     {
         PackedArray2D_ArrayData<T> &array = arraydata[i];
-        
+
         //tell the array where its first value is located
         if (array.nValues() > 0)
-            PackedArray2DMemoryBase::setValue0(&array, 
+            PackedArray2DMemoryBase::setValue0(&array,
                                         value0 + n_assigned_vals * sizeof(T));
         else
             PackedArray2DMemoryBase::setValue0(&array, 0);
@@ -996,7 +995,7 @@ PackedArray2D_ArrayData<T>::PackedArray2D_ArrayData()
                          : PackedArray2D_ArrayDataBase()
 {}
 
-/** Construct the data, telling it that it is at 
+/** Construct the data, telling it that it is at
     index 'this_idx' in the memory storage array */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -1017,7 +1016,7 @@ SIRE_OUTOFLINE_TEMPLATE
 PackedArray2D_ArrayData<T>::~PackedArray2D_ArrayData()
 {}
 
-/** Return a pointer to a PackedArray2D_ArrayData that has been detached from 
+/** Return a pointer to a PackedArray2D_ArrayData that has been detached from
     shared storage (could be a pointer to this PackedArray2D_ArrayData) */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -1027,20 +1026,20 @@ PackedArray2D_ArrayData<T>* PackedArray2D_ArrayData<T>::detach()
            ( PackedArray2DMemory<T>::detach( (char*)this, this->getThisArray() ) );
 }
 
-/** Return a pointer to a PackedArray2DData object that contains 
+/** Return a pointer to a PackedArray2DData object that contains
     just the data of this PackedArray2D_Array */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 PackedArray2DData<T>* PackedArray2D_ArrayData<T>::extract() const
 {
     const PackedArray2DData<T> *array = (const PackedArray2DData<T>*)(this->memory());
-    
+
     if (array->nArrays() <= 1)
         //this is already extracted!
         return const_cast<PackedArray2DData<T>*>(array);
-    
+
     char *new_storage = PackedArray2DMemory<T>::create(1, this->nValues());
-    
+
     try
     {
         //ok, we need to extract!
@@ -1048,7 +1047,7 @@ PackedArray2DData<T>* PackedArray2D_ArrayData<T>::extract() const
 
         new_array->setNValuesInArray(0, this->nValues());
         new_array->close();
-        
+
         //copy the objects
         quickCopy<T>(new_array->valueData(),
                      this->valueData(), this->nValues());
@@ -1059,7 +1058,7 @@ PackedArray2DData<T>* PackedArray2D_ArrayData<T>::extract() const
     {
         delete[] new_storage;
     }
-    
+
     return 0;
 }
 
@@ -1111,12 +1110,12 @@ static const SharedArray2DPtr< PackedArray2DData<T> >& getSharedNull()
     if (detail::PackedArray2DMemory<T>::shared_null.constData() == 0)
     {
         auto mutex = detail::get_shared_null_mutex();
-        
+
         tbb::spin_mutex::scoped_lock lock(*mutex);
-        
+
         auto new_ptr = (PackedArray2DData<T>*)( PackedArray2DMemory<T>::create(0,0) );
         new_ptr->close();
-        
+
         if (detail::PackedArray2DMemory<T>::shared_null.constData() == 0)
         {
             detail::PackedArray2DMemory<T>::shared_null = new_ptr;
@@ -1129,9 +1128,9 @@ static const SharedArray2DPtr< PackedArray2DData<T> >& getSharedNull()
 template<class T>
 static SharedArray2DPtr< PackedArray2D_ArrayData<T> > createNullArray()
 {
-    const SharedArray2DPtr< PackedArray2DData<T> > &array 
+    const SharedArray2DPtr< PackedArray2DData<T> > &array
                             = SireBase::detail::getSharedNull<T>();
-    
+
     return SharedArray2DPtr< PackedArray2D_ArrayData<T> >( array->nullArray() );
 }
 
@@ -1147,7 +1146,7 @@ static SharedArray2DPtr< PackedArray2D_ArrayData<T> > createArray(quint32 sz)
 {
     if (sz == 0)
         return SireBase::detail::createNullArray<T>();
-        
+
     //construct space for 1 array of sz objects
     char *storage = PackedArray2DMemory<T>::create(1, sz);
 
@@ -1160,7 +1159,7 @@ static SharedArray2DPtr< PackedArray2D_ArrayData<T> > createArray(quint32 sz)
     return SharedArray2DPtr< PackedArray2D_ArrayData<T> >( &(array->arrayDataData()[0]) );
 }
 
-/** Construct an array of size 'sz'. All of the objects will be initialised  
+/** Construct an array of size 'sz'. All of the objects will be initialised
     with their default values */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -1218,7 +1217,7 @@ PackedArray2D_Array<T>::~PackedArray2D_Array()
 
 /** Copy assignment operator - fast as this class is implicitly shared.
     However, as this copies a view of the whole packed array, you cannot
-    use this to assign the contents of this array within its current 
+    use this to assign the contents of this array within its current
     PackedArray2D - to do this, you must use the 'update()' function. */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -1239,16 +1238,16 @@ bool PackedArray2D_Array<T>::operator==(const PackedArray2D_Array<T> &other) con
 
     if (this->nValues() != other.nValues())
         return false;
-        
+
     const T *this_data = this->constData();
     const T *other_data = other.constData();
-    
+
     for (int i=0; i<this->nValues(); ++i)
     {
         if (this_data[i] != other_data[i])
             return false;
     }
-    
+
     return true;
 }
 
@@ -1260,7 +1259,7 @@ bool PackedArray2D_Array<T>::operator!=(const PackedArray2D_Array<T> &other) con
     return not this->operator==(other);
 }
 
-/** Assert that the index 'i' is valid for this array 
+/** Assert that the index 'i' is valid for this array
 
     \throw SireError::invalid_index
 */
@@ -1363,11 +1362,11 @@ QVector<T> PackedArray2D_Array<T>::toQVector() const
 {
     if (this->isEmpty())
         return QVector<T>();
-        
+
     QVector<T> ret( this->count() );
-    
+
     quickCopy<T>(ret.data(), this->data(), this->count());
-    
+
     return ret;
 }
 
@@ -1389,7 +1388,7 @@ void PackedArray2D_Array<T>::update(const PackedArray2D_Array<T> &other)
 {
     if (this->size() != other.size())
         detail::throwPackedArray2D_Array_incompatibleError(this->size(),other.size());
-        
+
     if (this->size() == 0)
         return;
 
@@ -1432,17 +1431,17 @@ namespace detail
 {
 
 template<class T>
-static SharedArray2DPtr< PackedArray2DData<T> > 
+static SharedArray2DPtr< PackedArray2DData<T> >
 createArray(quint32 narrays, quint32 nvals)
 {
     if (narrays == 0)
         return SireBase::detail::getSharedNull<T>();
-        
+
     //construct space for narrays arrays of nvals objects
     char *storage = PackedArray2DMemory<T>::create(narrays, nvals);
-        
+
     PackedArray2DData<T> *array = (PackedArray2DData<T>*)storage;
-    
+
     return SharedArray2DPtr< PackedArray2DData<T> >(array);
 }
 
@@ -1459,16 +1458,16 @@ PackedArray2D<T>::PackedArray2D(const QVector<T> &values)
 
     //count the number of values
     quint32 nvals = values.count();
-    
+
     d = SireBase::detail::createArray<T>(1, nvals);
-    
+
     detail::PackedArray2DData<T> *dptr = d.data();
     T *new_values = dptr->valueData();
-    
+
     //dimension the packed array
     dptr->setNValuesInArray(0, nvals);
     dptr->close();
-    
+
     //now copy all of the data
     quickCopy(new_values, values.constData(), nvals);
 }
@@ -1490,37 +1489,37 @@ PackedArray2D<T>::PackedArray2D(const QVector<typename PackedArray2D<T>::Array> 
 
     //count the number of values and groups...
     quint32 nvals = 0;
-    
+
     const Array *arrays_data = arrays.constData();
     quint32 narrays = arrays.count();
-    
+
     for (quint32 i=0; i<narrays; ++i)
     {
         nvals += arrays_data[i].count();
     }
-    
+
     d = SireBase::detail::createArray<T>(narrays, nvals);
-    
+
     detail::PackedArray2DData<T> *dptr = d.data();
     T *values = dptr->valueData();
-    
+
     //dimension each packed array
     for (quint32 i=0; i<narrays; ++i)
     {
         //dimension the array
         dptr->setNValuesInArray(i, arrays_data[i].count());
     }
-    
+
     dptr->close();
-    
+
     //now copy all of the data
     for (quint32 i=0; i<narrays; ++i)
     {
         const Array &array = arrays_data[i];
         const T *array_values = array.constData();
-        
+
         quickCopy<T>(values, array_values, array.count());
-        
+
         values += array.count();
     }
 }
@@ -1533,7 +1532,7 @@ PackedArray2D<T>::PackedArray2D(const QVector< QVector<T> > &values)
 {
     if (values.isEmpty())
         return;
-        
+
     else if (values.count() == 1)
     {
         this->operator=( PackedArray2D<T>(values.at(0)) );
@@ -1542,7 +1541,7 @@ PackedArray2D<T>::PackedArray2D(const QVector< QVector<T> > &values)
 
     //count the number of values and groups...
     quint32 nvals = 0;
-    
+
     const QVector<T> *values_data = values.constData();
     quint32 narrays = values.count();
 
@@ -1550,20 +1549,20 @@ PackedArray2D<T>::PackedArray2D(const QVector< QVector<T> > &values)
     {
         nvals += values_data[i].count();
     }
-    
+
     d = SireBase::detail::createArray<T>(narrays, nvals);
-    
+
     detail::PackedArray2DData<T> *dptr = d.data();
-    
+
     //dimension each packed array
     for (quint32 i=0; i<narrays; ++i)
     {
         //dimension the array
         dptr->setNValuesInArray(i, values_data[i].count());
     }
-    
+
     dptr->close();
-    
+
     //now copy all of the data
     T *values_array = dptr->valueData();
 
@@ -1572,9 +1571,9 @@ PackedArray2D<T>::PackedArray2D(const QVector< QVector<T> > &values)
         const QVector<T> &array = values_data[i];
 
         const T *array_values = array.constData();
-        
+
         quickCopy(values_array, array_values, array.count());
-        
+
         values_array += array.count();
     }
 }
@@ -1599,35 +1598,35 @@ PackedArray2D<T>::PackedArray2D(const PackedArray2D<T> &array0,
     //count the number of values and groups...
     quint32 nvals = array0.nValues() + array1.nValues();
     quint32 narrays = array0.nArrays() + array1.nArrays();
-    
+
     d = SireBase::detail::createArray<T>(narrays, nvals);
-    
+
     detail::PackedArray2DData<T> *dptr = d.data();
 
     const typename PackedArray2D<T>::Array *array0_data = array0.constData();
     const typename PackedArray2D<T>::Array *array1_data = array1.constData();
-    
+
     //dimension each packed array
     for (int i=0; i<array0.nArrays(); ++i)
     {
         //dimension the array
         dptr->setNValuesInArray(i, array0_data[i].count());
     }
-    
+
     for (int i=0; i<array1.nArrays(); ++i)
     {
         dptr->setNValuesInArray(array0.nArrays() + i, array1_data[i].count());
     }
-    
+
     dptr->close();
-    
+
     //now copy all of the data
     T *values_array = dptr->valueData();
 
     quickCopy(values_array, array0.constValueData(), array0.nValues());
-    
+
     values_array += array0.nValues();
-    
+
     quickCopy(values_array, array1.constValueData(), array1.nValues());
 }
 
@@ -1651,20 +1650,20 @@ bool PackedArray2D<T>::operator==(const PackedArray2D<T> &other) const
 {
     if (d.constData() == other.d.constData())
         return true;
-        
+
     if (this->nArrays() != other.nArrays())
         return false;
-        
+
     const Array *this_arrays = this->constData();
     const Array *other_arrays = other.constData();
     quint32 narrays = this->count();
-    
+
     for (quint32 i=0; i<narrays; ++i)
     {
         if (this_arrays[i] != other_arrays[i])
             return false;
     }
-    
+
     return true;
 }
 
@@ -1711,9 +1710,9 @@ const typename PackedArray2D<T>::Array& PackedArray2D<T>::at(quint32 i) const
     return this->operator[](i);
 }
 
-/** Return a reference to the jth value of the ith array in 
+/** Return a reference to the jth value of the ith array in
     this container
-    
+
     \throw SireError::invalid_index
 */
 template<class T>
@@ -1723,7 +1722,7 @@ const T& PackedArray2D<T>::operator()(quint32 i, quint32 j) const
     return this->at(i).at(j);
 }
 
-/** Return a modifiable reference to the jth value of the ith array 
+/** Return a modifiable reference to the jth value of the ith array
 
     \throw SireError::invalid_index
 */
@@ -1733,13 +1732,13 @@ T& PackedArray2D<T>::operator()(quint32 i, quint32 j)
 {
     this->assertValidIndex(i);
     Array &array = d->arrayData()[i];
-    
+
     return array[j];
 }
 
-/** Return a reference to the jth value of the ith array in 
+/** Return a reference to the jth value of the ith array in
     this container
-    
+
     \throw SireError::invalid_index
 */
 template<class T>
@@ -1824,7 +1823,7 @@ void PackedArray2D<T>::detach()
     d->detach();
 }
 
-/** Return a raw pointer to the array of values in the ith array 
+/** Return a raw pointer to the array of values in the ith array
 
     \throw SireError::invalid_index
 */
@@ -1836,8 +1835,8 @@ const T* PackedArray2D<T>::data(quint32 i) const
 }
 
 /** Return a modifiable pointer to the array of values in the
-    ith array. *DO NOT* delete this pointer! 
-    
+    ith array. *DO NOT* delete this pointer!
+
     \throw SireError::invalid_index
 */
 template<class T>
@@ -1848,7 +1847,7 @@ T* PackedArray2D<T>::data(quint32 i)
     return d->arrayData()[i].data();
 }
 
-/** Return a raw pointer to the array of values in the ith array 
+/** Return a raw pointer to the array of values in the ith array
 
     \throw SireError::invalid_index
 */
@@ -1867,7 +1866,7 @@ const T* PackedArray2D<T>::valueData() const
     return d->valueData();
 }
 
-/** Return a modifiable pointer to the array of all values in 
+/** Return a modifiable pointer to the array of all values in
     all arrays. *DO NOT* delete this pointer. */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -1891,11 +1890,11 @@ QVector<T> PackedArray2D<T>::toQVector() const
 {
     if (this->nValues() == 0)
         return QVector<T>();
-        
+
     QVector<T> ret( this->nValues() );
-    
+
     quickCopy<T>(ret.data(), this->valueData(), this->nValues());
-    
+
     return ret;
 }
 
@@ -1906,17 +1905,17 @@ QVector< QVector<T> > PackedArray2D<T>::toQVectorVector() const
 {
     if (this->isEmpty())
         return QVector< QVector<T> >();
-        
+
     QVector< QVector<T> > ret( this->count() );
 
     QVector<T> *ret_array = ret.data();
     const Array *arrays = this->data();
-    
+
     for (int i=0; i<this->count(); ++i)
     {
         ret_array[i] = arrays[i].toQVector();
     }
-    
+
     return ret;
 }
 
@@ -1931,7 +1930,7 @@ QString PackedArray2D<T>::toString() const
 namespace detail
 {
 
-SIREBASE_EXPORT void throwCannotConvertVariantError(const char *this_type, 
+SIREBASE_EXPORT void throwCannotConvertVariantError(const char *this_type,
                                                     const char *type_t,
                                                     const QString &codeloc);
 
@@ -1960,61 +1959,61 @@ struct VariantConverter
     {
         if (array.isEmpty())
             return PackedArray2D<QVariant>();
-            
+
         int narrays = array.nArrays();
-        
+
         QVector< QVector<QVariant> > variant(narrays);
         QVector<QVariant> *variant_array = variant.data();
         const typename PackedArray2D<T>::Array *array_array = array.constData();
-        
+
         for (int i=0; i<narrays; ++i)
         {
             const typename PackedArray2D<T>::Array &this_array = array_array[i];
-        
+
             int nvalues = this_array.count();
             const T *this_array_array = this_array.constData();
-            
+
             QVector<QVariant> this_variant(nvalues);
             QVariant *this_variant_array = this_variant.data();
-            
+
             for (int j=0; j<nvalues; ++j)
             {
                 this_variant_array[j] = QVariant::fromValue<T>(this_array_array[j]);
             }
-            
+
             variant_array[i] = this_variant;
         }
-        
+
         return PackedArray2D<QVariant>(variant);
     }
-    
+
     static PackedArray2D<T> input(const PackedArray2D<QVariant> &variant)
     {
         if (variant.isEmpty())
             return PackedArray2D<T>();
-            
+
         int narrays = variant.nArrays();
-        
+
         QVector< QVector<T> > array(narrays);
         QVector<T> *array_array = array.data();
-        const typename PackedArray2D<QVariant>::Array *variant_array 
+        const typename PackedArray2D<QVariant>::Array *variant_array
                                                             = variant.constData();
-        
+
         for (int i=0; i<narrays; ++i)
         {
-            const typename PackedArray2D<QVariant>::Array &this_variant 
+            const typename PackedArray2D<QVariant>::Array &this_variant
                                                                 = variant_array[i];
-        
+
             int nvalues = this_variant.count();
             const QVariant *this_variant_array = this_variant.constData();
-            
+
             QVector<T> this_array(nvalues);
             T *this_array_array = this_array.data();
-            
+
             for (int j=0; j<nvalues; ++j)
             {
                 const QVariant &value = this_variant_array[j];
-             
+
                 if (value.isNull())
                 {
                     //use a default-constructed value
@@ -2029,10 +2028,10 @@ struct VariantConverter
                 else
                     this_array_array[j] = value.value<T>();
             }
-            
+
             array_array[i] = this_array;
         }
-        
+
         return PackedArray2D<T>(array);
     }
 };
@@ -2044,7 +2043,7 @@ struct SIREBASE_EXPORT VariantConverter<QVariant>
     {
         return array;
     }
-    
+
     static PackedArray2D<QVariant> input(const PackedArray2D<QVariant> &variant)
     {
         return variant;
@@ -2095,7 +2094,7 @@ void PackedArray2D<T>::update(quint32 i, const QVector<T> &array)
 
 /** Update the arrays whose indicies are in 'idxs' so that they have the
     same contents as the passed arrays
-    
+
     \throw SireError::invalid_index
     \throw SireError::incompatible_error
 */
@@ -2110,12 +2109,12 @@ void PackedArray2D<T>::updateAll(const C &idxs, const PackedArray2D<T> &arrays)
                 "is not equal to the number of arrays (%2). Indicies are %3.")
                     .arg(idxs.count()).arg(arrays.count())
                     .arg(Sire::toString(idxs)), CODELOC );
-                
+
     PackedArray2D<T> other(*this);
-    
+
     const typename PackedArray2D<T>::Array *array = arrays.constData();
     int i = 0;
-    
+
     for (typename C::const_iterator it = idxs.constBegin();
          it != idxs.constEnd();
          ++it)
@@ -2124,19 +2123,19 @@ void PackedArray2D<T>::updateAll(const C &idxs, const PackedArray2D<T> &arrays)
         other.d->arrayData()[*it].update(array[i]);
         ++i;
     }
-    
+
     this->operator=(other);
 }
 
 /** Update the arrays whose indicies are in 'idxs' so that they have the
     same contents as the passed arrays
-    
+
     \throw SireError::invalid_index
     \throw SireError::incompatible_error
 */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
-void PackedArray2D<T>::updateAll(const QVarLengthArray<int> &idxs, 
+void PackedArray2D<T>::updateAll(const QVarLengthArray<int> &idxs,
                                  const PackedArray2D<T> &arrays)
 {
     if (idxs.count() != arrays.count())
@@ -2144,25 +2143,25 @@ void PackedArray2D<T>::updateAll(const QVarLengthArray<int> &idxs,
                 "You cannot update the arrays because the number of indicies (%1) "
                 "is not equal to the number of arrays (%2).")
                     .arg(idxs.count()).arg(arrays.count()), CODELOC );
-                
+
     PackedArray2D<T> other(*this);
-    
+
     const typename PackedArray2D<T>::Array *array = arrays.constData();
-    
+
     for (int i=0; i<idxs.count(); ++i)
     {
         int idx = idxs.constData()[i];
-    
+
         other.assertValidIndex(idx);
         other.d->arrayData()[idx].update(array[i]);
     }
-    
+
     this->operator=(other);
 }
 
 /** Update the arrays whose indicies are in 'idxs' so that they have the
     same contents as the passed arrays
-    
+
     \throw SireError::invalid_index
     \throw SireError::incompatible_error
 */
@@ -2177,11 +2176,11 @@ void PackedArray2D<T>::updateAll(const C &idxs, const QVector< QVector<T> > &arr
                 "is not equal to the number of arrays (%2). Indicies are %3.")
                     .arg(idxs.count()).arg(arrays.count())
                     .arg(Sire::toString(idxs)), CODELOC );
-                
+
     PackedArray2D<T> other(*this);
-    
+
     typename QVector< QVector<T> >::const_iterator array = arrays.constBegin();
-    
+
     for (typename C::const_iterator it = idxs.constBegin();
          it != idxs.constEnd();
          ++it)
@@ -2190,7 +2189,7 @@ void PackedArray2D<T>::updateAll(const C &idxs, const QVector< QVector<T> > &arr
         other.d->arrayData()[*it].update(*array);
         ++array;
     }
-    
+
     this->operator=(other);
 }
 
@@ -2236,34 +2235,34 @@ void PackedArray2D<T>::remove(quint32 idx)
 {
     quint32 nvals = this->nValues() - this->nValues(idx);
     quint32 narrays = this->nArrays() - 1;
-    
+
     if (nvals == 0 or narrays == 0)
     {
         this->operator=( PackedArray2D<T>() );
         return;
     }
-    
+
     detail::SharedArray2DPtr< detail::PackedArray2DData<T> > new_d
                                      = SireBase::detail::createArray<T>(narrays, nvals);
-    
+
     detail::PackedArray2DData<T> *dptr = new_d.data();
 
     const typename PackedArray2D<T>::Array *array_data = this->constData();
-    
+
     int int_idx = idx;
-    
+
     //dimension each packed array
     for (int i=0; i<this->nArrays(); ++i)
     {
         if (i < int_idx)
             dptr->setNValuesInArray(i, array_data[i].count());
-        
+
         else if (i > int_idx)
             dptr->setNValuesInArray(i-1, array_data[i].count());
     }
-    
+
     dptr->close();
-    
+
     //now copy all of the data
     T *values_array = dptr->valueData();
 
@@ -2273,11 +2272,11 @@ void PackedArray2D<T>::remove(quint32 idx)
         {
             quickCopy(values_array, array_data[i].constData(),
                       array_data[i].count());
-            
+
             values_array += array_data[i].count();
         }
     }
-    
+
     d = new_d;
 }
 
@@ -2292,25 +2291,25 @@ void PackedArray2D<T>::removeAll(const C &idxs)
 {
     if (idxs.isEmpty())
         return;
-    
+
     else if (idxs.count() == 1)
     {
         this->remove( *(idxs.constBegin()) );
         return;
     }
-    
+
     QVector<bool> to_keep(this->nArrays(), true);
-    
-    for (typename C::const_iterator it = idxs.constBegin(); 
+
+    for (typename C::const_iterator it = idxs.constBegin();
          it != idxs.constEnd();
          ++it)
     {
         this->assertValidIndex(*it);
         to_keep[*it] = false;
     }
-    
+
     quint32 narrays = 0;
-    
+
     for (QVector<bool>::const_iterator it = to_keep.constBegin();
          it != to_keep.constEnd();
          ++it)
@@ -2318,17 +2317,17 @@ void PackedArray2D<T>::removeAll(const C &idxs)
         if (*it)
             narrays += 1;
     }
-    
+
     if (narrays == 0)
     {
         this->operator=( PackedArray2D<T>() );
         return;
     }
-    
+
     quint32 nvals = 0;
-    
+
     const typename PackedArray2D<T>::Array *array_data = this->constData();
-    
+
     for (int i=0; i<this->nArrays(); ++i)
     {
         if (to_keep.constData()[i])
@@ -2336,20 +2335,20 @@ void PackedArray2D<T>::removeAll(const C &idxs)
             nvals += array_data[i].count();
         }
     }
-    
+
     if (nvals == 0)
     {
         this->operator=( PackedArray2D<T>() );
         return;
     }
-    
+
     detail::SharedArray2DPtr< detail::PackedArray2DData<T> > new_d
                                      = SireBase::detail::createArray<T>(narrays, nvals);
-    
+
     detail::PackedArray2DData<T> *dptr = new_d.data();
 
     int idx = 0;
-    
+
     //dimension each packed array
     for (int i=0; i<this->nArrays(); ++i)
     {
@@ -2359,9 +2358,9 @@ void PackedArray2D<T>::removeAll(const C &idxs)
             ++idx;
         }
     }
-    
+
     dptr->close();
-    
+
     //now copy all of the data
     T *values_array = dptr->valueData();
 
@@ -2371,11 +2370,11 @@ void PackedArray2D<T>::removeAll(const C &idxs)
         {
             quickCopy(values_array, array_data[i].constData(),
                       array_data[i].count());
-            
+
             values_array += array_data[i].count();
         }
     }
-    
+
     d = new_d;
 }
 
@@ -2389,23 +2388,23 @@ void PackedArray2D<T>::removeAll(const QVarLengthArray<int> &idxs)
 {
     if (idxs.isEmpty())
         return;
-    
+
     else if (idxs.count() == 1)
     {
         this->remove( idxs.constData()[0] );
         return;
     }
-    
+
     QVector<bool> to_keep(this->nArrays(), true);
-    
+
     for (int i=0; i<idxs.count(); ++i)
     {
         this->assertValidIndex( idxs.constData()[i] );
         to_keep[ idxs.constData()[i] ] = false;
     }
-    
+
     quint32 narrays = 0;
-    
+
     for (QVector<bool>::const_iterator it = to_keep.constBegin();
          it != to_keep.constEnd();
          ++it)
@@ -2413,17 +2412,17 @@ void PackedArray2D<T>::removeAll(const QVarLengthArray<int> &idxs)
         if (*it)
             narrays += 1;
     }
-    
+
     if (narrays == 0)
     {
         this->operator=( PackedArray2D<T>() );
         return;
     }
-    
+
     quint32 nvals = 0;
-    
+
     const typename PackedArray2D<T>::Array *array_data = this->constData();
-    
+
     for (int i=0; i<this->nArrays(); ++i)
     {
         if (to_keep.constData()[i])
@@ -2431,20 +2430,20 @@ void PackedArray2D<T>::removeAll(const QVarLengthArray<int> &idxs)
             nvals += array_data[i].count();
         }
     }
-    
+
     if (nvals == 0)
     {
         this->operator=( PackedArray2D<T>() );
         return;
     }
-    
+
     detail::SharedArray2DPtr< detail::PackedArray2DData<T> > new_d
                                      = SireBase::detail::createArray<T>(narrays, nvals);
-    
+
     detail::PackedArray2DData<T> *dptr = new_d.data();
 
     int idx = 0;
-    
+
     //dimension each packed array
     for (int i=0; i<this->nArrays(); ++i)
     {
@@ -2454,9 +2453,9 @@ void PackedArray2D<T>::removeAll(const QVarLengthArray<int> &idxs)
             ++idx;
         }
     }
-    
+
     dptr->close();
-    
+
     //now copy all of the data
     T *values_array = dptr->valueData();
 
@@ -2466,11 +2465,11 @@ void PackedArray2D<T>::removeAll(const QVarLengthArray<int> &idxs)
         {
             quickCopy(values_array, array_data[i].constData(),
                       array_data[i].count());
-            
+
             values_array += array_data[i].count();
         }
     }
-    
+
     d = new_d;
 }
 
@@ -2487,16 +2486,16 @@ QDataStream& operator<<(QDataStream &ds,
                         const typename SireBase::detail::PackedArray2D_Array<T> &array)
 {
     SireBase::detail::writePackedArray2DArrayHeader(ds, 1);
-    
+
     //serialise the number of objects in this array
     ds << quint32(array.count());
-    
+
     //serialise all of the values
     for (int i=0; i<array.count(); ++i)
     {
         ds << array.constData()[i];
     }
-    
+
     return ds;
 }
 
@@ -2507,37 +2506,37 @@ QDataStream& operator>>(QDataStream &ds,
                         typename SireBase::detail::PackedArray2D_Array<T> &array)
 {
     SireBase::detail::readPackedArray2DArrayHeader(ds, 1);
-    
+
     //extract the number of objects
     quint32 nvals;
     ds >> nvals;
-    
+
     if (nvals == 0)
     {
         array = typename SireBase::PackedArray2D<T>::Array();
         return ds;
     }
-    
+
     //create an array of sufficient size
     typename SireBase::PackedArray2D<T>::Array new_array(nvals);
-    
+
     //read in the values
     T *data = new_array.data();
-    
+
     for (quint32 i=0; i<nvals; ++i)
     {
         ds >> data[i];
     }
-    
+
     array = new_array;
-    
+
     return ds;
 }
 
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator<<(QDataStream &ds,
-                        const SireBase::detail::SharedArray2DPtr< 
+                        const SireBase::detail::SharedArray2DPtr<
                                     SireBase::detail::PackedArray2DData<T> > &d)
 {
     SireStream::SharedDataStream sds(ds);
@@ -2546,42 +2545,42 @@ QDataStream& operator<<(QDataStream &ds,
 
     //serialise the number of arrays in this array
     sds << narrays;
-    
+
     if (narrays == 0)
         return ds;
-    
+
     //now go through each array and serialise the number of values
     //in each array
     for (quint32 i=0; i<narrays; ++i)
     {
         sds << quint32( d->arrayData()[i].count() );
     }
-    
+
     //now serialise all of the data
     quint32 nvalues = d->nValues();
     const T *array_data = d->valueData();
-    
+
     for (quint32 i=0; i<nvalues; ++i)
     {
         sds << array_data[i];
     }
-    
+
     return ds;
 }
 
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator>>(QDataStream &ds,
-                        SireBase::detail::SharedArray2DPtr< 
+                        SireBase::detail::SharedArray2DPtr<
                                     SireBase::detail::PackedArray2DData<T> > &d)
 {
     SireStream::SharedDataStream sds(ds);
 
     //get the number of arrays in this array
     quint32 narrays;
-    
+
     sds >> narrays;
-    
+
     if (narrays == 0)
     {
         d = SireBase::detail::getSharedNull<T>();
@@ -2591,7 +2590,7 @@ QDataStream& operator>>(QDataStream &ds,
     QVarLengthArray<quint32> array_sizes(narrays);
 
     quint32 nvals = 0;
-    
+
     for (quint32 i=0; i<narrays; ++i)
     {
         sds >> array_sizes[i];
@@ -2603,31 +2602,31 @@ QDataStream& operator>>(QDataStream &ds,
         d = SireBase::detail::getSharedNull<T>();
         return ds;
     }
-    
-    SireBase::detail::SharedArray2DPtr< SireBase::detail::PackedArray2DData<T> > d2 
+
+    SireBase::detail::SharedArray2DPtr< SireBase::detail::PackedArray2DData<T> > d2
                                     = SireBase::detail::createArray<T>(narrays, nvals);
-    
+
     SireBase::detail::PackedArray2DData<T> *dptr = d2.data();
-    
+
     //dimension each packed array
     for (quint32 i=0; i<narrays; ++i)
     {
         //dimension the array
         dptr->setNValuesInArray(i, array_sizes[i]);
     }
-    
+
     dptr->close();
-    
+
     //now extract all of the objects...
     T *data = dptr->valueData();
-    
+
     for (quint32 i=0; i<nvals; ++i)
     {
         sds >> data[i];
     }
-    
+
     d = d2;
-    
+
     return ds;
 }
 
@@ -2645,12 +2644,12 @@ struct GetPackedArrayPointer
     {
         return d.constData();
     }
-    
+
     static void load(QDataStream &ds, SharedArray2DPtr< PackedArray2DData<T> > &d)
     {
         ds >> d;
     }
-    
+
     static void save(QDataStream &ds, const SharedArray2DPtr< PackedArray2DData<T> > &d)
     {
         ds << d;
@@ -2662,7 +2661,7 @@ struct GetPackedArrayPointer
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 SireStream::SharedDataStream& operator>>(SireStream::SharedDataStream &sds,
-                                         SireBase::detail::SharedArray2DPtr< 
+                                         SireBase::detail::SharedArray2DPtr<
                                             SireBase::detail::PackedArray2DData<T> > &d)
 {
     sds.sharedLoad< SireBase::detail::SharedArray2DPtr<
@@ -2675,7 +2674,7 @@ SireStream::SharedDataStream& operator>>(SireStream::SharedDataStream &sds,
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 SireStream::SharedDataStream& operator<<(SireStream::SharedDataStream &sds,
-                                         const SireBase::detail::SharedArray2DPtr< 
+                                         const SireBase::detail::SharedArray2DPtr<
                                             SireBase::detail::PackedArray2DData<T> > &d)
 {
     sds.sharedSave< SireBase::detail::SharedArray2DPtr<
@@ -2688,28 +2687,28 @@ SireStream::SharedDataStream& operator<<(SireStream::SharedDataStream &sds,
 /** Serialise a PackedArray2D<T> to a binary datastream */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator<<(QDataStream &ds, 
+QDataStream& operator<<(QDataStream &ds,
                         const SireBase::PackedArray2D<T> &arrays)
 {
     SireBase::detail::writePackedArray2DHeader(ds);
-    
+
     SireStream::SharedDataStream sds(ds);
-    
+
     sds << arrays.d;
-    
+
     return ds;
 }
 
 /** Extract a PackedArray2D<T> from a binary datastream */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator>>(QDataStream &ds, 
+QDataStream& operator>>(QDataStream &ds,
                         SireBase::PackedArray2D<T> &arrays)
 {
     SireStream::VersionID v = SireBase::detail::readPackedArray2DHeader(ds);
-    
+
     SireStream::SharedDataStream sds(ds);
-    
+
     if (v == 2)
     {
         sds >> arrays.d;
@@ -2720,7 +2719,7 @@ QDataStream& operator>>(QDataStream &ds,
     }
     else
         qFatal("SEVERE PROGRAM BUG IN %s", qPrintable(CODELOC));
-    
+
     return ds;
 }
 

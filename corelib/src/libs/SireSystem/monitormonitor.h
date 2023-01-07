@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,12 +49,12 @@ namespace SireSystem
     e.g. snap-shotting the average during the simulation, or
     snap-shotting the PDB. Equally, it can be used to transfer
     monitor data between systems, or from a system to a supra-system.
-    
+
     The MonitorMonitor can be non-destructive (the original monitor
     is just copied), or destructive (the original monitor is copied,
     then cleared), or annihilative (the original monitor is copied,
     then completely removed from the system)
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT MonitorMonitor
@@ -69,20 +68,20 @@ public:
     MonitorMonitor();
     MonitorMonitor(const MonitorID &id, bool clear_original=false,
                                         bool remove_original=false);
-    
+
     MonitorMonitor(const MonitorMonitor &other);
-    
+
     ~MonitorMonitor();
-    
+
     MonitorMonitor& operator=(const MonitorMonitor &other);
-    
+
     bool operator==(const MonitorMonitor &other) const;
     bool operator!=(const MonitorMonitor &other) const;
-    
+
     static const char* typeName();
 
     const SystemMonitor& operator[](int i) const;
-    
+
     const SystemMonitor& at(int i) const;
 
     int size() const;
@@ -93,24 +92,24 @@ public:
 
     void setClearOriginal(bool clear);
     void setRemoveOriginal(bool remove);
-    
+
     bool clearOriginal() const;
     bool removeOriginal() const;
 
     void clearStatistics();
-    
+
     void monitor(System &system);
-   
+
 private:
     /** The monitor being monitored */
     QList<SysMonPtr> monitor_states;
-    
+
     /** The ID of the monitor to monitor */
     MonitorIdentifier monitor_id;
 
     /** Whether or not to clear the original monitor */
     bool clear_original;
-    
+
     /** Whether or not to remove the original monitor */
     bool remove_original;
 };

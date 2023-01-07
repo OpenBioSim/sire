@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -60,32 +59,32 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MolNum&);
 public:
     MolNum();
     explicit MolNum(quint32 num);
-    
+
     MolNum(const MolNum &other);
 
     ~MolNum();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return MolNum::typeName();
     }
-    
+
     MolNum* clone() const;
-    
+
     static MolNum getUniqueNumber();
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-    
+
     QString toString() const;
-    
+
     MolNum& operator=(const MolNum &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     bool operator==(const MolNum &other) const;
     bool operator!=(const MolNum &other) const;
 
@@ -93,7 +92,7 @@ public:
     bool operator<=(const MolNum &other) const;
     bool operator>(const MolNum &other) const;
     bool operator>=(const MolNum &other) const;
-    
+
     QList<MolNum> map(const Molecules &molecules) const;
     QList<MolNum> map(const MoleculeGroup&) const;
     QList<MolNum> map(const MolGroupsBase&) const;

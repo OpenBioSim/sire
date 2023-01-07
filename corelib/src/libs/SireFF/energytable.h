@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -71,7 +70,7 @@ using SireMol::AtomSelection;
 
 using SireMaths::Vector;
 
-/** This class holds the energies of all of the atoms of 
+/** This class holds the energies of all of the atoms of
     selected CutGroups in a molecule. The MolEnergyTable is used
     to accumulate all of the energies of these atoms during
     an energy evaluation, and also to control which energies are
@@ -79,9 +78,9 @@ using SireMaths::Vector;
     are evaluated). This allows you to provide some control over
     the calculation, e.g. only placing a few protein residues into
     the energy table, thereby preventing the energy of all atoms
-    in a protein from being evaluated if they aren't actually 
+    in a protein from being evaluated if they aren't actually
     necessary.
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT MolEnergyTable : public SireBase::PackedArray2D<SireMaths::Vector>
@@ -94,13 +93,13 @@ public:
     typedef SireBase::PackedArray2D<SireMaths::Vector>::Array Array;
 
     MolEnergyTable();
-    
+
     MolEnergyTable(const MoleculeView &molview);
-    
+
     MolEnergyTable(const MolEnergyTable &other);
-    
+
     ~MolEnergyTable();
-    
+
     MolEnergyTable& operator=(const MolEnergyTable &other);
     MolEnergyTable& operator=(const Vector &force);
 
@@ -109,26 +108,26 @@ public:
 
     MolEnergyTable& operator+=(const MolEnergyTable &other);
     MolEnergyTable& operator-=(const MolEnergyTable &other);
-    
+
     MolEnergyTable operator+(const MolEnergyTable &other) const;
     MolEnergyTable operator-(const MolEnergyTable &other) const;
 
     MolEnergyTable& operator+=(const Vector &force);
     MolEnergyTable& operator-=(const Vector &force);
-    
+
     MolEnergyTable operator+(const Vector &force) const;
     MolEnergyTable operator-(const Vector &force) const;
-    
+
     MolEnergyTable& operator*=(double value);
     MolEnergyTable& operator/=(double value);
-    
+
     MolEnergyTable operator*(double value) const;
     MolEnergyTable operator/(double value) const;
 
     MolEnergyTable operator-() const;
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return MolEnergyTable::typeName();
@@ -146,12 +145,12 @@ public:
     MolNum molNum() const;
 
     const QUuid& molUID() const;
-    
+
     int map(CGIdx cgidx) const;
 
     QVector<Vector> toVector() const;
     QVector<Vector> toVector(const AtomSelection &selection) const;
-    
+
     bool add(const CGAtomIdx &cgatomidx, const Vector &force);
     bool subtract(const CGAtomIdx &cgatomidx, const Vector &force);
 
@@ -160,12 +159,12 @@ public:
 
     void add(const MolEnergyTable &other);
     void subtract(const MolEnergyTable &other);
-    
+
     void add(const Vector &force);
     void subtract(const Vector &force);
-    
+
     void setAll(const Vector &force);
-    
+
     void multiply(double value);
     void divide(double value);
 
@@ -174,31 +173,31 @@ private:
 
     /** The number of this molecule */
     MolNum molnum;
-    
+
     /** The UID of the molecular layout that the molecule possessed
         when this table was last constructed */
     QUuid moluid;
-    
+
     /** The total number of CutGroups in this molecule */
     qint32 ncgroups;
-    
+
     /** Index mapping CGIdx to index in forcetable
         of that CutGroup. If this is empty then there
         is a one-to-one mapping (all CutGroups are present) */
     QHash<CGIdx,qint32> cgidx_to_idx;
 };
 
-/** A EnergyTable is a workspace within which all of the energies acting 
-    on the atoms of several molecules may be stored. A EnergyTable is 
-    used as storing the energies requires lots of memory, and continually 
-    creating a deleting such large amouts of memory would be inefficient. 
-    Also, using a EnergyTable allows for energies to be accumulated directly, 
-    rather than requiring intermediate storage space for the 
+/** A EnergyTable is a workspace within which all of the energies acting
+    on the atoms of several molecules may be stored. A EnergyTable is
+    used as storing the energies requires lots of memory, and continually
+    creating a deleting such large amouts of memory would be inefficient.
+    Also, using a EnergyTable allows for energies to be accumulated directly,
+    rather than requiring intermediate storage space for the
     individual components.
 
-    You create an energy table to hold all of the energies of all of 
+    You create an energy table to hold all of the energies of all of
     the atoms of all of the molecules in a specified MoleculeGroup.
-    The energies are held in an array that holds the energies for 
+    The energies are held in an array that holds the energies for
     the molecules in the same order as the molecules appear
     in the molecule group. The energytable also comes with
     an index so you can quickly look up the energies for
@@ -215,9 +214,9 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, EnergyTable&);
 public:
     EnergyTable();
     EnergyTable(const MoleculeGroup &molgroup);
-    
+
     EnergyTable(const EnergyTable &other);
-    
+
     ~EnergyTable();
 
     static const char* typeName();
@@ -235,24 +234,24 @@ public:
 
     EnergyTable& operator+=(const EnergyTable &other);
     EnergyTable& operator-=(const EnergyTable &other);
-    
+
     EnergyTable operator+(const EnergyTable &other) const;
     EnergyTable operator-(const EnergyTable &other) const;
 
     EnergyTable& operator+=(const Vector &force);
     EnergyTable& operator-=(const Vector &force);
-    
+
     EnergyTable operator+(const Vector &force) const;
     EnergyTable operator-(const Vector &force) const;
-    
+
     EnergyTable& operator*=(double value);
     EnergyTable& operator/=(double value);
-    
+
     EnergyTable operator*(double value) const;
     EnergyTable operator/(double value) const;
-    
+
     EnergyTable operator-() const;
-    
+
     bool containsTable(MolNum molnum) const;
 
     void initialiseTables();
@@ -268,9 +267,9 @@ public:
     int count() const;
 
     const QHash<MolNum,qint32>& index() const;
-    
+
     int indexOf(MolNum molnum) const;
-    
+
     QList<MolNum> molNums() const;
 
     MolEnergyTable* data();
@@ -281,12 +280,12 @@ public:
 
     void add(const EnergyTable &other);
     void subtract(const EnergyTable &other);
-    
+
     void add(const Vector &force);
     void subtract(const Vector &force);
-    
+
     void setAll(const Vector &force);
-    
+
     void multiply(double value);
     void divide(double value);
 
@@ -294,7 +293,7 @@ private:
     /** All of the tables */
     QVector<MolEnergyTable> tables_by_idx;
 
-    /** Index mapping from the number of the Molecule to 
+    /** Index mapping from the number of the Molecule to
         the index of its force table in the above array */
     QHash<MolNum,qint32> molnum_to_idx;
 };
@@ -326,7 +325,7 @@ SIRE_ALWAYS_INLINE int MolEnergyTable::nCutGroups() const
     return ncgroups;
 }
 
-/** Return the number of selected CutGroups in this table 
+/** Return the number of selected CutGroups in this table
     (the number of CutGroups for which forces are held) */
 SIRE_ALWAYS_INLINE int MolEnergyTable::nSelectedCutGroups() const
 {
@@ -341,21 +340,21 @@ SIRE_ALWAYS_INLINE bool MolEnergyTable::selectedAll() const
 }
 
 /** Return whether or not the CutGroup at index 'cgidx' has been
-    selected 
-    
+    selected
+
     \throw SireError::invalid_index
 */
 SIRE_ALWAYS_INLINE bool MolEnergyTable::selected(CGIdx cgidx) const
 {
     cgidx = CGIdx(cgidx.map(this->nCutGroups()));
-    
+
     return this->selectedAll() or cgidx_to_idx.contains(cgidx);
 }
 
 /** Return the index of the forcetable for the CutGroup at index
     'cgidx'. This returns -1 if there is no forcetable for the
     specified CutGroup
-    
+
     \throw SireError::invalid_index
 */
 SIRE_ALWAYS_INLINE int MolEnergyTable::map(CGIdx cgidx) const
@@ -370,7 +369,7 @@ SIRE_ALWAYS_INLINE int MolEnergyTable::map(CGIdx cgidx) const
 ////// Inline functions for EnergyTable
 //////
 
-/** Return whether or not this contains a table for the 
+/** Return whether or not this contains a table for the
     molecule with number 'molnum' */
 SIRE_ALWAYS_INLINE bool EnergyTable::containsTable(MolNum molnum) const
 {
@@ -384,10 +383,10 @@ SIRE_ALWAYS_INLINE bool EnergyTable::containsTable(MolNum molnum) const
 SIRE_ALWAYS_INLINE MolEnergyTable& EnergyTable::getTable(MolNum molnum)
 {
     QHash<MolNum,qint32>::const_iterator it = molnum_to_idx.constFind(molnum);
-    
+
     if (it == molnum_to_idx.constEnd())
         this->assertContainsTableFor(molnum);
-        
+
     return tables_by_idx.data()[ it.value() ];
 }
 
@@ -398,10 +397,10 @@ SIRE_ALWAYS_INLINE MolEnergyTable& EnergyTable::getTable(MolNum molnum)
 SIRE_ALWAYS_INLINE const MolEnergyTable& EnergyTable::getTable(MolNum molnum) const
 {
     QHash<MolNum,qint32>::const_iterator it = molnum_to_idx.constFind(molnum);
-    
+
     if (it == molnum_to_idx.constEnd())
         this->assertContainsTableFor(molnum);
-        
+
     return tables_by_idx.constData()[ it.value() ];
 }
 
@@ -420,7 +419,7 @@ SIRE_ALWAYS_INLINE int EnergyTable::count() const
     return tables_by_idx.count();
 }
 
-/** Return the index used to find the index into the force tables array 
+/** Return the index used to find the index into the force tables array
     for the force table for the molecule with a specified number */
 SIRE_ALWAYS_INLINE const QHash<MolNum,qint32>& EnergyTable::index() const
 {

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,15 +43,15 @@ using namespace SireStream;
 
 static const RegisterMetaType<SystemMonitor> r_sysmon( MAGIC_ONLY,
                                                        "SireSystem::SystemMonitor" );
-                                                        
+
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                           const SystemMonitor &sysmon)
 {
     writeHeader(ds, r_sysmon, 1);
-    
+
     ds << static_cast<const Property&>(sysmon);
-    
+
     return ds;
 }
 
@@ -60,14 +59,14 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, SystemMonitor &sysmon)
 {
     VersionID v = readHeader(ds, r_sysmon);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(sysmon);
     }
     else
         throw version_error(v, "1", r_sysmon, CODELOC);
-        
+
     return ds;
 }
 
@@ -89,15 +88,15 @@ SystemMonitor::~SystemMonitor()
 /////////
 
 static const RegisterMetaType<NullMonitor> r_nullmonitor;
-                                                        
+
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                           const NullMonitor &nullmonitor)
 {
     writeHeader(ds, r_nullmonitor, 1);
-    
+
     ds << static_cast<const SystemMonitor&>(nullmonitor);
-    
+
     return ds;
 }
 
@@ -105,14 +104,14 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, NullMonitor &nullmonitor)
 {
     VersionID v = readHeader(ds, r_nullmonitor);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SystemMonitor&>(nullmonitor);
     }
     else
         throw version_error(v, "1", r_nullmonitor, CODELOC);
-        
+
     return ds;
 }
 

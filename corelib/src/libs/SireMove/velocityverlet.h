@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,7 +45,7 @@ namespace SireMove
 {
 
 /** This class implements an atomistic velocity verlet dynamics integrator
- 
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT VelocityVerlet
@@ -58,26 +57,26 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, VelocityVerlet&);
 
 public:
     VelocityVerlet(bool frequent_save_velocities = false);
-    
+
     VelocityVerlet(const VelocityVerlet &other);
-    
+
     ~VelocityVerlet();
-    
+
     VelocityVerlet& operator=(const VelocityVerlet &other);
-    
+
     bool operator==(const VelocityVerlet &other) const;
     bool operator!=(const VelocityVerlet &other) const;
-    
+
     static const char* typeName();
-    
+
     QString toString() const;
-    
+
     Ensemble ensemble() const;
-    
+
     bool isTimeReversible() const;
-    
+
     void integrate(IntegratorWorkspace &workspace,
-                   const Symbol &nrg_component, 
+                   const Symbol &nrg_component,
                    SireUnits::Dimension::Time timestep,
                    int nmoves, bool record_stats);
 
@@ -86,7 +85,7 @@ public:
                                            const PropertyMap &map = PropertyMap()) const;
 
 private:
-    /** Whether or not to save the velocities after every step, 
+    /** Whether or not to save the velocities after every step,
         or to save them at the end of all of the steps */
     bool frequent_save_velocities;
 };

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,15 +58,15 @@ static const RegisterMetaType<QMMMFF> r_qmmmff;
 QDataStream &operator<<(QDataStream &ds, const QMMMFF &qmmmff)
 {
     writeHeader(ds, r_qmmmff, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << static_cast<const G2FF&>(qmmmff)
         << static_cast<const QMMMElecEmbedPotential&>(qmmmff)
         << qmmmff.qmmols
         << qmmmff.mmmols
         << qmmmff.intermolecular_only;
-        
+
     return ds;
 }
 
@@ -75,38 +74,38 @@ QDataStream &operator<<(QDataStream &ds, const QMMMFF &qmmmff)
 QDataStream &operator>>(QDataStream &ds, QMMMFF &qmmmff)
 {
     VersionID v = readHeader(ds, r_qmmmff);
-    
+
     if (v <= 2)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> static_cast<G2FF&>(qmmmff)
             >> static_cast<QMMMElecEmbedPotential&>(qmmmff)
             >> qmmmff.qmmols
             >> qmmmff.mmmols;
-        
+
         if (v == 2)
             sds >> qmmmff.intermolecular_only;
         else
             qmmmff.intermolecular_only = false;
-        
+
         qmmmff._pvt_updateName();
     }
     else
         throw version_error(v, "1,2", r_qmmmff, CODELOC);
-        
+
     return ds;
 }
 
 /** Construct an empty, unnamed QM/MM forcefield */
-QMMMFF::QMMMFF() : ConcreteProperty<QMMMFF,G2FF>(), FF3D(), 
+QMMMFF::QMMMFF() : ConcreteProperty<QMMMFF,G2FF>(), FF3D(),
                    QMMMElecEmbedPotential(), intermolecular_only(false)
 {
     this->_pvt_updateName();
 }
 
 /** Construct an empty, named QM/MM forcefield */
-QMMMFF::QMMMFF(const QString &name) : ConcreteProperty<QMMMFF,G2FF>(), FF3D(), 
+QMMMFF::QMMMFF(const QString &name) : ConcreteProperty<QMMMFF,G2FF>(), FF3D(),
                                       QMMMElecEmbedPotential(), intermolecular_only(false)
 {
     G2FF::setName(name);
@@ -125,20 +124,20 @@ QMMMFF::QMMMFF(const QMMMFF &other)
 QMMMFF::~QMMMFF()
 {}
 
-/** Copy assignment operator */    
+/** Copy assignment operator */
 QMMMFF& QMMMFF::operator=(const QMMMFF &other)
 {
     if (this != &other)
     {
         G2FF::operator=(other);
         QMMMElecEmbedPotential::operator=(other);
-        
+
         qmmols = other.qmmols;
         mmmols = other.mmmols;
-        
+
         intermolecular_only = other.intermolecular_only;
     }
-    
+
     return *this;
 }
 
@@ -180,7 +179,7 @@ const SwitchingFunction& QMMMFF::switchingFunction() const
     return QMMMElecEmbedPotential::switchingFunction();
 }
 
-/** Return the QM program that will be used to calculate the 
+/** Return the QM program that will be used to calculate the
     energies and forces on the molecules */
 const QMProgram& QMMMFF::quantumProgram() const
 {
@@ -208,14 +207,14 @@ bool QMMMFF::setSpace(const Space &space)
     return QMMMElecEmbedPotential::setSpace(space);
 }
 
-/** Set the switching function used to provide the 
+/** Set the switching function used to provide the
     cutoff between the QM and MM regions */
 bool QMMMFF::setSwitchingFunction(const SwitchingFunction &switchfunc)
 {
     return QMMMElecEmbedPotential::setSwitchingFunction(switchfunc);
 }
 
-/** Set the QM program that will be used to calculate the 
+/** Set the QM program that will be used to calculate the
     energies and forces */
 bool QMMMFF::setQuantumProgram(const QMProgram &qmprog)
 {
@@ -231,7 +230,7 @@ bool QMMMFF::setZeroEnergy(MolarEnergy zero_energy)
     if (intermolecular_only.value())
         //do not set zero energy if we are only calculating intermolecular energies
         return false;
-    
+
     return QMMMElecEmbedPotential::setZeroEnergy(zero_energy);
 }
 
@@ -377,16 +376,16 @@ void QMMMFF::recalculateEnergy()
     QMEnergy nrg(0);
 
     QMMMElecEmbedPotential::calculateEnergy(qmmols, mmmols, nrg);
-    
+
     if (intermolecular_only.value())
     {
         //also calculate only the QM energy, and subtract this from the QM/MM energy
         QMEnergy qmnrg(0);
         QMMMElecEmbedPotential::calculateEnergy(qmmols, MMMolecules(), qmnrg);
-        
+
         nrg -= qmnrg;
     }
-    
+
     this->components().setEnergy(*this, nrg);
     this->setClean();
 }
@@ -404,14 +403,14 @@ void QMMMFF::_pvt_updateName()
 //// Virtual functions from SireFF::G2FF
 ////
 
-/** Record the fact that the molecule 'mol' has been added to this forcefield 
+/** Record the fact that the molecule 'mol' has been added to this forcefield
 
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void QMMMFF::_pvt_added(quint32 group_id, 
-                        const SireMol::PartialMolecule &molecule, 
+void QMMMFF::_pvt_added(quint32 group_id,
+                        const SireMol::PartialMolecule &molecule,
                         const SireBase::PropertyMap &map)
 {
     //add the molecule (don't record changes as everything
@@ -429,9 +428,9 @@ void QMMMFF::_pvt_added(quint32 group_id,
     else
         throwInvalidGroup(group_id);
 }
-                
+
 /** Record the fact that the molecule 'mol' has been removed from this forcefield */
-void QMMMFF::_pvt_removed(quint32 group_id, 
+void QMMMFF::_pvt_removed(quint32 group_id,
                           const SireMol::PartialMolecule &molecule)
 {
     if (group_id == 0)
@@ -447,7 +446,7 @@ void QMMMFF::_pvt_removed(quint32 group_id,
     else
         throwInvalidGroup(group_id);
 }
-                  
+
 /** Record that fact that the molecule 'molecule' has been changed
 
     \throw SireBase::missing_property
@@ -460,7 +459,7 @@ void QMMMFF::_pvt_changed(quint32 group_id, const SireMol::Molecule &molecule, b
     {
         qmmols.change(molecule, *this, false);
         G2FF::setDirty();
-    }   
+    }
     else if (group_id == 1)
     {
         mmmols.change(molecule, *this, false);
@@ -470,7 +469,7 @@ void QMMMFF::_pvt_changed(quint32 group_id, const SireMol::Molecule &molecule, b
         throwInvalidGroup(group_id);
 }
 
-/** Record that the provided list of molecules have changed 
+/** Record that the provided list of molecules have changed
 
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -482,7 +481,7 @@ void QMMMFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &mole
     if (group_id == 0)
     {
         QMMolecules old_mols;
-    
+
         try
         {
             for (QList<SireMol::Molecule>::const_iterator it = molecules.constBegin();
@@ -491,7 +490,7 @@ void QMMMFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &mole
             {
                 qmmols.change(*it, *this, false);
             }
-            
+
             G2FF::setDirty();
         }
         catch(...)
@@ -504,7 +503,7 @@ void QMMMFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &mole
     else if (group_id == 1)
     {
         MMMolecules old_mols;
-    
+
         try
         {
             for (QList<SireMol::Molecule>::const_iterator it = molecules.constBegin();
@@ -513,7 +512,7 @@ void QMMMFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &mole
             {
                 mmmols.change(*it, *this, false);
             }
-            
+
             G2FF::setDirty();
         }
         catch(...)
@@ -522,7 +521,7 @@ void QMMMFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &mole
             mmmols = old_mols;
             throw;
         }
-    }   
+    }
     else
         throwInvalidGroup(group_id);
 }
@@ -545,17 +544,17 @@ void QMMMFF::_pvt_removedAll(quint32 group_id)
 }
 
 /** Return whether or not the supplied property map contains different
-    properties for the molecule with number 'molnum' */       
-bool QMMMFF::_pvt_wouldChangeProperties(quint32 group_id, 
-                                        SireMol::MolNum molnum, 
+    properties for the molecule with number 'molnum' */
+bool QMMMFF::_pvt_wouldChangeProperties(quint32 group_id,
+                                        SireMol::MolNum molnum,
                                         const SireBase::PropertyMap &map) const
 {
     if (group_id == 0)
         return qmmols.wouldChangeProperties(molnum, map);
-        
+
     else if (group_id == 1)
         return mmmols.wouldChangeProperties(molnum, map);
-        
+
     else
     {
         throwInvalidGroup(group_id);
@@ -582,7 +581,7 @@ QString QMMMFF::forceCommandFile(const ForceTable &forcetable) const
 QString QMMMFF::potentialCommandFile(const PotentialTable &potentialtable,
                                      const SireFF::Probe &probe) const
 {
-    return QMMMElecEmbedPotential::potentialCommandFile(qmmols, mmmols, 
+    return QMMMElecEmbedPotential::potentialCommandFile(qmmols, mmmols,
                                                         potentialtable, probe);
 }
 
@@ -612,7 +611,7 @@ QString QMMMFF::fieldCommandFile(const FieldTable &fieldtable) const
 void QMMMFF::field(FieldTable &fieldtable, const SireFF::Probe &probe, double scale_field)
 {
     if (scale_field != 0)
-        QMMMElecEmbedPotential::calculateField(qmmols, mmmols, fieldtable, 
+        QMMMElecEmbedPotential::calculateField(qmmols, mmmols, fieldtable,
                                                probe, scale_field);
 }
 
@@ -631,7 +630,7 @@ void QMMMFF::potential(PotentialTable &potentialtable, const SireFF::Probe &prob
                        double scale_potential)
 {
     if (scale_potential != 0)
-        QMMMElecEmbedPotential::calculatePotential(qmmols, mmmols, potentialtable, 
+        QMMMElecEmbedPotential::calculatePotential(qmmols, mmmols, potentialtable,
                                                    probe, scale_potential);
 }
 
@@ -640,8 +639,8 @@ void QMMMFF::potential(PotentialTable &potentialtable, const Symbol &component,
                        const SireFF::Probe &probe, double scale_potential)
 {
     if (scale_potential != 0)
-        QMMMElecEmbedPotential::calculatePotential(qmmols, mmmols, potentialtable, 
-                                                   probe, component, 
+        QMMMElecEmbedPotential::calculatePotential(qmmols, mmmols, potentialtable,
+                                                   probe, component,
                                                    this->components(), scale_potential);
 }
 
@@ -655,10 +654,10 @@ void QMMMFF::field(FieldTable &fieldtable, double scale_field)
 void QMMMFF::field(FieldTable &fieldtable, const Symbol &component,
                    double scale_field)
 {
-    QMMMFF::field(fieldtable, component, QMMMElecEmbedPotential::Probe(), 
+    QMMMFF::field(fieldtable, component, QMMMElecEmbedPotential::Probe(),
                   scale_field);
 }
-           
+
 /** Calculate the potential from this forcefield in the passed potentialtable */
 void QMMMFF::potential(PotentialTable &potentialtable, double scale_potential)
 {
@@ -669,7 +668,7 @@ void QMMMFF::potential(PotentialTable &potentialtable, double scale_potential)
 void QMMMFF::potential(PotentialTable &potentialtable, const Symbol &component,
                        double scale_potential)
 {
-    QMMMFF::potential(potentialtable, component, QMMMElecEmbedPotential::Probe(), 
+    QMMMFF::potential(potentialtable, component, QMMMElecEmbedPotential::Probe(),
                       scale_potential);
 }
 

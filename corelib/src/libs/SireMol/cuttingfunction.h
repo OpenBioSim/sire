@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,7 +50,7 @@ class ResidueCutting;
 
 /** This is the base class of all cutting functions. These are
     functions that divide a molecule up into CutGroups.
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT CuttingFunction : public SireBase::Property
@@ -59,16 +58,16 @@ class SIREMOL_EXPORT CuttingFunction : public SireBase::Property
 public:
     CuttingFunction();
     CuttingFunction(const CuttingFunction &other);
-    
+
     virtual ~CuttingFunction();
-    
+
     static const char* typeName()
     {
         return "SireMol::CuttingFunction";
     }
 
     virtual CuttingFunction* clone() const=0;
-    
+
     virtual Molecule operator()(const Molecule &molecule) const;
     virtual MolStructureEditor operator()(MolStructureEditor &moleditor) const=0;
 

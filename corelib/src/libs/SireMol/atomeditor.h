@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -80,7 +79,7 @@ typedef Editor<AtomEditor, Atom> AtomEditorBase;
 
     @author Christopher Woods
 */
-class SIREMOL_EXPORT AtomEditor 
+class SIREMOL_EXPORT AtomEditor
             : public SireBase::ConcreteProperty<AtomEditor,AtomEditorBase>
 {
 
@@ -89,18 +88,18 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomEditor&);
 
 public:
     AtomEditor();
-    
+
     AtomEditor(const Atom &atom);
-    
+
     AtomEditor(const AtomEditor &other);
-    
+
     ~AtomEditor();
-    
+
     AtomEditor& operator=(const Atom &other);
     AtomEditor& operator=(const AtomEditor &other);
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return AtomEditor::typeName();
@@ -110,14 +109,14 @@ public:
 
     AtomEditor& rename(const AtomName &name);
     AtomEditor& renumber(AtomNum number);
-    
+
     AtomStructureEditor reindex(AtomIdx atomidx) const;
 
     MolStructureEditor remove() const;
-    
+
     AtomStructureEditor reparent(CGIdx cgidx) const;
     AtomStructureEditor reparent(const CGID &cgid) const;
-    
+
     AtomStructureEditor reparent(ResIdx residx) const;
     AtomStructureEditor reparent(const ResID &resid) const;
 
@@ -125,17 +124,17 @@ public:
     AtomStructureEditor reparent(const SegID &segid) const;
 };
 
-/** This class is used to edit an atom's relationship to 
+/** This class is used to edit an atom's relationship to
     other parts of the molecule (e.g. which CutGroup it
     is in, or which Residue it is in)
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT AtomStructureEditor : public StructureEditor
 {
 
 friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomStructureEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomStructureEditor&); 
+friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomStructureEditor&);
 
 public:
     AtomStructureEditor();
@@ -143,16 +142,16 @@ public:
     AtomStructureEditor(const StructureEditor &data, AtomIdx atomidx);
 
     AtomStructureEditor(const AtomStructureEditor &other);
-    
+
     ~AtomStructureEditor();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return AtomStructureEditor::typeName();
     }
-    
+
     AtomStructureEditor* clone() const;
 
     AtomStructureEditor& operator=(const Atom &atom);
@@ -175,15 +174,15 @@ public:
     AtomStructureEditor& rename(const AtomName &name);
     AtomStructureEditor& renumber(AtomNum number);
     AtomStructureEditor& reindex(AtomIdx idx);
-    
+
     MolStructureEditor remove();
 
     AtomStructureEditor& reparent(CGIdx cgidx);
     AtomStructureEditor& reparent(const CGID &cgid);
-    
+
     AtomStructureEditor& reparent(ResIdx residx);
     AtomStructureEditor& reparent(const ResID &resid);
-    
+
     AtomStructureEditor& reparent(SegIdx segidx);
     AtomStructureEditor& reparent(const SegID &segid);
 
@@ -201,7 +200,7 @@ public:
 
     template<class T>
     AtomStructureEditor& setMetadata(const QString &metakey, const T &value);
-    
+
     template<class T>
     AtomStructureEditor& setMetadata(const QString &key, const QString &metakey,
                                      const T &value);
@@ -223,7 +222,7 @@ private:
 /** Return the value for this atom of the property at key 'key'.
     Note that this property *must* be of type AtomProperty<T> for
     this to work!
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
 */
@@ -237,7 +236,7 @@ T AtomStructureEditor::property(const QString &key) const
 /** Return the value for this atom of the metadata at metakey 'metakey'.
     Note that this property *must* be of type AtomProperty<T> for
     this to work!
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
 */
@@ -250,15 +249,15 @@ T AtomStructureEditor::metadata(const QString &metakey) const
 
 /** Return the value for this atom of the metadata at metakey 'metakey'
     for the property at key 'key'.
-    
+
     Note that this property *must* be of type AtomProperty<T> for
     this to work!
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
 */
 template<class T>
-T AtomStructureEditor::metadata(const QString &key, 
+T AtomStructureEditor::metadata(const QString &key,
                                 const QString &metakey) const
 {
     const QVariant &value = this->getAtomMetadata(uid, key, metakey);
@@ -272,24 +271,24 @@ T AtomStructureEditor::metadata(const QString &key,
     \throw SireError::invalid_cast
 */
 template<class T>
-AtomStructureEditor& AtomStructureEditor::setProperty(const QString &key, 
+AtomStructureEditor& AtomStructureEditor::setProperty(const QString &key,
                                                       const T &value)
 {
     this->assertValidAtom(uid);
 
     //create space for this property
     this->_pvt_createSpaceForProperty< AtomProperty<T> >(key);
-    
+
     //now set the value of the property
     this->_pvt_setAtomProperty(uid, key, QVariant::fromValue<T>(value));
-    
+
     return *this;
 }
 
 /** Set the metadata at metakey 'metakey' to have the value 'value' for
-    this atom. Note that an exception will be thrown if an existing 
+    this atom. Note that an exception will be thrown if an existing
     property for this metakey is not of type AtomProperty<T>
-    
+
     \throw SireError::invalid_cast
 */
 template<class T>
@@ -297,36 +296,36 @@ AtomStructureEditor& AtomStructureEditor::setMetadata(const QString &metakey,
                                                       const T &value)
 {
     this->assertValidAtom(uid);
-    
+
     //create space for this metadata
     this->_pvt_createSpaceForMetadata< AtomProperty<T> >(metakey);
-    
+
     //now set the value of this metadata
     this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
-    
+
     return *this;
 }
 
 /** Set the metadata at metakey 'metakey' for the property at
     key 'key' to have the value 'value' for
-    this atom. Note that an exception will be thrown if an existing 
+    this atom. Note that an exception will be thrown if an existing
     property for this metakey is not of type AtomProperty<T>
-    
+
     \throw SireError::invalid_cast
 */
 template<class T>
-AtomStructureEditor& AtomStructureEditor::setMetadata(const QString &key, 
+AtomStructureEditor& AtomStructureEditor::setMetadata(const QString &key,
                                                       const QString &metakey,
                                                       const T &value)
 {
     this->assertValidAtom(uid);
-    
+
     //create space for this metadata
     this->_pvt_createSpaceForMetadata< AtomProperty<T> >(key, metakey);
-    
+
     //now set the value of this metadata
     this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
-    
+
     return *this;
 }
 

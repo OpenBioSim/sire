@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,9 +63,9 @@ using SireMol::Molecules;
 /** This is the base class of all Molecule constraints. These
     are constraints that affect molecules in a system. A molecule
     constraint works by being updated by a system and returning
-    the molecules that must then be changed to maintain the 
+    the molecules that must then be changed to maintain the
     constraint
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT MoleculeConstraint : public Constraint
@@ -78,16 +77,16 @@ friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, MoleculeConstra
 public:
     MoleculeConstraint();
     MoleculeConstraint(const MoleculeConstraint &other);
-    
+
     virtual ~MoleculeConstraint();
-    
+
     static const char* typeName();
-    
+
     virtual MoleculeConstraint* clone() const=0;
 
 protected:
     MoleculeConstraint& operator=(const MoleculeConstraint &other);
-    
+
     bool operator==(const MoleculeConstraint &other) const;
     bool operator!=(const MoleculeConstraint &other) const;
 };

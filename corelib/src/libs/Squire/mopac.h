@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -41,7 +40,7 @@
 
 SIRE_BEGIN_HEADER
 
-namespace Squire 
+namespace Squire
 {
 class Mopac;
 }
@@ -61,7 +60,7 @@ namespace Squire
 
 /** This is a wrapper that allows Mopac to be used to calculate
     semiempirical QM energies
-    
+
     @author Christopher Woods
 */
 class SQUIRE_EXPORT Mopac : public SireBase::ConcreteProperty<Mopac,QMProgram>
@@ -73,49 +72,49 @@ friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, Mopac&);
 public:
     Mopac();
     Mopac(const QString &mopac);
-    
+
     Mopac(const Mopac &other);
-    
+
     ~Mopac();
-    
+
     static const char* typeName();
-    
+
     Mopac& operator=(const Mopac &other);
-    
+
     bool operator==(const Mopac &other) const;
     bool operator!=(const Mopac &other) const;
-    
+
     void setExecutable(const QString &mopac_exe);
     void setEnvironment(const QString &variable, const QString &value);
-    
+
     QString executable() const;
-    
+
     const QHash<QString,QString>& environment() const;
-    
+
     QString environment(const QString &variable) const;
-    
+
     void setMethod(const QString &method);
-    
+
     const QString& method() const;
-    
+
     void setTotalCharge(int charge);
     int totalCharge() const;
-    
+
     void setEnergyTemplate(const QString &energy_template);
-    
+
     const QString& energyTemplate() const;
-    
+
     void setForceTemplate(const QString &force_template);
-    
+
     const QString& forceTemplate() const;
 
     void setChargeTemplate(const QString &charge_template);
-    
+
     const QString &chargeTemplate() const;
 
     void setMopacInputFilename(const QString &filename);
     void setMopacOutputFilename(const QString &filename);
-    
+
     const QString& mopacInputFilename() const;
     const QString& mopacOutputFilename() const;
 
@@ -146,8 +145,8 @@ private:
     QString createCommandFile(QString cmd_template,
                      const QList< QPair<Vector,SireMol::Element> > &atoms) const;
 
-    QString createCommandFile(QString cmd_template, 
-                              const QMPotential::Molecules &molecules) const;  
+    QString createCommandFile(QString cmd_template,
+                              const QMPotential::Molecules &molecules) const;
 
     QString writeShellFile(const SireBase::TempDir &tempdir) const;
 
@@ -163,35 +162,35 @@ private:
 
     /** The environmental variables to hold when running Mopac */
     QHash<QString,QString> env_variables;
-    
+
     /** The full path to the mopac executable to run (including
         any necessary command line arguments) */
     QString mopac_exe;
-    
+
     /** The QM method to use to calculate the energy */
     QString qm_method;
-    
+
     /** The template command file used for the energy calculations.
         The QM method and atom coordinates are substituted
         into this template */
     QString energy_template;
-    
+
     /** The template command file used for the force calculations.
         The QM method and atom coordinates are substituted
         into this template */
     QString force_template;
-    
+
     /** The template command file used for the atomic charge
         calculations. The QM method and atom coordinates
         are substituted into this template */
     QString charge_template;
-    
+
     /** The name mopac uses for the input file (e.g. FOR005) */
     QString mopac_input_filename;
-    
+
     /** The name mopac uses for the output file (e.g. FOR006) */
     QString mopac_output_filename;
-    
+
     /** The total charge of the system */
     qint32 total_charge;
 };

@@ -66,10 +66,10 @@ via a URL on the internet. To do this, simply pass in the path to the
 file on your disk, or the URL of the file on the internet.
 
 For example, let's load a cholesterol molecule from
-`https://siremol.org/m/cholesterol.sdf <https://siremol.org/m/cholesterol.sdf>`__.
+`https://sire.openbiosim.org/m/cholesterol.sdf <https://sire.openbiosim.org/m/cholesterol.sdf>`__.
 
->>> mols = sr.load("https://siremol.org/m/cholesterol.sdf")
-Downloading from 'https://siremol.org/m/cholesterol.sdf'...
+>>> mols = sr.load("https://sire.openbiosim.org/m/cholesterol.sdf")
+Downloading from 'https://sire.openbiosim.org/m/cholesterol.sdf'...
 Unzipping './cholesterol.sdf.bz2'...
 
 >>> print(mols)

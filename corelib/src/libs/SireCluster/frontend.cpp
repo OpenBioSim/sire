@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,8 +53,8 @@ FrontendBase::~FrontendBase()
 
 /** This private class implements the local Frontend that
     is used to communicate with a Backend that is in the same
-    address space 
-    
+    address space
+
     @author Christopher Woods
 */
 class LocalFrontend : public FrontendBase
@@ -64,22 +63,22 @@ class LocalFrontend : public FrontendBase
 public:
     LocalFrontend(const ActiveBackend &backend);
     ~LocalFrontend();
-    
+
     bool isLocal() const;
-    
+
     QUuid UID();
-    
+
     void startJob(const WorkPacket &workpacket);
-    
+
     void stopJob();
     void abortJob();
-    
+
     void wait();
     bool wait(int timeout);
-    
+
     float progress();
     WorkPacket interimResult();
-    
+
     WorkPacket result();
 
 private:
@@ -175,14 +174,14 @@ Frontend::Frontend(const Backend &backend)
 Frontend Frontend::tryAcquire(const Backend &backend)
 {
     ActiveBackend active_backend = backend.tryConnect();
-    
+
     Frontend frontend;
-    
+
     if (not active_backend.isNull())
     {
         frontend.d.reset( new LocalFrontend(active_backend) );
     }
-    
+
     return frontend;
 }
 
@@ -220,7 +219,7 @@ bool Frontend::isLocal() const
 {
     if (this->isNull())
         return false;
-        
+
     else
         return d->isLocal();
 }
@@ -243,7 +242,7 @@ QUuid Frontend::UID()
         return QUuid();
 }
 
-/** Perform the work in 'workpacket' on the backend - this 
+/** Perform the work in 'workpacket' on the backend - this
     blocks until the work has started */
 void Frontend::startJob(const WorkPacket &workpacket)
 {
@@ -305,7 +304,7 @@ float Frontend::progress()
     if (not this->isNull())
     {
         QMutexLocker lkr( &(d->datamutex) );
-        return d->progress(); 
+        return d->progress();
     }
     else
         return 0;

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,14 +47,14 @@ using namespace SireStream;
 
 static const RegisterMetaType<SupraMoves> r_supramoves( MAGIC_ONLY,
                                                     "SireMove::SupraMoves" );
-                                                    
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const SupraMoves &supramoves)
 {
     writeHeader(ds, r_supramoves, 1);
-    
+
     ds << static_cast<const Property&>(supramoves);
-    
+
     return ds;
 }
 
@@ -63,14 +62,14 @@ QDataStream &operator<<(QDataStream &ds, const SupraMoves &supramoves)
 QDataStream &operator>>(QDataStream &ds, SupraMoves &supramoves)
 {
     VersionID v = readHeader(ds, r_supramoves);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(supramoves);
     }
     else
         throw version_error(v, "1", r_supramoves, CODELOC);
-        
+
     return ds;
 }
 
@@ -104,14 +103,14 @@ bool SupraMoves::operator!=(const SupraMoves &other) const
     return false;
 }
 
-/** Return the ith move 
+/** Return the ith move
 
     \throw SireError::invalid_index
 */
 const SupraMove& SupraMoves::operator[](int i) const
 {
     QList<SupraMovePtr> mvs = this->moves();
-    
+
     return mvs.at( Index(i).map(mvs.count()) ).read();
 }
 
@@ -152,12 +151,12 @@ QDataStream &operator<<(QDataStream &ds,
                                         const SameSupraMoves &samesupramoves)
 {
     writeHeader(ds, r_samesupramoves, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << samesupramoves.mv
         << static_cast<const SupraMoves&>(samesupramoves);
-        
+
     return ds;
 }
 
@@ -165,17 +164,17 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, SameSupraMoves &samesupramoves)
 {
     VersionID v = readHeader(ds, r_samesupramoves);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> samesupramoves.mv
             >> static_cast<SupraMoves&>(samesupramoves);
     }
     else
         throw version_error(v, "1", r_samesupramoves, CODELOC);
-        
+
     return ds;
 }
 
@@ -202,9 +201,9 @@ SameSupraMoves::~SameSupraMoves()
 SameSupraMoves& SameSupraMoves::operator=(const SameSupraMoves &other)
 {
     SupraMoves::operator=(other);
-    
+
     mv = other.mv;
-    
+
     return *this;
 }
 
@@ -231,7 +230,7 @@ void SameSupraMoves::move(SupraSystem &system, int nmoves, bool record_stats)
 {
     if (nmoves == 0)
         return;
-        
+
     mv.edit().move(system, nmoves, record_stats);
 }
 
@@ -246,7 +245,7 @@ QList<SupraMovePtr> SameSupraMoves::moves() const
 {
     QList<SupraMovePtr> mvs;
     mvs.append(mv);
-    
+
     return mvs;
 }
 

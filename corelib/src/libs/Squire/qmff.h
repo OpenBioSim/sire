@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,7 +60,7 @@ using SireCAS::Symbol;
 /** This is a forcefield that uses an external Quantum Chemical program
     to calculate the quantum mechanics energy and / or force on the
     contained molecules.
-    
+
     @author Christopher Woods
 */
 class SQUIRE_EXPORT QMFF : public SireBase::ConcreteProperty<QMFF,SireFF::G1FF>,
@@ -77,23 +76,23 @@ public:
 
     QMFF();
     QMFF(const QString &name);
-    
+
     QMFF(const QMFF &other);
-    
+
     ~QMFF();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return QMFF::typeName();
     }
-    
+
     QMFF& operator=(const QMFF &other);
-    
+
     bool operator==(const QMFF &other) const;
     bool operator!=(const QMFF &other) const;
-    
+
     const Components& components() const;
 
     Parameters parameters() const
@@ -104,7 +103,7 @@ public:
     const Space& space() const;
     const QMProgram& quantumProgram() const;
     SireUnits::Dimension::MolarEnergy zeroEnergy() const;
-    
+
     bool setSpace(const Space &space);
     bool setQuantumProgram(const QMProgram &qmprog);
     bool setZeroEnergy(SireUnits::Dimension::MolarEnergy zero_energy);
@@ -114,36 +113,36 @@ public:
     bool containsProperty(const QString &name) const;
     const Properties& properties() const;
 
-    void mustNowRecalculateFromScratch();    
+    void mustNowRecalculateFromScratch();
 
     void energy(EnergyTable &energytable, double scale_energy=1);
-    
+
     void energy(EnergyTable &energytable, const Symbol &symbol,
 		double scale_energy=1);
 
     void force(ForceTable &forcetable, double scale_force=1);
-    
+
     void force(ForceTable &forcetable, const Symbol &symbol,
                double scale_force=1);
 
     void field(FieldTable &fieldtable, double scale_field=1);
-    
+
     void field(FieldTable &fieldtable, const Symbol &component,
                double scale_field=1);
-               
+
     void potential(PotentialTable &potentialtable, double scale_potential=1);
-    
+
     void potential(PotentialTable &potentialtable, const Symbol &component,
                    double scale_potential=1);
 
     void field(FieldTable &fieldtable, const SireFF::Probe &probe, double scale_field=1);
-    
+
     void field(FieldTable &fieldtable, const Symbol &component,
                const SireFF::Probe &probe, double scale_field=1);
-               
+
     void potential(PotentialTable &potentialtable, const SireFF::Probe &probe,
                    double scale_potential=1);
-    
+
     void potential(PotentialTable &potentialtable, const Symbol &component,
                    const SireFF::Probe &probe, double scale_potential=1);
 
@@ -151,7 +150,7 @@ public:
     QString forceCommandFile(const ForceTable &forcetable) const;
 
     QString fieldCommandFile(const FieldTable &fieldtable) const;
-    QString fieldCommandFile(const FieldTable &fieldtable, 
+    QString fieldCommandFile(const FieldTable &fieldtable,
                              const SireFF::Probe &probe) const;
 
     QString potentialCommandFile(const PotentialTable &pottable) const;
@@ -165,39 +164,39 @@ protected:
     ////
 
     const Components& _pvt_components() const;
-    
+
     void recalculateEnergy();
-    
+
     void _pvt_updateName();
-    
+
     ////
     //// Virtual functions from SireFF::G1FF
     ////
 
-    void _pvt_added(const SireMol::PartialMolecule &mol, 
+    void _pvt_added(const SireMol::PartialMolecule &mol,
                     const SireBase::PropertyMap&);
-                    
+
     void _pvt_removed(const SireMol::PartialMolecule &mol);
-    
+
     void _pvt_changed(const SireMol::Molecule &mol, bool auto_update);
-    
+
     void _pvt_changed(const QList<SireMol::Molecule> &mols, bool auto_update);
-    
+
     void _pvt_removedAll();
-    
-    bool _pvt_wouldChangeProperties(SireMol::MolNum molnum, 
+
+    bool _pvt_wouldChangeProperties(SireMol::MolNum molnum,
                                     const SireBase::PropertyMap &map) const;
 
     ////
     //// Virtual functions of QMFF
     ////
-    
+
     void changedPotential();
 
 private:
     /** The components of the energy */
     Components ffcomponents;
-    
+
     /** All of the molecules in this forcefield */
     QMPotential::Molecules qmmols;
 };

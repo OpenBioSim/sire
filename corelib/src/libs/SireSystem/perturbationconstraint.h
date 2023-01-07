@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -69,20 +68,20 @@ class PerturbationData : public SireBase::RefCountData
 public:
     PerturbationData();
     PerturbationData(const PerturbationPtr &perturbation);
-    
+
     PerturbationData(const PerturbationData &other);
-    
+
     ~PerturbationData();
-    
+
     bool wouldChange(const Molecule &molecule, const Values &values) const;
 
     Molecule perturb(const Molecule &molecule, const Values &values);
-    
+
 private:
     /** The actual perturbation */
     PerturbationPtr pert;
-    
-    /** The properties required, and the version of 
+
+    /** The properties required, and the version of
         the property in the molecule the last time it
         was updated */
     QHash<QString,quint64> props;
@@ -93,7 +92,7 @@ private:
 /** This constraint is used to constrain part or parts of a z-matrix
     to particular values - this is useful during single-topology
     free energy simulations
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT PerturbationConstraint
@@ -105,22 +104,22 @@ friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, PerturbationCon
 
 public:
     PerturbationConstraint();
-    PerturbationConstraint(const MoleculeGroup &molgroup, 
+    PerturbationConstraint(const MoleculeGroup &molgroup,
                            const PropertyMap &map = PropertyMap());
-                   
+
     PerturbationConstraint(const PerturbationConstraint &other);
-    
+
     ~PerturbationConstraint();
-    
+
     PerturbationConstraint& operator=(const PerturbationConstraint &other);
-    
+
     bool operator==(const PerturbationConstraint &other) const;
     bool operator!=(const PerturbationConstraint &other) const;
-    
+
     static const char* typeName();
-    
+
     QString toString() const;
-    
+
     const MoleculeGroup& moleculeGroup() const;
 
     SireBase::PropertyName perturbationProperty() const;
@@ -152,7 +151,7 @@ private:
     /** All of the symbols of components used by all of the perturbations */
     QSet<SireCAS::Symbol> all_pert_syms;
 
-    /** The symbols used by the perturbations for each molecule, 
+    /** The symbols used by the perturbations for each molecule,
         and their current values */
     QHash< MolNum,QSet<SireCAS::Symbol> > pert_syms;
 

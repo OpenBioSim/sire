@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -70,14 +69,14 @@ using SireMol::BondID;
 using SireMol::AngleID;
 using SireMol::DihedralID;
 
-/** This class implements an intramolecular Monte Carlo move that uses 
-    the move() method to perturb intramolecular degrees of freedom and 
+/** This class implements an intramolecular Monte Carlo move that uses
+    the move() method to perturb intramolecular degrees of freedom and
     that may be applied to a random molecule (or part of a molecule)
     within a MoleculeGroup. It is based on the ZMatMove class.
-    
+
     @author Julien Michel
 */
-class SIREMOVE_EXPORT InternalMoveSingle 
+class SIREMOVE_EXPORT InternalMoveSingle
             : public SireBase::ConcreteProperty<InternalMoveSingle,MonteCarlo>
 {
 
@@ -87,19 +86,19 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, InternalMoveSingl
 public:
 
     InternalMoveSingle(const PropertyMap &map = PropertyMap() );
-    
+
     InternalMoveSingle(const MoleculeGroup &molgroup,
                  const PropertyMap &map = PropertyMap() );
 
-    InternalMoveSingle(const Sampler &sampler, 
+    InternalMoveSingle(const Sampler &sampler,
                  const PropertyMap &map = PropertyMap() );
-    
+
     InternalMoveSingle(const InternalMoveSingle &other);
-    
+
     ~InternalMoveSingle();
-    
+
     InternalMoveSingle& operator=(const InternalMoveSingle &other);
-    
+
     static const char* typeName();
 
     bool operator==(const InternalMoveSingle &other) const;
@@ -112,7 +111,7 @@ public:
 
     const Sampler& sampler() const;
     const MoleculeGroup& moleculeGroup() const;
-    
+
     const PropertyName& flexibilityProperty() const;
 
     const MoleculeGroup& synchronisedMols() const;
@@ -134,7 +133,7 @@ private:
 
     /** The name of the property that contains the flexibility*/
     PropertyName flexibility_property;
-    
+
     /** The molgroup of molecules whose coordinates are synched to the moved molecules*/
     MoleculeGroup synched_molgroup;
 

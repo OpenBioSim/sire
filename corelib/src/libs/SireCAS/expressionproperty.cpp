@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,18 +44,18 @@ static const RegisterMetaType<ExpressionProperty> r_expprop;
 QDataStream &operator<<(QDataStream &ds, const ExpressionProperty &expprop)
 {
     writeHeader(ds, r_expprop, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << expprop._val << static_cast<const Property&>(expprop);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, ExpressionProperty &expprop)
 {
     VersionID v = readHeader(ds, r_expprop);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -65,7 +64,7 @@ QDataStream &operator>>(QDataStream &ds, ExpressionProperty &expprop)
     }
     else
         throw version_error(v, "1", r_expprop, CODELOC);
-    
+
     return ds;
 }
 
@@ -75,7 +74,7 @@ namespace SireCAS
     {
         return ExpressionProperty(val);
     }
-    
+
     PropertyPtr wrap(const Expression &val)
     {
         return ExpressionProperty(val);
@@ -120,7 +119,7 @@ ExpressionProperty& ExpressionProperty::operator=(const ExpressionProperty &othe
     {
         _val = other._val;
     }
-    
+
     return *this;
 }
 

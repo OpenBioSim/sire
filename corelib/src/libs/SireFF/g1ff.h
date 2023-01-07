@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,7 +53,7 @@ using SireMol::PartialMolecule;
 
 /** This is the base class of all forcefields that hold just
     a single group of molecules
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT G1FF : public FF
@@ -80,7 +79,7 @@ public:
     void add(const ViewsOfMol &molviews, const PropertyMap &map);
     void add(const Molecules &molecules, const PropertyMap &map);
     void add(const MoleculeGroup &molgroup, const PropertyMap &map);
-    
+
     void addIfUnique(const MoleculeView &molview, const PropertyMap &map);
     void addIfUnique(const ViewsOfMol &molviews, const PropertyMap &map);
     void addIfUnique(const Molecules &molecules, const PropertyMap &map);
@@ -90,19 +89,19 @@ public:
     void add(const ViewsOfMol &molviews);
     void add(const Molecules &molecules);
     void add(const MoleculeGroup &molgroup);
-    
+
     void addIfUnique(const MoleculeView &molview);
     void addIfUnique(const ViewsOfMol &molviews);
     void addIfUnique(const Molecules &molecules);
     void addIfUnique(const MoleculeGroup &molgroup);
 
     bool removeAll();
-    
+
     bool remove(const MoleculeView &molview);
     bool remove(const ViewsOfMol &molviews);
     bool remove(const Molecules &molecules);
     bool remove(const MoleculeGroup &molgroup);
-    
+
     bool removeAll(const MoleculeView &molview);
     bool removeAll(const ViewsOfMol &molviews);
     bool removeAll(const Molecules &molecules);
@@ -127,7 +126,7 @@ public:
 protected:
     G1FF(bool allow_overlap_of_atoms=false);
     G1FF(const G1FF &other);
-    
+
     G1FF& operator=(const G1FF &other);
 
     ////
@@ -141,19 +140,19 @@ protected:
 
     virtual void _pvt_changed(const Molecule &molecule, bool auto_commit)=0;
     virtual void _pvt_changed(const QList<Molecule> &molecules, bool auto_commit)=0;
-    
+
     virtual void _pvt_removedAll()=0;
-        
-    virtual bool _pvt_wouldChangeProperties(MolNum molnum, 
+
+    virtual bool _pvt_wouldChangeProperties(MolNum molnum,
                                             const PropertyMap &map) const=0;
-        
+
     ////
-    //// Virtual functions that must be changed if this 
+    //// Virtual functions that must be changed if this
     //// forcefield allows overlapping atoms (most don't!)
     ////
     virtual void _pvt_added(const ViewsOfMol &mol,
                             const PropertyMap &map);
-                            
+
     virtual void _pvt_removed(const ViewsOfMol &mol);
 
     virtual void _pvt_removedAll(const PartialMolecule &mol);
@@ -164,37 +163,37 @@ protected:
     ////
 
     const MoleculeGroup& getGroup(MGNum mgnum) const;
-    
+
     void getGroups(const QList<MGNum> &mgnums,
                    QVarLengthArray<const MoleculeGroup*,10> &groups) const;
 
     QHash<MGNum,const MoleculeGroup*> getGroups() const;
-    
+
     void group_setName(quint32 i, const QString &new_name);
-        
+
     void group_add(quint32 i, const MoleculeView &molview,
                            const PropertyMap &map);
-    void group_add(quint32 i, const ViewsOfMol &molviews, 
+    void group_add(quint32 i, const ViewsOfMol &molviews,
                            const PropertyMap &map);
-    void group_add(quint32 i, const Molecules &molecules, 
+    void group_add(quint32 i, const Molecules &molecules,
                            const PropertyMap &map);
-    void group_add(quint32 i, const MoleculeGroup &molgroup, 
+    void group_add(quint32 i, const MoleculeGroup &molgroup,
                            const PropertyMap &map);
-    
-    bool group_addIfUnique(quint32 i, const MoleculeView &molview, 
+
+    bool group_addIfUnique(quint32 i, const MoleculeView &molview,
                            const PropertyMap &map);
-    ViewsOfMol group_addIfUnique(quint32 i, const ViewsOfMol &molviews, 
+    ViewsOfMol group_addIfUnique(quint32 i, const ViewsOfMol &molviews,
                                  const PropertyMap &map);
-    QList<ViewsOfMol> group_addIfUnique(quint32 i, const Molecules &molecules, 
+    QList<ViewsOfMol> group_addIfUnique(quint32 i, const Molecules &molecules,
                                         const PropertyMap &map);
-    QList<ViewsOfMol> group_addIfUnique(quint32 i, const MoleculeGroup &molgroup, 
+    QList<ViewsOfMol> group_addIfUnique(quint32 i, const MoleculeGroup &molgroup,
                                         const PropertyMap &map);
 
     bool group_remove(quint32 i, const MoleculeView &molview);
     ViewsOfMol group_remove(quint32 i, const ViewsOfMol &molviews);
     QList<ViewsOfMol> group_remove(quint32 i, const Molecules &molecules);
     QList<ViewsOfMol> group_remove(quint32 i, const MoleculeGroup &molgroup);
-    
+
     bool group_removeAll(quint32 i, const MoleculeView &molview);
     ViewsOfMol group_removeAll(quint32 i, const ViewsOfMol &molviews);
     QList<ViewsOfMol> group_removeAll(quint32 i, const Molecules &molecules);
@@ -209,14 +208,14 @@ protected:
 
     QList<Molecule> group_update(quint32 i, const Molecules &molecules, bool auto_commit);
     QList<Molecule> group_update(quint32 i, const MoleculeGroup &molgroup, bool auto_commit);
-    
-    bool group_setContents(quint32 i, const MoleculeView &molview, 
+
+    bool group_setContents(quint32 i, const MoleculeView &molview,
                            const PropertyMap &map);
-    bool group_setContents(quint32 i, const ViewsOfMol &molviews, 
+    bool group_setContents(quint32 i, const ViewsOfMol &molviews,
                            const PropertyMap &map);
-    bool group_setContents(quint32 i, const Molecules &molecules, 
+    bool group_setContents(quint32 i, const Molecules &molecules,
                            const PropertyMap &map);
-    bool group_setContents(quint32 i, const MoleculeGroup &molgroup, 
+    bool group_setContents(quint32 i, const MoleculeGroup &molgroup,
                            const PropertyMap &map);
 
     void _pvt_updateName();
@@ -233,7 +232,7 @@ private:
 
     /** The single group of molecules in this forcefield */
     detail::FFMolGroupPvt molgroup;
-    
+
     /** Whether or not this forcefield allows overlap of atoms
         (e.g. allowing an atom to appear several times in the forcefield) */
     bool allow_overlap_of_atoms;

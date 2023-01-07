@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,7 +52,7 @@ class SupraSubSystem;
 /** This is the base class of the controller for the sub-moves
     that are performed on the sub-systems of each SupraSystem
     as part of a SupraMove
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT SupraSubMove : public SireBase::Property
@@ -64,39 +63,39 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SupraSubMove&);
 
 public:
     SupraSubMove();
-    
+
     SupraSubMove(const SupraSubMove &other);
-    
+
     virtual ~SupraSubMove();
-    
+
     virtual SupraSubMove* clone() const=0;
-    
+
     static const char* typeName()
     {
         return "SireMove::SupraSubMove";
     }
-    
+
     virtual QString toString() const=0;
-    
+
     virtual void clearStatistics();
-    
+
     virtual void move(SupraSubSystem &system, int n_supra_moves,
                       int n_supra_moves_per_block,
                       bool record_stats=true)=0;
 
     static const NullSupraSubMove& null();
-    
+
 protected:
     SupraSubMove& operator=(const SupraSubMove &other);
-    
+
     bool operator==(const SupraSubMove &other) const;
-    bool operator!=(const SupraSubMove &other) const; 
+    bool operator!=(const SupraSubMove &other) const;
 
 };
 
 /** This is a null move that doesn't move a SupraSubSystem...
 
-    @author Christopher Woods 
+    @author Christopher Woods
 */
 class SIREMOVE_EXPORT NullSupraSubMove
         : public SireBase::ConcreteProperty<NullSupraSubMove,SupraSubMove>
@@ -107,21 +106,21 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullSupraSubMove&
 
 public:
     NullSupraSubMove();
-    
+
     NullSupraSubMove(const NullSupraSubMove &other);
-    
+
     ~NullSupraSubMove();
-    
+
     NullSupraSubMove& operator=(const NullSupraSubMove &other);
-    
+
     bool operator==(const NullSupraSubMove &other) const;
     bool operator!=(const NullSupraSubMove &other) const;
-    
+
     static const char* typeName();
-    
+
     QString toString() const;
-    
-    void move(SupraSubSystem &system, int n_supra_moves, 
+
+    void move(SupraSubSystem &system, int n_supra_moves,
               int n_supra_moves_per_block, bool record_stats);
 };
 

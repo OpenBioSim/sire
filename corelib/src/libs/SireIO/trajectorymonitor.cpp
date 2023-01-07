@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,12 +60,12 @@ static QByteArray readFromDisk(const QPair< QString,shared_ptr<QTemporaryFile> >
 {
     //open the packed data file using a separate file handle
     QFile f( tmpfile.first );
-    
+
     if (not f.open(QIODevice::ReadOnly | QIODevice::Unbuffered))
     {
         throw SireError::file_error(f, CODELOC);
     }
-    
+
     //now read and return all of the data
     return f.readAll();
 }
@@ -80,7 +79,7 @@ static QString getUserName()
     #endif
 }
 
-static QPair< QString,shared_ptr<QTemporaryFile> > 
+static QPair< QString,shared_ptr<QTemporaryFile> >
                 writeToDisk(const QByteArray &data, const QString &temp_dir)
 {
     QString save_dir;
@@ -93,15 +92,15 @@ static QPair< QString,shared_ptr<QTemporaryFile> >
     else
     {
         QDir tempdir(temp_dir);
-    
+
         if (tempdir.exists())
             save_dir = tempdir.absolutePath();
         else
             save_dir = QDir::tempPath();
     }
-    
+
     QPair< QString,shared_ptr<QTemporaryFile> > tmp;
-    
+
     tmp.second.reset( new QTemporaryFile(QString("%1/%2_sire_trajmonitor_XXXXXX.data")
                                     .arg(save_dir, getUserName()) ) );
 
@@ -134,45 +133,45 @@ static QPair< QString,shared_ptr<QTemporaryFile> >
                 .arg(nbytes).arg(data.count())
                 .arg(save_dir), CODELOC );
     }
-    
+
     //need to save the filename as some Qt versions lose it when
     //the file is closed
     tmp.first = tmp.second->fileName();
-    
+
     tmp.second->close();
-    
+
     return tmp;
 }
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                       const TrajectoryMonitor &trajmon)
 {
     writeHeader(ds, r_trajmon, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << trajmon.io_writer << trajmon.mgid
         << trajmon.mol_properties << trajmon.temp_dir;
 
     //now write all of the frames
     sds << quint32( trajmon.traj_frames.count() );
-    
-    for (QList< QPair< QString,shared_ptr<QTemporaryFile> > >::const_iterator 
+
+    for (QList< QPair< QString,shared_ptr<QTemporaryFile> > >::const_iterator
                                                  it = trajmon.traj_frames.constBegin();
          it != trajmon.traj_frames.constEnd();
          ++it)
     {
         QByteArray data = ::readFromDisk( *it );
 
-        //don't shared-stream as this data cannot be shared, and 
+        //don't shared-stream as this data cannot be shared, and
         //pointer re-use may lead to fake shared streaming
         ds << data;
     }
-   
+
     sds << trajmon.space_frames
         << static_cast<const SystemMonitor&>(trajmon);
-        
+
     return ds;
 }
 
@@ -180,15 +179,15 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, TrajectoryMonitor &trajmon)
 {
     VersionID v = readHeader(ds, r_trajmon);
-    
+
     if (v == 1 or v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         TrajectoryMonitor new_monitor;
-        
+
         sds >> new_monitor.io_writer;
-        
+
         if (v == 2)
         {
             sds >> new_monitor.mgid;
@@ -205,25 +204,25 @@ QDataStream &operator>>(QDataStream &ds, TrajectoryMonitor &trajmon)
         //how many frames need to be read?
         quint32 nframes;
         sds >> nframes;
-        
+
         for (quint32 i=0; i<nframes; ++i)
         {
             QByteArray data;
-            
+
             //no shared streaming here
             ds >> data;
-            
+
             new_monitor.traj_frames.append( ::writeToDisk(data, new_monitor.temp_dir) );
         }
-            
+
         sds >> new_monitor.space_frames
             >> static_cast<SystemMonitor&>(new_monitor);
-        
+
         trajmon = new_monitor;
     }
     else
         throw version_error(v, "1,2", r_trajmon, CODELOC);
-        
+
     return ds;
 }
 
@@ -232,7 +231,7 @@ TrajectoryMonitor::TrajectoryMonitor()
                   : ConcreteProperty<TrajectoryMonitor,SystemMonitor>()
 {}
 
-/** Construct a monitor that monitors the trajectory of the molecules  
+/** Construct a monitor that monitors the trajectory of the molecules
     in the molecule group 'molgroup'. This writes the trajectory using
     the PDB writer, and uses the (optionally) supplied property map to
     control what is written */
@@ -243,18 +242,18 @@ TrajectoryMonitor::TrajectoryMonitor(const MoleculeGroup &molgroup,
                     mol_properties(map)
 {}
 
-/** Construct a monitor that monitors the trajectory of the molecules in 
-    the molecule group 'molgroup', writing the trajectory using the 
+/** Construct a monitor that monitors the trajectory of the molecules in
+    the molecule group 'molgroup', writing the trajectory using the
     molecule write 'writer', and using the (optionally) supplied property
     map to control what is written */
-TrajectoryMonitor::TrajectoryMonitor(const MoleculeGroup &molgroup, 
+TrajectoryMonitor::TrajectoryMonitor(const MoleculeGroup &molgroup,
                                      const IOBase &writer,
                                      const PropertyMap &map)
                   : ConcreteProperty<TrajectoryMonitor,SystemMonitor>(),
                     io_writer(writer), mgid(molgroup.number()), mol_properties(map)
 {}
 
-/** Construct a monitor that monitors the trajectory of the molecules  
+/** Construct a monitor that monitors the trajectory of the molecules
     in the molecule group with ID 'mgid'. This writes the trajectory using
     the PDB writer, and uses the (optionally) supplied property map to
     control what is written */
@@ -265,11 +264,11 @@ TrajectoryMonitor::TrajectoryMonitor(const MGID &mg_id,
                     mol_properties(map)
 {}
 
-/** Construct a monitor that monitors the trajectory of the molecules in 
-    the molecule group with ID 'mgid', writing the trajectory using the 
+/** Construct a monitor that monitors the trajectory of the molecules in
+    the molecule group with ID 'mgid', writing the trajectory using the
     molecule write 'writer', and using the (optionally) supplied property
     map to control what is written */
-TrajectoryMonitor::TrajectoryMonitor(const MGID &mg_id, 
+TrajectoryMonitor::TrajectoryMonitor(const MGID &mg_id,
                                      const IOBase &writer,
                                      const PropertyMap &map)
                   : ConcreteProperty<TrajectoryMonitor,SystemMonitor>(),
@@ -292,14 +291,14 @@ TrajectoryMonitor::~TrajectoryMonitor()
 TrajectoryMonitor& TrajectoryMonitor::operator=(const TrajectoryMonitor &other)
 {
     SystemMonitor::operator=(other);
-    
+
     io_writer = other.io_writer;
     mgid = other.mgid;
     traj_frames = other.traj_frames;
     mol_properties = other.mol_properties;
     space_frames = other.space_frames;
     temp_dir = other.temp_dir;
-    
+
     return *this;
 }
 
@@ -312,7 +311,7 @@ bool TrajectoryMonitor::operator==(const TrajectoryMonitor &other) const
             mol_properties == other.mol_properties and
             temp_dir == other.temp_dir and
             traj_frames == other.traj_frames and
-            space_frames == other.space_frames and 
+            space_frames == other.space_frames and
             SystemMonitor::operator==(other));
 }
 
@@ -321,8 +320,8 @@ bool TrajectoryMonitor::operator!=(const TrajectoryMonitor &other) const
 {
     return not this->operator==(other);
 }
-    
-/** Set the temporary directory used to store the trajectory as it 
+
+/** Set the temporary directory used to store the trajectory as it
     is being monitored during the simulation */
 void TrajectoryMonitor::setTempDir(const QString &tempdir)
 {
@@ -333,7 +332,7 @@ static QString getFrameNumber(int i, int n)
 {
     if (n == 1)
         return "";
-    
+
     else
     {
         return QString("%1").arg( i, n, int(10), QLatin1Char('0'));
@@ -343,7 +342,7 @@ static QString getFrameNumber(int i, int n)
 static int nColumns(int n)
 {
     int ncol = 0;
-    
+
     if (n < 0)
     {
         n = -n;
@@ -357,11 +356,11 @@ static int nColumns(int n)
         n /= 10;
         ++ncol;
     }
-    
+
     return ncol;
 }
 
-/** Write the trajectory to disk, using the file template 'file_template'. 
+/** Write the trajectory to disk, using the file template 'file_template'.
     This writes each frame to a separate file, numbering them sequentially
     from 0, replacing "XXXXXX" with the frame number */
 void TrajectoryMonitor::writeToDisk(const QString &file_template) const
@@ -377,26 +376,26 @@ void TrajectoryMonitor::writeToDisk(const QString &file_template) const
     {
         //read the file
         QByteArray data = ::readFromDisk( *it );
-        
+
         if (data.isEmpty())
             continue;
-        
+
         data = qUncompress(data);
-    
+
         QString filename = file_template;
-        
+
         if (filename.contains("XXXXXX"))
             filename.replace("XXXXXX", getFrameNumber(i, n));
         else if (nframes > 1)
             filename += (getFrameNumber(i,n) + ".pdb");
-            
+
         ++i;
-        
+
         QFile f(filename);
-        
+
         if (not f.open( QIODevice::WriteOnly ))
             throw SireError::file_error(f);
-            
+
         qint64 nbytes = f.write(data);
 
         if (nbytes == -1)
@@ -417,28 +416,28 @@ void TrajectoryMonitor::writeToDisk(const QString &file_template) const
                     .arg(nbytes).arg(data.count())
                     .arg(filename), CODELOC );
         }
-        
+
         f.close();
-        
+
         if (i <= space_frames.count())
         {
         	//now write the system space to disk
 			QString suffix = QFileInfo(filename).completeSuffix();
-            
+
             if (not suffix.isEmpty())
 	            filename.replace( filename.lastIndexOf(suffix), suffix.count(), "xsc");
 	        else
 	            filename += ".xsc";
-	            
-	        QFile g(filename);        
+
+	        QFile g(filename);
 
 	        if (not g.open( QIODevice::WriteOnly ))
 	            throw SireError::file_error(g);
 
 	        QTextStream ts(&g);
-            
+
     	    ts << space_frames.at(i-1).read().toString();
-			        
+
 	        g.close();
     	}
     }
@@ -462,10 +461,10 @@ void TrajectoryMonitor::monitor(System &system)
     try
     {
         const MoleculeGroup &new_group = system[mgid];
-        
+
         //write a new frame
         QByteArray frame_data = io_writer->write(new_group, mol_properties);
-            
+
         //compress the data and save it to a temporary file
         frame_data = qCompress(frame_data);
 
@@ -473,7 +472,7 @@ void TrajectoryMonitor::monitor(System &system)
 		SpacePtr space;
 
         const PropertyName &space_property = mol_properties["space"];
-        
+
         if (space_property.hasSource())
         {
 	        if (system.containsProperty(space_property.source()))
@@ -481,7 +480,7 @@ void TrajectoryMonitor::monitor(System &system)
 		}
         else if (space_property.hasValue())
         	space = space_property.value();
-            
+
         //now save this data to a temporary file
         traj_frames.append( ::writeToDisk(frame_data, temp_dir) );
 		space_frames.append(space);

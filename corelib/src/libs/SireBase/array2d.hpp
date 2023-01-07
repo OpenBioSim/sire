@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,17 +55,17 @@ namespace SireBase
 
 /** This provides a 2D matrix of objects of type T. All objects
     are packed together in memory in row-major order, e.g.
-    
+
         j0   j1   j2
     i0   0    1    2
     i1   3    4    5
     i2   6    7    8
-    
+
     Arranged in memory as;
-    
+
     [ (i0,j0), (i0,j1), (i0,j2), (i1,j0),  ... etc. ]
     [    0   ,    1   ,    2   ,   3    ,  ... etc. ]
-    
+
     @author Christopher Woods
 */
 template<class T>
@@ -80,7 +79,7 @@ public:
     Array2D();
 
     Array2D(int nrows, int ncolumns);
-    
+
     Array2D(int nrows, int ncolumns, const T &default_value);
 
     Array2D(const Array2D<T> &other);
@@ -167,7 +166,7 @@ SIRE_OUTOFLINE_TEMPLATE
 Array2D<T>::~Array2D()
 {}
 
-/** Copy assignment operator - fast as this class is implicitly 
+/** Copy assignment operator - fast as this class is implicitly
     shared */
 template<class T>
 SIRE_INLINE_TEMPLATE
@@ -195,8 +194,8 @@ bool Array2D<T>::operator!=(const Array2D<T> &other) const
 }
 
 /** Return a reference to the object in the ith row and
-    the jth column 
-    
+    the jth column
+
     \throw SireError::invalid_index
 */
 template<class T>
@@ -208,8 +207,8 @@ const T& Array2D<T>::operator()(int i, int j) const
 }
 
 /** Return a reference to the object in the ith row and
-    the jth column 
-    
+    the jth column
+
     \throw SireError::invalid_index
 */
 template<class T>
@@ -221,8 +220,8 @@ T& Array2D<T>::operator()(int i, int j)
 }
 
 /** Return a reference to the object in the ith row and
-    the jth column 
-    
+    the jth column
+
     \throw SireError::invalid_index
 */
 template<class T>
@@ -249,7 +248,7 @@ const T& Array2D<T>::get(int i, int j) const
 /** Redimension this Array2D to nrows by ncolumns objects.
     This will keep any existing data in the top left of the
     matrix if the matrix gets bigger, or it will crop any
-    extra data to the bottom right if the matrix gets smaller 
+    extra data to the bottom right if the matrix gets smaller
 */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
@@ -257,7 +256,7 @@ void Array2D<T>::redimension(int nrows, int ncolumns)
 {
     if (nrows < 0)
         nrows = 0;
-        
+
     if (ncolumns < 0)
         ncolumns = 0;
 
@@ -265,14 +264,14 @@ void Array2D<T>::redimension(int nrows, int ncolumns)
         return;
 
     Array2D<T> new_array(nrows, ncolumns);
-    
+
     //copy the data...
     nrows = qMin(nrows, this->nRows());
     ncolumns = qMin(ncolumns, this->nColumns());
-    
+
     T *data = new_array.data();
     const T *old_data = array.constData();
-    
+
     for (int i=0; i<nrows; ++i)
     {
         for (int j=0; j<ncolumns; ++j)
@@ -280,7 +279,7 @@ void Array2D<T>::redimension(int nrows, int ncolumns)
             data[this->map(i,j)] = old_data[this->map(i,j)];
         }
     }
-    
+
     this->operator=(new_array);
 }
 
@@ -342,12 +341,12 @@ Array2D<T> Array2D<T>::transpose() const
 {
     if (array.isEmpty())
         return Array2D<T>();
-    
+
     Array2D trans( this->nColumns(), this->nRows() );
-    
+
     T *new_array = trans.data();
     const T *old_array = array.constData();
-    
+
     for (int i=0; i < this->nRows(); ++i)
     {
         for (int j=0; j < this->nColumns(); ++j)
@@ -355,7 +354,7 @@ Array2D<T> Array2D<T>::transpose() const
             new_array[trans.map(j,i)] = old_array[this->map(i,j)];
         }
     }
-    
+
     return trans;
 }
 
@@ -366,7 +365,7 @@ void Array2D<T>::setAll(const T &value)
 {
     T *array_data = this->array.data();
     int count = this->array.count();
-    
+
     for (int i=0; i<count; ++i)
         array_data[i] = value;
 }
@@ -378,7 +377,7 @@ QString Array2D<T>::toString() const
 {
     if (this->nRows() == 0)
         return "( )";
-        
+
     else if (this->nRows() == 1)
     {
         QStringList row;
@@ -386,21 +385,21 @@ QString Array2D<T>::toString() const
         {
             row.append( Sire::toString( this->operator()(0,j) ) );
         }
-        
+
         return QString("( %1 )").arg( row.join(", ") );
     }
 
     QStringList rows;
-    
+
     for (int i=0; i<this->nRows(); ++i)
     {
         QStringList row;
-        
+
         for (int j=0; j<this->nColumns(); ++j)
         {
             row.append( Sire::toString( this->operator()(i,j) ) );
         }
-        
+
         if (i == 0)
             rows.append( QString("/ %1 \\").arg( row.join(", ") ) );
         else if (i == this->nRows() - 1)
@@ -408,7 +407,7 @@ QString Array2D<T>::toString() const
         else
             rows.append( QString("| %1 |").arg( row.join(", ") ) );
     }
-    
+
     return rows.join("\n");
 }
 
@@ -424,10 +423,10 @@ SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator<<(QDataStream &ds, const SireBase::Array2D<T> &array)
 {
     SireStream::SharedDataStream sds(ds);
-    
+
     sds << static_cast<const SireBase::Array2DBase&>(array)
         << array.array;
-        
+
     return ds;
 }
 
@@ -437,10 +436,10 @@ SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator>>(QDataStream &ds, SireBase::Array2D<T> &array)
 {
     SireStream::SharedDataStream sds(ds);
-    
+
     sds >> static_cast<SireBase::Array2DBase&>(array)
         >> array.array;
-        
+
     return ds;
 }
 

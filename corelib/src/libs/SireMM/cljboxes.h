@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -86,35 +85,35 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJBoxIndex&);
 public:
     CLJBoxIndex();
     CLJBoxIndex(qint16 i, qint16 j, qint16 k, qint16 atom_idx=-1);
-    
+
     CLJBoxIndex(const CLJBoxIndex &other);
-    
+
     ~CLJBoxIndex();
-    
+
     CLJBoxIndex& operator=(const CLJBoxIndex &other);
-    
+
     bool operator==(const CLJBoxIndex &other) const;
     bool operator!=(const CLJBoxIndex &other) const;
 
     bool operator<(const CLJBoxIndex &other) const;
     bool operator<=(const CLJBoxIndex &other) const;
-    
+
     bool operator>(const CLJBoxIndex &other) const;
     bool operator>=(const CLJBoxIndex &other) const;
-    
+
     static const char* typeName();
     const char* what() const;
-    
+
     QString toString() const;
-    
+
     qint16 i() const;
     qint16 j() const;
     qint16 k() const;
-    
+
     qint16 index() const;
-    
+
     bool isNull() const;
-    
+
     SireVol::AABox box(Length box_length) const;
 
     CLJBoxIndex boxOnly() const;
@@ -142,7 +141,7 @@ private:
     union
     {
         quint64 val;
-        
+
         struct
         {
             qint16 ii;
@@ -157,7 +156,7 @@ private:
 /** This class represents a single box of CLJ atoms. The CLJ calculation
     works by dividing space into a series of boxes and working out which
     boxes are close enough to be within cutoff distance
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJBox : public SireBase::RefCountData
@@ -171,31 +170,31 @@ public:
     CLJBox(const CLJBoxIndex &index, Length box_length);
     CLJBox(const CLJBoxIndex &index, Length box_length, const CLJAtoms &atoms);
     CLJBox(const CLJBox &other);
-    
+
     ~CLJBox();
-    
+
     CLJBox& operator=(const CLJBox &other);
-    
+
     bool operator==(const CLJBox &other) const;
     bool operator!=(const CLJBox &other) const;
-    
+
     CLJBox operator+(const CLJBox &other) const;
-    
+
     static const char* typeName();
     const char* what() const;
-    
+
     CLJAtom operator[](int i) const;
-    
+
     CLJAtom at(int i) const;
     CLJAtom getitem(int i) const;
 
     int count() const;
     int size() const;
-    
+
     bool isEmpty() const;
-    
+
     QString toString() const;
-    
+
     const CLJAtoms& atoms() const;
 
     int nAtoms() const;
@@ -213,7 +212,7 @@ public:
 
     const CLJBoxIndex& index() const;
     float boxLength() const;
-    
+
     SireVol::AABox dimensions() const;
 
 private:
@@ -221,13 +220,13 @@ private:
 
     /** The actual atoms in the box */
     CLJAtoms atms;
-    
+
     /** The indicies of gaps (dummy atoms) in the box */
     QStack<int> gaps;
-    
+
     /** The CLJBoxIndex of this box (gives its location in space) */
     CLJBoxIndex box_index;
-    
+
     /** The length of each box side */
     float box_length;
 };
@@ -243,20 +242,20 @@ public:
     CLJBoxPtr();
     CLJBoxPtr(CLJBox *box);
     CLJBoxPtr(const CLJBox &box);
-    
+
     CLJBoxPtr(const CLJBoxPtr &other);
-    
+
     ~CLJBoxPtr();
-    
+
     CLJBoxPtr& operator=(const CLJBoxPtr &other);
     CLJBoxPtr& operator=(const CLJBox &box);
-    
+
     bool operator==(const CLJBoxPtr &other) const;
     bool operator!=(const CLJBoxPtr &other) const;
-    
+
     const CLJBox& read() const;
     CLJBox& write();
-    
+
 private:
     /** Implicitly shared pointer to the box */
     SireBase::SharedDataPointer<CLJBox> d;
@@ -264,7 +263,7 @@ private:
 
 /** This simple class holds the minimum distance between the two
     CLJBoxes at specified indicies
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJBoxDistance
@@ -276,28 +275,28 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJBoxDistance&);
 public:
     CLJBoxDistance();
     CLJBoxDistance(quint32 box0, quint32 box1, float distance);
-    
+
     CLJBoxDistance(const CLJBoxDistance &other);
-    
+
     ~CLJBoxDistance();
-    
+
     CLJBoxDistance& operator=(const CLJBoxDistance &other);
-    
+
     bool operator==(const CLJBoxDistance &other) const;
     bool operator!=(const CLJBoxDistance &other) const;
-    
+
     bool operator<(const CLJBoxDistance &other) const;
     bool operator>(const CLJBoxDistance &other) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     QString toString() const;
-    
+
     quint32 box0() const;
     quint32 box1() const;
-    
+
     float distance() const;
 
 private:
@@ -313,7 +312,7 @@ private:
     have their interactions evaluated, and there is a natural parallelism
     between calculating interaction energies between pairs of boxes rather
     than pairs of atoms)
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJBoxes
@@ -328,24 +327,24 @@ public:
 
     CLJBoxes();
     CLJBoxes(Length box_size);
-    
+
     CLJBoxes(const CLJAtoms &atoms);
     CLJBoxes(const CLJAtoms &atoms0, const CLJAtoms &atoms1);
-    
+
     CLJBoxes(const CLJAtoms &atoms, Length box_size);
     CLJBoxes(const CLJAtoms &atoms0, const CLJAtoms &atoms1, Length box_size);
-    
+
     CLJBoxes(const CLJBoxes &other);
-    
+
     ~CLJBoxes();
-    
+
     CLJBoxes& operator=(const CLJBoxes &other);
-    
+
     bool operator==(const CLJBoxes &other) const;
     bool operator!=(const CLJBoxes &other) const;
 
     CLJAtom operator[](const CLJBoxIndex &idx) const;
-    
+
     CLJAtom at(const CLJBoxIndex &idx) const;
     CLJAtom getitem(const CLJBoxIndex &idx) const;
 
@@ -354,79 +353,79 @@ public:
     static const char* typeName();
 
     const char* what() const;
-    
+
     const CLJBoxPtr* constData() const;
     const CLJBoxPtr* data() const;
-    
+
     QString toString() const;
-    
+
     bool isEmpty() const;
-    
+
     QVector<CLJBoxIndex> occupiedBoxIndicies() const;
-    
+
     const Container& occupiedBoxes() const;
-    
+
     const_iterator begin() const;
     const_iterator constBegin() const;
-    
+
     const_iterator find(const CLJBoxIndex &box) const;
     const_iterator constFind(const CLJBoxIndex &box) const;
-    
+
     const_iterator end() const;
     const_iterator constEnd() const;
 
     CLJBox boxAt(int i) const;
     SireVol::AABox boxDimensionsAt(int i) const;
-    
+
     CLJBox boxAt(const CLJBoxIndex &index) const;
     SireVol::AABox boxDimensionsAt(const CLJBoxIndex &index) const;
-    
+
     CLJBox boxAt(const Vector &coords) const;
     SireVol::AABox boxDimensionsAt(const Vector &coords) const;
-    
+
     QVector<CLJBox> boxes() const;
     QVector<SireVol::AABox> boxDimensions() const;
-    
+
     float getDistance(const CLJBoxIndex &box0, const CLJBoxIndex &box1) const;
     float getDistance(const Space &space, const CLJBoxIndex &box0, const CLJBoxIndex &box1) const;
     float getDistance(const Space &space, const CLJBoxIndex &box0, const CLJBoxIndex &box1,
                       quint32 nx, quint32 ny, quint32 nz) const;
-    
+
     static QVector<CLJBoxDistance> getDistances(const Space &space, const CLJBoxes &boxes);
     static QVector<CLJBoxDistance> getDistances(const Space &space,
                                                 const CLJBoxes &boxes, Length cutoff);
-    
+
     static QVector<CLJBoxDistance> getDistances(const Space &space,
                                                 const CLJBoxes &boxes0, const CLJBoxes &boxes1);
     static QVector<CLJBoxDistance> getDistances(const Space &space,
                                                 const CLJBoxes &boxes0, const CLJBoxes &boxes1,
                                                 Length cutoff);
-    
+
     static QVector<CLJBoxDistance> getDistances(const Space &space,
                                                 const CLJAtoms &atoms0, const CLJBoxes &boxes1);
     static QVector<CLJBoxDistance> getDistances(const Space &space,
                                                 const CLJAtoms &atoms0, const CLJBoxes &boxes1,
                                                 Length cutoff);
-    
+
     QVector<CLJBoxIndex> add(const CLJAtoms &atoms);
 
     void remove(const QVector<CLJBoxIndex> &atoms);
-    
+
     CLJAtoms get(const QVector<CLJBoxIndex> &atoms) const;
-    
+
     CLJAtoms take(const QVector<CLJBoxIndex> &atoms);
-    
+
     CLJAtoms atoms() const;
     CLJAtoms atoms(const QVector<CLJBoxIndex> &atoms) const;
-    
+
     Length length() const;
-    
+
     int nAtoms() const;
-    
+
     int nOccupiedBoxes() const;
-    
+
     CLJBoxes squeeze() const;
-    
+
 private:
     void constructFrom(const CLJAtoms &atoms0, const CLJAtoms &atoms1);
 
@@ -437,7 +436,7 @@ private:
 
     /** All of the boxes that contain atoms */
     Container bxs;
-    
+
     /** The size of the box */
     float box_length;
 };
@@ -449,7 +448,7 @@ SIRE_ALWAYS_INLINE const CLJBox& CLJBoxPtr::read() const
 {
     return *d;
 }
-    
+
 /** Return the i value of the index */
 SIRE_ALWAYS_INLINE qint16 CLJBoxIndex::i() const
 {
@@ -552,7 +551,7 @@ SIRE_ALWAYS_INLINE const CLJBoxes::Container& CLJBoxes::occupiedBoxes() const
 {
     return bxs;
 }
-  
+
 /** Return a raw pointer to the array of boxes */
 SIRE_ALWAYS_INLINE const CLJBoxPtr* CLJBoxes::constData() const
 {
@@ -581,7 +580,7 @@ SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::constBegin() const
 SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::find(const CLJBoxIndex &box) const
 {
     ContainerMap::const_iterator it = box_to_idx.constFind(box);
-    
+
     if (it != box_to_idx.constEnd())
     {
         CLJBoxes::const_iterator it2 = bxs.constBegin();
@@ -589,7 +588,7 @@ SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::find(const CLJBoxIndex &bo
         {
             it2++;
         }
-        
+
         return it2;
     }
     else

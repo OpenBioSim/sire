@@ -224,11 +224,11 @@ def conda_install(dependencies, install_bss_reqs=False):
 
     if not _is_conda_prepped:
         if install_bss_reqs:
-            cmd = "%s config --prepend channels michellab/label/dev" % conda_exe
-            print("Activating michellab channel channel using: '%s'" % cmd)
+            cmd = "%s config --prepend channels openbiosim/label/dev" % conda_exe
+            print("Activating openbiosim channel channel using: '%s'" % cmd)
             status = subprocess.run(cmd.split())
             if status.returncode != 0:
-                print("Failed to add michellab channel!")
+                print("Failed to add openbiosim channel!")
                 sys.exit(-1)
 
         print("\nSetting channel priorities to favour conda-forge")

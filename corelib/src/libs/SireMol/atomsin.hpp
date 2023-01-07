@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,7 +55,7 @@ class MoleculeInfoData;
 /** This helper class is used to provide the '.atoms()' functionality
     of the group ID classes. This allows the class to an atom, or
     range of atoms by index from the group that has been identified.
-    
+
     @author Christopher Woods
 */
 template<class GROUP>
@@ -68,35 +67,35 @@ friend SIREMOL_EXPORT QDataStream& ::operator>><>(QDataStream&, AtomsIn<GROUP>&)
 
 public:
     AtomsIn();
-    
+
     AtomsIn(const GROUP &id);
     AtomsIn(const GROUP &id, qint32 i);
     AtomsIn(const GROUP &id, qint32 i, qint32 j);
-    
+
     AtomsIn(const AtomsIn<GROUP> &other);
-    
+
     ~AtomsIn();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     AtomsIn<GROUP>* clone() const;
-    
+
     AtomsIn<GROUP>& operator=(const AtomsIn<GROUP> &other);
 
     bool operator==(const AtomsIn<GROUP> &other) const;
     bool operator==(const SireID::ID &other) const;
-    
+
     bool operator!=(const AtomsIn<GROUP> &other) const;
     bool operator!=(const SireID::ID &other) const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-    
+
     QString toString() const;
-    
+
     QList<AtomIdx> map(const MolInfo &molinfo) const;
 
 private:
@@ -141,7 +140,7 @@ AtomsIn<GROUP>::AtomsIn(const GROUP &id, qint32 i, qint32 j)
 template<class GROUP>
 SIRE_OUTOFLINE_TEMPLATE
 AtomsIn<GROUP>::AtomsIn(const AtomsIn<GROUP> &other)
-            : AtomID(other), groupid(other.groupid), 
+            : AtomID(other), groupid(other.groupid),
               strt(other.strt), end(other.end)
 {}
 
@@ -197,7 +196,7 @@ bool AtomsIn<GROUP>::operator==(const SireID::ID &other) const
 {
     return SireID::ID::compare< AtomsIn<GROUP> >(*this, other);
 }
-    
+
 template<class GROUP>
 SIRE_OUTOFLINE_TEMPLATE
 const char* AtomsIn<GROUP>::typeName()
@@ -247,7 +246,7 @@ uint AtomsIn<GROUP>::hash() const
     return groupid.hash() + strt + end;
 }
 
-/** Map this ID to the indicies of matching atoms 
+/** Map this ID to the indicies of matching atoms
 
     \throw ???::missing_ID
     \throw SireError::invalid_index
@@ -258,24 +257,24 @@ QList<AtomIdx> AtomsIn<GROUP>::map(const MolInfo &molinfo) const
 {
     //first get the list of the indicies of the matching groups
     QList<typename GROUP::Index> idxs = groupid.map(molinfo);
-    
+
     //now get a list of the indicies of all of the atoms in these groups
     QList<AtomIdx> atomidxs;
-    
+
     foreach (typename GROUP::Index idx, idxs)
     {
         atomidxs += molinfo.getAtomsIn(idx);
     }
-    
+
     //now map _i and _j to the indicies...
     int nats = atomidxs.count();
-    
+
     int sane_strt = strt.map(nats);
     int sane_end = end.map(nats);
-    
+
     if (sane_strt > sane_end)
         qSwap(sane_strt, sane_end);
-    
+
     //now extract only the desired atom indicies
     if (sane_end - sane_strt == nats)
     {
@@ -284,12 +283,12 @@ QList<AtomIdx> AtomsIn<GROUP>::map(const MolInfo &molinfo) const
     else
     {
         QList<AtomIdx> specified_atomidxs;
-    
+
         for (int i=sane_strt; i<=sane_end; ++i)
         {
             specified_atomidxs.append( atomidxs[i] );
         }
-    
+
         return specified_atomidxs;
     }
 }

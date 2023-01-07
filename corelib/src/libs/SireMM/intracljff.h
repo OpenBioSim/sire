@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -68,7 +67,7 @@ SIRE_EXPOSE_ALIAS(
 SIRE_EXPOSE_ALIAS(
   SireFF::Intra2B3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >,
   SireMM::IntraCLJFF )
-  
+
 SIRE_EXPOSE_ALIAS(
   SireFF::Intra2B2GFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >,
   SireMM::IntraGroupCLJFFBase )
@@ -76,7 +75,7 @@ SIRE_EXPOSE_ALIAS(
 SIRE_EXPOSE_ALIAS(
   SireFF::Intra2B2G3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >,
   SireMM::IntraGroupCLJFF )
-  
+
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 
 template class SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>;

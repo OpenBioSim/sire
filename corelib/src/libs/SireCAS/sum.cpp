@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -71,10 +70,10 @@ QDataStream &operator>>(QDataStream &ds, Sum &sum)
     if (v == 1)
     {
         QList<Expression> posparts, negparts;
-        
+
         sum.posparts.clear();
         sum.negparts.clear();
-        
+
         ds >> posparts >> negparts >> sum.strtval
            >> static_cast<ExBase&>(sum);
 
@@ -305,7 +304,7 @@ void Sum::add(const Expression &ex)
                 posparts = sum.posparts;
                 negparts = sum.negparts;
                 strtval += sum.strtval;
-                
+
                 return;
             }
             else if (ex.factor() == -1)
@@ -313,11 +312,11 @@ void Sum::add(const Expression &ex)
                 posparts = sum.negparts;
                 negparts = sum.posparts;
                 strtval -= sum.strtval;
-                
+
                 return;
             }
         }
-            
+
         for (QHash<ExpressionBase,Expression>::const_iterator it = sum.posparts.begin();
              it != sum.posparts.end();
              ++it)
@@ -714,7 +713,7 @@ bool Sum::isCompound() const
 QList<Factor> Sum::expand(const Symbol &symbol) const
 {
     QHash<Expression, Expression> factors;
-    
+
     for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.constBegin();
          it != posparts.constEnd();
          ++it)
@@ -738,21 +737,21 @@ QList<Factor> Sum::expand(const Symbol &symbol) const
             factors[fac.power()] -= fac.factor();
         }
     }
-    
+
     QList<Factor> ret;
-    
+
     for (QHash<Expression,Expression>::const_iterator it = factors.constBegin();
          it != factors.constEnd();
          ++it)
     {
         ret.append( Factor( symbol, it.value(), it.key() ) );
     }
-    
+
     if (strtval != 0)
     {
         ret.append( Factor(symbol, strtval, 0) );
     }
-    
+
     return ret;
 }
 

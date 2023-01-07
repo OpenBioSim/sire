@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -101,10 +100,10 @@ using SireCAS::Symbol;
 using SireBase::PropertyMap;
 using SireBase::PropertyName;
 
-/** This is the base class of the workspaces which are used to 
-    hold the intermediate values used when integrating the 
+/** This is the base class of the workspaces which are used to
+    hold the intermediate values used when integrating the
     dynamics of a system
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT IntegratorWorkspaceJM : public SireBase::Property
@@ -117,11 +116,11 @@ public:
     IntegratorWorkspaceJM(const PropertyMap &map = PropertyMap());
     IntegratorWorkspaceJM(const MoleculeGroup &molgroup,
                         const PropertyMap &map = PropertyMap());
-    
+
     IntegratorWorkspaceJM(const IntegratorWorkspaceJM &other);
-    
+
     virtual ~IntegratorWorkspaceJM();
-    
+
     static const char* typeName()
     {
         return "SireBase::IntegratorWorkspaceJM";
@@ -132,7 +131,7 @@ public:
     const MoleculeGroup& moleculeGroup() const;
 
     const ForceTable& forceTable() const;
-   
+
     const EnergyTable& energyTable() const;
 
     virtual bool setSystem(const System &system);
@@ -140,9 +139,9 @@ public:
     const System& system() const;
 
     const PropertyMap& propertyMap() const;
-    
+
     virtual void setPropertyMap(const PropertyMap &map);
-    
+
     virtual void setGenerator(const RanGenerator &generator);
 
     virtual void setCoordinatesProperty(const PropertyName &source);
@@ -165,7 +164,7 @@ public:
     //    virtual bool calculateEnergies(const Symbol &nrg_component);
 
     bool forcesNeedCalculating(const Symbol &nrg_component) const;
-    
+
     void mustNowRecalculateFromScratch();
 
     void collectStatistics();
@@ -175,14 +174,14 @@ public:
     virtual SireUnits::Dimension::MolarEnergy kineticEnergy() const=0;
     virtual SireUnits::Dimension::MolarEnergy
                             kineticEnergy(MolNum molnum) const=0;
-    virtual SireUnits::Dimension::MolarEnergy 
+    virtual SireUnits::Dimension::MolarEnergy
                             kineticEnergy(const MoleculeView &molview) const=0;
-    
+
     static const NullIntegratorWorkspaceJM& null();
 
 protected:
     IntegratorWorkspaceJM& operator=(const IntegratorWorkspaceJM &other);
-    
+
     bool operator==(const IntegratorWorkspaceJM &other) const;
     bool operator!=(const IntegratorWorkspaceJM &other) const;
 
@@ -227,11 +226,11 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullIntegratorWor
 public:
     NullIntegratorWorkspaceJM();
     NullIntegratorWorkspaceJM(const NullIntegratorWorkspaceJM &other);
-    
+
     ~NullIntegratorWorkspaceJM();
-    
+
     NullIntegratorWorkspaceJM& operator=(const NullIntegratorWorkspaceJM &other);
-    
+
     bool operator==(const NullIntegratorWorkspaceJM &other) const;
     bool operator!=(const NullIntegratorWorkspaceJM &other) const;
 
@@ -245,8 +244,8 @@ public:
 };
 
 /** This class provides a workspace for integrators that make use
-    of atomic forces and velocities 
-    
+    of atomic forces and velocities
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT AtomicVelocityWorkspaceJM
@@ -260,18 +259,18 @@ public:
     AtomicVelocityWorkspaceJM(const PropertyMap &map = PropertyMap());
     AtomicVelocityWorkspaceJM(const MoleculeGroup &molgroup,
                             const PropertyMap &map = PropertyMap());
-    
+
     AtomicVelocityWorkspaceJM(const AtomicVelocityWorkspaceJM &other);
-    
+
     ~AtomicVelocityWorkspaceJM();
 
     AtomicVelocityWorkspaceJM& operator=(const AtomicVelocityWorkspaceJM &other);
-    
+
     bool operator==(const AtomicVelocityWorkspaceJM &other) const;
     bool operator!=(const AtomicVelocityWorkspaceJM &other) const;
-    
+
     static const char* typeName();
-    
+
     SireUnits::Dimension::MolarEnergy kineticEnergy() const;
     SireUnits::Dimension::MolarEnergy kineticEnergy(MolNum molnum) const;
     SireUnits::Dimension::MolarEnergy kineticEnergy(const MoleculeView &molview) const;
@@ -279,35 +278,35 @@ public:
     int nMolecules() const;
 
     int nAtoms(int i) const;
-    
+
     Vector* coordsArray(int i);
     Vector* momentaArray(int i);
 
     const Vector* coordsArray(int i) const;
     const Vector* forceArray(int i) const;
-    const Vector* energyArray(int i) const;   
+    const Vector* energyArray(int i) const;
 
     const Vector* momentaArray(int i) const;
 
     const double* massArray(int i) const;
-    
+
     const Vector* constCoordsArray(int i) const;
     const Vector* constForceArray(int i) const;
     const Vector* constEnergyArray(int i) const;
     const Vector* constMomentaArray(int i) const;
-    
+
     const double* constMassArray(int i) const;
-    
+
     bool calculateForces(const Symbol &nrg_component);
-    
+
 
     bool setSystem(const System &system);
 
     void regenerateVelocities(const VelocityGenerator &generator);
-    
+
     void commitCoordinates();
     void commitVelocities();
-    
+
     void commitCoordinatesAndVelocities();
 
 protected:
@@ -318,21 +317,21 @@ private:
 
     /** All of the atomic coordinates */
     QVector< QVector<Vector> > atom_coords;
-    
+
     /** All of the atomic momenta */
     QVector< QVector<Vector> > atom_momenta;
-    
-    /** All of the forces for molecules that are not 
-        fully selected */
-    QVector< QVector<Vector> > atom_forces; 
 
-    /** All of the energies for molecules that are not 
+    /** All of the forces for molecules that are not
+        fully selected */
+    QVector< QVector<Vector> > atom_forces;
+
+    /** All of the energies for molecules that are not
 	fully selected */
-    QVector< QVector<Vector> > atom_energies; 
+    QVector< QVector<Vector> > atom_energies;
 
     /** All of the atom masses */
     QVector< QVector<double> > atom_masses;
-    
+
     /** The generator used to get the initial velocities */
     VelGenPtr vel_generator;
 };

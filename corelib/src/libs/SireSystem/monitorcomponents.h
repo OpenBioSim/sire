@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,14 +56,14 @@ using SireMaths::Average;
 using SireCAS::Symbol;
 using SireCAS::Symbols;
 
-/** This is a monitor that can be used to monitor large numbers 
+/** This is a monitor that can be used to monitor large numbers
     of components of the system (of even all components). This
     monitor is similar to MonitorComponent, but is better suited
-    to situations where you want to monitor everything (or 
+    to situations where you want to monitor everything (or
     everything except for a small number of components), where
     it would be messy to specify lots of individual MonitorComponent
     monitors
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT MonitorComponents
@@ -76,25 +75,25 @@ friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, MonitorComponen
 
 public:
     MonitorComponents();
-    
+
     MonitorComponents(const Accumulator &accumulator);
-    
-    MonitorComponents(const Symbol &component, 
+
+    MonitorComponents(const Symbol &component,
                       const Accumulator &accumulator = Average());
-    MonitorComponents(const Symbols &components, 
+    MonitorComponents(const Symbols &components,
                       const Accumulator &accumulator = Average());
-    
+
     MonitorComponents(const MonitorComponent &component_monitor);
-    
+
     MonitorComponents(const MonitorComponents &other);
-    
+
     ~MonitorComponents();
-    
+
     MonitorComponents& operator=(const MonitorComponents &other);
-    
+
     bool operator==(const MonitorComponents &other) const;
     bool operator!=(const MonitorComponents &other) const;
-    
+
     static const char* typeName();
 
     void excludeComponent(const Symbol &component);
@@ -102,31 +101,31 @@ public:
 
     const Symbols& includeComponents() const;
     const Symbols& excludeComponents() const;
-    
+
     Symbols monitoredComponents() const;
-    
+
     const Accumulator& accumulatorTemplate() const;
-    
+
     const Accumulator& accumulator(const Symbol &component) const;
-    
+
     void clearStatistics();
-    
+
     void monitor(System &system);
-    
+
 private:
     /** The symbols representing components to be monitored.
         If this is empty, then all components will be monitored */
     Symbols include_symbols;
-    
+
     /** The symbols representing components that must
         not be monitored */
     Symbols exclude_symbols;
-    
+
     /** The accumulator used to accumulate components - this
         is a template */
     SireMaths::AccumulatorPtr accumulator_template;
-    
-    /** The actual accumulators associated with each component 
+
+    /** The actual accumulators associated with each component
         that has been monitored */
     QHash<Symbol,SireMaths::AccumulatorPtr> accumes;
 };

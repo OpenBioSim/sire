@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,7 +56,7 @@ using SireCAS::Symbol;
 
 /** This is the base class of all Moves objects. These are objects
     that contain a collection of moves that are applied to a system
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT Moves : public SireBase::Property
@@ -68,39 +67,39 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Moves&);
 
 public:
     Moves();
-    
+
     Moves(const Moves &other);
-    
+
     virtual ~Moves();
-    
+
     virtual Moves* clone() const=0;
-    
+
     static const char* typeName()
     {
         return "SireMove::Moves";
     }
-    
+
     const Move& operator[](int i) const;
-    
+
     int count() const;
     int size() const;
     int nMoveTypes() const;
-    
+
     virtual int nMoves() const;
-    
+
     virtual QString toString() const=0;
-    
+
     virtual const Symbol& energyComponent() const=0;
     virtual const PropertyName& spaceProperty() const=0;
-    
+
     virtual void setEnergyComponent(const Symbol &nrg_component);
     virtual void setSpaceProperty(const PropertyName &space_property);
-    
+
     SireUnits::Dimension::MolarEnergy energy(System &system) const;
     SireUnits::Dimension::Volume volume(const System &system) const;
-    
+
     Ensemble ensemble() const;
-    
+
     bool isConstantEnergy() const;
     bool isConstantTemperature() const;
     bool isConstantVolume() const;
@@ -109,7 +108,7 @@ public:
     bool isConstantFugacity() const;
 
     bool isConstantLambda(const Symbol &lam) const;
-    
+
     SireUnits::Dimension::Temperature temperature() const;
     SireUnits::Dimension::Pressure pressure() const;
     SireUnits::Dimension::Pressure fugacity() const;
@@ -122,19 +121,19 @@ public:
     void setChemicalPotential(
                     const SireUnits::Dimension::MolarEnergy &chemical_potential);
     void setFugacity(const SireUnits::Dimension::Pressure &fugacity);
-        
-    virtual System move(const System &system, 
+
+    virtual System move(const System &system,
                         int nmoves=1, bool record_stats=false)=0;
-    
+
     virtual void clearStatistics()=0;
 
     void setCheckRunningTotal(bool on);
     void setAcceptableDelta(SireUnits::Dimension::MolarEnergy delta);
-    
+
     SireUnits::Dimension::MolarEnergy acceptableDelta() const;
-    
+
     bool checkingRunningTotal() const;
-    
+
     virtual QList<MovePtr> moves() const=0;
 
     SireUnits::Dimension::Time timing(int i) const;
@@ -149,7 +148,7 @@ protected:
     void postCheck(System &system) const;
 
     Moves& operator=(const Moves &other);
-    
+
     bool operator==(const Moves &other) const;
 
     /** Set the temperature for all moves that have a constant temperature
@@ -157,13 +156,13 @@ protected:
         between them sample at constant temperature */
     virtual void _pvt_setTemperature(
                             const SireUnits::Dimension::Temperature &temperature)=0;
-                            
+
     /** Set the pressure for all moves that have a constant pressure
         to 'pressure'. It has already been checked that these moves
         between them sample at constant pressure */
     virtual void _pvt_setPressure(
                             const SireUnits::Dimension::Pressure &pressure)=0;
-                            
+
     /** Set the fugacity for all moves that have a constant fugacity
         to 'fugacity'. It has already been checked that these moves
         between them sample at constant fugacity */
@@ -181,10 +180,10 @@ private:
 
 /** This is a Moves class that just applies the same move over and
     over again
-    
+
     @author Christopher Woods
 */
-class SIREMOVE_EXPORT SameMoves 
+class SIREMOVE_EXPORT SameMoves
          : public SireBase::ConcreteProperty<SameMoves,Moves>
 {
 
@@ -194,36 +193,36 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SameMoves&);
 public:
     SameMoves();
     SameMoves(const Move &move);
-    
+
     SameMoves(const SameMoves &other);
-    
+
     ~SameMoves();
-    
+
     static const char* typeName();
-    
+
     SameMoves& operator=(const SameMoves &other);
-    
+
     bool operator==(const SameMoves &other) const;
     bool operator!=(const SameMoves &other) const;
-    
+
     SameMoves* clone() const;
-    
+
     QString toString() const;
-    
+
     using Moves::move;
-    
+
     void setEnergyComponent(const Symbol &component);
-    void setSpaceProperty(const PropertyName &spaceproperty); 
+    void setSpaceProperty(const PropertyName &spaceproperty);
 
     const Symbol& energyComponent() const;
     const PropertyName& spaceProperty() const;
-    
+
     void setGenerator(const RanGenerator &rangenerator);
-    
+
     System move(const System &system, int nmoves=1, bool record_stats=false);
-    
+
     void clearStatistics();
-    
+
     QList<MovePtr> moves() const;
 
     QList<SireUnits::Dimension::Time> timing() const;
@@ -238,7 +237,7 @@ private:
 
     /** The move that will be repeatedly applied */
     MovePtr mv;
-    
+
     /** The average time to run each move, in nanoseconds */
     SireMaths::Average avgtime;
 };

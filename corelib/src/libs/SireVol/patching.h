@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,7 +60,7 @@ typedef SireBase::PropPtr<Patching> PatchingPtr;
     CoordGroups - this allows inter-CoordGroup calculations to
     be accelerated as cutoff tests can be applied to the patches
     to eliminate tests of the contained CoordGroups.
-    
+
     @author Christopher Woods
 */
 class SIREVOL_EXPORT Patching : public SireBase::Property
@@ -73,17 +72,17 @@ friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, Patching&);
 public:
     Patching();
     Patching(const Patching &other);
-    
+
     virtual ~Patching();
-    
+
     static const char* typeName();
-    
+
     virtual Patching* clone() const=0;
-    
+
     const Space& space() const;
-    
+
     virtual int nPatches() const=0;
-    
+
     virtual int patchIndex(const Vector &point) const=0;
 
     virtual QPair<int,Vector> patchIndexAndCenter(const Vector &point) const=0;
@@ -97,9 +96,9 @@ public:
 
 protected:
     Patching(const Space &space);
-    
+
     Patching& operator=(const Patching &other);
-    
+
     bool operator==(const Patching &other) const;
     bool operator!=(const Patching &other) const;
 
@@ -109,7 +108,7 @@ private:
 };
 
 /** Null patching */
-class SIREVOL_EXPORT NullPatching 
+class SIREVOL_EXPORT NullPatching
         : public SireBase::ConcreteProperty<NullPatching,Patching>
 {
 
@@ -120,28 +119,28 @@ public:
     NullPatching();
     NullPatching(const Space &space);
     NullPatching(const NullPatching &other);
-    
+
     ~NullPatching();
-    
+
     static const char* typeName();
-    
+
     NullPatching& operator=(const NullPatching &other);
-    
+
     bool operator==(const NullPatching &other) const;
     bool operator!=(const NullPatching &other) const;
-    
+
     int nPatches() const;
-    
+
     int patchIndex(const Vector &point) const;
 
     QPair<int,Vector> patchIndexAndCenter(const Vector &point) const;
-    
+
     PatchingPtr repatch(const Space &new_space) const;
 };
 
-/** This is a simple patching scheme that divides space up into a 
+/** This is a simple patching scheme that divides space up into a
     series of cuboidal boxes (3D grid!)
-    
+
     @author Christopher Woods
 */
 class SIREVOL_EXPORT BoxPatching
@@ -155,19 +154,19 @@ public:
     BoxPatching();
     BoxPatching(const Space &space);
     BoxPatching(const Space &space, const Vector &center);
-    
+
     BoxPatching(const Space &space, SireUnits::Dimension::Length patch_size);
     BoxPatching(const Space &space, SireUnits::Dimension::Length patch_size,
                 const Vector &center);
-    
+
     BoxPatching(const BoxPatching &other);
-    
+
     ~BoxPatching();
-    
+
     static const char* typeName();
-    
+
     BoxPatching& operator=(const BoxPatching &other);
-    
+
     bool operator==(const BoxPatching &other) const;
     bool operator!=(const BoxPatching &other) const;
 
@@ -175,20 +174,20 @@ public:
 
     Vector center() const;
     SireUnits::Dimension::Length patchSize() const;
-    
+
     Vector patchDimension() const;
-    
+
     AABox patchBox(int i) const;
     AABox patchBox(const Vector &point) const;
-    
+
     int nPatches() const;
-    
+
     int patchIndex(const Vector &point) const;
 
     QPair<int,Vector> patchIndexAndCenter(const Vector &point) const;
-    
+
     PatchingPtr repatch(const Space &new_space) const;
-    
+
 private:
     int getIndex(const Vector &point) const;
 
@@ -197,11 +196,11 @@ private:
 
     /** The origin of the 3D grid */
     Vector orgn;
-    
+
     /** The inverse unit vector of the 3D grid (the grid is centered
         around (0,0,0) */
     Vector inv_gridvec;
-        
+
     /** The number of patches in the X, Y and Z dimensions */
     int nx, ny, nz;
 };

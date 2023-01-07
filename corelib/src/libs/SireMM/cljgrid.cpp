@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,42 +53,42 @@ static const RegisterMetaType<CLJGrid> r_grid(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const CLJGrid &grid)
 {
     writeHeader(ds, r_grid, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << grid.grid_info << grid.grid_buffer
         << grid.cljfunc << grid.grid_pots << grid.cljboxes
         << grid.close_atoms << grid.use_grid
         << grid.parallel_calc << grid.repro_sum;
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, CLJGrid &grid)
 {
     VersionID v = readHeader(ds, r_grid);
-    
+
     if (v <= 2)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> grid.grid_info >> grid.grid_buffer
             >> grid.cljfunc >> grid.grid_pots >> grid.cljboxes
             >> grid.close_atoms >> grid.use_grid;
-        
+
         grid.checkIfGridSupported();
-        
+
         if (grid.grid_info.nPoints() != grid.grid_pots.count())
         {
             qDebug() << "Discrepancy in grid dimensions!";
             qDebug() << grid.grid_info.nPoints() << grid.grid_pots.count();
-            
+
             GridInfo old = grid.grid_info;
             grid.grid_info = GridInfo();
             grid.clearGrid();
             grid.setGrid(old);
         }
-        
+
         if (v == 2)
         {
             sds >> grid.parallel_calc >> grid.repro_sum;
@@ -102,7 +101,7 @@ QDataStream &operator>>(QDataStream &ds, CLJGrid &grid)
     }
     else
         throw version_error(v, "1,2", r_grid, CODELOC);
-    
+
     return ds;
 }
 
@@ -164,7 +163,7 @@ CLJGrid::CLJGrid(const CLJFunction &func)
     checkIfGridSupported();
 }
 
-/** Construct, specifying the function to use to calculate the energy and 
+/** Construct, specifying the function to use to calculate the energy and
     the grid dimensions */
 CLJGrid::CLJGrid(const CLJFunction &func, const AABox &grid_dimensions)
         : grid_buffer(global_grid_buffer), cljfunc(func), use_grid(true),
@@ -222,7 +221,7 @@ CLJGrid& CLJGrid::operator=(const CLJGrid &other)
         parallel_calc = other.parallel_calc;
         repro_sum = other.repro_sum;
     }
-    
+
     return *this;
 }
 
@@ -375,8 +374,8 @@ void CLJGrid::disableReproducibleCalculation()
     setUseReproducibleCalculation(false);
 }
 
-/** Switch on or off use of an energy summing algorithm that guarantees the 
-    same energy regardless of whether a single core or multicore calculation 
+/** Switch on or off use of an energy summing algorithm that guarantees the
+    same energy regardless of whether a single core or multicore calculation
     is being performed */
 void CLJGrid::setUseReproducibleCalculation(bool on)
 {
@@ -441,7 +440,7 @@ void CLJGrid::setGridDimensions(const AABox &dimensions)
 void CLJGrid::setGridDimensions(const CLJAtoms &atoms, Length spacing, Length buffer)
 {
     grid_buffer = buffer.value();
-    
+
     if (atoms.x().isEmpty())
     {
         //build an empty grid
@@ -451,26 +450,26 @@ void CLJGrid::setGridDimensions(const CLJAtoms &atoms, Length spacing, Length bu
     {
         MultiFloat min_x( std::numeric_limits<float>::max() );
         MultiFloat max_x( -std::numeric_limits<float>::max() );
-        
+
         MultiFloat min_y( min_x );
         MultiFloat max_y( max_x );
-        
+
         MultiFloat min_z( min_x );
         MultiFloat max_z( max_x );
-        
+
         const int nats = atoms.x().count();
-        
+
         const MultiFloat *x = atoms.x().constData();
         const MultiFloat *y = atoms.y().constData();
         const MultiFloat *z = atoms.z().constData();
         const MultiInt *id = atoms.ID().constData();
-        
+
         const qint32 dummy_id = CLJAtoms::idOfDummy()[0];
-        
+
         for (int i=0; i<nats; ++i)
         {
             bool has_dummy = false;
-        
+
             for (int j=0; j<MultiInt::count(); ++j)
             {
                 if (id[i][j] == dummy_id)
@@ -479,7 +478,7 @@ void CLJGrid::setGridDimensions(const CLJAtoms &atoms, Length spacing, Length bu
                     break;
                 }
             }
-        
+
             if (has_dummy)
             {
                 for (int j=0; j<MultiInt::count(); ++j)
@@ -489,7 +488,7 @@ void CLJGrid::setGridDimensions(const CLJAtoms &atoms, Length spacing, Length bu
                         min_x.set(j, qMin(min_x[j], x[i][j]));
                         min_y.set(j, qMin(min_y[j], y[i][j]));
                         min_z.set(j, qMin(min_z[j], z[i][j]));
-                        
+
                         max_x.set(j, qMax(max_x[j], x[i][j]));
                         max_y.set(j, qMax(max_y[j], y[i][j]));
                         max_z.set(j, qMax(max_z[j], z[i][j]));
@@ -508,13 +507,13 @@ void CLJGrid::setGridDimensions(const CLJAtoms &atoms, Length spacing, Length bu
                 max_z = max_z.max(z[i]);
             }
         }
-        
+
         Vector mincoords( min_x.min(), min_y.min(), min_z.min() );
         Vector maxcoords( max_x.max(), max_y.max(), max_z.max() );
-        
+
         mincoords -= Vector(grid_buffer);
         maxcoords += Vector(grid_buffer);
-        
+
         setGrid( GridInfo( AABox::from(mincoords,maxcoords), spacing ) );
     }
 }
@@ -551,7 +550,7 @@ GridInfo CLJGrid::grid() const
 void CLJGrid::setUseGrid(bool on)
 {
     use_grid = on;
-    
+
     if (not use_grid)
         clearGrid();
 }
@@ -587,7 +586,7 @@ bool CLJGrid::functionSupportsGrid() const
 
 static QMutex const_update_mutex;
 
-/** Function called to calculate the potential grid. Note that this is called by 
+/** Function called to calculate the potential grid. Note that this is called by
     a const function, so we must be thread-safe when we update the potential */
 void CLJGrid::calculateGrid()
 {
@@ -608,16 +607,16 @@ void CLJGrid::calculateGrid()
              ++it)
         {
             const CLJAtoms &atoms = it->read().atoms();
-            
+
             for (int i=0; i<atoms.count(); ++i)
             {
                 CLJAtom atom = atoms[i];
-                
+
                 if (atom.ID() != 0)
                 {
                     double mindist = space.minimumDistance(atom.coordinates(),
                                                            grid_info.dimensions());
-                    
+
                     if (mindist < lj_cutoff)
                     {
                         near_atms.append(atom);
@@ -629,11 +628,11 @@ void CLJGrid::calculateGrid()
                 }
             }
         }
-        
+
         near_atoms = CLJAtoms(near_atms);
         far_atoms = CLJAtoms(far_atms);
     }
-    
+
     //now, go through any far atoms and add their potentials to the grid
     //if (parallel_calc)
     //{
@@ -644,12 +643,12 @@ void CLJGrid::calculateGrid()
     //{
             QVector<float> pot = cljfunc.read().calculate(far_atoms, grid_info);
     //}
-    
+
     //update the object - note that because this is called from a const function
     //we have to be doubly sure that this has not been called twice from two
     //different threads.
     QMutexLocker lkr(&const_update_mutex);
-    
+
     if (grid_pots.isEmpty())
     {
         grid_pots = pot;
@@ -663,10 +662,10 @@ void CLJGrid::total(const CLJBoxes &atoms, double &cnrg, double &ljnrg) const
 {
     cnrg = 0;
     ljnrg = 0;
-    
+
     if (cljboxes.isEmpty() or atoms.isEmpty())
         return;
-    
+
     if (use_grid and cljfunc_supports_grid)
     {
         //there is a big enough difference between the coulomb and LJ cutoffs that
@@ -679,7 +678,7 @@ void CLJGrid::total(const CLJBoxes &atoms, double &cnrg, double &ljnrg) const
 
         //calculate the energy between the atoms and the close atoms
         tuple<double,double> nrgs;
-        
+
         if (parallel_calc)
         {
             CLJCalculator cljcalc(repro_sum);
@@ -699,7 +698,7 @@ void CLJGrid::total(const CLJBoxes &atoms, double &cnrg, double &ljnrg) const
         QVector<MultiFloat> grid_weights;
 
         MultiDouble grid_nrg(0);
-    
+
         const qint32 dummy_id = CLJAtoms::idOfDummy()[0];
         const qint32 grid_id = idOfFixedAtom();
 
@@ -711,13 +710,13 @@ void CLJGrid::total(const CLJBoxes &atoms, double &cnrg, double &ljnrg) const
              ++it)
         {
             const CLJAtoms &atms = it->read().atoms();
-        
+
             const MultiFloat *x = atms.x().constData();
             const MultiFloat *y = atms.y().constData();
             const MultiFloat *z = atms.z().constData();
             const MultiFloat *q = atms.q().constData();
             const MultiInt *id = atms.ID().constData();
-            
+
             const int nats = atms.x().count();
 
             for (int i=0; i<nats; ++i)
@@ -731,13 +730,13 @@ void CLJGrid::total(const CLJBoxes &atoms, double &cnrg, double &ljnrg) const
                     // NEED TO CHECK IF ANY OF THE POINTS ARE DUMMIES. IF THEY ARE
                     // THEN WE NEED TO CALCULATE THE SUM MANUALLY
                     int ndummies = 0;
-                    
+
                     for (int j=0; j<MultiFloat::count(); ++j)
                     {
                         if (id[i][j] == dummy_id)
                         {
                             ndummies += 1;
-                            
+
                             //put the dummy into the first grid box
                             for (int k=0; k<8; ++k)
                             {
@@ -746,21 +745,21 @@ void CLJGrid::total(const CLJBoxes &atoms, double &cnrg, double &ljnrg) const
                             }
                         }
                     }
-                    
+
                     if (ndummies + n_in_grid != MultiFloat::count())
                     {
                         //at least one of the grid points is outside of the grid
                         qDebug() << "POINT" << x[i].toString() << y[i].toString()
                                             << z[i].toString() << "LIES OUTSIDE OF"
                                  << "THE GRID?" << grid_info.toString();
-                        
+
                         all_within_grid = false;
                         break;
                     }
                 }
 
                 MultiFloat phi(0);
-                
+
                 for (int j=0; j<8; ++j)
                 {
                     phi += MultiFloat(gridpot_array, grid_corners.constData()[j]) *
@@ -776,34 +775,34 @@ void CLJGrid::total(const CLJBoxes &atoms, double &cnrg, double &ljnrg) const
                 grid_nrg += (q[i] * phi).logicalAndNot( id[i].compareEqual(m_dummy_id) )
                                         .logicalAndNot( id[i].compareEqual(m_grid_id) );
             }
-            
+
             if (not all_within_grid)
                 break;
         }
-        
+
         if (all_within_grid)
         {
             cnrg = nrgs.get<0>() + grid_nrg.sum();
             ljnrg = nrgs.get<1>();
-            
+
             return;
         }
     }
-    
+
     //either the grid is not used or something went wrong with the grid calculation
     //Do not use a grid
     if (parallel_calc)
     {
         CLJCalculator cljcalc(repro_sum);
         tuple<double,double> nrgs = cljcalc.calculate(cljfunc.read(), atoms, cljboxes);
-        
+
         cnrg = nrgs.get<0>();
         ljnrg = nrgs.get<1>();
     }
     else
     {
         tuple<double,double> nrgs = cljfunc.read().calculate(atoms, cljboxes);
-        
+
         cnrg = nrgs.get<0>();
         ljnrg = nrgs.get<1>();
     }
@@ -835,7 +834,7 @@ boost::tuple<double,double> CLJGrid::calculate(const CLJBoxes &atoms) const
     return boost::tuple<double,double>(cnrg,ljnrg);
 }
 
-/** Return the coulomb energy of the passed atoms interacting with 
+/** Return the coulomb energy of the passed atoms interacting with
     the fixed atoms on this grid */
 double CLJGrid::coulomb(const CLJAtoms &atoms) const
 {
@@ -844,7 +843,7 @@ double CLJGrid::coulomb(const CLJAtoms &atoms) const
     return cnrg;
 }
 
-/** Return the coulomb energy of the passed atoms interacting with 
+/** Return the coulomb energy of the passed atoms interacting with
     the fixed atoms on this grid */
 double CLJGrid::coulomb(const CLJBoxes &atoms) const
 {

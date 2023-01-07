@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -41,7 +40,7 @@ using namespace SireStream;
 
 static const RegisterMetaType<FFComponent> r_ffcomp( MAGIC_ONLY,
                                                      "SireFF::FFComponent" );
-                                                     
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const FFComponent &ffcomp)
 {
@@ -55,14 +54,14 @@ QDataStream &operator<<(QDataStream &ds, const FFComponent &ffcomp)
 QDataStream &operator>>(QDataStream &ds, FFComponent &ffcomp)
 {
     VersionID v = readHeader(ds, r_ffcomp);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Symbol&>(ffcomp);
     }
     else
         throw version_error(v, "1", r_ffcomp, CODELOC);
-        
+
     return ds;
 }
 
@@ -73,7 +72,7 @@ FFComponent::FFComponent(const FFName &ffname, const QString &name)
             : Symbol( FFComponent::symbolName(ffname, name) )
 {}
 
-/** Construct from a passed symbol 
+/** Construct from a passed symbol
 
     \throw SireError::incompatible_error
 */
@@ -81,7 +80,7 @@ FFComponent::FFComponent(const Symbol &symbol, const QString &name)
             : Symbol(symbol)
 {
     QRegExp local_copy = name_regexp;
-    
+
     if (local_copy.indexIn( Symbol::toString() ) == -1)
         //we could not interpret the symbol
         throw SireError::incompatible_error( QObject::tr(
@@ -90,7 +89,7 @@ FFComponent::FFComponent(const Symbol &symbol, const QString &name)
             "where <FF_NAME> is the name of the forcefield that contains this "
             "component and <COMPONENT_NAME> is the name of the component itself.")
                 .arg(symbol.toString()), CODELOC );
-                                
+
     if (name != local_copy.cap(2))
         throw SireError::incompatible_error( QObject::tr(
             "The symbol \"%1\" is for the wrong component! (%2). "
@@ -112,13 +111,13 @@ FFComponent::~FFComponent()
 FFName FFComponent::forceFieldName() const
 {
     QRegExp local_copy = name_regexp;
-    
+
     if (local_copy.indexIn( Symbol::toString() ) == -1)
         //we could not interpret the name!
         throw SireError::program_bug( QObject::tr(
             "Could not interpret this symbol (%1) as an FFComponent.")
                 .arg(Symbol::toString()), CODELOC );
-                
+
     return FFName( local_copy.cap(1) );
 }
 
@@ -127,7 +126,7 @@ FFName FFComponent::forceFieldName() const
 QString FFComponent::componentName() const
 {
     QRegExp local_copy = name_regexp;
-    
+
     if (name_regexp.indexIn( Symbol::toString() ) == -1)
         //we could not interpret the name!
         throw SireError::program_bug( QObject::tr(
@@ -169,14 +168,14 @@ QDataStream &operator<<(QDataStream &ds, const SingleComponent &single)
 QDataStream &operator>>(QDataStream &ds, SingleComponent &single)
 {
     VersionID v = readHeader(ds, r_single);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(single);
     }
     else
         throw version_error(v, "1", r_single, CODELOC);
-        
+
     return ds;
 }
 
@@ -198,12 +197,12 @@ SingleComponent::SingleComponent(const SireCAS::Symbol &symbol)
                  : FFComponent(symbol, QLatin1String("total"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 SingleComponent::SingleComponent(const SingleComponent &other)
                  : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 SingleComponent::~SingleComponent()
 {}
 

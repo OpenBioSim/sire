@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,7 +47,7 @@ QDataStream &operator<<(QDataStream &ds, const VariantProperty &varprop)
     writeHeader(ds, r_varprop, 1)
         << static_cast<const Property&>(varprop)
         << static_cast<const QVariant&>(varprop);
-    
+
     return ds;
 }
 
@@ -56,7 +55,7 @@ QDataStream &operator<<(QDataStream &ds, const VariantProperty &varprop)
 QDataStream &operator>>(QDataStream &ds, VariantProperty &varprop)
 {
     VersionID v = readHeader(ds, r_varprop);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(varprop)
@@ -64,7 +63,7 @@ QDataStream &operator>>(QDataStream &ds, VariantProperty &varprop)
     }
     else
         throw version_error(v, "1", r_varprop, CODELOC);
-    
+
     return ds;
 }
 
@@ -80,7 +79,7 @@ VariantProperty::VariantProperty(const QVariant &value)
 
 /** Construct from a 'Property' - the property must be able to
  be cast to a VariantProperty
- 
+
  \throw SireError::invalid_cast
  */
 VariantProperty::VariantProperty(const Property &property)
@@ -92,7 +91,7 @@ VariantProperty::VariantProperty(const Property &property)
 VariantProperty::VariantProperty(const QString &value)
                 : ConcreteProperty<VariantProperty,Property>(), QVariant(value)
 {}
-    
+
 VariantProperty::VariantProperty(double value)
                 : ConcreteProperty<VariantProperty,Property>(), QVariant(value)
 {}
@@ -126,7 +125,7 @@ VariantProperty& VariantProperty::operator=(const VariantProperty &other)
 {
     QVariant::operator=(other);
     Property::operator=(other);
-    
+
     return *this;
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -77,15 +76,15 @@ public:
     typedef typename Parameters::Array Array;
 
     AtomicParameters();
-    
+
     AtomicParameters(const Parameters &parameters);
-    
+
     AtomicParameters(const AtomicParameters<PARAM> &other);
-    
+
     ~AtomicParameters();
-    
+
     AtomicParameters<PARAM>& operator=(const AtomicParameters<PARAM> &other);
-    
+
     bool operator==(const AtomicParameters<PARAM> &other) const;
     bool operator!=(const AtomicParameters<PARAM> &other) const;
 
@@ -96,12 +95,12 @@ public:
     void setAtomicParameters(const AtomicParameters<PARAM> &other);
 
     bool changedAllGroups(const AtomicParameters<PARAM> &params) const;
-    
+
     QSet<quint32> getChangedGroups(const AtomicParameters<PARAM> &params) const;
-    
+
     void addChangedGroups(const AtomicParameters<PARAM> &params,
                           QSet<quint32> &changed_groups) const;
-    
+
     AtomicParameters<PARAM> applyMask(const QSet<quint32> &idxs) const;
 
 protected:
@@ -146,7 +145,7 @@ AtomicParameters<PARAM>& AtomicParameters<PARAM>::operator=(
                                         const AtomicParameters<PARAM> &other)
 {
     params = other.params;
-    
+
     return *this;
 }
 
@@ -177,7 +176,7 @@ int AtomicParameters<PARAM>::nGroups() const
 /** Return the actual atomic parameters */
 template<class PARAM>
 SIRE_INLINE_TEMPLATE
-const typename AtomicParameters<PARAM>::Parameters& 
+const typename AtomicParameters<PARAM>::Parameters&
 AtomicParameters<PARAM>::atomicParameters() const
 {
     return params;
@@ -199,16 +198,16 @@ bool AtomicParameters<PARAM>::changedAllGroups(
                                   const AtomicParameters<PARAM> &other) const
 {
     int ngroups = qMin(params.count(), other.params.count());
-        
+
     const typename Parameters::Array *this_array = params.constData();
     const typename Parameters::Array *other_array = other.params.constData();
-                                                    
+
     for (int i=0; i<ngroups; ++i)
     {
         if (this_array[i] == other_array[i])
             return false;
     }
-        
+
     return true;
 }
 
@@ -221,22 +220,22 @@ void AtomicParameters<PARAM>::addChangedGroups(
 {
     //now add on the groups that have changed parameters
     quint32 ngroups = this->nGroups();
-    
+
     if (SireFF::detail::selectedAll(changed_groups, ngroups))
         return;
-        
+
     quint32 nsharedgroups = qMin(ngroups, quint32(other.params.count()));
-   
+
     const typename Parameters::Array *this_array = params.constData();
     const typename Parameters::Array *other_array = other.params.constData();
-    
+
     for (quint32 i=0; i<nsharedgroups; ++i)
     {
-        if (not changed_groups.contains(i) 
+        if (not changed_groups.contains(i)
             and (this_array[i] != other_array[i]))
         {
             changed_groups.insert(i);
-            
+
             if (SireFF::detail::selectedAll(changed_groups, ngroups))
                 return;
         }
@@ -251,14 +250,14 @@ QSet<quint32> AtomicParameters<PARAM>::getChangedGroups(
 {
     QSet<quint32> changed_groups;
     changed_groups.reserve(params.count());
-    
+
     this->addChangedGroups(other, changed_groups);
-    
+
     return changed_groups;
 }
 
-/** Mask this set of parameters so that only the CutGroups at indicies 
-    'idxs' are present */ 
+/** Mask this set of parameters so that only the CutGroups at indicies
+    'idxs' are present */
 template<class PARAM>
 SIRE_OUTOFLINE_TEMPLATE
 AtomicParameters<PARAM> AtomicParameters<PARAM>::applyMask(
@@ -267,32 +266,32 @@ AtomicParameters<PARAM> AtomicParameters<PARAM>::applyMask(
     if (SireFF::detail::selectedAll(idxs, params.count()))
         //all of the groups have been selected
         return *this;
-    
+
     else if (idxs.isEmpty())
         //definitely nothing has been selected
         return AtomicParameters<PARAM>();
-    
+
     else if (idxs.count() == 1)
         //return the single array
         return AtomicParameters<PARAM>( params[ *(idxs.constBegin()) ] );
-    
+
     //otherwise, some are marked - apply the mask
     //mask by the indicies
     quint32 ngroups = params.count();
-    
+
     QVector< typename Parameters::Array > group_params;
     group_params.reserve(idxs.count());
-    
+
     const typename Parameters::Array *this_array = params.constData();
-    
+
     for (quint32 i=0; i<ngroups; ++i)
     {
         if (idxs.contains(i))
             group_params.append( this_array[i] );
     }
-    
+
     Parameters new_params(group_params);
-    
+
     return AtomicParameters<PARAM>(new_params);
 }
 

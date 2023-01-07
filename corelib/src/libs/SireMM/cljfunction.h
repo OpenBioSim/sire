@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -99,7 +98,7 @@ typedef SireBase::PropPtr<CLJFunction> CLJFunctionPtr;
 
 /** Base class of all CLJFunctions. These are function classes that
     calculate the coulomb and LJ energy of the passed CLJAtoms groups
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJFunction : public SireBase::Property
@@ -117,34 +116,34 @@ public:
 
     CLJFunction();
     CLJFunction(COMBINING_RULES combining_rules);
-    
+
     CLJFunction(const Space &space);
     CLJFunction(const Space &space, COMBINING_RULES combining_rules);
-        
+
     CLJFunction(const CLJFunction &other);
-    
+
     virtual ~CLJFunction();
- 
+
     static const char* typeName();
-    
+
     virtual Properties properties() const;
-    
+
     virtual CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
-    
+
     virtual PropertyPtr property(const QString &name) const;
-    
+
     virtual bool containsProperty(const QString &name) const;
-    
+
     void operator()(const CLJAtoms &atoms,
                     double &cnrg, double &ljnrg) const;
-    
+
     void operator()(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                     double &cnrg, double &ljnrg,
                     float min_distance=0) const;
 
     void operator()(const CLJBoxes &atoms,
                     double &cnrg, double &ljnrg) const;
-    
+
     void operator()(const CLJBoxes &atoms0, const CLJBoxes &atoms1,
                     double &cnrg, double &ljnrg) const;
 
@@ -183,28 +182,28 @@ public:
 
     void total(const CLJAtoms &atoms,
                double &cnrg, double &ljnrg) const;
-    
+
     void total(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                double &cnrg, double &ljnrg,
                float min_distance=0) const;
-    
+
     void total(const CLJBoxes &atoms,
                double &cnrg, double &ljnrg) const;
-    
+
     void total(const CLJBoxes &atoms0, const CLJBoxes &atoms1,
                double &cnrg, double &ljnrg) const;
-    
+
     double coulomb(const CLJAtoms &atoms) const;
     double coulomb(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                    float min_distance=0) const;
-    
+
     double coulomb(const CLJBoxes &atoms) const;
     double coulomb(const CLJBoxes &atoms0, const CLJBoxes &atoms1) const;
-    
+
     double lj(const CLJAtoms &atoms) const;
     double lj(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
               float min_distance=0) const;
-    
+
     double lj(const CLJBoxes &atoms) const;
     double lj(const CLJBoxes &atoms0, const CLJBoxes &atoms1) const;
 
@@ -215,7 +214,7 @@ public:
     virtual bool supportsGridCalculation() const;
 
     virtual bool hasCutoff() const;
-    
+
     virtual Length coulombCutoff() const;
     virtual Length ljCutoff() const;
 
@@ -229,28 +228,28 @@ public:
     virtual const Space& space() const;
 
     virtual void setSpace(const Space &space);
-    
+
     virtual bool isSoftened() const;
 
     void setArithmeticCombiningRules(bool on);
     void setGeometricCombiningRules(bool on);
-    
+
     COMBINING_RULES combiningRules() const;
     void setCombiningRules(COMBINING_RULES rules);
-    
+
     bool usingArithmeticCombiningRules() const;
     bool usingGeometricCombiningRules() const;
 
 protected:
     CLJFunction& operator=(const CLJFunction &other);
-    
+
     bool operator==(const CLJFunction &other) const;
 
     friend class ::SireMM::detail::CLJGridCalculator;
 
     virtual void calcVacGrid(const CLJAtoms &atoms, const GridInfo &gridinfo,
                              const int start, const int end, float *potential) const;
-    
+
     virtual void calcBoxGrid(const CLJAtoms &atoms, const GridInfo &gridinfo,
                              const Vector &box_dimensions,
                              const int start, const int end, float *potential) const;
@@ -274,11 +273,11 @@ protected:
     virtual double calcVacCoulombEnergyGeo(const CLJAtoms &atoms) const;
     virtual double calcVacCoulombEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                                            float min_distance) const;
-    
+
     virtual double calcVacLJEnergyAri(const CLJAtoms &atoms) const;
     virtual double calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                                       float min_distance) const;
-    
+
     virtual double calcVacLJEnergyGeo(const CLJAtoms &atoms) const;
     virtual double calcVacLJEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                                       float min_distance) const;
@@ -308,13 +307,13 @@ protected:
                                            const CLJAtoms &atoms1,
                                            const Vector &box,
                                            float min_distance) const;
-    
+
     virtual double calcBoxLJEnergyAri(const CLJAtoms &atoms, const Vector &box) const;
     virtual double calcBoxLJEnergyAri(const CLJAtoms &atoms0,
                                       const CLJAtoms &atoms1,
                                       const Vector &box,
                                       float min_distance) const;
-    
+
     virtual double calcBoxLJEnergyGeo(const CLJAtoms &atoms, const Vector &box) const;
     virtual double calcBoxLJEnergyGeo(const CLJAtoms &atoms0,
                                       const CLJAtoms &atoms1,
@@ -333,7 +332,7 @@ private:
 
     /** whether or not to use arithmetic combining rules */
     bool use_arithmetic;
-    
+
     /** Whether or not to use a periodic box */
     bool use_box;
 };
@@ -346,16 +345,16 @@ public:
     NullCLJFunction();
     NullCLJFunction(const NullCLJFunction &other);
     ~NullCLJFunction();
-    
+
     NullCLJFunction& operator=(const NullCLJFunction &other);
-    
+
     bool operator==(const NullCLJFunction &other) const;
     bool operator!=(const NullCLJFunction &other) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
 private:
     void calcVacEnergyAri(const CLJAtoms &atoms,
                           double &cnrg, double &ljnrg) const;
@@ -398,22 +397,22 @@ public:
     CLJCutoffFunction();
     CLJCutoffFunction(Length cutoff);
     CLJCutoffFunction(Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJCutoffFunction(const Space &space, Length cutoff);
     CLJCutoffFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJCutoffFunction(Length cutoff, COMBINING_RULES combining_rules);
     CLJCutoffFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
-    
+
     CLJCutoffFunction(const Space &space, COMBINING_RULES combining_rules);
     CLJCutoffFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
     CLJCutoffFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
                       COMBINING_RULES combining_rules);
-    
+
     CLJCutoffFunction(const CLJCutoffFunction &other);
-    
+
     ~CLJCutoffFunction();
-    
+
     static const char* typeName();
 
     QString toString() const;
@@ -424,27 +423,27 @@ public:
     bool containsProperty(const QString &name) const;
 
     bool hasCutoff() const;
-    
+
     Length coulombCutoff() const;
     Length ljCutoff() const;
-    
+
     void setCutoff(Length distance);
     void setCutoff(Length coulomb_cutoff, Length lj_cutoff);
-    
+
     void setCoulombCutoff(Length distance);
     void setLJCutoff(Length distance);
-    
+
 private:
     void pvt_setCutoff( Length coulomb, Length lj );
-    
+
 protected:
     CLJCutoffFunction& operator=(const CLJCutoffFunction &other);
-    
+
     bool operator==(const CLJCutoffFunction &other) const;
-    
+
     /** The coulomb cutoff */
     float coul_cutoff;
-    
+
     /** The LJ cutoff */
     float lj_cutoff;
 };
@@ -463,22 +462,22 @@ public:
     CLJIntraFunction();
     CLJIntraFunction(Length cutoff);
     CLJIntraFunction(Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJIntraFunction(const Space &space, Length cutoff);
     CLJIntraFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJIntraFunction(Length cutoff, COMBINING_RULES combining_rules);
     CLJIntraFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
-    
+
     CLJIntraFunction(const Space &space, COMBINING_RULES combining_rules);
     CLJIntraFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
     CLJIntraFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
                      COMBINING_RULES combining_rules);
 
     CLJIntraFunction(const CLJIntraFunction &other);
-    
+
     ~CLJIntraFunction();
-    
+
     static const char* typeName();
 
     Properties properties() const;
@@ -490,10 +489,10 @@ public:
     void setConnectivity(const MoleculeView &molecule, const PropertyMap &map = PropertyMap());
 
     const Connectivity& connectivity() const;
-    
+
 protected:
     CLJIntraFunction& operator=(const CLJIntraFunction &other);
-    
+
     bool operator==(const CLJIntraFunction &other) const;
 
     bool isNotBonded(qint32 id0, const MultiInt &id1) const;
@@ -529,20 +528,20 @@ public:
     CLJSoftFunction();
     CLJSoftFunction(Length cutoff);
     CLJSoftFunction(Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJSoftFunction(const Space &space, Length cutoff);
     CLJSoftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJSoftFunction(Length cutoff, COMBINING_RULES combining_rules);
     CLJSoftFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
-    
+
     CLJSoftFunction(const Space &space, COMBINING_RULES combining_rules);
     CLJSoftFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
     CLJSoftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
                     COMBINING_RULES combining_rules);
-    
+
     CLJSoftFunction(const CLJSoftFunction &other);
-    
+
     ~CLJSoftFunction();
 
     static const char* typeName();
@@ -553,21 +552,21 @@ public:
     CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
     PropertyPtr property(const QString &name) const;
     bool containsProperty(const QString &name) const;
-    
+
     float alpha() const;
     float shiftDelta() const;
     float coulombPower() const;
-    
+
     void setAlpha(float alpha);
     void setShiftDelta(float shift);
     void setCoulombPower(float power);
-    
+
 private:
     void pvt_set(float alpha, float shift, float power);
-    
+
 protected:
     CLJSoftFunction& operator=(const CLJSoftFunction &other);
-    
+
     bool operator==(const CLJSoftFunction &other) const;
 
     float oneMinusAlphaToN() const;
@@ -575,10 +574,10 @@ protected:
 
     /** The value of alpha to use */
     float alpha_value;
-    
+
     /** The value of shift-delta */
     float shift_delta;
-    
+
     /** The value of coulomb power */
     float coulomb_power;
 };
@@ -598,20 +597,20 @@ public:
     CLJSoftIntraFunction();
     CLJSoftIntraFunction(Length cutoff);
     CLJSoftIntraFunction(Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJSoftIntraFunction(const Space &space, Length cutoff);
     CLJSoftIntraFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJSoftIntraFunction(Length cutoff, COMBINING_RULES combining_rules);
     CLJSoftIntraFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
-    
+
     CLJSoftIntraFunction(const Space &space, COMBINING_RULES combining_rules);
     CLJSoftIntraFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
     CLJSoftIntraFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
                          COMBINING_RULES combining_rules);
-    
+
     CLJSoftIntraFunction(const CLJSoftIntraFunction &other);
-    
+
     ~CLJSoftIntraFunction();
 
     static const char* typeName();
@@ -622,21 +621,21 @@ public:
     CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
     PropertyPtr property(const QString &name) const;
     bool containsProperty(const QString &name) const;
-    
+
     float alpha() const;
     float shiftDelta() const;
     float coulombPower() const;
-    
+
     void setAlpha(float alpha);
     void setShiftDelta(float shift);
     void setCoulombPower(float power);
-    
+
 private:
     void pvt_set(float alpha, float shift, float power);
-    
+
 protected:
     CLJSoftIntraFunction& operator=(const CLJSoftIntraFunction &other);
-    
+
     bool operator==(const CLJSoftIntraFunction &other) const;
 
     float oneMinusAlphaToN() const;
@@ -644,10 +643,10 @@ protected:
 
     /** The value of alpha to use */
     float alpha_value;
-    
+
     /** The value of shift-delta */
     float shift_delta;
-    
+
     /** The value of coulomb power */
     float coulomb_power;
 };
@@ -685,14 +684,14 @@ SIRE_ALWAYS_INLINE bool CLJIntraFunction::isNotBonded(const MultiInt &id0, const
     for (int i=0; i<MultiInt::count(); ++i)
     {
         const bool *row = bond_matrix.constData()[id0[i]].constData();
-        
+
         for (int j=0; j<MultiInt::count(); ++j)
         {
             if (row[id1[j]])
                 return false;
         }
     }
-    
+
     return true;
 }
 

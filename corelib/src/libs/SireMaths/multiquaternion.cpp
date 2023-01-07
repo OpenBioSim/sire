@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -195,14 +194,14 @@ QVector<MultiVector> MultiQuaternion::rotate(const QVector<MultiVector> &points)
     const MultiDouble swz = sc[2]*sc[3];
 
     QVector<MultiVector> ret(points);
- 
+
     const MultiDouble two(2.0);
     const MultiDouble half(0.5);
-   
+
     for (int i=0; i<ret.count(); ++i)
     {
         MultiVector &p = ret[i];
-        
+
         p = MultiVector( two*( ( half - sy2 - sz2 )*p.x()
                             + ( sxy - swz )      *p.y()
                             + ( sxz + swy )      *p.z()),
@@ -229,7 +228,7 @@ MultiQuaternion MultiQuaternion::identity()
 QString MultiQuaternion::toString() const
 {
     QStringList parts;
-    
+
     for (int i=0; i<MultiDouble::count(); ++i)
     {
         parts.append( this->at(i).toString() );
@@ -284,7 +283,7 @@ const MultiDouble& MultiQuaternion::w() const
 
 bool MultiQuaternion::operator==(const MultiQuaternion &p1) const
 {
-    return p1.sc[0] == sc[0] and p1.sc[1] == sc[1] and p1.sc[2] == sc[2] 
+    return p1.sc[0] == sc[0] and p1.sc[1] == sc[1] and p1.sc[2] == sc[2]
                   and p1.sc[3] == sc[3];
 }
 
@@ -370,7 +369,7 @@ MultiDouble MultiQuaternion::dot(const MultiQuaternion &q) const
 {
     MultiDouble d(sc[0]);
     d *= q.sc[0];
-    
+
     d.multiplyAdd( sc[1], q.sc[1] );
     d.multiplyAdd( sc[2], q.sc[2] );
     d.multiplyAdd( sc[3], q.sc[3] );
@@ -462,7 +461,7 @@ Quaternion MultiQuaternion::operator[](int i) const
     ret.sc[1] = sc[1].get(i);
     ret.sc[2] = sc[2].get(i);
     ret.sc[3] = sc[3].get(i);
-    
+
     return ret;
 }
 

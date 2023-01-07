@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,7 +45,7 @@ namespace SireMaths
 
 /** This is a vector that stores the vector as a unit vector giving
     the direction, and a scalar giving the magnitude
-    
+
     @author Christopher Woods
 */
 class SIREMATHS_EXPORT DistVector : private Vector
@@ -57,11 +56,11 @@ friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, DistVector&);
 
 public:
     DistVector();
-    
+
     DistVector(const Vector &vec);
-    
+
     DistVector(const DistVector &other);
-    
+
     ~DistVector();
 
     static const char* typeName();
@@ -86,7 +85,7 @@ public:
 
     bool operator==(const DistVector &p1) const;
     bool operator!=(const DistVector &p1) const;
-    
+
     const DistVector& operator+=(const DistVector &other);
     const DistVector& operator-=(const DistVector &other);
     const DistVector& operator*=(const double &other);
@@ -101,13 +100,13 @@ public:
     double at(unsigned int i) const;
 
     double manhattanLength() const;
-    
+
     double length() const;
     double length2() const;
-    
+
     double invLength() const;
     double invLength2() const;
-    
+
     DistVector normalise() const;
 
     bool isZero() const;
@@ -134,19 +133,19 @@ public:
 
     static double distance2(const DistVector &v1, const DistVector &v2);
     static double distance(const DistVector &v1, const DistVector &v2);
-    
+
     static double invDistance(const DistVector &v1, const DistVector &v2);
     static double invDistance2(const DistVector &v1, const DistVector &v2);
 
     static Angle angle(const DistVector &v0, const DistVector &v1);
-    static Angle angle(const DistVector &v0, const DistVector &v1, 
+    static Angle angle(const DistVector &v0, const DistVector &v1,
                        const DistVector &v2);
 
     static Angle dihedral(const DistVector &v0, const DistVector &v1,
                           const DistVector &v2, const DistVector &v3);
 
     static DistVector generate(double dst, const DistVector &v1, const Angle &ang,
-                               const DistVector &v2, const Angle &dih, 
+                               const DistVector &v2, const Angle &dih,
                                const DistVector &v3);
 };
 

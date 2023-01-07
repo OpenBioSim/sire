@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,8 +63,8 @@ using SireBase::PropertyName;
     objects. This class manages the extraction of data, recording of molecular
     properties and holding of all metadata needed to minimise the work of
     extracting data, e.g. as the molecule is updated or changed during
-    a Monte Carlo simulation 
-    
+    a Monte Carlo simulation
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJExtractor
@@ -92,51 +91,51 @@ public:
     CLJExtractor(const MoleculeView &mol, CLJAtoms::ID_SOURCE id_source,
                  EXTRACT_SOURCE extract_source,
                  const PropertyMap &map = PropertyMap());
-    
+
     CLJExtractor(const CLJExtractor &other);
-    
+
     ~CLJExtractor();
-    
+
     CLJExtractor& operator=(const CLJExtractor &other);
-    
+
     bool operator==(const CLJExtractor &other) const;
     bool operator!=(const CLJExtractor &other) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     QString toString() const;
-    
+
     bool changed() const;
     bool needsCommitting() const;
-    
+
     bool hasChangedAtoms() const;
-    
+
     bool isEmpty() const;
     bool isNull() const;
-    
+
     PartialMolecule oldMolecule() const;
     PartialMolecule newMolecule() const;
-    
+
     PropertyMap propertyMap() const;
-    
+
     PropertyName coordinatesProperty() const;
     PropertyName chargeProperty() const;
     PropertyName ljProperty() const;
-    
+
     bool extractingByCutGroup() const;
     bool extractingByResidue() const;
     bool extractingByMolecule() const;
-    
+
     CLJAtoms::ID_SOURCE idSource() const;
-    
+
     void add(const MoleculeView &new_molecule, CLJBoxes &boxes, CLJWorkspace &workspace);
     void add(const AtomSelection &new_selection, CLJBoxes &boxes, CLJWorkspace &workspace);
-    
+
     void updateSelection(const AtomSelection &selection,
                          CLJBoxes &boxes, CLJWorkspace &workspace);
-    
+
     void update(const MoleculeView &new_molecule,
                 CLJBoxes &boxes, CLJWorkspace &workspace);
 
@@ -144,7 +143,7 @@ public:
                 CLJBoxes &boxes, CLJWorkspace &workspace);
     void remove(const MoleculeView &new_molecule,
                 CLJBoxes &boxes, CLJWorkspace &workspace);
-                
+
     void removeAll(CLJBoxes &boxes, CLJWorkspace &workspace);
 
     void commit(CLJBoxes &boxes, CLJWorkspace &workspace);
@@ -155,21 +154,21 @@ private:
 
     /** Copy of the molecule itself */
     Molecule mol;
-    
+
     /** Copy of the current atom selection (empty if we have
         selected the entire molecule) */
     AtomSelection selected_atoms;
-    
+
     /** Copy of the new molecule  */
     Molecule newmol;
-    
+
     /** Copy of the new selection */
     AtomSelection new_selected_atoms;
-    
+
     /** The property map used to extract data (empty if we are
         using default properties) */
     PropertyMap props;
-    
+
     /** The indicies of all of the CLJAtoms in the CLJBoxes */
     QVector< QVector<CLJBoxIndex> > cljidxs;
 

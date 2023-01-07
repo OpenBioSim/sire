@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -43,10 +42,10 @@ using SireCluster::Node;
 
 /** This class is used to start and manage an active
     supra-simulation (a simulation of a SupraSystem).
-    
+
     A supra-simulation consists of a collection of
     supra-moves that are applied to a supra-system.
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT SupraSim
@@ -54,49 +53,49 @@ class SIREMOVE_EXPORT SupraSim
 public:
     SupraSim();
     SupraSim(const SupraSim &other);
-    
+
     ~SupraSim();
-    
+
     SupraSim& operator=(const SupraSim &other);
-    
+
     bool operator==(const SupraSim &other) const;
     bool operator!=(const SupraSim &other) const;
-    
+
     static SupraSim run(const SupraSystem &system, const SupraMoves &moves,
                         int nmoves, bool record_stats=true);
-                        
+
     static SupraSim run(const SupraSystem &system, const SupraMove &move,
                         int nmoves, bool record_stats=true);
-                        
+
     static SupraSim run(const SupraSimPacket &simpacket);
-    
+
     static SupraSim run(Node &node,
                         const SupraSystem &system, const SupraMoves &moves,
                         int nmoves, bool record_stats=true);
-                        
+
     static SupraSim run(Node &node,
                         const SupraSystem &system, const SupraMove &move,
                         int nmoves, bool record_stats=true);
 
     static SupraSim run(Node &node, const SupraSimPacket &simpacket);
-    
+
     void abort();
     void stop();
-    
+
     void wait();
     bool wait(int timeout);
-    
+
     bool isRunning();
-    
+
     bool isError();
     void throwError();
-    
+
     bool wasStopped();
-    
+
     bool wasAborted();
-    
+
     bool hasFinished();
-    
+
     float progress();
 
     SupraSimPacket input();
@@ -105,10 +104,10 @@ public:
 
     SupraSystemPtr initialSystem();
     SupraMovesPtr initialMoves();
-    
+
     SupraSystemPtr interimSystem();
     SupraMovesPtr interimMoves();
-    
+
     SupraSystemPtr system();
     SupraMovesPtr moves();
 

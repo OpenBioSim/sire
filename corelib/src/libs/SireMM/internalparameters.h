@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -93,18 +92,18 @@ class CGIDQuad
 {
 public:
     CGIDQuad();
-    
+
     CGIDQuad(CGIdx cgidx0);
     CGIDQuad(CGIdx cgidx0, CGIdx cgidx1);
     CGIDQuad(CGIdx cgidx0, CGIdx cgidx1, CGIdx cgidx2);
     CGIDQuad(CGIdx cgidx0, CGIdx cgidx1, CGIdx cgidx2, CGIdx cgidx3);
-    
+
     CGIDQuad(const CGIDQuad &other);
-    
+
     ~CGIDQuad();
-    
+
     CGIDQuad& operator=(const CGIDQuad &other);
-    
+
     bool operator==(const CGIDQuad &other) const;
     bool operator!=(const CGIDQuad &other) const;
 
@@ -112,7 +111,7 @@ public:
     bool isDoubleCutGroup() const;
     bool isTripleCutGroup() const;
     bool isQuadrupleCutGroup() const;
-    
+
     CGIdx cgIdx0() const;
     CGIdx cgIdx1() const;
     CGIdx cgIdx2() const;
@@ -136,15 +135,15 @@ class GroupInternalNonPhysParameters : public SireBase::RefCountData
 public:
     GroupInternalNonPhysParameters();
     GroupInternalNonPhysParameters(const GroupInternalNonPhysParameters &other);
-    
+
     ~GroupInternalNonPhysParameters();
-    
+
     GroupInternalNonPhysParameters& operator=(
                               const GroupInternalNonPhysParameters &other);
 
     bool operator==(const GroupInternalNonPhysParameters &other) const;
     bool operator!=(const GroupInternalNonPhysParameters &other) const;
-    
+
     /** The array of improper parameters */
     QVector<FourAtomFunction> improper_params;
 
@@ -162,9 +161,9 @@ class GroupInternalCrossParameters : public SireBase::RefCountData
 public:
     GroupInternalCrossParameters();
     GroupInternalCrossParameters(const GroupInternalCrossParameters &other);
-    
+
     ~GroupInternalCrossParameters();
-    
+
     GroupInternalCrossParameters& operator=(
                             const GroupInternalCrossParameters &other);
 
@@ -173,7 +172,7 @@ public:
 
     /** The array of stretch-stretch parameters */
     QVector<ThreeAtomFunction> stretch_stretch_params;
-    
+
     /** The stretch-stretch forces */
     QVector<ThreeAtomFunction> stretch_stretch_r01_forces;
     /** The stretch-stretch forces */
@@ -188,7 +187,7 @@ public:
     QVector<ThreeAtomFunction> stretch_bend_r01_forces;
     /** The stretch-bend forces */
     QVector<ThreeAtomFunction> stretch_bend_r21_forces;
-    
+
     /** The array of bend-bend parameters */
     QVector<FourAtomFunction> bend_bend_params;
 
@@ -201,7 +200,7 @@ public:
 
     /** The array of stretch-bend-torsion parameters */
     QVector<FourAtomFunction> stretch_bend_torsion_params;
-    
+
     /** The stretch-bend-torsion forces */
     QVector<FourAtomFunction> stretch_bend_torsion_phi_forces;
     /** The stretch-bend-torsion forces */
@@ -224,11 +223,11 @@ class GroupInternalParametersData : public SireBase::RefCountData
 public:
     GroupInternalParametersData();
     GroupInternalParametersData(const CGIDQuad &cgids);
-    
+
     GroupInternalParametersData(const GroupInternalParametersData &other);
-    
+
     ~GroupInternalParametersData();
-    
+
     GroupInternalParametersData& operator=(
                             const GroupInternalParametersData &other);
 
@@ -254,7 +253,7 @@ public:
         and Urey-Bradley) - no all groups will have these
         terms, so it is best to hide them to save space */
     SireBase::SharedDataPointer<GroupInternalNonPhysParameters> nonphys_terms;
-    
+
     /** Shared pointer to the cross-term internal parameters
         (double-pointer so as to save memory, as cross-terms
         tend not to be used with very large molecules) */
@@ -265,35 +264,35 @@ public:
 
 /** This class holds all of the internal parameters for one group
     combination within a molecule
-    
+
     There are several types of internal parameters, defined
     by the type of internal used to provide the coordinates,
     and the quantities calculated from those coordinates that
     can be used in the function
-    
+
     Bond            : Input Bond - function uses interatomic distance (1-2), r
     Angle           : Input Angle - function uses angle (1-2-3), theta
     Dihedral        : Input Dihedral - function uses torsion (1-2-3-4), phi
-    
+
     Improper        : Input Improper - function uses either torsion angle
                                        (1-3-4-2), phi, or out of plane angle, theta
-                                       
+
     Urey-Bradley    : Input Angle - function uses distance (1-3), r
-    
-    Stretch-Stretch : Input Angle - function uses distances (1-2), r12, and 
+
+    Stretch-Stretch : Input Angle - function uses distances (1-2), r12, and
                                     (3-2), r32
-                                    
+
     Stretch-Bend    : Input Angle - function uses distances angle (1-2-3), theta,
                                     and distances (1-2), r12, and (3-2) r32
-                                    
+
     Bend-Bend       : Input Improper - function uses angles (1-2-3), (3-2-4), (4-2-1),
-                                        theta123, theta324, theta421 
-    
+                                        theta123, theta324, theta421
+
     Stretch-Bend    : Input Dihedral - function uses torsion (1-2-3-4), phi,
       -Torsion                         distances (1-2), (2-3), (3-4), (1-4)
                                        r12, r23, r34, r14 and angles
                                        (1-2-3) and (2-3-4), theta123, theta234
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT GroupInternalParameters
@@ -306,11 +305,11 @@ friend class InternalParameters;  // so can call editing functions
 
 public:
     GroupInternalParameters();
-    
+
     GroupInternalParameters(const GroupInternalParameters &other);
-    
+
     ~GroupInternalParameters();
-    
+
     GroupInternalParameters& operator=(const GroupInternalParameters &other);
 
     bool operator==(const GroupInternalParameters &other) const;
@@ -321,7 +320,7 @@ public:
     bool hasPhysicalParameters() const;
     bool hasNonPhysicalParameters() const;
     bool hasCrossTerms() const;
-    
+
     bool isSingleCutGroup() const;
     bool isDoubleCutGroup() const;
     bool isTripleCutGroup() const;
@@ -343,34 +342,34 @@ public:
 
     const QVector<TwoAtomFunction>& bondPotential() const;
     const QVector<TwoAtomFunction>& bondForces() const;
-    
+
     const QVector<ThreeAtomFunction>& anglePotential() const;
     const QVector<ThreeAtomFunction>& angleForces() const;
-    
+
     const QVector<FourAtomFunction>& dihedralPotential() const;
     const QVector<FourAtomFunction>& dihedralForces() const;
-    
+
     const QVector<FourAtomFunction>& improperPotential() const;
     const QVector<FourAtomFunction>& improper_Theta_Forces() const;
     const QVector<FourAtomFunction>& improper_Phi_Forces() const;
-    
+
     const QVector<TwoAtomFunction>& ureyBradleyPotential() const;
     const QVector<TwoAtomFunction>& ureyBradleyForces() const;
-    
+
     const QVector<ThreeAtomFunction>& stretchStretchPotential() const;
     const QVector<ThreeAtomFunction>& stretchStretch_R01_Forces() const;
     const QVector<ThreeAtomFunction>& stretchStretch_R21_Forces() const;
-    
+
     const QVector<ThreeAtomFunction>& stretchBendPotential() const;
     const QVector<ThreeAtomFunction>& stretchBend_Theta_Forces() const;
     const QVector<ThreeAtomFunction>& stretchBend_R01_Forces() const;
     const QVector<ThreeAtomFunction>& stretchBend_R21_Forces() const;
-    
+
     const QVector<FourAtomFunction>& bendBendPotential() const;
     const QVector<FourAtomFunction>& bendBend_Theta012_Forces() const;
     const QVector<FourAtomFunction>& bendBend_Theta213_Forces() const;
     const QVector<FourAtomFunction>& bendBend_Theta310_Forces() const;
-    
+
     const QVector<FourAtomFunction>& stretchBendTorsionPotential() const;
     const QVector<FourAtomFunction>& stretchBendTorsion_Phi_Forces() const;
     const QVector<FourAtomFunction>& stretchBendTorsion_R01_Forces() const;
@@ -386,29 +385,29 @@ protected:
 
     void setBondPotential(const QVector<TwoAtomFunction> &potential,
                           const QVector<TwoAtomFunction> &forces);
-                           
+
     void setAnglePotential(const QVector<ThreeAtomFunction> &potential,
                            const QVector<ThreeAtomFunction> &forces);
-    
+
     void setDihedralPotential(const QVector<FourAtomFunction> &potential,
                               const QVector<FourAtomFunction> &forces);
-    
+
     void setImproperPotential(const QVector<FourAtomFunction> &potential,
                               const QVector<FourAtomFunction> &theta_forces,
                               const QVector<FourAtomFunction> &phi_forces);
-                               
+
     void setUreyBradleyPotential(const QVector<TwoAtomFunction> &potential,
                                  const QVector<TwoAtomFunction> &forces);
-    
+
     void setStretchStretchPotential(const QVector<ThreeAtomFunction> &potential,
                                     const QVector<ThreeAtomFunction> &r01_forces,
                                     const QVector<ThreeAtomFunction> &r21_forces);
-                                     
+
     void setStretchBendPotential(const QVector<ThreeAtomFunction> &potential,
                                  const QVector<ThreeAtomFunction> &theta_forces,
                                  const QVector<ThreeAtomFunction> &r01_forces,
                                  const QVector<ThreeAtomFunction> &r21_forces);
-                                  
+
     void setBendBendPotential(const QVector<FourAtomFunction> &potential,
                               const QVector<FourAtomFunction> &theta012_forces,
                               const QVector<FourAtomFunction> &theta213_forces,
@@ -441,11 +440,11 @@ public:
 
 protected:
     InternalSymbolsBase();
-    
+
     QSet<Symbol> symbols;
 };
 
-/** This class holds the symbols required for the bond 
+/** This class holds the symbols required for the bond
     and Urey-Bradley parameters. These are functions
     that act between two atoms, using the distance
     between the atoms (r) as the input variable */
@@ -454,9 +453,9 @@ class SIREMM_EXPORT BondSymbols : public InternalSymbolsBase
 public:
     BondSymbols();
     ~BondSymbols();
-    
+
     const Symbol& r() const;
-    
+
 private:
     /** The symbol for the length of a bond */
     Symbol r_;
@@ -470,16 +469,16 @@ class SIREMM_EXPORT AngleSymbols : public InternalSymbolsBase
 public:
     AngleSymbols();
     ~AngleSymbols();
-    
+
     const Symbol& theta() const;
-    
+
 private:
     /** The symbol for the size of the angle */
     Symbol theta_;
 };
 
 /** This class holds the symbols required for the dihedral parameters.
-    These are functions of the dihedral (0-1-2-3) (phi) made 
+    These are functions of the dihedral (0-1-2-3) (phi) made
     by four atoms, of atoms 0 and 3 about the bond between
     atoms 1 and 2 (measured clockwise) */
 class SIREMM_EXPORT DihedralSymbols : public InternalSymbolsBase
@@ -487,9 +486,9 @@ class SIREMM_EXPORT DihedralSymbols : public InternalSymbolsBase
 public:
     DihedralSymbols();
     ~DihedralSymbols();
-    
+
     const Symbol& phi() const;
-    
+
 private:
     /** The symbol for the size of the torsion */
     Symbol phi_;
@@ -504,15 +503,15 @@ class SIREMM_EXPORT ImproperSymbols : public InternalSymbolsBase
 public:
     ImproperSymbols();
     ~ImproperSymbols();
-    
+
     const Symbol& theta() const;
     const Symbol& phi() const;
-    
+
 private:
     /** The symbol for the angle made by the improper bond
         with the plane of the other atoms */
     Symbol theta_;
-    
+
     /** The symbol for the size of the improper torsion */
     Symbol phi_;
 };
@@ -525,18 +524,18 @@ class SIREMM_EXPORT StretchStretchSymbols : public InternalSymbolsBase
 public:
     StretchStretchSymbols();
     ~StretchStretchSymbols();
-    
+
     const Symbol& r01() const;
     const Symbol& r21() const;
     const Symbol& r12() const;
-    
+
 private:
     /** The symbol for the length of the bond 0->1 */
     Symbol r01_;
-    
+
     /** The symbol for the length of the bond 1<-2 */
     Symbol r21_;
-    
+
     /** The symbol for the length of the bond 1->2 */
     Symbol r12_;
 };
@@ -549,22 +548,22 @@ class SIREMM_EXPORT StretchBendSymbols : public InternalSymbolsBase
 public:
     StretchBendSymbols();
     ~StretchBendSymbols();
-    
+
     const Symbol& theta() const;
     const Symbol& r01() const;
     const Symbol& r21() const;
     const Symbol& r12() const;
-    
+
 private:
     /** The symbol for the size of the angle */
     Symbol theta_;
 
     /** The symbol for the length of the bond 0->1 */
     Symbol r01_;
-    
+
     /** The symbol for the length of the bond 1<-2 */
     Symbol r21_;
-    
+
     /** The symbol for the length of the bond 1->2 */
     Symbol r12_;
 };
@@ -578,11 +577,11 @@ class SIREMM_EXPORT BendBendSymbols : public InternalSymbolsBase
 public:
     BendBendSymbols();
     ~BendBendSymbols();
-    
+
     const Symbol& theta012() const;
     const Symbol& theta213() const;
     const Symbol& theta310() const;
-    
+
 private:
     /** The symbol for the size of the angle 0->1<-2 */
     Symbol theta012_;
@@ -603,17 +602,17 @@ class SIREMM_EXPORT StretchBendTorsionSymbols : public InternalSymbolsBase
 public:
     StretchBendTorsionSymbols();
     ~StretchBendTorsionSymbols();
-    
+
     const Symbol& phi() const;
-    
+
     const Symbol& theta012() const;
     const Symbol& theta321() const;
-    
+
     const Symbol& r01() const;
     const Symbol& r12() const;
     const Symbol& r32() const;
     const Symbol& r03() const;
-    
+
 private:
     /** The symbol for the size of the torsion */
     Symbol phi_;
@@ -622,7 +621,7 @@ private:
     Symbol theta012_;
     /** The symbol for the angle 3->2<-1 */
     Symbol theta321_;
-    
+
     /** The symbol for the length of the bond 0->1 */
     Symbol r01_;
     /** The symbol for the length of the bond 1->2 */
@@ -644,10 +643,10 @@ public:
     const BondSymbols& bond() const;
     const AngleSymbols& angle() const;
     const DihedralSymbols& dihedral() const;
-    
+
     const ImproperSymbols& improper() const;
     const BondSymbols& ureyBradley() const;
-    
+
     const StretchStretchSymbols& stretchStretch() const;
     const StretchBendSymbols& stretchBend() const;
     const BendBendSymbols& bendBend() const;
@@ -666,21 +665,21 @@ private:
 };
 
 /** This class holds the internal parameters for a molecule
-    (bond, angle, dihedral, improper, Urey-Bradley, 
+    (bond, angle, dihedral, improper, Urey-Bradley,
      stretch-stretch, stretch-bend, bend-bend, stretch-bend-torsion)
-     
-    The parameters are held in groups, that correspond to the 
+
+    The parameters are held in groups, that correspond to the
     set of CutGroups that contain the atoms, e.g.
-    
+
     group 0 contains all of the parameters that act on
     internals that act only within CutGroup 0
-    
+
     group 0,1 contains all of the parameters that act only
     between atoms in groups 0 and 1
-    
+
     group 0,1,2 contains all of the parameters that act only
     between atoms in groups 0, 1 and 2
-     
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT InternalParameters
@@ -691,7 +690,7 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, InternalParameters&
 
 public:
     InternalParameters();
-    
+
     InternalParameters(const PartialMolecule &molecule,
                        const PropertyName &bond_params,
                        const PropertyName &angle_params,
@@ -703,59 +702,59 @@ public:
                        const PropertyName &bb_params,
                        const PropertyName &sbt_params,
                        bool isstrict);
-    
+
     InternalParameters(const InternalParameters &other);
-    
+
     ~InternalParameters();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return InternalParameters::typeName();
     }
-    
+
     InternalParameters& operator=(const InternalParameters &other);
-    
+
     bool operator==(const InternalParameters &other) const;
     bool operator!=(const InternalParameters &other) const;
-    
+
     const InternalSymbols& symbols() const;
-    
+
     bool isEmpty() const;
-    
+
     bool hasBondParameters() const;
     bool hasAngleParameters() const;
     bool hasDihedralParameters() const;
-    
+
     bool hasPhysicalParameters() const;
-    
+
     bool hasImproperParameters() const;
     bool hasUreyBradleyParameters() const;
-    
+
     bool hasNonPhysicalParameters() const;
-    
+
     bool hasStretchStretchParameters() const;
     bool hasStretchBendParameters() const;
     bool hasBendBendParameters() const;
     bool hasStretchBendTorsionParameters() const;
-    
+
     bool hasCrossTerms() const;
-    
+
     bool changedAllGroups(const InternalParameters &other) const;
 
-    void addChangedGroups(const InternalParameters &other, 
+    void addChangedGroups(const InternalParameters &other,
                           QSet<quint32> &changed_groups) const;
-                          
+
     QSet<quint32> getChangedGroups(const InternalParameters &other) const;
-    
+
     InternalParameters applyMask(const QSet<quint32> &cgidxs) const;
 
     const QVector<GroupInternalParameters>& groupParameters() const;
-    
+
     QVector<GroupInternalParameters> groupParameters(quint32 cgidx) const;
     QVector<GroupInternalParameters> groupParameters(const QSet<quint32> &cgidxs) const;
-    
+
 private:
     qint32 getIndex(CGIdx cgidx0) const;
     qint32 getIndex(CGIdx cgidx0, CGIdx cgidx1) const;
@@ -765,22 +764,22 @@ private:
                     CGIdx cgidx2, CGIdx cgidx3) const;
 
     qint32 getIndex(const detail::CGIDQuad &cgids) const;
-    
+
     const GroupInternalParameters& getGroup(CGIdx cgidx0) const;
     const GroupInternalParameters& getGroup(CGIdx cgidx0, CGIdx cgidx1) const;
     const GroupInternalParameters& getGroup(CGIdx cgidx0, CGIdx cgidx1,
                                             CGIdx cgidx2) const;
     const GroupInternalParameters& getGroup(CGIdx cgidx0, CGIdx cgidx1,
                                             CGIdx cgidx2, CGIdx cgidx3) const;
-    
+
     qint32 addGroup(const detail::CGIDQuad &cgids);
-    
+
     GroupInternalParameters& getGroup(const detail::CGIDQuad &cgids,
                                       QHash<detail::CGIDQuad,qint32> &cached_groups);
-    
+
     void assertContainsOnly(const QSet<Symbol> &have_symbols,
-                            const QSet<Symbol> &test_symbols) const; 
-    
+                            const QSet<Symbol> &test_symbols) const;
+
     void addBonds(const TwoAtomFunctions &bondparams,
                   QHash<detail::CGIDQuad,qint32> &cached_groups);
     void addAngles(const ThreeAtomFunctions &angleparams,
@@ -801,12 +800,12 @@ private:
                 QHash<detail::CGIDQuad,qint32> &cached_groups);
     void addSBTs(const FourAtomFunctions &sbtparams,
                 QHash<detail::CGIDQuad,qint32> &cached_groups);
-    
+
     bool containsOnly(const QSet<quint32> &cgidxs) const;
-    
+
     void updateState();
     void reindex();
-    
+
     /** enum giving the state of these parameters */
     enum { EMPTY        = 0x0000,
            HAS_BOND     = 0x0001,
@@ -821,25 +820,25 @@ private:
            HAS_BB       = 0x0400,
            HAS_SBT      = 0x0800,
            HAS_CROSS    = 0x0f00 };
-    
+
     /** The current state of the parameters */
     uint state;
-    
+
     /** All of the groups of internal parameters */
     QVector<GroupInternalParameters> group_params;
-    
+
     /** The indicies of the groups that contains the parameters
         that involve a particular CutGroup, indexed by the CGIdx
         of that CutGroup */
     QHash< CGIdx, QSet<qint32> > groups_by_cgidx;
-    
+
     /** All of the symbols used by the internal functions */
     static InternalSymbols function_symbols;
 };
 
 /** This class holds intramolecular bonding parameters for 3D molecules
     (so it also contains the 3D coordinates of the molecule)
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT InternalParameters3D
@@ -851,7 +850,7 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, InternalParameters3
 
 public:
     InternalParameters3D();
-    
+
     InternalParameters3D(const PartialMolecule &molecule,
                          const PropertyName &coords_property,
                          const PropertyName &bond_params,
@@ -864,36 +863,36 @@ public:
                          const PropertyName &bb_params,
                          const PropertyName &sbt_params,
                          bool isstrict);
-    
-    InternalParameters3D(const InternalParameters3D &other);                     
-    
+
+    InternalParameters3D(const InternalParameters3D &other);
+
     ~InternalParameters3D();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return InternalParameters3D::typeName();
     }
-    
+
     InternalParameters3D& operator=(const InternalParameters3D &other);
-    
+
     bool operator==(const InternalParameters3D &other) const;
     bool operator!=(const InternalParameters3D &other) const;
-    
+
     const CoordGroupArray& atomicCoordinates() const;
-    
+
     void setAtomicCoordinates(const AtomicCoords3D &coords);
-    
+
     int nCutGroups() const;
-    
+
     bool changedAllGroups(const InternalParameters3D &other) const;
 
-    void addChangedGroups(const InternalParameters3D &other, 
+    void addChangedGroups(const InternalParameters3D &other,
                           QSet<quint32> &changed_groups) const;
-                          
+
     QSet<quint32> getChangedGroups(const InternalParameters3D &other) const;
-    
+
     InternalParameters3D applyMask(const QSet<quint32> &cgidxs) const;
 
 private:
@@ -931,7 +930,7 @@ SIRE_ALWAYS_INLINE bool InternalParameters::hasDihedralParameters() const
     return state & HAS_DIHEDRAL;
 }
 
-/** Return whether or not there are any physical (bond, angle 
+/** Return whether or not there are any physical (bond, angle
     or dihedral) parameters */
 SIRE_ALWAYS_INLINE bool InternalParameters::hasPhysicalParameters() const
 {

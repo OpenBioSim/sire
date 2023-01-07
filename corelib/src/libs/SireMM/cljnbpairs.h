@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -77,9 +76,9 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CoulombScaleFactor&
 
 public:
     CoulombScaleFactor(double scl=0);
-    
+
     CoulombScaleFactor(const CoulombScaleFactor &other);
-    
+
     ~CoulombScaleFactor();
 
     static const char* typeName();
@@ -111,9 +110,9 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, LJScaleFactor&);
 
 public:
     LJScaleFactor(double scl=0);
-    
+
     LJScaleFactor(const LJScaleFactor &other);
-    
+
     ~LJScaleFactor();
 
     static const char* typeName();
@@ -148,9 +147,9 @@ public:
     CLJScaleFactor(double scl=0);
 
     CLJScaleFactor(double scale_coul, double scale_lj);
-    
+
     CLJScaleFactor(const CLJScaleFactor &other);
-    
+
     ~CLJScaleFactor();
 
     static const char* typeName();
@@ -177,8 +176,8 @@ public:
 
     @author Christopher Woods
 */
-class SIREMM_EXPORT CoulombNBPairs 
-        : public SireBase::ConcreteProperty< CoulombNBPairs, 
+class SIREMM_EXPORT CoulombNBPairs
+        : public SireBase::ConcreteProperty< CoulombNBPairs,
                                              AtomPairs<CoulombScaleFactor> >
 {
 
@@ -207,7 +206,7 @@ public:
     CoulombNBPairs& operator=(const CLJNBPairs &cljpairs);
 
     static const char* typeName();
-    
+
     bool operator==(const CoulombNBPairs &other) const;
     bool operator!=(const CoulombNBPairs &other) const;
 };
@@ -221,8 +220,8 @@ public:
 
     @author Christopher Woods
 */
-class SIREMM_EXPORT LJNBPairs 
-        : public SireBase::ConcreteProperty< LJNBPairs, 
+class SIREMM_EXPORT LJNBPairs
+        : public SireBase::ConcreteProperty< LJNBPairs,
                                              AtomPairs<LJScaleFactor> >
 {
 
@@ -250,7 +249,7 @@ public:
     LJNBPairs& operator=(const CLJNBPairs &cljpairs);
 
     static const char* typeName();
-    
+
     bool operator==(const LJNBPairs &other) const;
     bool operator!=(const LJNBPairs &other) const;
 };
@@ -265,8 +264,8 @@ public:
 
     @author Christopher Woods
 */
-class SIREMM_EXPORT CLJNBPairs 
-        : public SireBase::ConcreteProperty< CLJNBPairs, 
+class SIREMM_EXPORT CLJNBPairs
+        : public SireBase::ConcreteProperty< CLJNBPairs,
                                              AtomPairs<CLJScaleFactor> >
 {
 
@@ -297,18 +296,18 @@ public:
     CLJNBPairs& operator=(const CLJNBPairs &other);
 
     static const char* typeName();
-    
+
     bool operator==(const CLJNBPairs &other) const;
     bool operator!=(const CLJNBPairs &other) const;
-    
+
     QString toString() const;
-    
+
     int nExcludedAtoms() const;
     QVector<AtomIdx> excludedAtoms() const;
-    
+
     int nExcludedAtoms(const AtomID &atomid) const;
     QVector<AtomIdx> excludedAtoms(const AtomID &atomid) const;
-    
+
 };
 
 }

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,10 +47,10 @@ typedef AtomProperty<Force3D> AtomForces;
 
 }
 
-SIRE_EXPOSE_ALIAS( 
+SIRE_EXPOSE_ALIAS(
         (SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> >),
         SireMol::Force3D )
-                   
+
 Q_DECLARE_METATYPE( SireMol::AtomForces );
 Q_DECLARE_METATYPE( SireMol::Force3D );
 

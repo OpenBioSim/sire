@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,13 +51,13 @@ using namespace SireStream;
 static const RegisterMetaType<AtomCutting> r_rescut;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                        const AtomCutting &rescut)
 {
     writeHeader(ds, r_rescut, 1);
-    
+
     ds << static_cast<const CuttingFunction&>(rescut);
-    
+
     return ds;
 }
 
@@ -66,14 +65,14 @@ QDataStream &operator<<(QDataStream &ds,
 QDataStream &operator>>(QDataStream &ds, AtomCutting &rescut)
 {
     VersionID v = readHeader(ds, r_rescut);
-    
+
     if (v == 1)
     {
         ds >> static_cast<CuttingFunction&>(rescut);
     }
     else
         throw version_error(v, "1", r_rescut, CODELOC);
-        
+
     return ds;
 }
 
@@ -114,31 +113,31 @@ MolStructureEditor AtomCutting::operator()(MolStructureEditor &moleditor) const
 {
     //remove the existing CutGroups
     moleditor.removeAllCutGroups();
-    
+
     //now create one CutGroup for each atom, giving it the same
     //number as the atom index
-    
+
     int k=0;
-    
+
     for (ResIdx i(0); i<moleditor.nResidues(); ++i)
     {
         ResStructureEditor reseditor = moleditor.residue(i);
-        
+
         for (int j=0; j<reseditor.nAtoms(); ++j)
         {
-            
-	  moleditor.add( CGName(QString::number(k)) );          
-            
+
+	  moleditor.add( CGName(QString::number(k)) );
+
 	  reseditor.atom(j).reparent( CGIdx(k) );
-            
+
 	  k++;
         }
-        
+
         //k=reseditor.nAtoms() + 1;
-        
-           
+
+
      }
-    
+
     return moleditor;
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -110,19 +109,19 @@ namespace SireBase
     *not* designed for numerical computation - it is merely to be
     used to efficiently hold a sparse matrix of objects.
 
-    Note that this matrix is *always* a 2^32 by 2^32 square 
+    Note that this matrix is *always* a 2^32 by 2^32 square
     matrix - it is just that the vast majority of it has
     the default value.
-    
-    The matrix can be set to be symmetric, meaning that 
-    the value at (i,j) is constrained to be equal to the 
+
+    The matrix can be set to be symmetric, meaning that
+    the value at (i,j) is constrained to be equal to the
     value at (j,i) - this means that setting (i,j) equal to
     'x' also sets the value of (j,i) equal to 'x'.
-    
+
     It is *very* fast to take the transpose of this matrix - the
-    implementation is such that taking the transpose just 
+    implementation is such that taking the transpose just
     involves setting a flag.
-    
+
     @author Christopher Woods
 */
 template<class T>
@@ -135,7 +134,7 @@ friend SIREBASE_EXPORT QDataStream& ::operator>><>(QDataStream&, SparseMatrix<T>
 template<class U> friend class SparseMatrix;
 
 public:
-    SparseMatrix(const T &default_value = T(), 
+    SparseMatrix(const T &default_value = T(),
                  bool is_symmetric=false);
 
     template<class U>
@@ -169,7 +168,7 @@ public:
     const T& defaultValue() const;
 
     SparseMatrix<T> transpose() const;
-    
+
 private:
     /** Possible state of the sparse matrix */
     enum MATRIX_STATE
@@ -178,10 +177,10 @@ private:
         TRANSPOSE  = 2,     //the transpose of the matrix is stored
         SYMMETRIC  = 4      //this is a symmetrix matrix
     };
-    
+
     /** The state of this matrix */
     MATRIX_STATE current_state;
-    
+
     /** The default value of each element of the matrix */
     T def;
 
@@ -195,7 +194,7 @@ private:
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 SparseMatrix<T>::SparseMatrix(const T &default_value,
-                              bool is_symmetric) 
+                              bool is_symmetric)
                 : current_state(NORMAL), def(default_value)
 {
     if (is_symmetric)
@@ -213,11 +212,11 @@ SparseMatrix<T>::SparseMatrix(const SparseMatrix<U> &other)
         case SparseMatrix<U>::NORMAL:
             current_state = SparseMatrix<T>::NORMAL;
             break;
-            
+
         case SparseMatrix<U>::TRANSPOSE:
             current_state = SparseMatrix<T>::TRANSPOSE;
             break;
-            
+
         case SparseMatrix<U>::SYMMETRIC:
             current_state = SparseMatrix<T>::SYMMETRIC;
             break;
@@ -255,7 +254,7 @@ SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix<T> &other)
     {
         data = other.data;
         def = other.def;
-        current_state = other.current_state;        
+        current_state = other.current_state;
     }
 
     return *this;
@@ -288,7 +287,7 @@ SIRE_OUTOFLINE_TEMPLATE
 const T& SparseMatrix<T>::operator()(quint32 i, quint32 j) const
 {
     detail::Index idx;
-    
+
     if ( current_state == TRANSPOSE or
          (current_state == SYMMETRIC and j < i) )
     {
@@ -360,15 +359,15 @@ SIRE_OUTOFLINE_TEMPLATE
 void SparseMatrix<T>::commit()
 {
     QMutableHashIterator<detail::Index,T> it(data);
-    
+
     while (it.hasNext())
     {
         it.next();
-    
+
         if (it.value() == def)
             it.remove();
     }
-    
+
     data.squeeze();
 }
 
@@ -378,7 +377,7 @@ SIRE_OUTOFLINE_TEMPLATE
 void SparseMatrix<T>::set(quint32 i, quint32 j, const T &value)
 {
     detail::Index idx;
-    
+
     if ( current_state == TRANSPOSE or
          (current_state == SYMMETRIC and j < i) )
     {
@@ -388,7 +387,7 @@ void SparseMatrix<T>::set(quint32 i, quint32 j, const T &value)
     {
         idx = detail::Index(i,j);
     }
-    
+
     if (value == def)
         data.remove(idx);
     else
@@ -435,7 +434,7 @@ SIRE_OUTOFLINE_TEMPLATE
 SparseMatrix<T> SparseMatrix<T>::transpose() const
 {
     SparseMatrix<T> ret(*this);
-    
+
     switch( this->current_state )
     {
         case NORMAL:
@@ -447,7 +446,7 @@ SparseMatrix<T> SparseMatrix<T>::transpose() const
         case SYMMETRIC:
             break;
     }
-    
+
     return ret;
 }
 
@@ -476,7 +475,7 @@ QDataStream& operator<<(QDataStream &ds, const SireBase::SparseMatrix<T> &matrix
     ds << qint32(matrix.current_state)
        << matrix.def
        << matrix.data;
-       
+
     return ds;
 }
 
@@ -485,27 +484,27 @@ template<class T>
 QDataStream& operator>>(QDataStream &ds, SireBase::SparseMatrix<T> &matrix)
 {
     qint32 typ;
-    
+
     ds >> typ >> matrix.def >> matrix.data;
-    
+
     switch (typ)
     {
         case SireBase::SparseMatrix<T>::NORMAL:
             matrix.current_state = SireBase::SparseMatrix<T>::NORMAL;
             break;
-        
+
         case SireBase::SparseMatrix<T>::TRANSPOSE:
             matrix.current_state = SireBase::SparseMatrix<T>::TRANSPOSE;
             break;
-        
+
         case SireBase::SparseMatrix<T>::SYMMETRIC:
             matrix.current_state = SireBase::SparseMatrix<T>::SYMMETRIC;
             break;
-        
+
         default:
             matrix.current_state = SireBase::SparseMatrix<T>::NORMAL;
     }
-    
+
     return ds;
 }
 

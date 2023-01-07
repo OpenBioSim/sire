@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,7 +56,7 @@ using SireMol::PartialMolecule;
     the CLJ energy between two groups of molecules, or
     QMMMFF, that calculates the QM/MM energy of a QM group
     of molecules interacting with an MM group
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT G2FF : public FF
@@ -68,14 +67,14 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, G2FF&);
 
 public:
     ~G2FF();
-    
+
     const MoleculeGroup& at(MGNum mgnum) const;
-    
+
     void assertContains(MGNum mgnum) const;
-    
+
     void accept();
     bool needsAccepting() const;
-    
+
 protected:
     G2FF(bool allow_overlap_of_atoms=false);
     G2FF(const G2FF &other);
@@ -96,25 +95,25 @@ protected:
     virtual void _pvt_changed(quint32 groupid,
                               const Molecule &molecule,
                               bool auto_commit)=0;
-                              
-    virtual void _pvt_changed(quint32 groupid, 
+
+    virtual void _pvt_changed(quint32 groupid,
                               const QList<Molecule> &molecules,
                               bool auto_commit)=0;
-    
+
     virtual void _pvt_removedAll(quint32 groupid)=0;
-        
+
     virtual bool _pvt_wouldChangeProperties(quint32 groupid,
-                                            MolNum molnum, 
+                                            MolNum molnum,
                                             const PropertyMap &map) const=0;
 
     ////
-    //// Virtual functions that must be changed if this 
+    //// Virtual functions that must be changed if this
     //// forcefield allows overlapping atoms (most don't!)
     ////
     virtual void _pvt_added(quint32 groupid,
                             const ViewsOfMol &mol,
                             const PropertyMap &map);
-                            
+
     virtual void _pvt_removed(quint32 groupid,
                               const ViewsOfMol &mol);
 
@@ -129,37 +128,37 @@ protected:
     ////
 
     const MoleculeGroup& getGroup(MGNum mgnum) const;
-    
+
     void getGroups(const QList<MGNum> &mgnums,
                    QVarLengthArray<const MoleculeGroup*,10> &groups) const;
 
     QHash<MGNum,const MoleculeGroup*> getGroups() const;
-    
+
     void group_setName(quint32 i, const QString &new_name);
-        
+
     void group_add(quint32 i, const MoleculeView &molview,
                            const PropertyMap &map);
-    void group_add(quint32 i, const ViewsOfMol &molviews, 
+    void group_add(quint32 i, const ViewsOfMol &molviews,
                            const PropertyMap &map);
-    void group_add(quint32 i, const Molecules &molecules, 
+    void group_add(quint32 i, const Molecules &molecules,
                            const PropertyMap &map);
-    void group_add(quint32 i, const MoleculeGroup &molgroup, 
+    void group_add(quint32 i, const MoleculeGroup &molgroup,
                            const PropertyMap &map);
-    
-    bool group_addIfUnique(quint32 i, const MoleculeView &molview, 
+
+    bool group_addIfUnique(quint32 i, const MoleculeView &molview,
                            const PropertyMap &map);
-    ViewsOfMol group_addIfUnique(quint32 i, const ViewsOfMol &molviews, 
+    ViewsOfMol group_addIfUnique(quint32 i, const ViewsOfMol &molviews,
                                  const PropertyMap &map);
-    QList<ViewsOfMol> group_addIfUnique(quint32 i, const Molecules &molecules, 
+    QList<ViewsOfMol> group_addIfUnique(quint32 i, const Molecules &molecules,
                                         const PropertyMap &map);
-    QList<ViewsOfMol> group_addIfUnique(quint32 i, const MoleculeGroup &molgroup, 
+    QList<ViewsOfMol> group_addIfUnique(quint32 i, const MoleculeGroup &molgroup,
                                         const PropertyMap &map);
 
     bool group_remove(quint32 i, const MoleculeView &molview);
     ViewsOfMol group_remove(quint32 i, const ViewsOfMol &molviews);
     QList<ViewsOfMol> group_remove(quint32 i, const Molecules &molecules);
     QList<ViewsOfMol> group_remove(quint32 i, const MoleculeGroup &molgroup);
-    
+
     bool group_removeAll(quint32 i, const MoleculeView &molview);
     ViewsOfMol group_removeAll(quint32 i, const ViewsOfMol &molviews);
     QList<ViewsOfMol> group_removeAll(quint32 i, const Molecules &molecules);
@@ -174,14 +173,14 @@ protected:
 
     QList<Molecule> group_update(quint32 i, const Molecules &molecules, bool auto_commit);
     QList<Molecule> group_update(quint32 i, const MoleculeGroup &molgroup, bool auto_commit);
-    
-    bool group_setContents(quint32 i, const MoleculeView &molview, 
+
+    bool group_setContents(quint32 i, const MoleculeView &molview,
                            const PropertyMap &map);
-    bool group_setContents(quint32 i, const ViewsOfMol &molviews, 
+    bool group_setContents(quint32 i, const ViewsOfMol &molviews,
                            const PropertyMap &map);
-    bool group_setContents(quint32 i, const Molecules &molecules, 
+    bool group_setContents(quint32 i, const Molecules &molecules,
                            const PropertyMap &map);
-    bool group_setContents(quint32 i, const MoleculeGroup &molgroup, 
+    bool group_setContents(quint32 i, const MoleculeGroup &molgroup,
                            const PropertyMap &map);
 
     void _pvt_updateName();
@@ -201,7 +200,7 @@ private:
 
     /** The two groups of molecules in this forcefield */
     detail::FFMolGroupPvt molgroup[2];
-    
+
     /** Whether or not this forcefield allows overlap of atoms
         (e.g. allowing an atom to appear several times in the forcefield) */
     bool allow_overlap_of_atoms;

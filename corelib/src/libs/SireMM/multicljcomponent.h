@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,7 +56,7 @@ boost::tuple<QString,QString> getSubscriptedProperty(QString name);
 
 /** This class is used to hold the symbols for CLJ forcefields
     that allow multiple CLJ functions to be indexed by key
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT MultiCLJComponent : public SireFF::FFComponent
@@ -68,38 +67,38 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, MultiCLJComponent&)
 
 public:
     MultiCLJComponent(const FFName &name = FFName());
-    
+
     MultiCLJComponent(const MultiCLJComponent &other);
-    
+
     ~MultiCLJComponent();
-    
+
     MultiCLJComponent rename(const FFName &name) const;
-    
+
     QString toString() const;
-    
+
     MultiCLJComponent& operator=(const MultiCLJComponent &other);
-    
+
     bool operator==(const MultiCLJComponent &other) const;
     bool operator!=(const MultiCLJComponent &other) const;
-    
+
     const CoulombComponent& coulomb() const;
     const CoulombComponent& coulomb(QString key) const;
 
     const LJComponent& lj() const;
     const LJComponent& lj(QString key) const;
-    
+
     const CLJComponent& total() const;
     const CLJComponent& total(QString key) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     MultiCLJComponent* clone() const;
 
     void setEnergy(FF &ff, const MultiCLJEnergy &cljnrg) const;
     void changeEnergy(FF &ff, const MultiCLJEnergy &cljnrg) const;
-    
+
     SireCAS::Symbols symbols() const;
 
     int add(QString key);
@@ -121,14 +120,14 @@ private:
 
     /** Array of the CLJ components in the order they appear in the forcefield */
     QVector<CLJComponent> comps;
-    
+
     /** Hash mapping from key name to index in the array */
     QHash<QString,quint32> key_to_idx;
 };
 
-/** This class is used during a CLJ calculation to hold all of the 
+/** This class is used during a CLJ calculation to hold all of the
     coulomb and LJ energies, and to then update them in the forcefield
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT MultiCLJEnergy : public CLJEnergy
@@ -142,7 +141,7 @@ public:
 
     MultiCLJEnergy(double cnrg=0, double ljnrg=0) : CLJEnergy(cnrg, ljnrg)
     {}
-    
+
     MultiCLJEnergy(const CLJEnergy &cljnrg) : CLJEnergy(cljnrg)
     {}
 
@@ -151,40 +150,40 @@ public:
     {
         double cnrg = 0;
         double ljnrg = 0;
-    
+
         if (not coul_nrgs.isEmpty())
         {
             cnrg = coul_nrgs.at(0);
         }
-        
+
         if (not lj_nrgs.isEmpty())
         {
             ljnrg = lj_nrgs.at(0);
         }
-        
+
         CLJEnergy::operator=( CLJEnergy(cnrg,ljnrg) );
-        
+
         cnrgs = coul_nrgs;
         ljnrgs = lj_nrgs;
     }
-    
+
     MultiCLJEnergy(const MultiCLJEnergy &other)
            : CLJEnergy(other), cnrgs(other.cnrgs), ljnrgs(other.ljnrgs)
     {}
-    
+
     ~MultiCLJEnergy()
     {}
-    
+
     static const char* typeName()
     {
         return "SireMM::MultiCLJEnergy";
     }
-    
+
     const char* what() const
     {
         return MultiCLJEnergy::typeName();
     }
-    
+
     MultiCLJEnergy& operator=(const MultiCLJEnergy &other)
     {
         CLJEnergy::operator=(other);
@@ -192,11 +191,11 @@ public:
         ljnrgs = other.ljnrgs;
         return *this;
     }
-    
+
     MultiCLJEnergy& operator+=(const MultiCLJEnergy &other)
     {
         CLJEnergy::operator+=(other);
-        
+
         if (not cnrgs.isEmpty())
         {
             for (int i=0; i<qMin(cnrgs.count(), other.cnrgs.count()); ++i)
@@ -204,7 +203,7 @@ public:
                 cnrgs.data()[i] += other.cnrgs.data()[i];
             }
         }
-        
+
         if (not ljnrgs.isEmpty())
         {
             for (int i=0; i<qMin(ljnrgs.count(), other.ljnrgs.count()); ++i)
@@ -212,14 +211,14 @@ public:
                 ljnrgs.data()[i] += other.ljnrgs.data()[i];
             }
         }
-        
+
         return *this;
     }
-    
+
     MultiCLJEnergy& operator-=(const MultiCLJEnergy &other)
     {
         CLJEnergy::operator-=(other);
-        
+
         if (not cnrgs.isEmpty())
         {
             for (int i=0; i<qMin(cnrgs.count(), other.cnrgs.count()); ++i)
@@ -227,7 +226,7 @@ public:
                 cnrgs.data()[i] -= other.cnrgs.data()[i];
             }
         }
-        
+
         if (not ljnrgs.isEmpty())
         {
             for (int i=0; i<qMin(ljnrgs.count(), other.ljnrgs.count()); ++i)
@@ -235,54 +234,54 @@ public:
                 ljnrgs.data()[i] -= other.ljnrgs.data()[i];
             }
         }
-        
+
         return *this;
     }
-    
+
     MultiCLJEnergy operator+(const MultiCLJEnergy &other) const
     {
         MultiCLJEnergy ret(*this);
         ret += other;
         return ret;
     }
-    
+
     MultiCLJEnergy operator-(const MultiCLJEnergy &other) const
     {
         MultiCLJEnergy ret(*this);
         ret -= other;
         return ret;
     }
-    
+
     Components components() const
     {
         return Components();
     }
-    
+
     double coulomb() const
     {
         return CLJEnergy::coulomb();
     }
-    
+
     double lj() const
     {
         return CLJEnergy::lj();
     }
-    
+
     double total() const
     {
         return CLJEnergy::total();
     }
-    
+
     double component(const CoulombComponent&) const
     {
         return coulomb();
     }
-    
+
     double component(const LJComponent&) const
     {
         return lj();
     }
-    
+
     double component(const CLJComponent&) const
     {
         return total();
@@ -296,11 +295,11 @@ public:
         {
             if (i >= cnrgs.count())
                 assertValidCoulombIndex(i);
-            
+
             return cnrgs.at(i);
         }
     }
-    
+
     double lj(quint32 i) const
     {
         if (i == 0)
@@ -309,42 +308,42 @@ public:
         {
             if (i >= ljnrgs.count())
                 assertValidLJIndex(i);
-            
+
             return ljnrgs.at(i);
         }
     }
-    
+
     double total(quint32 i) const
     {
         return coulomb(i) + lj(i);
     }
-    
+
     double component(const CoulombComponent&, quint32 i) const
     {
         return coulomb(i);
     }
-    
+
     double component(const LJComponent&, quint32 i) const
     {
         return lj(i);
     }
-    
+
     double component(const CLJComponent&, quint32 i) const
     {
         return total(i);
     }
-    
+
     operator double() const
     {
         //return the total energy
         return total();
     }
-    
+
     operator SireUnits::Dimension::MolarEnergy() const
     {
         return SireUnits::Dimension::MolarEnergy(total());
     }
-    
+
     operator CoulombEnergy() const
     {
         return CoulombEnergy(coulomb());

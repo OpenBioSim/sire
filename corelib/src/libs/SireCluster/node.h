@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,11 +58,11 @@ class PromisePvt;
     that are assigned to the nodes. Alternatively, you can
     grab a node manually from the Nodes object and you can
     assign WorkPackets to it yourself
-    
+
     Essentially, a Node is a means of directing WorkPackets
     to Frontends, so that they can be communicated on to
     Backends that perform the actual work.
-    
+
     @author Christopher Woods
 */
 class SIRECLUSTER_EXPORT Node
@@ -76,48 +75,48 @@ friend class detail::PromisePvt;
 
 public:
     Node();
-    
+
     Node(const Node &other);
-    
+
     ~Node();
-    
+
     Node& operator=(const Node &other);
-    
+
     bool operator==(const Node &other) const;
     bool operator!=(const Node &other) const;
-    
+
     QString toString() const;
-    
+
     Nodes nodes();
-    
+
     bool isHomeless();
-    
+
     bool release();
     void forceRelease();
-    
+
     bool isLocal();
-    
+
     bool isNull() const;
-    
+
     QUuid UID();
-    
+
     Promise startJob(const WorkPacket &workpacket);
-    
+
     Promise startJob(const WorkPacket &workpacket,
                      bool autodelete);
-    
+
     void stopJob();
     void abortJob();
-    
+
     void wait();
     bool wait(int timeout);
-    
+
     float progress();
 
 protected:
-    static Node create(const Nodes &nodes, 
+    static Node create(const Nodes &nodes,
                        const Frontend &frontend); // called by Nodes
-    
+
     void evict(); // called by Nodes
     void rehome(const Nodes &nodes); // called by Nodes
 

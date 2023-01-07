@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,18 +45,18 @@ namespace SireMove
 
 /** This class implements the rigid body dynamics integrator
     as described in;
-    
+
     "Symplectic splitting methods for rigid body molecular dynamics"
     Andreas Dullweber, Benedict Leimkuhler, Robert McLachlan
-    
+
     J. Chem. Phys., 107:15, 5840-5851, 1997
-    
-    This is a time-reversible, symplectic integrator for 
+
+    This is a time-reversible, symplectic integrator for
     general rigid bodies
-    
+
     @author Christopher Woods
 */
-class SIREMOVE_EXPORT DLMRigidBody 
+class SIREMOVE_EXPORT DLMRigidBody
         : public SireBase::ConcreteProperty<DLMRigidBody,Integrator>
 {
 
@@ -66,26 +65,26 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, DLMRigidBody&);
 
 public:
     DLMRigidBody(bool frequent_save_velocities = false);
-    
+
     DLMRigidBody(const DLMRigidBody &other);
-    
+
     ~DLMRigidBody();
-    
+
     DLMRigidBody& operator=(const DLMRigidBody &other);
-    
+
     bool operator==(const DLMRigidBody &other) const;
     bool operator!=(const DLMRigidBody &other) const;
-    
+
     static const char* typeName();
-    
+
     QString toString() const;
-    
+
     Ensemble ensemble() const;
-    
+
     bool isTimeReversible() const;
-    
+
     void integrate(IntegratorWorkspace &workspace,
-                   const Symbol &nrg_component, 
+                   const Symbol &nrg_component,
                    SireUnits::Dimension::Time timestep,
                    int nmoves, bool record_stats);
 

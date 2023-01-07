@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ LatticeCharge::LatticeCharge()
     {
         d[i] = 0;
     }
-    
+
     nprotons = 0;
 }
 
@@ -158,7 +157,7 @@ LatticeCharges::~LatticeCharges()
 {}
 
 /** Reserve space for 'n' lattice charges - this is useful to speed
-    things up by preventing memory reallocations if you already have 
+    things up by preventing memory reallocations if you already have
     a good idea of how many lattice charges you need */
 void LatticeCharges::reserve(int n)
 {
@@ -208,7 +207,7 @@ void LatticeCharges::set(int i, const LatticeCharge &point)
 void LatticeCharges::setElement(int i, const SireMol::Element &element)
 {
     LatticeCharge old = this->operator[](i);
-    
+
     this->set( i, LatticeCharge(old.x(), old.y(), old.z(), old.charge(), element) );
 }
 
@@ -216,7 +215,7 @@ void LatticeCharges::setElement(int i, const SireMol::Element &element)
 void LatticeCharges::setCoordinates(int i, const Vector &coords)
 {
     LatticeCharge old = this->operator[](i);
-    
+
     this->set( i, LatticeCharge(coords.x(), coords.y(), coords.z(), old.charge(), old.element()) );
 }
 
@@ -224,7 +223,7 @@ void LatticeCharges::setCoordinates(int i, const Vector &coords)
 void LatticeCharges::setCharge(int i, double charge)
 {
     LatticeCharge old = this->operator[](i);
-    
+
     this->set( i, LatticeCharge(old.x(), old.y(), old.z(), charge, old.element()) );
 }
 

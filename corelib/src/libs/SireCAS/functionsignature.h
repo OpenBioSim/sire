@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,7 +53,7 @@ class Function;
 
 /** This small class holds a signature for a function. This is ID that will uniquely
     ID a type of function, but not its current differentiation level.
-    
+
     \author Christopher Woods
 */
 class SIRECAS_EXPORT FunctionSignature
@@ -62,44 +61,44 @@ class SIRECAS_EXPORT FunctionSignature
 public:
     FunctionSignature()
     {}
-    
+
     FunctionSignature(const QString &name)
              : _name(name)
     {}
-    
+
     FunctionSignature(const QString &name, const QSet<SymbolID> &args)
              : _name(name), _args(args)
     {}
-    
+
     FunctionSignature(const FunctionSignature &other)
              : _name(other._name), _args(other._args)
     {}
-    
+
     ~FunctionSignature()
     {}
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return FunctionSignature::typeName();
     }
-    
+
     void add(SymbolID id)
     {
         _args.insert(id);
     }
-    
+
     void setName(const QString &name)
     {
         _name = name;
     }
-    
+
     bool operator==(const FunctionSignature &other) const
     {
         return _name == other._name and _args == other._args;
     }
-    
+
     bool operator!=(const FunctionSignature &other) const
     {
         return _name != other._name or _args != other._args;
@@ -121,7 +120,7 @@ public:
     }
 
 private:
-    
+
     QString _name;
     QSet<SymbolID> _args;
 };

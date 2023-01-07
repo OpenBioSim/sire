@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,10 +52,10 @@ class ReservationManager;
 
 /** This class provides the global registry for all nodes in the cluster.
     A node is defined as a resource that can run a WorkPacket. A node
-    consists of a Backend (the object in which the WorkPacket is 
+    consists of a Backend (the object in which the WorkPacket is
     run) and a Frontend (the object that allows the node to communicate
     with the Backend)
-    
+
     @author Christopher Woods
 */
 class SIRECLUSTER_EXPORT Cluster
@@ -67,20 +66,20 @@ friend class SireCluster::MPI::ReservationManager;
 
 public:
     static QList<QUuid> localUIDs();
-    
+
     static QList<QUuid> UIDs();
 
     static bool isLocal(const QUuid &uid);
 
     static int getRank();
     static int getCount();
-    
+
     static void start(int ppn=1);
 
     static void shutdown();
 
     static void wait();
-    
+
     static bool isRunning();
 
     static bool supportsMPI();
@@ -90,19 +89,19 @@ public:
 
     static Nodes getNode(const QUuid &uid);
     static Nodes getNode(const QUuid &uid, int timeout);
-    
+
     static Nodes getNodes(int nnodes);
     static Nodes getNodes(int nnodes, int timeout);
-    
+
     static Nodes getNodes(const QList<QUuid> &uids);
     static Nodes getNodes(const QList<QUuid> &uids, int timeout);
-    
+
     static Nodes getAllNodes();
     static Nodes getAllNodes(int timeout);
 
-protected:    
+protected:
     static void registerBackend(const Backend &backend);  // called by Backend
-    
+
     static QList<Frontend> localBackends(); // call by ReservationManager
 
 private:
@@ -117,7 +116,7 @@ private:
 
     static QList<Frontend> getFrontends(int n);
     static QList<Frontend> getFrontends(int n, int timeout);
-    
+
     static Frontend getFrontend(const QUuid &uid);
     static Frontend getFrontend(const QUuid &uid, int timeout);
 };

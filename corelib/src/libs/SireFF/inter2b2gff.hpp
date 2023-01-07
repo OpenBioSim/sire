@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,17 +49,17 @@ namespace SireFF
 {
 
 /** This class provides an intermolecular non-bonded forcefield
-    that can work with any two-body potential (provided via the 
+    that can work with any two-body potential (provided via the
     template type 'Potential') that calculates the intermolecular
     energy between two groups of molecules (this doesn't calculate
     the intermolecular energy within either group, just between
-    the two groups) 
-    
+    the two groups)
+
     @author Christopher Woods
 */
 template<class Potential>
-class Inter2B2GFF 
-              : public SireBase::ConcreteProperty<Inter2B2GFF<Potential>, G2FF>, 
+class Inter2B2GFF
+              : public SireBase::ConcreteProperty<Inter2B2GFF<Potential>, G2FF>,
                 public Potential
 {
 
@@ -72,17 +71,17 @@ public:
 
     Inter2B2GFF();
     Inter2B2GFF(const QString &name);
-    
+
     Inter2B2GFF(const Inter2B2GFF<Potential> &other);
-    
+
     ~Inter2B2GFF();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     Inter2B2GFF<Potential>& operator=(const Inter2B2GFF<Potential> &other);
-    
+
     bool operator==(const Inter2B2GFF<Potential> &other) const;
     bool operator!=(const Inter2B2GFF<Potential> &other) const;
 
@@ -95,7 +94,7 @@ public:
     bool containsProperty(const QString &name) const;
     const Properties& properties() const;
 
-    void mustNowRecalculateFromScratch();    
+    void mustNowRecalculateFromScratch();
 
 protected:
 
@@ -117,17 +116,17 @@ protected:
 
     void changedPotential();
 
-    void _pvt_added(quint32 groupid, const PartialMolecule &mol, 
+    void _pvt_added(quint32 groupid, const PartialMolecule &mol,
                     const PropertyMap &map);
 
     void _pvt_removed(quint32 groupid, const PartialMolecule &mol);
 
     void _pvt_changed(quint32 groupid, const SireMol::Molecule &molecule, bool auto_commit);
     void _pvt_changed(quint32 groupid, const QList<SireMol::Molecule> &molecules, bool auto_commit);
-    
+
     void _pvt_removedAll(quint32 groupid);
-        
-    bool _pvt_wouldChangeProperties(quint32 groupid, MolNum molnum, 
+
+    bool _pvt_wouldChangeProperties(quint32 groupid, MolNum molnum,
                                     const PropertyMap &map) const;
 
     void _pvt_updateName();
@@ -155,8 +154,8 @@ protected:
 /** Constructor */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-Inter2B2GFF<Potential>::Inter2B2GFF() 
-                       : SireBase::ConcreteProperty<Inter2B2GFF<Potential>,G2FF>(), 
+Inter2B2GFF<Potential>::Inter2B2GFF()
+                       : SireBase::ConcreteProperty<Inter2B2GFF<Potential>,G2FF>(),
                          Potential()
 {
     this->_pvt_updateName();
@@ -166,7 +165,7 @@ Inter2B2GFF<Potential>::Inter2B2GFF()
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 Inter2B2GFF<Potential>::Inter2B2GFF(const QString &ffname)
-                       : SireBase::ConcreteProperty<Inter2B2GFF<Potential>,G2FF>(), 
+                       : SireBase::ConcreteProperty<Inter2B2GFF<Potential>,G2FF>(),
                          Potential()
 {
     FF::setName(ffname);
@@ -176,7 +175,7 @@ Inter2B2GFF<Potential>::Inter2B2GFF(const QString &ffname)
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 Inter2B2GFF<Potential>::Inter2B2GFF(const Inter2B2GFF<Potential> &other)
-                     : SireBase::ConcreteProperty<Inter2B2GFF<Potential>,G2FF>(other), 
+                     : SireBase::ConcreteProperty<Inter2B2GFF<Potential>,G2FF>(other),
                        Potential(other),
                        ffcomponents(other.ffcomponents)
 {
@@ -196,23 +195,23 @@ Inter2B2GFF<Potential>::~Inter2B2GFF()
 /** Copy assignment operator */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
-Inter2B2GFF<Potential>& 
+Inter2B2GFF<Potential>&
 Inter2B2GFF<Potential>::operator=(const Inter2B2GFF<Potential> &other)
 {
     if (this != &other)
     {
         G2FF::operator=(other);
         Potential::operator=(other);
-        
+
         for (int i=0; i<2; ++i)
         {
             mols[i] = other.mols[i];
             changed_mols[i] = other.changed_mols[i];
         }
-        
+
         ffcomponents = other.ffcomponents;
     }
-    
+
     return *this;
 }
 
@@ -263,7 +262,7 @@ const typename Potential::Components& Inter2B2GFF<Potential>::components() const
     return ffcomponents;
 }
 
-/** Function used to perform the work of changing the name of this 
+/** Function used to perform the work of changing the name of this
     forcefield - this renames the component symbols and the molecule group */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
@@ -312,10 +311,10 @@ const Properties& Inter2B2GFF<Potential>::properties() const
     return Potential::properties();
 }
 
-/** Tell the forcefield that everything now should be calculated 
+/** Tell the forcefield that everything now should be calculated
     from scratch (and thus to stop recording changes). This is a useful
     function to call if you are about to make many changes to this
-    forcefield (e.g. performing an MD move), as this prevents the 
+    forcefield (e.g. performing an MD move), as this prevents the
     potentially costly record keeping needed to calculate the change
     in energy associated with the move. */
 template<class Potential>
@@ -324,7 +323,7 @@ void Inter2B2GFF<Potential>::mustNowRecalculateFromScratch()
 {
     //record that this forcefield is dirty
     G2FF::setDirty();
-    
+
     //now clear any delta information
     for (int i=0; i<2; ++i)
     {
@@ -332,7 +331,7 @@ void Inter2B2GFF<Potential>::mustNowRecalculateFromScratch()
     }
 }
 
-/** Return whether or not we need to record the changes to this   
+/** Return whether or not we need to record the changes to this
     forcefield (not necessary if the energy has to be recalculated
     from scratch) */
 template<class Potential>
@@ -353,22 +352,22 @@ void Inter2B2GFF<Potential>::recordChange(quint32 groupid,
         return;
 
     MolNum molnum = change.number();
-    
+
     if (changed_mols[groupid].contains(molnum))
     {
         ChangedMolecule &old_change = changed_mols[groupid][molnum];
-        
+
         if (old_change.oldMolecule() == change.newMolecule())
         {
             //we have reverted the change!
             changed_mols[groupid].remove(molnum);
-            
+
             if (changed_mols[0].isEmpty() and changed_mols[1].isEmpty())
             {
                 //there are now no changes
                 G2FF::setClean();
             }
-            
+
             return;
         }
         else
@@ -381,7 +380,7 @@ void Inter2B2GFF<Potential>::recordChange(quint32 groupid,
     {
         changed_mols[groupid].insert(molnum, change);
     }
-    
+
     G2FF::setDirty();
 }
 
@@ -404,7 +403,7 @@ void Inter2B2GFF<Potential>::changedPotential()
     this->mustNowRecalculateFromScratch();
 }
 
-/** Record the fact that the molecule 'mol' has been added to this forcefield 
+/** Record the fact that the molecule 'mol' has been added to this forcefield
 
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -413,7 +412,7 @@ void Inter2B2GFF<Potential>::changedPotential()
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 void Inter2B2GFF<Potential>::_pvt_added(quint32 groupid,
-                                      const PartialMolecule &molecule, 
+                                      const PartialMolecule &molecule,
                                       const PropertyMap &map)
 {
     if (this->recordingChanges())
@@ -470,7 +469,7 @@ void Inter2B2GFF<Potential>::_pvt_changed(quint32 groupid,
     }
 }
 
-/** Record that the provided list of molecules have changed 
+/** Record that the provided list of molecules have changed
 
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -488,7 +487,7 @@ void Inter2B2GFF<Potential>::_pvt_changed(quint32 groupid,
     try
     {
         if (this->recordingChanges())
-        {   
+        {
             for (QList<SireMol::Molecule>::const_iterator it = molecules.constBegin();
                  it != molecules.constEnd();
                  ++it)
@@ -505,7 +504,7 @@ void Inter2B2GFF<Potential>::_pvt_changed(quint32 groupid,
             {
                 mols[groupid].change(*it, *this, false);
             }
-            
+
             G2FF::setDirty();
         }
     }
@@ -516,7 +515,7 @@ void Inter2B2GFF<Potential>::_pvt_changed(quint32 groupid,
         throw;
     }
 }
-    
+
 /** Record that all of the molecules have been removed */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
@@ -526,13 +525,13 @@ void Inter2B2GFF<Potential>::_pvt_removedAll(quint32 groupid)
 
     this->mustNowRecalculateFromScratch();
 }
- 
+
 /** Return whether or not the supplied property map contains different
-    properties for the molecule with number 'molnum' */       
+    properties for the molecule with number 'molnum' */
 template<class Potential>
 SIRE_OUTOFLINE_TEMPLATE
 bool Inter2B2GFF<Potential>::_pvt_wouldChangeProperties(quint32 groupid,
-                                                      MolNum molnum, 
+                                                      MolNum molnum,
                                                       const PropertyMap &map) const
 {
     return mols[groupid].wouldChangeProperties(molnum, map);
@@ -547,7 +546,7 @@ SIRE_OUTOFLINE_TEMPLATE
 void Inter2B2GFF<Potential>::recalculateEnergy()
 {
     int nmols0 = mols[0].count();
-    const ChunkedVector<typename Potential::Molecule> &mols0_array 
+    const ChunkedVector<typename Potential::Molecule> &mols0_array
                             = mols[0].moleculesByIndex();
 
     int nmols1 = mols[1].count();
@@ -571,14 +570,14 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
         for (int i=0; i<nmols0; ++i)
         {
             const typename Potential::Molecule &mol0 = mols0_array[i];
-        
+
             for (int j=0; j<nmols1; ++j)
             {
                 const typename Potential::Molecule &mol1 = mols1_array[j];
                 Potential::calculateEnergy(mol0, mol1, total_nrg, workspace);
             }
         }
-        
+
         //set the energy
         this->components().setEnergy(*this, total_nrg);
     }
@@ -590,13 +589,13 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
 
         EnergyWorkspace old_workspace;
         EnergyWorkspace new_workspace;
-        
+
         if (changed_mols[0].count() == 1 and changed_mols[1].isEmpty())
         {
             //only need to calculate the energy of changed_mol0 with changed_mols1
-            const typename Potential::ChangedMolecule &changed_mol = 
+            const typename Potential::ChangedMolecule &changed_mol =
                                             *(changed_mols[0].constBegin());
-                         
+
             for (int i=0; i<nmols1; ++i)
             {
                 const typename Potential::Molecule &mol = mols1_array[i];
@@ -611,9 +610,9 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
         else if (changed_mols[0].isEmpty() and changed_mols[1].count() == 1)
         {
             //only need to calculate the energy of changed_mol0 with changed_mols1
-            const typename Potential::ChangedMolecule &changed_mol = 
+            const typename Potential::ChangedMolecule &changed_mol =
                                             *(changed_mols[1].constBegin());
-                         
+
             for (int i=0; i<nmols0; ++i)
             {
                 const typename Potential::Molecule &mol = mols0_array[i];
@@ -625,19 +624,19 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
                                            new_nrg, new_workspace);
             }
         }
-        else 
+        else
         {
             if (not changed_mols[1].isEmpty())
             {
                 for (int i=0; i<nmols0; ++i)
                 {
                     const typename Potential::Molecule &mol0 = mols0_array[i];
-                    
+
                     if (changed_mols[0].contains(mol0.number()))
-                        //this molecule has changed as well - deal with 
+                        //this molecule has changed as well - deal with
                         //this later...
                         continue;
-                        
+
                     for (typename QHash<MolNum,ChangedMolecule>::const_iterator it
                                                    = changed_mols[1].constBegin();
                          it != changed_mols[1].constEnd();
@@ -645,24 +644,24 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
                     {
                         Potential::calculateEnergy(mol0, it->oldParts(),
                                                    old_nrg, old_workspace);
-                                                   
+
                         Potential::calculateEnergy(mol0, it->newParts(),
                                                    new_nrg, new_workspace);
                     }
                 }
             }
-            
+
             if (not changed_mols[0].isEmpty())
             {
                 for (int i=0; i<nmols1; ++i)
                 {
                     const typename Potential::Molecule &mol1 = mols1_array[i];
-                    
+
                     if (changed_mols[1].contains(mol1.number()))
                         //this molecule has changed as well - deal with
                         //this later...
                         continue;
-                        
+
                     for (typename QHash<MolNum,ChangedMolecule>::const_iterator it
                                                   = changed_mols[0].constBegin();
                          it != changed_mols[0].constEnd();
@@ -670,13 +669,13 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
                     {
                         Potential::calculateEnergy(mol1, it->oldParts(),
                                                    old_nrg, old_workspace);
-                                                   
+
                         Potential::calculateEnergy(mol1, it->newParts(),
                                                    new_nrg, new_workspace);
                     }
                 }
             }
-            
+
             //now calculate the energy change between the changed molecules
             //of group0 and the changed molecules of group1
             if ( not (changed_mols[0].isEmpty() and changed_mols[1].isEmpty()) )
@@ -687,7 +686,7 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
                      ++it0)
                 {
                     bool changed_all_0 = it0->changedAll();
-                
+
                     for (typename QHash<MolNum,ChangedMolecule>::const_iterator it1
                                                    = changed_mols[1].constBegin();
                          it1 != changed_mols[1].constEnd();
@@ -699,7 +698,7 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
                             Potential::calculateEnergy( it0->oldMolecule(),
                                                         it1->oldMolecule(),
                                                         old_nrg, old_workspace );
-                                                        
+
                             Potential::calculateEnergy( it0->newMolecule(),
                                                         it1->newMolecule(),
                                                         new_nrg, new_workspace );
@@ -707,30 +706,30 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
                         else
                         {
                             //part of mol0 has changed and part of mol1 has changed
-                            // - calculate the energies of the changes with 
+                            // - calculate the energies of the changes with
                             //   the whole of the other molecule...
                             Potential::calculateEnergy( it0->oldParts(),
                                                         it1->oldMolecule(),
                                                         old_nrg, old_workspace );
-                                                        
+
                             Potential::calculateEnergy( it0->newParts(),
                                                         it1->newMolecule(),
                                                         new_nrg, new_workspace );
-                                                        
+
                             Potential::calculateEnergy( it1->oldParts(),
                                                         it0->oldMolecule(),
                                                         old_nrg, old_workspace );
-                                                        
+
                             Potential::calculateEnergy( it1->newParts(),
                                                         it0->newMolecule(),
                                                         new_nrg, new_workspace );
-                                                        
+
                             //now we need to subtract the double counted changed
                             //parts of mol0 with changed parts of mol1
                             Potential::calculateEnergy( it0->oldParts(),
                                                         it1->oldParts(),
                                                         old_nrg, old_workspace, -1 );
-                                                        
+
                             Potential::calculateEnergy( it0->newParts(),
                                                         it1->newParts(),
                                                         new_nrg, new_workspace, -1 );
@@ -739,19 +738,19 @@ void Inter2B2GFF<Potential>::recalculateEnergy()
                 }
             }
         }
-         
+
         //change the energy
         this->components().changeEnergy(*this, new_nrg - old_nrg);
-        
+
         //clear the changed molecules
         changed_mols[0].clear();
         changed_mols[1].clear();
     }
 
     Potential::finishedEvaluation();
-    
+
     this->setClean();
-    
+
     }
     catch(...)
     {
@@ -776,7 +775,7 @@ struct Inter2B2GRMT
 };
 
 template<class Potential>
-const RegisterMetaType< SireFF::Inter2B2GFF<Potential> > 
+const RegisterMetaType< SireFF::Inter2B2GFF<Potential> >
 Inter2B2GRMT<Potential>::r_inter2b2gff;
 
 } // end of namespace detail
@@ -789,16 +788,16 @@ SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator<<(QDataStream &ds,
                         const SireFF::Inter2B2GFF<Potential> &inter2b2gff)
 {
-    SireStream::writeHeader(ds, 
+    SireStream::writeHeader(ds,
                 SireFF::detail::Inter2B2GRMT<Potential>::r_inter2b2gff, 1);
-    
+
     SireStream::SharedDataStream sds(ds);
-    
-    sds << inter2b2gff.mols[0] << inter2b2gff.mols[1] 
+
+    sds << inter2b2gff.mols[0] << inter2b2gff.mols[1]
         << inter2b2gff.changed_mols[0] << inter2b2gff.changed_mols[1]
         << static_cast<const Potential&>(inter2b2gff)
         << static_cast<const SireFF::G2FF&>(inter2b2gff);
-        
+
     return ds;
 }
 
@@ -808,20 +807,20 @@ SIRE_OUTOFLINE_TEMPLATE
 QDataStream& operator>>(QDataStream &ds,
                         SireFF::Inter2B2GFF<Potential> &inter2b2gff)
 {
-    SireStream::VersionID v = SireStream::readHeader(ds, 
+    SireStream::VersionID v = SireStream::readHeader(ds,
                                SireFF::detail::Inter2B2GRMT<Potential>::r_inter2b2gff);
-                                        
+
     if (v == 1)
     {
         SireStream::SharedDataStream sds(ds);
-        
-        sds >> inter2b2gff.mols[0] >> inter2b2gff.mols[1] 
+
+        sds >> inter2b2gff.mols[0] >> inter2b2gff.mols[1]
             >> inter2b2gff.changed_mols[0] >> inter2b2gff.changed_mols[1]
             >> static_cast<Potential&>(inter2b2gff)
             >> static_cast<SireFF::G2FF&>(inter2b2gff);
-            
+
         inter2b2gff._pvt_updateName();
-        
+
         return ds;
     }
     else

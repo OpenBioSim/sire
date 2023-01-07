@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,42 +43,42 @@ class MemInfoPvt;
 }
 
 /** This class holds information about the current memory usage
-    of the process 
-    
+    of the process
+
     @author Christopher Woods
 */
 class SIREBASE_EXPORT MemInfo
 {
 public:
     MemInfo();
-    
+
     MemInfo(const MemInfo &other);
-    
+
     ~MemInfo();
-    
+
     MemInfo& operator=(const MemInfo &other);
-    
+
     QString toString() const;
-    
+
     quint64 allocatedBytes() const;
     quint64 mMappedBytes() const;
-    
+
     quint64 usedBytes() const;
-    
+
     quint64 totalSystemMemory() const;
     quint64 totalVirtualMemory() const;
-    
+
     quint64 usedSystemMemory() const;
     quint64 usedVirtualMemory() const;
-    
+
     static MemInfo takeMeasurement();
-    
+
     static void startMonitoring(int ms=1000);
     static void startMonitoring(const QString &filename, int ms=1000);
-    
+
     static void stopMonitoring();
-    
-private:  
+
+private:
     /** PIMPL pointer */
     boost::shared_ptr<detail::MemInfoPvt> d;
 };

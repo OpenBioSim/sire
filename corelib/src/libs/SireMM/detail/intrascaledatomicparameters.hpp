@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,10 +50,10 @@ class IntraScaledAtomicParameters;
 }
 
 template<class SCALE_FACTORS>
-QDataStream& operator<<(QDataStream&, 
+QDataStream& operator<<(QDataStream&,
                         const SireMM::detail::IntraScaledParameters<SCALE_FACTORS>&);
 template<class SCALE_FACTORS>
-QDataStream& operator>>(QDataStream&, 
+QDataStream& operator>>(QDataStream&,
                         SireMM::detail::IntraScaledParameters<SCALE_FACTORS>&);
 
 template<class ATOMPARAM, class INTRASCALE>
@@ -80,10 +79,10 @@ class SIREMM_EXPORT IntraScaleParameterName
 public:
     IntraScaleParameterName()
     {}
-    
+
     ~IntraScaleParameterName()
     {}
-    
+
     const QString& intraScaleFactors() const
     {
         return nbscl_param;
@@ -95,73 +94,73 @@ private:
 
 /** This class represents parameters that are scaled using information
     stored in the object of type 'SCALE_FACTORS'
-    
+
     @author Christopher Woods
-*/ 
+*/
 template<class SCALE_FACTORS>
 class IntraScaledParameters
 {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<<>(QDataStream&, 
+friend SIREMM_EXPORT QDataStream& ::operator<<<>(QDataStream&,
                                    const IntraScaledParameters<SCALE_FACTORS>&);
-friend SIREMM_EXPORT QDataStream& ::operator>><>(QDataStream&, 
+friend SIREMM_EXPORT QDataStream& ::operator>><>(QDataStream&,
                                    IntraScaledParameters<SCALE_FACTORS>&);
 
 public:
     typedef SCALE_FACTORS ScaleFactors;
 
     IntraScaledParameters();
-    
+
     IntraScaledParameters(const PartialMolecule &molecule,
                           const PropertyName &scale_property);
-                          
+
     IntraScaledParameters(const SCALE_FACTORS &scale_factors);
-                          
+
     IntraScaledParameters(const IntraScaledParameters<SCALE_FACTORS> &other);
-    
+
     ~IntraScaledParameters();
-    
+
     IntraScaledParameters<SCALE_FACTORS> operator=(
                         const IntraScaledParameters<SCALE_FACTORS> &other);
-                                
+
     bool operator==(const IntraScaledParameters<SCALE_FACTORS> &other) const;
     bool operator!=(const IntraScaledParameters<SCALE_FACTORS> &other) const;
-    
+
     int nGroups() const;
-    
+
     const ScaleFactors& intraScaleFactors() const;
-    
+
     void setIntraScaleFactors(const IntraScaledParameters<SCALE_FACTORS> &other);
-    
+
     bool changedAllGroups(const IntraScaledParameters<SCALE_FACTORS> &other) const;
-    
+
     QSet<quint32> getChangedGroups(
                     const IntraScaledParameters<SCALE_FACTORS> &params) const;
-    
+
     void addChangedGroups(
             const IntraScaledParameters<SCALE_FACTORS> &params,
             QSet<quint32> &changed_groups) const;
-    
+
     IntraScaledParameters<SCALE_FACTORS> applyMask(const QSet<quint32> &idxs) const;
 
 protected:
-    /** The intramolecular inter-atomic scale factors to apply to 
+    /** The intramolecular inter-atomic scale factors to apply to
         the potential between intramolecular pairs of atoms */
     ScaleFactors sclfactors;
 };
 
 /** Atomic parameters that use a scale factor
     for intramolecular atom pairs
-    
+
     @author Christopher Woods
 */
 template<class ATOMPARAM, class INTRASCALE>
 class IntraScaledAtomicParameters : public ATOMPARAM, public INTRASCALE
 {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<<>(QDataStream&, 
+friend SIREMM_EXPORT QDataStream& ::operator<<<>(QDataStream&,
                          const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>&);
-friend SIREMM_EXPORT QDataStream& ::operator>><>(QDataStream&, 
+friend SIREMM_EXPORT QDataStream& ::operator>><>(QDataStream&,
                          IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>&);
 
 public:
@@ -170,36 +169,36 @@ public:
     typedef typename INTRASCALE::ScaleFactors ScaleFactors;
 
     IntraScaledAtomicParameters();
-                          
+
     IntraScaledAtomicParameters(const ATOMPARAM &parameters,
                                 const INTRASCALE &sclfactors);
-                          
+
     IntraScaledAtomicParameters(
             const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &other);
-    
+
     ~IntraScaledAtomicParameters();
-    
+
     IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> operator=(
                         const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &other);
-                                
+
     bool operator==(
             const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &other) const;
     bool operator!=(
             const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &other) const;
-    
+
     int nGroups() const;
-    
+
     bool changedAllGroups(
             const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &other) const;
-    
+
     QSet<quint32> getChangedGroups(
             const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &params) const;
-    
+
     void addChangedGroups(
             const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &params,
             QSet<quint32> &changed_groups) const;
-    
-    IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> 
+
+    IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>
     applyMask(const QSet<quint32> &idxs) const;
 };
 
@@ -217,7 +216,7 @@ IntraScaledParameters<SCALE_FACTORS>::IntraScaledParameters()
 
 /** Construct for the molecule 'molecule' using the specified properties
     to find the coordinates and scale factor properties
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
 */
@@ -238,7 +237,7 @@ IntraScaledParameters<SCALE_FACTORS>::IntraScaledParameters(
                               const SCALE_FACTORS &scale_factors)
                 : sclfactors(scale_factors)
 {}
-                              
+
 /** Copy constructor */
 template<class SCALE_FACTORS>
 SIRE_OUTOFLINE_TEMPLATE
@@ -262,8 +261,8 @@ IntraScaledParameters<SCALE_FACTORS> IntraScaledParameters<SCALE_FACTORS>::opera
     sclfactors = other.sclfactors;
     return *this;
 }
-                 
-/** Comparison operator */           
+
+/** Comparison operator */
 template<class SCALE_FACTORS>
 SIRE_OUTOFLINE_TEMPLATE
 bool IntraScaledParameters<SCALE_FACTORS>::operator==(
@@ -289,7 +288,7 @@ int IntraScaledParameters<SCALE_FACTORS>::nGroups() const
     return sclfactors.nGroups();
 }
 
-/** Return the inter-atomic intramolecular scale factors for the 
+/** Return the inter-atomic intramolecular scale factors for the
     intramolecular atom-atom interactions */
 template<class SCALE_FACTORS>
 SIRE_OUTOFLINE_TEMPLATE
@@ -332,7 +331,7 @@ void IntraScaledParameters<SCALE_FACTORS>::addChangedGroups(
         {
             changed_groups.insert(i);
         }
-        
+
         return;
     }
 }
@@ -344,21 +343,21 @@ QSet<quint32> IntraScaledParameters<SCALE_FACTORS>::getChangedGroups(
                         const IntraScaledParameters<SCALE_FACTORS> &other) const
 {
     QSet<quint32> changed_groups;
- 
+
     if (sclfactors != other.sclfactors)
     {
         changed_groups.reserve(this->nGroups());
         this->addChangedGroups(other, changed_groups);
     }
-    
+
     return changed_groups;
 }
 
-/** Mask these parameters so that only the atomic parameters for the 
+/** Mask these parameters so that only the atomic parameters for the
     CutGroups whose indicies are in 'cgidxs' are present. */
 template<class SCALE_FACTORS>
 SIRE_OUTOFLINE_TEMPLATE
-IntraScaledParameters<SCALE_FACTORS> 
+IntraScaledParameters<SCALE_FACTORS>
 IntraScaledParameters<SCALE_FACTORS>::applyMask(const QSet<quint32>&) const
 {
     //there is no way to mask the intramolecular scale factors
@@ -376,7 +375,7 @@ IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::IntraScaledAtomicParameters()
               : ATOMPARAM(), INTRASCALE()
 {}
 
-/** Construct using the passed parameters */                    
+/** Construct using the passed parameters */
 template<class ATOMPARAM, class INTRASCALE>
 SIRE_OUTOFLINE_TEMPLATE
 IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::IntraScaledAtomicParameters(
@@ -385,8 +384,8 @@ IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::IntraScaledAtomicParameters(
               : ATOMPARAM(parameters),
                 INTRASCALE(sclfactors)
 {}
- 
-/** Copy constructor */                     
+
+/** Copy constructor */
 template<class ATOMPARAM, class INTRASCALE>
 SIRE_OUTOFLINE_TEMPLATE
 IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::IntraScaledAtomicParameters(
@@ -403,17 +402,17 @@ IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::~IntraScaledAtomicParameters(
 /** Copy assignment operator */
 template<class ATOMPARAM, class INTRASCALE>
 SIRE_OUTOFLINE_TEMPLATE
-IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> 
+IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>
 IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::operator=(
                     const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &other)
 {
     ATOMPARAM::operator=(other);
     INTRASCALE::operator=(other);
-    
+
     return *this;
 }
 
-/** Comparison operator */           
+/** Comparison operator */
 template<class ATOMPARAM, class INTRASCALE>
 SIRE_OUTOFLINE_TEMPLATE
 bool IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::operator==(
@@ -439,7 +438,7 @@ SIRE_OUTOFLINE_TEMPLATE
 int IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::nGroups() const
 {
     BOOST_ASSERT(ATOMPARAM::nGroups() == INTRASCALE::nGroups());
-                 
+
     return ATOMPARAM::nGroups();
 }
 
@@ -459,11 +458,11 @@ SIRE_OUTOFLINE_TEMPLATE
 QSet<quint32> IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::getChangedGroups(
         const IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &other) const
 {
-    QSet<quint32> changed_groups 
+    QSet<quint32> changed_groups
                 = INTRASCALE::getChangedGroups(other);
-                
+
     ATOMPARAM::addChangedGroups(other, changed_groups);
-    
+
     return changed_groups;
 }
 
@@ -499,7 +498,7 @@ IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE>::applyMask(
 
 /** Serialise to a binary datastream */
 template<class INTRASCALE>
-QDataStream& operator<<(QDataStream &ds, 
+QDataStream& operator<<(QDataStream &ds,
                         const SireMM::detail::IntraScaledParameters<INTRASCALE> &params)
 {
     ds << params.sclfactors;
@@ -508,7 +507,7 @@ QDataStream& operator<<(QDataStream &ds,
 
 /** Extract from a binary datastream */
 template<class INTRASCALE>
-QDataStream& operator>>(QDataStream &ds, 
+QDataStream& operator>>(QDataStream &ds,
                         SireMM::detail::IntraScaledParameters<INTRASCALE> &params)
 {
     ds >> params.sclfactors;
@@ -517,23 +516,23 @@ QDataStream& operator>>(QDataStream &ds,
 
 /** Serialise to a binary datastream */
 template<class ATOMPARAM, class INTRASCALE>
-QDataStream& operator<<(QDataStream &ds, 
+QDataStream& operator<<(QDataStream &ds,
       const SireMM::detail::IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &params)
 {
     ds << static_cast<const ATOMPARAM&>(params)
        << static_cast<const INTRASCALE&>(params);
-       
+
     return ds;
 }
 
 /** Extract from a binary datastream */
 template<class ATOMPARAM, class INTRASCALE>
-QDataStream& operator>>(QDataStream &ds, 
+QDataStream& operator>>(QDataStream &ds,
       SireMM::detail::IntraScaledAtomicParameters<ATOMPARAM,INTRASCALE> &params)
 {
     ds >> static_cast<ATOMPARAM&>(params)
        >> static_cast<INTRASCALE&>(params);
-       
+
     return ds;
 }
 

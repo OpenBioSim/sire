@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -147,17 +146,17 @@ MultiDouble::MultiDouble(const double *array, int size)
     else
     {
         double tmp[MULTIFLOAT_SIZE];
-        
+
         for (int i=0; i<size; ++i)
         {
             tmp[i] = array[i];
         }
-        
+
         for (int i=size; i<MULTIFLOAT_SIZE; ++i)
         {
             tmp[i] = 0;
         }
-        
+
         #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
             v.x[0] = _mm256_set_pd(tmp[3], tmp[2], tmp[1], tmp[0]);
             v.x[1] = _mm256_set_pd(tmp[7], tmp[6], tmp[5], tmp[4]);
@@ -191,7 +190,7 @@ MultiDouble::MultiDouble(const QVector<float> &array)
 
     QVector<double> darray;
     darray.reserve(array.count());
-    
+
     for (int i=0; i<array.count(); ++i)
     {
         darray.append(array.constData()[i]);
@@ -235,16 +234,16 @@ QVector<MultiDouble> MultiDouble::fromArray(const double *array, int size)
 {
     if (size == 0)
         return QVector<MultiDouble>();
-    
+
     int nvecs = size / MULTIFLOAT_SIZE;
     int nremain = size % MULTIFLOAT_SIZE;
-    
+
     QVector<MultiDouble> marray(nvecs + ( (nremain > 0) ? 1 : 0 ));
-    
+
     MultiDouble *ma = marray.data();
-    
+
     int idx = 0;
-    
+
     #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
         if (isAligned16(array))
         {
@@ -253,7 +252,7 @@ QVector<MultiDouble> MultiDouble::fromArray(const double *array, int size)
                 ma[i] = MultiDouble(array+idx, MULTIFLOAT_SIZE);
                 idx += MULTIFLOAT_SIZE;
             }
-    
+
             if (nremain > 0)
             {
                 ma[marray.count()-1] = MultiDouble(array+idx, nremain);
@@ -270,10 +269,10 @@ QVector<MultiDouble> MultiDouble::fromArray(const double *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-            
+
                 ma[i] = MultiDouble((double*)(&tmp), MULTIFLOAT_SIZE);
             }
-            
+
             if (nremain > 0)
             {
                 for (int j=0; j<nremain; ++j)
@@ -281,7 +280,7 @@ QVector<MultiDouble> MultiDouble::fromArray(const double *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-                
+
                 ma[marray.count()-1] = MultiDouble((double*)(&tmp), nremain);
             }
         }
@@ -293,7 +292,7 @@ QVector<MultiDouble> MultiDouble::fromArray(const double *array, int size)
                 ma[i] = MultiDouble(array+idx, MULTIFLOAT_SIZE);
                 idx += MULTIFLOAT_SIZE;
             }
-    
+
             if (nremain > 0)
             {
                 ma[marray.count()-1] = MultiDouble(array+idx, nremain);
@@ -310,10 +309,10 @@ QVector<MultiDouble> MultiDouble::fromArray(const double *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-            
+
                 ma[i] = MultiDouble((double*)(&tmp), MULTIFLOAT_SIZE);
             }
-            
+
             if (nremain > 0)
             {
                 for (int j=0; j<nremain; ++j)
@@ -321,7 +320,7 @@ QVector<MultiDouble> MultiDouble::fromArray(const double *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-                
+
                 ma[marray.count()-1] = MultiDouble((double*)(&tmp), nremain);
             }
         }
@@ -336,7 +335,7 @@ QVector<MultiDouble> MultiDouble::fromArray(const double *array, int size)
         assertAligned32(marray.constData(), CODELOC);
     #endif
     #endif
-    
+
     return marray;
 }
 
@@ -357,15 +356,15 @@ QVector<MultiDouble> MultiDouble::fromArray(const float *array, int size)
     #else
         double _ALIGNED(32) tmp[MULTIFLOAT_SIZE];
     #endif
-    
+
     int nvecs = size / MULTIFLOAT_SIZE;
     int nremain = size % MULTIFLOAT_SIZE;
 
     QVector<MultiDouble> marray(nvecs + ( (nremain > 0) ? 1 : 0 ));
     MultiDouble *a = marray.data();
-    
+
     int idx = 0;
-    
+
     for (int i=0; i<nvecs; ++i)
     {
         for (int j=0; j<MULTIFLOAT_SIZE; ++j)
@@ -373,10 +372,10 @@ QVector<MultiDouble> MultiDouble::fromArray(const float *array, int size)
             tmp[j] = array[idx];
             ++idx;
         }
-    
+
         a[i] = MultiDouble((double*)(&tmp), MULTIFLOAT_SIZE);
     }
-    
+
     if (nremain > 0)
     {
         for (int j=0; j<nremain; ++j)
@@ -384,10 +383,10 @@ QVector<MultiDouble> MultiDouble::fromArray(const float *array, int size)
             tmp[j] = array[idx];
             ++idx;
         }
-        
+
         a[marray.count()-1] = MultiDouble((double*)(&tmp), nremain);
     }
-    
+
     #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
         assertAligned32(marray.constData(), CODELOC);
     #else
@@ -413,20 +412,20 @@ QVector<double> MultiDouble::toArray(const QVector<MultiDouble> &array)
 {
     if (array.isEmpty())
         return QVector<double>();
-    
+
     QVector<double> ret;
     ret.reserve( array.count() * MULTIFLOAT_SIZE );
-    
+
     for (int i=0; i<array.count(); ++i)
     {
         const MultiDouble &f = array.constData()[i];
-        
+
         for (int j=0; j<MULTIFLOAT_SIZE; ++j)
         {
             ret.append(f[j]);
         }
     }
-    
+
     return ret;
 }
 
@@ -513,14 +512,14 @@ double MultiDouble::at(int i) const
 {
     if (i < 0)
         i = MULTIFLOAT_SIZE + i;
-    
+
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
         throw SireError::invalid_index( QObject::tr(
                 "Cannot access element %1 of MultiDouble (holds only %2 values)")
                     .arg(i).arg(MULTIFLOAT_SIZE), CODELOC );
     }
-    
+
     return v.a[i];
 }
 
@@ -533,12 +532,12 @@ double MultiDouble::getitem(int i) const
 MultiDouble MultiDouble::operator-() const
 {
     MultiDouble ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = -v.a[i];
     }
-    
+
     return ret;
 }
 
@@ -547,7 +546,7 @@ void MultiDouble::set(int i, double value)
 {
     if (i < 0)
         i = MULTIFLOAT_SIZE + i;
-    
+
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
         throw SireError::invalid_index( QObject::tr(
@@ -583,33 +582,33 @@ const char* MultiDouble::typeName()
 QString MultiDouble::toString() const
 {
     QStringList vals;
-    
+
     for (int i=0; i<this->count(); ++i)
     {
         vals.append( QString::number(v.a[i]) );
     }
-    
+
     return QObject::tr("{ %1 }").arg(vals.join(", "));
 }
 
 QString MultiDouble::toBinaryString() const
 {
     QStringList vals;
-    
+
     for (int i=0; i<this->count(); ++i)
     {
         const unsigned char *c = reinterpret_cast<const unsigned char*>(&(v.a[i]));
-        
+
         QString val("0x");
-        
+
         for (unsigned int j=0; j<sizeof(double); ++j)
         {
             val.append( QString("%1").arg((unsigned short)(c[j]), 2, 16, QChar('0')) );
         }
-        
+
         vals.append(val);
     }
-    
+
     return QObject::tr("{ %1 }").arg(vals.join(", "));
 }
 

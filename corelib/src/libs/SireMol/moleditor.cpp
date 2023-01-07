@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -66,9 +65,9 @@ QDataStream &operator<<(QDataStream &ds,
                                        const MolEditor &moleditor)
 {
     writeHeader(ds, r_moleditor, 1);
-    
+
     ds << static_cast<const Editor<MolEditor, Molecule>&>(moleditor);
-    
+
     return ds;
 }
 
@@ -77,14 +76,14 @@ QDataStream &operator>>(QDataStream &ds,
                                        MolEditor &moleditor)
 {
     VersionID v = readHeader(ds, r_moleditor);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Editor<MolEditor, Molecule>&>(moleditor);
     }
     else
         throw version_error(v, "1", r_moleditor, CODELOC);
-        
+
     return ds;
 }
 
@@ -132,9 +131,9 @@ MolEditor& MolEditor::rename(const QString &newname)
     if (MolName(newname) == this->name())
         //nothing needs doing
         return *this;
-        
+
     d->rename( MolName(newname) );
-    
+
     return *this;
 }
 
@@ -151,9 +150,9 @@ MolEditor& MolEditor::renumber(MolNum newnum)
     if (newnum == this->number())
         //nothing needs doing
         return *this;
-        
+
     d->renumber(newnum);
-    
+
     return *this;
 }
 
@@ -162,9 +161,9 @@ MolEditor& MolEditor::renumber(const QHash<AtomNum,AtomNum> &atomnums)
 {
     if (atomnums.isEmpty())
         return *this;
-    
+
     d->renumber(atomnums);
-    
+
     return *this;
 }
 
@@ -173,9 +172,9 @@ MolEditor& MolEditor::renumber(const QHash<ResNum,ResNum> &resnums)
 {
     if (resnums.isEmpty())
         return *this;
-    
+
     d->renumber(resnums);
-    
+
     return *this;
 }
 
@@ -185,9 +184,9 @@ MolEditor& MolEditor::renumber(const QHash<AtomNum,AtomNum> &atomnums,
 {
     if (atomnums.isEmpty() and resnums.isEmpty())
         return *this;
-    
+
     d->renumber(atomnums,resnums);
-    
+
     return *this;
 }
 
@@ -360,9 +359,9 @@ QDataStream &operator<<(QDataStream &ds,
                                        const MolStructureEditor &moleditor)
 {
     writeHeader(ds, r_molstructeditor, 1);
-    
+
     ds << static_cast<const StructureEditor&>(moleditor);
-    
+
     return ds;
 }
 
@@ -371,14 +370,14 @@ QDataStream &operator>>(QDataStream &ds,
                                        MolStructureEditor &moleditor)
 {
     VersionID v = readHeader(ds, r_molstructeditor);
-    
+
     if (v == 1)
     {
         ds >> static_cast<MolStructureEditor&>(moleditor);
     }
     else
         throw version_error( v, "1", r_molstructeditor, CODELOC );
-        
+
     return ds;
 }
 
@@ -623,7 +622,7 @@ AtomStructureEditor MolStructureEditor::add(const AtomName &name)
     return editor;
 }
 
-/** Add an atom with number 'number' to this molecule and 
+/** Add an atom with number 'number' to this molecule and
     return an editor for this atom */
 AtomStructureEditor MolStructureEditor::add(const AtomNum &number)
 {
@@ -641,7 +640,7 @@ ResStructureEditor MolStructureEditor::add(const ResName &name)
     return editor;
 }
 
-/** Add a residue with number 'number' to this molecule and 
+/** Add a residue with number 'number' to this molecule and
     return an editor for this residue */
 ResStructureEditor MolStructureEditor::add(const ResNum &number)
 {

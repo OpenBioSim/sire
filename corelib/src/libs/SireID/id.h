@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,7 +47,7 @@ namespace SireID
 
 /** This is the base class of all ID objects. An ID object
     is an object that is used to identify another object.
-    
+
     @author Christopher Woods
 */
 class SIREID_EXPORT ID
@@ -58,42 +57,42 @@ public:
 
     ID();
     ID(const ID&);
-    
+
     virtual ~ID();
-    
+
     static const char* typeName()
     {
         return "SireID::ID";
     }
-    
+
     /** Return a clone of this ID object. You are responsible
         for managing the returned object. */
     virtual ID* clone() const=0;
-    
+
     /** Return the type name of this ID object. */
     virtual const char* what() const=0;
-    
+
     /** Return a hash for this ID object - this allows
         this object to be used as a key in a dictionary */
     virtual uint hash() const=0;
- 
+
     /** Return a string representation of this ID */
     virtual QString toString() const=0;
- 
+
     /** Return whether or not this ID is null */
     virtual bool isNull() const=0;
-                            
+
     /** Comparison operator */
     virtual bool operator==(const ID &other) const=0;
-    
+
     /** Comparison operator */
     virtual bool operator!=(const ID &other) const
     {
         return not this->operator==(other);
     }
-    
+
     /** Use this function in your comparison operators, e.g.
-    
+
         <code>
         bool Foo::operator==(const ID &other) const
         {
@@ -112,13 +111,13 @@ public:
         else
             return false;
     }
-    
+
     template<class T>
     bool isA() const
     {
         return dynamic_cast<const T*>(this) != 0;
     }
-    
+
     template<class T>
     const T& asA() const
     {

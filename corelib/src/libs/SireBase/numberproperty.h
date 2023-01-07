@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,40 +61,40 @@ public:
 
     NumberProperty(const Property &other);
     NumberProperty(const NumberProperty &other);
-    
+
     ~NumberProperty();
-    
+
     static const char* typeName();
-    
+
     NumberProperty& operator=(const NumberProperty &other);
-    
+
     bool operator==(const NumberProperty &other) const;
     bool operator!=(const NumberProperty &other) const;
-    
+
     qint64 toInt() const;
     double toDouble() const;
-    
+
     double value() const;
-    
+
     QString toString() const;
-    
+
     bool isAString() const;
     bool isADouble() const;
     bool isAnInteger() const;
     bool isABoolean() const;
-    
+
     QString asAString() const;
     double asADouble() const;
     int asAnInteger() const;
     bool asABoolean() const;
-    
+
 private:
     union
     {
         double dval;
         qint64 ival;
     } val;
-    
+
     bool is_int;
 };
 

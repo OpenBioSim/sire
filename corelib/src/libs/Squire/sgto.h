@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,20 +63,20 @@ class SQUIRE_EXPORT S_GTO : public SireBase::ConcreteProperty<S_GTO,GTO>
 public:
     S_GTO();
     S_GTO(double alpha, double scale=1);
-    
+
     S_GTO(const S_GTO &other);
-    
+
     ~S_GTO();
-    
+
     static const char* typeName();
-    
+
     S_GTO& operator=(const S_GTO &other);
-    
+
     bool operator==(const S_GTO &other) const;
     bool operator!=(const S_GTO &other) const;
-    
+
     QString toString() const;
-    
+
     int angularMomentum() const;
     int nOrbitals() const;
 };
@@ -96,22 +95,22 @@ public:
            const Vector &B, const S_GTO &b);
 
     SS_GTO(const SS_GTO &other);
-    
+
     ~SS_GTO();
-    
+
     static const char* typeName();
-    
+
     SS_GTO& operator=(const SS_GTO &other);
-    
+
     bool operator==(const SS_GTO &other) const;
     bool operator!=(const SS_GTO &other) const;
 
     int angularMomentum0() const;
     int angularMomentum1() const;
-    
+
     int nOrbitals0() const;
     int nOrbitals1() const;
-};    
+};
 
 /** This class is used to calculate integrals involving just SS pairs.
     It is used to aid in the calculation of integrals.
@@ -122,25 +121,25 @@ class SQUIRE_EXPORT SS_GTOs
 {
 public:
 	SS_GTOs();
-    
-    SS_GTOs(const QVector<S_GTO> &s_gtos, 
+
+    SS_GTOs(const QVector<S_GTO> &s_gtos,
         	const QVector<Vector> &centers);
-    
+
     SS_GTOs(const SS_GTOs &other);
-    
+
     ~SS_GTOs();
-    
+
     SS_GTOs& operator=(const SS_GTOs &other);
 
 	TrigMatrix overlap_integral() const;
     TrigMatrix kinetic_integral() const;
-    
+
     TrigMatrix potential_integral(const QVector<PointCharge> &C) const;
     TrigMatrix potential_integral(const QVector<PointCharge> &C, int m) const;
-    
+
     TrigMatrix coulomb_integral(const SS_GTOs &other) const;
     TrigMatrix exchange_integral(const SS_GTOs &other) const;
-    
+
 private:
 	/** All of the orbital pairs */
     TrigArray2D<SS_GTO> orbs;

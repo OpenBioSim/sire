@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,7 +51,7 @@ class SupraSystem;
 
 /** This is the base class of all supra-system moves (supra-moves).
     A supra-move is a move that is applied to a supra-system
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT SupraMove : public SireBase::Property
@@ -63,13 +62,13 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SupraMove&);
 
 public:
     SupraMove();
-    
+
     SupraMove(const SupraMove &other);
-    
+
     virtual ~SupraMove();
-    
+
     virtual SupraMove* clone() const=0;
-    
+
     static const char* typeName()
     {
         return "SireMove::SupraMove";
@@ -79,7 +78,7 @@ public:
 
     virtual QString toString() const=0;
 
-    virtual void move(SupraSystem &system, int nmoves, 
+    virtual void move(SupraSystem &system, int nmoves,
                       bool record_stats=true)=0;
 
     virtual void clearStatistics();
@@ -88,7 +87,7 @@ public:
 
 protected:
     SupraMove& operator=(const SupraMove &other);
-    
+
     bool operator==(const SupraMove &other) const;
     bool operator!=(const SupraMove &other) const;
 
@@ -112,16 +111,16 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullSupraMove&);
 
 public:
     NullSupraMove();
-    
+
     NullSupraMove(const NullSupraMove &other);
-    
+
     ~NullSupraMove();
-    
+
     NullSupraMove& operator=(const NullSupraMove &other);
-    
+
     bool operator==(const NullSupraMove &other) const;
     bool operator!=(const NullSupraMove &other) const;
-    
+
     static const char* typeName();
 
     QString toString() const;

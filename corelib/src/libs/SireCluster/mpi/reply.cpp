@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,17 +61,17 @@ class ReplyPvt
 public:
     ReplyPvt()
     {}
-    
+
     ~ReplyPvt()
     {}
-    
+
     /** Mutex to protect access to this response */
     QMutex datamutex;
-    
+
     /** Wait conditions so that we can wait for the response
         from each process */
     QHash< int, shared_ptr<QWaitCondition> > waiters;
-    
+
     /** The responses received so far... */
     QHash< int, ReplyValue > responses;
 };
@@ -95,7 +94,7 @@ ReplyValue::ReplyValue() : is_error(false)
 ReplyValue::ReplyValue(const ReplyValue &other)
            : result_data(other.result_data), is_error(other.is_error)
 {}
-     
+
 /** Destructor */
 ReplyValue::~ReplyValue()
 {}
@@ -108,7 +107,7 @@ ReplyValue& ReplyValue::operator=(const ReplyValue &other)
         result_data = other.result_data;
         is_error = other.is_error;
     }
-    
+
     return *this;
 }
 
@@ -132,7 +131,7 @@ ReplyValue ReplyValue::result(const QByteArray &result_data)
     ReplyValue val;
     val.is_error = false;
     val.result_data = result_data;
-    
+
     return val;
 }
 
@@ -143,7 +142,7 @@ ReplyValue ReplyValue::error(const QByteArray &error_data)
     ReplyValue error;
     error.is_error = true;
     error.result_data = error_data;
-    
+
     return error;
 }
 
@@ -210,24 +209,24 @@ bool Reply::isNull() const
     return d.get() == 0;
 }
 
-/** Internal function called by MPICluster used to create 
+/** Internal function called by MPICluster used to create
     a new reply for the message 'message' */
 Reply Reply::create(const Message &message)
 {
     Reply reply;
-    
+
     reply.d.reset( new ReplyPvt() );
-    
+
     QMutexLocker lkr( &(reply.d->datamutex) );
-    
+
     QSet<int> recipients = message.recipients();
-    
+
     foreach (int recipient, recipients)
     {
-        reply.d->waiters.insert(recipient, 
+        reply.d->waiters.insert(recipient,
                                 shared_ptr<QWaitCondition>(new QWaitCondition()) );
     }
-    
+
     return reply;
 }
 
@@ -239,7 +238,7 @@ void Reply::setErrorFrom(int rank, const QByteArray &error_data)
         return;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->waiters.contains(rank))
     {
         d->responses.insert(rank, ReplyValue::error(error_data));
@@ -247,7 +246,7 @@ void Reply::setErrorFrom(int rank, const QByteArray &error_data)
     }
 }
 
-/** Inform the reply that a reply has been received from the 
+/** Inform the reply that a reply has been received from the
      process with rank 'rank' */
 void Reply::setResultFrom(int rank, const QByteArray &result_data)
 {
@@ -255,7 +254,7 @@ void Reply::setResultFrom(int rank, const QByteArray &result_data)
         return;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->waiters.contains(rank))
     {
         d->responses.insert(rank, ReplyValue::result(result_data));
@@ -271,7 +270,7 @@ void Reply::setProcessDown(int rank)
         return;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->waiters.contains(rank))
     {
         if (not d->responses.contains(rank))
@@ -279,10 +278,10 @@ void Reply::setProcessDown(int rank)
             SireError::unavailable_resource e( QObject::tr(
                     "The node with rank %1 has gone down while waiting "
                     "for a reply.").arg(rank), CODELOC );
-        
+
             d->responses.insert(rank, ReplyValue::error( e.pack() ));
         }
-        
+
         //wake everyone waiting for this process
         d->waiters.value(rank)->wakeAll();
     }
@@ -293,20 +292,20 @@ void Reply::shutdown()
 {
     if (this->isNull())
         return;
-        
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     QList<int> ranks = d->waiters.keys();
-    
+
     if (d->responses.count() != ranks.count())
     {
         //we need to fill in some missing responses
         SireError::unavailable_resource e( QObject::tr(
                 "There are no more replies available as we are being shutdown."),
                     CODELOC );
-                    
+
         QByteArray error_data = e.pack();
-        
+
         foreach (int rank, ranks)
         {
             if (not d->responses.contains(rank))
@@ -315,7 +314,7 @@ void Reply::shutdown()
             }
         }
     }
-    
+
     //make sure everyone is awake
     foreach (int rank, ranks)
     {
@@ -340,7 +339,7 @@ void Reply::waitFrom(int rank)
         return;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->waiters.contains(rank))
     {
         if (not d->responses.contains(rank))
@@ -368,7 +367,7 @@ bool Reply::waitFrom(int rank, int timeout)
         return true;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->waiters.contains(rank))
     {
         if (not d->responses.contains(rank))
@@ -376,7 +375,7 @@ bool Reply::waitFrom(int rank, int timeout)
             timeout -= t.elapsed();
             if (timeout < 0)
                 return false;
-        
+
             return d->waiters.value(rank)->wait( &(d->datamutex), timeout );
         }
         else
@@ -391,11 +390,11 @@ void Reply::wait()
 {
     if (this->isNull())
         return;
-    
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     QList<int> ranks = d->waiters.keys();
-    
+
     foreach (int rank, ranks)
     {
         if (not d->responses.contains(rank))
@@ -423,32 +422,32 @@ bool Reply::wait(int timeout)
         return true;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     QList<int> ranks = d->waiters.keys();
-    
+
     foreach (int rank, ranks)
     {
         if (not d->responses.contains(rank))
         {
             timeout -= t.elapsed();
             t.start();
-            
+
             if (timeout < 0)
                 return false;
-                
+
             if (not d->waiters.value(rank)->wait( &(d->datamutex), timeout ))
             {
                 return false;
             }
         }
     }
-    
+
     return true;
 }
 
-/** Return the value of the reply from the process with 
-    rank 'rank'. This blocks until the reply is available 
-    
+/** Return the value of the reply from the process with
+    rank 'rank'. This blocks until the reply is available
+
     \throw SireError::invalid_arg
 */
 ReplyValue Reply::from(int rank)
@@ -459,32 +458,32 @@ ReplyValue Reply::from(int rank)
                 .arg(rank), CODELOC );
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (not d->waiters.contains(rank))
         throw SireError::invalid_arg( QObject::tr(
             "There is no reply from the process with rank %1 in this reply. "
             "We are only waiting for replies from the processes with ranks %2.")
                 .arg(rank).arg(Sire::toString(d->waiters.keys())), CODELOC );
-                
+
     while (not d->responses.contains(rank))
     {
         //we need to wait for a response
         d->waiters.value(rank)->wait( &(d->datamutex) );
     }
-    
+
     return d->responses.value(rank);
 }
 
-/** Return the list of all replies indexed by the rank of the 
+/** Return the list of all replies indexed by the rank of the
     process that supplied the reply - this blocks until they are
     all available */
 QHash<int,ReplyValue> Reply::replies()
 {
     if (this->isNull())
         return QHash<int,ReplyValue>();
-    
+
     this->wait();
-    
+
     QMutexLocker lkr( &(d->datamutex) );
 
     return d->responses;

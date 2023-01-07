@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,7 +45,7 @@ namespace SireMol
 
 /** This perturbation is used to scale charges from one value
     to another as a function of lambda
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT ChargePerturbation
@@ -56,28 +55,28 @@ class SIREMOL_EXPORT ChargePerturbation
 friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ChargePerturbation&);
 friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ChargePerturbation&);
 
-public: 
+public:
     ChargePerturbation();
     ChargePerturbation(const PropertyMap &map);
-    
+
     ChargePerturbation(const Expression &mapping_function,
                        const PropertyMap &map = PropertyMap());
-    
+
     ChargePerturbation(const ChargePerturbation &other);
-    
+
     ~ChargePerturbation();
-    
+
     static const char* typeName();
-    
+
     ChargePerturbation& operator=(const ChargePerturbation &other);
-    
+
     bool operator==(const ChargePerturbation &other) const;
     bool operator!=(const ChargePerturbation &other) const;
 
     QString toString() const;
 
     QSet<QString> requiredProperties() const;
-    
+
     bool wouldChange(const Molecule &molecule, const Values &values) const;
 
 protected:

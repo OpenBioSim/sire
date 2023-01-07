@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ class WorkPacket;
 /** This is the base class of all Frontends - a Frontend is an object
     that you can use locally that can control a Backend that is either
     local or remote
-    
+
     @author Christopher Woods
 */
 class FrontendBase : public boost::noncopyable
@@ -60,24 +59,24 @@ friend class Frontend;
 
 public:
     FrontendBase();
-    
+
     virtual ~FrontendBase();
-    
+
     virtual bool isLocal() const=0;
-    
+
     virtual QUuid UID()=0;
-    
+
     virtual void startJob(const WorkPacket &workpacket)=0;
-    
+
     virtual void stopJob()=0;
     virtual void abortJob()=0;
-    
+
     virtual void wait()=0;
     virtual bool wait(int timeout)=0;
-    
+
     virtual float progress()=0;
     virtual WorkPacket interimResult()=0;
-    
+
     virtual WorkPacket result()=0;
 
 private:
@@ -87,7 +86,7 @@ private:
 
 /** This is the generic holder of a Frontend - a Frontend is an object
     that allows us to communicate with Backend, which may be local or remote
-    
+
     @author Christopher Woods
 */
 class Frontend
@@ -95,37 +94,37 @@ class Frontend
 public:
     Frontend();
     Frontend(const boost::shared_ptr<FrontendBase> &ptr);
-    
+
     Frontend(const Backend &backend);
-    
+
     Frontend(const Frontend &other);
-    
+
     ~Frontend();
 
     Frontend& operator=(const Frontend &other);
-    
+
     bool operator==(const Frontend &other) const;
     bool operator!=(const Frontend &other) const;
-    
+
     static Frontend tryAcquire(const Backend &backend);
-    
+
     bool isLocal() const;
-    
+
     bool isNull() const;
-    
+
     QUuid UID();
-    
+
     void startJob(const WorkPacket &workpacket);
-    
+
     void stopJob();
     void abortJob();
-    
+
     void wait();
     bool wait(int timeout);
-    
+
     float progress();
     WorkPacket interimResult();
-    
+
     WorkPacket result();
 
 private:

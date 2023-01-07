@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,38 +56,38 @@ public:
     ChainIdentifier();
     ChainIdentifier(const ChainID &chainid);
     ChainIdentifier(const ChainIdentifier &other);
-    
+
     ~ChainIdentifier();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return ChainIdentifier::typeName();
     }
-    
+
     ChainIdentifier* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-                
+
     QString toString() const;
-    
+
     const ChainID& base() const;
-    
+
     ChainIdentifier& operator=(const ChainIdentifier &other);
     ChainIdentifier& operator=(const ChainID &other);
-    
+
     bool operator==(const SireID::ID &other) const;
     using SireID::ID::operator!=;
-   
+
     bool operator==(const ChainIdentifier &other) const;
     bool operator!=(const ChainIdentifier &other) const;
-    
+
     bool operator==(const ChainID &other) const;
     bool operator!=(const ChainID &other) const;
-    
+
     QList<ChainIdx> map(const MolInfo &molinfo) const;
 
 private:
