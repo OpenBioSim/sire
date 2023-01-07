@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,13 +56,13 @@ static const RegisterMetaType<QMFF> r_qmff;
 QDataStream &operator<<(QDataStream &ds, const QMFF &qmff)
 {
     writeHeader(ds, r_qmff, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << static_cast<const G1FF&>(qmff)
         << static_cast<const QMPotential&>(qmff)
         << qmff.qmmols;
-        
+
     return ds;
 }
 
@@ -71,11 +70,11 @@ QDataStream &operator<<(QDataStream &ds, const QMFF &qmff)
 QDataStream &operator>>(QDataStream &ds, QMFF &qmff)
 {
     VersionID v = readHeader(ds, r_qmff);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> static_cast<G1FF&>(qmff)
             >> static_cast<QMPotential&>(qmff)
             >> qmff.qmmols;
@@ -84,7 +83,7 @@ QDataStream &operator>>(QDataStream &ds, QMFF &qmff)
     }
     else
         throw version_error(v, "1", r_qmff, CODELOC);
-        
+
     return ds;
 }
 
@@ -124,7 +123,7 @@ QMFF& QMFF::operator=(const QMFF &other)
         ffcomponents = other.ffcomponents;
         qmmols = other.qmmols;
     }
-    
+
     return *this;
 }
 
@@ -146,7 +145,7 @@ const Space& QMFF::space() const
     return QMPotential::space();
 }
 
-/** Return the QM program that will be used to calculate the 
+/** Return the QM program that will be used to calculate the
     energies and forces on the molecules */
 const QMProgram& QMFF::quantumProgram() const
 {
@@ -168,7 +167,7 @@ bool QMFF::setSpace(const Space &space)
     return QMPotential::setSpace(space);
 }
 
-/** Set the QM program that will be used to calculate the 
+/** Set the QM program that will be used to calculate the
     energies and forces */
 bool QMFF::setQuantumProgram(const QMProgram &qmprog)
 {
@@ -282,9 +281,9 @@ void QMFF::recalculateEnergy()
     //QM energies are always recalculated from scratch
     QMEnergy nrg(0);
     QMPotential::calculateEnergy(qmmols, nrg);
-    
+
     this->components().setEnergy(*this, nrg);
-    
+
     this->setClean();
 }
 
@@ -300,13 +299,13 @@ void QMFF::_pvt_updateName()
 //// Virtual functions from SireFF::G1FF
 ////
 
-/** Record the fact that the molecule 'mol' has been added to this forcefield 
+/** Record the fact that the molecule 'mol' has been added to this forcefield
 
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void QMFF::_pvt_added(const SireMol::PartialMolecule &molecule, 
+void QMFF::_pvt_added(const SireMol::PartialMolecule &molecule,
                       const SireBase::PropertyMap &map)
 {
     //add the molecule (don't record changes as everything
@@ -336,7 +335,7 @@ void QMFF::_pvt_changed(const SireMol::Molecule &molecule, bool auto_update)
     G1FF::setDirty();
 }
 
-/** Record that the provided list of molecules have changed 
+/** Record that the provided list of molecules have changed
 
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
@@ -345,7 +344,7 @@ void QMFF::_pvt_changed(const SireMol::Molecule &molecule, bool auto_update)
 void QMFF::_pvt_changed(const QList<SireMol::Molecule> &mols, bool auto_update)
 {
     QMPotential::Molecules old_mols;
-    
+
     try
     {
         for (QList<SireMol::Molecule>::const_iterator it = mols.constBegin();
@@ -354,7 +353,7 @@ void QMFF::_pvt_changed(const QList<SireMol::Molecule> &mols, bool auto_update)
         {
             qmmols.change(*it, *this, false);
         }
-        
+
         G1FF::setDirty();
     }
     catch(...)
@@ -373,8 +372,8 @@ void QMFF::_pvt_removedAll()
 }
 
 /** Return whether or not the supplied property map contains different
-    properties for the molecule with number 'molnum' */       
-bool QMFF::_pvt_wouldChangeProperties(SireMol::MolNum molnum, 
+    properties for the molecule with number 'molnum' */
+bool QMFF::_pvt_wouldChangeProperties(SireMol::MolNum molnum,
                                       const SireBase::PropertyMap &map) const
 {
     return qmmols.wouldChangeProperties(molnum, map);
@@ -411,7 +410,7 @@ QString QMFF::potentialCommandFile(const PotentialTable &potentialtable) const
 
 /** Return the command file that would be used to calculate the fields
     of the molecules in this forcefield */
-QString QMFF::fieldCommandFile(const FieldTable &fieldtable, 
+QString QMFF::fieldCommandFile(const FieldTable &fieldtable,
                                const SireFF::Probe &probe) const
 {
     return QMPotential::fieldCommandFile(qmmols, fieldtable, probe);
@@ -436,7 +435,7 @@ void QMFF::field(FieldTable &fieldtable, const Symbol &component,
                  const SireFF::Probe &probe, double scale_field)
 {
     if (scale_field != 0)
-        QMPotential::calculateField(qmmols, fieldtable, probe, component, 
+        QMPotential::calculateField(qmmols, fieldtable, probe, component,
                                     this->components(), scale_field);
 }
 
@@ -469,7 +468,7 @@ void QMFF::field(FieldTable &fieldtable, const Symbol &component,
 {
     QMFF::field(fieldtable, component, QMPotential::Probe(), scale_field);
 }
-           
+
 /** Calculate the potential from this forcefield in the passed potentialtable */
 void QMFF::potential(PotentialTable &potentialtable, double scale_potential)
 {

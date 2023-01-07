@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,29 +63,29 @@ public:
     enum CombiningRules { ARITHMETIC=0, GEOMETRIC=1 };
 
     LJParameter();
-    LJParameter(SireUnits::Dimension::Length sigma, 
+    LJParameter(SireUnits::Dimension::Length sigma,
                 SireUnits::Dimension::MolarEnergy epsilon);
-                
+
     LJParameter(const LJPair &ljpair);
-    
+
     LJParameter(const LJParameter &param);
-    
+
     ~LJParameter();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return LJParameter::typeName();
     }
-    
+
     LJParameter combine(const LJParameter &other, CombiningRules rules) const;
     LJParameter combineArithmetic(const LJParameter &other) const;
     LJParameter combineGeometric(const LJParameter &other) const;
-    
+
     bool isDummy() const;
     bool zeroLJ() const;
-    
+
     SireUnits::Dimension::Length sigma() const;
     SireUnits::Dimension::MolarEnergy epsilon() const;
     double sqrtEpsilon() const;
@@ -103,17 +102,17 @@ public:
     bool operator!=(const LJParameter &other) const;
 
     static LJParameter dummy();
-    static LJParameter fromSigmaAndEpsilon(SireUnits::Dimension::Length sigma, 
+    static LJParameter fromSigmaAndEpsilon(SireUnits::Dimension::Length sigma,
                                            SireUnits::Dimension::MolarEnergy epsilon);
-                                           
+
     static LJParameter fromAAndB(double a, double b);
-    static LJParameter fromRMinAndEpsilon(SireUnits::Dimension::Length rmin, 
+    static LJParameter fromRMinAndEpsilon(SireUnits::Dimension::Length rmin,
                                           SireUnits::Dimension::MolarEnergy epsilon);
 
 private:
     /** Square-root of the sigma parameter, in sqrt(Angstroms) */
     double sqrtsig;
-    
+
     /** Square-root of the epsilon parameter. The square-root
         is stored to improve the efficiency of combining rules.
         The units are sqrt(kcal mol-1) */
@@ -125,7 +124,7 @@ private:
 /** Hash a LJ parameter */
 SIRE_ALWAYS_INLINE uint qHash(const LJParameter &ljparam)
 {
-    return uint( 1000000.0 * ljparam.sqrtEpsilon() + 
+    return uint( 1000000.0 * ljparam.sqrtEpsilon() +
                    10000.0 * ljparam.sqrtSigma() );
 }
 
@@ -144,7 +143,7 @@ SIRE_ALWAYS_INLINE bool LJParameter::operator!=(const LJParameter &other) const
 /** Return whether or not this is a dummy LJ parameter */
 SIRE_ALWAYS_INLINE bool LJParameter::isDummy() const
 {
-    //we only need to compare sqrtsig as this will be set to zero if 
+    //we only need to compare sqrtsig as this will be set to zero if
     //sqrteps is zero
     return sqrtsig == 0.0;
 }
@@ -152,7 +151,7 @@ SIRE_ALWAYS_INLINE bool LJParameter::isDummy() const
 /** Return whether or not this parameter has non-zero LJ parameters */
 SIRE_ALWAYS_INLINE bool LJParameter::zeroLJ() const
 {
-    //we only need to compare sqrtsig as this will be set to zero if 
+    //we only need to compare sqrtsig as this will be set to zero if
     //sqrteps is zero
     return sqrtsig == 0;
 }

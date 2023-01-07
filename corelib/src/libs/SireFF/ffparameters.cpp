@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,27 +50,27 @@ namespace SireFF
 
 static const RegisterMetaType<FFParameters> r_ffparams( MAGIC_ONLY,
                                                         FFParameters::typeName() );
-                                                        
+
 QDataStream &operator<<(QDataStream &ds, const FFParameters &ffparams)
 {
     writeHeader(ds, r_ffparams, 1);
-    
+
     ds << static_cast<const Property&>(ffparams);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, FFParameters &ffparams)
 {
     VersionID v = readHeader(ds, r_ffparams);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(ffparams);
     }
     else
         throw version_error(v, "1", r_ffparams, CODELOC);
-        
+
     return ds;
 }
 
@@ -127,23 +126,23 @@ QDataStream &operator<<(QDataStream &ds,
                                       const FFParametersArray &ffparams)
 {
     writeHeader(ds, r_ffparamsarray, 1);
-    
+
     ds << static_cast<const Property&>(ffparams);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, FFParametersArray &ffparams)
 {
     VersionID v = readHeader(ds, r_ffparamsarray);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(ffparams);
     }
     else
         throw version_error(v, "1", r_ffparamsarray, CODELOC);
-        
+
     return ds;
 }
 
@@ -201,27 +200,27 @@ NullFFParametersArray FFParametersArray::null()
 
 static const RegisterMetaType<NullFFParameters> r_nullffparams;
 
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                       const NullFFParameters &nullffparams)
 {
     writeHeader(ds, r_nullffparams, 1);
-    
+
     ds << static_cast<const FFParameters&>(nullffparams);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, NullFFParameters &nullffparams)
 {
     VersionID v = readHeader(ds, r_nullffparams);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFParameters&>(nullffparams);
     }
     else
         throw version_error(v, "1", r_nullffparams, CODELOC);
-        
+
     return ds;
 }
 
@@ -275,28 +274,28 @@ FFParametersArrayPtr NullFFParameters::toArray() const
 static const RegisterMetaType<NullFFParametersArray> r_nullffarray;
 
 
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                       const NullFFParametersArray &nullffparams)
 {
     writeHeader(ds, r_nullffarray, 1);
-    
+
     ds << static_cast<const FFParametersArray&>(nullffparams);
-    
+
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, 
+QDataStream &operator>>(QDataStream &ds,
                                       NullFFParametersArray &nullffparams)
 {
     VersionID v = readHeader(ds, r_nullffarray);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFParametersArray&>(nullffparams);
     }
     else
         throw version_error(v, "1", r_nullffarray, CODELOC);
-        
+
     return ds;
 }
 
@@ -351,7 +350,7 @@ bool NullFFParametersArray::isEmpty() const
     return true;
 }
 
-/** Return the ith set of parameters 
+/** Return the ith set of parameters
 
     \throw SireError::invalid_index
 */
@@ -360,7 +359,7 @@ FFParametersPtr NullFFParametersArray::operator[](int i) const
     throw SireError::invalid_index( QObject::tr(
             "Cannot access element %1 from a NullFFParametersArray.")
                 .arg(i), CODELOC );
-                
+
     return FFParametersPtr();
 }
 
@@ -376,9 +375,9 @@ void NullFFParametersArray::append(const FFParametersArray &params)
 void NullFFParametersArray::update(int idx, const FFParameters &params)
 {}
 
-/** Update the parameters with the passed indicies so that they equal 
+/** Update the parameters with the passed indicies so that they equal
     the values in 'params' */
-void NullFFParametersArray::update(const QVarLengthArray<int> &idxs, 
+void NullFFParametersArray::update(const QVarLengthArray<int> &idxs,
                                    const FFParametersArray &params)
 {}
 

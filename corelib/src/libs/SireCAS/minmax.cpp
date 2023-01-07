@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,7 +47,7 @@ static const RegisterMetaType<Min> r_min;
 QDataStream &operator<<(QDataStream &ds, const Min &min)
 {
     writeHeader(ds, r_min, 1) << static_cast<const DoubleFunc&>(min);
-    
+
     return ds;
 }
 
@@ -56,14 +55,14 @@ QDataStream &operator<<(QDataStream &ds, const Min &min)
 QDataStream &operator>>(QDataStream &ds, Min &min)
 {
     VersionID v = readHeader(ds, r_min);
-    
+
     if (v == 1)
     {
         ds >> static_cast<DoubleFunc&>(min);
     }
     else
         throw version_error(v, "1", r_min, CODELOC);
-        
+
     return ds;
 }
 
@@ -89,7 +88,7 @@ bool Min::operator==(const ExBase &other) const
     const Min *other_min = dynamic_cast<const Min*>(&other);
 
     return other_min != 0 and typeid(other).name() == typeid(*this).name()
-                 and this->x() == other_min->x() 
+                 and this->x() == other_min->x()
                  and this->y() == other_min->y();
 }
 
@@ -107,11 +106,11 @@ Complex Min::evaluate(const ComplexValues &values) const
 
     if (xval == yval)
         return xval;
-        
+
     else if (xval.isReal() and yval.isReal())
         return Complex( qMin(xval.real(),yval.real()), 0 );
-        
-    else    
+
+    else
         throw SireMaths::domain_error( QObject::tr(
             "It is not possible to order the two complex numbers %1 and %2. "
             "It is thus not possible to find the minimum of %3.")
@@ -152,7 +151,7 @@ static const RegisterMetaType<Max> r_max;
 QDataStream &operator<<(QDataStream &ds, const Max &max)
 {
     writeHeader(ds, r_max, 1) << static_cast<const DoubleFunc&>(max);
-    
+
     return ds;
 }
 
@@ -160,14 +159,14 @@ QDataStream &operator<<(QDataStream &ds, const Max &max)
 QDataStream &operator>>(QDataStream &ds, Max &max)
 {
     VersionID v = readHeader(ds, r_max);
-    
+
     if (v == 1)
     {
         ds >> static_cast<DoubleFunc&>(max);
     }
     else
         throw version_error(v, "1", r_max, CODELOC);
-        
+
     return ds;
 }
 
@@ -193,7 +192,7 @@ bool Max::operator==(const ExBase &other) const
     const Max *other_max = dynamic_cast<const Max*>(&other);
 
     return other_max != 0 and typeid(other).name() == typeid(*this).name()
-                 and this->x() == other_max->x() 
+                 and this->x() == other_max->x()
                  and this->y() == other_max->y();
 }
 
@@ -211,11 +210,11 @@ Complex Max::evaluate(const ComplexValues &values) const
 
     if (xval == yval)
         return xval;
-        
+
     else if (xval.isReal() and yval.isReal())
         return Complex( qMax(xval.real(),yval.real()), 0 );
-        
-    else    
+
+    else
         throw SireMaths::domain_error( QObject::tr(
             "It is not possible to order the two complex numbers %1 and %2. "
             "It is thus not possible to find the minimum of %3.")

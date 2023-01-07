@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,15 +49,15 @@ using namespace SireStream;
 
 static const RegisterMetaType<MonitorProperty> r_monprop;
 
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                           const MonitorProperty &monprop)
 {
     writeHeader(ds, r_monprop, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << monprop.what_is_monitored;
-    
+
     switch( monprop.what_is_monitored )
     {
         case MonitorProperty::SYSTEM_PROPERTY:
@@ -71,9 +70,9 @@ QDataStream &operator<<(QDataStream &ds,
             sds << monprop.prop << monprop.mgid << monprop.molprops;
             break;
     }
-    
+
     sds << static_cast<const SystemMonitor&>(monprop);
-    
+
     return ds;
 }
 
@@ -81,14 +80,14 @@ QDataStream &operator>>(QDataStream &ds,
                                           MonitorProperty &monprop)
 {
     VersionID v = readHeader(ds, r_monprop);
-    
+
     if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         MonitorProperty mon;
         sds >> mon.what_is_monitored;
-        
+
         switch(mon.what_is_monitored)
         {
         case MonitorProperty::SYSTEM_PROPERTY:
@@ -101,21 +100,21 @@ QDataStream &operator>>(QDataStream &ds,
             sds >> mon.prop >> mon.mgid >> mon.molprops;
             break;
         }
-        
+
         sds >> static_cast<SystemMonitor&>(mon);
-        
+
         monprop = mon;
     }
     else if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         MonitorProperty mon;
         sds >> mon.what_is_monitored;
-        
+
         QVector<PropertyPtr> props;
         QHash< MolNum,QVector<PropertyPtr> > molprops;
-        
+
         switch(mon.what_is_monitored)
         {
         case MonitorProperty::SYSTEM_PROPERTY:
@@ -128,33 +127,33 @@ QDataStream &operator>>(QDataStream &ds,
             break;
         case MonitorProperty::MOLECULE_PROPERTY:
             sds >> mon.prop >> mon.mgid >> molprops;
-        
+
             mon.molprops.reserve(molprops.count());
-        
+
             for (QHash< MolNum,QVector<PropertyPtr> >::const_iterator
                                                 it = molprops.constBegin();
                  it != molprops.constEnd();
                  ++it)
             {
-                mon.molprops.insert(it.key(), 
+                mon.molprops.insert(it.key(),
                                     ChunkedVector<PropertyPtr,2048>::fromVector(*it));
             }
 
             break;
         }
-        
+
         sds >> static_cast<SystemMonitor&>(mon);
-        
+
         monprop = mon;
     }
     else
         throw version_error(v, "1", r_monprop, CODELOC);
-        
+
     return ds;
 }
 
 /** Null constructor */
-MonitorProperty::MonitorProperty() 
+MonitorProperty::MonitorProperty()
                 : ConcreteProperty<MonitorProperty,SystemMonitor>(),
                   what_is_monitored(IS_NULL)
 {}
@@ -169,7 +168,7 @@ MonitorProperty::MonitorProperty(const QString &property)
     in the molecule group 'molgroup' */
 MonitorProperty::MonitorProperty(const QString &property, const MoleculeGroup &molgroup)
                 : ConcreteProperty<MonitorProperty,SystemMonitor>(),
-                  prop(property), mgid(molgroup.number()), 
+                  prop(property), mgid(molgroup.number()),
                   what_is_monitored(MOLECULE_PROPERTY)
 {}
 
@@ -177,7 +176,7 @@ MonitorProperty::MonitorProperty(const QString &property, const MoleculeGroup &m
     in the molecule group(s) that matches the ID 'mgid' */
 MonitorProperty::MonitorProperty(const QString &property, const MGID &id)
                 : ConcreteProperty<MonitorProperty,SystemMonitor>(),
-                  prop(property), mgid(id), 
+                  prop(property), mgid(id),
                   what_is_monitored(MOLECULE_PROPERTY)
 {}
 
@@ -193,7 +192,7 @@ MonitorProperty::MonitorProperty(const QString &property, const FF &forcefield)
     in each of these forcefields at every step of the simulation */
 MonitorProperty::MonitorProperty(const QString &property, const FFID &id)
                 : ConcreteProperty<MonitorProperty,SystemMonitor>(),
-                  prop(property), ffid(id), 
+                  prop(property), ffid(id),
                   what_is_monitored(FORCEFIELD_PROPERTY)
 {}
 
@@ -222,7 +221,7 @@ MonitorProperty& MonitorProperty::operator=(const MonitorProperty &other)
         props = other.props;
         molprops = other.molprops;
     }
-    
+
     return *this;
 }
 
@@ -285,12 +284,12 @@ QString MonitorProperty::toString() const
     case FORCEFIELD_PROPERTY:
         return QObject::tr("MonitorProperty( forcefield (%1) property \"%2\" )")
                     .arg(ffid.toString(), prop);
-                    
+
     case MOLECULE_PROPERTY:
         return QObject::tr("MonitorProperty( molecule group (%1) property \"%2\" )")
                     .arg(mgid.toString(), prop);
     }
-    
+
     return QObject::tr("MonitorProperty( BUGGY! )");
 }
 
@@ -334,7 +333,7 @@ QVector<PropertyPtr> MonitorProperty::properties() const
                 "This MonitorProperty (%1) is not monitoring the property "
                 "of the system or forcefield(s).")
                     .arg( this->toString() ), CODELOC );
-    
+
     return props.toVector();
 }
 
@@ -350,9 +349,9 @@ QVector<PropertyPtr> MonitorProperty::properties(MolNum molnum) const
                 "of molecules in molecule group(s).")
                     .arg( this->toString() ), CODELOC );
 
-    QHash< MolNum,ChunkedVector<PropertyPtr,2048> >::const_iterator 
+    QHash< MolNum,ChunkedVector<PropertyPtr,2048> >::const_iterator
                                                     it = molprops.constFind(molnum);
-    
+
     if (it == molprops.constEnd())
         throw SireMol::missing_molecule( QObject::tr(
                 "No properties were monitored for the molecule with number %1. "
@@ -375,7 +374,7 @@ QList<MolNum> MonitorProperty::monitoredMolecules() const
     return molprops.keys();
 }
 
-/** Write all of the properties to disk in text format to the 
+/** Write all of the properties to disk in text format to the
     file 'filename'. The aim of this function is to provide something
     quick and dirty to follow the properties. To properly save the properties
     you should use the streaming functions */
@@ -383,31 +382,31 @@ void MonitorProperty::writeToDisk(const QString &filename)
 {
     if (what_is_monitored == IS_NULL or (props.isEmpty() and molprops.isEmpty()))
         return;
-        
+
     QFile f( filename );
-    
+
     if (not f.open(QIODevice::WriteOnly))
         throw SireError::file_error(f, CODELOC);
-        
+
     QTextStream ts(&f);
-    
+
     switch (what_is_monitored)
     {
     case SYSTEM_PROPERTY:
         ts << QObject::tr("# System property \"%1\"\n").arg(prop);
         break;
-        
+
     case FORCEFIELD_PROPERTY:
         ts << QObject::tr("# Forcefield property \"%1\" for %2\n")
                         .arg(prop, ffid.toString());
         break;
-        
+
     case MOLECULE_PROPERTY:
         ts << QObject::tr("# Molecule property \"%1\" for %2\n")
                         .arg(prop, mgid.toString());
         break;
     }
-    
+
     if (not props.isEmpty())
     {
         for (int i=0; i<props.count(); ++i)
@@ -424,26 +423,26 @@ void MonitorProperty::writeToDisk(const QString &filename)
         {
             ts << QObject::tr("\n ---- Molecule %1 ----\n")
                         .arg(it.key());
-                        
+
             const ChunkedVector<PropertyPtr,2048> &p = *it;
-            
+
             for (int i=0; i<p.count(); ++i)
             {
                 ts << i << " : " << p.at(i).read().toString() << "\n";
             }
         }
     }
-    
+
     f.close();
 }
 
 void MonitorProperty::monitor(const Molecules &molecules)
 {
     int nsteps = 0;
-    
+
     if (not molprops.isEmpty())
         nsteps = molprops.constBegin()->count();
-    
+
     for (Molecules::const_iterator it = molecules.constBegin();
          it != molecules.constEnd();
          ++it)
@@ -455,12 +454,12 @@ void MonitorProperty::monitor(const Molecules &molecules)
         }
 
         const MoleculeData &moldata = it->data();
-        
+
         PropertyPtr property;
-        
+
         if (moldata.hasProperty(prop))
             property = moldata.property(prop);
-            
+
         molprops[it.key()].append(property);
     }
 }
@@ -472,23 +471,23 @@ void MonitorProperty::monitor(System &system)
     {
     case IS_NULL:
         return;
-        
+
     case SYSTEM_PROPERTY:
         if (system.containsProperty(prop))
             props.append( system.property(prop) );
         else
             props.append( PropertyPtr() );
-            
+
         break;
-        
+
     case FORCEFIELD_PROPERTY:
         if (system.containsProperty(ffid, prop))
             props.append( system.property(ffid, prop) );
         else
             props.append( PropertyPtr() );
-            
+
         break;
-        
+
     case MOLECULE_PROPERTY:
         this->monitor( system.molecules(mgid) );
         break;

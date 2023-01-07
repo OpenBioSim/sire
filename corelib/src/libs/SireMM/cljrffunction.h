@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -58,7 +57,7 @@ namespace SireMM
 
 /** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
     CLJAtoms using a reaction field cutoff
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJRFFunction
@@ -72,32 +71,32 @@ public:
     CLJRFFunction();
     CLJRFFunction(Length cutoff);
     CLJRFFunction(Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJRFFunction(const Space &space, Length cutoff);
     CLJRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJRFFunction(Length cutoff, COMBINING_RULES combining_rules);
     CLJRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
-    
+
     CLJRFFunction(const Space &space, COMBINING_RULES combining_rules);
     CLJRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
     CLJRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
                      COMBINING_RULES combining_rules);
-    
+
     CLJRFFunction(const CLJRFFunction &other);
-    
+
     ~CLJRFFunction();
-    
+
     CLJRFFunction& operator=(const CLJRFFunction &other);
-    
+
     bool operator==(const CLJRFFunction &other) const;
     bool operator!=(const CLJRFFunction &other) const;
-    
+
     static const char* typeName();
     const char* what() const;
-    
+
     QString toString() const;
-    
+
     CLJRFFunction* clone() const;
 
     Properties properties() const;
@@ -115,26 +114,26 @@ public:
 protected:
     void calcVacEnergyAri(const CLJAtoms &atoms,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           double &cnrg, double &ljnrg, float min_distance) const;
 
     void calcVacEnergyGeo(const CLJAtoms &atoms,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           double &cnrg, double &ljnrg, float min_distance) const;
 
     void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           const Vector &box_dimensions, double &cnrg, double &ljnrg,
                           float min_distance) const;
 
     void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           const Vector &box_dimensions, double &cnrg, double &ljnrg,
                           float min_distance) const;
@@ -142,14 +141,14 @@ protected:
     double calcVacCoulombEnergyAri(const CLJAtoms &atoms) const;
     double calcVacCoulombEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                                    float min_distance) const;
-    
+
     double calcVacLJEnergyAri(const CLJAtoms &atoms) const;
     double calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                               float min_distance) const;
 
     void calcVacGrid(const CLJAtoms &atoms, const GridInfo &gridinfo,
                      const int start, const int end, float *gridpot) const;
-    
+
     void calcBoxGrid(const CLJAtoms &atoms, const GridInfo &gridinfo,
                      const Vector &box_dimensions,
                      const int start, const int end, float *gridpot) const;
@@ -161,7 +160,7 @@ private:
 
 /** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
     CLJAtoms using a reaction field cutoff
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJIntraRFFunction
@@ -175,30 +174,30 @@ public:
     CLJIntraRFFunction();
     CLJIntraRFFunction(Length cutoff);
     CLJIntraRFFunction(Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJIntraRFFunction(const Space &space, Length cutoff);
     CLJIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJIntraRFFunction(Length cutoff, COMBINING_RULES combining_rules);
     CLJIntraRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
-    
+
     CLJIntraRFFunction(const Space &space, COMBINING_RULES combining_rules);
     CLJIntraRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
     CLJIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
                           COMBINING_RULES combining_rules);
-    
+
     CLJIntraRFFunction(const CLJIntraRFFunction &other);
-    
+
     ~CLJIntraRFFunction();
-    
+
     CLJIntraRFFunction& operator=(const CLJIntraRFFunction &other);
-    
+
     bool operator==(const CLJIntraRFFunction &other) const;
     bool operator!=(const CLJIntraRFFunction &other) const;
-    
+
     static const char* typeName();
     const char* what() const;
-    
+
     CLJIntraRFFunction* clone() const;
 
     Properties properties() const;
@@ -214,26 +213,26 @@ public:
 protected:
     void calcVacEnergyAri(const CLJAtoms &atoms,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           double &cnrg, double &ljnrg, float min_distance) const;
 
     void calcVacEnergyGeo(const CLJAtoms &atoms,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           double &cnrg, double &ljnrg, float min_distance) const;
 
     void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           const Vector &box_dimensions, double &cnrg, double &ljnrg
                           , float min_distance) const;
 
     void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           const Vector &box_dimensions, double &cnrg, double &ljnrg,
                           float min_distance) const;
@@ -247,7 +246,7 @@ private:
 /** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
     CLJAtoms using a reaction field cutoff, and provides a soft-core
     potential that can soften molecules that are involved in free energy calculations
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJSoftRFFunction
@@ -261,32 +260,32 @@ public:
     CLJSoftRFFunction();
     CLJSoftRFFunction(Length cutoff);
     CLJSoftRFFunction(Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJSoftRFFunction(const Space &space, Length cutoff);
     CLJSoftRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJSoftRFFunction(Length cutoff, COMBINING_RULES combining_rules);
     CLJSoftRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
-    
+
     CLJSoftRFFunction(const Space &space, COMBINING_RULES combining_rules);
     CLJSoftRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
     CLJSoftRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
                      COMBINING_RULES combining_rules);
-    
+
     CLJSoftRFFunction(const CLJSoftRFFunction &other);
-    
+
     ~CLJSoftRFFunction();
-    
+
     CLJSoftRFFunction& operator=(const CLJSoftRFFunction &other);
-    
+
     bool operator==(const CLJSoftRFFunction &other) const;
     bool operator!=(const CLJSoftRFFunction &other) const;
-    
+
     static const char* typeName();
     const char* what() const;
-    
+
     QString toString() const;
-    
+
     CLJSoftRFFunction* clone() const;
 
     Properties properties() const;
@@ -302,26 +301,26 @@ public:
 protected:
     void calcVacEnergyAri(const CLJAtoms &atoms,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           double &cnrg, double &ljnrg, float min_distance) const;
 
     void calcVacEnergyGeo(const CLJAtoms &atoms,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           double &cnrg, double &ljnrg, float min_distance) const;
 
     void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           const Vector &box_dimensions, double &cnrg, double &ljnrg,
                           float min_distance) const;
 
     void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           const Vector &box_dimensions, double &cnrg, double &ljnrg,
                           float min_distance) const;
@@ -334,7 +333,7 @@ private:
 /** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
     CLJAtoms using a reaction field cutoff, and provides a soft-core
     potential that can soften molecules that are involved in free energy calculations
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT CLJSoftIntraRFFunction
@@ -348,31 +347,31 @@ public:
     CLJSoftIntraRFFunction();
     CLJSoftIntraRFFunction(Length cutoff);
     CLJSoftIntraRFFunction(Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJSoftIntraRFFunction(const Space &space, Length cutoff);
     CLJSoftIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
-    
+
     CLJSoftIntraRFFunction(Length cutoff, COMBINING_RULES combining_rules);
     CLJSoftIntraRFFunction(Length coul_cutoff, Length lj_cutoff,
                               COMBINING_RULES combining_rules);
-    
+
     CLJSoftIntraRFFunction(const Space &space, COMBINING_RULES combining_rules);
     CLJSoftIntraRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
     CLJSoftIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
                               COMBINING_RULES combining_rules);
-    
+
     CLJSoftIntraRFFunction(const CLJSoftIntraRFFunction &other);
-    
+
     ~CLJSoftIntraRFFunction();
-    
+
     CLJSoftIntraRFFunction& operator=(const CLJSoftIntraRFFunction &other);
-    
+
     bool operator==(const CLJSoftIntraRFFunction &other) const;
     bool operator!=(const CLJSoftIntraRFFunction &other) const;
-    
+
     static const char* typeName();
     const char* what() const;
-    
+
     CLJSoftIntraRFFunction* clone() const;
 
     Properties properties() const;
@@ -388,26 +387,26 @@ public:
 protected:
     void calcVacEnergyAri(const CLJAtoms &atoms,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           double &cnrg, double &ljnrg, float min_distance) const;
 
     void calcVacEnergyGeo(const CLJAtoms &atoms,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           double &cnrg, double &ljnrg, float min_distance) const;
 
     void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           const Vector &box_dimensions, double &cnrg, double &ljnrg,
                           float min_distance) const;
 
     void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
                           double &cnrg, double &ljnrg) const;
-    
+
     void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
                           const Vector &box_dimensions, double &cnrg, double &ljnrg,
                           float min_distance) const;

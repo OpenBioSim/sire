@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,7 +61,7 @@ namespace SireMM
 
 using SireUnits::Dimension::Length;
 
-/** This is the virtual base class of all switching functions. These 
+/** This is the virtual base class of all switching functions. These
     return scale factors based on the supplied distance
 
     @author Christopher Woods
@@ -105,7 +104,7 @@ public:
 
     Length electrostaticCutoffDistance() const;
     Length electrostaticFeatherDistance() const;
-    
+
     Length vdwCutoffDistance() const;
     Length vdwFeatherDistance() const;
 
@@ -153,7 +152,7 @@ SIRE_ALWAYS_INLINE Length SwitchingFunction::cutoffDistance() const
     return Length(cutdist);
 }
 
-/** Return the feather distance, below which feathering of the 
+/** Return the feather distance, below which feathering of the
     electrostatic and vdw interactions is *not* performed */
 SIRE_ALWAYS_INLINE Length SwitchingFunction::featherDistance() const
 {
@@ -180,7 +179,7 @@ SIRE_ALWAYS_INLINE Length SwitchingFunction::vdwCutoffDistance() const
     return Length(cut_vdw);
 }
 
-/** Return the distance below which the VDW interaction is 
+/** Return the distance below which the VDW interaction is
     *not* feathered */
 SIRE_ALWAYS_INLINE Length SwitchingFunction::vdwFeatherDistance() const
 {
@@ -189,12 +188,12 @@ SIRE_ALWAYS_INLINE Length SwitchingFunction::vdwFeatherDistance() const
 
 #endif //SIRE_SKIP_INLINE_FUNCTIONS
 
-/** This class implements no cutoffs (e.g. there is no cutoff, 
+/** This class implements no cutoffs (e.g. there is no cutoff,
     and no switching function!).
 
     @author Christopher Woods
 */
-class SIREMM_EXPORT NoCutoff 
+class SIREMM_EXPORT NoCutoff
         : public SireBase::ConcreteProperty<NoCutoff,SwitchingFunction>
 {
 
@@ -209,17 +208,17 @@ public:
     ~NoCutoff();
 
     static const char* typeName();
-    
+
     NoCutoff& operator=(const NoCutoff &other);
-    
+
     bool operator==(const NoCutoff &other) const;
     bool operator!=(const NoCutoff &other) const;
-    
+
     QString toString() const;
-    
+
     double electrostaticScaleFactor(Length dist) const;
     double vdwScaleFactor(Length dist) const;
-    
+
     double dElectrostaticScaleFactor(Length dist) const;
     double dVDWScaleFactor(Length dist) const;
 };
@@ -229,7 +228,7 @@ public:
 
     @author Christopher Woods
 */
-class SIREMM_EXPORT HarmonicSwitchingFunction 
+class SIREMM_EXPORT HarmonicSwitchingFunction
          : public SireBase::ConcreteProperty<HarmonicSwitchingFunction,
                                              SwitchingFunction>
 {
@@ -256,16 +255,16 @@ public:
     QString toString() const;
 
     HarmonicSwitchingFunction& operator=(const HarmonicSwitchingFunction &other);
-    
+
     bool operator==(const HarmonicSwitchingFunction &other) const;
     bool operator!=(const HarmonicSwitchingFunction &other) const;
-    
+
     double electrostaticScaleFactor(Length dist) const;
     double vdwScaleFactor(Length dist) const;
 
     double dElectrostaticScaleFactor(Length dist) const;
     double dVDWScaleFactor(Length dist) const;
-    
+
 protected:
     void set(double cutelec, double featherelec,
              double cutvdw, double feathervdw);
@@ -287,15 +286,15 @@ protected:
     in a dynamics simulation)
 
     This is the switching function reported in;
-    
+
     Steinbach and Brooks, "New spherical cutoff methods for long-range
                            forces in macromolecular simulaton"
-    
+
     J. Comp. Chem., 15, 7, pp667-683, 1994
 
     @author Christopher Woods
 */
-class SIREMM_EXPORT CHARMMSwitchingFunction 
+class SIREMM_EXPORT CHARMMSwitchingFunction
          : public SireBase::ConcreteProperty<CHARMMSwitchingFunction,
                                              SwitchingFunction>
 {
@@ -320,37 +319,37 @@ public:
     static const char* typeName();
 
     CHARMMSwitchingFunction& operator=(const CHARMMSwitchingFunction &other);
-    
+
     bool operator==(const CHARMMSwitchingFunction &other) const;
     bool operator!=(const CHARMMSwitchingFunction &other) const;
-    
+
     QString toString() const;
-    
+
     double electrostaticScaleFactor(Length dist) const;
     double vdwScaleFactor(Length dist) const;
 
     double dElectrostaticScaleFactor(Length dist) const;
     double dVDWScaleFactor(Length dist) const;
-    
+
 protected:
     void set(double cutelec, double featherelec,
              double cutvdw, double feathervdw);
 
     /** Square of the cutoff distance */
     double cut_elec2;
-    
+
     /** Square of the feather distance */
     double feather_elec2;
-    
+
     /** Normalisation factor for the electrostatic cutoff */
     double norm_elec;
 
     /** Square of the cutoff distance */
     double cut_vdw2;
-    
+
     /** Square of the feather distance */
     double feather_vdw2;
-    
+
     /** Normalisation factor for the vdw cutoff */
     double norm_vdw;
 };

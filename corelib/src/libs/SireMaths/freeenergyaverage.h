@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,7 +55,7 @@ namespace SireMaths
     average. As well as calculating the average, it also
     records a histogram of values that can be used for
     error analysis
-    
+
     @author Christopher Woods
 */
 class SIREMATHS_EXPORT FreeEnergyAverage
@@ -71,27 +70,27 @@ public:
     FreeEnergyAverage(bool forwards_free_energy);
     FreeEnergyAverage(const SireUnits::Dimension::Temperature &temperature,
                       bool forwards_free_energy=true);
-    
+
     FreeEnergyAverage(const SireUnits::Dimension::MolarEnergy &binwidth,
                       bool forwards_free_energy=true);
-    
+
     FreeEnergyAverage(const SireUnits::Dimension::Temperature &temperature,
                       const SireUnits::Dimension::MolarEnergy &binwidth,
                       bool forwards_free_energy=true);
-    
+
     FreeEnergyAverage(const FreeEnergyAverage &other);
-    
+
     ~FreeEnergyAverage();
-    
+
     FreeEnergyAverage& operator=(const FreeEnergyAverage &other);
-    
+
     bool operator==(const FreeEnergyAverage &other) const;
     bool operator!=(const FreeEnergyAverage &other) const;
-    
+
     FreeEnergyAverage operator+(const FreeEnergyAverage &other) const;
-    
+
     FreeEnergyAverage& operator+=(const FreeEnergyAverage &other);
-    
+
     static const char* typeName();
 
     SireUnits::Dimension::Temperature temperature() const;
@@ -104,7 +103,7 @@ public:
     bool isBackwardsFreeEnergy() const;
 
     void clear();
-    
+
     void accumulate(double value);
 
     double average() const;
@@ -117,10 +116,10 @@ public:
 
 private:
     /** A histogram of all of the energy values. This allows the free energy
-        average to be monitored and the error, and corrected values to be 
+        average to be monitored and the error, and corrected values to be
         calculated */
     Histogram hist;
-    
+
     /** Whether or not this is a forwards free energy (from a low lambda to high lambda
         value) or a backwards free energy (from a high lambda to low lambda). Note that
         the negative of the free energy is returned if this is a backwards free energy */
@@ -129,18 +128,18 @@ private:
 
 /** This class is used to accumulate the free energy average, using
     both FEP and Bennett's acceptance ratio method. Bennett's method
-    calculates a free energy difference between A and B using 
+    calculates a free energy difference between A and B using
     simulations at both ensembles A and B. The forwards average
     < f( beta(U_B-U_A) )>_A divided by the backwards average
     < f( beta(U_A-U_B) )>_B is equal to exp(-beta deltaG).
-    
+
     In this case, we don't use the "C" energy offset value, as this
     is optimally equal to deltaG, which we don't know, and also because
     in windowed calculations, abs(deltaG) is < 5 kcal mol-1.
-    
+
     Also note that we use the function f(x) = 1 / (1 + exp(x)) as
-    this is also supposed to be the most efficient. 
- 
+    this is also supposed to be the most efficient.
+
     @author Christopher Woods
 */
 class SIREMATHS_EXPORT BennettsFreeEnergyAverage
@@ -160,38 +159,38 @@ public:
     BennettsFreeEnergyAverage(const SireUnits::Dimension::MolarEnergy &constant,
                               const SireUnits::Dimension::Temperature &temperature,
                               bool forwards_free_energy=true);
-    
+
     BennettsFreeEnergyAverage(const SireUnits::Dimension::MolarEnergy &constant,
                               bool forwards_free_energy=true);
-    
+
     BennettsFreeEnergyAverage(const SireUnits::Dimension::Temperature &temperature,
                               const SireUnits::Dimension::MolarEnergy &binwidth,
                               bool forwards_free_energy=true);
-    
+
     BennettsFreeEnergyAverage(const SireUnits::Dimension::MolarEnergy &constant,
                               const SireUnits::Dimension::Temperature &temperature,
                               const SireUnits::Dimension::MolarEnergy &binwidth,
                               bool forwards_free_energy=true);
-    
+
     BennettsFreeEnergyAverage(const BennettsFreeEnergyAverage &other);
-    
+
     ~BennettsFreeEnergyAverage();
-    
+
     BennettsFreeEnergyAverage& operator=(const BennettsFreeEnergyAverage &other);
-    
+
     bool operator==(const BennettsFreeEnergyAverage &other) const;
     bool operator!=(const BennettsFreeEnergyAverage &other) const;
-    
+
     BennettsFreeEnergyAverage operator+(const BennettsFreeEnergyAverage &other) const;
-    
+
     BennettsFreeEnergyAverage& operator+=(const BennettsFreeEnergyAverage &other);
-    
+
     static const char* typeName();
 
     QString toString() const;
 
     void clear();
-    
+
     void accumulate(double value);
 
     double bennettsRatio() const;
@@ -205,10 +204,10 @@ public:
 private:
     /** The average bennetts ratio */
     double bennetts_avg;
-    
+
     /** The average of the squared bennetts ratio */
     double bennetts_avg2;
-    
+
     /** The energy offset for each ratio */
     SireUnits::Dimension::MolarEnergy const_offset;
 };

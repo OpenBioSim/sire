@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -43,7 +42,7 @@ static const RegisterMetaType<LJPair> r_ljpair(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const LJPair &ljpair)
 {
     writeHeader(ds, r_ljpair, 1) << ljpair.sig << ljpair.eps;
-    
+
     return ds;
 }
 
@@ -51,14 +50,14 @@ QDataStream &operator<<(QDataStream &ds, const LJPair &ljpair)
 QDataStream &operator>>(QDataStream &ds, LJPair &ljpair)
 {
     VersionID v = readHeader(ds, r_ljpair);
-    
+
     if (v == 1)
     {
         ds >> ljpair.sig >> ljpair.eps;
     }
     else
         throw version_error(v, "1", r_ljpair, CODELOC);
-    
+
     return ds;
 }
 
@@ -88,7 +87,7 @@ LJPair::LJPair(double sigma, double epsilon)
     }
 }
 
-/** Construct a LJPair that is the combination of lj0 and lj1 
+/** Construct a LJPair that is the combination of lj0 and lj1
     using the passed specified combining rules */
 LJPair::LJPair(const LJParameter &lj0, const LJParameter &lj1,
                LJParameterDB::CombiningRules rules) : sig(0), eps(0)
@@ -98,7 +97,7 @@ LJPair::LJPair(const LJParameter &lj0, const LJParameter &lj1,
         case LJParameterDB::ARITHMETIC:
             this->operator=( LJPair::arithmetic(lj0, lj1) );
             break;
-        
+
         case LJParameterDB::GEOMETRIC:
             this->operator=( LJPair::geometric(lj0, lj1) );
             break;
@@ -130,7 +129,7 @@ bool LJPair::operator!=(const LJPair &other) const
 /** Return whether or not this is a dummy LJ parameter */
 bool LJPair::isDummy() const
 {
-    //we only need to compare sigma as this will be set to zero if 
+    //we only need to compare sigma as this will be set to zero if
     //epsilon is zero
     return sig == 0.0;
 }
@@ -138,7 +137,7 @@ bool LJPair::isDummy() const
 /** Return whether or not this parameter has non-zero LJ parameters */
 bool LJPair::zeroLJ() const
 {
-    //we only need to compare sigma as this will be set to zero if 
+    //we only need to compare sigma as this will be set to zero if
     //epsilon is zero
     return sig == 0.0;
 }

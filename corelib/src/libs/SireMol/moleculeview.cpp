@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,26 +60,26 @@ using namespace SireBase;
 using namespace SireVol;
 using namespace SireMol;
 
-RegisterMetaType<MoleculeView> r_molview( MAGIC_ONLY,
-                                          "SireMol::MoleculeView" );
+RegisterMetaType<MoleculeView> r_molview(MAGIC_ONLY,
+                                         "SireMol::MoleculeView");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds,
-                                       const MoleculeView &molview)
+                        const MoleculeView &molview)
 {
     writeHeader(ds, r_molview, 2);
 
     SharedDataStream sds(ds);
 
     sds << molview.d
-        << static_cast<const Property&>(molview);
+        << static_cast<const Property &>(molview);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
 QDataStream &operator>>(QDataStream &ds,
-                                       MoleculeView &molview)
+                        MoleculeView &molview)
 {
     VersionID v = readHeader(ds, r_molview);
 
@@ -88,7 +87,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> molview.d >> static_cast<Property&>(molview);
+        sds >> molview.d >> static_cast<Property &>(molview);
     }
     else if (v == 1)
     {
@@ -103,25 +102,29 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-MoleculeView::MoleculeView() : Property(), d( MoleculeData::null() )
-{}
+MoleculeView::MoleculeView() : Property(), d(MoleculeData::null())
+{
+}
 
 /** Construct a view of the molecule whose data is in 'moldata' */
 MoleculeView::MoleculeView(const MoleculeData &moldata)
-             : Property(), d(moldata)
-{}
+    : Property(), d(moldata)
+{
+}
 
 /** Copy constructor */
 MoleculeView::MoleculeView(const MoleculeView &other)
-             : Property(other), d(other.d)
-{}
+    : Property(other), d(other.d)
+{
+}
 
 /** Destructor */
 MoleculeView::~MoleculeView()
-{}
+{
+}
 
 /** Copy assignment operator */
-MoleculeView& MoleculeView::operator=(const MoleculeView &other)
+MoleculeView &MoleculeView::operator=(const MoleculeView &other)
 {
     Property::operator=(other);
     d = other.d;
@@ -247,7 +250,7 @@ void MoleculeView::saveFrame(int frame, const SireBase::PropertyMap &map)
 {
     const auto traj_prop = map["trajectory"];
 
-    if (not (traj_prop.hasSource()))
+    if (not(traj_prop.hasSource()))
         return;
 
     Trajectory traj;
@@ -270,7 +273,7 @@ void MoleculeView::saveFrame(const SireBase::PropertyMap &map)
 {
     const auto traj_prop = map["trajectory"];
 
-    if (not (traj_prop.hasSource()))
+    if (not(traj_prop.hasSource()))
         return;
 
     Trajectory traj;
@@ -288,7 +291,7 @@ void MoleculeView::deleteFrame(int frame, const SireBase::PropertyMap &map)
 {
     const auto traj_prop = map["trajectory"];
 
-    if (not (traj_prop.hasSource() and d->hasProperty(traj_prop)))
+    if (not(traj_prop.hasSource() and d->hasProperty(traj_prop)))
         return;
 
     auto traj = d->property(traj_prop.source()).asA<Trajectory>();
@@ -327,13 +330,15 @@ bool MoleculeView::isSameMolecule(const MoleculeView &other) const
 void MoleculeView::assertSameMolecule(const MoleculeData &other) const
 {
     if (d->number() != other.number())
-        //these are different molecules!
-        throw SireError::incompatible_error( QObject::tr(
-            "The molecules \"%1\", number %2, and \"%3\", number %4, "
-            "are different, and therefore incompatible.")
-                .arg(d->name()).arg(d->number())
-                .arg(other.name()).arg(other.number()),
-                    CODELOC );
+        // these are different molecules!
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The molecules \"%1\", number %2, and \"%3\", number %4, "
+                                                "are different, and therefore incompatible.")
+                                                .arg(d->name())
+                                                .arg(d->number())
+                                                .arg(other.name())
+                                                .arg(other.number()),
+                                            CODELOC);
 }
 
 /** Assert that this is a view of the same molecule as 'other'
@@ -387,7 +392,7 @@ QStringList MoleculeView::keys() const
 
     \throw SireBase::missing_property
 */
-const char* MoleculeView::propertyType(const PropertyName &key) const
+const char *MoleculeView::propertyType(const PropertyName &key) const
 {
     return d->property(key).what();
 }
@@ -396,7 +401,7 @@ const char* MoleculeView::propertyType(const PropertyName &key) const
 
     \throw SireBase::missing_property
 */
-const char* MoleculeView::metadataType(const PropertyName &metakey) const
+const char *MoleculeView::metadataType(const PropertyName &metakey) const
 {
     return d->metadata(metakey).what();
 }
@@ -406,7 +411,7 @@ const char* MoleculeView::metadataType(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-const char* MoleculeView::metadataType(const PropertyName &key,
+const char *MoleculeView::metadataType(const PropertyName &key,
                                        const PropertyName &metakey) const
 {
     return d->metadata(key, metakey).what();
@@ -420,11 +425,13 @@ const char* MoleculeView::metadataType(const PropertyName &key,
 void MoleculeView::assertContains(AtomIdx atomidx) const
 {
     if (not this->selection().selected(atomidx))
-        throw SireMol::missing_atom( QObject::tr(
-            "This view of the molecule \"%1\" (%2) does not "
-            "contain the atom at index %3.")
-                .arg(d->name()).arg(d->number())
-                .arg(atomidx), CODELOC );
+        throw SireMol::missing_atom(QObject::tr(
+                                        "This view of the molecule \"%1\" (%2) does not "
+                                        "contain the atom at index %3.")
+                                        .arg(d->name())
+                                        .arg(d->number())
+                                        .arg(atomidx),
+                                    CODELOC);
 }
 
 /** Assert that this contains a property at key 'key'
@@ -434,12 +441,13 @@ void MoleculeView::assertContains(AtomIdx atomidx) const
 void MoleculeView::assertHasProperty(const PropertyName &key) const
 {
     if (not this->hasProperty(key))
-        throw SireBase::missing_property( QObject::tr(
-            "This view of the molecule \"%1\" (view type %2) "
-            "does not have a valid property at key \"%3\".")
-                .arg(d->name())
-                .arg(this->what())
-                .arg(key.toString()), CODELOC );
+        throw SireBase::missing_property(QObject::tr(
+                                             "This view of the molecule \"%1\" (view type %2) "
+                                             "does not have a valid property at key \"%3\".")
+                                             .arg(d->name())
+                                             .arg(this->what())
+                                             .arg(key.toString()),
+                                         CODELOC);
 }
 
 /** Assert that this contains some metadata at metakey 'metakey'
@@ -449,12 +457,13 @@ void MoleculeView::assertHasProperty(const PropertyName &key) const
 void MoleculeView::assertHasMetadata(const PropertyName &metakey) const
 {
     if (not this->hasMetadata(metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "This view of the molecule \"%1\" (view type %2) "
-            "does not have some valid metadata at metakey \"%3\".")
-                .arg(d->name())
-                .arg(this->what())
-                .arg(metakey.toString()), CODELOC );
+        throw SireBase::missing_property(QObject::tr(
+                                             "This view of the molecule \"%1\" (view type %2) "
+                                             "does not have some valid metadata at metakey \"%3\".")
+                                             .arg(d->name())
+                                             .arg(this->what())
+                                             .arg(metakey.toString()),
+                                         CODELOC);
 }
 
 /** Assert that this contains some metadata at metakey 'metakey'
@@ -465,15 +474,16 @@ void MoleculeView::assertHasMetadata(const PropertyName &metakey) const
 void MoleculeView::assertHasMetadata(const PropertyName &key,
                                      const PropertyName &metakey) const
 {
-    if (not this->hasMetadata(key,metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "This view of the molecule \"%1\" (view type %2) "
-            "does not have some valid metadata at metakey \"%3\" "
-            "for the property at key \"%4\".")
-                .arg(d->name())
-                .arg(this->what())
-                .arg(metakey.toString())
-                .arg(key.toString()), CODELOC );
+    if (not this->hasMetadata(key, metakey))
+        throw SireBase::missing_property(QObject::tr(
+                                             "This view of the molecule \"%1\" (view type %2) "
+                                             "does not have some valid metadata at metakey \"%3\" "
+                                             "for the property at key \"%4\".")
+                                             .arg(d->name())
+                                             .arg(this->what())
+                                             .arg(metakey.toString())
+                                             .arg(key.toString()),
+                                         CODELOC);
 }
 
 Atom MoleculeView::atom(int i, const PropertyMap &map) const
@@ -497,24 +507,24 @@ Atom MoleculeView::atom(const QString &name, const PropertyMap &map) const
     {
         return this->atom(AtomID::fromString(name), map);
     }
-    catch(const SireMol::duplicate_atom &e)
+    catch (const SireMol::duplicate_atom &e)
     {
         throw e;
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         try
         {
             auto a = this->search(name).views().at(0).atom();
             return this->atom(a.index(), map);
         }
-        catch(...)
+        catch (...)
         {
             if (name.length() < 5)
-                //likely a name error
+                // likely a name error
                 e.throwSelf();
             else
-                //likely a syntax error
+                // likely a syntax error
                 throw;
         }
     }
@@ -533,7 +543,7 @@ Atom MoleculeView::atom(const AtomID &atomid, const PropertyMap &map) const
     return atomid.selectFrom(*this, map);
 }
 
-template<class T>
+template <class T>
 QList<qint64> _toIndicies(const QList<T> &ids)
 {
     QList<qint64> idxs;
@@ -553,7 +563,7 @@ Selector<Atom> MoleculeView::atoms(const QString &name,
     {
         return this->atoms(AtomID::fromString(name), map);
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         try
         {
@@ -561,18 +571,20 @@ Selector<Atom> MoleculeView::atoms(const QString &name,
 
             if (a.count() == 0)
                 throw SireMol::missing_atom(QObject::tr(
-                    "No atom matches '%1'").arg(name), CODELOC);
+                                                "No atom matches '%1'")
+                                                .arg(name),
+                                            CODELOC);
 
             return this->molecule().atoms(
-                        _toIndicies(a[0].atoms().IDs()), map);
+                _toIndicies(a[0].atoms().IDs()), map);
         }
-        catch(...)
+        catch (...)
         {
             if (name.length() < 5)
-                //likely a name error
+                // likely a name error
                 e.throwSelf();
             else
-                //likely a syntax error
+                // likely a syntax error
                 throw;
         }
     }
@@ -585,11 +597,12 @@ Selector<Atom> MoleculeView::atoms(const QStringList &names,
 {
     if (names.count() == 0)
         throw SireMol::missing_atom(QObject::tr(
-            "You must specify some names.."), CODELOC);
+                                        "You must specify some names.."),
+                                    CODELOC);
 
     auto s = this->atoms(names[0], map);
 
-    for (int i=1; i<names.count(); ++i)
+    for (int i = 1; i < names.count(); ++i)
     {
         s = s + this->atoms(names[i], map);
     }
@@ -602,11 +615,12 @@ Selector<Atom> MoleculeView::atoms(const QList<qint64> &values,
 {
     if (values.count() == 0)
         throw SireError::invalid_index(QObject::tr(
-            "You must specify some indexes.."), CODELOC);
+                                           "You must specify some indexes.."),
+                                       CODELOC);
 
-    if (this->isA< Selector<Atom> >())
+    if (this->isA<Selector<Atom>>())
     {
-        auto IDs = this->asA< Selector<Atom> >().indexes();
+        auto IDs = this->asA<Selector<Atom>>().indexes();
 
         QList<AtomIdx> ret;
         ret.reserve(values.count());
@@ -645,9 +659,9 @@ Selector<Atom> MoleculeView::atoms(const QList<qint64> &values,
 Selector<Atom> MoleculeView::atoms(const Slice &slice,
                                    const PropertyMap &map) const
 {
-    if (this->isA< Selector<Atom> >())
+    if (this->isA<Selector<Atom>>())
     {
-        auto IDs = this->asA< Selector<Atom> >().indexes();
+        auto IDs = this->asA<Selector<Atom>>().indexes();
 
         QList<AtomIdx> ret;
 
@@ -703,16 +717,18 @@ Atom MoleculeView::atom() const
     QVector<AtomIdx> selected_atoms = this->selection().selectedAtoms();
 
     if (selected_atoms.isEmpty())
-        throw SireMol::missing_atom( QObject::tr(
-                "This view does not contain any atoms."), CODELOC );
+        throw SireMol::missing_atom(QObject::tr(
+                                        "This view does not contain any atoms."),
+                                    CODELOC);
 
     else if (selected_atoms.count() != 1)
-        throw SireMol::duplicate_atom( QObject::tr(
-                "Cannot convert this view (%1) into an Atom as "
-                "we can only do this is just one atom is selected. "
-                "The number of matching atoms is %2.")
-                    .arg(this->toString()).arg(selected_atoms.count()),
-                        CODELOC );
+        throw SireMol::duplicate_atom(QObject::tr(
+                                          "Cannot convert this view (%1) into an Atom as "
+                                          "we can only do this is just one atom is selected. "
+                                          "The number of matching atoms is %2.")
+                                          .arg(this->toString())
+                                          .arg(selected_atoms.count()),
+                                      CODELOC);
 
     return Atom(this->data(), selected_atoms.at(0));
 }
@@ -723,15 +739,16 @@ Atom MoleculeView::atom() const
 */
 Selector<Atom> MoleculeView::atoms() const
 {
-    if (this->isA< Selector<Atom> >())
-        return this->asA< Selector<Atom> >();
+    if (this->isA<Selector<Atom>>())
+        return this->asA<Selector<Atom>>();
 
     AtomSelection selected_atoms = this->selection();
 
     if (selected_atoms.selectedNone())
-        throw SireMol::missing_atom( QObject::tr(
-                "No atoms are available in this view (%1).")
-                    .arg(this->toString()), CODELOC );
+        throw SireMol::missing_atom(QObject::tr(
+                                        "No atoms are available in this view (%1).")
+                                        .arg(this->toString()),
+                                    CODELOC);
 
     return Selector<Atom>(this->data(), this->selection());
 }
@@ -777,9 +794,9 @@ Selector<CutGroup> MoleculeView::cutGroups(const QString &name,
 Selector<CutGroup> MoleculeView::cutGroups(const Slice &slice,
                                            const PropertyMap &map) const
 {
-    if (this->isA< Selector<CutGroup> >())
+    if (this->isA<Selector<CutGroup>>())
     {
-        auto IDs = this->asA< Selector<CutGroup> >().indexes();
+        auto IDs = this->asA<Selector<CutGroup>>().indexes();
 
         QList<CGIdx> ret;
 
@@ -837,16 +854,17 @@ CutGroup MoleculeView::cutGroup() const
     QList<CGIdx> selected_cgs = this->selection().selectedCutGroups();
 
     if (selected_cgs.isEmpty())
-        throw SireMol::missing_cutgroup( QObject::tr(
-                "This view does not contain any CutGroups."), CODELOC );
+        throw SireMol::missing_cutgroup(QObject::tr(
+                                            "This view does not contain any CutGroups."),
+                                        CODELOC);
 
     else if (selected_cgs.count() != 1)
-        throw SireMol::duplicate_cutgroup( QObject::tr(
-                "Cannot convert this view (%1) into a CutGroup as "
-                "we can only do this is just one CutGroup is selected. "
-                "These CutGroups are selected ; %2.")
-                    .arg(this->toString(), Sire::toString(selected_cgs)),
-                        CODELOC );
+        throw SireMol::duplicate_cutgroup(QObject::tr(
+                                              "Cannot convert this view (%1) into a CutGroup as "
+                                              "we can only do this is just one CutGroup is selected. "
+                                              "These CutGroups are selected ; %2.")
+                                              .arg(this->toString(), Sire::toString(selected_cgs)),
+                                          CODELOC);
 
     return CutGroup(this->data(), selected_cgs.at(0));
 }
@@ -857,14 +875,15 @@ CutGroup MoleculeView::cutGroup() const
 */
 Selector<CutGroup> MoleculeView::cutGroups() const
 {
-    if (this->isA< Selector<CutGroup> >())
-        return this->asA< Selector<CutGroup> >();
+    if (this->isA<Selector<CutGroup>>())
+        return this->asA<Selector<CutGroup>>();
 
     QList<CGIdx> selected_cgs = this->selection().selectedCutGroups();
 
     if (selected_cgs.isEmpty())
-        throw SireMol::missing_cutgroup( QObject::tr(
-                "This view does not contain any CutGroups."), CODELOC );
+        throw SireMol::missing_cutgroup(QObject::tr(
+                                            "This view does not contain any CutGroups."),
+                                        CODELOC);
 
     return Selector<CutGroup>(this->data(), selected_cgs);
 }
@@ -890,24 +909,24 @@ Residue MoleculeView::residue(const QString &name, const PropertyMap &map) const
     {
         return this->residue(ResID::fromString(name), map);
     }
-    catch(const SireMol::duplicate_residue &e)
+    catch (const SireMol::duplicate_residue &e)
     {
         throw e;
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         try
         {
             auto a = this->search(name).views().at(0).residue();
             return this->residue(a.index(), map);
         }
-        catch(...)
+        catch (...)
         {
             if (name.length() < 5)
-                //likely a name error
+                // likely a name error
                 e.throwSelf();
             else
-                //likely a syntax error
+                // likely a syntax error
                 throw;
         }
     }
@@ -933,7 +952,7 @@ Selector<Residue> MoleculeView::residues(const QString &name,
     {
         return this->residues(ResID::fromString(name), map);
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         try
         {
@@ -941,18 +960,20 @@ Selector<Residue> MoleculeView::residues(const QString &name,
 
             if (a.count() == 0)
                 throw SireMol::missing_residue(QObject::tr(
-                    "No residue matches '%1'").arg(name), CODELOC);
+                                                   "No residue matches '%1'")
+                                                   .arg(name),
+                                               CODELOC);
 
             return this->molecule().residues(
-                        _toIndicies(a[0].residues().IDs()), map);
+                _toIndicies(a[0].residues().IDs()), map);
         }
-        catch(...)
+        catch (...)
         {
             if (name.length() < 5)
-                //likely a name error
+                // likely a name error
                 e.throwSelf();
             else
-                //likely a syntax error
+                // likely a syntax error
                 throw;
         }
     }
@@ -965,11 +986,12 @@ Selector<Residue> MoleculeView::residues(const QStringList &names,
 {
     if (names.count() == 0)
         throw SireMol::missing_residue(QObject::tr(
-            "You must specify some names.."), CODELOC);
+                                           "You must specify some names.."),
+                                       CODELOC);
 
     auto s = this->residues(names[0], map);
 
-    for (int i=1; i<names.count(); ++i)
+    for (int i = 1; i < names.count(); ++i)
     {
         s = s + this->residues(names[i], map);
     }
@@ -982,11 +1004,12 @@ Selector<Residue> MoleculeView::residues(const QList<qint64> &values,
 {
     if (values.count() == 0)
         throw SireError::invalid_index(QObject::tr(
-            "You must specify some indexes.."), CODELOC);
+                                           "You must specify some indexes.."),
+                                       CODELOC);
 
-    if (this->isA< Selector<Residue> >())
+    if (this->isA<Selector<Residue>>())
     {
-        auto IDs = this->asA< Selector<Residue> >().indexes();
+        auto IDs = this->asA<Selector<Residue>>().indexes();
 
         QList<ResIdx> ret;
         ret.reserve(values.count());
@@ -1025,9 +1048,9 @@ Selector<Residue> MoleculeView::residues(const QList<qint64> &values,
 Selector<Residue> MoleculeView::residues(const Slice &slice,
                                          const PropertyMap &map) const
 {
-    if (this->isA< Selector<Residue> >())
+    if (this->isA<Selector<Residue>>())
     {
-        auto IDs = this->asA< Selector<Residue> >().indexes();
+        auto IDs = this->asA<Selector<Residue>>().indexes();
 
         QList<ResIdx> ret;
 
@@ -1083,16 +1106,17 @@ Residue MoleculeView::residue() const
     QList<ResIdx> selected_res = this->selection().selectedResidues();
 
     if (selected_res.isEmpty())
-        throw SireMol::missing_residue( QObject::tr(
-                "This view does not contain any residues."), CODELOC );
+        throw SireMol::missing_residue(QObject::tr(
+                                           "This view does not contain any residues."),
+                                       CODELOC);
 
     else if (selected_res.count() != 1)
-        throw SireMol::duplicate_residue( QObject::tr(
-                "Cannot convert this view (%1) into a Residue as "
-                "we can only do this is just one Residue is selected. "
-                "These Residues are selected ; %2.")
-                    .arg(this->toString(), Sire::toString(selected_res)),
-                        CODELOC );
+        throw SireMol::duplicate_residue(QObject::tr(
+                                             "Cannot convert this view (%1) into a Residue as "
+                                             "we can only do this is just one Residue is selected. "
+                                             "These Residues are selected ; %2.")
+                                             .arg(this->toString(), Sire::toString(selected_res)),
+                                         CODELOC);
 
     return Residue(this->data(), selected_res.at(0));
 }
@@ -1103,15 +1127,16 @@ Residue MoleculeView::residue() const
 */
 Selector<Residue> MoleculeView::residues() const
 {
-    if (this->isA< Selector<Residue> >())
-        return this->asA< Selector<Residue> >();
+    if (this->isA<Selector<Residue>>())
+        return this->asA<Selector<Residue>>();
 
     QList<ResIdx> selected_res = this->selection().selectedResidues();
 
     if (selected_res.isEmpty())
     {
-        throw SireMol::missing_residue( QObject::tr(
-                "This view does not contain any residues."), CODELOC );
+        throw SireMol::missing_residue(QObject::tr(
+                                           "This view does not contain any residues."),
+                                       CODELOC);
     }
 
     return Selector<Residue>(this->data(), selected_res);
@@ -1138,24 +1163,24 @@ Chain MoleculeView::chain(const QString &name, const PropertyMap &map) const
     {
         return this->chain(ChainID::fromString(name), map);
     }
-    catch(const SireMol::duplicate_chain &e)
+    catch (const SireMol::duplicate_chain &e)
     {
         throw e;
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         try
         {
             auto a = this->search(name).views().at(0).chain();
             return this->chain(a.index(), map);
         }
-        catch(...)
+        catch (...)
         {
             if (name.length() < 5)
-                //likely a name error
+                // likely a name error
                 e.throwSelf();
             else
-                //likely a syntax error
+                // likely a syntax error
                 throw;
         }
     }
@@ -1182,7 +1207,7 @@ Selector<Chain> MoleculeView::chains(const QString &name,
     {
         return this->chains(ChainID::fromString(name), map);
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         try
         {
@@ -1190,18 +1215,20 @@ Selector<Chain> MoleculeView::chains(const QString &name,
 
             if (a.count() == 0)
                 throw SireMol::missing_chain(QObject::tr(
-                    "No chain matches '%1'").arg(name), CODELOC);
+                                                 "No chain matches '%1'")
+                                                 .arg(name),
+                                             CODELOC);
 
             return this->molecule().chains(
-                        _toIndicies(a[0].chains().IDs()), map);
+                _toIndicies(a[0].chains().IDs()), map);
         }
-        catch(...)
+        catch (...)
         {
             if (name.length() < 5)
-                //likely a name error
+                // likely a name error
                 e.throwSelf();
             else
-                //likely a syntax error
+                // likely a syntax error
                 throw;
         }
     }
@@ -1214,11 +1241,12 @@ Selector<Chain> MoleculeView::chains(const QStringList &names,
 {
     if (names.count() == 0)
         throw SireMol::missing_atom(QObject::tr(
-            "You must specify some names.."), CODELOC);
+                                        "You must specify some names.."),
+                                    CODELOC);
 
     auto s = this->chains(names[0], map);
 
-    for (int i=1; i<names.count(); ++i)
+    for (int i = 1; i < names.count(); ++i)
     {
         s = s + this->chains(names[i], map);
     }
@@ -1231,11 +1259,12 @@ Selector<Chain> MoleculeView::chains(const QList<qint64> &values,
 {
     if (values.count() == 0)
         throw SireError::invalid_index(QObject::tr(
-            "You must specify some indexes.."), CODELOC);
+                                           "You must specify some indexes.."),
+                                       CODELOC);
 
-    if (this->isA< Selector<Chain> >())
+    if (this->isA<Selector<Chain>>())
     {
-        auto IDs = this->asA< Selector<Chain> >().indexes();
+        auto IDs = this->asA<Selector<Chain>>().indexes();
 
         QList<ChainIdx> ret;
         ret.reserve(values.count());
@@ -1274,9 +1303,9 @@ Selector<Chain> MoleculeView::chains(const QList<qint64> &values,
 Selector<Chain> MoleculeView::chains(const Slice &slice,
                                      const PropertyMap &map) const
 {
-    if (this->isA< Selector<Chain> >())
+    if (this->isA<Selector<Chain>>())
     {
-        auto IDs = this->asA< Selector<Chain> >().indexes();
+        auto IDs = this->asA<Selector<Chain>>().indexes();
 
         QList<ChainIdx> ret;
 
@@ -1335,16 +1364,17 @@ Chain MoleculeView::chain() const
     QList<ChainIdx> selected_chn = this->selection().selectedChains();
 
     if (selected_chn.isEmpty())
-        throw SireMol::missing_chain( QObject::tr(
-                "This view does not contain any chains."), CODELOC );
+        throw SireMol::missing_chain(QObject::tr(
+                                         "This view does not contain any chains."),
+                                     CODELOC);
 
     else if (selected_chn.count() != 1)
-        throw SireMol::duplicate_chain( QObject::tr(
-                "Cannot convert this view (%1) into a Chain as "
-                "we can only do this is just one Chain is selected. "
-                "These Chains are selected ; %2.")
-                    .arg(this->toString(), Sire::toString(selected_chn)),
-                        CODELOC );
+        throw SireMol::duplicate_chain(QObject::tr(
+                                           "Cannot convert this view (%1) into a Chain as "
+                                           "we can only do this is just one Chain is selected. "
+                                           "These Chains are selected ; %2.")
+                                           .arg(this->toString(), Sire::toString(selected_chn)),
+                                       CODELOC);
 
     return Chain(this->data(), selected_chn.at(0));
 }
@@ -1355,14 +1385,15 @@ Chain MoleculeView::chain() const
 */
 Selector<Chain> MoleculeView::chains() const
 {
-    if (this->isA< Selector<Chain> >())
-        return this->asA< Selector<Chain> >();
+    if (this->isA<Selector<Chain>>())
+        return this->asA<Selector<Chain>>();
 
     QList<ChainIdx> selected_chn = this->selection().selectedChains();
 
     if (selected_chn.isEmpty())
-        throw SireMol::missing_chain( QObject::tr(
-                "This view does not contain any chains."), CODELOC );
+        throw SireMol::missing_chain(QObject::tr(
+                                         "This view does not contain any chains."),
+                                     CODELOC);
 
     return Selector<Chain>(this->data(), selected_chn);
 }
@@ -1388,24 +1419,24 @@ Segment MoleculeView::segment(const QString &name, const PropertyMap &map) const
     {
         return this->segment(SegID::fromString(name), map);
     }
-    catch(const SireMol::duplicate_segment &e)
+    catch (const SireMol::duplicate_segment &e)
     {
         throw e;
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         try
         {
             auto a = this->search(name).views().at(0).segment();
             return this->segment(a.index(), map);
         }
-        catch(...)
+        catch (...)
         {
             if (name.length() < 5)
-                //likely a name error
+                // likely a name error
                 e.throwSelf();
             else
-                //likely a syntax error
+                // likely a syntax error
                 throw;
         }
     }
@@ -1432,7 +1463,7 @@ Selector<Segment> MoleculeView::segments(const QString &name,
     {
         return this->segments(SegID::fromString(name), map);
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         try
         {
@@ -1440,18 +1471,20 @@ Selector<Segment> MoleculeView::segments(const QString &name,
 
             if (a.count() == 0)
                 throw SireMol::missing_segment(QObject::tr(
-                    "No segment matches '%1'").arg(name), CODELOC);
+                                                   "No segment matches '%1'")
+                                                   .arg(name),
+                                               CODELOC);
 
             return this->molecule().segments(
-                        _toIndicies(a[0].segments().IDs()), map);
+                _toIndicies(a[0].segments().IDs()), map);
         }
-        catch(...)
+        catch (...)
         {
             if (name.length() < 5)
-                //likely a name error
+                // likely a name error
                 e.throwSelf();
             else
-                //likely a syntax error
+                // likely a syntax error
                 throw;
         }
     }
@@ -1464,11 +1497,12 @@ Selector<Segment> MoleculeView::segments(const QStringList &names,
 {
     if (names.count() == 0)
         throw SireMol::missing_atom(QObject::tr(
-            "You must specify some names.."), CODELOC);
+                                        "You must specify some names.."),
+                                    CODELOC);
 
     auto s = this->segments(names[0], map);
 
-    for (int i=1; i<names.count(); ++i)
+    for (int i = 1; i < names.count(); ++i)
     {
         s = s + this->segments(names[i], map);
     }
@@ -1481,11 +1515,12 @@ Selector<Segment> MoleculeView::segments(const QList<qint64> &values,
 {
     if (values.count() == 0)
         throw SireError::invalid_index(QObject::tr(
-            "You must specify some indexes.."), CODELOC);
+                                           "You must specify some indexes.."),
+                                       CODELOC);
 
-    if (this->isA< Selector<Segment> >())
+    if (this->isA<Selector<Segment>>())
     {
-        auto IDs = this->asA< Selector<Segment> >().indexes();
+        auto IDs = this->asA<Selector<Segment>>().indexes();
 
         QList<SegIdx> ret;
         ret.reserve(values.count());
@@ -1524,9 +1559,9 @@ Selector<Segment> MoleculeView::segments(const QList<qint64> &values,
 Selector<Segment> MoleculeView::segments(const Slice &slice,
                                          const PropertyMap &map) const
 {
-    if (this->isA< Selector<Segment> >())
+    if (this->isA<Selector<Segment>>())
     {
-        auto IDs = this->asA< Selector<Segment> >().indexes();
+        auto IDs = this->asA<Selector<Segment>>().indexes();
 
         QList<SegIdx> ret;
 
@@ -1583,16 +1618,17 @@ Segment MoleculeView::segment() const
     QList<SegIdx> selected_seg = this->selection().selectedSegments();
 
     if (selected_seg.isEmpty())
-        throw SireMol::missing_segment( QObject::tr(
-                "This view does not contain any segments."), CODELOC );
+        throw SireMol::missing_segment(QObject::tr(
+                                           "This view does not contain any segments."),
+                                       CODELOC);
 
     else if (selected_seg.count() != 1)
-        throw SireMol::duplicate_segment( QObject::tr(
-                "Cannot convert this view (%1) into a Segment as "
-                "we can only do this is just one Segment is selected. "
-                "These Segments are selected ; %2.")
-                    .arg(this->toString(), Sire::toString(selected_seg)),
-                        CODELOC );
+        throw SireMol::duplicate_segment(QObject::tr(
+                                             "Cannot convert this view (%1) into a Segment as "
+                                             "we can only do this is just one Segment is selected. "
+                                             "These Segments are selected ; %2.")
+                                             .arg(this->toString(), Sire::toString(selected_seg)),
+                                         CODELOC);
 
     return Segment(this->data(), selected_seg.at(0));
 }
@@ -1603,14 +1639,15 @@ Segment MoleculeView::segment() const
 */
 Selector<Segment> MoleculeView::segments() const
 {
-    if (this->isA< Selector<Segment> >())
-        return this->asA< Selector<Segment> >();
+    if (this->isA<Selector<Segment>>())
+        return this->asA<Selector<Segment>>();
 
     QList<SegIdx> selected_seg = this->selection().selectedSegments();
 
     if (selected_seg.isEmpty())
-        throw SireMol::missing_segment( QObject::tr(
-                "This view does not contain any segments."), CODELOC );
+        throw SireMol::missing_segment(QObject::tr(
+                                           "This view does not contain any segments."),
+                                       CODELOC);
 
     return Selector<Segment>(this->data(), selected_seg);
 }
@@ -1813,14 +1850,14 @@ Selector<Segment> MoleculeView::selectAllSegments() const
  *  helps code distinguish between views of single objects,
  *  e.g. Atom, Residue etc., and views of multiple objects,
  *  e.g. Selector<Atom>, Selector<Residue> etc.
-*/
+ */
 bool MoleculeView::isSelector() const
 {
     return false;
 }
 
 /** Return a completely null molecule */
-const MoleculeView& MoleculeView::null()
+const MoleculeView &MoleculeView::null()
 {
     return *(create_shared_null<Molecule>());
 }
@@ -1889,7 +1926,7 @@ Molecules MoleculeView::toMolecules() const
  *  this is a unit class, e.g. Atom, Residue, Molecule etc.
  *  This will return a list of unit classes if this is a Selector<T> or
  *  equivalent type class.
-*/
+ */
 QList<MolViewPtr> MoleculeView::toList() const
 {
     return QList<MolViewPtr>({MolViewPtr(this->clone())});

@@ -8,11 +8,11 @@ multiple files, e.g. a separate topology and coordinate file.
 You load from multiple files simply by passing multiple filenames and/or
 URLs to :func:`sire.load`.
 
->>> mols = sr.load("https://siremol.org/m/ala.top",
-...                "https://siremol.org/m/ala.crd")
-Downloading from 'https://siremol.org/m/ala.top'...
+>>> mols = sr.load("https://sire.openbiosim.org/m/ala.top",
+...                "https://sire.openbiosim.org/m/ala.crd")
+Downloading from 'https://sire.openbiosim.org/m/ala.top'...
 Unzipping './ala.top.bz2'...
-Downloading from 'https://siremol.org/m/ala.crd'...
+Downloading from 'https://sire.openbiosim.org/m/ala.crd'...
 Unzipping './ala.crd.bz2'...
 
 >>> print(mols)
@@ -21,13 +21,13 @@ System( name=ACE num_molecules=631 num_residues=633 num_atoms=1912 )
 You can pass in the filenames as multiple arguments or as a list,
 whichever you find easiest.
 
->>> mols = sr.load(["https://siremol.org/m/ala.top",
-...                 "https://siremol.org/m/ala.crd"])
+>>> mols = sr.load(["https://sire.openbiosim.org/m/ala.top",
+...                 "https://sire.openbiosim.org/m/ala.crd"])
 
 If the files or URLs have a common base, then you can save some typing
 by using :func:`sire.expand`, e.g.
 
->>> mols = sr.load(sr.expand("https://siremol.org/m",
+>>> mols = sr.load(sr.expand("https://sire.openbiosim.org/m",
 ...                          "ala.top", "ala.crd"))
 
 or
@@ -38,7 +38,7 @@ or
 .. note::
 
    ``sr.tutorial_url`` expands to the base URL for tutorial files
-   (https://siremol.org/m). It is worth using this variable for
+   (https://sire.openbiosim.org/m). It is worth using this variable for
    the tutorial as it auto-completes and will reduce errors.
 
 If you are loading files, you can also make use of glob expressions

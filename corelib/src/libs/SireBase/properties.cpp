@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -95,7 +94,7 @@ const SharedDataPointer<PropertiesData>& PropertiesData::getNullData()
     {
         //use a constructor where the circular reference is broken
         PropertiesData *ptr = new PropertiesData(false);
-        
+
         nulldata_ptr = ptr;
 
         //fix the reference
@@ -109,28 +108,28 @@ const SharedDataPointer<PropertiesData>& PropertiesData::getNullData()
 QDataStream& operator<<(QDataStream &ds, const PropertiesData &props)
 {
     SharedDataStream sds(ds);
-    
+
     sds << props.metadata;
-    
+
     sds << quint32( props.properties.count() );
-    
+
     for (QHash<QString,PropertyPtr>::const_iterator it = props.properties.constBegin();
          it != props.properties.constEnd();
          ++it)
     {
         sds << it.key() << it.value();
     }
-     
+
     sds << quint32( props.props_metadata.count() );
-    
-    for (QHash<QString,Properties>::const_iterator 
+
+    for (QHash<QString,Properties>::const_iterator
                                         it = props.props_metadata.constBegin();
          it != props.props_metadata.constEnd();
          ++it)
     {
         sds << it.key() << it.value();
     }
-     
+
     return ds;
 }
 
@@ -138,49 +137,49 @@ QDataStream& operator<<(QDataStream &ds, const PropertiesData &props)
 QDataStream& operator>>(QDataStream &ds, PropertiesData &props)
 {
     SharedDataStream sds(ds);
-    
+
     sds >> props.metadata;
-    
+
     quint32 nprops;
-    
+
     sds >> nprops;
-    
+
     props.properties.clear();
-    
+
     if (nprops > 0)
     {
         props.properties.reserve(nprops);
-    
+
         for (quint32 i=0; i<nprops; ++i)
         {
             QString key;
             PropertyPtr value;
-        
+
             sds >> key >> value;
-        
+
             props.properties.insert(key, value);
         }
     }
-    
+
     sds >> nprops;
-    
+
     props.props_metadata.clear();
-    
+
     if (nprops > 0)
     {
         props.props_metadata.reserve(nprops);
-    
+
         for (quint32 i=0; i<nprops; ++i)
         {
             QString key;
             Properties value;
-        
+
             sds >> key >> value;
-        
+
             props.props_metadata.insert(key, value);
         }
     }
-    
+
     return ds;
 }
 
@@ -214,14 +213,14 @@ PropertiesData& PropertiesData::operator=(const PropertiesData &other)
 /** Comparison operator */
 bool PropertiesData::operator==(const PropertiesData &other) const
 {
-    return metadata == other.metadata and properties == other.properties 
+    return metadata == other.metadata and properties == other.properties
                 and props_metadata == other.props_metadata;
 }
 
 /** Comparison operator */
 bool PropertiesData::operator!=(const PropertiesData &other) const
 {
-    return metadata != other.metadata or properties != other.properties 
+    return metadata != other.metadata or properties != other.properties
                 or props_metadata != other.props_metadata;
 }
 
@@ -235,7 +234,7 @@ static const RegisterMetaType<Properties> r_props;
 QDataStream &operator<<(QDataStream &ds, const Properties &props)
 {
     writeHeader(ds, r_props, 1);
-    
+
     SharedDataStream sds(ds);
 
     if (props.isEmpty())
@@ -249,7 +248,7 @@ QDataStream &operator<<(QDataStream &ds, const Properties &props)
         sds << qint32(1) << props.d
             << static_cast<const Property&>(props);
     }
-    
+
     return ds;
 }
 
@@ -257,15 +256,15 @@ QDataStream &operator<<(QDataStream &ds, const Properties &props)
 QDataStream &operator>>(QDataStream &ds, Properties &props)
 {
     VersionID v = readHeader(ds, r_props);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         qint32 not_empty;
-        
+
         sds >> not_empty;
-        
+
         if (not_empty)
         {
             sds >> props.d
@@ -279,23 +278,23 @@ QDataStream &operator>>(QDataStream &ds, Properties &props)
     }
     else
         throw version_error(v, "1", r_props, CODELOC);
-    
+
     return ds;
 }
 
 /** Private constructor used to avoid the problem of the circular reference! */
-Properties::Properties(bool) 
+Properties::Properties(bool)
            : ConcreteProperty<Properties,Property>(), d(0)
 {}
 
 /** Null constructor - construct an empty set of properties */
-Properties::Properties() 
+Properties::Properties()
            : ConcreteProperty<Properties,Property>(),
              d( PropertiesData::getNullData() )
 {}
 
 /** Copy constructor */
-Properties::Properties(const Properties &other) 
+Properties::Properties(const Properties &other)
            : ConcreteProperty<Properties,Property>(other),
              d(other.d)
 {}
@@ -309,7 +308,7 @@ Properties& Properties::operator=(const Properties &other)
 {
     d = other.d;
     Property::operator=(other);
-    
+
     return *this;
 }
 
@@ -413,21 +412,21 @@ QStringList Properties::metadataKeys(const PropertyName &key) const
 
 /** Assert that this set contains the metadata property for the
     property 'key' with metakey 'metakey'
-    
+
     \throw SireBase::missing_property
 */
-void Properties::assertContainsMetadata(const PropertyName &key, 
+void Properties::assertContainsMetadata(const PropertyName &key,
                                         const PropertyName &metakey) const
 {
     this->assertContainsProperty(key);
-    
-    if (metakey.hasSource() and 
+
+    if (metakey.hasSource() and
         not this->allMetadata(key).hasProperty(metakey))
     {
         throw SireBase::missing_property( QObject::tr(
             "There is no metadata with metakey \"%1\" for the property \"%2\". "
             "Available metakeys are ( %3 ).")
-                .arg(metakey.source(), 
+                .arg(metakey.source(),
                      key.toString(), metadataKeys(key).join(", ")), CODELOC );
     }
 }
@@ -455,7 +454,7 @@ const Property& Properties::operator[](const PropertyName &key) const
         return key.value();
     else
     {
-        QHash<QString,PropertyPtr>::const_iterator 
+        QHash<QString,PropertyPtr>::const_iterator
                             it = d->properties.constFind(key.source());
 
         if (it == d->properties.constEnd())
@@ -491,12 +490,12 @@ const Properties& Properties::allMetadata(const PropertyName &key) const
         return null_properties;
     else
     {
-        QHash<QString,Properties>::const_iterator 
+        QHash<QString,Properties>::const_iterator
                                 it = d->props_metadata.constFind(key.source());
 
         if (it == d->props_metadata.constEnd())
         {
-            if (key.hasDefaultValue())  
+            if (key.hasDefaultValue())
                 return null_properties;
             else
                 throw SireBase::missing_property( QObject::tr(
@@ -511,19 +510,19 @@ const Properties& Properties::allMetadata(const PropertyName &key) const
 
 /** Return whether or not the property with key 'key' contains some
     metadata with the metakey 'metakey'
-    
+
     \throw SireBase::missing_property
 */
-bool Properties::hasMetadata(const PropertyName &key, 
+bool Properties::hasMetadata(const PropertyName &key,
                              const PropertyName &metakey) const
 {
     this->assertContainsProperty(key);
-    
-    return metakey.hasValue() or 
+
+    return metakey.hasValue() or
            this->allMetadata(key).hasProperty(metakey);
 }
 
-/** Return the property with key 'key' - note that if 
+/** Return the property with key 'key' - note that if
     'key' specifies a value rather than a source, then the
     value contained in the key is returned
 
@@ -534,10 +533,10 @@ const Property& Properties::property(const PropertyName &key) const
     return this->operator[](key);
 }
 
-/** Return the property with key 'key' - note that if 
+/** Return the property with key 'key' - note that if
     'key' specifies a value rather than a source, then the
     value contained in the key is returned. If no such source
-    exists, and there is no value in the key, then 
+    exists, and there is no value in the key, then
     'default_value' is returned */
 const Property& Properties::property(const PropertyName &key,
                                      const Property &default_value) const
@@ -548,7 +547,7 @@ const Property& Properties::property(const PropertyName &key,
     }
     else
     {
-        QHash<QString,Properties>::const_iterator 
+        QHash<QString,Properties>::const_iterator
                                 it = d->props_metadata.constFind(key.source());
 
         if (it != d->props_metadata.constEnd())
@@ -561,7 +560,7 @@ const Property& Properties::property(const PropertyName &key,
 /** Return the metadata at metakey 'metakey' - note that if 'metakey'
     specifies a value rather than a source, then the value contained
     in the metakey is returned.
-    
+
     \throw SireBase::missing_property
 */
 const Property& Properties::metadata(const PropertyName &metakey) const
@@ -572,7 +571,7 @@ const Property& Properties::metadata(const PropertyName &metakey) const
 /** Return the metadata at metakey 'metakey' - note that if 'metakey'
     specifies a value rather than a source, then the value contained
     in the metakey is returned. If there is no such metadata, and no
-    value is contained in the metakey, then 'default_value' is 
+    value is contained in the metakey, then 'default_value' is
     returned */
 const Property& Properties::metadata(const PropertyName &metakey,
                                      const Property &default_value) const
@@ -582,7 +581,7 @@ const Property& Properties::metadata(const PropertyName &metakey,
 
 /** Return the metadata at metakey 'metakey' that is associated with
     the property at key 'key'.
-    
+
     \throw SireBase::missing_property
 */
 const Property& Properties::metadata(const PropertyName &key,
@@ -602,7 +601,7 @@ const Property& Properties::metadata(const PropertyName &key,
     return this->allMetadata(key).property(metakey,default_value);
 }
 
-/** Set the property at key 'key' to have the value 'value'. This 
+/** Set the property at key 'key' to have the value 'value'. This
     replaces any existing property at this key, and removes any
     existing metadata is 'clear_metadata' is true */
 void Properties::setProperty(const QString &key, const Property &value,
@@ -664,7 +663,7 @@ void Properties::removeAllMetadata()
     d->metadata.clear();
 }
 
-/** Remove the metadata at metakey 'metakey' for the 
+/** Remove the metadata at metakey 'metakey' for the
     property at key 'key' */
 void Properties::removeMetadata(const QString &key, const QString &metakey)
 {
@@ -674,7 +673,7 @@ void Properties::removeMetadata(const QString &key, const QString &metakey)
     }
 }
 
-/** Remove all of the metadata associated with the property at 
+/** Remove all of the metadata associated with the property at
     key 'key' */
 void Properties::removeAllMetadata(const QString &key)
 {
@@ -688,7 +687,7 @@ void Properties::clear()
     this->operator=( Properties() );
 }
 
-/** Return the type name of the property at key 'key' 
+/** Return the type name of the property at key 'key'
 
     \throw SireBase::missing_property
 */
@@ -707,8 +706,8 @@ const char* Properties::metadataType(const PropertyName &metakey) const
 }
 
 /** Return the type name of the metadata at metakey 'metakey'
-    for the property at key 'key' 
-    
+    for the property at key 'key'
+
     \throw SireBase::missing_property
 */
 const char* Properties::metadataType(const PropertyName &key,
@@ -740,9 +739,9 @@ QString Properties::toString() const
 {
     if (this->isEmpty())
         return QObject::tr("Properties::null");
-        
+
     QStringList props;
-    
+
     for (Properties::const_iterator it = this->constBegin();
          it != this->constEnd();
          ++it)
@@ -750,7 +749,7 @@ QString Properties::toString() const
         props.append( QObject::tr("    %1 => %2")
                             .arg(it.key(), it.value().read().toString()) );
     }
-    
+
     if (props.count() == 1)
         return QObject::tr("Properties( %1 )")
                     .arg( props.at(0).simplified() );

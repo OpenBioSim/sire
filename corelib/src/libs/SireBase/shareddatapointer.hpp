@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -73,17 +72,17 @@ public:
     SharedDataPointer<T> &operator=(SharedDataPointer<T> &&other);
 
     SharedDataPointer<T>& operator=(int);
-    
+
     void detach();
-    
+
     T& operator*();
     const T& operator*() const;
     T* operator->();
     const T* operator->() const;
-    
+
     operator T*();
     operator const T*() const;
-    
+
     T *data();
     const T* data() const;
     const T* constData() const;
@@ -119,7 +118,7 @@ template<class T>
 Q_INLINE_TEMPLATE
 SharedDataPointer<T>::SharedDataPointer(T *adata) : d(adata)
 {
-    if (d) 
+    if (d)
         d->ref.ref();
 }
 
@@ -133,7 +132,7 @@ Q_INLINE_TEMPLATE
 SharedDataPointer<T>::SharedDataPointer(const T &obj)
 {
     T *obj_ptr = const_cast<T*>(&obj);
-    
+
     if ( obj_ptr->ref.isNotReferenced() )
     {
         //the reference count was zero - this implies that
@@ -175,12 +174,12 @@ SharedDataPointer<T>::SharedDataPointer(SharedDataPointer<T> &&other)
 template<class T>
 Q_INLINE_TEMPLATE
 SharedDataPointer<T>::~SharedDataPointer()
-{ 
+{
     if (d && !d->ref.deref()) delete d;
     d = 0;
 }
 
-/** Null assignment operator - allows you to write ptr = 0 to 
+/** Null assignment operator - allows you to write ptr = 0 to
     reset the pointer to null */
 template<class T>
 Q_INLINE_TEMPLATE
@@ -188,9 +187,9 @@ SharedDataPointer<T>& SharedDataPointer<T>::operator=(int)
 {
     if (d and not d->ref.deref())
         delete d;
-        
+
     d = 0;
-    
+
     return *this;
 }
 
@@ -204,10 +203,10 @@ SharedDataPointer<T>& SharedDataPointer<T>::operator=(T *ptr)
     {
         if (ptr)
             ptr->ref.ref();
-        
+
         T *old = d;
         d = ptr;
-        
+
         if (old && !old->ref.deref())
             delete old;
     }
@@ -225,7 +224,7 @@ SharedDataPointer<T>& SharedDataPointer<T>::operator=(const T &obj)
     if (d != &obj)
     {
         T *obj_ptr = const_cast<T*>(&obj);
-    
+
         if ( obj_ptr->ref.isNotReferenced() )
         {
             //the reference count was zero - this implies that
@@ -236,10 +235,10 @@ SharedDataPointer<T>& SharedDataPointer<T>::operator=(const T &obj)
             obj_ptr = new T(obj);
 
             obj_ptr->ref.ref();
-            
+
             T *old = d;
             d = obj_ptr;
-            
+
             if (old && !old->ref.deref())
                 delete old;
         }
@@ -249,16 +248,16 @@ SharedDataPointer<T>& SharedDataPointer<T>::operator=(const T &obj)
             if (&obj != d)
             {
                 const_cast<T*>(&obj)->ref.ref();
-                
+
                 T *old = d;
                 d = const_cast<T*>(&obj);
-                
+
                 if (old && !old->ref.deref())
                     delete old;
             }
         }
     }
-    
+
     return *this;
 }
 
@@ -271,14 +270,14 @@ SharedDataPointer<T>& SharedDataPointer<T>::operator=(const SharedDataPointer<T>
     {
         if (other.d)
             other.d->ref.ref();
-        
+
         T *old = d;
         d = other.d;
-        
+
         if (old && !old->ref.deref())
             delete old;
     }
-    
+
     return *this;
 }
 
@@ -306,7 +305,7 @@ void SharedDataPointer<T>::detach_helper()
 /** Detach the object pointed to by this pointer from shared storage */
 template <class T>
 Q_INLINE_TEMPLATE
-void SharedDataPointer<T>::detach() 
+void SharedDataPointer<T>::detach()
 {
     if (d && d->ref.hasMultipleReferences()) detach_helper();
 }
@@ -314,18 +313,18 @@ void SharedDataPointer<T>::detach()
 /** Dereference this pointer */
 template <class T>
 Q_INLINE_TEMPLATE
-T& SharedDataPointer<T>::operator*() 
-{ 
-    detach(); 
-    return *d; 
+T& SharedDataPointer<T>::operator*()
+{
+    detach();
+    return *d;
 }
 
 /** Dereference this pointer */
 template <class T>
 Q_INLINE_TEMPLATE
-const T& SharedDataPointer<T>::operator*() const 
+const T& SharedDataPointer<T>::operator*() const
 {
-    return *d; 
+    return *d;
 }
 
 /** Dereference this pointer for reading (const-access) */
@@ -348,16 +347,16 @@ T& SharedDataPointer<T>::write()
 /** Pointer dereference */
 template <class T>
 Q_INLINE_TEMPLATE
-T* SharedDataPointer<T>::operator->() 
+T* SharedDataPointer<T>::operator->()
 {
-    detach(); 
-    return d; 
+    detach();
+    return d;
 }
 
 /** Pointer dereference */
 template <class T>
 Q_INLINE_TEMPLATE
-const T* SharedDataPointer<T>::operator->() const 
+const T* SharedDataPointer<T>::operator->() const
 {
     return d;
 }
@@ -365,16 +364,16 @@ const T* SharedDataPointer<T>::operator->() const
 /** Cast back to a normal pointer */
 template <class T>
 Q_INLINE_TEMPLATE
-SharedDataPointer<T>::operator T*() 
+SharedDataPointer<T>::operator T*()
 {
-    detach(); 
-    return d; 
+    detach();
+    return d;
 }
 
 /** Cast back to a normal pointer */
 template <class T>
 Q_INLINE_TEMPLATE
-SharedDataPointer<T>::operator const T*() const 
+SharedDataPointer<T>::operator const T*() const
 {
     return d;
 }
@@ -384,8 +383,8 @@ template <class T>
 Q_INLINE_TEMPLATE
 T* SharedDataPointer<T>::data()
 {
-    detach(); 
-    return d; 
+    detach();
+    return d;
 }
 
 /** Return the pointer held by this shared pointer */
@@ -407,7 +406,7 @@ const T* SharedDataPointer<T>::constData() const
 /** Used to implement if (!ptr){ ... } */
 template <class T>
 Q_INLINE_TEMPLATE
-bool SharedDataPointer<T>::operator!() const 
+bool SharedDataPointer<T>::operator!() const
 {
     return !d;
 }

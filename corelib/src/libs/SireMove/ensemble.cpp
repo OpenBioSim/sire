@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,7 +56,7 @@ static QDataStream& operator<<(QDataStream &ds, const CharArray<T> &array)
     {
         ds << array[i];
     }
-    
+
     return ds;
 }
 
@@ -68,7 +67,7 @@ static QDataStream& operator>>(QDataStream &ds, CharArray<T> &array)
     {
         ds >> array[i];
     }
-    
+
     return ds;
 }
 
@@ -76,13 +75,13 @@ static QDataStream& operator>>(QDataStream &ds, CharArray<T> &array)
 QDataStream &operator<<(QDataStream &ds, const Ensemble &ensemble)
 {
     writeHeader(ds, r_ensemble, 1);
-    
+
     ds << double(ensemble.ensemble_temperature)
        << double(ensemble.ensemble_pressure)
        << double(ensemble.ensemble_fugacity)
        << ensemble.ensemble_state
        << static_cast<const Property&>(ensemble);
-       
+
     return ds;
 }
 
@@ -90,22 +89,22 @@ QDataStream &operator<<(QDataStream &ds, const Ensemble &ensemble)
 QDataStream &operator>>(QDataStream &ds, Ensemble &ensemble)
 {
     VersionID v = readHeader(ds, r_ensemble);
-    
+
     if (v == 1)
     {
         double temp, press, fug;
-        
+
         ds >> temp >> press >> fug
            >> ensemble.ensemble_state
            >> static_cast<Property&>(ensemble);
-        
+
         ensemble.ensemble_temperature = Temperature(temp);
         ensemble.ensemble_pressure = Pressure(press);
         ensemble.ensemble_fugacity = Pressure(fug);
     }
     else
         throw version_error( v, "1", r_ensemble, CODELOC );
-        
+
     return ds;
 }
 
@@ -124,31 +123,31 @@ static const quint8 T = 16;      // constant temperature
 static CharArray<quint32> getDescription(quint8 n, quint8 v, quint8 t)
 {
     CharArray<quint32> description;
-    
+
     description[0] = n;
     description[1] = v;
     description[2] = t;
-    
+
     return description;
 }
 
 /** Return the merged version of the passed two states */
 template<class T>
-static CharArray<T> merge(const CharArray<T> &des0, 
+static CharArray<T> merge(const CharArray<T> &des0,
                           const CharArray<T> &des1)
 {
     CharArray<T> merged;
-    
+
     for (int i=0; i<CharArray<T>::count(); ++i)
     {
         merged[i] = qMax( des0[i], des1[i] );
     }
-    
+
     return merged;
 }
 
 /** Construct an NVE ensemble */
-Ensemble::Ensemble() 
+Ensemble::Ensemble()
          : ensemble_temperature(0), ensemble_pressure(0),
            ensemble_fugacity(0)
 {
@@ -177,7 +176,7 @@ Ensemble& Ensemble::operator=(const Ensemble &other)
         ensemble_fugacity = other.ensemble_fugacity;
         ensemble_state = other.ensemble_state;
     }
-    
+
     return *this;
 }
 
@@ -290,7 +289,7 @@ bool Ensemble::isGrandCanonical() const
 QString Ensemble::shortHand() const
 {
     QString shorthand(3, ' ');
-    
+
     switch (ensemble_state[0])
     {
         case N:
@@ -316,7 +315,7 @@ QString Ensemble::shortHand() const
             shorthand[1] = '?';
             break;
     }
-    
+
     switch (ensemble_state[2])
     {
         case E:
@@ -329,7 +328,7 @@ QString Ensemble::shortHand() const
             shorthand[2] = '?';
             break;
     }
-    
+
     return shorthand;
 }
 
@@ -338,16 +337,16 @@ QString Ensemble::name() const
 {
     if (this->isMicroCanonical())
         return QObject::tr("microcanonical (NVE) ensemble");
-        
+
     else if (this->isCanonical())
         return QObject::tr("canonical (NVT) ensemble");
-        
+
     else if (this->isIsothermalIsobaric())
         return QObject::tr("isothermal-isobaric (NPT) ensemble");
-        
+
     else if (this->isGrandCanonical())
         return QObject::tr("grand canonical (MuVT) ensemble");
-        
+
     else
         return QObject::tr("%1 ensemble").arg(this->shortHand());
 }
@@ -356,28 +355,28 @@ QString Ensemble::name() const
 QString Ensemble::toString() const
 {
     QStringList parts;
-    
+
     if (this->isConstantChemicalPotential())
     {
         parts.append( QObject::tr("chemical potential = %1 kcal mol-1")
                             .arg( this->chemicalPotential().to(kcal_per_mol) ) );
     }
-    
+
     if (this->isConstantPressure())
     {
         parts.append( QObject::tr("pressure = %1 atm")
                             .arg( this->pressure().to(atm) ) );
     }
-    
+
     if (this->isConstantTemperature())
     {
         parts.append( QObject::tr("temperature = %1 C")
                             .arg( this->temperature().to(Celsius()) ) );
     }
-    
+
     if (parts.isEmpty())
         return this->name();
-        
+
     else
         return QString("%1 { %2 }")
                     .arg(this->name(), Sire::toString(parts));
@@ -411,7 +410,7 @@ Pressure Ensemble::pressure() const
     return ensemble_pressure;
 }
 
-/** Return the fugacity of this ensemble 
+/** Return the fugacity of this ensemble
 
     \throw SireError::incompatible_error
 */
@@ -435,14 +434,14 @@ MolarEnergy Ensemble::chemicalPotential() const
         throw SireError::incompatible_error( QObject::tr(
             "The %1 ensemble does not have a constant chemical potential.")
                 .arg(this->shortHand()), CODELOC );
-    
+
     // mu = mu_0 + RT ln ( f / P_0 )
     //
     //  mu == chemical potential
     //  mu_0 == chemical potential of standard state
     //  f == fugacity
     //  where P_0 is 1 bar (standard state)
-    
+
     // we will actually return mu - mu_0  == RT ln (f / P_0 )
     return MolarEnergy( gasr * ensemble_temperature.value()
                              * std::log( ensemble_fugacity / 1.0*bar ) );
@@ -454,9 +453,9 @@ MolarEnergy Ensemble::chemicalPotential() const
 Ensemble Ensemble::merge(const Ensemble &e0, const Ensemble &e1)
 {
     Ensemble merged;
-    
+
     merged.ensemble_state = ::merge(e0.ensemble_state, e1.ensemble_state);
-                                              
+
     if (merged.ensemble_state[0] == Mu)
     {
         if (e0.ensemble_state[0] == Mu)
@@ -488,7 +487,7 @@ Ensemble Ensemble::merge(const Ensemble &e0, const Ensemble &e1)
         else
             merged.ensemble_pressure = e1.pressure();
     }
-    
+
     if (merged.ensemble_state[2] == T)
     {
         if (e0.ensemble_state[2] == T)
@@ -504,7 +503,7 @@ Ensemble Ensemble::merge(const Ensemble &e0, const Ensemble &e1)
         else
             merged.ensemble_temperature = e1.temperature();
     }
-    
+
     return merged;
 }
 
@@ -533,7 +532,7 @@ Ensemble Ensemble::NVT(const Temperature &temperature)
     return nvt;
 }
 
-/** Return the NPT ensemble for the temperature 'temperature' and 
+/** Return the NPT ensemble for the temperature 'temperature' and
     the pressure 'pressure' */
 Ensemble Ensemble::NPT(const Temperature &temperature,
                        const Pressure &pressure)
@@ -556,9 +555,9 @@ Ensemble Ensemble::MuVT(const Temperature &temperature,
     mupt.ensemble_fugacity = fugacity;
     return mupt;
 }
-                
+
 /** Return the MuVT ensemble for the temperature 'temperature' and
-    the chemical potential 'chemical_potential' */      
+    the chemical potential 'chemical_potential' */
 Ensemble Ensemble::MuVT(const Temperature &temperature,
                         const MolarEnergy &chemical_potential)
 {
@@ -568,13 +567,13 @@ Ensemble Ensemble::MuVT(const Temperature &temperature,
     //  mu_0 == chemical potential of standard state
     //  f == fugacity
     //  where P_0 is 1 bar (standard state)
-    
+
     // we will actually use mu - mu_0  == RT ln (f / P_0 )
     // so chemical potential = mu - mu_0
     return Ensemble::MuVT( temperature,
                            std::exp( chemical_potential / (gasr*temperature) ) * bar );
 }
-                      
+
 /** Syntactic sugar to return the NVE ensemble */
 Ensemble Ensemble::microcanonical()
 {

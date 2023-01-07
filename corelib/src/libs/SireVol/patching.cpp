@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,31 +48,31 @@ using namespace SireStream;
 
 static const RegisterMetaType<Patching> r_patching( MAGIC_ONLY,
                                                     Patching::typeName() );
-                                                    
+
 QDataStream &operator<<(QDataStream &ds, const Patching &patching)
 {
     writeHeader(ds, r_patching, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << patching.spce << static_cast<const Property&>(patching);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, Patching &patching)
 {
     VersionID v = readHeader(ds, r_patching);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> patching.spce >> static_cast<Property&>(patching);
     }
     else
         throw version_error(v, "1", r_patching, CODELOC);
-        
+
     return ds;
 }
 
@@ -102,7 +101,7 @@ Patching& Patching::operator=(const Patching &other)
         spce = other.spce;
         Property::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -122,7 +121,7 @@ const char* Patching::typeName()
 {
     return "SireVol::Patching";
 }
-    
+
 /** Return the space used to create this patching scheme */
 const Space& Patching::space() const
 {
@@ -152,23 +151,23 @@ static const RegisterMetaType<NullPatching> r_nullpatching;
 QDataStream &operator<<(QDataStream &ds, const NullPatching &nullpatching)
 {
     writeHeader(ds, r_nullpatching, 1);
-    
+
     ds << static_cast<const Patching&>(nullpatching);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, NullPatching &nullpatching)
 {
     VersionID v = readHeader(ds, r_nullpatching);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Patching&>(nullpatching);
     }
     else
         throw version_error(v, "1", r_nullpatching, CODELOC);
-        
+
     return ds;
 }
 
@@ -247,38 +246,38 @@ static const RegisterMetaType<BoxPatching> r_boxpatching;
 QDataStream &operator<<(QDataStream &ds, const BoxPatching &boxpatching)
 {
     writeHeader(ds, r_boxpatching, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << boxpatching.patch_size.to(angstrom)
         << boxpatching.orgn << boxpatching.inv_gridvec
         << boxpatching.nx << boxpatching.ny << boxpatching.nz
         << static_cast<const Patching&>(boxpatching);
-        
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, BoxPatching &boxpatching)
 {
     VersionID v = readHeader(ds, r_boxpatching);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         double patch_size;
-        
+
         sds >> patch_size >> boxpatching.orgn >> boxpatching.inv_gridvec
             >> boxpatching.nx >> boxpatching.ny >> boxpatching.nz
             >> static_cast<Patching&>(boxpatching);
-           
+
         boxpatching.patch_size = patch_size*angstrom;
-              
+
         return ds;
     }
     else
         throw version_error(v, "1", r_boxpatching, CODELOC);
-        
+
     return ds;
 }
 
@@ -290,10 +289,10 @@ BoxPatching::BoxPatching()
 
 /** Construct for the passed space, placing the center of the grid at "center",
     trying to construct a grid that divides space using a patch size of
-    approximately "patch_size" 
-    
+    approximately "patch_size"
+
     Note that this patching is only compatible with cartesian spaces.
-    
+
     \throw SireError::incompatible_error
 */
 BoxPatching::BoxPatching(const Space &space, Length size, const Vector &center)
@@ -312,13 +311,13 @@ BoxPatching::BoxPatching(const Space &space, Length size, const Vector &center)
         //need a virtual function call here - as at the moment it
         //depends on all cartesian periodic spaces being PeriodicBox...
         Vector dimensions = space.asA<PeriodicBox>().dimensions();
-        
+
         nx = int( dimensions.x() / size.value() ) + 1;
         ny = int( dimensions.y() / size.value() ) + 1;
         nz = int( dimensions.z() / size.value() ) + 1;
-        
+
         BOOST_ASSERT( nx > 0 and ny > 0 and nz > 0 );
-        
+
         if (nx > 64)
         {
             qDebug() << "Limiting patching in x dimension to a maximum of 64:" << nx;
@@ -336,11 +335,11 @@ BoxPatching::BoxPatching(const Space &space, Length size, const Vector &center)
             qDebug() << "Limiting patching in z dimension to a maximum of 64:" << nz;
             nz = 64;
         }
-        
+
         inv_gridvec = Vector( nx / dimensions.x(),
                               ny / dimensions.y(),
                               nz / dimensions.z() );
-                              
+
         orgn = center - 0.5*dimensions;
     }
     else
@@ -349,9 +348,9 @@ BoxPatching::BoxPatching(const Space &space, Length size, const Vector &center)
         nx = 16;
         ny = 16;
         nz = 16;
-        
+
         inv_gridvec = Vector( 1 / patch_size.value() );
-        
+
         orgn = center - Vector(8 * patch_size.value());
     }
 }
@@ -365,7 +364,7 @@ BoxPatching::BoxPatching(const Space &space, const Vector &center)
     this->operator=( BoxPatching(space, 8*angstrom, center) );
 }
 
-/** Construct for the passed space, using the passed patch size. This will try 
+/** Construct for the passed space, using the passed patch size. This will try
     to build a cubic grid of patches where the grid dimension is approximately
     'patch_size', with the center of the grid at (0,0,0) */
 BoxPatching::BoxPatching(const Space &space, Length patch_size)
@@ -413,7 +412,7 @@ BoxPatching& BoxPatching::operator=(const BoxPatching &other)
         nz = other.nz;
         Patching::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -456,7 +455,7 @@ Vector BoxPatching::patchDimension() const
 {
     if (nx == 0 or ny == 0 or nz == 0)
         return Vector(0);
-    
+
     else
         return Vector( 1.0 / inv_gridvec.x(),
                        1.0 / inv_gridvec.y(),
@@ -492,7 +491,7 @@ int BoxPatching::getIndex(const Vector &point) const
 
     //translate the point so that it is relative to the origin of the grid
     Vector p = (point - orgn);
-    
+
     p = Vector( p.x() * inv_gridvec.x(),
                 p.y() * inv_gridvec.y(),
                 p.z() * inv_gridvec.z() );
@@ -500,7 +499,7 @@ int BoxPatching::getIndex(const Vector &point) const
     int i = int(p.x());
     int j = int(p.y());
     int k = int(p.z());
-    
+
     if (i < 0 or i >= nx or j < 0 or j >= ny or k < 0 or k >= nz)
         //this point is outside of the grid
         return nx*ny*nz;
@@ -513,7 +512,7 @@ AABox BoxPatching::patchBox(int ith) const
 {
     if (ith < 0 or ith >= nx*ny*nz)
         return AABox(Vector(0), Vector(1.0e50));
-        
+
     else
     {
         //decompose this back into i,j,k
@@ -522,7 +521,7 @@ AABox BoxPatching::patchBox(int ith) const
 
         int j = ith / nx;
         int i = ith - j*nx;
-        
+
         return AABox( Vector( orgn.x() + (i+0.5) / inv_gridvec.x(),
                               orgn.y() + (j+0.5) / inv_gridvec.y(),
                               orgn.z() + (k+0.5) / inv_gridvec.z() ),
@@ -541,7 +540,7 @@ int BoxPatching::patchIndex(const Vector &point) const
         return BoxPatching::getIndex( point );
 }
 
-/** Return the AABox of that completely encloses the patch that contains the 
+/** Return the AABox of that completely encloses the patch that contains the
     point 'point' */
 AABox BoxPatching::patchBox(const Vector &point) const
 {
@@ -555,7 +554,7 @@ QPair<int,Vector> BoxPatching::patchIndexAndCenter(const Vector &point) const
     if ( space().isPeriodic() )
     {
         Vector mapped_point = space().getMinimumImage(point, Vector(0));
-        
+
         return QPair<int,Vector>( BoxPatching::getIndex(mapped_point), mapped_point );
     }
     else

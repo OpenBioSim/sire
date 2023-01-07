@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -83,25 +82,25 @@ class SIREMM_EXPORT CoulombComponent : public SireFF::FFComponent
 public:
     CoulombComponent(const FFName &ffname = FFName());
     CoulombComponent(const FFName &ffname, const QString &suffix);
-    
+
     CoulombComponent(const SireCAS::Symbol &symbol);
-    
+
     CoulombComponent(const CoulombComponent &other);
-    
+
     ~CoulombComponent();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return CoulombComponent::typeName();
     }
-    
+
     CoulombComponent* clone() const
     {
         return new CoulombComponent(*this);
     }
-    
+
     const CoulombComponent& total() const
     {
         return *this;
@@ -109,7 +108,7 @@ public:
 
     void setEnergy(FF &ff, const CoulombEnergy &ljnrg) const;
     void changeEnergy(FF &ff, const CoulombEnergy &ljnrg) const;
-    
+
     SireCAS::Symbols symbols() const
     {
         return *this;
@@ -122,25 +121,25 @@ class SIREMM_EXPORT LJComponent : public SireFF::FFComponent
 public:
     LJComponent(const FFName &ffname = FFName());
     LJComponent(const FFName &ffname, const QString &suffix);
-    
+
     LJComponent(const SireCAS::Symbol &symbol);
-    
+
     LJComponent(const LJComponent &other);
-    
+
     ~LJComponent();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return LJComponent::typeName();
     }
-    
+
     LJComponent* clone() const
     {
         return new LJComponent(*this);
     }
-    
+
     const LJComponent& total() const
     {
         return *this;
@@ -148,7 +147,7 @@ public:
 
     void setEnergy(FF &ff, const LJEnergy &ljnrg) const;
     void changeEnergy(FF &ff, const LJEnergy &ljnrg) const;
-    
+
     SireCAS::Symbols symbols() const
     {
         return *this;
@@ -166,35 +165,35 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJComponent&);
 public:
     CLJComponent(const FFName &name = FFName());
     CLJComponent(const FFName &name, const QString &suffix);
-    
+
     CLJComponent(const SireCAS::Symbol &symbol);
-    
+
     CLJComponent(const CLJComponent &other);
-    
+
     ~CLJComponent();
-    
+
     const CoulombComponent& coulomb() const
     {
         return coul_component;
     }
-    
+
     const LJComponent& lj() const
     {
         return lj_component;
     }
-    
+
     const CLJComponent& total() const
     {
         return *this;
     }
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return CLJComponent::typeName();
     }
-    
+
     CLJComponent* clone() const
     {
         return new CLJComponent(*this);
@@ -202,13 +201,13 @@ public:
 
     void setEnergy(FF &ff, const CLJEnergy &cljnrg) const;
     void changeEnergy(FF &ff, const CLJEnergy &cljnrg) const;
-    
+
     SireCAS::Symbols symbols() const;
 
 protected:
     /** The coulomb component */
     CoulombComponent coul_component;
-    
+
     /** The LJ component */
     LJComponent lj_component;
 };
@@ -230,7 +229,7 @@ public:
         iljnrg = ljnrg;
         #endif
     }
-    
+
     CLJEnergy(const CLJEnergy &other)
           #ifdef SIRE_USE_SSE
           : nrgs(other.nrgs)
@@ -238,20 +237,20 @@ public:
           : icnrg(other.icnrg), iljnrg(other.iljnrg)
           #endif
     {}
-    
+
     ~CLJEnergy()
     {}
-    
+
     static const char* typeName()
     {
         return "SireMM::CLJEnergy";
     }
-    
+
     const char* what() const
     {
         return CLJEnergy::typeName();
     }
-    
+
     CLJEnergy& operator+=(const CLJEnergy &other)
     {
         #ifdef SIRE_USE_SSE
@@ -260,10 +259,10 @@ public:
         icnrg += other.icnrg;
         iljnrg += other.iljnrg;
         #endif
-        
+
         return *this;
     }
-    
+
     CLJEnergy& operator-=(const CLJEnergy &other)
     {
         #ifdef SIRE_USE_SSE
@@ -272,29 +271,29 @@ public:
         icnrg -= other.icnrg;
         iljnrg -= other.iljnrg;
         #endif
-        
+
         return *this;
     }
-    
+
     CLJEnergy operator+(const CLJEnergy &other) const
     {
         CLJEnergy ret(*this);
         ret += other;
         return ret;
     }
-    
+
     CLJEnergy operator-(const CLJEnergy &other) const
     {
         CLJEnergy ret(*this);
         ret -= other;
         return ret;
     }
-    
+
     Components components() const
     {
         return Components();
     }
-    
+
     double coulomb() const
     {
         #ifdef SIRE_USE_SSE
@@ -303,7 +302,7 @@ public:
         return icnrg;
         #endif
     }
-    
+
     double lj() const
     {
         #ifdef SIRE_USE_SSE
@@ -312,38 +311,38 @@ public:
         return iljnrg;
         #endif
     }
-    
+
     double total() const
     {
         return coulomb() + lj();
     }
-    
+
     double component(const CoulombComponent&) const
     {
         return coulomb();
     }
-    
+
     double component(const LJComponent&) const
     {
         return lj();
     }
-    
+
     double component(const CLJComponent&) const
     {
         return total();
     }
-    
+
     operator double() const
     {
         //return the total energy
         return total();
     }
-    
+
     operator SireUnits::Dimension::MolarEnergy() const
     {
         return SireUnits::Dimension::MolarEnergy(total());
     }
-    
+
     operator CoulombEnergy() const
     {
         return CoulombEnergy(coulomb());

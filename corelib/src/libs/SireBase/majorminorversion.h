@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,14 +60,14 @@ class SIREBASE_EXPORT MajorMinorVersionData
 public:
     MajorMinorVersionData() : last_major_version(0), last_minor_version(0)
     {}
-    
+
     MajorMinorVersionData(quint64 majv, quint64 minv)
            : last_major_version(majv), last_minor_version(minv)
     {}
-    
+
     ~MajorMinorVersionData()
     {}
-    
+
     QMutex version_mutex;
     quint64 last_major_version;
     quint64 last_minor_version;
@@ -86,28 +85,28 @@ friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, Version&);
 public:
     Version(quint64 major=0, quint64 minor=0);
     Version(const Version &other);
-    
+
     ~Version();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return Version::typeName();
     }
-    
+
     Version* clone() const
     {
         return new Version(*this);
     }
-    
+
     Version& operator=(const Version &other);
-    
+
     bool operator==(const Version &other) const;
     bool operator!=(const Version &other) const;
-    
+
     QString toString() const;
-    
+
     quint64 majorVersion() const;
     quint64 minorVersion() const;
 
@@ -116,9 +115,9 @@ private:
 };
 
 /** This is a class that provides a version numbering scheme that
-    is guaranteed to provide unique version numbers, even for 
-    different copies of this object 
-    
+    is guaranteed to provide unique version numbers, even for
+    different copies of this object
+
     @author Christopher Woods
 */
 class SIREBASE_EXPORT MajorMinorVersion
@@ -126,52 +125,52 @@ class SIREBASE_EXPORT MajorMinorVersion
 public:
     MajorMinorVersion();
     MajorMinorVersion(const boost::shared_ptr<detail::MajorMinorVersionData> &other);
-    
+
     MajorMinorVersion(quint64 vmaj, quint64 vmin);
-    
+
     MajorMinorVersion(const MajorMinorVersion &other);
-    
+
     ~MajorMinorVersion();
-    
+
     MajorMinorVersion& operator=(const MajorMinorVersion &other);
-    
+
     bool operator==(const MajorMinorVersion &other) const;
     bool operator!=(const MajorMinorVersion &other) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return MajorMinorVersion::typeName();
     }
-    
+
     void incrementMajor();
     void incrementMinor();
-    
+
     const Version& version() const;
-    
+
     quint64 majorVersion() const;
     quint64 minorVersion() const;
-    
+
     operator boost::weak_ptr<detail::MajorMinorVersionData>() const
     {
         return d;
     }
-    
+
 private:
     static boost::shared_ptr<detail::MajorMinorVersionData> shared_null;
-    
+
     /** Shared pointer to the version data of the last incremented
         version object */
     boost::shared_ptr<detail::MajorMinorVersionData> d;
-    
+
     /** The major and minor version of this object */
     Version v;
 };
 
 /** This class provides a registry of that last version number
-    assigned to the objects identified by keys of type 'T' 
-    
+    assigned to the objects identified by keys of type 'T'
+
     @author Christopher Woods
 */
 template<class T>
@@ -188,7 +187,7 @@ public:
 private:
     /** Mutex used to protect access to the registry */
     QMutex registry_mutex;
-    
+
     /** The data for the registry */
     QHash< T, boost::weak_ptr<detail::MajorMinorVersionData> > registry;
 };
@@ -203,7 +202,7 @@ SIRE_ALWAYS_INLINE Version& Version::operator=(const Version &other)
         maj = other.maj;
         min = other.min;
     }
-    
+
     return *this;
 }
 
@@ -219,7 +218,7 @@ SIRE_ALWAYS_INLINE bool Version::operator!=(const Version &other) const
     return maj != other.maj or min != other.min;
 }
 
-/** Return the major version number. We cannot call this 
+/** Return the major version number. We cannot call this
     .major() as this name is reserved on linux in sys/sysmacros.h
     (this is a glibc bug) */
 SIRE_ALWAYS_INLINE quint64 Version::majorVersion() const
@@ -243,7 +242,7 @@ SIRE_ALWAYS_INLINE MajorMinorVersion& MajorMinorVersion::operator=(const MajorMi
         d = other.d;
         v = other.v;
     }
-    
+
     return *this;
 }
 
@@ -289,14 +288,14 @@ SIRE_OUTOFLINE_TEMPLATE
 VersionRegistry<T>::~VersionRegistry()
 {}
 
-/** Return whether or not an object with key 'key' has been  
+/** Return whether or not an object with key 'key' has been
     registered */
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 bool VersionRegistry<T>::registered(const T &key)
 {
     QMutexLocker lkr(&registry_mutex);
-    
+
     return not registry.value(key).expired();
 }
 
@@ -312,9 +311,9 @@ MajorMinorVersion VersionRegistry<T>::registerObject(const T &key)
 
     if (registry.contains(key))
     {
-        boost::shared_ptr<detail::MajorMinorVersionData> 
+        boost::shared_ptr<detail::MajorMinorVersionData>
                                         d = registry.value(key).lock();
-                                        
+
         if (d.get() != 0)
         {
             MajorMinorVersion v(d);
@@ -322,11 +321,11 @@ MajorMinorVersion VersionRegistry<T>::registerObject(const T &key)
             return v;
         }
     }
-    
+
     //either we don't know about this object, or we used to, but
     //not any more!
     MajorMinorVersion v(1,0);
-    
+
     registry.insert( key, v );
 
     if (registry.count() % 100 == 0)
@@ -335,18 +334,18 @@ MajorMinorVersion VersionRegistry<T>::registerObject(const T &key)
         // - so lets try and clean it up a little
         QMutableHashIterator< T,boost::weak_ptr<detail::MajorMinorVersionData> >
                             it(registry);
-        
+
         while (it.hasNext())
         {
             it.next();
-            
+
             if (it.value().expired())
                 //this object has since been removed
                 it.remove();
         }
 
     }
-    
+
     return v;
 }
 

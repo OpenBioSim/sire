@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,31 +52,31 @@ static const RegisterMetaType<Grid> r_grid( MAGIC_ONLY, Grid::typeName() );
 QDataStream &operator<<(QDataStream &ds, const Grid &grid)
 {
     writeHeader(ds, r_grid, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << grid.grid_points << grid.grid_weights
         << static_cast<const Property&>(grid);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, Grid &grid)
 {
     VersionID v = readHeader(ds, r_grid);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> grid.grid_points >> grid.grid_weights
             >> static_cast<Property&>(grid);
-            
+
         grid.aabox = AABox(grid.grid_points);
     }
     else
         throw version_error(v, "1", r_grid, CODELOC);
-        
+
     return ds;
 }
 
@@ -86,7 +85,7 @@ Grid::Grid() : Property()
 {}
 
 /** Copy constructor */
-Grid::Grid(const Grid &other) 
+Grid::Grid(const Grid &other)
      : Property(other), grid_points(other.grid_points),
        grid_weights(other.grid_weights), aabox(other.aabox)
 {}
@@ -108,10 +107,10 @@ Grid& Grid::operator=(const Grid &other)
         grid_points = other.grid_points;
         grid_weights = other.grid_weights;
         aabox = other.aabox;
-        
+
         Property::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -144,13 +143,13 @@ void Grid::setGrid(const QVector<Vector> &gridpoints, const QVector<double> &wei
     {
         this->setGrid(gridpoints);
     }
-    
+
     if (gridpoints.count() != weights.count())
         throw SireError::program_bug( QObject::tr(
                 "It is a mistake to pass in a different number of grid point weights "
                 "(%1) to grid point coordinates (%2)!")
                     .arg(gridpoints.count()).arg(weights.count()), CODELOC);
-                    
+
     grid_points = gridpoints;
     grid_weights = weights;
     aabox = AABox(grid_points);
@@ -252,23 +251,23 @@ static const RegisterMetaType<NullGrid> r_nullgrid;
 QDataStream &operator<<(QDataStream &ds, const NullGrid &nullgrid)
 {
     writeHeader(ds, r_nullgrid, 1);
-    
+
     ds << static_cast<const Grid&>(nullgrid);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, NullGrid &nullgrid)
 {
     VersionID v = readHeader(ds, r_nullgrid);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Grid&>(nullgrid);
     }
     else
         throw version_error(v, "1", r_nullgrid, CODELOC);
-        
+
     return ds;
 }
 
@@ -320,14 +319,14 @@ GridPtr NullGrid::recenter(const Vector &center) const
     return *this;
 }
 
-/** Return a copy of this grid that has been rotated using the passed rotation 
+/** Return a copy of this grid that has been rotated using the passed rotation
     quaternion about 'center' */
 GridPtr NullGrid::rotate(const Quaternion &quat, const Vector &center) const
 {
     return *this;
 }
 
-/** Return a copy of this grid that has been rotated using the passed rotation 
+/** Return a copy of this grid that has been rotated using the passed rotation
     matrix about 'center' */
 GridPtr NullGrid::rotate(const Matrix &rotmat, const Vector &center) const
 {
@@ -349,18 +348,18 @@ static const RegisterMetaType<RegularGrid> r_reggrid;
 QDataStream &operator<<(QDataStream &ds, const RegularGrid &grid)
 {
     writeHeader(ds, r_reggrid, 1);
-    
+
     ds << grid.basis_vectors << grid.grid_spacing
        << grid.dimx << grid.dimy << grid.dimz
        << static_cast<const Grid&>(grid);
-       
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, RegularGrid &grid)
 {
     VersionID v = readHeader(ds, r_reggrid);
-    
+
     if (v == 1)
     {
         ds >> grid.basis_vectors >> grid.grid_spacing
@@ -369,7 +368,7 @@ QDataStream &operator>>(QDataStream &ds, RegularGrid &grid)
     }
     else
         throw version_error( v, "1", r_reggrid, CODELOC );
-        
+
     return ds;
 }
 
@@ -397,57 +396,57 @@ RegularGrid::RegularGrid(const Vector &min, const Vector &max,
     Vector maxcoords = max;
     mincoords.setMin(max);
     maxcoords.setMax(min);
-    
+
     //work out the number of grid points in each dimension
     int nx = 1 + ((maxcoords.x() - mincoords.x()) / spacing.value());
     int ny = 1 + ((maxcoords.y() - mincoords.y()) / spacing.value());
     int nz = 1 + ((maxcoords.z() - mincoords.z()) / spacing.value());
 
     int n = nx * ny * nz;
-    
+
     dimx = nx;
     dimy = ny;
     dimz = nz;
-    
+
     if (nx > 1500 or ny > 1500 or nz > 1500 or n > (320*320*320))
         throw SireError::unavailable_resource( QObject::tr(
                     "You cannot create a grid of more than 320^3 points, "
                     "or with a single side having more than 1500 points, as this "
                     "would take up too much memory!"), CODELOC );
-        
+
     Vector start = mincoords;
-    
+
     QVector<Vector> grid_points(n);
     grid_points.squeeze();
     Vector *grid_point = grid_points.data();
-    
+
     Vector delta_x = grid_spacing.value() * basis_vectors.column0();
     Vector delta_y = grid_spacing.value() * basis_vectors.column1();
     Vector delta_z = grid_spacing.value() * basis_vectors.column2();
 
     Vector current_x = start;
-    
+
     for (int i=0; i<nx; ++i)
     {
         Vector current_y = current_x;
-        
+
         for (int j=0; j<ny; ++j)
         {
             Vector current_z = current_y;
-            
+
             for (int k=0; k<nz; ++k)
             {
                 *grid_point = current_z;
                 ++grid_point;
                 current_z += delta_z;
             }
-            
+
             current_y += delta_y;
         }
-        
+
         current_x += delta_x;
     }
-    
+
     this->setGrid(grid_points);
 }
 
@@ -461,14 +460,14 @@ RegularGrid::RegularGrid(const Vector &min, const Vector &max, Length spacing)
 
 /** Construct a regular grid that spans from 'min' to 'max' using the
     passed three orthoganol basis vectors, using a grid spacing of 'spacing' */
-RegularGrid::RegularGrid(const Vector &min, const Vector &max, 
+RegularGrid::RegularGrid(const Vector &min, const Vector &max,
                          const Matrix &basis, Length spacing)
             : ConcreteProperty<RegularGrid,Grid>()
 {
     this->operator=( RegularGrid(min, max, Quaternion(basis), spacing) );
 }
 
-/** Construct a regular grid that is centered at 'center', has a total of 
+/** Construct a regular grid that is centered at 'center', has a total of
     'npoints' points which are spaced using a grid spacing of 'spacing',
     and arranged along the three orthoganol basis vectors supplied
     in 'basis' */
@@ -490,53 +489,53 @@ RegularGrid::RegularGrid(const Vector &center, const Quaternion &basis, int npoi
     else
     {
         double half_npoints = (npoints-1) / 2;
-        
+
         Vector delta_x = grid_spacing * basis_vectors.column0();
         Vector delta_y = grid_spacing * basis_vectors.column1();
         Vector delta_z = grid_spacing * basis_vectors.column2();
-        
-        Vector start = center - half_npoints * delta_x 
+
+        Vector start = center - half_npoints * delta_x
                               - half_npoints * delta_y
                               - half_npoints * delta_z;
-        
+
         int n = npoints * npoints * npoints;
-        
+
         dimx = npoints;
         dimy = npoints;
         dimz = npoints;
-        
+
         QVector<Vector> grid_points(n);
         grid_points.squeeze();
         Vector *grid_point = grid_points.data();
-        
+
         Vector current_x = start;
-        
+
         for (int i=0; i<npoints; ++i)
         {
             Vector current_y = current_x;
-        
+
             for (int j=0; j<npoints; ++j)
             {
                 Vector current_z = current_y;
-            
+
                 for (int k=0; k<npoints; ++k)
                 {
                     *grid_point = current_z;
                     current_z += delta_z;
                     ++grid_point;
                 }
-                
+
                 current_y += delta_y;
             }
-            
+
             current_x += delta_x;
         }
-        
+
         this->setGrid(grid_points);
     }
 }
 
-/** Construct a regular grid that is centered at 'center', has a total of 
+/** Construct a regular grid that is centered at 'center', has a total of
     'npoints' points which are spaced using a grid spacing of 'spacing' */
 RegularGrid::RegularGrid(const Vector &center, int npoints, Length spacing)
             : ConcreteProperty<RegularGrid,Grid>()
@@ -544,7 +543,7 @@ RegularGrid::RegularGrid(const Vector &center, int npoints, Length spacing)
     this->operator=( RegularGrid(center, Quaternion(), npoints, spacing) );
 }
 
-/** Construct a regular grid that is centered at 'center', has a total of 
+/** Construct a regular grid that is centered at 'center', has a total of
     'npoints' points which are spaced using a grid spacing of 'spacing',
     and arranged along the three orthoganol basis vectors supplied
     in 'basis' */
@@ -578,7 +577,7 @@ RegularGrid& RegularGrid::operator=(const RegularGrid &other)
         dimz = other.dimz;
         Grid::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -644,7 +643,7 @@ GridPtr RegularGrid::translate(const Vector &delta) const
     RegularGrid grid(*this);
 
     QVector<Vector> grid_points = this->points();
-    
+
     for (QVector<Vector>::iterator it = grid_points.begin();
          it != grid_points.end();
          ++it)
@@ -663,7 +662,7 @@ GridPtr RegularGrid::recenter(const Vector &cent) const
     return this->translate( cent - this->center() );
 }
 
-/** Return a copy of this grid that has been rotated using the passed rotation 
+/** Return a copy of this grid that has been rotated using the passed rotation
     quaternion about 'center' */
 GridPtr RegularGrid::rotate(const Quaternion &quat, const Vector &center) const
 {
@@ -673,9 +672,9 @@ GridPtr RegularGrid::rotate(const Quaternion &quat, const Vector &center) const
     RegularGrid grid(*this);
 
     QVector<Vector> grid_points = this->points();
-    
+
     Matrix rotmat = quat.toMatrix();
-    
+
     for (QVector<Vector>::iterator it = grid_points.begin();
          it != grid_points.end();
          ++it)
@@ -689,7 +688,7 @@ GridPtr RegularGrid::rotate(const Quaternion &quat, const Vector &center) const
     return grid;
 }
 
-/** Return a copy of this grid that has been rotated using the passed rotation 
+/** Return a copy of this grid that has been rotated using the passed rotation
     matrix about 'center' */
 GridPtr RegularGrid::rotate(const Matrix &rotmat, const Vector &center) const
 {
@@ -705,9 +704,9 @@ GridPtr RegularGrid::scale(double scalefactor) const
     RegularGrid grid(*this);
 
     QVector<Vector> grid_points = this->points();
-    
+
     Vector center = this->center();
-    
+
     for (QVector<Vector>::iterator it = grid_points.begin();
          it != grid_points.end();
          ++it)

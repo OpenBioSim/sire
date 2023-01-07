@@ -22,7 +22,7 @@ import sys
 parser = argparse.ArgumentParser(description="Evaluates the free energy cost for removing a restraint and setting standard state concentration",
                                 epilog="standardstatecorrection is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org",
+                                        "http://sire.openbiosim.org",
                                  prog="standardstatecorrection")
 
 parser.add_argument('-C', '--config', nargs="?",

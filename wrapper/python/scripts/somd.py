@@ -22,7 +22,7 @@ from Sire.Tools import readParams
 parser = argparse.ArgumentParser(description="Perform molecular dynamics using OpenMM",
                                  epilog="somd is built using Sire and OpenMM and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org",
+                                        "http://sire.openbiosim.org",
                                  prog="somd")
 
 parser.add_argument('-C', '--config', nargs="?",

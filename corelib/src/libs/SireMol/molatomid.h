@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ namespace SireMol
 /** This class represents an ID that is used to identify
     a specific atom (or atoms) in a specific molecule
     (of molecules)
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT MolAtomID : public AtomID
@@ -63,40 +62,40 @@ public:
     MolAtomID();
     MolAtomID(const MolID &molid, const AtomID &atomid);
     MolAtomID(const AtomID &atomid, const MolID &molid);
-    
+
     MolAtomID(const boost::tuple<MolIdentifier,AtomIdentifier> &molatomid);
     MolAtomID(const boost::tuple<AtomIdentifier,MolIdentifier> &molatomid);
-    
+
     MolAtomID(const MolAtomID &other);
-    
+
     ~MolAtomID();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return MolAtomID::typeName();
     }
-    
+
     MolAtomID* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-                
+
     QString toString() const;
-    
+
     const AtomID& atomID() const;
     const MolID& molID() const;
-    
+
     MolAtomID& operator=(const MolAtomID &other);
-    
+
     bool operator==(const SireID::ID &other) const;
     using SireID::ID::operator!=;
-   
+
     bool operator==(const MolAtomID &other) const;
     bool operator!=(const MolAtomID &other) const;
-    
+
     QList<AtomIdx> map(const MolInfo &molinfo) const;
 
     QHash< MolNum,Selector<Atom> > selectAllFrom(const Molecules &molecules,
@@ -111,7 +110,7 @@ private:
 
     /** The molecule identifier */
     MolIdentifier molid;
-    
+
     /** The atom identifier */
     AtomIdentifier atomid;
 };

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -611,18 +610,18 @@ Functions Expression::functions() const
     return exbase.functions();
 }
 
-/** Return the factors and powers for the symbol 'symbol', given the values of the 
+/** Return the factors and powers for the symbol 'symbol', given the values of the
     other symbols in 'values'. This attempts to rearrange this equation
-    so that it is of the form 'm * symbol^i + n * symbol^j ... + constant', 
-    and it returns the values of 'm,i', 'n,j' etc.. 
+    so that it is of the form 'm * symbol^i + n * symbol^j ... + constant',
+    and it returns the values of 'm,i', 'n,j' etc..
     Note that this will fail if such a rearrangement is not possible
-    
+
     \throw SireCAS::rearrangement_error
 */
 QList<Factor> Expression::expand(const Symbol &symbol) const
 {
     QList<Factor> factors = exbase.expand(symbol);
-    
+
     if (fac != 1)
     {
         for (QList<Factor>::iterator it = factors.begin();
@@ -632,7 +631,7 @@ QList<Factor> Expression::expand(const Symbol &symbol) const
             *it = Factor( it->symbol(), fac * it->factor(), it->power() );
         }
     }
-    
+
     return factors;
 }
 

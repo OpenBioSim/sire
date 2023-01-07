@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -43,7 +42,7 @@
 using namespace SireCluster::MPI;
 using namespace SireCluster::MPI::Messages;
 
-/** Construct, using the passed MPI communicator to send the 
+/** Construct, using the passed MPI communicator to send the
     messages */
 SendQueue::SendQueue(MPI_Comm comm)
           : QThread(), boost::noncopyable(),
@@ -57,7 +56,7 @@ SendQueue::~SendQueue()
     message_queue.clear();
     been_stopped = true;
     datamutex.unlock();
-    
+
     while (not QThread::wait(200))
     {
         waiter.wakeAll();
@@ -80,7 +79,7 @@ void SendQueue::send(const Message &message)
     if (not message.isNull())
     {
         QMutexLocker lkr(&datamutex);
-        
+
         if (not been_stopped)
             message_queue.enqueue(message);
 
@@ -118,20 +117,20 @@ void SendQueue::run()
 {
     SireError::setThreadString("SendQueue");
     SireMaths::seed_qrand();
-    
+
     QMutexLocker lkr(&datamutex);
-    
+
     if (message_queue.isEmpty())
     {
         waiter.wait(&datamutex);
     }
-    
+
     while (not message_queue.isEmpty())
     {
         if (been_stopped)
             //we've been stopped!
             break;
-    
+
         Message message = message_queue.dequeue();
         lkr.unlock();
 
@@ -148,34 +147,34 @@ void SendQueue::run()
             else if ( MPICluster::isMaster() )
             {
                 //we can directly send the messages ourselves!
-                if (message.destination() == -1 and 
+                if (message.destination() == -1 and
                     not message.isA<Broadcast>())
                 {
                     //this message is to be broadcast to everyone
                     message = Broadcast(message);
                 }
-                
+
                 //the master sends the message to just the intended recipients
                 QByteArray message_data = message.pack();
-                
+
                 int size = message_data.count();
-                
+
                 BOOST_ASSERT( size != 0 );
-                
+
                 if (message.isA<Broadcast>())
                 {
                     QSet<int> recipients = message.asA<Broadcast>().recipients();
-                    
+
                     foreach (int recipient, recipients)
                     {
                         if (recipient != MPICluster::master())
                         {
                             MPI_Request request;
-                            MPI_Isend(&size, 1, MPI_INT, recipient, 1, 
+                            MPI_Isend(&size, 1, MPI_INT, recipient, 1,
                                       send_comm, &request);
                         }
                     }
-                    
+
                     foreach (int recipient, recipients)
                     {
                         if (recipient != MPICluster::master())
@@ -201,7 +200,7 @@ void SendQueue::run()
                 else
                 {
                     int recipient = message.destination();
-                    
+
                     if (recipient != MPICluster::master())
                     {
                         MPI_Request request;
@@ -214,7 +213,7 @@ void SendQueue::run()
             else
             {
                 QByteArray message_data;
-            
+
                 if (message.destination() == MPICluster::master())
                 {
                     //send this message to the master directly
@@ -222,12 +221,12 @@ void SendQueue::run()
                 }
                 else
                 {
-                    //we need to send the message to the master, for 
+                    //we need to send the message to the master, for
                     //retransmission to the destination process
                     Message broadcast( Broadcast(message, message.destination()) );
                     message_data = broadcast.pack();
                 }
-                
+
                 //maybe change to Isend so that we can kill the send if
                 //'been_stopped' is true
                 MPI_Send(message_data.data(), message_data.count(),
@@ -246,16 +245,16 @@ void SendQueue::run()
         {
             MPICluster::send( Messages::Error(message, CODELOC) );
         }
-        
+
         lkr.relock();
-        
+
         if (message_queue.isEmpty())
         {
             //wait until there are some more messages
             waiter.wait( &datamutex );
         }
     }
-    
+
     //there are no more messages being broadcast - we need to tell
     //the backend nodes of this fact
     if ( MPICluster::isMaster() )
@@ -268,7 +267,7 @@ void SendQueue::run()
                 MPI_Send(&quit, 1, MPI_INT, i, 1, send_comm);
         }
     }
-    
+
     //we're not sending any more messages, so release the resources
     //held by the communicator
     MPI_Comm_free(&send_comm);

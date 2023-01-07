@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,87 +48,87 @@ class SIREMATHS_EXPORT Rational
 public:
     Rational() : num(0), den(1)
     {}
-    
-    
+
+
     Rational(qint32 number) : num(number) , den(1)
     {}
-    
+
     Rational(qint32 numerator, qint32 denominator)
         : num(numerator), den(denominator)
     {}
-    
+
     Rational(const Rational &other) : num(other.num), den(other.den)
     {}
-    
+
     ~Rational();
-    
+
     Rational& operator=(const Rational &other)
     {
         num = other.num;
         den = other.den;
         return *this;
     }
-    
+
     Rational& operator=(qint32 number)
     {
         num = number;
         den = 1;
         return *this;
     }
-    
+
     bool operator==(const Rational &other) const;
     bool operator!=(const Rational &other) const;
     bool operator>=(const Rational &other) const;
     bool operator<=(const Rational &other) const;
     bool operator>(const Rational &other) const;
     bool operator<(const Rational &other) const;
-    
+
     bool operator==(qint32 number) const;
     bool operator!=(qint32 number) const;
     bool operator>=(qint32 number) const;
     bool operator<=(qint32 number) const;
     bool operator>(qint32 number) const;
     bool operator<(qint32 number) const;
-    
+
     Rational operator-() const
     {
         return Rational(-num,den);
     }
-    
+
     Rational& operator+=(const Rational &other);
     Rational& operator-=(const Rational &other);
     Rational& operator*=(const Rational &other);
     Rational& operator/=(const Rational &other);
-    
+
     Rational& operator+=(qint32 number)
     {
         num += number*den;
         return *this;
     }
-    
+
     Rational& operator-=(qint32 number)
     {
         num -= number*den;
         return *this;
     }
-    
+
     Rational& operator*=(qint32 number);
     Rational& operator/=(qint32 number);
-    
+
     QString toString() const;
-    
+
     const Rational& operator++()
     {
         num += den;
         return *this;
     }
-    
+
     const Rational& operator--()
     {
         num -= den;
         return *this;
     }
-    
+
     bool operator!() const
     {
         return !num;
@@ -139,7 +138,7 @@ public:
     {
         return num;
     }
-    
+
     qint32 denominator() const
     {
         return den;
@@ -178,7 +177,7 @@ SIREMATHS_EXPORT double pow(double x, const Rational &power);
 SIREMATHS_EXPORT bool isRational(double val, int maxdenom);
 
 /** Return 'val' converted into the best approximated rational number
-    with maximum denominator 'maxdenom'. A perfect conversion will only 
+    with maximum denominator 'maxdenom'. A perfect conversion will only
     result if 'isRational(val,maxdenom)' returned true. */
 SIREMATHS_EXPORT Rational toRational(double val, int maxdenom);
 

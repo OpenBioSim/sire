@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -60,7 +59,7 @@ using SireFF::Probe;
 
 using SireCAS::Symbol;
 
-/** This class provides the default names of the element, 
+/** This class provides the default names of the element,
     charge and coordinates properties required by the
     QMMMPotential
 */
@@ -70,11 +69,11 @@ class SQUIRE_EXPORT ChargeElementParameterNames3D
              public SireFF::detail::Coords3DParameterName
 {
 public:
-    ChargeElementParameterNames3D() 
+    ChargeElementParameterNames3D()
           : ElementParameterName(), SireMM::ChargeParameterName(),
             SireFF::detail::Coords3DParameterName()
     {}
-    
+
     ~ChargeElementParameterNames3D()
     {}
 };
@@ -82,7 +81,7 @@ public:
 /** This is a forcefield that implements QM/MM using electrostatic
     embedding. This forcefield calculates the energy of a QM molecule
     that is surrounded by a collection of MM point charges
-    
+
     @author Christopher Woods
 */
 class SQUIRE_EXPORT QMMMFF
@@ -100,23 +99,23 @@ public:
 
     QMMMFF();
     QMMMFF(const QString &name);
-    
+
     QMMMFF(const QMMMFF &other);
-    
+
     ~QMMMFF();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return QMMMFF::typeName();
     }
-    
+
     QMMMFF& operator=(const QMMMFF &other);
-    
+
     bool operator==(const QMMMFF &other) const;
     bool operator!=(const QMMMFF &other) const;
-    
+
     const Components& components() const;
 
     Parameters parameters() const
@@ -130,7 +129,7 @@ public:
     SireUnits::Dimension::MolarEnergy zeroEnergy() const;
     bool isIntermolecularOnly() const;
     double chargeScalingFactor() const;
-    
+
     bool setSpace(const Space &space);
     bool setSwitchingFunction(const SwitchingFunction &switchfunc);
     bool setQuantumProgram(const QMProgram &qmprog);
@@ -143,36 +142,36 @@ public:
     bool containsProperty(const QString &name) const;
     const Properties& properties() const;
 
-    void mustNowRecalculateFromScratch();    
+    void mustNowRecalculateFromScratch();
 
     void energy(EnergyTable &energytable, double scale_energy=1);
-    
+
     void energy(EnergyTable &energytable, const Symbol &symbol,
 		double scale_energy=1);
 
     void force(ForceTable &forcetable, double scale_force=1);
-    
+
     void force(ForceTable &forcetable, const Symbol &symbol,
                double scale_force=1);
 
     void field(FieldTable &fieldtable, double scale_field=1);
-    
+
     void field(FieldTable &fieldtable, const Symbol &component,
                double scale_field=1);
-               
+
     void potential(PotentialTable &potentialtable, double scale_potential=1);
-    
+
     void potential(PotentialTable &potentialtable, const Symbol &component,
                    double scale_potential=1);
 
     void field(FieldTable &fieldtable, const SireFF::Probe &probe, double scale_field=1);
-    
+
     void field(FieldTable &fieldtable, const Symbol &component,
                const SireFF::Probe &probe, double scale_field=1);
-               
+
     void potential(PotentialTable &potentialtable, const SireFF::Probe &probe,
                    double scale_potential=1);
-    
+
     void potential(PotentialTable &potentialtable, const Symbol &component,
                    const SireFF::Probe &probe, double scale_potential=1);
 
@@ -181,7 +180,7 @@ public:
     QString forceCommandFile(const ForceTable &forcetable) const;
 
     QString fieldCommandFile(const FieldTable &fieldtable) const;
-    QString fieldCommandFile(const FieldTable &fieldtable, 
+    QString fieldCommandFile(const FieldTable &fieldtable,
                              const SireFF::Probe &probe) const;
 
     QString potentialCommandFile(const PotentialTable &pottable) const;
@@ -193,36 +192,36 @@ protected:
     ////
     //// Virtual functions from SireMM::InterCoulombPotential and QMPotential
     ////
-    
+
     void changedPotential();
 
     ////
     //// Virtual functions from SireFF::FF
     ////
-    
+
     void recalculateEnergy();
 
     void _pvt_updateName();
-    
+
     ////
     //// Virtual functions from SireFF::G2FF
     ////
 
-    void _pvt_added(quint32 group_id, 
-                    const SireMol::PartialMolecule &mol, 
+    void _pvt_added(quint32 group_id,
+                    const SireMol::PartialMolecule &mol,
                     const SireBase::PropertyMap &map);
-                    
-    void _pvt_removed(quint32 group_id, 
+
+    void _pvt_removed(quint32 group_id,
                       const SireMol::PartialMolecule &mol);
-                      
+
     void _pvt_changed(quint32 group_id, const SireMol::Molecule &mol, bool auto_update);
-    
+
     void _pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &mols, bool auto_update);
-    
+
     void _pvt_removedAll(quint32 group_id);
-    
-    bool _pvt_wouldChangeProperties(quint32 group_id, 
-                                    SireMol::MolNum molnum, 
+
+    bool _pvt_wouldChangeProperties(quint32 group_id,
+                                    SireMol::MolNum molnum,
                                     const SireBase::PropertyMap &map) const;
 
 private:
@@ -233,13 +232,13 @@ private:
 
     /** The energy components of this forcefield */
     Components ffcomponents;
-    
+
     /** The QM molecules */
     QMMolecules qmmols;
-    
+
     /** The MM molecules */
     MMMolecules mmmols;
-    
+
     /** Whether or not only the intermolecular energy is included
         (just the energy between the QM and MM atoms) */
     SireBase::BooleanProperty intermolecular_only;

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -58,14 +57,14 @@ using SireMol::PartialMolecule;
 using SireFF::PointPtr;
 using SireFF::PointRef;
 
-/** This class uses the machinery of the identity point to 
+/** This class uses the machinery of the identity point to
     pick out molecules that are associated with identity points.
     This is useful if you want to monitor a property or energy,
     but don't actually want to change the coordinates of atoms
-    
+
     @author Christopher Woods
 */
-class SIRESYSTEM_EXPORT IDAssigner 
+class SIRESYSTEM_EXPORT IDAssigner
          : public SireBase::ConcreteProperty<IDAssigner,SireBase::Property>
 {
 
@@ -74,44 +73,44 @@ friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, IDAssigner&);
 
 public:
     IDAssigner();
-    
+
     IDAssigner(const PointRef &point,
                const MoleculeGroup &molgroup,
                const PropertyMap &map = PropertyMap());
-    
+
     IDAssigner(const QVector<SireFF::PointPtr> &points,
                const MoleculeGroup &molgroup,
                const PropertyMap &map = PropertyMap());
-    
+
     IDAssigner(const PointRef &point,
                const MoleculeGroup &molgroup,
                const SireVol::Space &space,
                const PropertyMap &map = PropertyMap());
-    
+
     IDAssigner(const QVector<SireFF::PointPtr> &points,
                const MoleculeGroup &molgroup,
                const SireVol::Space &space,
                const PropertyMap &map = PropertyMap());
-    
+
     IDAssigner(const IDAssigner &other);
 
     ~IDAssigner();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     IDAssigner* clone() const;
-    
+
     IDAssigner& operator=(const IDAssigner &other);
-    
+
     bool operator==(const IDAssigner &other) const;
     bool operator!=(const IDAssigner &other) const;
-    
+
     QString toString() const;
-    
+
     const MoleculeGroup& moleculeGroup() const;
-    
+
     QVector<SireFF::PointPtr> points() const;
 
     int nPoints() const;
@@ -140,10 +139,10 @@ private:
 
     /** The molecule group that will be scanned for molecules */
     SireMol::MolGroupPtr molgroup;
-    
+
     /** The set of identity points */
     QVector<PointPtr> identity_points;
- 
+
     /** The space being used to calculate the distances */
     SireVol::SpacePtr spce;
 
@@ -154,16 +153,16 @@ private:
     /** The collection of the 'npoints' closest molecules to each
         of the identity points */
     QVector<CloseMols> points_with_mols;
-    
+
     /** The mapping of index to molecule number - this is necessary
         as the mapping above is just over the close molecules - we
         need to record the numbers of the close molecules */
     QVector<SireMol::MolNum> mol_to_molnum;
-    
-    /** The distances between all molecules in 'mol_to_molnum' and 
+
+    /** The distances between all molecules in 'mol_to_molnum' and
         all of the identity points */
     QHash<SireMol::MolNum,SireMaths::NVector> point_distances;
-    
+
     /** The current mapping of points to molecules. This is the index
         of the molecule number of the matching molecule for each point
         in the "mol_to_molnum" array, e.g. point_to_mol[3] will return
@@ -171,8 +170,8 @@ private:
         being the index in mol_to_molnum of the molecule number of that
         molecule */
     QVector<int> point_to_mol;
-    
-    /** Whether or not the distances have changed since the last 
+
+    /** Whether or not the distances have changed since the last
         time this constraint was updated - if they have, then the
         mapping of molecules to points needs to be recalculated */
     bool distances_changed;

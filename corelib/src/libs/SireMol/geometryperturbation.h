@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -73,8 +72,8 @@ template<class T> class Mover;
 
 /** This is the base class of all geometry perturbations.
     These are perturbations that affect the geometry
-    of a molecule 
-    
+    of a molecule
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT GeometryPerturbation : public Perturbation
@@ -87,11 +86,11 @@ friend class GeometryPerturbations;
 
 public:
     GeometryPerturbation(const GeometryPerturbation &other);
-    
+
     ~GeometryPerturbation();
-    
+
     static const char* typeName();
-    
+
     QSet<QString> requiredProperties() const;
 
     static const NullGeometryPerturbation& null();
@@ -100,14 +99,14 @@ protected:
     GeometryPerturbation(const PropertyMap &map = PropertyMap());
     GeometryPerturbation(const SireCAS::Expression &expression,
                          const PropertyMap &map = PropertyMap());
-    
+
     GeometryPerturbation& operator=(const GeometryPerturbation &other);
-    
+
     bool operator==(const GeometryPerturbation &other) const;
     bool operator!=(const GeometryPerturbation &other) const;
-    
+
     void perturbMolecule(MolEditor &molecule, const SireCAS::Values &values) const;
-    
+
     virtual void perturbMolecule(Mover<Molecule> &molecule,
                                  const SireCAS::Values &values) const=0;
 };
@@ -123,20 +122,20 @@ public:
     NullGeometryPerturbation();
     NullGeometryPerturbation(const NullGeometryPerturbation &other);
     ~NullGeometryPerturbation();
-    
+
     NullGeometryPerturbation& operator=(const NullGeometryPerturbation &other);
-    
+
     bool operator==(const NullGeometryPerturbation &other) const;
     bool operator!=(const NullGeometryPerturbation &other) const;
-    
+
     static const char* typeName();
 
     QSet<Symbol> requiredSymbols() const;
     QSet<QString> requiredProperties() const;
-    
+
     bool wouldChange(const Molecule&, const SireCAS::Values&) const;
     void perturbMolecule(MolEditor&, const SireCAS::Values&) const;
-    
+
 protected:
     void perturbMolecule(Mover<Molecule> &molecule, const SireCAS::Values &values) const;
 };
@@ -153,41 +152,41 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, GeometryPerturbati
 
 public:
     GeometryPerturbations();
-    
+
     GeometryPerturbations(const GeometryPerturbation &perturbation);
     GeometryPerturbations(const QList<GeomPertPtr> &perturbations);
-                          
+
     GeometryPerturbations(const GeometryPerturbations &other);
-    
+
     ~GeometryPerturbations();
-    
+
     static const char* typeName();
-    
+
     GeometryPerturbations& operator=(const GeometryPerturbations &other);
-    
+
     bool operator==(const GeometryPerturbations &other) const;
     bool operator!=(const GeometryPerturbations &other) const;
-    
+
     QString toString() const;
-    
+
     QList<GeomPertPtr> perturbations() const;
 
     PerturbationPtr recreate(const SireCAS::Expression &mapping_function) const;
     PerturbationPtr recreate(const PropertyMap &map) const;
     PerturbationPtr recreate(const SireCAS::Expression &mapping_function,
                              const PropertyMap &map) const;
-    
+
     PerturbationPtr substitute(const SireCAS::Identities &identities) const;
     PerturbationPtr substitute(const SireCAS::Symbol &old_symbol,
                                const SireCAS::Symbol &new_symbol) const;
-    
+
     QList<PerturbationPtr> children() const;
-    
+
     QSet<Symbol> requiredSymbols() const;
     QSet<QString> requiredProperties() const;
 
     bool wouldChange(const Molecule &molecule, const Values &values) const;
-    
+
 protected:
     void perturbMolecule(Mover<Molecule> &molecule, const SireCAS::Values &values) const;
 
@@ -215,44 +214,44 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, BondPerturbation&)
 
 public:
     BondPerturbation();
-    
-    BondPerturbation(const BondID &bond, 
+
+    BondPerturbation(const BondID &bond,
                      const SireUnits::Dimension::Length &start,
                      const SireUnits::Dimension::Length &end,
                      const PropertyMap &map = PropertyMap());
-                     
-    BondPerturbation(const BondID &bond, 
-                     const SireUnits::Dimension::Length &start,
-                     const SireUnits::Dimension::Length &end,
-                     const SireCAS::Expression &mapping_function,
-                     const PropertyMap &map = PropertyMap());
-    
-    BondPerturbation(const AtomID &atom0, const AtomID &atom1,
-                     const SireUnits::Dimension::Length &start,
-                     const SireUnits::Dimension::Length &end,
-                     const PropertyMap &map = PropertyMap());
-                     
-    BondPerturbation(const AtomID &atom0, const AtomID &atom1,
+
+    BondPerturbation(const BondID &bond,
                      const SireUnits::Dimension::Length &start,
                      const SireUnits::Dimension::Length &end,
                      const SireCAS::Expression &mapping_function,
                      const PropertyMap &map = PropertyMap());
-    
+
+    BondPerturbation(const AtomID &atom0, const AtomID &atom1,
+                     const SireUnits::Dimension::Length &start,
+                     const SireUnits::Dimension::Length &end,
+                     const PropertyMap &map = PropertyMap());
+
+    BondPerturbation(const AtomID &atom0, const AtomID &atom1,
+                     const SireUnits::Dimension::Length &start,
+                     const SireUnits::Dimension::Length &end,
+                     const SireCAS::Expression &mapping_function,
+                     const PropertyMap &map = PropertyMap());
+
     BondPerturbation(const BondPerturbation &other);
-    
+
     ~BondPerturbation();
-    
+
     static const char* typeName();
-    
+
     BondPerturbation& operator=(const BondPerturbation &other);
-    
+
     bool operator==(const BondPerturbation &other) const;
     bool operator!=(const BondPerturbation &other) const;
-    
+
     QString toString() const;
-    
+
     const BondID& bond() const;
-    
+
     const SireUnits::Dimension::Length& start() const;
     const SireUnits::Dimension::Length& end() const;
 
@@ -264,7 +263,7 @@ protected:
 private:
     /** The ID for the bond */
     BondID bondid;
-    
+
     /** The start and end lengths of the bond */
     SireUnits::Dimension::Length start_size, end_size;
 };
@@ -288,46 +287,46 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AnglePerturbation&
 
 public:
     AnglePerturbation();
-    
-    AnglePerturbation(const AngleID &angle, 
+
+    AnglePerturbation(const AngleID &angle,
                       const SireUnits::Dimension::Angle &start,
                       const SireUnits::Dimension::Angle &end,
                       const PropertyMap &map = PropertyMap());
-                     
-    AnglePerturbation(const AngleID &angle, 
+
+    AnglePerturbation(const AngleID &angle,
                       const SireUnits::Dimension::Angle &start,
                       const SireUnits::Dimension::Angle &end,
                       const SireCAS::Expression &mapping_function,
                       const PropertyMap &map = PropertyMap());
-    
-    AnglePerturbation(const AtomID &atom0, const AtomID &atom1, 
+
+    AnglePerturbation(const AtomID &atom0, const AtomID &atom1,
                       const AtomID &atom2,
                       const SireUnits::Dimension::Angle &start,
                       const SireUnits::Dimension::Angle &end,
                       const PropertyMap &map = PropertyMap());
-                     
+
     AnglePerturbation(const AtomID &atom0, const AtomID &atom1,
                       const AtomID &atom2,
                       const SireUnits::Dimension::Angle &start,
                       const SireUnits::Dimension::Angle &end,
                       const SireCAS::Expression &mapping_function,
                       const PropertyMap &map = PropertyMap());
-     
+
     AnglePerturbation(const AnglePerturbation &other);
-    
+
     ~AnglePerturbation();
-    
+
     static const char* typeName();
-    
+
     AnglePerturbation& operator=(const AnglePerturbation &other);
-    
+
     bool operator==(const AnglePerturbation &other) const;
     bool operator!=(const AnglePerturbation &other) const;
-    
+
     QString toString() const;
-    
+
     const AngleID& angle() const;
-    
+
     const SireUnits::Dimension::Angle& start() const;
     const SireUnits::Dimension::Angle& end() const;
 
@@ -339,7 +338,7 @@ protected:
 private:
     /** The ID for the angle */
     AngleID angleid;
-    
+
     /** The start and end sizes of the angle */
     SireUnits::Dimension::Angle start_size, end_size;
 };
@@ -363,46 +362,46 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, DihedralPerturbati
 
 public:
     DihedralPerturbation();
-    
-    DihedralPerturbation(const DihedralID &dihedral, 
+
+    DihedralPerturbation(const DihedralID &dihedral,
                          const SireUnits::Dimension::Angle &start,
                          const SireUnits::Dimension::Angle &end,
                          const PropertyMap &map = PropertyMap());
-                     
-    DihedralPerturbation(const DihedralID &dihedral, 
+
+    DihedralPerturbation(const DihedralID &dihedral,
                          const SireUnits::Dimension::Angle &start,
                          const SireUnits::Dimension::Angle &end,
                          const SireCAS::Expression &mapping_function,
                          const PropertyMap &map = PropertyMap());
-    
-    DihedralPerturbation(const AtomID &atom0, const AtomID &atom1, 
+
+    DihedralPerturbation(const AtomID &atom0, const AtomID &atom1,
                          const AtomID &atom2, const AtomID &atom3,
                          const SireUnits::Dimension::Angle &start,
                          const SireUnits::Dimension::Angle &end,
                          const PropertyMap &map = PropertyMap());
-                     
+
     DihedralPerturbation(const AtomID &atom0, const AtomID &atom1,
                          const AtomID &atom2, const AtomID &atom3,
                          const SireUnits::Dimension::Angle &start,
                          const SireUnits::Dimension::Angle &end,
                          const SireCAS::Expression &mapping_function,
                          const PropertyMap &map = PropertyMap());
-     
+
     DihedralPerturbation(const DihedralPerturbation &other);
-    
+
     ~DihedralPerturbation();
-    
+
     static const char* typeName();
-    
+
     DihedralPerturbation& operator=(const DihedralPerturbation &other);
-    
+
     bool operator==(const DihedralPerturbation &other) const;
     bool operator!=(const DihedralPerturbation &other) const;
-    
+
     QString toString() const;
-    
+
     const DihedralID& dihedral() const;
-    
+
     const SireUnits::Dimension::Angle& start() const;
     const SireUnits::Dimension::Angle& end() const;
 
@@ -414,7 +413,7 @@ protected:
 private:
     /** The ID for the dihedral */
     DihedralID dihedralid;
-    
+
     /** The start and end sizes of the angle */
     SireUnits::Dimension::Angle start_size, end_size;
 };

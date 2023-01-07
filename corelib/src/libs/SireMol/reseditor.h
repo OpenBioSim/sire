@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -77,7 +76,7 @@ typedef Editor<ResEditor, Residue> ResEditorBase;
 
     @author Christopher Woods
 */
-class SIREMOL_EXPORT ResEditor 
+class SIREMOL_EXPORT ResEditor
         : public SireBase::ConcreteProperty< ResEditor,Editor<ResEditor,Residue> >
 {
 
@@ -86,45 +85,45 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ResEditor&);
 
 public:
     ResEditor();
-    
+
     ResEditor(const Residue &residue);
-    
+
     ResEditor(const ResEditor &other);
-    
+
     ~ResEditor();
-    
+
     ResEditor& operator=(const Residue &residue);
     ResEditor& operator=(const ResEditor &other);
-    
+
     static const char* typeName();
 
     QString toString() const;
-    
+
     ResEditor& rename(const ResName &name);
     ResEditor& renumber(ResNum number);
-    
+
     ResStructureEditor reindex(ResIdx index) const;
-    
+
     MolStructureEditor remove() const;
-    
+
     ResStructureEditor reparent(const ChainID &chainid) const;
 
     AtomStructureEditor add(const AtomName &atomname) const;
     AtomStructureEditor add(AtomNum atomnum) const;
-    
+
     ResStructureEditor remove(const AtomID &atomid) const;
 
     ResStructureEditor remove(int i) const;
-    
+
     ResStructureEditor transfer(const AtomID &atomid, const ResID &resid) const;
     ResStructureEditor transfer(int i, const ResID &resid) const;
-    
+
     ResStructureEditor transferAll(const ResID &resid) const;
-    
+
     Residue commit() const;
 };
 
-/** This is the class used to edit a residue's structure 
+/** This is the class used to edit a residue's structure
 
     @author Christopher Woods
 */
@@ -138,61 +137,61 @@ public:
     ResStructureEditor();
     ResStructureEditor(const Residue &residue);
     ResStructureEditor(const StructureEditor &data, ResIdx residx);
-    
+
     ResStructureEditor(const ResStructureEditor &other);
-    
+
     ~ResStructureEditor();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return ResStructureEditor::typeName();
     }
-    
+
     ResStructureEditor* clone() const;
-    
+
     ResStructureEditor& operator=(const Residue &residue);
     ResStructureEditor& operator=(const ResStructureEditor &other);
-    
+
     QString toString() const;
-    
+
     bool selectedAll() const;
-    
+
     const ResName& name() const;
     ResNum number() const;
     ResIdx index() const;
-    
+
     int nAtoms() const;
-    
+
     ChainStructureEditor chain();
     MolStructureEditor molecule();
-    
+
     AtomStructureEditor atom(int i);
     AtomStructureEditor atom(const AtomID &atomid);
 
     AtomStructureEditor select(int i);
     AtomStructureEditor select(const AtomID &atomid);
-    
+
     ResStructureEditor& rename(const ResName &name);
     ResStructureEditor& renumber(ResNum number);
-    
+
     ResStructureEditor& reindex(ResIdx index);
-    
+
     MolStructureEditor remove();
-    
+
     ResStructureEditor& reparent(const ChainID &chainid);
 
     AtomStructureEditor add(const AtomName &atomname);
     AtomStructureEditor add(AtomNum atomnum);
-    
+
     ResStructureEditor& remove(const AtomID &atomid);
 
     ResStructureEditor& remove(int i);
-    
+
     ResStructureEditor& transfer(const AtomID &atomid, const ResID &resid);
     ResStructureEditor& transfer(int i, const ResID &resid);
-    
+
     ResStructureEditor& transferAll(const ResID &resid);
 
     template<class T>
@@ -209,13 +208,13 @@ public:
 
     template<class T>
     ResStructureEditor& setMetadata(const QString &metakey, const T &value);
-    
+
     template<class T>
     ResStructureEditor& setMetadata(const QString &key, const QString &metakey,
                                     const T &value);
 
     Residue commit() const;
-    
+
     operator Residue() const;
 
 private:
@@ -228,7 +227,7 @@ private:
 /** Return the value for this residue of the property at key 'key'.
     Note that this property *must* be of type ResProperty<T> for
     this to work!
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
 */
@@ -242,7 +241,7 @@ T ResStructureEditor::property(const QString &key) const
 /** Return the value for this residue of the metadata at metakey 'metakey'.
     Note that this property *must* be of type ResProperty<T> for
     this to work!
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
 */
@@ -255,15 +254,15 @@ T ResStructureEditor::metadata(const QString &metakey) const
 
 /** Return the value for this residue of the metadata at metakey 'metakey'
     for the property at key 'key'.
-    
+
     Note that this property *must* be of type ResProperty<T> for
     this to work!
-    
+
     \throw SireBase::missing_property
     \throw SireError::invalid_cast
 */
 template<class T>
-T ResStructureEditor::metadata(const QString &key, 
+T ResStructureEditor::metadata(const QString &key,
                                const QString &metakey) const
 {
     const QVariant &value = this->getResMetadata(uid, key, metakey);
@@ -277,24 +276,24 @@ T ResStructureEditor::metadata(const QString &key,
     \throw SireError::invalid_cast
 */
 template<class T>
-ResStructureEditor& ResStructureEditor::setProperty(const QString &key, 
+ResStructureEditor& ResStructureEditor::setProperty(const QString &key,
                                                     const T &value)
 {
     this->assertValidResidue(uid);
 
     //create space for this property
     this->_pvt_createSpaceForProperty< ResProperty<T> >(key);
-    
+
     //now set the value of the property
     this->_pvt_setResProperty(uid, key, QVariant::fromValue<T>(value));
-    
+
     return *this;
 }
 
 /** Set the metadata at metakey 'metakey' to have the value 'value' for
-    this residue. Note that an exception will be thrown if an existing 
+    this residue. Note that an exception will be thrown if an existing
     property for this metakey is not of type ResProperty<T>
-    
+
     \throw SireError::invalid_cast
 */
 template<class T>
@@ -302,36 +301,36 @@ ResStructureEditor& ResStructureEditor::setMetadata(const QString &metakey,
                                                     const T &value)
 {
     this->assertValidResidue(uid);
-    
+
     //create space for this metadata
     this->_pvt_createSpaceForMetadata< ResProperty<T> >(metakey);
-    
+
     //now set the value of this metadata
     this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
-    
+
     return *this;
 }
 
 /** Set the metadata at metakey 'metakey' for the property at
     key 'key' to have the value 'value' for
-    this residue. Note that an exception will be thrown if an existing 
+    this residue. Note that an exception will be thrown if an existing
     property for this metakey is not of type ResProperty<T>
-    
+
     \throw SireError::invalid_cast
 */
 template<class T>
-ResStructureEditor& ResStructureEditor::setMetadata(const QString &key, 
+ResStructureEditor& ResStructureEditor::setMetadata(const QString &key,
                                                     const QString &metakey,
                                                     const T &value)
 {
     this->assertValidResidue(uid);
-    
+
     //create space for this metadata
     this->_pvt_createSpaceForMetadata< ResProperty<T> >(key, metakey);
-    
+
     //now set the value of this metadata
     this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
-    
+
     return *this;
 }
 

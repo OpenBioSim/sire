@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,7 +51,7 @@ using namespace SireUnits;
 Cube::Cube() : cutoff(10000)
 {}
 
-Cube::Cube(SireUnits::Dimension::MolarEnergy c) 
+Cube::Cube(SireUnits::Dimension::MolarEnergy c)
      : cutoff( convertTo(c.value(), kcal_per_mol) )
 {}
 
@@ -86,7 +85,7 @@ static void assertValidGrid(const PotentialTable &table)
                 "that contain a single Grid."), CODELOC );
 
     const Grid &grid = table.gridData()[0].grid();
-    
+
     if (not grid.isA<RegularGrid>())
         throw SireError::incompatible_error( QObject::tr(
                 "Sire can only write Cube data files when using a RegularGrid. "
@@ -104,23 +103,23 @@ static void writeHeader(QTextStream &ts, int nats,  const Grid &grid)
     ts << nats;
     ts.setFieldWidth(12);
     ts.setRealNumberPrecision(6);
-    ts << convertTo(grid.minCoords().x(), bohr_radii) 
-       << convertTo(grid.minCoords().y(), bohr_radii) 
+    ts << convertTo(grid.minCoords().x(), bohr_radii)
+       << convertTo(grid.minCoords().y(), bohr_radii)
        << convertTo(grid.minCoords().z(), bohr_radii) << "\n";
 
-    Vector basis = convertTo(rgrid.gridSpacing().value(), bohr_radii) 
+    Vector basis = convertTo(rgrid.gridSpacing().value(), bohr_radii)
                                         * rgrid.basis().column0();
     ts.setFieldWidth(4);
     ts << rgrid.dimX();
     ts.setFieldWidth(12);
     ts << basis.x() << basis.y() << basis.z() << "\n";
-    
+
     basis = convertTo(rgrid.gridSpacing(), bohr_radii) * rgrid.basis().column1();
     ts.setFieldWidth(4);
     ts << rgrid.dimY();
     ts.setFieldWidth(12);
     ts << basis.x() << basis.y() << basis.z() << "\n";
-    
+
     basis = convertTo(rgrid.gridSpacing(), bohr_radii) * rgrid.basis().column2();
     ts.setFieldWidth(4);
     ts << rgrid.dimZ();
@@ -132,16 +131,16 @@ void Cube::write(const PotentialTable &table,
                  const QString &filename, const PropertyMap &map) const
 {
     assertValidGrid(table);
-        
+
     QFile f(filename);
-    
+
     if (not f.open(QIODevice::WriteOnly))
         throw SireError::file_error(f, CODELOC);
 
     QTextStream ts(&f);
-    
+
     writeHeader(ts, 0, table.gridData()[0].grid());
-        
+
     f.close();
 }
 
@@ -150,7 +149,7 @@ static void writeTable(QTextStream &ts, const MolPotentialTable &moltable,
                        const T &molgroup, const PropertyMap &map, double cutoff)
 {
     MolNum molnum = moltable.molNum();
-    
+
     if (not molgroup.contains(molnum))
     {
     }
@@ -160,10 +159,10 @@ static void writeTable(QTextStream &ts, const MolPotentialTable &moltable,
 
         const AtomCoords &coords = mol.property( map["coordinates"] )
                                       .asA<AtomCoords>();
-                                          
+
         const AtomElements &elements = mol.property( map["element"] )
                                           .asA<AtomElements>();
-    
+
         if (moltable.selectedAll())
         {
             for (CGIdx i(0); i<moltable.nCutGroups(); ++i)
@@ -171,12 +170,12 @@ static void writeTable(QTextStream &ts, const MolPotentialTable &moltable,
                 const MolarEnergy *nrg = moltable.constData(i);
                 const Vector *c = coords.constData(i);
                 const Element *e = elements.constData(i);
-                
+
                 for (int j=0; j<coords.nAtoms(i); ++j)
                 {
                     ts.setFieldWidth(4);
                     ts << e[j].nProtons();
-                    
+
                     ts.setFieldWidth(12);
 
                     double val = convertTo( nrg[j], kcal_per_mol );
@@ -184,7 +183,7 @@ static void writeTable(QTextStream &ts, const MolPotentialTable &moltable,
                         val = cutoff;
                     else if (val < -cutoff)
                         val = -cutoff;
-                    
+
                     ts << SireUnits::convertTo(nrg[j], kcal_per_mol)
                        << SireUnits::convertTo(c[j].x(), bohr_radii)
                        << SireUnits::convertTo(c[j].y(), bohr_radii)
@@ -199,13 +198,13 @@ static void writeGrid(QTextStream &ts, const GridPotentialTable &gridtable,
                       double cutoff)
 {
     const RegularGrid &grid = gridtable.grid().asA<RegularGrid>();
-    
+
     ts.setFieldWidth(12);
-    
+
     int count = 0;
 
     const MolarEnergy *data = gridtable.constData();
-    
+
     for (int i=0; i<grid.dimX(); ++i)
     {
         for (int j=0; j<grid.dimY(); ++j)
@@ -213,18 +212,18 @@ static void writeGrid(QTextStream &ts, const GridPotentialTable &gridtable,
             for (int k=0; k<grid.dimZ(); ++k)
             {
                 double val = convertTo( data->value(), kcal_per_mol );
-            
+
                 if (val > cutoff)
                     ts << cutoff << " ";
                 else if (val < -cutoff)
                     ts << -cutoff << " ";
                 else
                     ts << val << " ";
-                    
+
                 ++data;
-                                
+
                 ++count;
-                
+
                 if (count == 5)
                 {
                     count = 0;
@@ -238,13 +237,13 @@ static void writeGrid(QTextStream &ts, const GridPotentialTable &gridtable,
 static int countAtoms(const PotentialTable &table)
 {
     int nats = 0;
-    
+
     for (int i=0; i<table.nMolecules(); ++i)
     {
         const MolPotentialTable &moltable = table.moleculeData()[i];
         nats += moltable.nValues();
     }
-    
+
     return nats;
 }
 
@@ -269,21 +268,21 @@ void Cube::write(const PotentialTable &table, const MoleculeGroup &molgroup,
     assertValidGrid(table);
 
     QFile f(filename);
-    
+
     if (not f.open(QIODevice::WriteOnly))
         throw SireError::file_error(f, CODELOC);
-        
+
     QTextStream ts(&f);
-    
+
     writeHeader(ts, nats, table.gridData()[0].grid());
-    
+
     for (int i=0; i<table.nMolecules(); ++i)
     {
         writeTable( ts, table.moleculeData()[i], molgroup, map, cutoff );
     }
 
     writeGrid( ts, table.gridData()[0], cutoff );
-        
+
     f.close();
 }
 
@@ -310,20 +309,20 @@ void Cube::write(const PotentialTable &table, const MolGroupsBase &molgroups,
     assertValidGrid(table);
 
     QFile f(filename);
-    
+
     if (not f.open(QIODevice::WriteOnly))
         throw SireError::file_error(f, CODELOC);
-        
+
     QTextStream ts(&f);
-    
+
     writeHeader(ts, nats, table.gridData()[0].grid());
-    
+
     for (int i=0; i<table.nMolecules(); ++i)
     {
         writeTable( ts, table.moleculeData()[i], molgroups, map, cutoff );
     }
 
     writeGrid( ts, table.gridData()[0], cutoff );
-        
+
     f.close();
 }

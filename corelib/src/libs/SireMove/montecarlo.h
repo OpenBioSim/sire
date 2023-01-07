@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -69,7 +68,7 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, MonteCarlo&);
 
 public:
     MonteCarlo(const PropertyMap &map = PropertyMap());
-    
+
     MonteCarlo(const MonteCarlo &other);
 
     ~MonteCarlo();
@@ -84,7 +83,7 @@ public:
     quint32 nAttempted() const;
     quint32 nAccepted() const;
     quint32 nRejected() const;
-    
+
     void enableOptimisedMoves();
     void disableOptimisedMoves();
     void setUseOptimisedMoves(bool on);
@@ -114,12 +113,12 @@ protected:
 
     bool test(double new_energy, double old_energy,
               int nmolecules,
-              const SireUnits::Dimension::Volume &new_volume, 
+              const SireUnits::Dimension::Volume &new_volume,
               const SireUnits::Dimension::Volume &old_volume);
 
     bool test(double new_energy, double old_energy,
               int nmolecules,
-              const SireUnits::Dimension::Volume &new_volume, 
+              const SireUnits::Dimension::Volume &new_volume,
               const SireUnits::Dimension::Volume &old_volume,
               double new_bias, double old_bias);
 
@@ -136,7 +135,7 @@ private:
 
     /** The number of times this move has been rejected */
     quint32 nreject;
-    
+
     /** Whether or not to use optimised moves. This turns on
         newer, less tested code that is likely to be faster, but
         potentially less correct for more complex moves */

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,9 +56,9 @@ QDataStream &operator<<(QDataStream &ds, const AmberParameters &amberparam)
 
     SharedDataStream sds(ds);
 
-    sds << amberparam.molinfo << amberparam.bonds 
-	<< amberparam.angles << amberparam.dihedrals 
-	<< amberparam.impropers << amberparam.nb14pairs << static_cast<const MoleculeProperty&>(amberparam); 
+    sds << amberparam.molinfo << amberparam.bonds
+	<< amberparam.angles << amberparam.dihedrals
+	<< amberparam.impropers << amberparam.nb14pairs << static_cast<const MoleculeProperty&>(amberparam);
 
     return ds;
 }
@@ -70,7 +69,7 @@ QDataStream &operator>>(QDataStream &ds, AmberParameters &amberparam)
     //empty class so nothing to stream
 
     VersionID v = readHeader(ds, r_amberparam);
-    
+
     if (v != 1 and v != 2)
         throw version_error( v, "1", r_amberparam, CODELOC );
     else if (v == 2)
@@ -78,18 +77,18 @@ QDataStream &operator>>(QDataStream &ds, AmberParameters &amberparam)
 	SharedDataStream sds(ds);
 
 	sds >> amberparam.molinfo >> amberparam.bonds
-	    >> amberparam.angles >> amberparam.dihedrals 
-	    >> amberparam.impropers >> amberparam.nb14pairs >> static_cast<MoleculeProperty&>(amberparam); 
+	    >> amberparam.angles >> amberparam.dihedrals
+	    >> amberparam.impropers >> amberparam.nb14pairs >> static_cast<MoleculeProperty&>(amberparam);
       }
     else
       {
 	SharedDataStream sds(ds);
 
 	sds >> amberparam.molinfo >> amberparam.bonds
-	    >> amberparam.angles >> amberparam.dihedrals 
-	    >> amberparam.impropers >> static_cast<MoleculeProperty&>(amberparam); 
+	    >> amberparam.angles >> amberparam.dihedrals
+	    >> amberparam.impropers >> static_cast<MoleculeProperty&>(amberparam);
       }
-            
+
     return ds;
 }
 
@@ -124,7 +123,7 @@ AmberParameters& AmberParameters::operator=(const AmberParameters &other)
         impropers = other.impropers;
         nb14pairs = other.nb14pairs;
     }
-  
+
     return *this;
 }
 
@@ -135,7 +134,7 @@ AmberParameters::~AmberParameters()
 /** Comparison operator */
 bool AmberParameters::operator==(const AmberParameters &other) const
 {
-  return (molinfo == other.molinfo and bonds == other.bonds and angles == other.angles 
+  return (molinfo == other.molinfo and bonds == other.bonds and angles == other.angles
 	  and dihedrals == other.dihedrals and impropers == other.impropers and nb14pairs == other.nb14pairs);
 }
 
@@ -156,7 +155,7 @@ const MoleculeInfoData& AmberParameters::info() const
         return *molinfo;
 }
 
-/** Return whether or not this flexibility is compatible with the molecule 
+/** Return whether or not this flexibility is compatible with the molecule
     whose info is in 'molinfo' */
 bool AmberParameters::isCompatibleWith(const SireMol::MoleculeInfoData &molinfo) const
 {
@@ -168,7 +167,7 @@ const char* AmberParameters::typeName()
     return QMetaType::typeName(qMetaTypeId<AmberParameters>());
 }
 
-void AmberParameters::add(const BondID &bond, const double &k, const double &r0) 
+void AmberParameters::add(const BondID &bond, const double &k, const double &r0)
 {
   QList<double> params;
   params.append(k);
@@ -192,7 +191,7 @@ QList<BondID> AmberParameters::getAllBonds()
   return bonds.keys();
 }
 
-void AmberParameters::add(const AngleID &angle, const double &k, const double &theta0) 
+void AmberParameters::add(const AngleID &angle, const double &k, const double &theta0)
 {
   QList<double> params;
   params.append(k);
@@ -223,9 +222,9 @@ void AmberParameters::add(const DihedralID &dihedral, const double &v, const dou
 
     // If dihedral already exists, we will append parameters
     QHash< DihedralID,QList<double> >::const_iterator it = dihedrals.constFind(dihedral);
-    
+
     bool is_mirrored = false;
-    
+
     if (it != dihedrals.constEnd())
     {
         params = *it;
@@ -233,14 +232,14 @@ void AmberParameters::add(const DihedralID &dihedral, const double &v, const dou
     else
     {
         it = dihedrals.constFind(dihedral.mirror());
-        
+
         if (it != dihedrals.constEnd())
         {
             params = *it;
             is_mirrored = true;
         }
     }
-    
+
     params.append(v);
     params.append(periodicity);
     params.append(phase);
@@ -272,7 +271,7 @@ void AmberParameters::add(const ImproperID &improper, const double &v,
     QList<double> params;
 
     QHash< ImproperID, QList<double> >::const_iterator it = impropers.constFind(improper);
-    
+
     if (it != impropers.constEnd())
     {
         params = *it;
@@ -300,7 +299,7 @@ QList<ImproperID> AmberParameters::getAllImpropers()
   return impropers.keys();
 }
 
-void AmberParameters::add14Pair(const BondID &pair, const double &cscl, const double &ljscl) 
+void AmberParameters::add14Pair(const BondID &pair, const double &cscl, const double &ljscl)
 {
   QList<double> params;
   params.append(cscl);

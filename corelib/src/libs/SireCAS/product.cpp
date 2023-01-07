@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -1066,18 +1065,18 @@ Expression Product::simplify(int options) const
         if (it->base().isA<Sum>())
         {
             const Sum &sum = it->base().asA<Sum>();
-            
+
             Expression part = ret;
-            ret = ((it->factor() * sum.strtval) 
+            ret = ((it->factor() * sum.strtval)
                         * part.simplify(options))
                                 .simplify(options);
-            
+
             for (QHash<ExpressionBase, Expression>::const_iterator
                                                         it2 = sum.posparts.constBegin();
                  it2 != sum.posparts.constEnd();
                  ++it2)
             {
-                ret += (part.simplify(options) * 
+                ret += (part.simplify(options) *
                             ( it->factor() * it2.value().simplify(options) ))
                                     .simplify(options);
             }
@@ -1087,7 +1086,7 @@ Expression Product::simplify(int options) const
                  it2 != sum.negparts.constEnd();
                  ++it2)
             {
-                ret -= (part.simplify(options) * 
+                ret -= (part.simplify(options) *
                             ( it->factor() * it2.value().simplify(options) ))
                                     .simplify(options);
             }
@@ -1096,18 +1095,18 @@ Expression Product::simplify(int options) const
         {
             Expression old_ret = ret;
             const Sum &sum = old_ret.base().asA<Sum>();
-            
+
             Expression part = it.value();
-            ret = ((old_ret.factor() * sum.strtval) 
+            ret = ((old_ret.factor() * sum.strtval)
                         * part.simplify(options))
                                 .simplify(options);
-            
+
             for (QHash<ExpressionBase, Expression>::const_iterator
                                                         it2 = sum.posparts.constBegin();
                  it2 != sum.posparts.constEnd();
                  ++it2)
             {
-                ret += (part.simplify(options) * 
+                ret += (part.simplify(options) *
                             ( it->factor() * it2.value().simplify(options) ))
                                     .simplify(options);
             }
@@ -1117,7 +1116,7 @@ Expression Product::simplify(int options) const
                  it2 != sum.negparts.constEnd();
                  ++it2)
             {
-                ret -= (part.simplify(options) * 
+                ret -= (part.simplify(options) *
                             ( it->factor() * it2.value().simplify(options) ))
                                     .simplify(options);
             }
@@ -1172,7 +1171,7 @@ static QList<Factor> multiply(const QList<Factor> &f0s, const QList<Factor> &f1s
         return f0s;
 
     QHash<Expression,Expression> factors;
-    
+
     foreach (const Factor &f0, f0s)
     {
         foreach (const Factor &f1, f1s)
@@ -1180,16 +1179,16 @@ static QList<Factor> multiply(const QList<Factor> &f0s, const QList<Factor> &f1s
             factors[ f0.power() + f1.power() ] += (f0.factor() * f1.factor());
         }
     }
-    
+
     QList<Factor> ret;
-    
+
     for (QHash<Expression,Expression>::const_iterator it = factors.constBegin();
          it != factors.constEnd();
          ++it)
     {
         ret.append( Factor( f0s.at(0).symbol(), it.value(), it.key() ) );
     }
-    
+
     return ret;
 }
 
@@ -1203,10 +1202,10 @@ static QList<Factor> expand(const QHash<Expression,Expression> &product,
          ++it)
     {
         QList<Factor> factors = it->expand(symbol);
-        
+
         ret = multiply(ret, factors);
     }
-    
+
     return ret;
 }
 
@@ -1225,9 +1224,9 @@ QList<Factor> Product::expand(const Symbol &symbol) const
             "as the denominator contains more than one power of %2.")
                 .arg(this->toString(), symbol.toString()), CODELOC );
     }
-    
+
     QList<Factor> num_factors = ::expand(numparts, symbol);
-    
+
     //multiply the numerator by the constant...
     if (strtval != 1)
     {
@@ -1238,7 +1237,7 @@ QList<Factor> Product::expand(const Symbol &symbol) const
             *it = Factor( symbol, strtval * it->factor(), it->power() );
         }
     }
-    
+
     //now invert the power of the denominator...
     for (QList<Factor>::iterator it = denom_factors.begin();
          it != denom_factors.end();
@@ -1246,7 +1245,7 @@ QList<Factor> Product::expand(const Symbol &symbol) const
     {
         *it = Factor( it->symbol(), it->factor(), -(it->power()) );
     }
-    
+
     return ::multiply(num_factors, denom_factors);
 }
 

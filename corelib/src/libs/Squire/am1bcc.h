@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,12 +44,12 @@ SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::AM1BCC&);
 namespace Squire
 {
 
-/** This charge calculator calculates AM1-BCC partial 
+/** This charge calculator calculates AM1-BCC partial
     atomic charges
-    
+
     @author Christopher Woods
 */
-class SQUIRE_EXPORT AM1BCC 
+class SQUIRE_EXPORT AM1BCC
         : public SireBase::ConcreteProperty<AM1BCC,QMChargeCalculator>
 {
 
@@ -60,13 +59,13 @@ friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, AM1BCC&);
 public:
     AM1BCC();
     AM1BCC(const AM1BCC &other);
-    
+
     ~AM1BCC();
-    
+
     static const char* typeName();
-    
+
     AM1BCC& operator=(const AM1BCC &other);
-    
+
     bool operator==(const AM1BCC &other) const;
     bool operator!=(const AM1BCC &other) const;
 
@@ -75,7 +74,7 @@ public:
     const QHash<QString,QString>& environment() const;
 
     QString environment(const QString &variable) const;
-    
+
     void setTotalCharge(int charge);
     int totalCharge() const;
 
@@ -95,8 +94,8 @@ private:
                                            const Molecule &molecule,
                                            const PropertyMap &map,
                                            const QString &amberhome) const;
-    
-    /** Currently, this uses Mopac to calculate the 
+
+    /** Currently, this uses Mopac to calculate the
         AM1 Mulliken charges */
     Mopac mopac;
 };

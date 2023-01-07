@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -83,7 +82,7 @@ using SireVol::GridPtr;
 
 using SireUnits::Dimension::MolarEnergy;
 
-/** This class holds the potential at the points of all of the atoms of 
+/** This class holds the potential at the points of all of the atoms of
     selected CutGroups in a molecule. The MolPotentialTable is used
     to accumulate all of the potentials acting on these atoms during
     a field evaluation, and also to control which potentials are
@@ -91,9 +90,9 @@ using SireUnits::Dimension::MolarEnergy;
     are evaluated). This allows you to provide some control over
     the calculation, e.g. only placing a few protein residues into
     the field table, thereby preventing the potentials on all atoms
-    in a protein from being evaluated if they aren't actually 
+    in a protein from being evaluated if they aren't actually
     necessary.
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT MolPotentialTable : public SireBase::PackedArray2D<MolarEnergy>
@@ -106,13 +105,13 @@ public:
     typedef SireBase::PackedArray2D<MolarEnergy>::Array Array;
 
     MolPotentialTable();
-    
+
     MolPotentialTable(const MoleculeView &molview);
-    
+
     MolPotentialTable(const MolPotentialTable &other);
-    
+
     ~MolPotentialTable();
-    
+
     MolPotentialTable& operator=(const MolPotentialTable &other);
     MolPotentialTable& operator=(const MolarEnergy &potential);
 
@@ -121,13 +120,13 @@ public:
 
     MolPotentialTable& operator+=(const MolPotentialTable &other);
     MolPotentialTable& operator-=(const MolPotentialTable &other);
-    
+
     MolPotentialTable operator+(const MolPotentialTable &other) const;
     MolPotentialTable operator-(const MolPotentialTable &other) const;
 
     MolPotentialTable& operator+=(const MolarEnergy &potential);
     MolPotentialTable& operator-=(const MolarEnergy &potential);
-    
+
     MolPotentialTable operator+(const MolarEnergy &potential) const;
     MolPotentialTable operator-(const MolarEnergy &potential) const;
 
@@ -140,7 +139,7 @@ public:
     MolPotentialTable operator-() const;
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return MolPotentialTable::typeName();
@@ -158,12 +157,12 @@ public:
     MolNum molNum() const;
 
     const QUuid& molUID() const;
-    
+
     int map(CGIdx cgidx) const;
 
     QVector<MolarEnergy> toVector() const;
     QVector<MolarEnergy> toVector(const AtomSelection &selection) const;
-    
+
     bool add(const CGAtomIdx &cgatomidx, const MolarEnergy &potential);
     bool subtract(const CGAtomIdx &cgatomidx, const MolarEnergy &potential);
 
@@ -175,9 +174,9 @@ public:
 
     void add(const MolarEnergy &potential);
     void subtract(const MolarEnergy &potential);
-    
+
     void setAll(const MolarEnergy &potential);
-    
+
     void multiply(double value);
     void divide(double value);
 
@@ -186,14 +185,14 @@ private:
 
     /** The number of this molecule */
     MolNum molnum;
-    
+
     /** The UID of the molecular layout that the molecule possessed
         when this table was last constructed */
     QUuid moluid;
-    
+
     /** The total number of CutGroups in this molecule */
     qint32 ncgroups;
-    
+
     /** Index mapping CGIdx to index in table
         of that CutGroup. If this is empty then there
         is a one-to-one mapping (all CutGroups are present) */
@@ -214,62 +213,62 @@ public:
     GridPotentialTable();
     GridPotentialTable(const Grid &grid);
     GridPotentialTable(const GridPotentialTable &other);
-    
+
     ~GridPotentialTable();
-    
+
     GridPotentialTable& operator=(const GridPotentialTable &other);
     GridPotentialTable& operator=(const MolarEnergy &potential);
-    
+
     bool operator==(const GridPotentialTable &other) const;
     bool operator!=(const GridPotentialTable &other) const;
-    
+
     GridPotentialTable& operator+=(const GridPotentialTable &other);
     GridPotentialTable& operator-=(const GridPotentialTable &other);
-    
+
     GridPotentialTable operator+(const GridPotentialTable &other) const;
     GridPotentialTable operator-(const GridPotentialTable &other) const;
-    
+
     GridPotentialTable& operator+=(const MolarEnergy &potential);
     GridPotentialTable& operator-=(const MolarEnergy &potential);
-    
+
     GridPotentialTable operator+(const MolarEnergy &potential) const;
     GridPotentialTable operator-(const MolarEnergy &potential) const;
-    
+
     GridPotentialTable& operator*=(double value);
     GridPotentialTable& operator/=(double value);
-    
+
     GridPotentialTable operator*(double value) const;
     GridPotentialTable operator/(double value) const;
-    
+
     GridPotentialTable operator-() const;
-    
+
     MolarEnergy& operator[](int i);
     const MolarEnergy& operator[](int i) const;
-    
+
     const MolarEnergy& at(int i) const;
-    
+
     static const char* typeName();
-    
+
     void initialise();
-    
+
     int nPoints() const;
     int count() const;
-    
+
     const Grid& grid() const;
-    
+
     QVector<MolarEnergy> toVector() const;
-    
+
     void add(int ipoint, const MolarEnergy &potential);
     void subtract(int ipoint, const MolarEnergy &potential);
-    
+
     void add(const GridPotentialTable &other);
     void subtract(const GridPotentialTable &other);
-    
+
     void add(const MolarEnergy &potential);
     void subtract(const MolarEnergy &potential);
-    
+
     void setAll(const MolarEnergy &potential);
-    
+
     void multiply(double value);
     void divide(double value);
 
@@ -280,39 +279,39 @@ public:
 
     iterator begin();
     iterator end();
-    
+
     const_iterator begin() const;
     const_iterator end() const;
-    
+
     const_iterator constBegin() const;
     const_iterator constEnd() const;
 
 private:
     /** The grid that contains the points at which the field is evaluated */
     GridPtr grd;
-    
+
     /** The potential at each of the grid points */
     QVector<MolarEnergy> potentialvals;
 };
 
-/** A PotentialTable is a workspace within which all of the potentials 
+/** A PotentialTable is a workspace within which all of the potentials
     at the points of atoms in molecules, or the points on a grid
     may be stored. A PotentialTable is used as storing the potentials
-    may require lots of memory, and continually 
-    creating a deleting such large amouts of memory would be inefficient. 
-    Also, using a PotentialTable allows for potentials to be accumalated directly, 
-    rather than requiring intermediate storage space for the 
+    may require lots of memory, and continually
+    creating a deleting such large amouts of memory would be inefficient.
+    Also, using a PotentialTable allows for potentials to be accumalated directly,
+    rather than requiring intermediate storage space for the
     individual components.
 
-    You create a potential table to hold all of the potentials at all of 
+    You create a potential table to hold all of the potentials at all of
     the atoms of all of the molecules in a specified MoleculeGroup,
     or at all of the points of a passed Grid.
-    
-    The potentials are held in an array that holds the potentials for 
+
+    The potentials are held in an array that holds the potentials for
     the molecules in the same order as the molecules appear
     in the molecule group, or in an array that holds the potentials
-    in the same order as they appear in the grid. 
-    The potential table also comes with an index so you can quickly 
+    in the same order as they appear in the grid.
+    The potential table also comes with an index so you can quickly
     look up the potential for a specific molecule.
 
     @author Christopher Woods
@@ -329,12 +328,12 @@ public:
 
     PotentialTable(const Grid &grid);
     PotentialTable(const QVector<GridPtr> &grids);
-    
+
     PotentialTable(const MoleculeGroup &molgroup, const Grid &grid);
     PotentialTable(const MoleculeGroup &molgroup, const QVector<GridPtr> &grids);
-    
+
     PotentialTable(const PotentialTable &other);
-    
+
     ~PotentialTable();
 
     static const char* typeName();
@@ -352,19 +351,19 @@ public:
 
     PotentialTable& operator+=(const PotentialTable &other);
     PotentialTable& operator-=(const PotentialTable &other);
-    
+
     PotentialTable operator+(const PotentialTable &other) const;
     PotentialTable operator-(const PotentialTable &other) const;
 
     PotentialTable& operator+=(const MolarEnergy &potential);
     PotentialTable& operator-=(const MolarEnergy &potential);
-    
+
     PotentialTable operator+(const MolarEnergy &potential) const;
     PotentialTable operator-(const MolarEnergy &potential) const;
-    
+
     PotentialTable& operator*=(double value);
     PotentialTable& operator/=(double value);
-    
+
     PotentialTable operator*(double value) const;
     PotentialTable operator/(double value) const;
 
@@ -390,9 +389,9 @@ public:
     bool isEmpty() const;
 
     const QHash<MolNum,qint32>& index() const;
-    
+
     int indexOf(MolNum molnum) const;
-    
+
     QList<MolNum> molNums() const;
 
     int nMolecules() const;
@@ -409,15 +408,15 @@ public:
 
     void assertContainsTableFor(MolNum molnum) const;
     void assertContainsTableFor(const Grid &grid) const;
-    
+
     void add(const PotentialTable &other);
     void subtract(const PotentialTable &other);
-    
+
     void add(const MolarEnergy &potential);
     void subtract(const MolarEnergy &potential);
-    
+
     void setAll(const MolarEnergy &potential);
-    
+
     void multiply(double value);
     void divide(double value);
 
@@ -430,7 +429,7 @@ private:
     /** All of the grid tables */
     QVector<GridPotentialTable> gridtables;
 
-    /** Index mapping from the number of the Molecule to 
+    /** Index mapping from the number of the Molecule to
         the index of its force table in the above array */
     QHash<MolNum,qint32> molnum_to_idx;
 };
@@ -462,7 +461,7 @@ SIRE_ALWAYS_INLINE int MolPotentialTable::nCutGroups() const
     return ncgroups;
 }
 
-/** Return the number of selected CutGroups in this table 
+/** Return the number of selected CutGroups in this table
     (the number of CutGroups for which fields are held) */
 SIRE_ALWAYS_INLINE int MolPotentialTable::nSelectedCutGroups() const
 {
@@ -477,21 +476,21 @@ SIRE_ALWAYS_INLINE bool MolPotentialTable::selectedAll() const
 }
 
 /** Return whether or not the CutGroup at index 'cgidx' has been
-    selected 
-    
+    selected
+
     \throw SireError::invalid_index
 */
 SIRE_ALWAYS_INLINE bool MolPotentialTable::selected(CGIdx cgidx) const
 {
     cgidx = CGIdx(cgidx.map(this->nCutGroups()));
-    
+
     return this->selectedAll() or cgidx_to_idx.contains(cgidx);
 }
 
 /** Return the index of the fieldtable for the CutGroup at index
     'cgidx'. This returns -1 if there is no fieldtable for the
     specified CutGroup
-    
+
     \throw SireError::invalid_index
 */
 SIRE_ALWAYS_INLINE int MolPotentialTable::map(CGIdx cgidx) const
@@ -506,7 +505,7 @@ SIRE_ALWAYS_INLINE int MolPotentialTable::map(CGIdx cgidx) const
 ////// Inline functions for PotentialTable
 //////
 
-/** Return whether or not this contains a table for the 
+/** Return whether or not this contains a table for the
     molecule with number 'molnum' */
 SIRE_ALWAYS_INLINE bool PotentialTable::contains(MolNum molnum) const
 {
@@ -520,10 +519,10 @@ SIRE_ALWAYS_INLINE bool PotentialTable::contains(MolNum molnum) const
 SIRE_ALWAYS_INLINE MolPotentialTable& PotentialTable::getTable(MolNum molnum)
 {
     QHash<MolNum,qint32>::const_iterator it = molnum_to_idx.constFind(molnum);
-    
+
     if (it == molnum_to_idx.constEnd())
         this->assertContainsTableFor(molnum);
-        
+
     return moltables_by_idx.data()[ it.value() ];
 }
 
@@ -534,10 +533,10 @@ SIRE_ALWAYS_INLINE MolPotentialTable& PotentialTable::getTable(MolNum molnum)
 SIRE_ALWAYS_INLINE const MolPotentialTable& PotentialTable::getTable(MolNum molnum) const
 {
     QHash<MolNum,qint32>::const_iterator it = molnum_to_idx.constFind(molnum);
-    
+
     if (it == molnum_to_idx.constEnd())
         this->assertContainsTableFor(molnum);
-        
+
     return moltables_by_idx.constData()[ it.value() ];
 }
 
@@ -562,7 +561,7 @@ SIRE_ALWAYS_INLINE int PotentialTable::nGrids() const
     return gridtables.count();
 }
 
-/** Return the index used to find the index into the field tables array 
+/** Return the index used to find the index into the field tables array
     for the field table for the molecule with a specified number */
 SIRE_ALWAYS_INLINE const QHash<MolNum,qint32>& PotentialTable::index() const
 {

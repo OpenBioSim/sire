@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -88,24 +87,24 @@ QString Torsion::toString() const
                   .arg(angle().to(degrees)).arg(vector03().length());
 }
 
-/** Return the torsion angle of this torsion (the torsion angle 0-1-2-3 
+/** Return the torsion angle of this torsion (the torsion angle 0-1-2-3
     around the 1-2 line) */
 Angle Torsion::angle() const
 {
     return Vector::dihedral(points[0], points[1], points[2], points[3]);
 }
 
-/** Return the improper angle of this torsion (the acute angle between the 
+/** Return the improper angle of this torsion (the acute angle between the
     vector 0-1 and the plane formed by 1-2-3) */
 Angle Torsion::improperAngle() const
 {
     //get the vector perpendicular to the plane
     Vector perp = Vector::cross( points[2] - points[1], points[3] - points[1] );
-    
+
     //get the angle between the perpendicular and the vector
     //from 0-1
     Angle angle = Vector::angle( points[0] - points[1], perp );
-    
+
     //return 90 - angle
     return (90*degrees) - angle;
 }

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -43,15 +42,15 @@ using namespace SireStream;
 
 static const RegisterMetaType<SupraMove> r_supramove(MAGIC_ONLY,
                                                 "SireMove::SupraMove");
-                                                
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const SupraMove &supramove)
 {
     writeHeader(ds, r_supramove, 1);
-    
+
     ds << supramove.nmoves
        << static_cast<const Property&>(supramove);
-    
+
     return ds;
 }
 
@@ -59,7 +58,7 @@ QDataStream &operator<<(QDataStream &ds, const SupraMove &supramove)
 QDataStream &operator>>(QDataStream &ds, SupraMove &supramove)
 {
     VersionID v = readHeader(ds, r_supramove);
-    
+
     if (v == 1)
     {
         ds >> supramove.nmoves
@@ -67,7 +66,7 @@ QDataStream &operator>>(QDataStream &ds, SupraMove &supramove)
     }
     else
         throw version_error(v, "1", r_supramove, CODELOC);
-        
+
     return ds;
 }
 
@@ -76,7 +75,7 @@ SupraMove::SupraMove() : Property(), nmoves(0)
 {}
 
 /** Copy constructor */
-SupraMove::SupraMove(const SupraMove &other) 
+SupraMove::SupraMove(const SupraMove &other)
           : Property(other), nmoves(other.nmoves)
 {}
 
@@ -141,9 +140,9 @@ QDataStream &operator<<(QDataStream &ds,
                                         const NullSupraMove &nullsupramove)
 {
     writeHeader(ds, r_nullsupramove, 1);
-    
+
     ds << static_cast<const SupraMove&>(nullsupramove);
-    
+
     return ds;
 }
 
@@ -152,14 +151,14 @@ QDataStream &operator>>(QDataStream &ds,
                                         NullSupraMove &nullsupramove)
 {
     VersionID v = readHeader(ds, r_nullsupramove);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SupraMove&>(nullsupramove);
     }
     else
         throw version_error(v, "1", r_nullsupramove, CODELOC);
-        
+
     return ds;
 }
 

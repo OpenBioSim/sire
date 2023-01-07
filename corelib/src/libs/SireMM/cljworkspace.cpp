@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,11 +44,11 @@ namespace SireMM
 namespace detail
 {
     /** This class holds all of the data of a CLJWorkspace. This is held
-        as an implicitly shared pointer, with the caveat that copying the 
+        as an implicitly shared pointer, with the caveat that copying the
         pointer from an empty workspace will reset the original to point
-        to an empty copy, while taking this copy to the detached (new) 
+        to an empty copy, while taking this copy to the detached (new)
         object
-        
+
         @author Christopher Woods
     */
     class CLJWorkspaceData
@@ -57,14 +56,14 @@ namespace detail
     public:
         CLJWorkspaceData()
         {}
-        
+
         CLJWorkspaceData(const CLJWorkspaceData &other)
                 : deltas(other.deltas), same_ids(other.same_ids)
         {}
-        
+
         ~CLJWorkspaceData()
         {}
-        
+
         CLJWorkspaceData& operator=(const CLJWorkspaceData &other)
         {
             if (this != &other)
@@ -72,25 +71,25 @@ namespace detail
                 deltas = other.deltas;
                 same_ids = other.same_ids;
             }
-            
+
             return *this;
         }
-        
+
         QVarLengthArray<CLJDelta,4> deltas;
-        
+
         QVarLengthArray<QVector<CLJBoxIndex>, 4> same_ids;
-        
+
         void clear()
         {
             deltas.resize(0);
             same_ids.resize(0);
         }
-        
+
         bool isEmpty() const
         {
             return deltas.isEmpty() and same_ids.isEmpty();
         }
-        
+
         /** Return whether or not all of the atoms in the deltas
             have a single ID. If they have a single ID, then we don't
             need to remove the old atoms before calculating the energy
@@ -99,16 +98,16 @@ namespace detail
         {
             if (isEmpty())
                 return true;
-            
+
             qint32 id = CLJAtoms::idOfDummy()[0];
             const qint32 dummy_id = id;
-            
+
             for (int i=0; i<deltas.count(); ++i)
             {
                 //loop over the old and new atoms
                 {
                     const QVector<MultiInt> &ids = deltas.constData()[i].newAtoms().ID();
-                
+
                     for (int j=0; j<ids.count(); ++j)
                     {
                         for (int k=0; k<MultiInt::count(); ++k)
@@ -131,7 +130,7 @@ namespace detail
                 //loop over the old and new atoms
                 {
                     const QVector<MultiInt> &ids = deltas.constData()[i].oldAtoms().ID();
-                
+
                     for (int j=0; j<ids.count(); ++j)
                     {
                         for (int k=0; k<MultiInt::count(); ++k)
@@ -151,7 +150,7 @@ namespace detail
                     }
                 }
             }
-            
+
             return true;
         }
 
@@ -161,7 +160,7 @@ namespace detail
             {
                 boxes.remove(same_ids.at(i));
             }
-            
+
             same_ids.clear();
         }
 
@@ -174,7 +173,7 @@ namespace detail
         void accept(CLJBoxes &boxes)
         {
             removeSameIDAtoms(boxes);
-            
+
             for (int i=0; i<deltas.count(); ++i)
             {
                 if (not deltas.at(i).isNull())
@@ -185,7 +184,7 @@ namespace detail
                                 .arg(i).arg(deltas.at(i).toString()), CODELOC );
                 }
             }
-            
+
             deltas.clear();
         }
 
@@ -199,12 +198,12 @@ namespace detail
                             "How can we have an old delta (%1) when the current "
                             "CLJWorkspace is empty? %2")
                                 .arg(old_delta.toString()).arg(deltas.count()), CODELOC );
-            
+
                 //this is the first change being made to the boxes
                 CLJAtoms old_cljatoms = boxes.get(old_atoms);
-                
+
                 deltas.append( CLJDelta(0, old_cljatoms, new_atoms) );
-                
+
                 if (this->isSingleID())
                 {
                     //we don't need to remove the old atoms from the
@@ -217,7 +216,7 @@ namespace detail
                     //CLJBoxes as they will interfere with the calculation
                     boxes.remove(old_atoms);
                 }
-                
+
                 return deltas.last();
             }
             else if (not same_ids.isEmpty())
@@ -226,9 +225,9 @@ namespace detail
                 //so far have involved atoms with the same ID. Is this
                 //going to continue?
                 CLJAtoms old_cljatoms = boxes.get(old_atoms);
-                
+
                 CLJDelta new_delta;
-                
+
                 if (old_delta.isNull())
                 {
                     new_delta = CLJDelta(deltas.count(), old_cljatoms, new_atoms);
@@ -242,17 +241,17 @@ namespace detail
                                 "when this CLJWorkspace only has %3 deltas?")
                                     .arg(old_delta.toString()).arg(old_delta.ID())
                                         .arg(deltas.count()), CODELOC );
-                
+
                     if (old_delta.oldAtoms() != old_cljatoms)
                     {
                         QStringList differences;
-                        
+
                         for (int i=0; i<qMin(old_delta.oldAtoms().count(), old_cljatoms.count());
                                 ++i)
                         {
                             CLJAtom old0 = old_delta.oldAtoms().at(i);
                             CLJAtom old1 = old_cljatoms.at(i);
-                            
+
                             if (old0 != old1)
                             {
                                 differences.append( QObject::tr(
@@ -260,7 +259,7 @@ namespace detail
                                         .arg(i).arg(old0.toString(),old1.toString()) );
                             }
                         }
-                        
+
                         if (old_delta.oldAtoms().nAtoms() != old_cljatoms.nAtoms())
                         {
                             differences.append( QObject::tr(
@@ -268,14 +267,14 @@ namespace detail
                                         .arg(old_delta.oldAtoms().nAtoms())
                                         .arg(old_cljatoms.nAtoms()) );
                         }
-                        
+
                         if (not differences.isEmpty())
                             throw SireError::program_bug( QObject::tr(
                                     "Disagreement in the old atoms when changing "
                                     "the CLJAtoms for a second time:\n%1\n")
                                         .arg(differences.join("\n")), CODELOC );
                     }
-                    
+
                     new_delta = CLJDelta(old_delta.ID(), old_cljatoms, new_atoms);
                     deltas[old_delta.ID()] = new_delta;
                 }
@@ -292,7 +291,7 @@ namespace detail
                     boxes.remove(old_atoms);
                     removeSameIDAtoms(boxes);
                 }
-                
+
                 return new_delta;
             }
             else
@@ -324,7 +323,7 @@ namespace detail
                 }
             }
         }
-        
+
         tuple<CLJAtoms,CLJAtoms,CLJAtoms> merge() const
         {
             if (deltas.isEmpty())
@@ -334,7 +333,7 @@ namespace detail
                 return CLJDelta::merge(deltas.constData(), deltas.count());
             }
         }
-        
+
         CLJAtoms changedAtoms() const
         {
             if (deltas.isEmpty())
@@ -366,7 +365,7 @@ namespace detail
                 return CLJDelta::mergeOld(deltas.constData(), deltas.count());
             }
         }
-        
+
         bool needsAccepting() const
         {
             if (not same_ids.isEmpty())
@@ -378,23 +377,23 @@ namespace detail
                     if (not deltas.at(i).isNull())
                         return true;
                 }
-                
+
                 return false;
             }
         }
-        
+
         QVector<CLJBoxIndex> commit(CLJBoxes &boxes, const CLJDelta &delta)
         {
             removeSameIDAtoms(boxes);
-            
+
             if (delta.ID() < 0 or delta.ID() >= deltas.count())
                 //invalid delta, so return nothing
                 return QVector<CLJBoxIndex>();
-            
+
             else if (deltas.at(delta.ID()).isNull())
                 //we have already committed this delta
                 return QVector<CLJBoxIndex>();
-            
+
             else
             {
                 //make sure that we have agreement regarding the delta...
@@ -403,19 +402,19 @@ namespace detail
                 return boxes.add(delta.newAtoms());
             }
         }
-        
+
         QVector<CLJBoxIndex> revert(CLJBoxes &boxes, const CLJDelta &delta)
         {
             removeSameIDAtoms(boxes);
-            
+
             if (delta.ID() < 0 or delta.ID() >= deltas.count())
                 //invalid delta, so return nothing
                 return QVector<CLJBoxIndex>();
-            
+
             else if (deltas.at(delta.ID()).isNull())
                 //we have already committed this delta
                 return QVector<CLJBoxIndex>();
-            
+
             else
             {
                 //make sure that we have agreement regarding the delta...
@@ -433,12 +432,12 @@ static const RegisterMetaType<CLJWorkspace> r_workspace(NO_ROOT);
 QDataStream  &operator<<(QDataStream &ds, const SireMM::detail::CLJWorkspaceData &ws)
 {
     ds << quint32( ws.deltas.count() );
-    
+
     for (int i=0; i<ws.deltas.count(); ++i)
     {
         ds << ws.deltas.at(i);
     }
-    
+
     return ds;
 }
 
@@ -446,46 +445,46 @@ QDataStream  &operator>>(QDataStream &ds, SireMM::detail::CLJWorkspaceData &ws)
 {
     quint32 n;
     ds >> n;
-    
+
     ws.deltas.resize(n);
-    
+
     for (quint32 i=0; i<n; ++i)
     {
         ds >> ws.deltas[i];
     }
-    
+
     return ds;
 }
 
 QDataStream &operator<<(QDataStream &ds, const CLJWorkspace &ws)
 {
     writeHeader(ds, r_workspace, 2);
-    
+
     ds << ws.recalc_from_scratch << ws.isEmpty();
-    
+
     if (not ws.isEmpty())
     {
         SharedDataStream sds(ds);
         sds << ws.d;
     }
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, CLJWorkspace &ws)
 {
     VersionID v = readHeader(ds, r_workspace);
-    
+
     if (v <= 2)
     {
         bool recalc_from_scratch = false;
         bool is_empty = true;
-        
+
         if (v == 2)
             ds >> recalc_from_scratch;
-        
+
         ds >> is_empty;
-        
+
         if (is_empty)
         {
             ws = CLJWorkspace();
@@ -500,7 +499,7 @@ QDataStream &operator>>(QDataStream &ds, CLJWorkspace &ws)
     }
     else
         throw version_error(v, "1,2", r_workspace, CODELOC);
-    
+
     return ds;
 }
 
@@ -512,24 +511,24 @@ void CLJWorkspace::returnToMemoryPool()
 {
     if (d.get() == 0)
         return;
-    
+
     if (not d.unique())
     {
         d.reset();
         return;
     }
-    
+
     if (not cache.hasLocalData())
     {
         cache.setLocalData( new CLJWorkspaceCache() );
     }
-    
+
     if (cache.localData()->count() < 32)
     {
         d->clear();
         cache.localData()->push_back(d);
     }
-    
+
     d.reset();
 }
 
@@ -546,7 +545,7 @@ void CLJWorkspace::createFromMemoryPool()
         else
             d.reset();
     }
-    
+
     if (cache.hasLocalData())
     {
         if (not cache.localData()->isEmpty())
@@ -557,7 +556,7 @@ void CLJWorkspace::createFromMemoryPool()
             return;
         }
     }
-    
+
     //no available value in the pool
     //qDebug() << "CREATING AS NOT AVAILABLE IN THE POOL";
     d.reset( new SireMM::detail::CLJWorkspaceData() );
@@ -593,7 +592,7 @@ CLJWorkspace& CLJWorkspace::operator=(const CLJWorkspace &other)
     }
 
     recalc_from_scratch = other.recalc_from_scratch;
-    
+
     return *this;
 }
 
@@ -636,12 +635,12 @@ const CLJDelta& CLJWorkspace::operator[](int i) const
         throw SireError::invalid_index( QObject::tr(
                 "Cannot return the delta at index %1 at this is an empty workspace.")
                         .arg(i), CODELOC );
-    
+
     if (i < 0 or i >= d->deltas.count())
         throw SireError::invalid_index( QObject::tr(
                 "Cannot return the delta at index %1 as there number of deltas is only %2.")
                     .arg(i).arg(d->deltas.count()), CODELOC );
-    
+
     return d->deltas.at(i);
 }
 
@@ -696,14 +695,14 @@ void CLJWorkspace::detach()
             boost::shared_ptr<detail::CLJWorkspaceData> d2 = d;
             d.reset();
             createFromMemoryPool();
-            
+
             d->operator=(*d2);
         }
     }
 }
 
 /** Internal function used to fully remove atoms that have not been
-    removed because they all have the same ID. This is used when the 
+    removed because they all have the same ID. This is used when the
     optimisation of not removing same ID atoms would break the energy
     calculation, e.g. if we have multiple CLJGroups and have multiple
     changed IDs across these groups */
@@ -716,7 +715,7 @@ void CLJWorkspace::removeSameIDAtoms(CLJBoxes &boxes)
     }
 }
 
-/** Push the passed change onto the workspace. This changes the atoms in the 
+/** Push the passed change onto the workspace. This changes the atoms in the
     passed CLJBoxes from their values in 'old_atoms' to their values in the
     passed 'new_atoms'. The last CLJDelta used for these atoms is supplied as
     'old_delta', and this returns the new CLJDelta for these atoms. */
@@ -726,12 +725,12 @@ CLJDelta CLJWorkspace::push(CLJBoxes &boxes, const QVector<CLJBoxIndex> &old_ato
     if (not recalc_from_scratch)
     {
         detach();
-        
+
         if (d.get() == 0)
         {
             createFromMemoryPool();
         }
-        
+
         return d->push(boxes, old_atoms, new_atoms, old_delta);
     }
     else
@@ -855,7 +854,7 @@ CLJAtoms CLJWorkspace::changedAtoms() const
         return d->changedAtoms();
 }
 
-/** Merge all of the old atoms from the deltas together into a single 
+/** Merge all of the old atoms from the deltas together into a single
     set of old CLJAtoms that can be used for the change in energy calculation */
 CLJAtoms CLJWorkspace::oldAtoms() const
 {
@@ -875,7 +874,7 @@ CLJAtoms CLJWorkspace::newAtoms() const
         return d->newAtoms();
 }
 
-/** Merge all of the deltas together to return the tuple of the 
+/** Merge all of the deltas together to return the tuple of the
     changed, old and new atoms. This is equivalent to calling
     changedAtoms(), oldAtoms() and newAtoms() and placing them
     into a tuple. This is more efficient than three separate calls */

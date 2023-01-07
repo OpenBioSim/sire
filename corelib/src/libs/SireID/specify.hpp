@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,10 +49,10 @@ QDataStream& operator>>(QDataStream&, SireID::Specify<ID>&);
 namespace SireID
 {
 
-/** This class is used to help form specified ID matches, 
+/** This class is used to help form specified ID matches,
     e.g. the third residue called alanine ( ResName("ALA")[2] )
     or the last three atoms called "CA" ( AtomName("CA")(-3,-1) )
-    
+
     @author Christopher Woods
 */
 template<class ID>
@@ -69,41 +68,41 @@ public:
     Specify(const ID &id, qint64 start, qint64 end);
     Specify(const ID &id, qint64 start, qint64 end, qint64 increment);
     Specify(const ID &id, const SireBase::Range &range);
-    
+
     Specify(const Specify<ID> &other);
-    
+
     ~Specify();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     Specify<ID>* clone() const;
 
     Specify<ID>& operator=(const Specify<ID> &other);
-    
+
     bool operator==(const Specify<ID> &other) const;
     bool operator==(const SireID::ID &other) const;
 
     bool operator!=(const Specify<ID> &other) const;
-    
+
     bool operator!=(const SireID::ID &other) const;
-    
+
     Specify<ID> operator[](qint64 i) const;
     Specify<ID> operator[](const SireBase::Range &range) const;
-    
+
     Specify<ID> operator()(qint64 i) const;
-    
+
     Specify<ID> operator()(qint64 start, qint64 end) const;
     Specify<ID> operator()(qint64 start, qint64 end, qint64 increment) const;
     Specify<ID> operator()(const SireBase::Range &range) const;
-    
+
     uint hash() const;
-    
+
     bool isNull() const;
-    
+
     QString toString() const;
-    
+
     QList<typename ID::Index> map(const typename ID::SearchObject &obj) const;
 
 private:
@@ -136,29 +135,29 @@ SIRE_OUTOFLINE_TEMPLATE
 Specify<ID>::Specify(const ID &idobj, qint64 start, qint64 end)
             : ID(), id(idobj), idxs(SireBase::Range::create(start,end))
 {}
-  
+
 /** Construct using the passed ID and range */
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 Specify<ID>::Specify(const ID &idobj, qint64 start, qint64 end, qint64 increment)
             : ID(), id(idobj), idxs(SireBase::Range::create(start,end,increment))
 {}
-  
+
 /** Construct using the passed ID and range */
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 Specify<ID>::Specify(const ID &idobj, const SireBase::Range &range)
             : ID(), id(idobj), idxs(range)
 {}
-  
-/** Copy constructor */  
+
+/** Copy constructor */
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 Specify<ID>::Specify(const Specify<ID> &other)
             : ID(other), id(other.id), idxs(other.idxs)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 Specify<ID>::~Specify()
@@ -175,7 +174,7 @@ Specify<ID>& Specify<ID>::operator=(const Specify<ID> &other)
         id = other.id;
         idxs = other.idxs;
     }
-    
+
     return *this;
 }
 
@@ -211,17 +210,17 @@ QList<typename ID::Index> Specify<ID>::map(const typename ID::SearchObject &obj)
 {
     //first get all of the matches
     QList<typename ID::Index> found_idxs = id.map(obj);
-    
+
     //now get the specified matches
     auto range = idxs.read().populate(found_idxs.count());
 
     QList<typename ID::Index> specified_idxs;
-    
+
     while (range.read().hasNext())
     {
         specified_idxs.append( found_idxs[range.edit().next()] );
     }
-    
+
     return specified_idxs;
 }
 

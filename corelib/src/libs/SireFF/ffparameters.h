@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -70,10 +69,10 @@ typedef SireBase::PropPtr<FFParametersArray> FFParametersArrayPtr;
     The FFParameters holds all of the forcefield parameters for a single
     bead in the forcefield. All of the parameters for all of the beads
     are held in the corresponding FFParametersArray-derived class.
-    
+
     These classes are designed to be used internally by the forcefields
     and are not designed to be part of the public API
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT FFParameters : public SireBase::Property
@@ -85,11 +84,11 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFParameters&);
 public:
     FFParameters();
     FFParameters(const FFParameters &other);
-    
+
     virtual ~FFParameters();
-    
+
     static const char* typeName();
-    
+
     virtual FFParameters* clone() const=0;
 
     virtual FFParametersArrayPtr toArray() const=0;
@@ -98,7 +97,7 @@ public:
 
 protected:
     FFParameters& operator=(const FFParameters &other);
-    
+
     bool operator==(const FFParameters &other) const;
     bool operator!=(const FFParameters &other) const;
 };
@@ -107,13 +106,13 @@ protected:
     classes are used to hold all of the parameters for all of the beads
     in the forcefield, in a format that allows for rapid computation by
     the forcefield.
-    
+
     The parameters for an individual bead are held in the corresponding
     FFParameters-derived class.
-    
+
     These classes are designed to be used internally by the forcefields
     and are not designed to be part of the public API
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT FFParametersArray : public SireBase::Property
@@ -125,17 +124,17 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFParametersArray&)
 public:
     FFParametersArray();
     FFParametersArray(const FFParametersArray &other);
-    
+
     virtual ~FFParametersArray();
-    
+
     static const char* typeName();
-    
+
     virtual FFParametersArray* clone() const=0;
-    
+
     static NullFFParametersArray null();
 
     virtual FFParametersPtr operator[](int i) const=0;
-    
+
     FFParametersPtr at(int i) const;
 
     virtual int count() const=0;
@@ -143,25 +142,25 @@ public:
 
     virtual void append(const FFParameters &params)=0;
     virtual void append(const FFParametersArray &params)=0;
-    
+
     virtual void update(int idx, const FFParameters &params)=0;
-    virtual void update(const QVarLengthArray<int> &idxs, 
+    virtual void update(const QVarLengthArray<int> &idxs,
                         const FFParametersArray &params)=0;
 
     virtual void remove(int idx)=0;
     virtual void remove(const QVarLengthArray<int> &idxs)=0;
-    
+
     virtual void removeAll()=0;
 
 protected:
     FFParametersArray& operator=(const FFParametersArray &other);
-    
+
     bool operator==(const FFParametersArray &other) const;
     bool operator!=(const FFParametersArray &other) const;
 };
 
 /** Null FFParameters */
-class SIREFF_EXPORT NullFFParameters 
+class SIREFF_EXPORT NullFFParameters
             : public SireBase::ConcreteProperty<NullFFParameters,FFParameters>
 {
 
@@ -171,16 +170,16 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, NullFFParameters&);
 public:
     NullFFParameters();
     NullFFParameters(const NullFFParameters &other);
-    
+
     ~NullFFParameters();
-    
+
     static const char* typeName();
-    
+
     NullFFParameters& operator=(const NullFFParameters &other);
-    
+
     bool operator==(const NullFFParameters &other) const;
     bool operator!=(const NullFFParameters &other) const;
-    
+
     FFParametersArrayPtr toArray() const;
 };
 
@@ -195,16 +194,16 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, NullFFParametersArr
 public:
     NullFFParametersArray();
     NullFFParametersArray(const NullFFParametersArray &other);
-    
+
     ~NullFFParametersArray();
-    
+
     static const char* typeName();
-    
+
     NullFFParametersArray& operator=(const NullFFParametersArray &other);
-    
+
     bool operator==(const NullFFParametersArray &other) const;
     bool operator!=(const NullFFParametersArray &other) const;
-    
+
     FFParametersPtr operator[](int i) const;
 
     int count() const;
@@ -212,13 +211,13 @@ public:
 
     void append(const FFParameters &params);
     void append(const FFParametersArray &params);
-    
+
     void update(int idx, const FFParameters &params);
     void update(const QVarLengthArray<int> &idxs, const FFParametersArray &params);
 
     void remove(int idx);
     void remove(const QVarLengthArray<int> &idxs);
-    
+
     void removeAll();
 };
 

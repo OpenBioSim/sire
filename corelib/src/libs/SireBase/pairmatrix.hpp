@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -36,13 +35,13 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-/** This provides a 2D matrix that contains information about all pairs of 
-    two groups. This matrix is designed to be used in a pair-pair loop, 
+/** This provides a 2D matrix that contains information about all pairs of
+    two groups. This matrix is designed to be used in a pair-pair loop,
     where each element is accessed sequentially, and it is thus highly optimised
     for such use. It does provide random access via indicies, but this will be slightly
     slower (though still quite quick!).
 
-    If you want a general purpose 2D, implicitly shared array, then 
+    If you want a general purpose 2D, implicitly shared array, then
     use Array2D
 
     @author Christopher Woods
@@ -141,7 +140,7 @@ PairMatrix<T>::PairMatrix(const PairMatrix<T> &other)
     if (n_elements > 0)
     {
         array = new T[n_elements];
-        
+
         //have to manual copy as T may not be memcpy'able
         for (quint32 i=0; i<n_elements; ++i)
         {

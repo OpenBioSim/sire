@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,10 +51,10 @@ using SireBase::Properties;
 /** This is a property which creates a SireVol::CombinedSpace object
     of the specified properties (which must all be space objects
     themselves)
-    
+
     @author Christopher Woods
 */
-class SIREVOL_EXPORT CombineSpaces 
+class SIREVOL_EXPORT CombineSpaces
         : public SireBase::ConcreteProperty<CombineSpaces,SireBase::CombineProperties>
 {
 
@@ -67,24 +66,24 @@ public:
 
     CombineSpaces(const PropertyName &source);
     CombineSpaces(const PropertyName &source0, const PropertyName &source1);
-    
+
     CombineSpaces(const QList<PropertyName> &sources);
     CombineSpaces(const QVector<PropertyName> &sources);
-    
+
     CombineSpaces(const QList<QString> &sources);
     CombineSpaces(const QVector<QString> &sources);
-    
+
     CombineSpaces(const CombineSpaces &other);
-    
+
     ~CombineSpaces();
-    
+
     CombineSpaces& operator=(const CombineSpaces &other);
-    
+
     bool operator==(const CombineSpaces &other) const;
     bool operator!=(const CombineSpaces &other) const;
-    
+
     static const char* typeName();
-    
+
     void updateFrom(const Properties &properties);
 };
 

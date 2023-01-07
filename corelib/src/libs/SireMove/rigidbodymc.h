@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -74,7 +73,7 @@ using SireMol::MoleculeView;
 
     @author Christopher Woods
 */
-class SIREMOVE_EXPORT RigidBodyMC 
+class SIREMOVE_EXPORT RigidBodyMC
         : public SireBase::ConcreteProperty<RigidBodyMC,MonteCarlo>
 {
 
@@ -124,36 +123,36 @@ public:
 
     void setReflectionSphere(MolNum molnum, Vector sphere_center,
                              SireUnits::Dimension::Length sphere_radius);
-    
+
     void setReflectionSphere(const MoleculeView &molview, Vector sphere_center,
                              SireUnits::Dimension::Length sphere_radius);
-    
+
     bool usesReflectionMoves(MolNum molnum) const;
     bool usesReflectionMoves(const MoleculeView &molview) const;
-    
+
     Vector reflectionSphereCenter(MolNum molnum) const;
     Vector reflectionSphereCenter(const MoleculeView &molview) const;
-    
+
     SireUnits::Dimension::Length reflectionSphereRadius(MolNum molnum) const;
     SireUnits::Dimension::Length reflectionSphereRadius(const MoleculeView &molview) const;
 
     void setReflectionVolume(const QVector<SireMaths::Vector> &points,
                              SireUnits::Dimension::Length radius);
-    
+
     void setReflectionVolume(const MoleculeView &molecule,
                              SireUnits::Dimension::Length radius,
                              bool heavy_atoms_only,
                              const PropertyMap &map = PropertyMap());
-    
+
     void setReflectionVolume(const MoleculeView &molecule,
                              SireUnits::Dimension::Length radius,
                              const PropertyMap &map = PropertyMap());
-    
+
     bool usesReflectionVolume() const;
-    
+
     void disableReflectionSphere();
     void disableReflectionVolume();
-    
+
     QVector<SireMaths::Vector> reflectionVolumePoints() const;
     SireUnits::Dimension::Length reflectionVolumeRadius() const;
 
@@ -163,7 +162,7 @@ public:
     void setSynchronisedTranslation(bool on);
     void setSynchronisedRotation(bool on);
     void setSharedRotationCenter(bool on);
-    
+
     bool synchronisedTranslation() const;
     bool synchronisedRotation() const;
     bool sharedRotationCenter() const;
@@ -215,7 +214,7 @@ private:
 
     /** Whether or not to synchronise the translation of all views */
     bool sync_trans;
-    
+
     /** Whether or not to synchronise the rotation of all views */
     bool sync_rot;
 

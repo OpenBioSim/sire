@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -76,8 +75,8 @@ using SireMol::Molecules;
 using SireVol::SpacePtr;
 using SireVol::Space;
 
-/** This class is used to read in an AMBER top file and crd file 
-    
+/** This class is used to read in an AMBER top file and crd file
+
     @author Julien Michel
 */
 class SIREIO_EXPORT Amber
@@ -85,26 +84,26 @@ class SIREIO_EXPORT Amber
 
 friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const SireIO::Amber&);
 friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, SireIO::Amber&);
-  
+
 public:
     Amber();
     Amber(const Amber &other);
     ~Amber();
-  
+
     Amber& operator=(const Amber &other);
-    
+
     bool operator==(const Amber &other) const;
     bool operator!=(const Amber &other) const;
-  
+
     static const char* typeName();
-  
+
     const char* what() const;
-  
+
     void set14Factors(double coul_14, double lj_14);
-    
+
     double coulomb14Factor() const;
     double lj14Factor() const;
-  
+
     tuple<MoleculeGroup,SpacePtr> readCrdTop(const QString &crdfile,
                                              const QString &topfile,
                                              QString flag_cutting="perresidue") const;

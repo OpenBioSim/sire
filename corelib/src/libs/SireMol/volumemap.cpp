@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,37 +52,37 @@ static const RegisterMetaType<VolumeMap> r_volmap;
 QDataStream &operator<<(QDataStream &ds, const VolumeMap &volmap)
 {
     writeHeader(ds, r_volmap, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << volmap.grid_info << volmap.grid_spacing.to(angstrom)
         << qint32(volmap.map_type) << qint32(volmap.fill_type)
         << volmap.occ << volmap.nsamples << volmap.max_grid_points
         << volmap.mask_points << volmap.mask_dist
         << volmap.skip_light_atoms
         << static_cast<const Property&>(volmap);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, VolumeMap &volmap)
 {
     VersionID v = readHeader(ds, r_volmap);
-    
+
     if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         double grid_spacing;
         qint32 map_type, fill_type;
-        
+
         sds >> volmap.grid_info >> grid_spacing
             >> map_type >> fill_type
             >> volmap.occ >> volmap.nsamples >> volmap.max_grid_points
             >> volmap.mask_points >> volmap.mask_dist
             >> volmap.skip_light_atoms
             >> static_cast<Property&>(volmap);
-        
+
         volmap.grid_spacing = grid_spacing * angstrom;
         volmap.map_type = VolumeMap::MapType(map_type);
         volmap.fill_type = VolumeMap::FillType(fill_type);
@@ -91,26 +90,26 @@ QDataStream &operator>>(QDataStream &ds, VolumeMap &volmap)
     else if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         double grid_spacing;
         qint32 map_type, fill_type;
-        
+
         volmap.mask_dist = 0;
         volmap.mask_points.clear();
-        
+
         sds >> volmap.grid_info >> grid_spacing
             >> map_type >> fill_type
             >> volmap.occ >> volmap.nsamples >> volmap.max_grid_points
             >> volmap.skip_light_atoms
             >> static_cast<Property&>(volmap);
-        
+
         volmap.grid_spacing = grid_spacing * angstrom;
         volmap.map_type = VolumeMap::MapType(map_type);
         volmap.fill_type = VolumeMap::FillType(fill_type);
     }
     else
         throw version_error(v, "1,2", r_volmap, CODELOC);
-    
+
     return ds;
 }
 
@@ -123,24 +122,24 @@ namespace SireMol
         public:
             VolumeMapData()
             {}
-            
+
             ~VolumeMapData()
             {}
-            
+
             void addToGrid(const Vector &coords, const Element &element);
-            
+
             GridInfo grid_info;
             Length grid_spacing;
             QVector<float> occ;
-            
+
             VolumeMap::MapType map_type;
             VolumeMap::FillType fill_type;
-            
+
             QVector<Vector> mask_points;
             float mask_dist;
-            
+
             qint32 max_points;
-            
+
             QElapsedTimer t;
         };
     }
@@ -301,11 +300,11 @@ VolumeMap& VolumeMap::operator=(const VolumeMap &other)
         mask_points = other.mask_points;
         mask_dist = other.mask_dist;
         skip_light_atoms = other.skip_light_atoms;
-        
+
         delete d;
         d = 0;
     }
-    
+
     return *this;
 }
 
@@ -406,7 +405,7 @@ void VolumeMap::clear()
 void VolumeMap::redimensionGrid(Length new_spacing)
 {
     GridInfo new_grid_info( grid_info.dimensions(), new_spacing );
-    
+
     if (new_grid_info.nPoints() > max_grid_points)
         throw SireError::unavailable_resource( QObject::tr(
                 "Cannot redimension this grid to a spacing %1 A, as doing so would "
@@ -416,12 +415,12 @@ void VolumeMap::redimensionGrid(Length new_spacing)
                     .arg(new_spacing.value())
                     .arg(new_grid_info.nPoints())
                     .arg(max_grid_points), CODELOC );
-    
+
     if (not occ.isEmpty())
     {
         occ = grid_info.redimension(occ, new_grid_info);
     }
-    
+
     grid_info = new_grid_info;
     grid_spacing = new_spacing;
 }
@@ -432,12 +431,12 @@ void VolumeMap::setGridSpacing(Length new_spacing)
 {
     if (new_spacing < min_grid_spacing)
         new_spacing = min_grid_spacing;
-    
+
     if (grid_spacing != new_spacing)
     {
         redimensionGrid(new_spacing);
     }
-    
+
     grid_spacing = new_spacing;
 }
 
@@ -461,7 +460,7 @@ void VolumeMap::setMapType(MapType new_type)
 {
     if (new_type != map_type)
         clear();
-    
+
     map_type = new_type;
 }
 
@@ -477,16 +476,16 @@ VolumeMap::FillType VolumeMap::fillType() const
     VDW_RADIUS  - atoms are assigned to all points underneath their VDW radius
     COVALENT_RADIUS - atoms are assigned to all points underneath their covalent radius
     BOND_ORDER_RADIUS - atoms are assigned to all points underneath their bond order radius
-    
+
     Default is VDW_RADIUS
-    
+
     Note that changing the fill type will clear the current grid
 */
 void VolumeMap::setFillType(FillType new_type)
 {
     if (new_type != fill_type)
         clear();
-    
+
     fill_type = new_type;
 }
 
@@ -513,7 +512,7 @@ qint64 VolumeMap::nSamples() const
 AABox VolumeMap::presize(const Vector &coords, const Element &element, const AABox &box) const
 {
     float rad;
-    
+
     switch (fill_type)
     {
         case VolumeMap::VDW_RADIUS:
@@ -529,16 +528,16 @@ AABox VolumeMap::presize(const Vector &coords, const Element &element, const AAB
         default:
             rad = 0;
     }
-    
+
     //ensure that the grid contains the atom
     const AABox atombox = AABox(coords, Vector(rad+2.5));
 
     if (box.isNull())
         return atombox;
-    
+
     else if (box.contains(atombox))
         return box;
-    
+
     else
     {
         return box + atombox;
@@ -553,17 +552,17 @@ void VolumeMap::presize(const Molecules &molecules, const PropertyMap &map)
         return;
 
     AABox box;
-    
+
     for (Molecules::const_iterator it = molecules.constBegin();
          it != molecules.constEnd();
          ++it)
     {
         const MoleculeView &molecule = it.value();
-    
+
         //extract the coordinates and element properties from the molecule
         const AtomCoords &coords = molecule.data().property( map["coordinates"] ).asA<AtomCoords>();
         const AtomElements &elems = molecule.data().property( map["element"] ).asA<AtomElements>();
-        
+
         if (molecule.selectedAll())
         {
             //loop over all atoms and add them to the grid
@@ -571,7 +570,7 @@ void VolumeMap::presize(const Molecules &molecules, const PropertyMap &map)
             {
                 const Vector *ca = coords.data(CGIdx(i));
                 const Element *ea = elems.data(CGIdx(i));
-                
+
                 for (int j=0; j<coords.nAtoms(CGIdx(i)); ++j)
                 {
                     if ((not skipLightAtoms()) or ea[j].nProtons() >= 6)
@@ -585,7 +584,7 @@ void VolumeMap::presize(const Molecules &molecules, const PropertyMap &map)
         {
             //not selected all atoms...
             const AtomSelection selected_atoms = molecule.selection();
-            
+
             for (int i=0; i<coords.nCutGroups(); ++i)
             {
                 const Vector *ca = coords.data(CGIdx(i));
@@ -621,9 +620,9 @@ void VolumeMap::beginEvaluation()
 {
     delete d;
     d = 0;
-    
+
     d = new detail::VolumeMapData();
-    
+
     d->grid_info = grid_info;
     d->occ = QVector<float>(grid_info.nPoints(), 0.0);
     d->grid_spacing = grid_spacing;
@@ -638,7 +637,7 @@ void VolumeMap::beginEvaluation()
 void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Element &element)
 {
     float rad;
-    
+
     switch (fill_type)
     {
         case VolumeMap::VDW_RADIUS:
@@ -656,14 +655,14 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
     }
 
     const float rad2 = rad*rad;
-    
+
     //ensure that the grid contains the atom
     const AABox atombox = AABox(coords, Vector(rad+2.5));
-    
+
     if (occ.isEmpty())
     {
         grid_info = GridInfo(atombox, grid_spacing);
-        
+
         if (grid_info.nPoints() > max_points)
         {
             grid_info = GridInfo();
@@ -679,7 +678,7 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
                         .arg(grid_info.nPoints())
                         .arg(max_points), CODELOC );
         }
-        
+
         occ = QVector<float>(grid_info.nPoints(), 0.0);
     }
     else if (not grid_info.dimensions().contains(atombox))
@@ -688,9 +687,9 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
         if (not mask_points.isEmpty())
         {
             bool is_masked = true;
-            
+
             Cartesian space;
-            
+
             for (int i=0; i<mask_points.count(); ++i)
             {
                 if (space.minimumDistance(mask_points.at(i),atombox) <= mask_dist)
@@ -699,16 +698,16 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
                     break;
                 }
             }
-            
+
             if (is_masked)
                 //this atom will be masked, so don't bother evaluating it
                 return;
         }
-    
+
         //must redimension
         Vector mincoords = grid_info.dimensions().minCoords();
         Vector maxcoords = grid_info.dimensions().maxCoords();
-        
+
         while (mincoords.x() > atombox.minCoords().x())
         {
             mincoords.setX( mincoords.x() - grid_spacing.value() );
@@ -723,7 +722,7 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
         {
             mincoords.setZ( mincoords.z() - grid_spacing.value() );
         }
-        
+
         while (maxcoords.x() < atombox.maxCoords().x())
         {
             maxcoords.setX( maxcoords.x() + grid_spacing.value() );
@@ -738,9 +737,9 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
         {
             maxcoords.setZ( maxcoords.z() + grid_spacing.value() );
         }
-        
+
         GridInfo new_grid_info( AABox::from(mincoords,maxcoords), grid_spacing );
-        
+
         if (new_grid_info.nPoints() > max_points)
             throw SireError::unavailable_resource( QObject::tr(
                     "Unable to add the atoms as doing so would increase the number of grid points "
@@ -759,15 +758,15 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
 
         grid_info = new_grid_info;
     }
-    
+
     GridIndex idx = grid_info.pointToGridIndex(coords);
-    
+
     const int nboxes = int(rad / grid_spacing.value()) + 2;
 
     const Vector center_point = grid_info.point(idx);
 
     QVarLengthArray<int> occupied_points;
-    
+
     for (int i=-nboxes; i<=nboxes; ++i)
     {
         for (int j=-nboxes; j<=nboxes; ++j)
@@ -777,7 +776,7 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
                 Vector grid_point = center_point + Vector(i*grid_spacing.value(),
                                                           j*grid_spacing.value(),
                                                           k*grid_spacing.value());
-            
+
                 if (Vector::distance2(grid_point,coords) <= rad2)
                 {
                     int point_idx = grid_info.gridToArrayIndex(idx.i() + i,
@@ -788,22 +787,22 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
                         throw SireError::program_bug( QObject::tr(
                                 "Could not add the point as dimensioning was incorrect?"),
                                     CODELOC );
-                
+
                     occupied_points.push_back(point_idx);
                 }
             }
         }
     }
-    
+
     //we've found all of the occupied points for this atom - add them onto the grid
     float *o = occ.data();
-    
+
     for (int i=0; i<occupied_points.count(); ++i)
     {
         if (not mask_points.isEmpty())
         {
             bool is_masked = true;
-            
+
             for (int j=0; j<mask_points.count(); ++j)
             {
                 if (Vector::distance(mask_points.at(j),
@@ -813,7 +812,7 @@ void SireMol::detail::VolumeMapData::addToGrid(const Vector &coords, const Eleme
                     break;
                 }
             }
-        
+
             if (not is_masked)
                 o[ occupied_points.constData()[i] ] = 1;
         }
@@ -830,7 +829,7 @@ void VolumeMap::evaluate(const MoleculeView &molecule, const PropertyMap &map)
     //extract the coordinates and element properties from the molecule
     const AtomCoords &coords = molecule.data().property( map["coordinates"] ).asA<AtomCoords>();
     const AtomElements &elems = molecule.data().property( map["element"] ).asA<AtomElements>();
-    
+
     if (molecule.selectedAll())
     {
         //loop over all atoms and add them to the grid
@@ -838,7 +837,7 @@ void VolumeMap::evaluate(const MoleculeView &molecule, const PropertyMap &map)
         {
             const Vector *ca = coords.data(CGIdx(i));
             const Element *ea = elems.data(CGIdx(i));
-            
+
             for (int j=0; j<coords.nAtoms(CGIdx(i)); ++j)
             {
                 if ((not skipLightAtoms()) or ea[j].nProtons() >= 6)
@@ -852,7 +851,7 @@ void VolumeMap::evaluate(const MoleculeView &molecule, const PropertyMap &map)
     {
         //not selected all atoms...
         const AtomSelection selected_atoms = molecule.selection();
-        
+
         for (int i=0; i<coords.nCutGroups(); ++i)
         {
             const Vector *ca = coords.data(CGIdx(i));
@@ -886,7 +885,7 @@ void VolumeMap::evaluate(const Molecules &molecules, const PropertyMap &map)
 {
     if (not d)
         return;
-    
+
     for (Molecules::const_iterator it = molecules.constBegin();
          it != molecules.constEnd();
          ++it)
@@ -914,7 +913,7 @@ void VolumeMap::endEvaluation()
 {
     if (not d)
         return;
-    
+
     if (grid_info != d->grid_info)
     {
         if (occ.isEmpty())
@@ -925,7 +924,7 @@ void VolumeMap::endEvaluation()
         {
             occ = grid_info.redimension(occ, d->grid_info);
         }
-        
+
         grid_info = d->grid_info;
     }
     else if (occ.isEmpty())
@@ -944,14 +943,14 @@ void VolumeMap::endEvaluation()
         {
             const float big_ratio = float(nsamples) / float(nsamples+1);
             const float small_ratio = float(1) / float(nsamples+1);
-            
+
             for (int i=0; i<occ.count(); ++i)
             {
                 occ[i] = big_ratio*occ[i] + small_ratio*d->occ[i];
             }
         }
         break;
-        
+
         case MAXIMUM:
         {
             for (int i=0; i<occ.count(); ++i)
@@ -960,7 +959,7 @@ void VolumeMap::endEvaluation()
             }
         }
         break;
-        
+
         case SUM:
         {
             for (int i=0; i<occ.count(); ++i)
@@ -1084,7 +1083,7 @@ void VolumeMap::add(const QList<Molecules> &molecules, const PropertyMap &map)
     {
         int biggest = -1;
         int nbiggest = 0;
-        
+
         for (int i=0; i<molecules.count(); ++i)
         {
             if (molecules.at(i).nMolecules() > nbiggest)
@@ -1093,7 +1092,7 @@ void VolumeMap::add(const QList<Molecules> &molecules, const PropertyMap &map)
                 nbiggest = molecules.at(i).nMolecules();
             }
         }
-        
+
         if (biggest >= 0)
             presize( molecules.at(biggest), map );
     }
@@ -1166,7 +1165,7 @@ void VolumeMap::add(const QList<MoleculeGroup> &molecules, const PropertyMap &ma
     {
         int biggest = -1;
         int nbiggest = 0;
-        
+
         for (int i=0; i<molecules.count(); ++i)
         {
             if (molecules.at(i).nMolecules() > nbiggest)
@@ -1175,7 +1174,7 @@ void VolumeMap::add(const QList<MoleculeGroup> &molecules, const PropertyMap &ma
                 nbiggest = molecules.at(i).nMolecules();
             }
         }
-        
+
         if (biggest >= 0)
             presize( molecules.at(biggest).molecules(), map );
     }
@@ -1257,20 +1256,20 @@ void VolumeMap::applyMask()
     for (int i=0; i<grid_info.nPoints(); ++i)
     {
         Vector c = grid_info.point(i);
-        
+
         bool should_be_masked = true;
-        
+
         for (int j=0; j<mask_points.count(); ++j)
         {
             Vector m = mask_points.at(j);
-            
+
             if (Vector::distance(c,m) <= mask_dist)
             {
                 should_be_masked = false;
                 break;
             }
         }
-        
+
         if (should_be_masked)
             occ[i] = 0;
     }
@@ -1284,10 +1283,10 @@ void VolumeMap::setMaskWithinDistance(Length dist, const Vector &point, bool cle
     mask_points.clear();
     mask_points.append(point);
     mask_dist = dist.value();
-    
+
     if (mask_dist < 0)
         mask_dist = 0;
-    
+
     if (clear_points)
         applyMask();
 }
@@ -1300,19 +1299,19 @@ void VolumeMap::setMaskWithinDistance(Length dist, const MoleculeView &molecule,
 {
     const AtomCoords &coords = molecule.data().property( map["coordinates"] )
                                               .asA<AtomCoords>();
-    
+
     mask_points.clear();
     mask_dist = dist.value();
 
     if (mask_dist < 0)
         mask_dist = 0;
-    
+
     if (molecule.selectedAll())
     {
         for (int i=0; i<coords.nCutGroups(); ++i)
         {
             const Vector *c = coords.data(CGIdx(i));
-        
+
             for (int j=0; j<coords.nAtoms(CGIdx(i)); ++j)
             {
                 mask_points.append( c[j] );
@@ -1322,15 +1321,15 @@ void VolumeMap::setMaskWithinDistance(Length dist, const MoleculeView &molecule,
     else
     {
         AtomSelection selected_atoms = molecule.selection();
-        
+
         for (int i=0; i<coords.nCutGroups(); ++i)
         {
             CGIdx ci(i);
-        
+
             if (selected_atoms.selected(ci))
             {
                 const Vector *c = coords.data(ci);
-            
+
                 if (selected_atoms.selectedAll(ci))
                 {
                     for (int j=0; j<coords.nAtoms(ci); ++j)
@@ -1348,7 +1347,7 @@ void VolumeMap::setMaskWithinDistance(Length dist, const MoleculeView &molecule,
             }
         }
     }
-    
+
     if (clear_points)
         applyMask();
 }

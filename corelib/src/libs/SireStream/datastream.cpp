@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -77,10 +76,10 @@ namespace SireStream
         {
             if (id == r_type.magicID())
                 return true;
-            
+
             QHash< QString,QSet<MagicID> >::const_iterator it
                         = alt_ids.constFind( QLatin1String(r_type.typeName()) );
-            
+
             if (it != alt_ids.constEnd())
                 return it->contains(id);
             else
@@ -93,7 +92,7 @@ namespace SireStream
     void registerAlternativeName(const char *name, const char *alternative)
     {
         QLatin1String str(name);
-        
+
         if (alt_ids.contains(str))
         {
             alt_ids[str].insert( getMagic(alternative) );
@@ -104,9 +103,9 @@ namespace SireStream
             alts.insert( getMagic(alternative) );
             alt_ids.insert(str, alts);
         }
-        
+
         QLatin1String altname(alternative);
-        
+
         if (alt_names.contains(altname))
         {
             alt_names[altname].insert( QLatin1String(name) );

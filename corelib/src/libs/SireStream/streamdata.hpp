@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,13 +60,13 @@ namespace detail
 {
 SIRESTREAM_EXPORT QByteArray streamDataSave( const void *object, const char *type_name );
 
-SIRESTREAM_EXPORT QByteArray streamDataSave( 
-                 const QList< boost::tuple<const void*,const char*> > &objects ); 
+SIRESTREAM_EXPORT QByteArray streamDataSave(
+                 const QList< boost::tuple<const void*,const char*> > &objects );
 
 SIRESTREAM_EXPORT QByteArray streamDataSave(
                  const QList< boost::tuple<boost::shared_ptr<void>,QString> > &objects );
 
-SIRESTREAM_EXPORT void streamDataSave( const void *object, const char *type_name, 
+SIRESTREAM_EXPORT void streamDataSave( const void *object, const char *type_name,
                      const QString &filename );
 
 SIRESTREAM_EXPORT void streamDataSave(
@@ -78,7 +77,7 @@ SIRESTREAM_EXPORT void streamDataSave(
                 const QList< boost::tuple<boost::shared_ptr<void>,QString> > &objects,
                 const QString &filename );
 
-SIRESTREAM_EXPORT void throwStreamDataInvalidCast(const QString &load_type, 
+SIRESTREAM_EXPORT void throwStreamDataInvalidCast(const QString &load_type,
                                 const QString &cast_type);
 
 struct void_deleter
@@ -86,10 +85,10 @@ struct void_deleter
 public:
     void_deleter(int type_id) : id(type_id)
     {}
-    
+
     ~void_deleter()
     {}
-    
+
     void operator()(void const *ptr) const
     {
         QMetaType::destroy(id, const_cast<void*>(ptr));
@@ -106,12 +105,12 @@ SIRESTREAM_EXPORT QList< boost::tuple<boost::shared_ptr<void>,QString> > load(co
 
 /** This class provides metadata about the binary representation
     of an object. This is to allow the owner of the data to identify
-    it as belonging to themselves, to provide information about 
+    it as belonging to themselves, to provide information about
     what data is contained, when it was created and on what,
-    and to provide some information about how much space the 
+    and to provide some information about how much space the
     data may require to load. The aim is to allow the provenance
     (well, at least the origin!) of a file to be determined.
-    
+
     @author Christopher Woods
 */
 class SIRESTREAM_EXPORT FileHeader
@@ -120,35 +119,35 @@ class SIRESTREAM_EXPORT FileHeader
 friend SIRESTREAM_EXPORT QDataStream& ::operator<<(QDataStream&, const FileHeader&);
 friend SIRESTREAM_EXPORT QDataStream& ::operator>>(QDataStream&, FileHeader&);
 
-friend QByteArray detail::streamDataSave( 
+friend QByteArray detail::streamDataSave(
                         const QList< boost::tuple<const void*,const char*> >& );
 
-friend QByteArray detail::streamDataSave( 
+friend QByteArray detail::streamDataSave(
                         const QList< boost::tuple<boost::shared_ptr<void>,QString> >& );
 
 public:
     FileHeader();
     FileHeader(const FileHeader &other);
-    
+
     ~FileHeader();
-    
+
     FileHeader& operator=(const FileHeader &other);
-    
+
     QString toString() const;
-    
+
     const QString& createdBy() const;
     const QDateTime& createdWhen() const;
     const QString& createdWhere() const;
-    
+
     const QString& systemInfo() const;
-    
+
     quint32 requiredMemory() const;
-    
+
     double compressionRatio() const;
-    
+
     QString dataType() const;
     const QStringList& dataTypes() const;
-    
+
     QStringList requiredLibraries() const;
 
     bool requireLibrary(const QString &library) const;
@@ -177,10 +176,10 @@ private:
 
     /** The username of the person who created this data */
     QString created_by;
-    
+
     /** When this data was created */
     QDateTime created_when;
-    
+
     /** The hostname of the machine on which this data was created */
     QString created_where;
 
@@ -189,13 +188,13 @@ private:
 
     /** The typename(s) of the top-level object(s) stored in this data */
     QStringList type_names;
-    
+
     /** The source repository from which this code was downloaded */
     QString build_repository;
 
     /** Version string giving the build version of
         the program used to create this file */
-    QString build_version; 
+    QString build_version;
 
     /** The names and versions of the libraries loaded when this
         data was written */
@@ -210,10 +209,10 @@ private:
 
     /** The size of the compressed data */
     quint32 compressed_size;
-    
+
     /** The size of the uncompressed data */
     quint32 uncompressed_size;
-    
+
     /** The version number of the file */
     quint32 version_number;
 };
@@ -238,7 +237,7 @@ public:
     {
         registerLibrary(library_name, version, min_supported_version);
     }
-    
+
     ~RegisterLibrary()
     {}
 };
@@ -247,10 +246,10 @@ public:
 
 /** This loads an object of type T from the passed blob of binary
     data. Note that this data *must* have been created by the "save"
-    function below, and T must match the type of the object saved 
+    function below, and T must match the type of the object saved
     in this data. Also note that this type must have been registered
     with the metatype system (via RegisterMetaType)
-    
+
     \throw SireError::invalid_cast
 */
 template<class T>
@@ -303,10 +302,10 @@ SIRE_OUTOFLINE_TEMPLATE
 QByteArray save(const T0 &obj0, const T1 &obj1)
 {
     QList< boost::tuple<const void*,const char*> > objects;
-    
+
     objects.append( boost::tuple<const void*,const char*>( &obj0, obj0.what() ) );
     objects.append( boost::tuple<const void*,const char*>( &obj1, obj1.what() ) );
-    
+
     return detail::streamDataSave( objects );
 }
 
@@ -322,10 +321,10 @@ SIRE_OUTOFLINE_TEMPLATE
 void saveToFile(const T0 &obj0, const T1 &obj1, const QString &filename)
 {
     QList< boost::tuple<const void*,const char*> > objects;
-    
+
     objects.append( boost::tuple<const void*,const char*>( &obj0, obj0.what() ) );
     objects.append( boost::tuple<const void*,const char*>( &obj1, obj1.what() ) );
-    
+
     detail::streamDataSave( objects, filename );
 }
 

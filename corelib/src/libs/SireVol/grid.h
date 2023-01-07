@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -69,8 +68,8 @@ using SireMaths::Matrix;
 
 /** This is the base class of all grids. A grid is a set of points
     in space which are laid out in some manner (e.g. regularly spaced,
-    or randomly distributed). 
-    
+    or randomly distributed).
+
     @author Christopher Woods
 */
 class SIREVOL_EXPORT Grid : public SireBase::Property
@@ -82,13 +81,13 @@ friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, Grid&);
 public:
     Grid();
     Grid(const Grid &other);
-    
+
     ~Grid();
-    
+
     static const char* typeName();
-    
+
     virtual Grid* clone() const=0;
-    
+
     const QVector<Vector>& points() const;
     const QVector<double>& weights() const;
 
@@ -97,37 +96,37 @@ public:
     Vector minCoords() const;
     Vector maxCoords() const;
     Vector center() const;
-    
+
     const AABox& aaBox() const;
-    
+
     bool hasWeights() const;
-    
+
     int nPoints() const;
-    
+
     int count() const;
-    
+
     const Vector* data() const;
     const Vector* constData() const;
-    
+
     const double* weightData() const;
     const double* constWeightData() const;
-    
+
     static const NullGrid& null();
-    
+
     virtual GridPtr translate(const Vector &delta) const=0;
 
     virtual GridPtr recenter(const Vector &center) const=0;
-    
-    virtual GridPtr rotate(const Matrix &rotmat, 
+
+    virtual GridPtr rotate(const Matrix &rotmat,
                            const Vector &center = Vector(0)) const=0;
     virtual GridPtr rotate(const Quaternion &quat,
                            const Vector &center = Vector(0)) const=0;
-    
+
     virtual GridPtr scale(double scalefactor) const=0;
-    
+
 protected:
     Grid& operator=(const Grid &other);
-    
+
     bool operator==(const Grid &other) const;
     bool operator!=(const Grid &other) const;
 
@@ -138,11 +137,11 @@ protected:
 private:
     /** The locations of all of the grid points */
     QVector<Vector> grid_points;
-    
+
     /** The weights of all of the points - this is empty
         if all of the points are equally weighted */
     QVector<double> grid_weights;
-    
+
     /** The axis-aligned box that encompasses all of the grid points */
     AABox aabox;
 };
@@ -157,29 +156,29 @@ friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, NullGrid&);
 public:
     NullGrid();
     NullGrid(const NullGrid &other);
-    
+
     ~NullGrid();
-    
+
     NullGrid& operator=(const NullGrid &other);
-    
+
     bool operator==(const NullGrid &other) const;
     bool operator!=(const NullGrid &other) const;
-    
+
     static const char* typeName();
-    
+
     GridPtr translate(const Vector &delta) const;
-    
+
     GridPtr recenter(const Vector &center) const;
-    
+
     GridPtr rotate(const Matrix &rotmat, const Vector &center = Vector(0)) const;
     GridPtr rotate(const Quaternion &quat, const Vector &center = Vector(0)) const;
-    
+
     GridPtr scale(double scalefactor) const;
 };
 
 /** This is a regular grid, containing points which are equally spaced
     along the three orthoganol coordinates
-    
+
     @author Christopher Woods
 */
 class SIREVOL_EXPORT RegularGrid : public SireBase::ConcreteProperty<RegularGrid,Grid>
@@ -190,9 +189,9 @@ friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, RegularGrid&);
 
 public:
     RegularGrid();
-    RegularGrid(const Vector &min, const Vector &max, 
+    RegularGrid(const Vector &min, const Vector &max,
                 SireUnits::Dimension::Length gridsize);
-    RegularGrid(const Vector &min, const Vector &max, 
+    RegularGrid(const Vector &min, const Vector &max,
                 const Matrix &basis, SireUnits::Dimension::Length gridsize);
     RegularGrid(const Vector &min, const Vector &max,
                 const Quaternion &basis, SireUnits::Dimension::Length gridsize);
@@ -205,40 +204,40 @@ public:
                 SireUnits::Dimension::Length gridsize);
 
     RegularGrid(const RegularGrid &other);
-    
+
     ~RegularGrid();
-    
+
     RegularGrid& operator=(const RegularGrid &other);
-    
+
     bool operator==(const RegularGrid &other) const;
     bool operator!=(const RegularGrid &other) const;
 
     QString toString() const;
-    
+
     const Matrix& basis() const;
-    
+
     int dimX() const;
     int dimY() const;
     int dimZ() const;
-    
+
     SireUnits::Dimension::Length gridSpacing() const;
-    
+
     GridPtr translate(const Vector &delta) const;
-    
+
     GridPtr recenter(const Vector &center) const;
-    
+
     GridPtr rotate(const Matrix &rotmat, const Vector &center = Vector(0)) const;
     GridPtr rotate(const Quaternion &quat, const Vector &center = Vector(0)) const;
-    
+
     GridPtr scale(double scalefactor) const;
-    
+
 private:
     /** The basis vectors for this grid */
     Matrix basis_vectors;
-    
+
     /** The distance between nearest neighbour grid points */
     SireUnits::Dimension::Length grid_spacing;
-    
+
     /** The number of points in the x, y and z dimensions */
     quint32 dimx, dimy, dimz;
 };

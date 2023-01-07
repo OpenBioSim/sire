@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,13 +45,13 @@ typedef int LINPACK_INT;
 extern "C"
 {
     /** This is dgeco - see LINPACK API for documentation */
-    void SireDGECO(double *A, const LINPACK_INT *LDA, 
-                   const LINPACK_INT *N, LINPACK_INT *IPVT, 
+    void SireDGECO(double *A, const LINPACK_INT *LDA,
+                   const LINPACK_INT *N, LINPACK_INT *IPVT,
                    double *RCOND, double *Z);
 
     /** This is dgedi - see LINPACK API for documentation */
-    void SireDGEDI(double *A, const LINPACK_INT *LDA, 
-                   const LINPACK_INT *N, const LINPACK_INT *IPVT, 
+    void SireDGEDI(double *A, const LINPACK_INT *LDA,
+                   const LINPACK_INT *N, const LINPACK_INT *IPVT,
                    double *DET, double *WORK, const LINPACK_INT *JOB);
 
 } // end of extern "C"
@@ -75,26 +74,26 @@ std::pair< NMatrix,QVector<int> > dgeco(const NMatrix &A)
     #else
 
     LINPACK_INT LDA, N;
-    
+
     if (A.isTransposed())
         return dgeco( A.transpose().fullTranspose() );
-        
+
     N = A.nRows();
     BOOST_ASSERT( A.nColumns() == N );
-    
+
     LDA = N;
-    
+
     QVector<LINPACK_INT> IPVT(N);
-    
+
     double RCOND;
     QVector<double> Z(N);
-    
+
     NMatrix A_OUT(A);
-    
+
     ::SireDGECO(A_OUT.data(), &LDA, &N, IPVT.data(), &RCOND, Z.data());
-    
+
     return std::pair< NMatrix,QVector<int> >(A_OUT, IPVT);
-    
+
     #endif // SIRE_DISABLE_FORTRAN
 }
 
@@ -116,20 +115,20 @@ NMatrix dgedi_inverse(const NMatrix &A, const QVector<int> &IPVT)
     N = A.nRows();
     BOOST_ASSERT( A.nColumns() == N );
     BOOST_ASSERT( IPVT.count() == N );
-    
+
     LDA = N;
-    
+
     QVector<double> WORK(N);
-    
+
     JOB = 01;
-    
+
     NMatrix A_OUT( A );
-    
+
     double DET[2];
-    
-    ::SireDGEDI(A_OUT.data(), &LDA, &N, IPVT.constData(), &(DET[0]), 
+
+    ::SireDGEDI(A_OUT.data(), &LDA, &N, IPVT.constData(), &(DET[0]),
                 WORK.data(), &JOB);
-              
+
     return A_OUT;
 
     #endif // SIRE_DISABLE_FORTRAN
@@ -147,37 +146,37 @@ double dgedi_determinant(const NMatrix &A, const QVector<int> &IPVT)
     return 0;
 
     #else
-    
+
     LINPACK_INT LDA, N, JOB;
 
     N = A.nRows();
     BOOST_ASSERT( A.nColumns() == N );
     BOOST_ASSERT( IPVT.count() == N );
-    
+
     LDA = N;
-    
+
     QVector<double> WORK(N);
-    
+
     JOB = 10;
-    
+
     NMatrix A_OUT( A );
-    
+
     double DET[2];
-    
-    ::SireDGEDI(A_OUT.data(), &LDA, &N, IPVT.constData(), &(DET[0]), 
+
+    ::SireDGEDI(A_OUT.data(), &LDA, &N, IPVT.constData(), &(DET[0]),
                 WORK.data(), &JOB);
-              
+
     // DET contains DET[0] * 10^DET[1]
     return DET[0] * std::pow(10,DET[1]);
-    
+
     #endif // SIRE_DISABLE_FORTRAN
 }
 
-std::pair<double,NMatrix> dgedi(const NMatrix &A, 
+std::pair<double,NMatrix> dgedi(const NMatrix &A,
                                                  const QVector<int> &IPVT)
 {
     #ifdef SIRE_DISABLE_FORTRAN
-    
+
     throw SireError::unsupported( QObject::tr(
             "dgedi not available as LINPACK does not work with this version of Sire."),
                     CODELOC );
@@ -191,20 +190,20 @@ std::pair<double,NMatrix> dgedi(const NMatrix &A,
     N = A.nRows();
     BOOST_ASSERT( A.nColumns() == N );
     BOOST_ASSERT( IPVT.count() == N );
-    
+
     LDA = N;
-    
+
     QVector<double> WORK(N);
-    
+
     JOB = 11;
-    
+
     NMatrix A_OUT( A );
-    
+
     double DET[2];
-    
-    ::SireDGEDI(A_OUT.data(), &LDA, &N, IPVT.constData(), &(DET[0]), 
+
+    ::SireDGEDI(A_OUT.data(), &LDA, &N, IPVT.constData(), &(DET[0]),
                 WORK.data(), &JOB);
-              
+
     // DET contains DET[0] * 10^DET[1]
     return std::pair<double,NMatrix>( DET[0] * std::pow(10,DET[1]), A_OUT );
 

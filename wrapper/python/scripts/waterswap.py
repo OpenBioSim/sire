@@ -57,7 +57,7 @@ parser = argparse.ArgumentParser(description="Calculate absolute binding free "
                                              "energies using waterswap",
                                  epilog="waterswap is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/waterswap.html, or type "
+                                        "http://sire.openbiosim.org/waterswap.html, or type "
                                         "'waterswap --description'",
                                  prog="waterswap")
 

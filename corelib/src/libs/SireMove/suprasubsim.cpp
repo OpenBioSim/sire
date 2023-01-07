@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -73,32 +72,32 @@ bool SupraSubSim::operator!=(const SupraSubSim &other) const
     return sim_promise != other.sim_promise;
 }
 
-/** Run the sub-system simulation described in 'simpacket' on the node 'node' 
+/** Run the sub-system simulation described in 'simpacket' on the node 'node'
     and return a handle to the running simulation */
 SupraSubSim SupraSubSim::run(Node &node, const SupraSubSimPacket &simpacket)
 {
     return SupraSubSim( node.startJob(simpacket) );
 }
-                    
+
 /** Run the sub-system simulation described
     in 'simpacket' in the current thread */
 SupraSubSim SupraSubSim::run(const SupraSubSimPacket &simpacket)
 {
     Nodes nodes;
-    
+
     ThisThread this_thread = nodes.borrowThisThread();
-    
+
     if (nodes.isEmpty())
         throw SireError::unavailable_resource( QObject::tr(
             "This thread is unavailable for running a simulation. It is already "
             "busy doing something else!"), CODELOC );
-            
+
     Node node = nodes.getNode();
-    
+
     SupraSubSim sim = SupraSubSim::run(node, simpacket);
-    
+
     sim.wait();
-    
+
     return sim;
 }
 
@@ -110,7 +109,7 @@ SupraSubSim SupraSubSim::run(const SupraSubSystem &system, const SupraSubMoves &
 {
     return SupraSubSim::run( SupraSubSimPacket(system, moves, nmoves, record_stats) );
 }
-                    
+
 /** Run the sub-system simulation consisting of 'nmoves' moves of 'move'
     on the sub-system 'system', recording statistics if 'record_stats'
     is true. Run the simulation in the current thread */
@@ -131,7 +130,7 @@ SupraSubSim SupraSubSim::run(Node &node,
 {
     return SupraSubSim::run(node, SupraSubSimPacket(system,moves,nmoves,record_stats) );
 }
-                    
+
 /** Run the sub-system simulation consisting of 'nmoves' moves of the move 'move'
     on the sub-system 'system', recording statistics if 'record_stats'
     is true. Run the simulation on the node 'node', returning a handle to
@@ -193,7 +192,7 @@ void SupraSubSim::throwError()
 bool SupraSubSim::wasStopped()
 {
     return sim_promise.wasStopped();
-}    
+}
 
 /** Return whether or not the simulation was aborted */
 bool SupraSubSim::wasAborted()
@@ -207,17 +206,17 @@ bool SupraSubSim::hasFinished()
 {
     if (this->isRunning())
         return false;
-        
+
     else
     {
         //we aren't running any more - lets see what happened
         if (this->isError() or this->wasAborted())
             return false;
-            
+
         try
         {
             SupraSubSimPacket sim = this->result();
-            
+
             return sim.nSubCompleted() == sim.nSubMoves();
         }
         catch(...)
@@ -238,18 +237,18 @@ SupraSubSimPacket SupraSubSim::input()
 {
     if (sim_promise.isNull())
         return SupraSubSimPacket();
-        
+
     else
     {
         WorkPacket initial_packet = sim_promise.input();
-        
+
         if (initial_packet.isNull())
         {
             throw SireError::program_bug( QObject::tr(
                 "How could we lose the input simulation WorkPacket? How has "
                 "it become null?"), CODELOC );
         }
-        
+
         if (not initial_packet.isA<SupraSubSimPacket>())
         {
             throw SireError::program_bug( QObject::tr(
@@ -257,24 +256,24 @@ SupraSubSimPacket SupraSubSim::input()
                 "it turned into a %1?").arg(initial_packet.base().what()),
                     CODELOC );
         }
-    
+
         return initial_packet.asA<SupraSubSimPacket>();
     }
 }
 
 /** Return the simulation WorkPacket from an intermediate point along
     the simulation. This will throw an error if the simulation is in an
-    error state, and the initial packet if the simulation 
+    error state, and the initial packet if the simulation
     was aborted */
 SupraSubSimPacket SupraSubSim::interimResult()
 {
     if (sim_promise.isNull())
         return SupraSubSimPacket();
-        
+
     else
     {
         WorkPacket interim_packet = sim_promise.interimResult();
-        
+
         if (interim_packet.wasAborted())
         {
             return this->input();
@@ -283,14 +282,14 @@ SupraSubSimPacket SupraSubSim::interimResult()
         {
             interim_packet.throwError();
         }
-        
+
         if (interim_packet.isNull())
         {
             throw SireError::program_bug( QObject::tr(
                 "How could we lose the interim simulation WorkPacket? How has "
                 "it become null?"), CODELOC );
         }
-        
+
         if (not interim_packet.isA<SupraSubSimPacket>())
         {
             throw SireError::program_bug( QObject::tr(
@@ -298,7 +297,7 @@ SupraSubSimPacket SupraSubSim::interimResult()
                 "it turned into a %1?").arg(interim_packet.base().what()),
                     CODELOC );
         }
-    
+
         return interim_packet.asA<SupraSubSimPacket>();
     }
 }
@@ -311,11 +310,11 @@ SupraSubSimPacket SupraSubSim::result()
 {
     if (sim_promise.isNull())
         return SupraSubSimPacket();
-        
+
     else
     {
         WorkPacket result_packet = sim_promise.result();
-        
+
         if (result_packet.wasAborted())
         {
             return this->input();
@@ -324,14 +323,14 @@ SupraSubSimPacket SupraSubSim::result()
         {
             result_packet.throwError();
         }
-        
+
         if (result_packet.isNull())
         {
             throw SireError::program_bug( QObject::tr(
                 "How could we lose the simulation result WorkPacket? How has "
                 "it become null?"), CODELOC );
         }
-        
+
         if (not result_packet.isA<SupraSubSimPacket>())
         {
             throw SireError::program_bug( QObject::tr(
@@ -339,7 +338,7 @@ SupraSubSimPacket SupraSubSim::result()
                 "it turned into a %1?").arg(result_packet.base().what()),
                     CODELOC );
         }
-    
+
         return result_packet.asA<SupraSubSimPacket>();
     }
 }
@@ -357,7 +356,7 @@ SupraSubMovesPtr SupraSubSim::initialMoves()
 }
 
 /** Return the current state of the System (updated while the simulation
-    is running). This will throw an exception if the system hits an 
+    is running). This will throw an exception if the system hits an
     error state */
 SupraSubSystemPtr SupraSubSim::interimSystem()
 {
@@ -365,7 +364,7 @@ SupraSubSystemPtr SupraSubSim::interimSystem()
 }
 
 /** Return the current state of the moves (updated while the simulation
-    is running). This will throw an exception if the system hits an 
+    is running). This will throw an exception if the system hits an
     error state */
 SupraSubMovesPtr SupraSubSim::interimMoves()
 {
@@ -381,7 +380,7 @@ SupraSubSystemPtr SupraSubSim::system()
 }
 
 /** Return the final state of the moves after the simulation. This
-    blocks until the simulation has finished and will throw an 
+    blocks until the simulation has finished and will throw an
     exception if the system hits an error state */
 SupraSubMovesPtr SupraSubSim::moves()
 {

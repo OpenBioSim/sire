@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -60,7 +59,7 @@ class BackendLock
 public:
     BackendLock(const shared_ptr<QWaitCondition> &w) : waiter(w)
     {}
-    
+
     ~BackendLock()
     {
         if (waiter.get() != 0)
@@ -79,19 +78,19 @@ public:
         uid = QUuid::createUuid();
         connectionwaiter.reset( new QWaitCondition() );
     }
-    
+
     ~BackendPvt()
     {}
-    
+
     shared_ptr<BackendLock> lock();
     shared_ptr<BackendLock> tryLock();
     shared_ptr<BackendLock> tryLock(int timeout);
-    
-    /** Mutex used to protect access to the data of 
+
+    /** Mutex used to protect access to the data of
         this backend */
     QMutex datamutex;
 
-    
+
     /** This mutex is used to ensure that only one Frontend
         at a time is connecting to this Backend */
     QMutex connectionmutex;
@@ -102,28 +101,28 @@ public:
 
     /** Weak pointer to the BackendLock that has locked this Backend */
     weak_ptr<BackendLock> backend_lock;
-    
-    
-    /** This mutex is used to ensure that only one 
+
+
+    /** This mutex is used to ensure that only one
         thread can try to start a job at a time */
     QMutex startmutex;
-    
-    /** WaitCondition used to signal that the backend thread 
+
+    /** WaitCondition used to signal that the backend thread
         has started */
     QWaitCondition startwaiter;
-    
+
     /** The work packet being processed by this backend */
     WorkPacket workpacket;
-    
+
     /** The final results */
     WorkPacket resultspacket;
-    
+
     /** The unique ID of this backend */
     QUuid uid;
-    
+
     /** Whether or not to keep running */
     bool keep_running;
-    
+
     /** A flag used to indicate whether or not a job is starting */
     bool job_is_starting;
 
@@ -149,9 +148,9 @@ Backend Backend::create()
 {
     Backend backend;
     backend.d.reset( new BackendPvt() );
-    
+
     Cluster::registerBackend(backend);
-    
+
     return backend;
 }
 
@@ -163,7 +162,7 @@ Backend Backend::createLocalOnly()
 {
     Backend backend;
     backend.d.reset( new BackendPvt() );
-    
+
     return backend;
 }
 
@@ -205,7 +204,7 @@ QUuid Backend::UID() const
 {
     if (not this->isNull())
         return d->uid;
-     
+
     else
         return QUuid();
 }
@@ -219,53 +218,53 @@ void BackendPvt::run()
 
     //wake the thread that told us to run the job
     startmutex.lock();
-    
+
     if (not job_is_starting)
     {
         qDebug() << SireError::getPIDString() << "How have we been started???"
                  << "job_is_started is false in BackendPvt::run()";
-                 
+
         startwaiter.wakeAll();
         startmutex.unlock();
         return;
     }
-    
+
     job_is_starting = false;
-    
+
     startwaiter.wakeAll();
     startmutex.unlock();
-    
+
     while (true)
     {
         try
         {
             WorkPacket local_packet;
-        
+
             //// copy the work packet into a local space
             {
                 QMutexLocker lkr(&datamutex);
-            
+
                 if (not keep_running)
                     break;
-                
+
                 if (workpacket.hasFinished())
                     break;
-                
+
                 local_packet = workpacket;
             }
-        
+
             //now perform the work on the local packet
             local_packet.runChunk();
-        
+
             //// copy the local work back to the global work
             {
                 QMutexLocker lkr(&datamutex);
-            
-                if (workpacket.hasFinished())    
+
+                if (workpacket.hasFinished())
                     break;
-                
+
                 workpacket = local_packet;
-            
+
                 if (not keep_running)
                     break;
             }
@@ -291,13 +290,13 @@ void BackendPvt::run()
             break;
         }
     }
-    
+
     //the work has finished - copy the results
     QMutexLocker lkr(&datamutex);
     resultspacket = workpacket;
 }
 
-/** This function is called by a Frontend which it connects to 
+/** This function is called by a Frontend which it connects to
     this backend - this blocks until there are no other frontends
     connecting to this backend. This returns an ActiveBackend - which
     provides the active interface that a Frontend uses to talk with
@@ -307,7 +306,7 @@ ActiveBackend Backend::connect() const
     return ActiveBackend(*this);
 }
 
-/** This function is called by a Frontend to attempt a connection to this 
+/** This function is called by a Frontend to attempt a connection to this
     Backend - this returns a non-null ActiveBackend if it was successful.
     Use this function to test if a Backend is active (as it avoids
     the possibility of race conditions) */
@@ -316,7 +315,7 @@ ActiveBackend Backend::tryConnect() const
     return ActiveBackend::tryConnect(*this);
 }
 
-/** This function is called by a Frontend to attempt a connection to this 
+/** This function is called by a Frontend to attempt a connection to this
     Backend and to keep trying for up to 'timeout' milliseconds if necessary.
     This returns a non-null ActiveBackend if it was successful */
 ActiveBackend Backend::tryConnect(int timeout) const
@@ -329,9 +328,9 @@ ActiveBackend Backend::tryConnect(int timeout) const
 shared_ptr<BackendLock> BackendPvt::tryLock()
 {
     QMutexLocker lkr( &connectionmutex );
-    
+
     shared_ptr<BackendLock> my_lock;
-    
+
     if (backend_lock.expired() and (connectionwaiter.get() != 0))
     {
         //we can connect!
@@ -342,27 +341,27 @@ shared_ptr<BackendLock> BackendPvt::tryLock()
     return my_lock;
 }
 
-/** Try to lock this backend, and keep trying for up to 'timeout' 
+/** Try to lock this backend, and keep trying for up to 'timeout'
     milliseconds - returns a null pointer if it fails */
 shared_ptr<BackendLock> BackendPvt::tryLock(int timeout)
 {
     if (timeout < 0)
         return this->lock();
-        
+
     shared_ptr<BackendLock> my_lock = this->tryLock();
-    
+
     if (my_lock.get() == 0)
     {
         //we weren't successful - we may have to sleep on it
         QMutexLocker lkr( &connectionmutex );
-        
+
         if (connectionwaiter.get() == 0)
             //this backend is shutting down - noone may connect to it
             return my_lock;
-        
+
         shared_ptr<QWaitCondition> w = connectionwaiter;
         w->wait( &connectionmutex, timeout );
-        
+
         if (connectionwaiter.get() != 0)
         {
             //we are still allowed to connect
@@ -370,7 +369,7 @@ shared_ptr<BackendLock> BackendPvt::tryLock(int timeout)
             backend_lock = my_lock;
         }
     }
-        
+
     return my_lock;
 }
 
@@ -379,19 +378,19 @@ shared_ptr<BackendLock> BackendPvt::tryLock(int timeout)
 shared_ptr<BackendLock> BackendPvt::lock()
 {
     shared_ptr<BackendLock> my_lock = this->tryLock();
-    
+
     if (my_lock.get() == 0)
     {
         //we weren't successful - we may have to sleep on it
         QMutexLocker lkr( &connectionmutex );
-        
+
         if (connectionwaiter.get() == 0)
             //this backend is shutting down - no-one may connect to it
             return my_lock;
-        
+
         shared_ptr<QWaitCondition> w = connectionwaiter;
         w->wait( &connectionmutex );
-        
+
         if (connectionwaiter.get() != 0)
         {
             //we are still allowed to connect
@@ -409,23 +408,23 @@ void Backend::shutdown()
 {
     if (this->isNull())
         return;
-        
+
     /////// Abort any running jobs
     {
         QMutexLocker lkr( &(d->datamutex) );
-    
+
         if (not d->workpacket.isNull())
             //there is nothing running to be aborted
             d->workpacket.abort();
     }
 
-    //now make sure that no other frontends can 
+    //now make sure that no other frontends can
     //connect to this backend - we do this by wiping
     //out the connectionwaiter (after waking anyone
     //waiting on it)
     {
         QMutexLocker lkr( &(d->connectionmutex) );
-    
+
         if (d->connectionwaiter.get() != 0)
         {
             d->connectionwaiter->wakeAll();
@@ -448,13 +447,13 @@ ActiveBackend::ActiveBackend(const Backend &backend)
 {
     this->operator=( ActiveBackend::connect(backend) );
 }
-    
+
 /** Copy constructor */
 ActiveBackend::ActiveBackend(const ActiveBackend &other)
               : d(other.d), d_lock(other.d_lock)
 {}
-  
-/** Destructor */ 
+
+/** Destructor */
 ActiveBackend::~ActiveBackend()
 {
     d_lock.reset();
@@ -487,11 +486,11 @@ bool ActiveBackend::operator!=(const ActiveBackend &other) const
 ActiveBackend ActiveBackend::tryConnect(const Backend &backend)
 {
     ActiveBackend active_backend;
-    
+
     if (not backend.isNull())
     {
         shared_ptr<BackendLock> d_lock = backend.d->tryLock();
-    
+
         if (d_lock.get() != 0)
         {
             //we got a lock
@@ -499,7 +498,7 @@ ActiveBackend ActiveBackend::tryConnect(const Backend &backend)
             active_backend.d_lock = d_lock;
         }
     }
-    
+
     return active_backend;
 }
 
@@ -509,11 +508,11 @@ ActiveBackend ActiveBackend::tryConnect(const Backend &backend)
 ActiveBackend ActiveBackend::tryConnect(const Backend &backend, int timeout)
 {
     ActiveBackend active_backend;
-    
+
     if (not backend.isNull())
     {
         shared_ptr<BackendLock> d_lock = backend.d->tryLock(timeout);
-    
+
         if (d_lock.get() != 0)
         {
             //we got a lock
@@ -522,7 +521,7 @@ ActiveBackend ActiveBackend::tryConnect(const Backend &backend, int timeout)
             active_backend.d_lock = d_lock;
         }
     }
-    
+
     return active_backend;
 }
 
@@ -534,18 +533,18 @@ ActiveBackend ActiveBackend::tryConnect(const Backend &backend, int timeout)
 ActiveBackend ActiveBackend::connect(const Backend &backend)
 {
     ActiveBackend active_backend;
-    
+
     if (not backend.isNull())
     {
         shared_ptr<BackendLock> d_lock = backend.d->lock();
-        
+
         if (d_lock.get() != 0)
         {
             active_backend.d = backend.d;
             active_backend.d_lock = d_lock;
         }
     }
-    
+
     return active_backend;
 }
 
@@ -560,7 +559,7 @@ QUuid ActiveBackend::UID() const
 {
     if (not this->isNull())
         return d->uid;
-     
+
     else
         return QUuid();
 }
@@ -571,7 +570,7 @@ void ActiveBackend::startJob(const WorkPacket &workpacket)
 {
     if (this->isNull() or workpacket.hasFinished())
         return;
-        
+
     //block to ensure that only one job can be started at a time
     QMutexLocker lkr( &(d->startmutex) );
 
@@ -587,7 +586,7 @@ void ActiveBackend::startJob(const WorkPacket &workpacket)
 
     //wait until the last job has finished
     d->wait();
-    
+
     //ok, we now know that we are the only thread trying to start
     //a job, and we know that no job is currently running
     QMutexLocker lkr2( &(d->datamutex) );
@@ -602,10 +601,10 @@ void ActiveBackend::startJob(const WorkPacket &workpacket)
     d->resultspacket = WorkPacket();
     d->keep_running = true;
     lkr2.unlock();
-    
+
     //start the job
     d->start();
-    
+
     //wait until the job has started
     d->startwaiter.wait( &(d->startmutex) );
 }
@@ -623,7 +622,7 @@ void ActiveBackend::stopJob()
 void ActiveBackend::abortJob()
 {
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (not d->workpacket.isNull())
         //there is nothing running to be aborted
         d->workpacket.abort();
@@ -646,7 +645,7 @@ void ActiveBackend::wait()
 }
 
 /** Wait for the backend thread to finish the work, or for timeout
-    milliseconds to pass - this returns whether or not the work has 
+    milliseconds to pass - this returns whether or not the work has
     finished */
 bool ActiveBackend::wait(int timeout)
 {
@@ -686,17 +685,17 @@ WorkPacket ActiveBackend::result()
         return WorkPacket();
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->workpacket.isNull())
         //there is nothing running to be stopped
         return d->workpacket;
-    
+
     d->keep_running = false;
     lkr.unlock();
-    
+
     //wait for the thread to stop
     d->wait();
-    
+
     lkr.relock();
 
     if (d->workpacket.isNull())
@@ -707,6 +706,6 @@ WorkPacket ActiveBackend::result()
     d->workpacket = WorkPacket();
     d->resultspacket = WorkPacket();
     d->keep_running = true;
-    
+
     return finished_packet;
 }

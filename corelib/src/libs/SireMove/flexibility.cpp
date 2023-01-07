@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -66,10 +65,10 @@ QDataStream &operator<<(QDataStream &ds, const DofID &dofid)
     writeHeader(ds, r_dofid, 2);
 
     SharedDataStream sds(ds);
-  
+
     sds << dofid.idx0 << dofid.idx1
         << dofid.idx2 << dofid.idx3;
-       
+
     return ds;
 }
 
@@ -80,7 +79,7 @@ QDataStream &operator>>(QDataStream &ds, DofID &dofid)
     if (v == 2)
     {
         SharedDataStream sds(ds);
-   
+
         sds >> dofid.idx0 >> dofid.idx1
             >> dofid.idx2 >> dofid.idx3;
     }
@@ -140,7 +139,7 @@ void DofID::sort()
 }
 
 /** Null constructor */
-DofID::DofID() 
+DofID::DofID()
       : idx0(-1), idx1(-1), idx2(-1), idx3(-1)
 {}
 
@@ -161,7 +160,7 @@ DofID::DofID(const AtomIdx &atom0, const AtomIdx &atom1, const AtomIdx &atom2)
 }
 
 /** Constructor for a set of 4 AtomIdxs*/
-DofID::DofID(const AtomIdx &atom0, const AtomIdx &atom1, 
+DofID::DofID(const AtomIdx &atom0, const AtomIdx &atom1,
              const AtomIdx &atom2, const AtomIdx &atom3)
       : idx0(atom0.value()), idx1(atom1.value()),
         idx2(atom2.value()), idx3(atom3.value())
@@ -171,7 +170,7 @@ DofID::DofID(const AtomIdx &atom0, const AtomIdx &atom1,
 
 /** Copy constructor */
 DofID::DofID(const DofID &other)
-      : idx0(other.idx0), idx1(other.idx1), 
+      : idx0(other.idx0), idx1(other.idx1),
         idx2(other.idx2), idx3(other.idx3)
 {}
 
@@ -186,7 +185,7 @@ DofID& DofID::operator=(const DofID &other)
     idx1 = other.idx1;
     idx2 = other.idx2;
     idx3 = other.idx3;
-    
+
     return *this;
 }
 
@@ -217,15 +216,15 @@ static const RegisterMetaType<Flexibility> r_flex;
 QDataStream &operator<<(QDataStream &ds, const Flexibility &flex)
 {
     writeHeader(ds, r_flex, 2);
-    
+
     SharedDataStream sds(ds);
-    
-    sds << flex.molinfo << flex.maxtranslation 
-        << flex.maxrotation << flex.maxbondvar 
+
+    sds << flex.molinfo << flex.maxtranslation
+        << flex.maxrotation << flex.maxbondvar
 	<< flex.maxanglevar << flex.maxdihedralvar
-        << flex.bond_deltas << flex.angle_deltas 
+        << flex.bond_deltas << flex.angle_deltas
         << static_cast<const MoleculeProperty&>(flex);
-    
+
     return ds;
 }
 
@@ -233,13 +232,13 @@ QDataStream &operator<<(QDataStream &ds, const Flexibility &flex)
 QDataStream &operator>>(QDataStream &ds, Flexibility &flex)
 {
     VersionID v = readHeader(ds, r_flex);
-    
+
     if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> flex.molinfo >> flex.maxtranslation
-            >> flex.maxrotation >> flex.maxbondvar 
+            >> flex.maxrotation >> flex.maxbondvar
 	    >> flex.maxanglevar >> flex.maxdihedralvar
             >> flex.bond_deltas >> flex.angle_deltas
             >> static_cast<MoleculeProperty&>(flex);
@@ -251,7 +250,7 @@ QDataStream &operator>>(QDataStream &ds, Flexibility &flex)
         qint32 maxvar;
 
         sds >> flex.molinfo >> flex.maxtranslation
-            >> flex.maxrotation >> maxvar 
+            >> flex.maxrotation >> maxvar
             >> flex.bond_deltas >> flex.angle_deltas
             >> static_cast<MoleculeProperty&>(flex);
 
@@ -261,7 +260,7 @@ QDataStream &operator>>(QDataStream &ds, Flexibility &flex)
     }
     else
         throw version_error(v, "1,2", r_flex, CODELOC);
-        
+
     return ds;
 }
 
@@ -303,7 +302,7 @@ Flexibility& Flexibility::operator=(const Flexibility &other)
         bond_deltas = other.bond_deltas;
         angle_deltas = other.angle_deltas;
     }
-  
+
     return *this;
 }
 
@@ -341,9 +340,9 @@ static QString getAtom(const AtomIdx &idx, const MoleculeInfoData &molinfo)
 QString Flexibility::toString() const
 {
     QStringList lines;
-    
+
     lines.append(QObject::tr("Flexibility ") );
-    
+
     lines.append(QObject::tr("Rotation: %1 , Translation: %2 ")
                             .arg(maxrotation.toString())
                             .arg(maxtranslation.toString()));
@@ -360,18 +359,18 @@ QString Flexibility::toString() const
          ++it)
     {
         const DofID &bond = it.key();
-    
+
         lines.append(QObject::tr("%2-%3 = %1")
                     .arg(it.value().toString())
                     .arg(getAtom(bond.atom0(),*molinfo), getAtom(bond.atom1(),*molinfo)));
     }
-    
+
     for (QHash<DofID,Angle>::const_iterator it = angle_deltas.constBegin();
          it != angle_deltas.constEnd();
          ++it)
     {
         const DofID &angle = it.key();
-    
+
         if (angle.atom3().isNull())
         {
             lines.append(QObject::tr("%1-%2-%3 = %4")
@@ -380,7 +379,7 @@ QString Flexibility::toString() const
                     .arg(it.value().toString()));
         }
     }
-    
+
     for (QHash<DofID,Angle>::const_iterator it = angle_deltas.constBegin();
          it != angle_deltas.constEnd();
          ++it)
@@ -399,7 +398,7 @@ QString Flexibility::toString() const
     return lines.join("\n");
 }
 
-/** Return whether or not this flexibility is compatible with the molecule 
+/** Return whether or not this flexibility is compatible with the molecule
     whose info is in 'molinfo' */
 bool Flexibility::isCompatibleWith(const SireMol::MoleculeInfoData &molinfo) const
 {
@@ -464,25 +463,25 @@ int Flexibility::maximumDihedralVar() const
 }
 
 
-static DofID getBond(const BondID &bond, 
+static DofID getBond(const BondID &bond,
                      const SharedDataPointer<MoleculeInfoData> &molinfo)
 {
     return DofID( molinfo->atomIdx(bond.atom0()), molinfo->atomIdx(bond.atom1()) );
 }
 
-static DofID getAngle(const AngleID &angle, 
+static DofID getAngle(const AngleID &angle,
                       const SharedDataPointer<MoleculeInfoData> &molinfo)
 {
     return DofID( molinfo->atomIdx(angle.atom0()), molinfo->atomIdx(angle.atom1()),
                   molinfo->atomIdx(angle.atom2()) );
 }
 
-static DofID getDihedral(const DihedralID &dihedral, 
+static DofID getDihedral(const DihedralID &dihedral,
                          const SharedDataPointer<MoleculeInfoData> &molinfo)
 {
     return DofID( molinfo->atomIdx(dihedral.atom0()),
                   molinfo->atomIdx(dihedral.atom1()),
-                  molinfo->atomIdx(dihedral.atom2()), 
+                  molinfo->atomIdx(dihedral.atom2()),
                   molinfo->atomIdx(dihedral.atom3()) );
 }
 
@@ -580,14 +579,14 @@ Angle Flexibility::delta(const DihedralID &dihedral) const
 QList<BondID> Flexibility::flexibleBonds() const
 {
     QList<BondID> bonds;
-    
+
     for (QHash<DofID,Length>::const_iterator it = bond_deltas.constBegin();
          it != bond_deltas.constEnd();
          ++it)
     {
         bonds.append( BondID(it.key().atom0(), it.key().atom1()) );
     }
-    
+
     return bonds;
 }
 
@@ -595,7 +594,7 @@ QList<BondID> Flexibility::flexibleBonds() const
 QList<AngleID> Flexibility::flexibleAngles() const
 {
     QList<AngleID> angles;
-    
+
     for (QHash<DofID,Angle>::const_iterator it = angle_deltas.constBegin();
          it != angle_deltas.constEnd();
          ++it)
@@ -604,7 +603,7 @@ QList<AngleID> Flexibility::flexibleAngles() const
             angles.append( AngleID(it.key().atom0(), it.key().atom1(),
                                    it.key().atom2()) );
     }
-    
+
     return angles;
 }
 
@@ -612,7 +611,7 @@ QList<AngleID> Flexibility::flexibleAngles() const
 QList<DihedralID> Flexibility::flexibleDihedrals() const
 {
     QList<DihedralID> dihedrals;
-    
+
     for (QHash<DofID,Angle>::const_iterator it = angle_deltas.constBegin();
          it != angle_deltas.constEnd();
          ++it)
@@ -621,7 +620,7 @@ QList<DihedralID> Flexibility::flexibleDihedrals() const
             dihedrals.append( DihedralID(it.key().atom0(), it.key().atom1(),
                                          it.key().atom2(), it.key().atom3()) );
     }
-    
+
     return dihedrals;
 }
 

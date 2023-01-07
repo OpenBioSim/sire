@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,18 +55,18 @@ friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, TrigArray2DBase&)
 
 public:
     ~TrigArray2DBase();
-    
+
     int size() const;
     int count() const;
-    
+
     int nRows() const;
     int nColumns() const;
-    
+
     int map(int i, int j) const;
-    
+
     int offset(int i, int j) const;
     int checkedOffset(int i, int j) const;
-    
+
     void assertValidIndex(int i, int j) const;
 
 protected:
@@ -84,7 +83,7 @@ protected:
 
 private:
     void throwInvalidIndex(int i, int j) const;
-    
+
     /** The dimension of this square matrix */
     qint32 dim;
 };
@@ -103,14 +102,14 @@ SIRE_ALWAYS_INLINE int TrigArray2DBase::nColumns() const
     return dim;
 }
 
-/** Return the number of unique items in this array (the size of 
+/** Return the number of unique items in this array (the size of
     the underlying 1D array) */
 SIRE_ALWAYS_INLINE int TrigArray2DBase::size() const
 {
 	return (dim*dim + dim)/2;
 }
 
-/** Return the number of unique items in this array (the size of 
+/** Return the number of unique items in this array (the size of
     the underlying 1D array) */
 SIRE_ALWAYS_INLINE int TrigArray2DBase::count() const
 {

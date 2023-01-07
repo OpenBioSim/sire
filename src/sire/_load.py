@@ -272,8 +272,8 @@ def expand(base: str, path: _Union[str, _List[str]], *args, **kwargs):
          The list of expanded filenames or URLs
 
      Examples:
-         >>> expand("https://siremol.org/m", "urea.gro", "urea.top")
-         ["https://siremol.org/m/urea.gro", "https://siremol.org/n/urea.top"]
+         >>> expand("https://sire.openbiosim.org/m", "urea.gro", "urea.top")
+         ["https://sire.openbiosim.org/m/urea.gro", "https://sire.openbiosim.org/n/urea.top"]
 
          >>> expand("input", ["ala.top", "ala.crd"])
          ["input/ala.top", "input/ala.crd"]

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -41,7 +40,7 @@ using namespace SireStream;
 QDataStream &operator<<(QDataStream &ds, const CLJParam &cljparam)
 {
     ds << cljparam.charge().to(mod_electron) << cljparam.lj();
-       
+
     return ds;
 }
 
@@ -49,11 +48,11 @@ QDataStream &operator>>(QDataStream &ds, CLJParam &cljparam)
 {
     double q;
     LJParameter lj;
-    
+
     ds >> q >> lj;
-    
+
     cljparam = CLJParam( q * mod_electron, lj );
-    
+
     return ds;
 }
 
@@ -67,11 +66,11 @@ CLJParam::CLJParam() : reduced_chg(0), ljid(0)
 CLJParam::CLJParam(const Charge &charge, const LJParameter &ljparam, bool auto_lock)
          : reduced_chg(0), ljid(0)
 {
-    static const double sqrt_one_over_4pieps0 
+    static const double sqrt_one_over_4pieps0
                             = std::sqrt(SireUnits::one_over_four_pi_eps0);
 
     reduced_chg = charge * sqrt_one_over_4pieps0;
-    
+
     if (auto_lock)
     {
         ljid = LJParameterDB::addLJParameter(ljparam);
@@ -81,9 +80,9 @@ CLJParam::CLJParam(const Charge &charge, const LJParameter &ljparam, bool auto_l
         ljid = LJParameterDB::_locked_addLJParameter(ljparam);
     }
 }
-         
+
 /** Copy constructor */
-CLJParam::CLJParam(const CLJParam &other)   
+CLJParam::CLJParam(const CLJParam &other)
          : reduced_chg(other.reduced_chg), ljid(other.ljid)
 {}
 

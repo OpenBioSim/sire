@@ -27,7 +27,7 @@ Once cmake has completed, you can compile using
 
 :-> make -j X
 
-where X is the number of cores in your computer, e.g. if you want to 
+where X is the number of cores in your computer, e.g. if you want to
 run 4 compile jobs in parallel on a 4-core node, type
 
 :-> make -j 4
@@ -36,7 +36,7 @@ Once make has completed (it will take a LONG time), install using
 
 :-> make -j X install/strip
 
-To test that the corelib has installed correctly, check that the sire 
+To test that the corelib has installed correctly, check that the sire
 executable runs, e.g.
 
 :-> ~/sire.app/bin/sire
@@ -82,7 +82,7 @@ This should drop you into the python 3 prompt. Use "CTRL+D" to exit.
 
 D. RUNNING SIRE EXECUTABLES AND SCRIPTS
 
-To run a Sire script, e.g. script.py, simply using the Sire python 
+To run a Sire script, e.g. script.py, simply using the Sire python
 executable, e.g.
 
 :-> ~/sire.app/bin/python script.py
@@ -108,4 +108,4 @@ as that on which you compiled the binary.
 
 To get further help, please get in touch with the authors
 via the Sire mailing lists, or via the email links on the
-Sire website, http://siremol.org
+Sire website, http://sire.openbiosim.org

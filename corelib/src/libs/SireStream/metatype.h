@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -43,9 +42,9 @@ namespace SireStream
     bool isDerivedFrom(const char *base, const QString &type_name);
     bool isRootless(const QString &type_name);
     bool isRegistered(const QString &type_name);
-    
+
     QString registeredRoot(const QString &type_name);
-    
+
     QSet<QString> leafClassesOf(const char *base);
     QSet<QString> branchClassesOf(const char *base);
     QSet<QString> derivedClassesOf(const char *base);
@@ -59,7 +58,7 @@ namespace SireStream
     {
         return isDerivedFrom(T::typeName(), type_name);
     }
-    
+
     /** Return whether the class "T" is derived from the root (base) class "S" */
     template<class S, class T>
     bool isDerivedFrom()
@@ -73,7 +72,7 @@ namespace SireStream
     {
         return isLeafOf(T::typeName(), type_name);
     }
-    
+
     /** Return whether the class "T" is a leaf of the root (base) class "S" */
     template<class S, class T>
     bool isLeafOf()
@@ -87,21 +86,21 @@ namespace SireStream
     {
         return isBranchOf(T::typeName(), type_name);
     }
-    
+
     /** Return whether the class "T" is a branch of the root (base) class "S" */
     template<class S, class T>
     bool isBranchOf()
     {
         return isBranchOf(S::typeName(), QLatin1String(T::typeName()));
     }
-    
+
     /** Return whether or not class T is rootless */
     template<class T>
     bool isRootless()
     {
         return isRootless(T::typeName());
     }
-    
+
     /** Return the registered root of class T. This returns an empty
         string if the class has not been registered */
     template<class T>
@@ -109,28 +108,28 @@ namespace SireStream
     {
         return registeredRoot( T::typeName() );
     }
-    
+
     /** Return whether or not class T is registered */
     template<class T>
     bool isRegistered()
     {
         return isRegistered(T::typeName());
     }
-    
+
     /** Return all of the leaf classes derived from root/base class T */
     template<class T>
     QSet<QString> leafClassesOf()
     {
         return leafClassesOf(T::typeName());
     }
-    
+
     /** Return all of the branch classes derived from root/base class T */
     template<class T>
     QSet<QString> branchClassesOf()
     {
         return branchClassesOf(T::typeName());
     }
-    
+
     /** Return all of the classes derived from root/base class T */
     template<class T>
     QSet<QString> derivedClassesOf()

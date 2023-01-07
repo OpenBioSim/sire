@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description="Subgrids, subtracts grids in dx fo
                                              "gridl.dx=diff.dx.  Grids must be of identical dimensions and grid density ",
                                  epilog="nautilus-subgrids is built using Sire, Numpy and mdtraj and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/nautilus",
+                                        "http://sire.openbiosim.org/nautilus",
                                  prog="nautilus")
 
 parser.add_argument('--author', action="store_true",

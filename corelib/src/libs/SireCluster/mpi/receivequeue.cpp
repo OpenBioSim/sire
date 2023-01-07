@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,16 +55,16 @@ ReceiveQueue::~ReceiveQueue()
     been_stopped = true;
     message_queue.clear();
     datamutex.unlock();
-    
+
     while (not QThread::wait(200))
     {
         waiter.wakeAll();
     }
-    
+
     secondthread->wait();
-    
+
     delete secondthread;
-    
+
     MPI_Comm_free(&recv_comm);
 }
 
@@ -85,10 +84,10 @@ void ReceiveQueue::received(const Message &message)
     if ((not message.isNull()) or message.isRecipient( MPICluster::getRank() ) )
     {
         QMutexLocker lkr(&datamutex);
-        
+
         if (not been_stopped)
             message_queue.enqueue(message);
-            
+
         waiter.wakeAll();
     }
 }
@@ -108,7 +107,7 @@ void ReceiveQueue::stop()
 void ReceiveQueue::wait()
 {
     secondthread->wait();
-    
+
     while (not QThread::wait(200))
     {
         waiter.wakeAll();
@@ -128,7 +127,7 @@ void ReceiveQueue::run()
     SireMaths::seed_qrand();
 
     QMutexLocker lkr(&datamutex);
-    
+
     if (message_queue.isEmpty())
     {
         waiter.wait(&datamutex);
@@ -138,7 +137,7 @@ void ReceiveQueue::run()
     {
         if (been_stopped)
             break;
-    
+
         //get the next message to read
         Message message = message_queue.dequeue();
         lkr.unlock();
@@ -162,15 +161,15 @@ void ReceiveQueue::run()
         {
             MPICluster::send( Messages::Error(message, CODELOC) );
         }
-        
+
         if (message.hasReply())
         {
             //send the reply
             MPICluster::send( message.reply() );
         }
-        
+
         lkr.relock();
-        
+
         if (message_queue.isEmpty())
         {
             //wait until there are some more messages
@@ -200,11 +199,11 @@ Message ReceiveQueue::unpackMessage(const QByteArray &message_data, int sender) 
     {
         MPICluster::send( Messages::Error(sender, CODELOC) );
     }
-    
+
     return Message();
 }
 
-/** This function contains the event loop that receives the 
+/** This function contains the event loop that receives the
     messages using MPI */
 void ReceiveQueue::run2()
 {
@@ -218,21 +217,21 @@ void ReceiveQueue::run2()
         MPI_Status status;
 
         while (keep_listening)
-        {        
+        {
             //the master listens for messages from anyone
             int found_message;
             MPI_Iprobe(MPI_ANY_SOURCE, 1, recv_comm, &found_message, &status);
-            
+
             if (found_message)
             {
                 //there is a message from one of the slaves
                 int slave_rank = status.MPI_SOURCE;
                 int count;
                 MPI_Get_count(&status, MPI_BYTE, &count);
-                
+
                 //receive the message
                 message_data.resize(count + 1);
-                
+
                 //perhaps change this to use Irecv so that we can kill
                 //the communication if 'keep_listening' is set to false
                 MPI_Recv(message_data.data(), count, MPI_BYTE,
@@ -243,7 +242,7 @@ void ReceiveQueue::run2()
 
                 if (message.isNull())
                     continue;
-                
+
                 //are we the recipient?
                 if (message.destination() == MPICluster::master())
                 {
@@ -263,38 +262,38 @@ void ReceiveQueue::run2()
     {
         //everyone else listens to messages from the master
         MPI_Status status;
-        
+
         while (true)
         {
             int found_message;
             MPI_Iprobe(MPICluster::master(), 1, recv_comm, &found_message, &status);
-        
+
             if (found_message)
             {
                 //there is a message from the master - it should be a
                 //single integer giving the size of the broadcast
                 int count;
                 MPI_Get_count(&status, MPI_INT, &count);
-                
+
                 if (count != 1)
                     qDebug() << "HAVE NOT GOT AN INTEGER?";
 
                 MPI_Recv( &count, 1, MPI_INT, MPICluster::master(), 1,
                           recv_comm, &status );
-        
+
                 if (count == 0)
                     //we've just been told to quit
                     break;
-        
+
                 //receive the message
                 message_data.resize(count + 1);
-        
+
                 MPI_Recv( message_data.data(), count, MPI_BYTE,
                           MPICluster::master(), 1, recv_comm, &status );
 
                 Message message = this->unpackMessage( message_data,
                                                        MPICluster::master() );
-        
+
                 if (not message.isNull())
                 {
                     if (message.isA<Messages::Shutdown>())
@@ -304,17 +303,17 @@ void ReceiveQueue::run2()
                             //shutdown here and now - don't queue this message
                             //as we could deadlock at shutdown if we do!
                             message.read();
-                        
+
                             //the master will send a zero size message to signal
                             //that it has also quit - wait for that message now
                             //recv_comm->Barrier();
                             MPI_Recv(&count, 1, MPI_INT, MPICluster::master(), 1,
                                      recv_comm, &status);
-                        
+
                             if (count != 0)
                                 qDebug() << "Shutdown has not been followed by a zero "
                                          << "shutdown message from the master?" << count;
-                        
+
                             //stop listening for any further messages
                             break;
                         }

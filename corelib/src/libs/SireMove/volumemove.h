@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ using SireMol::MoleculeGroup;
 
 /** This is a Monte Carlo volume move. This is used to allow
     the pressure to be kept constant
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT VolumeMove
@@ -66,43 +65,43 @@ public:
     VolumeMove(const MGID &mgid, const PropertyMap &map = PropertyMap());
     VolumeMove(const MoleculeGroup &molgroup,
                const PropertyMap &map = PropertyMap());
-    
+
     VolumeMove(const VolumeChanger &volchanger,
                const PropertyMap &map = PropertyMap());
-    
+
     VolumeMove(const VolumeMove &other);
-    
+
     ~VolumeMove();
-    
+
     VolumeMove& operator=(const VolumeMove &other);
-    
+
     static const char* typeName();
-        
+
     bool operator==(const VolumeMove &other) const;
     bool operator!=(const VolumeMove &other) const;
-    
+
     QString toString() const;
 
     void setVolumeChanger(const VolumeChanger &volchanger);
     void setVolumeChanger(const MoleculeGroup &molgroup);
-    
+
     const VolumeChanger& volumeChanger() const;
 
     const MGID& groupID() const;
-    
+
     void setGenerator(const RanGenerator &rangenerator);
-    
+
     void setMaximumVolumeChange(const SireUnits::Dimension::Volume &delta);
     const SireUnits::Dimension::Volume& maximumVolumeChange() const;
-    
+
     void move(System &system, int nmoves, bool record_stats=true);
 
 protected:
     void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
     void _pvt_setPressure(const SireUnits::Dimension::Pressure &pressure);
-    
+
 private:
-    /** The volume changing function used to change the volume of  
+    /** The volume changing function used to change the volume of
         the system */
     VolumeChangerPtr volchanger;
 

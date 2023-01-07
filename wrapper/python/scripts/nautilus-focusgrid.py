@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(description="Focusgrid, a protocol where select
                                              "by using clustered densities of interest",
                                  epilog="nautilus-focusgrid is built using Sire, Numpy and mdtraj and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/nautilus",
+                                        "http://sire.openbiosim.org/nautilus",
                                  prog="nautilus")
 
 parser.add_argument('-C', '--config', nargs="?",

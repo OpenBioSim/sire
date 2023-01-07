@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,11 +53,11 @@ static const RegisterMetaType<MolAtomID> r_molatomid;
 QDataStream &operator<<(QDataStream &ds, const MolAtomID &molatomid)
 {
     writeHeader(ds, r_molatomid, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << molatomid.molid << molatomid.atomid;
-    
+
     return ds;
 }
 
@@ -66,7 +65,7 @@ QDataStream &operator<<(QDataStream &ds, const MolAtomID &molatomid)
 QDataStream &operator>>(QDataStream &ds, MolAtomID &molatomid)
 {
     VersionID v = readHeader(ds, r_molatomid);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -74,7 +73,7 @@ QDataStream &operator>>(QDataStream &ds, MolAtomID &molatomid)
     }
     else
         throw version_error( v, "1", r_molatomid, CODELOC );
-        
+
     return ds;
 }
 
@@ -89,11 +88,11 @@ void MolAtomID::collapse()
         {
             if (molid.isNull())
                 molid = molatomid->molID();
-                
+
             else
                 molid = IDAndSet<MolID>( molid, molatomid->molID() );
         }
-        
+
         atomid = molatomid->atomID();
     }
 }
@@ -146,16 +145,16 @@ uint MolAtomID::hash() const
 {
     return (molid.hash() << 16) | (atomid.hash() & 0x0000FFFF);
 }
-            
+
 /** Return a string representation of this ID */
 QString MolAtomID::toString() const
 {
     if (atomid.isNull())
         return QObject::tr("Atoms in %1").arg(molid.toString());
-    
+
     else if (molid.isNull())
         return atomid.toString();
-        
+
     else
         return QObject::tr("%1 and %2")
                             .arg(molid.toString(), atomid.toString());
@@ -199,7 +198,7 @@ bool MolAtomID::operator!=(const MolAtomID &other) const
     return molid != other.molid or atomid != other.atomid;
 }
 
-/** Map this ID to the indicies of the matching atoms 
+/** Map this ID to the indicies of the matching atoms
 
     \throw SireMol::missing_atom
     \throw SireError::invalid_index
@@ -211,13 +210,13 @@ QList<AtomIdx> MolAtomID::map(const MolInfo &molinfo) const
     return atomid.map(molinfo);
 }
 
-QHash< MolNum,Selector<Atom> > 
+QHash< MolNum,Selector<Atom> >
 MolAtomID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 {
     QHash< MolNum,Selector<Atom> > selected_atoms;
-    
+
     QList<MolNum> molnums = molid.map(molecules);
-    
+
     foreach (MolNum molnum, molnums)
     {
         const ViewsOfMol &mol = molecules[molnum];
@@ -241,13 +240,13 @@ MolAtomID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) con
     return selected_atoms;
 }
 
-QHash< MolNum,Selector<Atom> > 
+QHash< MolNum,Selector<Atom> >
 MolAtomID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     QHash< MolNum,Selector<Atom> > selected_atoms;
-    
+
     QList<MolNum> molnums = molid.map(molgroup);
-    
+
     foreach (MolNum molnum, molnums)
     {
         const ViewsOfMol &mol = molgroup[molnum];
@@ -271,13 +270,13 @@ MolAtomID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) 
     return selected_atoms;
 }
 
-QHash< MolNum,Selector<Atom> > 
+QHash< MolNum,Selector<Atom> >
 MolAtomID::selectAllFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     QHash< MolNum,Selector<Atom> > selected_atoms;
-    
+
     QList<MolNum> molnums = molid.map(molgroups);
-    
+
     foreach (MolNum molnum, molnums)
     {
         ViewsOfMol mol = molgroups[molnum];

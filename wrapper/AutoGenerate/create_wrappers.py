@@ -558,7 +558,7 @@ def write_wrappers(mb, module, huge_classes, header_files = [],
    mb.code_creator.replace_included_headers( header_files )
 
    #give each piece of code the GPL license header
-   mb.code_creator.license = "// (C) Christopher Woods, GPL >= 2 License\n"
+   mb.code_creator.license = "// (C) Christopher Woods, GPL >= 3 License\n"
 
    #use local directory paths
    mb.code_creator.user_defined_directories.append(".")

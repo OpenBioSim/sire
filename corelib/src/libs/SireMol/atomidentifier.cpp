@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,9 +56,9 @@ QDataStream &operator<<(QDataStream &ds,
                                        const AtomIdentifier &atomid)
 {
     writeHeader(ds, r_atomid, 1);
-    
+
     SireStream::savePolyPointer(ds, atomid.d);
-    
+
     return ds;
 }
 
@@ -68,14 +67,14 @@ QDataStream &operator>>(QDataStream &ds,
                                        AtomIdentifier &atomid)
 {
     VersionID v = readHeader(ds, r_atomid);
-    
+
     if (v == 1)
     {
         SireStream::loadPolyPointer(ds, atomid.d);
     }
     else
         throw version_error( v, "1", r_atomid, CODELOC );
-        
+
     return ds;
 }
 
@@ -116,7 +115,7 @@ uint AtomIdentifier::hash() const
     else
         return d->hash();
 }
-            
+
 /** Return a string representatio of this ID */
 QString AtomIdentifier::toString() const
 {
@@ -151,7 +150,7 @@ AtomIdentifier& AtomIdentifier::operator=(const AtomID &other)
         d.reset();
     else
         d.reset(other.clone());
-    
+
     return *this;
 }
 

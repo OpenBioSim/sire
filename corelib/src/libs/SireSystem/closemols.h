@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -65,7 +64,7 @@ using SireBase::PropertyMap;
 
 /** This class is used to maintain a list of the closest molecules
     to a specified point
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT CloseMols
@@ -82,36 +81,36 @@ public:
 
     CloseMols(const SireFF::PointRef &point, const MoleculeGroup &molgroup,
               const Space &space, int nclosest=1, const PropertyMap &map = PropertyMap());
-    
+
     CloseMols(const CloseMols &other);
-    
+
     ~CloseMols();
-    
+
     CloseMols& operator=(const CloseMols &other);
-    
+
     bool operator==(const CloseMols &other) const;
     bool operator!=(const CloseMols &other) const;
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     CloseMols* clone() const;
-    
+
     const Point& point() const;
-    
+
     const MoleculeGroup& moleculeGroup() const;
-    
+
     const Space& space() const;
-    
+
     const PropertyMap& propertyMap() const;
-    
+
     int nClosest() const;
-    
+
     const QHash<MolNum,double>& closeMolecules() const;
-    
+
     bool isClose(MolNum molnum) const;
-    
+
     bool update(const System &system);
     bool update(const System &system, MolNum changed_mol);
     bool update(const System &system, const Molecules &molecules);
@@ -124,36 +123,36 @@ private:
     void getNewFurthestMolNum();
 
     bool differentMolecules(const QHash<MolNum,double> &mols) const;
-    
+
     void updateData(const System &system,
                     bool &point_changed, bool &space_changed,
                     bool &molgroup_major_changed,
                     bool &molgroup_minor_changed);
-    
+
     /** The point in space from which to find the closest molecules */
     SireFF::PointPtr p;
-    
+
     /** The molecule group containing the molecules */
     SireMol::MolGroupPtr molgroup;
-    
-    /** The space used to calculate the distances between the 
+
+    /** The space used to calculate the distances between the
         molecules and the point */
     SireVol::SpacePtr spce;
-    
+
     /** The number of molecules to record */
     quint32 nclosest;
-    
-    /** The property map containing the location of the coordinates 
+
+    /** The property map containing the location of the coordinates
         and space properties */
     PropertyMap map;
-    
-    /** The numbers of the 'nclosest' closest molecules, 
+
+    /** The numbers of the 'nclosest' closest molecules,
         together with the distance from the molecule to the point */
     QHash<MolNum,double> close_mols;
-    
+
     /** The molecule number of the furthest recorded molecule */
     MolNum furthest_molnum;
-    
+
     /** The distance^2 from the point to the furthest recorded molecule */
     double cutoff_dist2;
 };

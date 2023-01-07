@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,7 +61,7 @@ namespace SireMol
 
 /** This ID class identifies residues that contain atoms that
     match the passed AtomID
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT ResWithAtoms : public ResID
@@ -75,34 +74,34 @@ public:
     ResWithAtoms();
     ResWithAtoms(const AtomID &atomid);
     ResWithAtoms(const ResWithAtoms &other);
-    
+
     ~ResWithAtoms();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return ResWithAtoms::typeName();
     }
-    
+
     ResWithAtoms* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-                
+
     QString toString() const;
-    
+
     const AtomID& atomID() const;
-    
+
     ResWithAtoms& operator=(const ResWithAtoms &other);
-    
+
     bool operator==(const SireID::ID &other) const;
     using SireID::ID::operator!=;
-   
+
     bool operator==(const ResWithAtoms &other) const;
     bool operator!=(const ResWithAtoms &other) const;
-    
+
     QList<ResIdx> map(const MolInfo &molinfo) const;
 
 private:
@@ -111,7 +110,7 @@ private:
 
 /** This ID class identifies CutGroups that contain atoms that
     match the passed AtomID
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT CGsWithAtoms : public CGID
@@ -124,34 +123,34 @@ public:
     CGsWithAtoms();
     CGsWithAtoms(const AtomID &atomid);
     CGsWithAtoms(const CGsWithAtoms &other);
-    
+
     ~CGsWithAtoms();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return CGsWithAtoms::typeName();
     }
-    
+
     CGsWithAtoms* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-                
+
     QString toString() const;
-    
+
     const AtomID& atomID() const;
-    
+
     CGsWithAtoms& operator=(const CGsWithAtoms &other);
-    
+
     bool operator==(const SireID::ID &other) const;
     using SireID::ID::operator!=;
-   
+
     bool operator==(const CGsWithAtoms &other) const;
     bool operator!=(const CGsWithAtoms &other) const;
-    
+
     QList<CGIdx> map(const MolInfo &molinfo) const;
 
 private:
@@ -160,7 +159,7 @@ private:
 
 /** This ID class identifies chains that contain atoms that
     match the passed AtomID
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT ChainsWithAtoms : public ChainID
@@ -173,34 +172,34 @@ public:
     ChainsWithAtoms();
     ChainsWithAtoms(const AtomID &atomid);
     ChainsWithAtoms(const ChainsWithAtoms &other);
-    
+
     ~ChainsWithAtoms();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return ChainsWithAtoms::typeName();
     }
-    
+
     ChainsWithAtoms* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-                
+
     QString toString() const;
-    
+
     const AtomID& atomID() const;
-    
+
     ChainsWithAtoms& operator=(const ChainsWithAtoms &other);
-    
+
     bool operator==(const SireID::ID &other) const;
     using SireID::ID::operator!=;
-   
+
     bool operator==(const ChainsWithAtoms &other) const;
     bool operator!=(const ChainsWithAtoms &other) const;
-    
+
     QList<ChainIdx> map(const MolInfo &molinfo) const;
 
 private:
@@ -209,7 +208,7 @@ private:
 
 /** This ID class identifies segments that contain atoms that
     match the passed AtomID
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT SegsWithAtoms : public SegID
@@ -222,34 +221,34 @@ public:
     SegsWithAtoms();
     SegsWithAtoms(const AtomID &atomid);
     SegsWithAtoms(const SegsWithAtoms &other);
-    
+
     ~SegsWithAtoms();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return SegsWithAtoms::typeName();
     }
-    
+
     SegsWithAtoms* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-                
+
     QString toString() const;
-    
+
     const AtomID& atomID() const;
-    
+
     SegsWithAtoms& operator=(const SegsWithAtoms &other);
-    
+
     bool operator==(const SireID::ID &other) const;
     using SireID::ID::operator!=;
-   
+
     bool operator==(const SegsWithAtoms &other) const;
     bool operator!=(const SegsWithAtoms &other) const;
-    
+
     QList<SegIdx> map(const MolInfo &molinfo) const;
 
 private:

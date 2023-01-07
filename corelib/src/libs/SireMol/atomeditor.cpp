@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -74,9 +73,9 @@ QDataStream &operator<<(QDataStream &ds,
                                        const AtomEditor &atomeditor)
 {
     writeHeader(ds, r_atomeditor, 1);
-    
+
     ds << static_cast<const Editor<AtomEditor,Atom>&>(atomeditor);
-    
+
     return ds;
 }
 
@@ -85,7 +84,7 @@ QDataStream &operator>>(QDataStream &ds,
                                        AtomEditor &atomeditor)
 {
     VersionID v = readHeader(ds, r_atomeditor);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Editor<AtomEditor,Atom>&>(atomeditor);
@@ -140,9 +139,9 @@ AtomEditor& AtomEditor::rename(const AtomName &newname)
     if (newname == this->name())
         //nothing needs to be done
         return *this;
-        
+
     d->rename( this->index(), newname );
-    
+
     return *this;
 }
 
@@ -152,9 +151,9 @@ AtomEditor& AtomEditor::renumber(AtomNum newnum)
     if (newnum == this->number())
         //nothing needs to be done
         return *this;
-        
+
     d->renumber( this->index(), newnum );
-    
+
     return *this;
 }
 
@@ -172,17 +171,17 @@ AtomStructureEditor AtomEditor::reindex(AtomIdx newidx) const
     that can further edit the structure of the molecule */
 MolStructureEditor AtomEditor::remove() const
 {
-    MolStructureEditor moleditor(*this);    
+    MolStructureEditor moleditor(*this);
     moleditor.remove(this->index());
-    
+
     return moleditor;
 }
 
 /** Reparent this atom so that it will be placed into the CutGroup
-    with index 'cgidx' - this returns the updated atom in 
+    with index 'cgidx' - this returns the updated atom in
     an AtomStructureEditor, which is optimised for further
     editing of the molecule structure
-    
+
     \throw SireError::invalid_index
 */
 AtomStructureEditor AtomEditor::reparent(CGIdx cgidx) const
@@ -193,10 +192,10 @@ AtomStructureEditor AtomEditor::reparent(CGIdx cgidx) const
 }
 
 /** Reparent this atom so that it will be placed into the CutGroup
-    with ID 'cgid' - this returns the updated atom in 
+    with ID 'cgid' - this returns the updated atom in
     an AtomStructureEditor, which is optimised for further
     editing of the molecule structure
-    
+
     \throw SireMol::missing_cutgroup
     \throw SireMol::duplicate_cutgroup
     \throw SireError::invalid_index
@@ -209,10 +208,10 @@ AtomStructureEditor AtomEditor::reparent(const CGID &cgid) const
 }
 
 /** Reparent this atom so that it will be placed into the residue
-    with index 'residx' - this returns the updated atom in 
+    with index 'residx' - this returns the updated atom in
     an AtomStructureEditor, which is optimised for further
     editing of the molecule structure
-    
+
     \throw SireError::invalid_index
 */
 AtomStructureEditor AtomEditor::reparent(ResIdx residx) const
@@ -223,10 +222,10 @@ AtomStructureEditor AtomEditor::reparent(ResIdx residx) const
 }
 
 /** Reparent this atom so that it will be placed into the residue
-    with ID 'resid' - this returns the updated atom in 
+    with ID 'resid' - this returns the updated atom in
     an AtomStructureEditor, which is optimised for further
     editing of the molecule structure
-    
+
     \throw SireMol::missing_residue
     \throw SireMol::duplicate_residue
     \throw SireError::invalid_index
@@ -239,10 +238,10 @@ AtomStructureEditor AtomEditor::reparent(const ResID &resid) const
 }
 
 /** Reparent this atom so that it will be placed into the segment
-    with index 'segidx' - this returns the updated atom in 
+    with index 'segidx' - this returns the updated atom in
     an AtomStructureEditor, which is optimised for further
     editing of the molecule structure
-    
+
     \throw SireError::invalid_index
 */
 AtomStructureEditor AtomEditor::reparent(SegIdx segidx) const
@@ -253,10 +252,10 @@ AtomStructureEditor AtomEditor::reparent(SegIdx segidx) const
 }
 
 /** Reparent this atom so that it will be placed into the segment
-    with ID 'segid' - this returns the updated atom in 
+    with ID 'segid' - this returns the updated atom in
     an AtomStructureEditor, which is optimised for further
     editing of the molecule structure
-    
+
     \throw SireMol::missing_segment
     \throw SireMol::duplicate_segment
     \throw SireError::invalid_index
@@ -284,10 +283,10 @@ QDataStream &operator<<(QDataStream &ds,
                                        const AtomStructureEditor &atomeditor)
 {
     writeHeader(ds, r_atomstructeditor, 1);
-    
+
     ds << atomeditor.uid
        << static_cast<const StructureEditor&>(atomeditor);
-    
+
     return ds;
 }
 
@@ -296,7 +295,7 @@ QDataStream &operator>>(QDataStream &ds,
                                        AtomStructureEditor &atomeditor)
 {
     VersionID v = readHeader(ds, r_atomstructeditor);
-    
+
     if (v == 1)
     {
         ds >> atomeditor.uid
@@ -323,7 +322,7 @@ AtomStructureEditor::AtomStructureEditor(const Atom &atom)
 
 /** Construct for the atom at index 'idx' in the molecule whose data
     is being edited in 'moldata'
-    
+
     \throw SireError::invalid_index
 */
 AtomStructureEditor::AtomStructureEditor(const StructureEditor &moldata,
@@ -347,7 +346,7 @@ AtomStructureEditor& AtomStructureEditor::operator=(const Atom &atom)
 {
     StructureEditor::operator=(atom.data());
     uid = this->getUID(atom.index());
-    
+
     return *this;
 }
 
@@ -435,7 +434,7 @@ AtomStructureEditor& AtomStructureEditor::renumber(AtomNum newnum)
     return *this;
 }
 
-/** Reindex this atom to 'newidx' - this will move the atom to 
+/** Reindex this atom to 'newidx' - this will move the atom to
     the end if 'newidx' is greater than the number of atoms
     in the molecule */
 AtomStructureEditor& AtomStructureEditor::reindex(AtomIdx newidx)
@@ -464,8 +463,8 @@ AtomStructureEditor& AtomStructureEditor::reparent(CGIdx cgidx)
 }
 
 /** Reparent this atom so that it is now in the CutGroup identified
-    by ID 'cgid' 
-    
+    by ID 'cgid'
+
     \throw SireMol::missing_cutgroup
     \throw SireMol::duplicate_cutgroup
     \throw SireMol::invalid_index
@@ -486,8 +485,8 @@ AtomStructureEditor& AtomStructureEditor::reparent(ResIdx residx)
 }
 
 /** Reparent this atom so that it is now in the residue identified
-    by ID 'resid' 
-    
+    by ID 'resid'
+
     \throw SireMol::missing_residue
     \throw SireMol::duplicate_residue
     \throw SireMol::invalid_index
@@ -508,8 +507,8 @@ AtomStructureEditor& AtomStructureEditor::reparent(SegIdx segidx)
 }
 
 /** Reparent this atom so that it is now in the segment identified
-    by ID 'segid' 
-    
+    by ID 'segid'
+
     \throw SireMol::missing_segment
     \throw SireMol::duplicate_segment
     \throw SireMol::invalid_index

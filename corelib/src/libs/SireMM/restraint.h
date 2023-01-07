@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -111,7 +110,7 @@ typedef SireBase::PropPtr<Restraint3D> Restraint3DPtr;
     a molecule caused by external potential, e.g. a harmonic
     restraining potential, or a solvent cap potential, or
     a dihedral restraint potential
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT Restraint : public SireBase::Property
@@ -122,20 +121,20 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, Restraint&);
 
 public:
     Restraint();
-    
+
     Restraint(const Restraint &other);
-    
+
     virtual ~Restraint();
-    
+
     static const char* typeName()
     {
         return "SireMM::Restraint";
     }
-    
+
     virtual Restraint* clone() const=0;
-    
+
     virtual QString toString() const=0;
-    
+
     virtual SireUnits::Dimension::MolarEnergy energy() const=0;
 
     virtual void update(const MoleculeData &moldata)=0;
@@ -143,7 +142,7 @@ public:
     virtual void update(const Molecules &molecules)=0;
 
     virtual Molecules molecules() const=0;
-    
+
     virtual bool contains(MolNum molnum) const=0;
     virtual bool contains(const MolID &molid) const=0;
 
@@ -157,7 +156,7 @@ public:
     virtual Symbols symbols() const=0;
     virtual Symbols builtinSymbols() const=0;
     virtual Symbols userSymbols() const=0;
-    
+
     virtual Values values() const=0;
     virtual Values builtinValues() const=0;
     virtual Values userValues() const=0;
@@ -168,14 +167,14 @@ public:
 
 protected:
     Restraint& operator=(const Restraint &other);
-    
+
     bool operator==(const Restraint &other) const;
     bool operator!=(const Restraint &other) const;
 };
 
 /** This is the base class of all restraints that operate in 3 dimensions,
     and so can thus return the force on the molecule caused by the restraint
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT Restraint3D : public Restraint
@@ -186,9 +185,9 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, Restraint3D&);
 
 public:
     Restraint3D();
-    
+
     Restraint3D(const Restraint3D &other);
-    
+
     virtual ~Restraint3D();
 
     static const char* typeName()
@@ -200,17 +199,17 @@ public:
 
     virtual void force(MolForceTable &forcetable, double scale_force=1) const=0;
     virtual void force(ForceTable &forcetable, double scale_force=1) const=0;
-    
+
     virtual bool usesMoleculesIn(const ForceTable &forcetable) const=0;
     virtual bool usesMoleculesIn(const Molecules &molecules) const=0;
-    
+
     const Space& space() const;
-    
+
     virtual void setSpace(const Space &space);
-    
+
 protected:
     Restraint3D& operator=(const Restraint3D &other);
-    
+
     bool operator==(const Restraint3D &other) const;
     bool operator!=(const Restraint3D &other) const;
 
@@ -231,9 +230,9 @@ public:
     ExpressionRestraint3D();
     ExpressionRestraint3D(const Expression &nrg_expression,
                           const Values &values = Values());
-    
+
     ExpressionRestraint3D(const ExpressionRestraint3D &other);
-    
+
     ~ExpressionRestraint3D();
 
     static const char* typeName()
@@ -252,7 +251,7 @@ public:
 
     Symbols symbols() const;
     Symbols userSymbols() const;
-    
+
     Values values() const;
     Values userValues() const;
 
@@ -260,7 +259,7 @@ public:
 
 protected:
     ExpressionRestraint3D& operator=(const ExpressionRestraint3D &other);
-    
+
     bool operator==(const ExpressionRestraint3D &other) const;
     bool operator!=(const ExpressionRestraint3D &other) const;
 
@@ -269,17 +268,17 @@ protected:
 private:
     /** The energy expression */
     Expression nrg_expression;
-    
+
     /** All values that are plugged into this expression */
     Values vals;
 };
 
 /** This is a null restraint, that does not affect the energy
     or force on any molecule
-    
+
     @author Christopher Woods
 */
-class SIREMM_EXPORT NullRestraint 
+class SIREMM_EXPORT NullRestraint
             : public SireBase::ConcreteProperty<NullRestraint,Restraint3D>
 {
 
@@ -288,20 +287,20 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, NullRestraint &othe
 
 public:
     NullRestraint();
-    
+
     NullRestraint(const NullRestraint &other);
-    
+
     ~NullRestraint();
-    
+
     NullRestraint& operator=(const NullRestraint &other);
-    
+
     bool operator==(const NullRestraint &other) const;
     bool operator!=(const NullRestraint &other) const;
-    
+
     static const char* typeName();
 
     QString toString() const;
-    
+
     SireUnits::Dimension::MolarEnergy energy() const;
 
     void setValue(const Symbol &symbol, double value);
@@ -321,15 +320,15 @@ public:
 
     void force(MolForceTable &forcetable, double scale_force=1) const;
     void force(ForceTable &forcetable, double scale_force=1) const;
-    
+
     void update(const MoleculeData &moldata);
     void update(const Molecules &molecules);
 
     Molecules molecules() const;
-    
+
     bool contains(MolNum molnum) const;
     bool contains(const MolID &molid) const;
-    
+
     bool usesMoleculesIn(const ForceTable &forcetable) const;
     bool usesMoleculesIn(const Molecules &molecules) const;
 };

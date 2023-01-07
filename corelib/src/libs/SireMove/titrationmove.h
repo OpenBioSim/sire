@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,7 +48,7 @@ namespace SireMove
     of once molecule with another, e.g. swapping a charge with a water.
     This allows ions to move quickly through a simulation box, and for
     ions to equilibrate between boxes (e.g. during a WSRC calcualtion)
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT TitrationMove
@@ -62,20 +61,20 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, TitrationMove&);
 public:
     TitrationMove();
     TitrationMove(const TitrationMove &other);
-    
+
     ~TitrationMove();
 
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     TitrationMove& operator=(const TitrationMove &other);
-    
+
     bool operator==(const TitrationMove &other) const;
     bool operator!=(const TitrationMove &other) const;
-    
+
     QString toString() const;
-    
+
     void move(System &system, int nmoves, bool record_stats=true);
 
 protected:

@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(description="An app to calculate the correction
                                               "can result in substantial errors in certain regimes.",
                                 epilog="boresch_numerical_correction is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org",
+                                        "http://sire.openbiosim.org",
                                  prog="boresch_numerical_correction")
 
 parser.add_argument('-C', '--config', nargs="?",

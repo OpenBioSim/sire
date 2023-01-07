@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -48,14 +47,14 @@ QDataStream &operator<<(QDataStream &ds, const BooleanProperty &prop)
 QDataStream &operator>>(QDataStream &ds, BooleanProperty &prop)
 {
     VersionID v = readHeader(ds, r_prop);
-    
+
     if (v == 1)
     {
         ds >> prop.val;
     }
     else
         throw version_error(v, "1", r_prop, CODELOC);
-    
+
     return ds;
 }
 
@@ -73,7 +72,7 @@ BooleanProperty::BooleanProperty(const QString &value)
                 : ConcreteProperty<BooleanProperty,Property>()
 {
     QString v = value.toLower().simplified();
-    
+
     if (v == "true" or v == "t" or v == "yes" or v == "y" or v == "on")
     {
         val = true;
@@ -85,9 +84,9 @@ BooleanProperty::BooleanProperty(const QString &value)
     else
     {
         bool ok;
-        
+
         double dv = v.toDouble(&ok);
-        
+
         if (ok)
         {
             val = dv;
@@ -129,7 +128,7 @@ BooleanProperty& BooleanProperty::operator=(const BooleanProperty &other)
     {
         val = other.val;
     }
-    
+
     return *this;
 }
 

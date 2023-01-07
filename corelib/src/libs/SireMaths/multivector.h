@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,8 +52,8 @@ SIREMATHS_EXPORT MultiQuaternion operator*(const MultiVector &p1, const MultiQua
 SIREMATHS_EXPORT MultiQuaternion operator*(const MultiQuaternion &p1, const MultiVector &p2);
 
 /**
-This is a vectorised version of Vector, e.g. x, y, and z 
-are held as MultiDouble objects, meaning that this is a 
+This is a vectorised version of Vector, e.g. x, y, and z
+are held as MultiDouble objects, meaning that this is a
 packed vector of vectors
 
 @author Christopher Woods
@@ -70,14 +69,14 @@ public:
 
     MultiVector(const Vector *array, int size);
     MultiVector(const QVector<Vector> &array);
-    
+
     #ifdef SIRE_HAS_CPP_11
         MultiVector(const std::function<double ()> &func);
         MultiVector(const std::function<Vector ()> &func);
     #endif
-    
+
     MultiVector(const MultiVector &other);
-    
+
     ~MultiVector();
 
     static QVector<MultiVector> fromArray(const Vector *array, int size);
@@ -129,7 +128,7 @@ public:
 
     bool operator==(const MultiVector &p1) const;
     bool operator!=(const MultiVector &p1) const;
-    
+
     MultiVector& operator+=(const MultiVector &other);
     MultiVector& operator-=(const MultiVector &other);
     MultiVector& operator*=(const MultiDouble &other);
@@ -152,13 +151,13 @@ public:
     Vector getitem(int i) const;
 
     MultiDouble manhattanLength() const;
-    
+
     MultiDouble length() const;
     MultiDouble length2() const;
-    
+
     MultiDouble invLength() const;
     MultiDouble invLength2() const;
-    
+
     MultiVector normalise() const;
 
     QString toString() const;
@@ -174,7 +173,7 @@ public:
 
     static MultiDouble distance2(const MultiVector &v1, const MultiVector &v2);
     static MultiDouble distance(const MultiVector &v1, const MultiVector &v2);
-    
+
     static MultiDouble invDistance(const MultiVector &v1, const MultiVector &v2);
     static MultiDouble invDistance2(const MultiVector &v1, const MultiVector &v2);
 
@@ -222,7 +221,7 @@ SIRE_ALWAYS_INLINE MultiVector::MultiVector(const MultiDouble &x, const MultiDou
         sc[1] = MultiDouble(generator);
         sc[2] = MultiDouble(generator);
     }
-    
+
     /** Construct a MultiVector from the passed function */
     SIRE_ALWAYS_INLINE MultiVector::MultiVector(const std::function<Vector ()> &generator)
     {

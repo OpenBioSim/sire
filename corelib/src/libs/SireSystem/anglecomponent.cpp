@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,26 +61,26 @@ QDataStream &operator<<(QDataStream &ds,
                                           const AngleComponent &angcomp)
 {
     writeHeader(ds, r_angcomp, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << angcomp.p0 << angcomp.p1 << angcomp.p2
         << static_cast<const GeometryComponent&>(angcomp);
-        
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, AngleComponent &angcomp)
 {
     VersionID v = readHeader(ds, r_angcomp);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> angcomp.p0 >> angcomp.p1 >> angcomp.p2
             >> static_cast<GeometryComponent&>(angcomp);
-            
+
         angcomp.intra_molecule_points = Point::areIntraMoleculePoints(
                                                         angcomp.p0, angcomp.p1 ) and
                                         Point::areIntraMoleculePoints(
@@ -89,12 +88,12 @@ QDataStream &operator>>(QDataStream &ds, AngleComponent &angcomp)
     }
     else
         throw version_error(v, "1", r_angcomp, CODELOC);
-        
+
     return ds;
 }
 
 /** Null constructor */
-AngleComponent::AngleComponent() 
+AngleComponent::AngleComponent()
                : ConcreteProperty<AngleComponent,GeometryComponent>(),
                  intra_molecule_points(true)
 {}
@@ -154,7 +153,7 @@ const Symbol& AngleComponent::r12()
     return *(getR12Symbol());
 }
 
-/** Construct to set the value of 'constrained_symbol' equal to the 
+/** Construct to set the value of 'constrained_symbol' equal to the
     angle between the three points 'point0', 'point1' and 'point2' */
 AngleComponent::AngleComponent(const Symbol &constrained_symbol,
                                const PointRef &point0, const PointRef &point1,
@@ -169,7 +168,7 @@ AngleComponent::AngleComponent(const Symbol &constrained_symbol,
                             Point::areIntraMoleculePoints(p0,p2);
 }
 
-/** Construct to set the value of 'constrained_symbol' equal to the 
+/** Construct to set the value of 'constrained_symbol' equal to the
     expression based on the angles within the three points
     'point0', 'point1' and 'point2' */
 AngleComponent::AngleComponent(const Symbol &constrained_symbol,
@@ -185,7 +184,7 @@ AngleComponent::AngleComponent(const Symbol &constrained_symbol,
     intra_molecule_points = Point::areIntraMoleculePoints(p0,p1) and
                             Point::areIntraMoleculePoints(p0,p2);
 }
-  
+
 /** Copy constructor */
 AngleComponent::AngleComponent(const AngleComponent &other)
                   : ConcreteProperty<AngleComponent,GeometryComponent>(other),
@@ -208,7 +207,7 @@ AngleComponent& AngleComponent::operator=(const AngleComponent &other)
         p2 = other.p2;
         intra_molecule_points = other.intra_molecule_points;
     }
-    
+
     return *this;
 }
 
@@ -246,7 +245,7 @@ void AngleComponent::setSpace(const Space &new_space)
         return;
 
     AngleComponent old_state(*this);
-    
+
     try
     {
         p0.edit().setSpace(new_space);
@@ -268,7 +267,7 @@ void AngleComponent::setSpace(const Space &new_space)
 const Point& AngleComponent::point(int i) const
 {
     i = Index(i).map( nPoints() );
-    
+
     switch (i % 3)
     {
         case 0:
@@ -338,10 +337,10 @@ Values AngleComponent::getValues(const System &system)
 
     if (p1.read().wouldUpdate(system))
         p1.edit().update(system);
-        
+
     if (p2.read().wouldUpdate(system))
         p2.edit().update(system);
-        
+
     Triangle trig = getTriangle();
 
     Values vals;
@@ -352,7 +351,7 @@ Values AngleComponent::getValues(const System &system)
     vals.set( r01(), trig.line2().length() );
     vals.set( r12(), trig.line0().length() );
     vals.set( r02(), trig.line1().length() );
-        
+
     return vals;
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -37,18 +36,18 @@ void test_sincos(bool verbose)
     for (int i=-50; i<=50; ++i)
     {
         double x = 0.1*i;
-        
+
         double sval = std::sin(x);
         double cval = std::cos(x);
-        
+
         double stest, ctest;
         SireMaths::sincos(x, &stest, &ctest);
-        
+
         if (verbose)
         {
             qDebug() << "Test x = " << x << sval << stest << cval << ctest;
         }
-        
+
         SireBase::assert_nearly_equal(sval, stest, 0.001, CODELOC);
         SireBase::assert_nearly_equal(cval, ctest, 0.001, CODELOC);
     }

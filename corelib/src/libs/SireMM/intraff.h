@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -60,13 +59,13 @@ namespace detail
 class IntraFFData;
 }
 
-/** This forcefield is used to calculate the intramolecular 
+/** This forcefield is used to calculate the intramolecular
     coulomb and LJ energy of the contained molecules. Note
     that this is the coulomb and LJ energy of the non-bonded
     atoms *only*, i.e. it does not contain the scaled
     1-4 coulomb and LJ energies. These should be calculated
     separately, e.g. via additional terms added to InternalFF
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT IntraFF : public SireBase::ConcreteProperty<IntraFF,SireFF::G1FF>
@@ -78,17 +77,17 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, IntraFF&);
 public:
     IntraFF();
     IntraFF(const QString &name);
-    
+
     IntraFF(const IntraFF &other);
-    
+
     ~IntraFF();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     IntraFF& operator=(const IntraFF &other);
-    
+
     bool operator==(const IntraFF &other) const;
     bool operator!=(const IntraFF &other) const;
 
@@ -108,7 +107,7 @@ public:
 
     int nCLJFunctions() const;
     QStringList cljFunctionKeys() const;
-    
+
     QHash<QString,CLJFunctionPtr> cljFunctions() const;
 
     void enableParallelCalculation();
@@ -126,7 +125,7 @@ public:
     bool containsProperty(const QString &name) const;
     const Properties& properties() const;
 
-    void mustNowRecalculateFromScratch();    
+    void mustNowRecalculateFromScratch();
 
     void accept();
     bool needsAccepting() const;
@@ -136,9 +135,9 @@ private:
 
     void recalculateEnergy();
     void rebuildProps();
-    
+
     MultiCLJEnergy calcEnergy(detail::IntraFFMolData &moldata) const;
-    
+
     void _pvt_added(const SireMol::PartialMolecule &mol,
                     const SireBase::PropertyMap &map);
 
@@ -146,9 +145,9 @@ private:
 
     void _pvt_changed(const SireMol::Molecule &molecule, bool auto_update);
     void _pvt_changed(const QList<SireMol::Molecule> &molecules, bool auto_update);
-    
+
     void _pvt_removedAll();
-        
+
     bool _pvt_wouldChangeProperties(SireMol::MolNum molnum,
                                     const SireBase::PropertyMap &map) const;
 

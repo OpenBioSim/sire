@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -50,7 +49,7 @@ class MonitorName;
 
 /** This class holds a set of SystemMonitor objects, and controls
     when those monitors are evaluated on a system
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT SystemMonitors
@@ -61,27 +60,27 @@ friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, SystemMonitors&
 
 public:
     SystemMonitors();
-    
+
     SystemMonitors(const SystemMonitors &other);
-    
+
     ~SystemMonitors();
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return SystemMonitors::typeName();
     }
 
     SystemMonitors& operator=(const SystemMonitors &other);
-    
+
     bool operator==(const SystemMonitors &other) const;
     bool operator!=(const SystemMonitors &other) const;
-    
+
     const SystemMonitor& operator[](const MonitorID &monid) const;
 
     const SystemMonitor& at(const MonitorID &monid) const;
-    
+
     bool isEmpty() const;
 
     QList<MonitorName> map(const MonitorName &monname) const;
@@ -97,44 +96,44 @@ public:
 
     void add(const QString &name, const SystemMonitor &monitor,
              int frequency = 1);
-    
+
     void add(const SystemMonitors &other);
     void add(const SystemMonitors &other, int frequency);
-    
+
     void remove(const MonitorID &monid);
     void removeAll();
-    
+
     void clearStatistics();
     void clearStatistics(const MonitorID &monid);
-    
+
     void setAllFrequency(int frequency);
     void setFrequency(const MonitorID &monid, int frequency);
-   
+
     int getFrequency(const MonitorID &monid) const;
-     
+
     const SystemMonitor& monitor(const MonitorID &monid) const;
-    
+
     QList<SysMonPtr> monitors(const MonitorID &monid) const;
-    
+
     QList<SysMonPtr> monitors() const;
-    
+
     int nMonitors() const;
     int count() const;
     int size() const;
-    
+
     void monitor(System &system);
-    
+
 private:
     /** All of the monitors, indexed by name */
     QHash<MonitorName,SysMonPtr> mons_by_name;
-    
+
     /** The names of all of the monitors in the order they
         appear in this collection */
     QList<MonitorName> mons_by_idx;
-    
+
     /** The frequency of each monitor */
     QHash< quint32, QList<MonitorName> > mons_by_frequency;
-    
+
     /** The current step number of this set of monitors */
     quint32 stepnum;
 };

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,11 +60,11 @@ protected:
     GlobalSharedPointerBase();
 
     static QMutex* registryMutex();
-    static QSet<const void*>& getRegistry(const char *typname); 
+    static QSet<const void*>& getRegistry(const char *typname);
 
     template<class T>
     static T* registerObject(const T *obj_ptr);
-    
+
     template<class T>
     static void unregisterObject(const T *obj_ptr);
 };
@@ -80,16 +79,16 @@ T* GlobalSharedPointerBase::registerObject(const T *obj_ptr)
         return const_cast<T*>(obj_ptr);
 
     QMutexLocker lkr( GlobalSharedPointerBase::registryMutex() );
-    
+
     QSet<const void*> &registry = GlobalSharedPointerBase::getRegistry(
                                         SharedPolyPointerHelper<T>::typeName() );
-                                        
+
     for (typename QSet<const void*>::const_iterator it = registry.constBegin();
          it != registry.constEnd();
          ++it)
     {
         const T *global_obj = (const T*)(*it);
-        
+
         if ( obj_ptr == global_obj)
             //this is the same pointer
             return const_cast<T*>(obj_ptr);
@@ -100,10 +99,10 @@ T* GlobalSharedPointerBase::registerObject(const T *obj_ptr)
             return const_cast<T*>(global_obj);
         }
     }
-    
+
     //there is no global object with this value
     registry.insert( obj_ptr );
-    
+
     return const_cast<T*>(obj_ptr);
 }
 
@@ -115,7 +114,7 @@ void GlobalSharedPointerBase::unregisterObject(const T *obj_ptr)
         return;
 
     QMutexLocker lkr( GlobalSharedPointerBase::registryMutex() );
-    
+
     QSet<const void*> &registry = GlobalSharedPointerBase::getRegistry(
                                         SharedPolyPointerHelper<T>::typeName() );
 
@@ -132,10 +131,10 @@ void GlobalSharedPointerBase::unregisterObject(const T *obj_ptr)
 
 /** This is a SharedPolyPointer that uses a global registry
     to ensure that there is just one shared copy of an object.
-    
+
     Note that the this can only hold a const pointer - it does
-    not allow editing of the object. 
-    
+    not allow editing of the object.
+
     @author Christopher Woods
 */
 template<class T>
@@ -186,14 +185,14 @@ public:
 
     template<class S>
     GlobalSharedPointer<T>& operator=(S *obj);
-    
+
     bool unique() const;
-    
+
     const T& operator*() const;
     const T* operator->() const;
-    
+
     operator const T*() const;
-    
+
     const T* data() const;
     const T* constData() const;
 
@@ -245,7 +244,7 @@ SIRE_OUTOFLINE_TEMPLATE
 void GlobalSharedPointer<T>::registerGlobalPointer(bool auto_detach)
 {
     if (this->constData())
-    {   
+    {
         if (auto_detach)
         {
             if (not this->unique())
@@ -289,7 +288,7 @@ GlobalSharedPointer<T>::GlobalSharedPointer(const SharedPolyPointer<T> &o)
 template<class T>
 SIRE_OUTOFLINE_TEMPLATE
 GlobalSharedPointer<T>::GlobalSharedPointer(const GlobalSharedPointer<T> &o)
-               : SharedPolyPointer<T>( static_cast<const SharedPolyPointer<T>&>(o) ), 
+               : SharedPolyPointer<T>( static_cast<const SharedPolyPointer<T>&>(o) ),
                  GlobalSharedPointerBase()
 {
     //by definition, 'o' is already global
@@ -335,7 +334,7 @@ GlobalSharedPointer<T>& GlobalSharedPointer<T>::operator=(T *o)
 
     SharedPolyPointer<T>::operator=(o);
     this->registerGlobalPointer();
-    
+
     return *this;
 }
 
@@ -349,7 +348,7 @@ GlobalSharedPointer<T>& GlobalSharedPointer<T>::operator=(const T &obj)
 
     SharedPolyPointer<T>::operator=(obj);
     this->registerGlobalPointer();
-    
+
     return *this;
 }
 
@@ -363,7 +362,7 @@ GlobalSharedPointer<T>& GlobalSharedPointer<T>::operator=(
         GlobalSharedPointerBase::unregisterObject( this->constData() );
 
     SharedPolyPointer<T>::operator=( static_cast<const SharedPolyPointer<T>&>(o) );
-    
+
     return *this;
 }
 
@@ -392,7 +391,7 @@ GlobalSharedPointer<T>& GlobalSharedPointer<T>::operator=(int val)
         GlobalSharedPointerBase::unregisterObject( this->constData() );
 
     SharedPolyPointer<T>::operator=(val);
-    
+
     return *this;
 }
 
@@ -404,10 +403,10 @@ GlobalSharedPointer<T>& GlobalSharedPointer<T>::operator=(const S &obj)
 {
     if (SharedPolyPointer<T>::unique())
         GlobalSharedPointerBase::unregisterObject( this->constData() );
-    
+
     SharedPolyPointer<T>::operator=(obj);
     this->registerGlobalPointer();
-    
+
     return *this;
 }
 
@@ -422,7 +421,7 @@ GlobalSharedPointer<T>& GlobalSharedPointer<T>::operator=(S *obj)
 
     SharedPolyPointer<T>::operator=(obj);
     this->registerGlobalPointer();
-    
+
     return *this;
 }
 
@@ -535,7 +534,7 @@ bool GlobalSharedPointer<T>::isA() const
 
 /** Return the object pointed to by this pointer cast as
     an object of type 'S'
-    
+
     \throw SireError::invalid_cast
 */
 template<class T>
@@ -563,11 +562,11 @@ template<class T>
 QDataStream& operator>>(QDataStream &ds, SireBase::GlobalSharedPointer<T> &obj)
 {
     obj = 0;
-    
+
     ds >> static_cast<SireBase::SharedPolyPointer<T>&>(obj);
-    
+
     obj.registerGlobalPointer(false);
-    
+
     return ds;
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -70,12 +69,12 @@ CountFlops* CountFlops::global_counter( 0 );
 void CountFlops::createGlobalCounter()
 {
     CountFlops *flops = new CountFlops();
-    
+
     QMutexLocker lkr( threadFlopsMutex() );
-    
+
     if (global_counter == 0)
         global_counter = flops;
-        
+
     else
         delete flops;
 }
@@ -100,7 +99,7 @@ FlopsMark CountFlops::mark()
     QMutexLocker lkr( threadFlopsMutex() );
 
     int nthreads = threadFlops()->count();
-    
+
     QVector<int> thread_flops(nthreads);
     int *thread_flops_array = thread_flops.data();
 
@@ -111,7 +110,7 @@ FlopsMark CountFlops::mark()
         ++i;
     }
 
-    return FlopsMark(thread_flops, 
+    return FlopsMark(thread_flops,
                      global_counter->flop_timer.elapsed());
 }
 
@@ -126,7 +125,7 @@ FlopsMark& FlopsMark::operator=(const FlopsMark &other)
 {
     nflops = other.nflops;
     ms = other.ms;
-    
+
     return *this;
 }
 
@@ -156,16 +155,16 @@ FlopsMark::~FlopsMark()
 int FlopsMark::nFlops() const
 {
     int total_nflops = 0;
-    
+
     foreach (int thread_nflops, nflops)
     {
         total_nflops += thread_nflops;
     }
-    
+
     return total_nflops;
 }
 
-/** Return the total number of threads that contributed to this 
+/** Return the total number of threads that contributed to this
     flop count */
 int FlopsMark::nThreads() const
 {
@@ -174,7 +173,7 @@ int FlopsMark::nThreads() const
 
 /** Return a FlopsMark object that contains just the information
     for the ith thread
-    
+
     \throw SireError::invalid_index
 */
 FlopsMark FlopsMark::threadFlops(int i) const
@@ -185,13 +184,13 @@ FlopsMark FlopsMark::threadFlops(int i) const
                 .arg(i).arg(this->nThreads()), CODELOC );
 
     QVector<int> thread_nflops(1, nflops.at(i));
-    
+
     return FlopsMark(thread_nflops, ms);
 }
 
 /** Return a FlopsMark object that contains just the information
     for the ith thread
-    
+
     \throw SireError::invalid_index
 */
 FlopsMark FlopsMark::operator[](int i) const
@@ -205,13 +204,13 @@ double FlopsMark::operator-(const FlopsMark &other) const
 {
     int dnflops = this->nFlops() - other.nFlops();
     int dms = ms - other.ms;
-    
+
     if (dms == 0)
         //are lowest resolution is 1 ms
         dms = 1;
 
     qDebug() << dnflops << dms;
-        
+
     return (1000.0 * dnflops) / dms;
 }
 
@@ -229,21 +228,21 @@ double FlopsMark::benchmarkSum()
 
     const int nvals = 1000;
     const int nloops = 100000;
-    
+
     double values[nvals];
-    
+
     //fill this up with random rubbish
     for (int i=0; i<nvals; ++i)
     {
         values[i] = 5 * std::rand();
     }
-    
+
     //now calculate the sum of the square root of each value with
     //the previous value
     FlopsMark before_sum;
-    
+
     double sum = 0;
-    
+
     {
         const double *my_values = values;
         double my_sum = 0;
@@ -258,10 +257,10 @@ double FlopsMark::benchmarkSum()
                 {
                     __m128d low_pair = _mm_setr_pd( my_values[i-1], my_values[i-2] );
                     __m128d high_pair = _mm_setr_pd( my_values[i], my_values[i-1] );
-                    
+
                     //__m128d sse_sum = _mm_sqrt_pd( low_pair * high_pair );
                     __m128d sse_sum = _mm_add_pd( low_pair, high_pair );
-                    
+
                     my_sse_sum = _mm_add_pd(my_sse_sum, sse_sum);
                 }
 
@@ -277,28 +276,28 @@ double FlopsMark::benchmarkSum()
             }
             #endif
         }
-    
+
         {
             sum += my_sum;
         }
     }
-    
+
     int nflops = nloops * (2 * (nvals-1));
-    
+
     ADD_FLOPS(nflops);
-    
+
     FlopsMark after_sum;
-    
-    //save the sum - this prevents the compiler from optimising 
+
+    //save the sum - this prevents the compiler from optimising
     //away the benchmark
     *(::benchmarkSum()) = sum;
-    
+
     return after_sum - before_sum;
-    
+
     #else
-    
+
     return 0;
-    
+
     #endif
 }
 
@@ -313,21 +312,21 @@ double FlopsMark::benchmarkProduct()
 
     const int nvals = 1000;
     const int nloops = 100000;
-    
+
     double values[nvals];
-    
+
     //fill this up with random rubbish
     for (int i=0; i<nvals; ++i)
     {
         values[i] = 5 * std::rand();
     }
-    
+
     //now calculate the sum of the square root of each value with
     //the previous value
     FlopsMark before_sum;
-    
+
     double sum = 0;
-    
+
     {
         const double *my_values = values;
         double my_sum = 0;
@@ -342,10 +341,10 @@ double FlopsMark::benchmarkProduct()
                 {
                     __m128d low_pair = _mm_setr_pd( my_values[i-1], my_values[i-2] );
                     __m128d high_pair = _mm_setr_pd( my_values[i], my_values[i-1] );
-                    
+
                     //__m128d sse_sum = _mm_sqrt_pd( low_pair * high_pair );
                     __m128d sse_sum = _mm_mul_pd(low_pair, high_pair);
-                    
+
                     my_sse_sum = _mm_add_pd(my_sse_sum, sse_sum);
                 }
 
@@ -361,28 +360,28 @@ double FlopsMark::benchmarkProduct()
             }
             #endif
         }
-    
+
         {
             sum += my_sum;
         }
     }
-    
+
     int nflops = nloops * (2 * (nvals-1));
-    
+
     ADD_FLOPS(nflops);
-    
+
     FlopsMark after_sum;
-    
-    //save the sum - this prevents the compiler from optimising 
+
+    //save the sum - this prevents the compiler from optimising
     //away the benchmark
     *(::benchmarkSum()) = sum;
-    
+
     return after_sum - before_sum;
-    
+
     #else
-    
+
     return 0;
-    
+
     #endif
 }
 
@@ -397,21 +396,21 @@ double FlopsMark::benchmarkQuotient()
 
     const int nvals = 1000;
     const int nloops = 100000;
-    
+
     double values[nvals];
-    
+
     //fill this up with random rubbish
     for (int i=0; i<nvals; ++i)
     {
         values[i] = 5 * std::rand();
     }
-    
+
     //now calculate the sum of the square root of each value with
     //the previous value
     FlopsMark before_sum;
-    
+
     double sum = 0;
-    
+
     {
         const double *my_values = values;
         double my_sum = 0;
@@ -426,10 +425,10 @@ double FlopsMark::benchmarkQuotient()
                 {
                     __m128d low_pair = _mm_setr_pd( my_values[i-1], my_values[i-2] );
                     __m128d high_pair = _mm_setr_pd( my_values[i], my_values[i-1] );
-                    
+
                     //__m128d sse_sum = _mm_sqrt_pd( low_pair * high_pair );
                     __m128d sse_sum = _mm_div_pd(low_pair, high_pair);
-                
+
                     my_sse_sum = _mm_add_pd(my_sse_sum, sse_sum);
                 }
 
@@ -445,28 +444,28 @@ double FlopsMark::benchmarkQuotient()
             }
             #endif
         }
-    
+
         {
             sum += my_sum;
         }
     }
-    
+
     int nflops = nloops * (2 * (nvals-1));
-    
+
     ADD_FLOPS(nflops);
-    
+
     FlopsMark after_sum;
-    
-    //save the sum - this prevents the compiler from optimising 
+
+    //save the sum - this prevents the compiler from optimising
     //away the benchmark
     *(::benchmarkSum()) = sum;
-    
+
     return after_sum - before_sum;
-    
+
     #else
-    
+
     return 0;
-    
+
     #endif
 }
 
@@ -481,21 +480,21 @@ double FlopsMark::benchmark()
 
     const int nvals = 1000;
     const int nloops = 100000;
-    
+
     double values[nvals];
-    
+
     //fill this up with random rubbish
     for (int i=0; i<nvals; ++i)
     {
         values[i] = 5 * std::rand();
     }
-    
+
     //now calculate the sum of the square root of each value with
     //the previous value
     FlopsMark before_sum;
-    
+
     double sum = 0;
-    
+
     {
         const double *my_values = values;
         double my_sum = 0;
@@ -510,9 +509,9 @@ double FlopsMark::benchmark()
                 {
                     __m128d low_pair = _mm_setr_pd( my_values[i-1], my_values[i-2] );
                     __m128d high_pair = _mm_setr_pd( my_values[i], my_values[i-1] );
-                    
+
                     __m128d sse_sum = _mm_sqrt_pd( _mm_mul_pd(low_pair, high_pair) );
-                    
+
                     my_sse_sum = _mm_add_pd(my_sse_sum, sse_sum);
                 }
 
@@ -528,27 +527,27 @@ double FlopsMark::benchmark()
             }
             #endif
         }
-    
+
         {
             sum += my_sum;
         }
     }
-    
+
     int nflops = nloops * (3 * (nvals-1));
-    
+
     ADD_FLOPS(nflops);
-    
+
     FlopsMark after_sum;
-    
-    //save the sum - this prevents the compiler from optimising 
+
+    //save the sum - this prevents the compiler from optimising
     //away the benchmark
     *(::benchmarkSum()) = sum;
-    
+
     return after_sum - before_sum;
-    
+
     #else
-    
+
     return 0;
-    
+
     #endif
 }

@@ -40,7 +40,7 @@ def downloadTestsFromWebsite():
         with open(test_package_file, "wb") as f:
             c = pycurl.Curl()
             c.setopt(c.URL,
-              "http://siremol.org/largefiles/sire_releases/download.php?name=%s" \
+              "http://sire.openbiosim.org/largefiles/sire_releases/download.php?name=%s" \
                       % test_package )
             c.setopt(c.WRITEDATA, f)
             c.perform()

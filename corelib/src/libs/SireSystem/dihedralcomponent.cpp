@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,26 +61,26 @@ QDataStream &operator<<(QDataStream &ds,
                                           const DihedralComponent &dihcomp)
 {
     writeHeader(ds, r_dihcomp, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << dihcomp.p0 << dihcomp.p1 << dihcomp.p2 << dihcomp.p3
         << static_cast<const GeometryComponent&>(dihcomp);
-        
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, DihedralComponent &dihcomp)
 {
     VersionID v = readHeader(ds, r_dihcomp);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> dihcomp.p0 >> dihcomp.p1 >> dihcomp.p2 >> dihcomp.p3
             >> static_cast<GeometryComponent&>(dihcomp);
-            
+
         dihcomp.intra_molecule_points = Point::areIntraMoleculePoints(
                                                         dihcomp.p0, dihcomp.p1 ) and
                                         Point::areIntraMoleculePoints(
@@ -91,12 +90,12 @@ QDataStream &operator>>(QDataStream &ds, DihedralComponent &dihcomp)
     }
     else
         throw version_error(v, "1", r_dihcomp, CODELOC);
-        
+
     return ds;
 }
 
 /** Null constructor */
-DihedralComponent::DihedralComponent() 
+DihedralComponent::DihedralComponent()
                : ConcreteProperty<DihedralComponent,GeometryComponent>(),
                  intra_molecule_points(true)
 {}
@@ -155,7 +154,7 @@ const Symbol& DihedralComponent::r03()
     return *(getR03Symbol());
 }
 
-/** Construct to set the value of 'constrained_symbol' equal to the 
+/** Construct to set the value of 'constrained_symbol' equal to the
     dihedral between the four points 'point0', 'point1', 'point2' and 'point2' */
 DihedralComponent::DihedralComponent(const Symbol &constrained_symbol,
                                const PointRef &point0, const PointRef &point1,
@@ -171,7 +170,7 @@ DihedralComponent::DihedralComponent(const Symbol &constrained_symbol,
                             Point::areIntraMoleculePoints(p0,p3);
 }
 
-/** Construct to set the value of 'constrained_symbol' equal to the 
+/** Construct to set the value of 'constrained_symbol' equal to the
     expression based on the dihedral, angles and distances within the four points
     'point0', 'point1', 'point2' and 'point3' */
 DihedralComponent::DihedralComponent(const Symbol &constrained_symbol,
@@ -188,7 +187,7 @@ DihedralComponent::DihedralComponent(const Symbol &constrained_symbol,
                             Point::areIntraMoleculePoints(p0,p2) and
                             Point::areIntraMoleculePoints(p0,p3);
 }
-  
+
 /** Copy constructor */
 DihedralComponent::DihedralComponent(const DihedralComponent &other)
                   : ConcreteProperty<DihedralComponent,GeometryComponent>(other),
@@ -212,7 +211,7 @@ DihedralComponent& DihedralComponent::operator=(const DihedralComponent &other)
         p3 = other.p3;
         intra_molecule_points = other.intra_molecule_points;
     }
-    
+
     return *this;
 }
 
@@ -250,7 +249,7 @@ void DihedralComponent::setSpace(const Space &new_space)
         return;
 
     DihedralComponent old_state(*this);
-    
+
     try
     {
         p0.edit().setSpace(new_space);
@@ -273,7 +272,7 @@ void DihedralComponent::setSpace(const Space &new_space)
 const Point& DihedralComponent::point(int i) const
 {
     i = Index(i).map( nPoints() );
-    
+
     switch (i % 4)
     {
         case 0:
@@ -353,13 +352,13 @@ Values DihedralComponent::getValues(const System &system)
 
     if (p1.read().wouldUpdate(system))
         p1.edit().update(system);
-        
+
     if (p2.read().wouldUpdate(system))
         p2.edit().update(system);
-        
+
     if (p3.read().wouldUpdate(system))
         p3.edit().update(system);
-        
+
     Torsion tor = getTorsion();
 
     Values vals;
@@ -370,6 +369,6 @@ Values DihedralComponent::getValues(const System &system)
     vals.set( r12(), tor.line12().length() );
     vals.set( r23(), tor.triangle2().line0().length() );
     vals.set( r03(), tor.line03().length() );
-        
+
     return vals;
 }

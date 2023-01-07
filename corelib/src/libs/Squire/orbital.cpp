@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,9 +44,9 @@ static const RegisterMetaType<Orbital> r_orbital( MAGIC_ONLY, Orbital::typeName(
 QDataStream &operator<<(QDataStream &ds, const Orbital &orbital)
 {
     writeHeader(ds, r_orbital, 1);
-    
+
     ds << static_cast<const Property&>(orbital);
-    
+
     return ds;
 }
 
@@ -55,7 +54,7 @@ QDataStream &operator<<(QDataStream &ds, const Orbital &orbital)
 QDataStream &operator>>(QDataStream &ds, Orbital &orbital)
 {
     VersionID v = readHeader(ds, r_orbital);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(orbital);
@@ -106,16 +105,16 @@ const char* Orbital::typeName()
 //////////// Implementation of OrbitalShell
 ////////////
 
-static const RegisterMetaType<OrbitalShell> r_orbshell( MAGIC_ONLY, 
+static const RegisterMetaType<OrbitalShell> r_orbshell( MAGIC_ONLY,
                                                         OrbitalShell::typeName() );
-                                                        
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const OrbitalShell &orbshell)
 {
     writeHeader(ds, r_orbshell, 1);
-    
+
     ds << static_cast<const Orbital&>(orbshell);
-    
+
     return ds;
 }
 
@@ -123,7 +122,7 @@ QDataStream &operator<<(QDataStream &ds, const OrbitalShell &orbshell)
 QDataStream &operator>>(QDataStream &ds, OrbitalShell &orbshell)
 {
     VersionID v = readHeader(ds, r_orbshell);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Orbital&>(orbshell);
@@ -180,9 +179,9 @@ static const RegisterMetaType<ShellPair> r_shellpair( MAGIC_ONLY, ShellPair::typ
 QDataStream &operator<<(QDataStream &ds, const ShellPair &pair)
 {
     writeHeader(ds, r_shellpair, 1);
-    
+
     ds << static_cast<const Property&>(pair);
-    
+
     return ds;
 }
 
@@ -190,14 +189,14 @@ QDataStream &operator<<(QDataStream &ds, const ShellPair &pair)
 QDataStream &operator>>(QDataStream &ds, ShellPair &pair)
 {
     VersionID v = readHeader(ds, r_shellpair);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(pair);
     }
     else
         throw version_error(v, "1", r_shellpair, CODELOC);
-        
+
     return ds;
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,13 +50,13 @@ static const RegisterMetaType<Replicas> r_replicas;
 QDataStream &operator<<(QDataStream &ds, const Replicas &replicas)
 {
     writeHeader(ds, r_replicas, 3);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << replicas.replica_ids
         << replicas.replica_history
         << static_cast<const SupraSystem&>(replicas);
-    
+
     return ds;
 }
 
@@ -65,7 +64,7 @@ QDataStream &operator<<(QDataStream &ds, const Replicas &replicas)
 QDataStream &operator>>(QDataStream &ds, Replicas &replicas)
 {
     VersionID v = readHeader(ds, r_replicas);
-    
+
     if (v == 3)
     {
         SharedDataStream sds(ds);
@@ -78,7 +77,7 @@ QDataStream &operator>>(QDataStream &ds, Replicas &replicas)
         SharedDataStream sds(ds);
         sds >> replicas.replica_ids
             >> static_cast<SupraSystem&>(replicas);
-        
+
         replicas.replica_history.clear();
     }
     else if (v < 2)
@@ -91,7 +90,7 @@ QDataStream &operator>>(QDataStream &ds, Replicas &replicas)
     }
     else
         throw version_error(v, "2,3", r_replicas, CODELOC);
-        
+
     return ds;
 }
 
@@ -103,26 +102,26 @@ Replicas::Replicas() : ConcreteProperty<Replicas,SupraSystem>()
 void Replicas::resetReplicaIDs()
 {
     quint32 n = this->nReplicas();
-    
+
     quint32 *replica_ids_array = replica_ids.data();
-    
+
     for (quint32 i=0; i<n; ++i)
     {
         replica_ids_array[i] = i;
     }
-    
+
     replica_history.clear();
 }
 
 /** Construct a set of 'n' replicas */
-Replicas::Replicas(int n) 
+Replicas::Replicas(int n)
          : ConcreteProperty<Replicas,SupraSystem>(n),
            replica_ids(n)
 {
     if (n > 0)
     {
         SupraSystem::setSubSystem( Replica() );
-        
+
         replica_ids.squeeze();
         this->resetReplicaIDs();
     }
@@ -137,9 +136,9 @@ Replicas::Replicas(const System &system, int n)
     {
         Replica replica;
         replica.setSubSystem(system);
-    
+
         SupraSystem::setSubSystem(replica);
-        
+
         replica_ids.squeeze();
         this->resetReplicaIDs();
     }
@@ -154,15 +153,15 @@ Replicas::Replicas(const QVector<System> &systems)
     {
         Replica replica;
         replica.setSubSystem(systems.at(i));
-        
+
         SupraSystem::setSubSystem( i, replica );
     }
-    
+
     replica_ids.squeeze();
     this->resetReplicaIDs();
 }
 
-/** Construct a Replicas object that contains 'n' copies of the 
+/** Construct a Replicas object that contains 'n' copies of the
     passed subsystem */
 Replicas::Replicas(const SupraSubSystem &subsystem, int n)
          : ConcreteProperty<Replicas,SupraSystem>(n),
@@ -178,7 +177,7 @@ Replicas::Replicas(const SupraSubSystem &subsystem, int n)
         for (int i=0; i<n; ++i)
             SupraSystem::setSubSystem(i, Replica(subsystem));
     }
-    
+
     replica_ids.squeeze();
     this->resetReplicaIDs();
 }
@@ -199,7 +198,7 @@ Replicas::Replicas(const SupraSystem &suprasystem)
             else
                 SupraSystem::setSubSystem( i, Replica(suprasystem[i]) );
         }
-        
+
         replica_ids.resize(suprasystem.nSubSystems());
         replica_ids.squeeze();
         this->resetReplicaIDs();
@@ -207,7 +206,7 @@ Replicas::Replicas(const SupraSystem &suprasystem)
 }
 
 /** Copy constructor */
-Replicas::Replicas(const Replicas &other) 
+Replicas::Replicas(const Replicas &other)
          : ConcreteProperty<Replicas,SupraSystem>(other),
            replica_ids(other.replica_ids), replica_history(other.replica_history)
 {}
@@ -220,10 +219,10 @@ Replicas::~Replicas()
 Replicas& Replicas::operator=(const Replicas &other)
 {
     SupraSystem::operator=(other);
-    
+
     replica_ids = other.replica_ids;
     replica_history = other.replica_history;
-    
+
     return *this;
 }
 
@@ -246,12 +245,12 @@ bool Replicas::operator!=(const Replicas &other) const
 Replica& Replicas::_pvt_replica(int i)
 {
     SupraSubSystem &subsys = SupraSystem::_pvt_subSystem(i);
-    
+
     if (not subsys.isA<Replica>())
         throw SireError::program_bug( QObject::tr(
             "How did Replicas get a replica that is a %1?")
                 .arg(subsys.what()), CODELOC );
-                
+
     return subsys.asA<Replica>();
 }
 
@@ -260,12 +259,12 @@ Replica& Replicas::_pvt_replica(int i)
 const Replica& Replicas::_pvt_replica(int i) const
 {
     const SupraSubSystem &subsys = SupraSystem::_pvt_subSystem(i);
-    
+
     if (not subsys.isA<Replica>())
         throw SireError::program_bug( QObject::tr(
             "How did Replicas get a replica that is a %1?")
                 .arg(subsys.what()), CODELOC );
-                
+
     return subsys.asA<Replica>();
 }
 
@@ -282,7 +281,7 @@ int Replicas::nReplicas() const
     return SupraSystem::nSubSystems();
 }
 
-/** Return the ith replica 
+/** Return the ith replica
 
     \throw SireError::invalid_index
 */
@@ -315,12 +314,12 @@ QVector<double> Replicas::lambdaTrajectory() const
         return QVector<double>();
 
     QVector<double> lamtraj( this->nReplicas() );
-    
+
     for (int i=0; i<this->nReplicas(); ++i)
     {
         lamtraj[ replica_ids[i] ] = this->at(i).lambdaValue();
     }
-    
+
     return lamtraj;
 }
 
@@ -373,20 +372,20 @@ void Replicas::setSubSystem(const System &subsystem)
 }
 
 /** Overloaded function used to ensure that this system only contains
-    Replica subsystems 
-    
+    Replica subsystems
+
     \throw SireError::invalid_index
 */
 void Replicas::setSubSystem(int i, const SupraSubSystem &subsystem)
 {
     if (subsystem.isA<Replica>())
         SupraSystem::setSubSystem(i, subsystem);
-        
+
     else
         SupraSystem::setSubSystem(i, Replica(subsystem));
 }
 
-/** Overloaded function used to set the ith subsystem equal to 'system' 
+/** Overloaded function used to set the ith subsystem equal to 'system'
 
     \throw SireError::invalid_index
 */
@@ -399,18 +398,18 @@ void Replicas::setSubSystem(int i, const System &system)
 void Replicas::setEnergyComponent(const Symbol &symbol)
 {
     Replicas old_state = *this;
-    
+
     try
     {
         int n = this->nReplicas();
-    
+
         QSet<int> done_systems;
         done_systems.reserve(n);
-    
+
         for (int i=0; i<n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
-            
+
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setEnergyComponent(symbol);
@@ -440,23 +439,23 @@ void Replicas::setEnergyComponent(int i, const Symbol &symbol)
     }
 }
 
-/** Set the property used to find the simulation space for all replicas 
+/** Set the property used to find the simulation space for all replicas
     to 'spaceproperty' */
 void Replicas::setSpaceProperty(const PropertyName &spaceproperty)
 {
     Replicas old_state = *this;
-    
+
     try
     {
         int n = this->nReplicas();
-        
+
         QSet<int> done_systems;
         done_systems.reserve(n);
-        
+
         for (int i=0; i<n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
-            
+
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setSpaceProperty(spaceproperty);
@@ -486,23 +485,23 @@ void Replicas::setSpaceProperty(int i, const PropertyName &spaceproperty)
     }
 }
 
-/** Set the lambda component used for Hamiltonian replica exchange 
+/** Set the lambda component used for Hamiltonian replica exchange
     for all replicas to 'symbol' */
 void Replicas::setLambdaComponent(const Symbol &symbol)
 {
     Replicas old_state = *this;
-    
+
     try
     {
         int n = this->nReplicas();
-        
+
         QSet<int> done_systems;
         done_systems.reserve(n);
-        
+
         for (int i=0; i<n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
-            
+
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setLambdaComponent(symbol);
@@ -520,7 +519,7 @@ void Replicas::setLambdaComponent(const Symbol &symbol)
 
 /** Set the lambda component used by the ith replica for Hamiltonian
     replica exchange to 'symbol'
-    
+
     \throw SireError::invalid_index
 */
 void Replicas::setLambdaComponent(int i, const Symbol &symbol)
@@ -536,18 +535,18 @@ void Replicas::setLambdaComponent(int i, const Symbol &symbol)
 void Replicas::setLambdaValue(double value)
 {
     Replicas old_state = *this;
-    
+
     try
     {
         int n = this->nReplicas();
-        
+
         QSet<int> done_systems;
         done_systems.reserve(n);
-        
+
         for (int i=0; i<n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
-            
+
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setLambdaValue(value);
@@ -565,7 +564,7 @@ void Replicas::setLambdaValue(double value)
 
 /** Set the value of lambda used for Hamiltonian replica exchange for
     the ith replica to 'value'
-    
+
     \throw SireError::invalid_index
 */
 void Replicas::setLambdaValue(int i, double value)
@@ -580,24 +579,24 @@ void Replicas::setLambdaValue(int i, double value)
 
 /** Set the temperature of the ensemble sampled by all replicas
     to 'temperature'
-    
+
     \throw SireError::incompatible_error
 */
 void Replicas::setTemperature(const Temperature &temperature)
 {
     Replicas old_state = *this;
-    
+
     try
     {
         int n = this->nReplicas();
-        
+
         QSet<int> done_systems;
         done_systems.reserve(n);
-        
+
         for (int i=0; i<n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
-            
+
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setTemperature(temperature);
@@ -634,18 +633,18 @@ void Replicas::setTemperature(int i, const Temperature &temperature)
 void Replicas::setPressure(const Pressure &pressure)
 {
     Replicas old_state = *this;
-    
+
     try
     {
         int n = this->nReplicas();
-        
+
         QSet<int> done_systems;
         done_systems.reserve(n);
-        
+
         for (int i=0; i<n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
-            
+
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setPressure(pressure);
@@ -663,38 +662,38 @@ void Replicas::setPressure(const Pressure &pressure)
 
 /** Set the pressure of the ensemble sampled by the ith replica
     to 'pressure'
-    
+
     \throw SireError::invalid_index
     \throw SireError::incompatible_error
 */
 void Replicas::setPressure(int i, const Pressure &pressure)
 {
     i = Index(i).map( this->nReplicas() );
-    
+
     if (this->_pvt_constReplica(i).pressure() != pressure)
         this->_pvt_replica(i).setPressure(pressure);
 }
 
 /** Set the fugacity of the ensemble sampled by all replicas
     to 'fugacity'
-    
+
     \throw SireError::incompatible_error
 */
 void Replicas::setFugacity(const Pressure &fugacity)
 {
     Replicas old_state = *this;
-    
+
     try
     {
         int n = this->nReplicas();
-        
+
         QSet<int> done_systems;
         done_systems.reserve(n);
-        
+
         for (int i=0; i<n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
-            
+
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setFugacity(fugacity);
@@ -712,38 +711,38 @@ void Replicas::setFugacity(const Pressure &fugacity)
 
 /** Set the fugacity of the ensemble sampled by the ith replica
     to 'fugacity'
-    
+
     \throw SireError::invalid_index
     \throw SireError::incompatible_error
 */
 void Replicas::setFugacity(int i, const Pressure &fugacity)
 {
     i = Index(i).map( this->nReplicas() );
-    
+
     if (this->_pvt_constReplica(i).fugacity() != fugacity)
         this->_pvt_replica(i).setFugacity(fugacity);
 }
 
 /** Set the chemical potential of the ensemble sampled by all
     replicas to 'chemical_potential'
-    
+
     \throw SireError::incompatible_error
 */
 void Replicas::setChemicalPotential(const MolarEnergy &chemical_potential)
 {
     Replicas old_state = *this;
-    
+
     try
     {
         int n = this->nReplicas();
-        
+
         QSet<int> done_systems;
         done_systems.reserve(n);
-        
+
         for (int i=0; i<n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
-            
+
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setChemicalPotential(chemical_potential);
@@ -759,14 +758,14 @@ void Replicas::setChemicalPotential(const MolarEnergy &chemical_potential)
     }
 }
 
-/** Set the random number generator used by all of the replicas  
+/** Set the random number generator used by all of the replicas
     to 'rangenerator' - this doesn't give all of the replicas
-    the same generator - rather it uses this generator to 
+    the same generator - rather it uses this generator to
     reproducibly generate new generators for each replica */
 void Replicas::setGenerator(const RanGenerator &generator)
 {
     int n = this->nReplicas();
-    
+
     for (int i=0; i<n; ++i)
     {
         this->_pvt_replica(i).setGenerator( RanGenerator(generator.randInt()) );
@@ -785,43 +784,43 @@ void Replicas::setGenerator(int i, const RanGenerator &generator)
 
 /** Set the chemical potential of the ensemble sampled by the ith
     replica to 'chemical_potential'
-    
+
     \throw SireError::invalid_index
     \throw SireError::incompatible_error
 */
 void Replicas::setChemicalPotential(int i, const MolarEnergy &chemical_potential)
 {
     i = Index(i).map( this->nReplicas() );
-    
+
     if (this->_pvt_constReplica(i).chemicalPotential() != chemical_potential)
         this->_pvt_replica(i).setChemicalPotential(chemical_potential);
 }
 
 /** Swap the systems between replicas i and j. If swap_monitors is
-    true then the monitors are swapped as well 
-    
+    true then the monitors are swapped as well
+
     \throw SireError::invalid_index
 */
 void Replicas::swapSystems(int i, int j, bool swap_monitors)
 {
     i = Index(i).map( this->nReplicas() );
     j = Index(j).map( this->nReplicas() );
-    
+
     if (i == j)
         return;
-    
+
     Replica old_i = this->_pvt_constReplica(i);
-    
-    this->_pvt_replica(i).swapInSystem( this->_pvt_constReplica(j).subSystemAndMoves(), 
+
+    this->_pvt_replica(i).swapInSystem( this->_pvt_constReplica(j).subSystemAndMoves(),
                                         swap_monitors );
-                                        
+
     this->_pvt_replica(j).swapInSystem( old_i.subSystemAndMoves(), swap_monitors );
-    
+
     //swap the ID's of the replicas
     qSwap( replica_ids[i], replica_ids[j] );
 }
 
-/** Swap the molecules between replicas i and j 
+/** Swap the molecules between replicas i and j
 
     \throw SireError::invalid_index
 */
@@ -829,17 +828,17 @@ void Replicas::swapMolecules(int i, int j)
 {
     i = Index(i).map( this->nReplicas() );
     j = Index(j).map( this->nReplicas() );
-    
+
     if (i == j)
         return;
-        
+
     Replica old_i = this->_pvt_constReplica(i);
-    
-    this->_pvt_replica(i).swapInMolecules( 
+
+    this->_pvt_replica(i).swapInMolecules(
                                 this->_pvt_constReplica(j).subSystemAndMoves() );
-                                
+
     this->_pvt_replica(j).swapInMolecules( old_i.subSystemAndMoves() );
-    
+
     //swap the IDs of the replicas
     qSwap( replica_ids[i], replica_ids[j] );
 }

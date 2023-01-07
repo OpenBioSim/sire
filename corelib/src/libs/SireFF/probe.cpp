@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,23 +44,23 @@ static const RegisterMetaType<Probe> r_probe( MAGIC_ONLY, Probe::typeName() );
 QDataStream &operator<<(QDataStream &ds, const Probe &probe)
 {
     writeHeader(ds, r_probe, 1);
-    
+
     ds << static_cast<const Property&>(probe);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, Probe &probe)
 {
     VersionID v = readHeader(ds, r_probe);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(probe);
     }
     else
         throw version_error( v, "1", r_probe, CODELOC );
-        
+
     return ds;
 }
 
@@ -124,23 +123,23 @@ static const RegisterMetaType<NullProbe> r_nullprobe;
 QDataStream &operator<<(QDataStream &ds, const NullProbe &nullprobe)
 {
     writeHeader(ds, r_nullprobe, 1);
-    
+
     ds << static_cast<const Probe&>(nullprobe);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, NullProbe &nullprobe)
 {
     VersionID v = readHeader(ds, r_nullprobe);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Probe&>(nullprobe);
     }
     else
         throw version_error(v, "1", r_nullprobe, CODELOC);
-        
+
     return ds;
 }
 

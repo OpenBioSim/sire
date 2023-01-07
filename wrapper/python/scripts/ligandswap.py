@@ -54,7 +54,7 @@ parser = argparse.ArgumentParser(description="Calculate relative binding free "
                                              "energies using ligandswap",
                                  epilog="ligandswap is built using Sire and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/ligandswap",
+                                        "http://sire.openbiosim.org/ligandswap",
                                  prog="ligandswap")
 
 parser.add_argument('--description', action="store_true",

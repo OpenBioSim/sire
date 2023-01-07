@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,9 +53,9 @@ static const RegisterMetaType<Within> r_within;
 QDataStream &operator<<(QDataStream &ds, const Within &within)
 {
     writeHeader(ds, r_within, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << within.atomid << within.point << within.dist.to(angstrom);
 
     return ds;
@@ -66,20 +65,20 @@ QDataStream &operator<<(QDataStream &ds, const Within &within)
 QDataStream &operator>>(QDataStream &ds, Within &within)
 {
     VersionID v = readHeader(ds, r_within);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         double dist;
-        
+
         sds >> within.atomid >> within.point >> dist;
-            
+
         within.dist = dist*angstrom;
     }
     else
         throw version_error( v, "1", r_within, CODELOC );
-        
+
     return ds;
 }
 
@@ -119,7 +118,7 @@ uint Within::hash() const
 {
     return atomid.hash();
 }
-            
+
 /** Return a string representatio of this ID */
 QString Within::toString() const
 {
@@ -144,7 +143,7 @@ Within& Within::operator=(const Within &other)
         point = other.point;
         dist = other.dist;
     }
-    
+
     return *this;
 }
 
@@ -184,9 +183,9 @@ QList<AtomIdx> Within::map(const MolInfo&) const
     return QList<AtomIdx>();
 }
 
-/** Map this ID to the list of atomidxs of specified atoms 
+/** Map this ID to the list of atomidxs of specified atoms
     in the passed molecule
-    
+
     \throw SireMol::missing_atom
     \throw SireError::invalid_index
 */
@@ -223,15 +222,15 @@ QList<AtomIdx> Within::map(const MoleculeView &molview, const PropertyMap &map) 
     else
     {
         Selector<Atom> atoms = molview.molecule().selectAll(atomid,map);
-        
+
         QVector<Vector> points;
-        
-        
+
+
         for (int i=0; i<atoms.count(); ++i)
         {
             points.append( coords[atoms(i).cgAtomIdx()] );
         }
-        
+
         if (molview.selectedAll())
         {
             for (AtomIdx i(0); i<coords.nAtoms(); ++i)
@@ -261,12 +260,12 @@ QList<AtomIdx> Within::map(const MoleculeView &molview, const PropertyMap &map) 
             }
         }
     }
-    
+
     if (atomidxs.isEmpty())
         throw SireMol::missing_atom( QObject::tr(
                 "There is no atom that matches %1.").arg(this->toString()),
                     CODELOC );
-                    
+
     return atomidxs;
 }
 

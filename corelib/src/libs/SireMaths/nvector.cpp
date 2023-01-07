@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,11 +44,11 @@ static const RegisterMetaType<NVector> r_nvector(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const NVector &vector)
 {
     writeHeader(ds, r_nvector, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << vector.array;
-    
+
     return ds;
 }
 
@@ -57,16 +56,16 @@ QDataStream &operator<<(QDataStream &ds, const NVector &vector)
 QDataStream &operator>>(QDataStream &ds, NVector &vector)
 {
     VersionID v = readHeader(ds, r_nvector);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> vector.array;
     }
     else
         throw version_error(v, "1", r_nvector, CODELOC);
-        
+
     return ds;
 }
 
@@ -93,7 +92,7 @@ NVector::NVector(int nrows, double initial_value)
 NVector::NVector(const Vector &vector) : array(3)
 {
     array.squeeze();
-    
+
     memcpy(array.data(), vector.constData(), 3*sizeof(double));
 }
 
@@ -186,8 +185,8 @@ void NVector::assertNRows(int nrows) const
 }
 
 /** Assert that this column vector has 'ncolumns' columns - note
-    that this is a column vector, so only has 1 column! 
-    
+    that this is a column vector, so only has 1 column!
+
     \throw SireError::incompatible_error
 */
 void NVector::assertNColumns(int ncolumns) const
@@ -205,9 +204,9 @@ void NVector::assertNColumns(int ncolumns) const
                     .arg(array.count()).arg(ncolumns), CODELOC );
 }
 
-/** Return a modifiable reference to the ith row of this 
+/** Return a modifiable reference to the ith row of this
     column vector
-    
+
     \throw SireError::invalid_index
 */
 double& NVector::operator[](int i)
@@ -216,9 +215,9 @@ double& NVector::operator[](int i)
     return array.data()[i];
 }
 
-/** Return a modifiable reference to the ith row of this 
+/** Return a modifiable reference to the ith row of this
     column vector
-    
+
     \throw SireError::invalid_index
 */
 double& NVector::operator()(int i)
@@ -227,7 +226,7 @@ double& NVector::operator()(int i)
 }
 
 /** Return a modifiable reference to the value at [i,j]
-    
+
     \throw SireError::invalid_index
 */
 double& NVector::operator()(int i, int j)
@@ -255,7 +254,7 @@ const double& NVector::operator()(int i) const
     return this->operator[](i);
 }
 
-/** Return the value at index [i,j] 
+/** Return the value at index [i,j]
 
     \throw SireError::invalid_index
 */
@@ -302,17 +301,17 @@ int NVector::nColumns() const
 NVector& NVector::operator+=(const NVector &other)
 {
     this->assertNRows(other.nRows());
-    
+
     double *d = array.data();
     const double *other_d = other.array.constData();
-    
+
     const int sz = array.count();
-    
+
     for (int i=0; i<sz; ++i)
     {
         d[i] += other_d[i];
     }
-    
+
     return *this;
 }
 
@@ -320,17 +319,17 @@ NVector& NVector::operator+=(const NVector &other)
 NVector& NVector::operator-=(const NVector &other)
 {
     this->assertNRows(other.nRows());
-    
+
     double *d = array.data();
     const double *other_d = other.array.constData();
-    
+
     const int sz = array.count();
-    
+
     for (int i=0; i<sz; ++i)
     {
         d[i] -= other_d[i];
     }
-    
+
     return *this;
 }
 
@@ -354,11 +353,11 @@ NVector& NVector::operator*=(double scale)
             d[i] *= scale;
         }
     }
-    
+
     return *this;
 }
 
-/** Vector scale 
+/** Vector scale
 
     \throw SireMaths::domain_error
 */
@@ -375,15 +374,15 @@ NVector& NVector::operator/=(double scale)
 NVector NVector::operator-() const
 {
     NVector ret(*this);
-    
+
     const int sz = array.count();
     double *d = ret.array.data();
-    
+
     for (int i=0; i<sz; ++i)
     {
         d[i] = -d[i];
     }
-    
+
     return ret;
 }
 
@@ -392,7 +391,7 @@ NVector NVector::operator+(const NVector &other) const
 {
     NVector ret(*this);
     ret += other;
-    
+
     return ret;
 }
 
@@ -445,7 +444,7 @@ void NVector::setAll(double value)
 {
     const int sz = array.count();
     double *d = array.data();
-    
+
     for (int i=0; i<sz; ++i)
     {
         d[i] = value;
@@ -469,14 +468,14 @@ double NVector::length2() const
 {
     const int sz = array.count();
     const double *d = array.constData();
-    
+
     double l2(0);
-    
+
     for (int i=0; i<sz; ++i)
     {
         l2 += d[i]*d[i];
     }
-    
+
     return l2;
 }
 
@@ -493,14 +492,14 @@ double NVector::length() const
 NVector NVector::normalise() const
 {
     double l = this->length();
-    
+
     if (l == 0)
         throw SireMaths::domain_error( QObject::tr(
                 "It is not possible to normalise a vector of length 0."),
                     CODELOC );
-                    
+
     l = 1 / l;
-    
+
     return *this * l;
 }
 
@@ -508,16 +507,16 @@ NVector NVector::normalise() const
 double NVector::sum() const
 {
     const double *d = array.constData();
-    
+
     int sz = array.count();
-    
+
     double total = 0;
-    
+
     for (int i=0; i<sz; ++i)
     {
         total += d[i];
     }
-    
+
     return total;
 }
 
@@ -532,22 +531,22 @@ QString NVector::toString() const
 {
     if (array.count() == 0)
         return "( )";
-        
+
     else if (array.count() == 1)
     {
         const double *d = array.constData();
-    
+
         return QString("( %1 )").arg( QString::number(d[0], 'g', 8) );
     }
 
     QStringList rows;
-    
+
     const double *d = array.constData();
-    
+
     for (qint32 i=0; i<array.count(); ++i)
     {
         QString numstr = QString::number(d[i], 'g', 6);
-    
+
         if (i == 0)
             rows.append( QString("/ %1 \\").arg(numstr, 8) );
         else if (i == this->nRows() - 1)
@@ -555,7 +554,7 @@ QString NVector::toString() const
         else
             rows.append( QString("| %1 |").arg(numstr, 8) );
     }
-    
+
     return rows.join("\n");
 }
 
@@ -566,18 +565,18 @@ QString NVector::toString() const
 double NVector::dot(const NVector &other) const
 {
     this->assertNRows(other.nRows());
-    
+
     const int sz = array.count();
     const double *d = array.constData();
     const double *other_d = other.array.constData();
-    
+
     double sum(0);
-    
+
     for (int i=0; i<sz; ++i)
     {
         sum += d[i]*other_d[i];
     }
-    
+
     return sum;
 }
 
@@ -589,12 +588,12 @@ double NVector::dot(const NVector &other) const
 NVector NVector::cross(const NVector &other) const
 {
     this->assertNRows(other.nRows());
-    
+
     if (this->nRows() == 3)
     {
         const double *d = array.constData();
         const double *other_d = other.array.constData();
-    
+
         return Vector::cross( Vector(d[0], d[1], d[2]),
                               Vector(other_d[0], other_d[1], other_d[2]) );
     }
@@ -611,7 +610,7 @@ NVector NVector::cross(const NVector &other) const
                 "vectors. A column vector of rank %1 is not supported.")
                     .arg(this->nRows()), CODELOC );
     }
-    
+
     return NVector();
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,9 +51,9 @@ class Reply;
 class P2PComm;
 
 /** This class provides the global interface to all of the
-    MPI nodes in the cluster (and, on the root node, the 
+    MPI nodes in the cluster (and, on the root node, the
     global registry of all nodes available via MPI)
-    
+
     This is a private class which is only available internally
     to SireCluster if MPI is available
 
@@ -73,12 +72,12 @@ public:
     static void registerBackend(const Backend &backend);
 
     static P2PComm createP2P(int master_rank, int slave_rank);
-    
+
     static Frontend getFrontend();
     static Frontend getFrontend(const QUuid &uid);
-    
+
     static QList<Frontend> getFrontends(int n);
-    
+
     static QList<QUuid> UIDs();
 
     static bool hasBackend(const QUuid &uid);
@@ -96,10 +95,10 @@ public:
     static void informedShutdown();
 
     static Reply getReply(const Message &message);
-    
+
     static void postResult(const QUuid &subject_uid, int sender,
                            const QByteArray &result_data);
-                           
+
     static void postError(const QUuid &subject_uid, int sender,
                           const QByteArray &message_data,
                           const QByteArray &error_data);

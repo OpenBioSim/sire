@@ -119,7 +119,7 @@ if __name__ == '__main__':
                                                  "free energies, PMFs and to view convergence.",
                                      epilog="analyse_freenrg is built using Sire and is distributed "
                                             "under the GPL. For more information please visit "
-                                            "http://siremol.org/analyse_freenrg",
+                                            "http://sire.openbiosim.org/analyse_freenrg",
                                      prog="analyse_freenrg")
     parser.add_argument('--description', action="store_true",
                         help="Print a complete description of this program.")

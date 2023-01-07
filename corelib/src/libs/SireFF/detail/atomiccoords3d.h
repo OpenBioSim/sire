@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -67,12 +66,12 @@ using SireBase::PropertyName;
 
 namespace detail
 {
-    
+
 SIREFF_EXPORT bool selectedAll(const QSet<quint32> &idxs, quint32 n);
 
 /** This class holds the 3D coordinates of all of the atoms,
     optimised for access by the forcefield
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT AtomicCoords3D
@@ -83,34 +82,34 @@ friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, AtomicCoords3D&);
 
 public:
     AtomicCoords3D();
-    
+
     AtomicCoords3D(const PartialMolecule &molecule,
                    const PropertyName &coords_property);
-    
+
     AtomicCoords3D(const CoordGroupArray &coords);
-                   
+
     AtomicCoords3D(const AtomicCoords3D &other);
-    
+
     ~AtomicCoords3D();
-    
+
     AtomicCoords3D& operator=(const AtomicCoords3D &other);
-    
+
     bool operator==(const AtomicCoords3D &other) const;
     bool operator!=(const AtomicCoords3D &other) const;
-    
+
     const CoordGroupArray& atomicCoordinates() const;
-    
+
     void setAtomicCoordinates(const AtomicCoords3D &other);
-    
+
     bool changedAllGroups(const AtomicCoords3D &params) const;
-    
+
     QSet<quint32> getChangedGroups(const AtomicCoords3D &params) const;
-    
+
     void addChangedGroups(const AtomicCoords3D &params,
                           QSet<quint32> &changed_groups) const;
-    
+
     AtomicCoords3D applyMask(const QSet<quint32> &idxs) const;
-    
+
 private:
     /** The 3D coordinates of all of the atoms in this forcefield,
         arranged by CutGroup */

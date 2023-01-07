@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -67,28 +66,28 @@ class ChainID;
 class SegID;
 class CGID;
 
-/** This is the base class of GroupAtomID, used to abstract   
+/** This is the base class of GroupAtomID, used to abstract
     template-independent parts away from the template code.
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT GroupAtomIDBase : public AtomID
 {
 public:
     GroupAtomIDBase();
-    
+
     GroupAtomIDBase(const GroupAtomIDBase &other);
-    
+
     ~GroupAtomIDBase();
-    
+
 protected:
     void throwMissingAtom(const MolInfo &molinfo) const;
 };
 
-/** This class represents an Atom ID that is comprised of both 
+/** This class represents an Atom ID that is comprised of both
     an AtomID part and an ID of a group in the molecule (e.g.
     a Residue, Segment, Chain or CutGroup)
-    
+
     @author Christopher Woods
 */
 template<class GROUP, class ATOM>
@@ -100,33 +99,33 @@ friend SIREMOL_EXPORT QDataStream& ::operator>><>(QDataStream&, GroupAtomID<GROU
 
 public:
     GroupAtomID();
-    
+
     GroupAtomID(const GROUP &groupid, const ATOM &atomid);
-    
+
     GroupAtomID(const GroupAtomID &other);
-    
+
     ~GroupAtomID();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     GroupAtomID<GROUP,ATOM>* clone() const;
-    
+
     bool operator==(const GroupAtomID<GROUP,ATOM> &other) const;
-    
+
     bool operator!=(const GroupAtomID<GROUP,ATOM> &other) const;
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     uint hash() const;
-    
+
     bool isNull() const;
-    
+
     QString toString() const;
-    
+
     QList<AtomIdx> map(const MolInfo &molinfo) const;
- 
+
 private:
     typename GROUP::Identifier groupid;
     typename ATOM::Identifier atomid;
@@ -161,7 +160,7 @@ template<class GROUP, class ATOM>
 SIRE_OUTOFLINE_TEMPLATE
 GroupAtomID<GROUP,ATOM>::~GroupAtomID()
 {}
-    
+
 template<class GROUP, class ATOM>
 SIRE_OUTOFLINE_TEMPLATE
 const char* GroupAtomID<GROUP,ATOM>::typeName()
@@ -227,7 +226,7 @@ QString GroupAtomID<GROUP,ATOM>::toString() const
     return QString("%1 and %2").arg(groupid.toString(), atomid.toString());
 }
 
-/** Map this combined ID back to the indicies of the atoms that match this ID 
+/** Map this combined ID back to the indicies of the atoms that match this ID
 
     \throw ???::missing_GROUP
     \throw SireMol::missing_atom
@@ -243,14 +242,14 @@ QList<AtomIdx> GroupAtomID<GROUP,ATOM>::map(const MolInfo &molinfo) const
         return molinfo.getAtomsIn(groupid);
     else if (groupid.isNull())
         return atomid.map(molinfo);
-    
-    QList<AtomIdx> atomidxs = 
+
+    QList<AtomIdx> atomidxs =
                 MolInfo::intersection(atomid.map(molinfo),
                                       molinfo.getAtomsIn(groupid) );
-                                             
+
     if (atomidxs.isEmpty())
         this->throwMissingAtom(molinfo);
-            
+
     return atomidxs;
 }
 
@@ -265,7 +264,7 @@ typedef GroupAtomID<CGID,AtomID> CGAtomID;
 /** Serialise to a binary datastream */
 template<class GROUP, class ATOM>
 SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator<<(QDataStream &ds, 
+QDataStream& operator<<(QDataStream &ds,
                         const SireMol::GroupAtomID<GROUP,ATOM> &groupatomid)
 {
     ds << groupatomid.groupid << groupatomid.atomid;
@@ -275,7 +274,7 @@ QDataStream& operator<<(QDataStream &ds,
 /** Extract from a binary datastream */
 template<class GROUP, class ATOM>
 SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator>>(QDataStream &ds, 
+QDataStream& operator>>(QDataStream &ds,
                         SireMol::GroupAtomID<GROUP,ATOM> &groupatomid)
 {
     ds >> groupatomid.groupid >> groupatomid.atomid;
@@ -289,13 +288,13 @@ Q_DECLARE_METATYPE(SireMol::SegAtomID);
 Q_DECLARE_METATYPE(SireMol::CGAtomID);
 
 SIRE_EXPOSE_CLASS( SireMol::GroupAtomIDBase )
-SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::ResID, SireMol::AtomID>), 
+SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::ResID, SireMol::AtomID>),
                     SireMol::ResAtomID )
-SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::ChainID, SireMol::AtomID>), 
+SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::ChainID, SireMol::AtomID>),
                     SireMol::ChainAtomID )
-SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::SegID, SireMol::AtomID>), 
+SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::SegID, SireMol::AtomID>),
                     SireMol::SegAtomID )
-SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID>), 
+SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID>),
                     SireMol::CGAtomID )
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES

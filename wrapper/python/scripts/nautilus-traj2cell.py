@@ -16,7 +16,7 @@ import sys
 parser = argparse.ArgumentParser(description="Generate cell files from a passed trajectory",
                                  epilog="nautilus-traj2cell is built using Sire, Numpy and mdtraj and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/nautilus",
+                                        "http://sire.openbiosim.org/nautilus",
                                  prog="nautilus")
 
 parser.add_argument('-C', '--config', nargs="?",

@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser(description="Perform molecular dynamics single 
                                              "using OpenMM",
                                  epilog="somd-freenrg is built using Sire and OpenMM and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org",
+                                        "http://sire.openbiosim.org",
                                  prog="somd-freenrg")
 
 parser.add_argument('-C', '--config', nargs="?",

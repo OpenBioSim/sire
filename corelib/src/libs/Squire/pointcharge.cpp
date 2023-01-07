@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -43,9 +42,9 @@ static const RegisterMetaType<PointCharge> r_pointcharge(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const PointCharge &q)
 {
     writeHeader(ds, r_pointcharge, 1);
-    
+
     ds << q.cent << q.q;
-    
+
     return ds;
 }
 
@@ -53,14 +52,14 @@ QDataStream &operator<<(QDataStream &ds, const PointCharge &q)
 QDataStream &operator>>(QDataStream &ds, PointCharge &q)
 {
     VersionID v = readHeader(ds, r_pointcharge);
-    
+
     if (v == 1)
     {
         ds >> q.cent >> q.q;
     }
     else
         throw version_error(v, "1", r_pointcharge, CODELOC);
-        
+
     return ds;
 }
 
@@ -68,13 +67,13 @@ QDataStream &operator>>(QDataStream &ds, PointCharge &q)
 PointCharge::PointCharge() : q(0)
 {}
 
-/** Construct a point charge at the specified location with the 
+/** Construct a point charge at the specified location with the
     specified charge */
 PointCharge::PointCharge(const Vector &coords, const Charge &charge)
             : cent(coords), q(charge.to(mod_electron))
 {}
 
-/** Construct a point charge at the specified location with the 
+/** Construct a point charge at the specified location with the
     specified charge */
 PointCharge::PointCharge(const Charge &charge, const Vector &coords)
             : cent(coords), q(charge.to(mod_electron))

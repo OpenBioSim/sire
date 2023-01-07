@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,31 +43,31 @@ SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ResidueCutting&);
 namespace SireMol
 {
 
-/** This is a cutting function that divides up a molecule into 
-    CutGroups based on residue - each residue is placed into 
+/** This is a cutting function that divides up a molecule into
+    CutGroups based on residue - each residue is placed into
     a different CutGroup
-    
+
     @author Christopher Woods
 */
-class SIREMOL_EXPORT ResidueCutting 
+class SIREMOL_EXPORT ResidueCutting
         : public SireBase::ConcreteProperty<ResidueCutting,CuttingFunction>
 {
 public:
     ResidueCutting();
-    
+
     ResidueCutting(const ResidueCutting &other);
-    
+
     ~ResidueCutting();
-    
+
     static const char* typeName();
-    
+
     ResidueCutting& operator=(const ResidueCutting &other);
-    
+
     bool operator==(const ResidueCutting &other) const;
     bool operator!=(const ResidueCutting &other) const;
-    
+
     MolStructureEditor operator()(MolStructureEditor &moleditor) const;
-}; 
+};
 
 }
 

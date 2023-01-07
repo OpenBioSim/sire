@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,14 +52,14 @@ QDataStream &operator<<(QDataStream &ds, const CoulombComponent &coul)
 QDataStream &operator>>(QDataStream &ds, CoulombComponent &coul)
 {
     VersionID v = readHeader(ds, r_coul);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(coul);
     }
     else
         throw version_error(v, "1", r_coul, CODELOC);
-        
+
     return ds;
 }
 
@@ -82,12 +81,12 @@ CoulombComponent::CoulombComponent(const SireCAS::Symbol &symbol)
                  : FFComponent(symbol, QLatin1String("coulomb"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 CoulombComponent::CoulombComponent(const CoulombComponent &other)
                  : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 CoulombComponent::~CoulombComponent()
 {}
 
@@ -128,14 +127,14 @@ QDataStream &operator<<(QDataStream &ds, const LJComponent &lj)
 QDataStream &operator>>(QDataStream &ds, LJComponent &lj)
 {
     VersionID v = readHeader(ds, r_lj);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(lj);
     }
     else
         throw version_error(v, "1", r_lj, CODELOC);
-        
+
     return ds;
 }
 
@@ -157,12 +156,12 @@ LJComponent::LJComponent(const SireCAS::Symbol &symbol)
             : FFComponent(symbol, QLatin1String("LJ"))
 {}
 
-/** Copy constructor */  
+/** Copy constructor */
 LJComponent::LJComponent(const LJComponent &other)
             : FFComponent(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 LJComponent::~LJComponent()
 {}
 
@@ -197,7 +196,7 @@ QDataStream &operator<<(QDataStream &ds, const CLJComponent &clj)
     writeHeader(ds, r_clj, 1);
     ds << static_cast<const FFComponent&>(clj)
        << clj.coul_component << clj.lj_component;
-       
+
     return ds;
 }
 
@@ -205,7 +204,7 @@ QDataStream &operator<<(QDataStream &ds, const CLJComponent &clj)
 QDataStream &operator>>(QDataStream &ds, CLJComponent &clj)
 {
     VersionID v = readHeader(ds, r_clj);
-    
+
     if (v == 1)
     {
         ds >> static_cast<FFComponent&>(clj)
@@ -213,7 +212,7 @@ QDataStream &operator>>(QDataStream &ds, CLJComponent &clj)
     }
     else
         throw version_error(v, "1", r_clj, CODELOC);
-        
+
     return ds;
 }
 
@@ -240,13 +239,13 @@ CLJComponent::CLJComponent(const SireCAS::Symbol &symbol)
     lj_component = LJComponent( this->forceFieldName() );
 }
 
-/** Copy constructor */  
+/** Copy constructor */
 CLJComponent::CLJComponent(const CLJComponent &other)
-            : FFComponent(other), coul_component(other.coul_component), 
+            : FFComponent(other), coul_component(other.coul_component),
               lj_component(other.lj_component)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 CLJComponent::~CLJComponent()
 {}
 
@@ -270,11 +269,11 @@ Symbols CLJComponent::symbols() const
 {
     Symbols symbls;
     symbls.reserve(3);
-    
+
     symbls.insert(coul_component);
     symbls.insert(lj_component);
     symbls.insert(*this);
-    
+
     return symbls;
 }
 

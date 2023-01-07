@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -70,9 +69,9 @@ QDataStream &operator<<(QDataStream &ds,
                                        const ChainEditor &chaineditor)
 {
     writeHeader(ds, r_chaineditor, 1);
-    
+
     ds << static_cast<const Editor<ChainEditor,Chain>&>(chaineditor);
-    
+
     return ds;
 }
 
@@ -81,14 +80,14 @@ QDataStream &operator>>(QDataStream &ds,
                                        ChainEditor &chaineditor)
 {
     VersionID v = readHeader(ds, r_chaineditor);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Editor<ChainEditor,Chain>&>(chaineditor);
     }
     else
         throw version_error( v, "1", r_chaineditor, CODELOC );
-        
+
     return ds;
 }
 
@@ -97,12 +96,12 @@ ChainEditor::ChainEditor() : ConcreteProperty< ChainEditor,Editor<ChainEditor,Ch
 {}
 
 /** Construct to edit a copy of the Chain 'chain' */
-ChainEditor::ChainEditor(const Chain &chain) 
+ChainEditor::ChainEditor(const Chain &chain)
             : ConcreteProperty< ChainEditor,Editor<ChainEditor,Chain> >(chain)
 {}
 
 /** Copy constructor */
-ChainEditor::ChainEditor(const ChainEditor &other) 
+ChainEditor::ChainEditor(const ChainEditor &other)
             : ConcreteProperty< ChainEditor,Editor<ChainEditor,Chain> >(other)
 {}
 
@@ -136,9 +135,9 @@ ChainEditor& ChainEditor::rename(const ChainName &newname)
     if (newname == this->name())
         //nothing to do
         return *this;
-        
+
     d->rename( this->index(), newname );
-    
+
     return *this;
 }
 
@@ -148,7 +147,7 @@ ChainStructureEditor ChainEditor::reindex(ChainIdx newidx) const
 {
     ChainStructureEditor editor(*this);
     editor.reindex(newidx);
-    
+
     return editor;
 }
 
@@ -157,7 +156,7 @@ ChainStructureEditor ChainEditor::reindex(ChainIdx newidx) const
 MolStructureEditor ChainEditor::remove() const
 {
     ChainStructureEditor editor(*this);
-    
+
     return editor.remove();
 }
 
@@ -166,7 +165,7 @@ MolStructureEditor ChainEditor::remove() const
 ResStructureEditor ChainEditor::add(const ResName &resname) const
 {
     ChainStructureEditor editor(*this);
-    
+
     return editor.add(resname);
 }
 
@@ -175,13 +174,13 @@ ResStructureEditor ChainEditor::add(const ResName &resname) const
 ResStructureEditor ChainEditor::add(ResNum resnum) const
 {
     ChainStructureEditor editor(*this);
-    
+
     return editor.add(resnum);
 }
 
-/** Completely remove all residues that match the ID 'resid' from 
-    this Chain 
-    
+/** Completely remove all residues that match the ID 'resid' from
+    this Chain
+
     \throw SireMol::missing_residue
     \throw SireError::invalid_index
 */
@@ -189,7 +188,7 @@ ChainStructureEditor ChainEditor::remove(const ResID &resid) const
 {
     ChainStructureEditor editor(*this);
     editor.remove(resid);
-    
+
     return editor;
 }
 
@@ -201,7 +200,7 @@ ChainStructureEditor ChainEditor::remove(int i) const
 {
     ChainStructureEditor editor(*this);
     editor.remove(i);
-    
+
     return editor;
 }
 
@@ -214,43 +213,43 @@ ChainStructureEditor ChainEditor::remove(const AtomID &atomid) const
 {
     ChainStructureEditor editor(*this);
     editor.remove(atomid);
-    
+
     return editor;
 }
 
-/** Transfer all residues that match the ID 'resid' in this Chain 
+/** Transfer all residues that match the ID 'resid' in this Chain
     to the Chain that matches the ID 'cgid'
-    
+
     \throw SireMol::missing_residue
     \throw SireMol::missing_chain
     \throw SireMol::duplicate_chain
     \throw SireError::invalid_index
 */
-ChainStructureEditor ChainEditor::transfer(const ResID &resid, 
+ChainStructureEditor ChainEditor::transfer(const ResID &resid,
                                            const ChainID &cgid) const
 {
     ChainStructureEditor editor(*this);
     editor.transfer(resid, cgid);
-    
+
     return editor;
 }
-                                     
+
 /** Transfer the ith residue of this Chain into the Chain identified
     by the ID 'cgid'
-    
+
     \throw SireError::invalid_index
 */
 ChainStructureEditor ChainEditor::transfer(int i, const ChainID &cgid) const
 {
     ChainStructureEditor editor(*this);
     editor.transfer(i, cgid);
-    
+
     return editor;
 }
 
-/** Completely transfer all of the residues in this Chain to 
+/** Completely transfer all of the residues in this Chain to
     the Chain that matches the ID 'cgid'
-    
+
     \throw SireMol::missing_chain
     \throw SireMol::duplicate_chain
     \throw SireError::invalid_index
@@ -259,11 +258,11 @@ ChainStructureEditor ChainEditor::transferAll(const ChainID &cgid) const
 {
     ChainStructureEditor editor(*this);
     editor.transferAll(cgid);
-    
+
     return editor;
 }
 
-/** Commit the changes made by this editor and return the 
+/** Commit the changes made by this editor and return the
     updated Chain */
 Chain ChainEditor::commit() const
 {
@@ -286,10 +285,10 @@ QDataStream &operator<<(QDataStream &ds,
                                        const ChainStructureEditor &chaineditor)
 {
     writeHeader(ds, r_cgstructeditor, 1);
-    
+
     ds << chaineditor.uid
        << static_cast<const StructureEditor&>(chaineditor);
-    
+
     return ds;
 }
 
@@ -298,7 +297,7 @@ QDataStream &operator>>(QDataStream &ds,
                                        ChainStructureEditor &chaineditor)
 {
     VersionID v = readHeader(ds, r_cgstructeditor);
-    
+
     if (v == 1)
     {
         ds >> chaineditor.uid
@@ -306,7 +305,7 @@ QDataStream &operator>>(QDataStream &ds,
     }
     else
         throw version_error( v, "1", r_cgstructeditor, CODELOC );
-        
+
     return ds;
 }
 
@@ -324,9 +323,9 @@ ChainStructureEditor::ChainStructureEditor(const Chain &chain)
     uid = this->getUID(chain.index());
 }
 
-/** Construct to edit the Chain at index 'cgidx' in the molecule 
+/** Construct to edit the Chain at index 'cgidx' in the molecule
     also being edited in 'data'
-    
+
     \throw SireError::invalid_index
 */
 ChainStructureEditor::ChainStructureEditor(const StructureEditor &data, ChainIdx cgidx)
@@ -349,7 +348,7 @@ ChainStructureEditor& ChainStructureEditor::operator=(const Chain &chain)
 {
     StructureEditor::operator=(chain.data());
     uid = this->getUID(chain.index());
-    
+
     return *this;
 }
 
@@ -358,7 +357,7 @@ ChainStructureEditor& ChainStructureEditor::operator=(const ChainStructureEditor
 {
     StructureEditor::operator=(other);
     uid = other.uid;
-    
+
     return *this;
 }
 
@@ -416,7 +415,7 @@ ResStructureEditor ChainStructureEditor::residue(int i)
 
 /** Return an editor for the residue that matches the ID 'resid' in
     this chain
-    
+
     \throw SireMol::missing_residue
     \throw SireMol::duplicate_residue
     \throw SireError::invalid_index
@@ -428,7 +427,7 @@ ResStructureEditor ChainStructureEditor::residue(const ResID &resid)
 
 /** Return an editor for the atom that matches the ID 'atomid' in
     this Chain
-    
+
     \throw SireMol::missing_atom
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
@@ -449,7 +448,7 @@ ResStructureEditor ChainStructureEditor::select(int i)
 
 /** Return an editor for the atom that matches the ID 'atomid' in
     this Chain
-    
+
     \throw SireMol::missing_atom
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
@@ -461,7 +460,7 @@ AtomStructureEditor ChainStructureEditor::select(const AtomID &atomid)
 
 /** Return an editor for the residue that matches the ID 'resid' in
     this chain
-    
+
     \throw SireMol::missing_residue
     \throw SireMol::duplicate_residue
     \throw SireError::invalid_index
@@ -503,7 +502,7 @@ ResStructureEditor ChainStructureEditor::add(const ResName &resname)
     ResStructureEditor residue = this->addResidue();
     residue.rename(resname);
     residue.reparent( this->index() );
-    
+
     return residue;
 }
 
@@ -516,13 +515,13 @@ ResStructureEditor ChainStructureEditor::add(ResNum resnum)
     ResStructureEditor residue = this->addResidue();
     residue.renumber(resnum);
     residue.reparent( this->index() );
-    
+
     return residue;
 }
 
-/** Completely remove all residues that match the ID 'resid' from 
-    this Chain 
-    
+/** Completely remove all residues that match the ID 'resid' from
+    this Chain
+
     \throw SireMol::missing_residue
     \throw SireError::invalid_index
 */
@@ -544,7 +543,7 @@ ChainStructureEditor& ChainStructureEditor::remove(int i)
 
 /** Completely remove all atoms that match the ID 'atomid' from
     all of the residues that are part of this chain
-    
+
     \throw SireMol::missing_atom
     \throw SireError::invalid_index
 */
@@ -554,38 +553,38 @@ ChainStructureEditor& ChainStructureEditor::remove(const AtomID &atomid)
     return *this;
 }
 
-/** Transfer all residues that match the ID 'resid' in this Chain 
+/** Transfer all residues that match the ID 'resid' in this Chain
     to the Chain that matches the ID 'chainid'
-    
+
     \throw SireMol::missing_residue
     \throw SireMol::missing_chain
     \throw SireMol::duplicate_chain
     \throw SireError::invalid_index
 */
-ChainStructureEditor& ChainStructureEditor::transfer(const ResID &resid, 
+ChainStructureEditor& ChainStructureEditor::transfer(const ResID &resid,
                                                      const ChainID &chainid)
 {
     this->reparentResidue( this->getUID(this->index() + resid),
                            this->chainIdx(chainid) );
-                        
+
     return *this;
 }
 
 /** Transfer the ith residue of this Chain into the Chain identified
     by the ID 'chainid'
-    
+
     \throw SireError::invalid_index
 */
-ChainStructureEditor& ChainStructureEditor::transfer(int i, 
+ChainStructureEditor& ChainStructureEditor::transfer(int i,
                                                      const ChainID &chainid)
 {
     this->reparentResidue( residueInChain(uid,i), this->chainIdx(chainid) );
     return *this;
 }
 
-/** Completely transfer all of the residues in this Chain to 
+/** Completely transfer all of the residues in this Chain to
     the Chain that matches the ID 'cgid'
-    
+
     \throw SireMol::missing_chain
     \throw SireMol::duplicate_chain
     \throw SireError::invalid_index
@@ -593,18 +592,18 @@ ChainStructureEditor& ChainStructureEditor::transfer(int i,
 ChainStructureEditor& ChainStructureEditor::transferAll(const ChainID &chainid)
 {
     ChainIdx chainidx = this->chainIdx(chainid);
-    
+
     int nres = this->nResidues();
-    
+
     for (int i=0; i<nres; ++i)
     {
         this->reparentResidue( residueInChain(uid,i), chainidx );
     }
-    
+
     return *this;
 }
 
-/** Commit the changes made by this editor and return the 
+/** Commit the changes made by this editor and return the
     updated Chain */
 Chain ChainStructureEditor::commit() const
 {

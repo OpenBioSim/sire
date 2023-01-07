@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -70,7 +69,7 @@ public:
     LJDBIOLock();
     LJDBIOLock(const LJDBIOLock &other);
     ~LJDBIOLock();
-    
+
 private:
     friend class LJParameterDB;
     LJDBIOLock( const boost::shared_ptr<detail::LJDBIOLockData> &p );
@@ -78,18 +77,18 @@ private:
     boost::shared_ptr<detail::LJDBIOLockData> d;
 };
 
-/** This static singleton class holds a complete database of 
+/** This static singleton class holds a complete database of
     all of the LJ parameters used during the simulation. This
     provides rapid access to the combined parameters during the
     pair loop, removing the need to combine the LJ parameters
     together at simulation time (as it can all be done during
-    setup time). A singleton class is used to save memory - 
+    setup time). A singleton class is used to save memory -
     it is not necessary for each LJ potential to keep a copy
     of its own database, as in the normal case there will be
     several common LJ parameters.
-  
+
     This class is both reentrant and thread-safe
-        
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT LJParameterDB
@@ -108,10 +107,10 @@ public:
     static const QString& toString(CombiningRules rule);
 
     static void lock();
-    
+
     static quint32 _locked_addLJParameter(const LJParameter &ljparam);
     static LJParameter _locked_getLJParameter(quint32 id);
-    
+
     static void unlock();
 
 private:
@@ -123,38 +122,38 @@ private:
     public:
         LJParameterDBData();
         ~LJParameterDBData();
-    
+
         const LJPairMatrix& getLJPairs(CombiningRules type);
         quint32 addLJParameter(const LJParameter &ljparam);
         LJParameter getLJParameter(quint32 id);
-    
+
         void lock();
         quint32 _locked_addLJParameter(const LJParameter &ljparam);
         LJParameter _locked_getLJParameter(quint32 id) const;
         void unlock();
-                
+
     private:
         LJPairMatrix combineArithmetic() const;
         LJPairMatrix combineGeometric() const;
-    
+
         friend class LJParameterDB;
-    
+
         /** Read-write lock used to control access to shared resources */
         QReadWriteLock db_lock;
-    
+
         /** Any requested LJPair arrays, indexed by CombiningRule type */
         QHash<int, LJPairMatrix> ljpair_arrays;
-    
+
         /** All of the LJ parameters indexed by their ID */
         QVector<LJParameter> ljparams_by_idx;
-    
+
         /** Index allowing reverse lookup of a LJParameter's ID number */
         QHash<LJParameter,quint32> ljparams_by_value;
-        
+
         /** Whether or not we are in the process of saving or loading the data */
         int dbio_count;
     };
-    
+
     static LJParameterDBData ljdb;
 };
 
@@ -173,7 +172,7 @@ SIRE_ALWAYS_INLINE LJPairMatrix LJParameterDB::getLJPairs(CombiningRules type)
     return ljdb.getLJPairs(type);
 }
 
-/** Add a new LJParameter to the database, returning the ID of the 
+/** Add a new LJParameter to the database, returning the ID of the
     parameter. This has to lock and unlock the database, so it may
     be slow if you are adding large numbers of parameters */
 SIRE_ALWAYS_INLINE quint32 LJParameterDB::addLJParameter(const LJParameter &ljparam)
@@ -190,14 +189,14 @@ SIRE_ALWAYS_INLINE LJParameter LJParameterDB::getLJParameter(quint32 id)
     return ljdb.getLJParameter(id);
 }
 
-/** Lock the database - use this if you are going to add lots of 
+/** Lock the database - use this if you are going to add lots of
     parameters via the '_locked_addLJParameter' function */
 SIRE_ALWAYS_INLINE void LJParameterDB::lock()
 {
     ljdb.lock();
 }
 
-/** Add a new LJParameter to the database, returning the ID of the 
+/** Add a new LJParameter to the database, returning the ID of the
     parameter. You can only call this function if you have manually
     locked the database via the lock() function, and you must
     unlock the database via the unlock() function once you have

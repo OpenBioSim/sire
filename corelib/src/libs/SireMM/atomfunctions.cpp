@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,7 +45,7 @@ QDataStream &operator<<(QDataStream &ds,
 {
     SharedDataStream sds(ds);
     sds << atomfunc.func;
-    
+
     return ds;
 }
 
@@ -55,7 +54,7 @@ QDataStream &operator>>(QDataStream &ds,
 {
     SharedDataStream sds(ds);
     sds >> atomfunc.func;
-    
+
     return ds;
 }
 
@@ -108,10 +107,10 @@ QDataStream &operator<<(QDataStream &ds,
                                       const AtomFunctions &atomfuncs)
 {
     writeHeader(ds, r_atomfuncs, 1);
-    
+
     SharedDataStream sds(ds);
     sds << atomfuncs.molinfo << atomfuncs.symbls;
-    
+
     return ds;
 }
 
@@ -120,16 +119,16 @@ QDataStream &operator>>(QDataStream &ds,
                                       AtomFunctions &atomfuncs)
 {
     VersionID v = readHeader(ds, r_atomfuncs);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> atomfuncs.molinfo >> atomfuncs.symbls;
     }
     else
         throw version_error( v, "1", r_atomfuncs, CODELOC );
-        
+
     return ds;
 }
 
@@ -167,7 +166,7 @@ AtomFunctions& AtomFunctions::operator=(const AtomFunctions &other)
     MoleculeProperty::operator=(other);
     molinfo = other.molinfo;
     symbls = other.symbls;
-    
+
     return *this;
 }
 

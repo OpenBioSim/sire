@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,20 +56,20 @@ static const RegisterMetaType<HMCVelGen> r_hmcvelgen( MAGIC_ONLY,
 QDataStream &operator<<(QDataStream &ds, const HMCVelGen &hmcvelgen)
 {
     writeHeader(ds, r_hmcvelgen, 1);
-    
-    ds << hmcvelgen.rangen << hmcvelgen.temp 
+
+    ds << hmcvelgen.rangen << hmcvelgen.temp
        << static_cast<const VelocityGenerator&>(hmcvelgen);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, HMCVelGen &hmcvelgen)
 {
     VersionID v = readHeader(ds, r_hmcvelgen);
-    
+
     if (v == 1)
     {
-        ds >> hmcvelgen.rangen >> hmcvelgen.temp 
+        ds >> hmcvelgen.rangen >> hmcvelgen.temp
            >> static_cast<VelocityGenerator&>(hmcvelgen);
     }
     else
@@ -84,7 +83,7 @@ HMCVelGen::HMCVelGen() : VelocityGenerator(), temp(25*celsius)
 {}
 
 /** Copy constructor */
-HMCVelGen::HMCVelGen(const HMCVelGen &other) 
+HMCVelGen::HMCVelGen(const HMCVelGen &other)
           : VelocityGenerator(other), rangen(other.rangen), temp(other.temp)
 {}
 
@@ -101,7 +100,7 @@ HMCVelGen& HMCVelGen::operator=(const HMCVelGen &other)
         rangen = other.rangen;
         VelocityGenerator::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -117,7 +116,7 @@ bool HMCVelGen::operator!=(const HMCVelGen &other) const
     return not HMCVelGen::operator==(other);
 }
 
-/** Set the random number generator used to generate the random 
+/** Set the random number generator used to generate the random
     numbers needed by this generator */
 void HMCVelGen::setGenerator(const RanGenerator &generator)
 {
@@ -151,23 +150,23 @@ static const RegisterMetaType<HMCGenerator> r_hmcgen;
 QDataStream &operator<<(QDataStream &ds, const HMCGenerator &hmcgen)
 {
     writeHeader(ds, r_hmcgen, 1);
-    
+
     ds << static_cast<const HMCVelGen&>(hmcgen);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, HMCGenerator &hmcgen)
 {
     VersionID v = readHeader(ds, r_hmcgen);
-    
+
     if (v == 1)
     {
         ds >> static_cast<HMCVelGen&>(hmcgen);
     }
     else
         throw version_error(v, "1", r_hmcgen, CODELOC);
-        
+
     return ds;
 }
 
@@ -227,40 +226,40 @@ static QVector<MolarMass> getMassesFromElements(const MoleculeView &molview,
 {
     const AtomElements &elements = molview.data().property(map["element"])
                                                  .asA<AtomElements>();
-                                                 
+
     QVector<Element> elms;
-    
+
     if (molview.selectedAll())
         elms = elements.toVector();
     else
         elms = elements.toVector(molview.selection());
-        
+
     int sz = elms.count();
-        
+
     QVector<MolarMass> masses(sz);
-    
+
     const Element *elm_array = elms.constData();
     MolarMass *masses_array = masses.data();
-    
+
     for (int i=0; i<sz; ++i)
     {
         masses_array[i] = elm_array[i].mass();
     }
-    
+
     return masses;
 }
 
-static QVector<MolarMass> getMasses(const MoleculeView &molview, 
+static QVector<MolarMass> getMasses(const MoleculeView &molview,
                                     const PropertyMap &map)
 {
     PropertyName mass_property = map["mass"];
-    
+
     if (not molview.data().hasProperty(mass_property))
         return ::getMassesFromElements(molview, map);
-        
+
     const AtomMasses &masses = molview.data().property(mass_property)
                                              .asA<AtomMasses>();
-                                             
+
     if (molview.selectedAll())
         return masses.toVector();
     else
@@ -268,28 +267,28 @@ static QVector<MolarMass> getMasses(const MoleculeView &molview,
 }
 
 /** Generate the velocities for the passed molecule view */
-AtomVelocities HMCGenerator::generate(const MoleculeView &molview, 
+AtomVelocities HMCGenerator::generate(const MoleculeView &molview,
                                       const PropertyMap &map) const
 {
     const double kT = temperature().to(kelvin) * k_boltz;
 
     AtomVelocities molvels( molview.data().info() );
-    
+
     QVector<Velocity3D> vels;
-    
+
     if (molview.selectedAll())
         vels = molvels.toVector();
     else
         vels = molvels.toVector(molview.selection());
-        
+
     QVector<MolarMass> masses = ::getMasses(molview, map);
-    
+
     int sz = vels.count();
     BOOST_ASSERT( masses.count() == sz );
-    
+
     Velocity3D *vels_array = vels.data();
     const MolarMass *masses_array = masses.constData();
-    
+
     for (int i=0; i<sz; ++i)
     {
         //generate random momenta from the following gaussian
@@ -305,7 +304,7 @@ AtomVelocities HMCGenerator::generate(const MoleculeView &molview,
         //
         // To generate the desired momenta, we thus need
         // to generate normally distributed values, with mean 0
-        // and variance sqrt( m / beta ) = sqrt( kT m ) 
+        // and variance sqrt( m / beta ) = sqrt( kT m )
         //
         // However, as we work with velocities (P = mV), we need
         //
@@ -318,12 +317,12 @@ AtomVelocities HMCGenerator::generate(const MoleculeView &molview,
         Vector norm_rand( rand().randNorm(0,1),
                           rand().randNorm(0,1),
                           rand().randNorm(0,1) );
-        
+
         // the velocity is this, multiplied by sqrt( kT / m )
         if (masses_array[i].value() == 0)
             vels_array[i] = Velocity3D(0*miles_per_hour);
         else
-            vels_array[i] = Velocity3D( std::sqrt(kT / masses_array[i].value()) 
+            vels_array[i] = Velocity3D( std::sqrt(kT / masses_array[i].value())
                                                             * norm_rand );
     }
 
@@ -331,7 +330,7 @@ AtomVelocities HMCGenerator::generate(const MoleculeView &molview,
         molvels.copyFrom(vels);
     else
         molvels.copyFrom(vels, molview.selection());
-        
+
     return molvels;
 }
 
@@ -344,28 +343,28 @@ static const RegisterMetaType<HybridMC> r_hmc;
 QDataStream &operator<<(QDataStream &ds, const HybridMC &hmc)
 {
     writeHeader(ds, r_hmc, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << hmc.md << hmc.nsteps << static_cast<const MonteCarlo&>(hmc);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, HybridMC &hmc)
 {
     VersionID v = readHeader(ds, r_hmc);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> hmc.md >> hmc.nsteps >> static_cast<MonteCarlo&>(hmc);
     }
     else
         throw version_error(v, "1", r_hmc, CODELOC);
-    
-    
+
+
     return ds;
 }
 
@@ -401,7 +400,7 @@ void HybridMC::assertValidIntegrator(const Integrator &integrator) const
                 "Try an integrator like VelocityVerlet().")
                     .arg(integrator.toString())
                     .arg(integrator.ensemble().toString()), CODELOC );
-                    
+
     if (not integrator.isTimeReversible())
         throw SireError::incompatible_error( QObject::tr(
                 "You can only use a time-reversible integrator with "
@@ -463,7 +462,7 @@ HybridMC::HybridMC(const MoleculeGroup &molgroup, int n, const PropertyMap &map)
 
 /** Construct to perform hybrid MC moves on the passed molecule group,
     using the passed integrator, running 'nmoves' MD moves per MC move */
-HybridMC::HybridMC(const MoleculeGroup &molgroup, const Integrator &integrator, 
+HybridMC::HybridMC(const MoleculeGroup &molgroup, const Integrator &integrator,
                    int n, const PropertyMap &map)
          : ConcreteProperty<HybridMC,MonteCarlo>(map),
            md(molgroup, integrator, map), velgen(HMCGenerator()), nsteps(0)
@@ -492,7 +491,7 @@ HybridMC::HybridMC(const MoleculeGroup &molgroup, Time timestep, int n,
 }
 
 /** Construct to perform hybrid MC moves on the passed molecule group,
-    using the passed integrator, with a timestep of 'timestep', 
+    using the passed integrator, with a timestep of 'timestep',
     running 'nmoves' MD moves per MC move */
 HybridMC::HybridMC(const MoleculeGroup &molgroup, const Integrator &integrator,
                    Time timestep, int n, const PropertyMap &map)
@@ -531,7 +530,7 @@ HybridMC& HybridMC::operator=(const HybridMC &other)
         velgen = other.velgen;
         MonteCarlo::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -637,13 +636,13 @@ void HybridMC::move(System &system, int nmoves, bool record_stats)
     HybridMC old_state(*this);
 
     System old_system_state(system);
-    
+
     HMCVelGen &gen = velgen.edit().asA<HMCVelGen>();
-    
+
     try
     {
         gen.setTemperature( this->temperature() );
-    
+
         for (int i=0; i<nmoves; ++i)
         {
             //save the old dynamics move
@@ -654,10 +653,10 @@ void HybridMC::move(System &system, int nmoves, bool record_stats)
 
             //save the old system
             System old_system(system);
-        
+
             //regenerate random velocities for this temperature
             double old_bias = gen.generate(system, md);
-        
+
             qDebug() << old_nrg << md.kineticEnergy().value()
                      << (old_nrg + md.kineticEnergy().value());
 
@@ -666,10 +665,10 @@ void HybridMC::move(System &system, int nmoves, bool record_stats)
             //run the dynamics moves (we don't record statistics
             //during the MD moves)
             md.move(system, nsteps, false);
-    
+
             //calculate the energy of the system
             double new_nrg = system.energy( this->energyComponent() );
-            
+
             //calculate the new kinetic energy
             double new_bias = gen.getBias(md);
 

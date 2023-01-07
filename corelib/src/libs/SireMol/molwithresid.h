@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -47,10 +46,10 @@ SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MolWithResID&);
 namespace SireMol
 {
 
-/** This class is used to identify a molecule according to 
-    whether or not it contains a residue with matching 
+/** This class is used to identify a molecule according to
+    whether or not it contains a residue with matching
     residue ID
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT MolWithResID : public MolID
@@ -64,38 +63,38 @@ public:
     explicit MolWithResID(const QString &resname);
     explicit MolWithResID(int resnum);
     explicit MolWithResID(const ResID &resid);
-    
+
     MolWithResID(const QString &resname, SireID::CaseSensitivity case_sensitivity);
-    
+
     MolWithResID(const MolWithResID &other);
-    
+
     ~MolWithResID();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return MolWithResID::typeName();
     }
-    
+
     MolWithResID* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-    
+
     QString toString() const;
-    
+
     MolWithResID& operator=(const MolWithResID &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     bool operator==(const MolWithResID &other) const;
-    
+
     bool operator!=(const MolWithResID &other) const;
-    
+
     const ResID& resID() const;
-    
+
     QList<MolNum> map(const Molecules &molecules) const;
     QList<MolNum> map(const MoleculeGroup &molgroup) const;
     QList<MolNum> map(const MolGroupsBase &molgroups) const;

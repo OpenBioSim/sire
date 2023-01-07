@@ -60,7 +60,7 @@ about:
   license_file: '{{ environ["RECIPE_DIR"] }}/LICENSE'
   summary: "An advanced, multiscale, molecular-simulation framework."
   dev_url: https://github.com/openbiosim/sire
-  doc_url: https://siremol.org
+  doc_url: https://sire.openbiosim.org
   description: |
                 Sire is a free, open source, multiscale molecular-simulation framework,
                 written to allow computational modellers to quickly prototype and develop

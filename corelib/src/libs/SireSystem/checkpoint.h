@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,10 +45,10 @@ SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::CheckPoint&)
 namespace SireSystem
 {
 
-/** This class holds a checkpoint of a system. This allows you to 
+/** This class holds a checkpoint of a system. This allows you to
     save the current state of a system so that you can restore
     it at a later point (or even save it to disk/database)
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT CheckPoint
@@ -62,19 +61,19 @@ friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, CheckPoint&);
 public:
     CheckPoint();
     CheckPoint(const System &system);
-    
+
     CheckPoint(const CheckPoint &other);
-    
+
     ~CheckPoint();
-    
+
     static const char* typeName();
-    
+
     CheckPoint& operator=(const System &system);
     CheckPoint& operator=(const CheckPoint &other);
-    
+
     bool operator==(const CheckPoint &other) const;
     bool operator!=(const CheckPoint &other) const;
-    
+
     operator System() const;
 
 private:

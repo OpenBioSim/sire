@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,25 +61,25 @@ QDataStream &operator<<(QDataStream &ds, const VolMapMonitor &mon)
     writeHeader(ds, r_mon, 1);
 
     SharedDataStream sds(ds);
-    
+
     sds << mon.molgroup << mon.propmap << mon.volmap << static_cast<const SystemMonitor&>(mon);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, VolMapMonitor &mon)
 {
     VersionID v = readHeader(ds, r_mon);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> mon.molgroup >> mon.propmap >> mon.volmap >> static_cast<SystemMonitor&>(mon);
     }
     else
         throw version_error(v, "1", r_mon, CODELOC);
-    
+
     return ds;
 }
 
@@ -105,7 +104,7 @@ VolMapMonitor::VolMapMonitor(const MoleculeGroup &group, const PropertyMap &map)
                 molgroup(group), propmap(map), volmap(map_type, fill_type)
 {}
 
-/** Construct, specifying the molecule group to be monitored and the grid spacing 
+/** Construct, specifying the molecule group to be monitored and the grid spacing
     for the occupancy grid */
 VolMapMonitor::VolMapMonitor(const MoleculeGroup &group,
                              const SireUnits::Dimension::Length &grid_spacing,
@@ -156,7 +155,7 @@ VolMapMonitor& VolMapMonitor::operator=(const VolMapMonitor &other)
         volmap = other.volmap;
         propmap = other.propmap;
     }
-    
+
     return *this;
 }
 
@@ -198,7 +197,7 @@ const MoleculeGroup& VolMapMonitor::group() const
     return molgroup.read();
 }
 
-/** Set the molecule group being monitored (together with the property map 
+/** Set the molecule group being monitored (together with the property map
     used to get the required properties from that group) */
 void VolMapMonitor::setGroup(const MoleculeGroup &group, const PropertyMap &map)
 {
@@ -278,7 +277,7 @@ VolumeMap VolMapMonitor::volumeMap() const
 void VolMapMonitor::monitor(System &system)
 {
     MolGroupPtr group_to_monitor;
-    
+
     //now update the molecule group, if needed
     if (system.contains(group().number()))
     {
@@ -289,7 +288,7 @@ void VolMapMonitor::monitor(System &system)
         group_to_monitor = molgroup;
         group_to_monitor.edit().update(system.molecules());
     }
-    
+
     if (group_to_monitor.read().isEmpty())
         return;
 

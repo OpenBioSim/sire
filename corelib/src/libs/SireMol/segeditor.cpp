@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -69,9 +68,9 @@ QDataStream &operator<<(QDataStream &ds,
                                        const SegEditor &segeditor)
 {
     writeHeader(ds, r_segeditor, 1);
-    
+
     ds << static_cast<const Editor<SegEditor,Segment>&>(segeditor);
-    
+
     return ds;
 }
 
@@ -80,14 +79,14 @@ QDataStream &operator>>(QDataStream &ds,
                                        SegEditor &segeditor)
 {
     VersionID v = readHeader(ds, r_segeditor);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Editor<SegEditor,Segment>&>(segeditor);
     }
     else
         throw version_error( v, "1", r_segeditor, CODELOC );
-        
+
     return ds;
 }
 
@@ -96,12 +95,12 @@ SegEditor::SegEditor() : ConcreteProperty< SegEditor,Editor<SegEditor,Segment> >
 {}
 
 /** Construct to edit a copy of the Segment 'segment' */
-SegEditor::SegEditor(const Segment &segment) 
+SegEditor::SegEditor(const Segment &segment)
           : ConcreteProperty< SegEditor,Editor<SegEditor,Segment> >(segment)
 {}
 
 /** Copy constructor */
-SegEditor::SegEditor(const SegEditor &other) 
+SegEditor::SegEditor(const SegEditor &other)
           : ConcreteProperty< SegEditor,Editor<SegEditor,Segment> >(other)
 {}
 
@@ -136,9 +135,9 @@ SegEditor& SegEditor::rename(const SegName &newname)
     if (newname == this->name())
         //nothing to do
         return *this;
-        
+
     d->rename( this->index(), newname );
-    
+
     return *this;
 }
 
@@ -148,7 +147,7 @@ SegStructureEditor SegEditor::reindex(SegIdx newidx) const
 {
     SegStructureEditor editor(*this);
     editor.reindex(newidx);
-    
+
     return editor;
 }
 
@@ -157,7 +156,7 @@ SegStructureEditor SegEditor::reindex(SegIdx newidx) const
 MolStructureEditor SegEditor::remove() const
 {
     SegStructureEditor editor(*this);
-    
+
     return editor.remove();
 }
 
@@ -166,7 +165,7 @@ MolStructureEditor SegEditor::remove() const
 AtomStructureEditor SegEditor::add(const AtomName &atomname) const
 {
     SegStructureEditor editor(*this);
-    
+
     return editor.add(atomname);
 }
 
@@ -175,13 +174,13 @@ AtomStructureEditor SegEditor::add(const AtomName &atomname) const
 AtomStructureEditor SegEditor::add(AtomNum atomnum) const
 {
     SegStructureEditor editor(*this);
-    
+
     return editor.add(atomnum);
 }
 
-/** Completely remove all atoms that match the ID 'atomid' from 
-    this Segment 
-    
+/** Completely remove all atoms that match the ID 'atomid' from
+    this Segment
+
     \throw SireMol::missing_atom
     \throw SireError::invalid_index
 */
@@ -189,7 +188,7 @@ SegStructureEditor SegEditor::remove(const AtomID &atomid) const
 {
     SegStructureEditor editor(*this);
     editor.remove(atomid);
-    
+
     return editor;
 }
 
@@ -201,43 +200,43 @@ SegStructureEditor SegEditor::remove(int i) const
 {
     SegStructureEditor editor(*this);
     editor.remove(i);
-    
+
     return editor;
 }
 
-/** Transfer all atoms that match the ID 'atomid' in this Segment 
+/** Transfer all atoms that match the ID 'atomid' in this Segment
     to the Segment that matches the ID 'cgid'
-    
+
     \throw SireMol::missing_atom
     \throw SireMol::missing_segment
     \throw SireMol::duplicate_segment
     \throw SireError::invalid_index
 */
-SegStructureEditor SegEditor::transfer(const AtomID &atomid, 
+SegStructureEditor SegEditor::transfer(const AtomID &atomid,
                                      const SegID &cgid) const
 {
     SegStructureEditor editor(*this);
     editor.transfer(atomid, cgid);
-    
+
     return editor;
 }
-                                     
+
 /** Transfer the ith atom of this Segment into the Segment identified
     by the ID 'cgid'
-    
+
     \throw SireError::invalid_index
 */
 SegStructureEditor SegEditor::transfer(int i, const SegID &cgid) const
 {
     SegStructureEditor editor(*this);
     editor.transfer(i, cgid);
-    
+
     return editor;
 }
 
-/** Completely transfer all of the atoms in this Segment to 
+/** Completely transfer all of the atoms in this Segment to
     the Segment that matches the ID 'cgid'
-    
+
     \throw SireMol::missing_segment
     \throw SireMol::duplicate_segment
     \throw SireError::invalid_index
@@ -246,11 +245,11 @@ SegStructureEditor SegEditor::transferAll(const SegID &cgid) const
 {
     SegStructureEditor editor(*this);
     editor.transferAll(cgid);
-    
+
     return editor;
 }
 
-/** Commit the changes made by this editor and return the 
+/** Commit the changes made by this editor and return the
     updated Segment */
 Segment SegEditor::commit() const
 {
@@ -273,10 +272,10 @@ QDataStream &operator<<(QDataStream &ds,
                                        const SegStructureEditor &segeditor)
 {
     writeHeader(ds, r_segstructeditor, 1);
-    
+
     ds << segeditor.uid
        << static_cast<const StructureEditor&>(segeditor);
-    
+
     return ds;
 }
 
@@ -285,7 +284,7 @@ QDataStream &operator>>(QDataStream &ds,
                                        SegStructureEditor &segeditor)
 {
     VersionID v = readHeader(ds, r_segstructeditor);
-    
+
     if (v == 1)
     {
         ds >> segeditor.uid
@@ -293,7 +292,7 @@ QDataStream &operator>>(QDataStream &ds,
     }
     else
         throw version_error( v, "1", r_segstructeditor, CODELOC );
-        
+
     return ds;
 }
 
@@ -311,9 +310,9 @@ SegStructureEditor::SegStructureEditor(const Segment &segment)
     uid = this->getUID(segment.index());
 }
 
-/** Construct to edit the Segment at index 'cgidx' in the molecule 
+/** Construct to edit the Segment at index 'cgidx' in the molecule
     also being edited in 'data'
-    
+
     \throw SireError::invalid_index
 */
 SegStructureEditor::SegStructureEditor(const StructureEditor &data, SegIdx cgidx)
@@ -336,7 +335,7 @@ SegStructureEditor& SegStructureEditor::operator=(const Segment &segment)
 {
     StructureEditor::operator=(segment.data());
     uid = this->getUID(segment.index());
-    
+
     return *this;
 }
 
@@ -345,7 +344,7 @@ SegStructureEditor& SegStructureEditor::operator=(const SegStructureEditor &othe
 {
     StructureEditor::operator=(other);
     uid = other.uid;
-    
+
     return *this;
 }
 
@@ -397,7 +396,7 @@ AtomStructureEditor SegStructureEditor::atom(int i)
 
 /** Return an editor for the atom that matches the ID 'atomid' in
     this Segment
-    
+
     \throw SireMol::missing_atom
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
@@ -418,7 +417,7 @@ AtomStructureEditor SegStructureEditor::select(int i)
 
 /** Return an editor for the atom that matches the ID 'atomid' in
     this Segment
-    
+
     \throw SireMol::missing_atom
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
@@ -460,7 +459,7 @@ AtomStructureEditor SegStructureEditor::add(const AtomName &atomname)
     AtomStructureEditor atom = this->addAtom();
     atom.rename(atomname);
     atom.reparent( this->index() );
-    
+
     return atom;
 }
 
@@ -473,13 +472,13 @@ AtomStructureEditor SegStructureEditor::add(AtomNum atomnum)
     AtomStructureEditor atom = this->addAtom();
     atom.renumber(atomnum);
     atom.reparent( this->index() );
-    
+
     return atom;
 }
 
-/** Completely remove all atoms that match the ID 'atomid' from 
-    this Segment 
-    
+/** Completely remove all atoms that match the ID 'atomid' from
+    this Segment
+
     \throw SireMol::missing_atom
     \throw SireError::invalid_index
 */
@@ -499,26 +498,26 @@ SegStructureEditor& SegStructureEditor::remove(int i)
     return *this;
 }
 
-/** Transfer all atoms that match the ID 'atomid' in this Segment 
+/** Transfer all atoms that match the ID 'atomid' in this Segment
     to the Segment that matches the ID 'segid'
-    
+
     \throw SireMol::missing_atom
     \throw SireMol::missing_segment
     \throw SireMol::duplicate_segment
     \throw SireError::invalid_index
 */
-SegStructureEditor& SegStructureEditor::transfer(const AtomID &atomid, 
+SegStructureEditor& SegStructureEditor::transfer(const AtomID &atomid,
                                                  const SegID &segid)
 {
     this->reparentAtom( this->getUID(this->index() + atomid),
                         this->segIdx(segid) );
-                        
+
     return *this;
 }
 
 /** Transfer the ith atom of this Segment into the Segment identified
     by the ID 'segid'
-    
+
     \throw SireError::invalid_index
 */
 SegStructureEditor& SegStructureEditor::transfer(int i, const SegID &segid)
@@ -527,9 +526,9 @@ SegStructureEditor& SegStructureEditor::transfer(int i, const SegID &segid)
     return *this;
 }
 
-/** Completely transfer all of the atoms in this Segment to 
+/** Completely transfer all of the atoms in this Segment to
     the Segment that matches the ID 'segid'
-    
+
     \throw SireMol::missing_segment
     \throw SireMol::duplicate_segment
     \throw SireError::invalid_index
@@ -537,18 +536,18 @@ SegStructureEditor& SegStructureEditor::transfer(int i, const SegID &segid)
 SegStructureEditor& SegStructureEditor::transferAll(const SegID &segid)
 {
     SegIdx segidx = this->segIdx(segid);
-    
+
     int nats = this->nAtoms();
-    
+
     for (int i=0; i<nats; ++i)
     {
         this->reparentAtom( atomInSegment(uid,i), segidx );
     }
-    
+
     return *this;
 }
 
-/** Commit the changes made by this editor and return the 
+/** Commit the changes made by this editor and return the
     updated Segment */
 Segment SegStructureEditor::commit() const
 {

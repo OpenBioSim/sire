@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,8 +48,8 @@ using namespace SireCluster::MPI;
 MPIFrontend::MPIFrontend() : FrontendBase()
 {}
 
-/** Construct a frontend that uses the passed  
-    point-to-point communicator to communicate with 
+/** Construct a frontend that uses the passed
+    point-to-point communicator to communicate with
     the backend */
 MPIFrontend::MPIFrontend(const P2PComm &p2pcomm)
             : FrontendBase(), p2p(p2pcomm)
@@ -71,7 +70,7 @@ QUuid MPIFrontend::UID()
 {
     if (p2p.isNull())
         return QUuid();
-    
+
     else if (cached_uid.isNull())
     {
         QMutexLocker lkr(&datamutex);
@@ -79,7 +78,7 @@ QUuid MPIFrontend::UID()
         p2p.sendMessage( P2PComm::GETUID );
         cached_uid = p2p.awaitResponse<QUuid>(true);
     }
-    
+
     return cached_uid;
 }
 
@@ -91,9 +90,9 @@ void MPIFrontend::startJob(const WorkPacket &workpacket)
         QMutexLocker lkr(&datamutex);
 
         p2p.sendMessage( P2PComm::START, workpacket );
-        
+
         int result = p2p.awaitIntegerResponse(true);
-        
+
         if (result != 0)
             qDebug() << SireError::getPIDString()
                      << "Starting a remote job got a weird response" << result;
@@ -106,11 +105,11 @@ void MPIFrontend::stopJob()
     if (not p2p.isNull())
     {
         QMutexLocker lkr(&datamutex);
-        
+
         p2p.sendMessage( P2PComm::STOP );
 
         int result = p2p.awaitIntegerResponse();
-        
+
         if (result != 0)
             qDebug() << SireError::getPIDString()
                      << "Stopping a remote job got a weird response" << result;
@@ -123,13 +122,13 @@ void MPIFrontend::abortJob()
     if (not p2p.isNull())
     {
         QMutexLocker lkr(&datamutex);
-        
+
         p2p.sendMessage( P2PComm::ABORT );
 
         int result = p2p.awaitIntegerResponse();
-        
+
         if (result != 0)
-            qDebug() << SireError::getPIDString() 
+            qDebug() << SireError::getPIDString()
                      << "Aborting a remote job got a weird response" << result;
     }
 }
@@ -141,16 +140,16 @@ void MPIFrontend::wait()
     {
         return;
     }
-    
+
     QMutexLocker lkr( &datamutex );
-    
+
     while (true)
     {
         p2p.sendMessage( P2PComm::IS_RUNNING );
-        
+
         if (not p2p.awaitIntegerResponse())
             break;
-            
+
         else
             //wait a second
             ::sleep(1);
@@ -174,23 +173,23 @@ bool MPIFrontend::wait(int timeout)
     {
         return true;
     }
-    
+
     QMutexLocker lkr( &datamutex );
-    
+
     while (t.elapsed() < timeout)
     {
         p2p.sendMessage( P2PComm::IS_RUNNING );
-        
+
         if (not p2p.awaitIntegerResponse())
             return true;
-            
+
         //wait a second
         if (t.elapsed() + 1000 > timeout)
             break;
-        
+
         ::sleep(1);
     }
-    
+
     return false;
 }
 
@@ -200,7 +199,7 @@ float MPIFrontend::progress()
     if (not p2p.isNull())
     {
         QMutexLocker lkr(&datamutex);
-        
+
         p2p.sendMessage( P2PComm::PROGRESS );
 
         return p2p.awaitFloatResponse();
@@ -215,7 +214,7 @@ WorkPacket MPIFrontend::interimResult()
     if (not p2p.isNull())
     {
         QMutexLocker lkr(&datamutex);
-        
+
         p2p.sendMessage( P2PComm::INTERIM );
 
         return p2p.awaitResponse<WorkPacket>();
@@ -231,7 +230,7 @@ WorkPacket MPIFrontend::result()
     if (not p2p.isNull())
     {
         QMutexLocker lkr(&datamutex);
-        
+
         p2p.sendMessage( P2PComm::RESULT );
 
         return p2p.awaitResponse<WorkPacket>();

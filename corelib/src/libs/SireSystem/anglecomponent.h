@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -51,7 +50,7 @@ namespace SireSystem
 /** This is a constraint that constrains a symbol to equal the
     value of an expression that involves an angle between three points
     or atoms
-    
+
     @author Christopher Woods
 */
 class SIRESYSTEM_EXPORT AngleComponent
@@ -72,41 +71,41 @@ public:
                    const SireFF::PointRef &point2,
                    const SireCAS::Expression &geometry_expression,
                    const PropertyMap &map = PropertyMap());
-                      
+
     AngleComponent(const AngleComponent &other);
-    
+
     ~AngleComponent();
-    
+
     AngleComponent& operator=(const AngleComponent &other);
-    
+
     bool operator==(const AngleComponent &other) const;
     bool operator!=(const AngleComponent &other) const;
-    
+
     static const char* typeName();
-    
+
     QString toString() const;
-    
+
     const SireFF::Point& point(int i) const;
-    
+
     const SireFF::Point& point0() const;
     const SireFF::Point& point1() const;
     const SireFF::Point& point2() const;
-    
+
     int nPoints() const;
-    
+
     static const SireCAS::Symbol& theta();
     static const SireCAS::Symbol& theta102();
     static const SireCAS::Symbol& theta012();
     static const SireCAS::Symbol& theta021();
-    
+
     static const SireCAS::Symbol& r01();
     static const SireCAS::Symbol& r02();
     static const SireCAS::Symbol& r12();
-    
+
 protected:
     bool wouldChange(const Delta &delta, quint32 last_subversion) const;
     SireCAS::Values getValues(const System &system);
-    
+
     void setSpace(const SireVol::Space &space);
 
 private:
@@ -114,7 +113,7 @@ private:
 
     /** The three points between which the angle is calculated */
     SireFF::PointPtr p0, p1, p2;
-    
+
     /** Whether or not the points are within the same molecule */
     bool intra_molecule_points;
 };

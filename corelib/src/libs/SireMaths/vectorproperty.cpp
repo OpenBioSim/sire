@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -41,12 +40,12 @@ namespace SireMaths
     {
         return PropertyPtr( VectorProperty(vector) );
     }
-    
+
     PropertyPtr wrap(const QVector<Vector> &vector)
     {
         return PropertyPtr( VectorArrayProperty(vector) );
     }
-    
+
     PropertyPtr wrap(const QList<Vector> &vector)
     {
         return PropertyPtr( VectorArrayProperty(vector) );
@@ -62,17 +61,17 @@ static const RegisterMetaType<VectorArrayProperty> r_vectorarray;
 QDataStream &operator<<(QDataStream &ds, const VectorArrayProperty &vecarray)
 {
     writeHeader(ds, r_vectorarray, 1);
-    
+
     SharedDataStream sds(ds);
     sds << vecarray.array();
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, VectorArrayProperty &vecarray)
 {
     VersionID v = readHeader(ds, r_vectorarray);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
@@ -82,7 +81,7 @@ QDataStream &operator>>(QDataStream &ds, VectorArrayProperty &vecarray)
     }
     else
         throw version_error(v, "1", r_vectorarray, CODELOC);
-    
+
     return ds;
 }
 
@@ -146,23 +145,23 @@ static const RegisterMetaType<VectorProperty> r_vecprop;
 QDataStream &operator<<(QDataStream &ds, const VectorProperty &vecprop)
 {
     writeHeader(ds, r_vecprop, 1);
-    
+
     ds << static_cast<const Vector&>(vecprop);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, VectorProperty &vecprop)
 {
     VersionID v = readHeader(ds, r_vecprop);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Vector&>(vecprop);
     }
     else
         throw version_error(v, "1", r_vecprop, CODELOC);
-    
+
     return ds;
 }
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -72,7 +71,7 @@ using SireMol::MoleculeInfoData;
 /** This is the base class of all objects that hold the raw data
     for an AtomFunction (a function that acts between
     a set number of atoms)
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT AtomFunction
@@ -83,20 +82,20 @@ friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, AtomFunction&);
 
 public:
     ~AtomFunction();
-    
+
     const SireCAS::Expression& function() const;
-    
+
 protected:
     AtomFunction();
     AtomFunction(const SireCAS::Expression &function);
-    
+
     AtomFunction(const AtomFunction &other);
-    
+
     AtomFunction& operator=(const AtomFunction &other);
 
     bool operator==(const AtomFunction &other) const;
     bool operator!=(const AtomFunction &other) const;
-    
+
 private:
     /** The function acting between the atoms */
     SireCAS::Expression func;
@@ -105,7 +104,7 @@ private:
 /** This is the base class of all of the AtomFunctions molecular
     properties (these are properties that contain lots of AtomFunction
     functions for the atoms in a molecule)
-    
+
     @author Christopher Woods
 */
 class SIREMM_EXPORT AtomFunctions : public SireMol::MoleculeProperty
@@ -125,11 +124,11 @@ protected:
     AtomFunctions();
     AtomFunctions(const MoleculeData &moldata);
     AtomFunctions(const MoleculeInfoData &molinfo);
-    
+
     AtomFunctions(const AtomFunctions &other);
-    
+
     AtomFunctions& operator=(const AtomFunctions &other);
-    
+
     bool operator==(const AtomFunctions &other) const;
     bool operator!=(const AtomFunctions &other) const;
 
@@ -139,7 +138,7 @@ protected:
     }
 
     void addSymbols(const QSet<Symbol> &symbols);
-    
+
     void removeSymbols(const QSet<Symbol> &symbols);
     void removeSymbols();
 

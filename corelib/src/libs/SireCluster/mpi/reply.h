@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -61,31 +60,31 @@ class ReplyValue
 public:
     ReplyValue();
     ReplyValue(const ReplyValue &other);
-    
+
     ~ReplyValue();
-    
+
     ReplyValue& operator=(const ReplyValue &other);
-    
+
     bool operator==(const ReplyValue &other) const;
     bool operator!=(const ReplyValue &other) const;
 
     static ReplyValue result(const QByteArray &result_data);
     static ReplyValue error(const QByteArray &error_data);
-    
+
     bool isError() const;
-    
+
     template<class T>
     bool isA() const
     {
         if (this->is_error)
             return false;
-            
+
         try
         {
             QDataStream ds(this->result_data);
             T value;
             ds >> value;
-            
+
             return true;
         }
         catch(...)
@@ -93,24 +92,24 @@ public:
             return false;
         }
     }
-    
+
     template<class T>
     T asA() const
     {
         if (this->is_error)
             SireError::exception::unpackAndThrow(result_data);
-            
+
         QDataStream ds(this->result_data);
         T value;
         ds >> value;
-        
+
         return value;
     }
-    
+
 private:
     /** The binary representation of the value */
     QByteArray result_data;
-    
+
     /** Is this reply actually an error? */
     bool is_error;
 };
@@ -118,10 +117,10 @@ private:
 /** This class hold the reply (or replies) to a message. This class
     provides a space in which the replies will be received, and can
     be used as a block to wait for a reply
-    
+
     Replies are arranged according to the rank of the MPI process
     that sent the reply
-    
+
     @author Christopher Woods
 */
 class Reply
@@ -136,21 +135,21 @@ public:
     Reply(const ReplyPtr &ptr);
 
     Reply(const Reply &other);
-    
+
     ~Reply();
-    
+
     Reply& operator=(const Reply &other);
-    
+
     bool operator==(const Reply &other) const;
     bool operator!=(const Reply &other) const;
-    
+
     bool isNull() const;
-    
+
     bool isValidRank(int rank);
-    
+
     void waitFrom(int rank);
     bool waitFrom(int rank, int timeout);
-    
+
     void wait();
     bool wait(int timeout);
 
@@ -180,15 +179,15 @@ class ReplyPtr
 public:
     ReplyPtr();
     ReplyPtr(const Reply &reply);
-    
+
     ReplyPtr(const ReplyPtr &other);
-    
+
     ~ReplyPtr();
-    
+
     ReplyPtr& operator=(const ReplyPtr &other);
-    
+
     bool isNull() const;
-    
+
     Reply operator*() const;
 
     Reply lock() const;

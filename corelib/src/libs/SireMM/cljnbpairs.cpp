@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -68,7 +67,7 @@ namespace SireMM
 QDataStream &operator<<(QDataStream &ds, const CoulombScaleFactor &sclfac)
 {
     ds << sclfac.cscl;
-       
+
     return ds;
 }
 
@@ -76,7 +75,7 @@ QDataStream &operator<<(QDataStream &ds, const CoulombScaleFactor &sclfac)
 QDataStream &operator>>(QDataStream &ds, CoulombScaleFactor &sclfac)
 {
     ds >> sclfac.cscl;
-       
+
     return ds;
 }
 
@@ -97,7 +96,7 @@ CoulombScaleFactor::~CoulombScaleFactor()
 CoulombScaleFactor& CoulombScaleFactor::operator=(const CoulombScaleFactor &other)
 {
     cscl = other.cscl;
-    
+
     return *this;
 }
 
@@ -127,7 +126,7 @@ double CoulombScaleFactor::coulomb() const
 QDataStream &operator<<(QDataStream &ds, const LJScaleFactor &sclfac)
 {
     ds << sclfac.ljscl;
-       
+
     return ds;
 }
 
@@ -135,7 +134,7 @@ QDataStream &operator<<(QDataStream &ds, const LJScaleFactor &sclfac)
 QDataStream &operator>>(QDataStream &ds, LJScaleFactor &sclfac)
 {
     ds >> sclfac.ljscl;
-       
+
     return ds;
 }
 
@@ -156,7 +155,7 @@ LJScaleFactor::~LJScaleFactor()
 LJScaleFactor& LJScaleFactor::operator=(const LJScaleFactor &other)
 {
     ljscl = other.ljscl;
-    
+
     return *this;
 }
 
@@ -185,18 +184,18 @@ double LJScaleFactor::lj() const
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const CLJScaleFactor &sclfac)
 {
-    ds << static_cast<const CoulombScaleFactor&>(sclfac) 
+    ds << static_cast<const CoulombScaleFactor&>(sclfac)
        << static_cast<const LJScaleFactor&>(sclfac);
-       
+
     return ds;
 }
 
 /** Extract from a binary datastream */
 QDataStream &operator>>(QDataStream &ds, CLJScaleFactor &sclfac)
 {
-    ds >> static_cast<CoulombScaleFactor&>(sclfac) 
+    ds >> static_cast<CoulombScaleFactor&>(sclfac)
        >> static_cast<LJScaleFactor&>(sclfac);
-       
+
     return ds;
 }
 
@@ -226,7 +225,7 @@ CLJScaleFactor& CLJScaleFactor::operator=(const CLJScaleFactor &other)
 {
     CoulombScaleFactor::operator=(other);
     LJScaleFactor::operator=(other);
-    
+
     return *this;
 }
 
@@ -279,14 +278,14 @@ QDataStream &operator>>(QDataStream &ds, CoulombNBPairs &coulnbpairs)
 }
 
 /** Null constructor */
-CoulombNBPairs::CoulombNBPairs() 
+CoulombNBPairs::CoulombNBPairs()
                : ConcreteProperty<CoulombNBPairs,
                     AtomPairs<CoulombScaleFactor> >( CoulombScaleFactor(1) )
 {}
 
 /** Construct, using 'default_scale' for all of the atom-atom
     interactions in the molecule 'molinfo' */
-CoulombNBPairs::CoulombNBPairs(const MoleculeInfoData &molinfo, 
+CoulombNBPairs::CoulombNBPairs(const MoleculeInfoData &molinfo,
                                const CoulombScaleFactor &default_scale)
                : ConcreteProperty<CoulombNBPairs,
                     AtomPairs<CoulombScaleFactor> >(molinfo, default_scale)
@@ -376,7 +375,7 @@ LJNBPairs::LJNBPairs() : ConcreteProperty<LJNBPairs,
 
 /** Construct, using 'default_scale' for all of the atom-atom
     interactions in the molecule 'molinfo' */
-LJNBPairs::LJNBPairs(const MoleculeInfoData &molinfo, 
+LJNBPairs::LJNBPairs(const MoleculeInfoData &molinfo,
                      const LJScaleFactor &default_scale)
            : ConcreteProperty<LJNBPairs,
                    AtomPairs<LJScaleFactor> >(molinfo, default_scale)
@@ -465,7 +464,7 @@ CLJNBPairs::CLJNBPairs() : ConcreteProperty<CLJNBPairs,
 
 /** Construct, using 'default_scale' for all of the atom-atom
     interactions in the molecule 'molinfo' */
-CLJNBPairs::CLJNBPairs(const MoleculeInfoData &molinfo, 
+CLJNBPairs::CLJNBPairs(const MoleculeInfoData &molinfo,
                        const CLJScaleFactor &default_scale)
            : ConcreteProperty<CLJNBPairs,
                    AtomPairs<CLJScaleFactor> >(molinfo, default_scale)
@@ -494,15 +493,15 @@ CLJNBPairs::CLJNBPairs(const Connectivity &connectivity,
                    AtomPairs<CLJScaleFactor> >(connectivity.info(), CLJScaleFactor(1,1))
 {
     const auto molinfo = connectivity.info();
-    
+
     if (molinfo.nAtoms() == 0)
         return;
-    
+
     //create a list of connected CutGroups
     QList< std::tuple<CGIdx,CGIdx> > connected_cgroups;
-    
+
     const int ncg = molinfo.nCutGroups();
-    
+
     for (CGIdx i(0); i<ncg; ++i)
     {
         for (CGIdx j(i); j<ncg; ++j)
@@ -511,49 +510,49 @@ CLJNBPairs::CLJNBPairs(const Connectivity &connectivity,
                 connected_cgroups.append( std::make_tuple(i,j) );
         }
     }
-    
+
     //now we have the set of connected pairs, loop through all pairs of atoms
     //of connected cutgroups and work out how they are bonded
     QMutex mutex;
-    
+
     auto get_pairs = [&]( std::tuple<CGIdx,CGIdx> cgpair )
     {
         //loop over all pairs of atoms between the two cutgroups
         const CGIdx cg0 = std::get<0>(cgpair);
         const CGIdx cg1 = std::get<1>(cgpair);
-        
+
         const int nats0 = molinfo.nAtoms(cg0);
         const int nats1 = molinfo.nAtoms(cg1);
-        
+
         //default is that atoms are not bonded, so scale factor is 1,1
         CGPairs pairs01( CLJScaleFactor(1,1) );
         pairs01.reserve(nats0,nats1);
-        
+
         CGPairs pairs10 = pairs01;
-        
+
         if (cg0 != cg1)
         {
             pairs10 = CGPairs(CLJScaleFactor(1,1));
             pairs10.reserve(nats1,nats0);
         }
-        
+
         for (int i=0; i<nats0; ++i)
         {
             const CGAtomIdx cgidx0(cg0, Index(i));
             const AtomIdx atom0 = molinfo.atomIdx(cgidx0);
-            
+
             for (int j=0; j<nats1; ++j)
             {
                 const CGAtomIdx cgidx1(cg1, Index(j));
                 const AtomIdx atom1 = molinfo.atomIdx(cgidx1);
-                
+
                 int connection_type = connectivity.connectionType(atom0,atom1);
-                
+
                 if (connection_type > 0 and connection_type < 4)
                 {
                     //this is either the same pair, bonded pair or angled pair
                     pairs01.set(i,j,CLJScaleFactor(0,0));
-                    
+
                     if (cg0 != cg1)
                         pairs10.set(j,i,CLJScaleFactor(0,0));
                 }
@@ -561,23 +560,23 @@ CLJNBPairs::CLJNBPairs(const Connectivity &connectivity,
                 {
                     //this is a 1-4 pair
                     pairs01.set(i,j,scale14);
-                    
+
                     if (cg0 != cg1)
                         pairs10.set(j,i,scale14);
                 }
             }
         }
-        
+
         //now update the global map for all cg/cg pairs
         QMutexLocker lkr(&mutex);
         cgpairs.set(cg0.value(), cg1.value(), pairs01);
-        
+
         if (cg0 != cg1)
             cgpairs.set(cg1.value(), cg0.value(), pairs10);
     };
-    
+
     bool uses_parallel = true;
-    
+
     if (uses_parallel)
     {
         tbb::parallel_for( tbb::blocked_range<int>(0, connected_cgroups.count()),
@@ -630,7 +629,7 @@ QString CLJNBPairs::toString() const
 {
     if (nAtoms() == 0)
         return QObject::tr("CLJNBPairs::null");
-    
+
     return QObject::tr("CLJNBPairs( nAtoms() == %1, nGroups() == %2 )")
                 .arg(nAtoms()).arg(nGroups());
 }
@@ -645,17 +644,17 @@ QVector<AtomIdx> CLJNBPairs::excludedAtoms(const AtomID &atomid) const
     auto const cgatomidx = molinfo.cgAtomIdx(atomid);
 
     QVector<AtomIdx> excluded_atoms;
-    
+
     //loop through all of the CGAtomPairs
     for (int i=0; i<molinfo.nCutGroups(); ++i)
     {
         const auto cgpairs = this->get( cgatomidx.cutGroup(), CGIdx(i) );
-        
+
         if (cgpairs.isEmpty())
         {
             //all of the pairs have the same value
             const auto cljscl = cgpairs.defaultValue();
-            
+
             if (cljscl.coulomb() == 0 and cljscl.lj() == 0)
             {
                 //all of the pairs are excluded!
@@ -671,7 +670,7 @@ QVector<AtomIdx> CLJNBPairs::excludedAtoms(const AtomID &atomid) const
             for (int j=0; j<molinfo.nAtoms( CGIdx(i) ); ++j)
             {
                 const auto cljscl = cgpairs.get(cgatomidx.atom().value(), j);
-                
+
                 if (cljscl.coulomb() == 0 and cljscl.lj() == 0)
                 {
                     //this pair is excluded
@@ -680,13 +679,13 @@ QVector<AtomIdx> CLJNBPairs::excludedAtoms(const AtomID &atomid) const
             }
         }
     }
-    
+
     //don't include the atom excluded from itself
     int idx = excluded_atoms.indexOf( molinfo.atomIdx(atomid) );
-    
+
     if (idx >= 0)
         excluded_atoms.remove(idx);
-    
+
     return excluded_atoms;
 }
 
@@ -700,17 +699,17 @@ int CLJNBPairs::nExcludedAtoms(const AtomID &atomid) const
     auto const cgatomidx = molinfo.cgAtomIdx(atomid);
 
     int nexcluded = 0;
-    
+
     //loop through all of the CGAtomPairs
     for (int i=0; i<molinfo.nCutGroups(); ++i)
     {
         const auto cgpairs = this->get( cgatomidx.cutGroup(), CGIdx(i) );
-        
+
         if (cgpairs.isEmpty())
         {
             //all of the pairs have the same value
             const auto cljscl = cgpairs.defaultValue();
-            
+
             if (cljscl.coulomb() == 0 and cljscl.lj() == 0)
             {
                 nexcluded += molinfo.nAtoms( CGIdx(i) );
@@ -722,7 +721,7 @@ int CLJNBPairs::nExcludedAtoms(const AtomID &atomid) const
             for (int j=0; j<molinfo.nAtoms( CGIdx(i) ); ++j)
             {
                 const auto cljscl = cgpairs.get(cgatomidx.atom().value(), j);
-                
+
                 if (cljscl.coulomb() == 0 and cljscl.lj() == 0)
                 {
                     //this pair is excluded
@@ -731,21 +730,21 @@ int CLJNBPairs::nExcludedAtoms(const AtomID &atomid) const
             }
         }
     }
-    
+
     //don't count the atom excluded with itself
     return nexcluded - 1;
 }
 
 /** Return the total number of atoms that are excluded from the internal
     non-bonded calculation. These are atoms that do not interact with any
-    other atoms (e.g. because their nbscl factors to all other atoms in 
+    other atoms (e.g. because their nbscl factors to all other atoms in
     the molecule are zero) */
 int CLJNBPairs::nExcludedAtoms() const
 {
     //loop through all atoms and find those that don't interact with any others
     int nats = info().nAtoms();
     int nexcl = 0;
-    
+
     for (AtomIdx i(0); i<nats; ++i)
     {
         if (this->nExcludedAtoms(i) == nats-1)
@@ -753,11 +752,11 @@ int CLJNBPairs::nExcludedAtoms() const
             nexcl += 1;
         }
     }
-    
+
     return nexcl;
 }
 
-/** Return the IDs of atoms that don't interact with any other atom in 
+/** Return the IDs of atoms that don't interact with any other atom in
     the intramolecular non-bonded calculation (their scale factors to all
     other atoms is zero) */
 QVector<AtomIdx> CLJNBPairs::excludedAtoms() const
@@ -765,7 +764,7 @@ QVector<AtomIdx> CLJNBPairs::excludedAtoms() const
     //loop through all atoms and find those that don't interact with any others
     int nats = info().nAtoms();
     QVector<AtomIdx> excl;
-    
+
     for (AtomIdx i(0); i<nats; ++i)
     {
         if (this->nExcludedAtoms(i) == nats-1)
@@ -773,7 +772,7 @@ QVector<AtomIdx> CLJNBPairs::excludedAtoms() const
             excl.append(i);
         }
     }
-    
+
     return excl;
 }
 

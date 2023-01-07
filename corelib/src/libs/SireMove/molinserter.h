@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -88,7 +87,7 @@ using SireSystem::System;
     manipulator classes that are used to insert (add) molecules
     to a system or molecule group(s) during a running simulation.
     e.g. This is useful for Grand Canonial or Gibbs Ensemble simulations.
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT MolInserter : public SireBase::Property
@@ -100,19 +99,19 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, MolInserter&);
 public:
     MolInserter();
     MolInserter(const MolInserter &other);
-    
+
     virtual ~MolInserter();
-    
+
     static const char* typeName();
-    
+
     virtual MolInserter* clone() const=0;
-    
+
     virtual void setGenerator(const RanGenerator &generator);
     virtual void setGroups(const MGIDsAndMaps &mgids);
-    
+
     const RanGenerator& generator() const;
     const MGIDsAndMaps& groups() const;
-    
+
     /** Insert the entire molecule 'molecule' into the system 'system'
         using the space 'space', using the information about which
         groups to add the molecule to (and which properties to use)
@@ -122,7 +121,7 @@ public:
         was added at a uniformly random orientation and position) */
     virtual double insert(const Molecule &molecule,
                           System &system, const Space &space)=0;
-    
+
     /** Insert the partial molecule 'molecule' into the system 'system'
         using the space 'space', using the information about which
         groups to add the molecule to (and which properties to use)
@@ -132,39 +131,39 @@ public:
         was added at a uniformly random orientation and position) */
     virtual double insert(const PartialMolecule &molecule,
                           System &system, const Space &space)=0;
-    
+
     static const NullInserter& null();
-    
+
 protected:
     MolInserter& operator=(const MolInserter &other);
-    
+
     bool operator==(const MolInserter &other) const;
     bool operator!=(const MolInserter &other) const;
-    
+
     void rebuildCoordsProperties();
-    
+
     const QStringList& coordsProperties() const;
-    
+
 private:
     /** The random number generator used to randomly position
         (and/or orientate) the molecule when it is inserted */
     RanGenerator rangen;
-    
+
     /** The identities of which groups the molecule should be added
         to, together with the property maps to use for each group
         to find the correct properties */
     MGIDsAndMaps mgids;
-    
+
     /** The list of all coordinates properties */
     QStringList coords_properties;
 };
 
-/** This is the null inserter - this doesn't insert anything 
+/** This is the null inserter - this doesn't insert anything
     into anything
-    
+
     @author Christopher Woods
 */
-class SIREMOVE_EXPORT NullInserter 
+class SIREMOVE_EXPORT NullInserter
             : public SireBase::ConcreteProperty<NullInserter,MolInserter>
 {
 
@@ -174,26 +173,26 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullInserter&);
 public:
     NullInserter();
     NullInserter(const NullInserter &other);
-    
+
     ~NullInserter();
-    
+
     static const char* typeName();
-    
+
     NullInserter& operator=(const NullInserter &other);
-    
+
     bool operator==(const NullInserter &other) const;
     bool operator!=(const NullInserter &other) const;
-    
+
     double insert(const Molecule &molecule, System &system,
                   const Space &space);
-                  
+
     double insert(const PartialMolecule &molecule, System &system,
                   const Space &space);
 };
 
 /** This inserter inserts a molecule to a random point in space, using
     a random orientation, chosen uniformly at random
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT UniformInserter
@@ -205,23 +204,23 @@ friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, UniformInserter&)
 
 public:
     UniformInserter();
-    
+
     UniformInserter(const MGIDsAndMaps &mgids);
-    
+
     UniformInserter(const UniformInserter &other);
-    
+
     ~UniformInserter();
 
     static const char* typeName();
-    
+
     UniformInserter& operator=(const UniformInserter &other);
-    
+
     bool operator==(const UniformInserter &other) const;
     bool operator!=(const UniformInserter &other) const;
-    
+
     double insert(const Molecule &molecule, System &system,
                   const Space &space);
-                  
+
     double insert(const PartialMolecule &molecule, System &system,
                   const Space &space);
 

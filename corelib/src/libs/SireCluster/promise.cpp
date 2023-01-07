@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,27 +51,27 @@ class PromisePvt : public QThread
 public:
     PromisePvt() : QThread()
     {}
-    
+
     ~PromisePvt()
     {
         this->wait();
     }
-    
+
     /** Mutex to protect access to the data
         of this promise */
     QMutex datamutex;
-    
+
     /** The node on which the calculation is running */
     Node node;
-    
+
     /** Wait condition used to wait for a result of the calculation */
     QWaitCondition waiter;
-    
+
     /** The initial state of the WorkPacket before the calculation.
         It will either be in this packet, or compressed into binary */
     WorkPacket initial_packet;
     QByteArray initial_data;
-    
+
     /** The final state of the WorkPacket */
     WorkPacket result_packet;
 
@@ -81,20 +80,20 @@ protected:
     {
         SireError::setThreadString("Promise");
         SireMaths::seed_qrand();
-        
+
         QMutexLocker lkr(&datamutex);
-        
+
         //get a local copy of the node
         Node my_node = node;
         lkr.unlock();
-        
+
         //wait until the job has finished
         my_node.wait();
-        
+
         //the node has finished - grab the result and
         //drop our copy of the node
         WorkPacket my_result = my_node.result();
-        
+
         if (my_result.isNull())
         {
             //where did the result go???
@@ -102,14 +101,14 @@ protected:
                             "There was no result from the running calculation!!!"),
                                 CODELOC ) );
         }
-        
+
         //copy the result to the promise
         lkr.relock();
         result_packet = my_result;
-        
+
         //drop the reference to the node
         node = Node();
-        
+
         //wake anyone waiting for a result
         waiter.wakeAll();
     }
@@ -125,16 +124,16 @@ Promise::Promise()
 {}
 
 /** Internal constructor called by Node that constructs a promise
-    that is following the progress of the work in 'initial_packet' 
+    that is following the progress of the work in 'initial_packet'
     as it is being processed by the node 'node' */
 Promise::Promise(const Node &node, const WorkPacket &initial_workpacket)
 {
     BOOST_ASSERT( not node.isNull() );
-    
+
     d.reset( new PromisePvt() );
-    
+
     d->node = node;
-    
+
     if (initial_workpacket.shouldPack())
     {
         d->initial_data = initial_workpacket.pack();
@@ -143,7 +142,7 @@ Promise::Promise(const Node &node, const WorkPacket &initial_workpacket)
     {
         d->initial_packet = initial_workpacket;
     }
-    
+
     //now start a background thread that grabs the result
     //as soon as it is available
     d->start();
@@ -187,11 +186,11 @@ void Promise::abort()
 {
     if (d.get() == 0)
         return;
-        
+
     d->datamutex.lock();
     Node my_node = d->node;
     d->datamutex.unlock();
-    
+
     my_node.abortJob();
 }
 
@@ -200,11 +199,11 @@ void Promise::stop()
 {
     if (d.get() == 0)
         return;
-        
+
     d->datamutex.lock();
     Node my_node = d->node;
     d->datamutex.unlock();
-    
+
     my_node.stopJob();
 }
 
@@ -213,9 +212,9 @@ void Promise::wait()
 {
     if (d.get() == 0)
         return;
-        
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->result_packet.isNull())
     {
         //we still don't have the result
@@ -234,14 +233,14 @@ bool Promise::wait(int timeout)
 {
     if (d.get() == 0)
         return true;
-        
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->result_packet.isNull())
     {
         //we still don't have the result
         d->waiter.wait( &(d->datamutex), timeout );
-        
+
         return not d->result_packet.isNull();
     }
     else
@@ -253,9 +252,9 @@ bool Promise::isRunning()
 {
     if (d.get() == 0)
         return false;
-        
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     //if we are running, then we still have a handle on the node
     return not d->node.isNull();
 }
@@ -268,9 +267,9 @@ bool Promise::isError()
         return false;
 
     this->wait();
-    
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     return d->result_packet.isError();
 }
 
@@ -281,9 +280,9 @@ void Promise::throwError()
     if (d.get() != 0)
     {
         this->wait();
-        
+
         QMutexLocker lkr( &(d->datamutex) );
-        
+
         d->result_packet.throwError();
     }
 }
@@ -296,9 +295,9 @@ bool Promise::wasStopped()
         return false;
 
     this->wait();
-    
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     return not d->result_packet.hasFinished();
 }
 
@@ -312,9 +311,9 @@ bool Promise::wasAborted()
         return false;
 
     this->wait();
-    
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     return d->result_packet.wasAborted();
 }
 
@@ -325,16 +324,16 @@ float Promise::progress()
         return 1;
 
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->result_packet.isNull())
     {
         Node my_node = d->node;
         lkr.unlock();
-        
+
         float current_progress = my_node.progress();
-        
+
         lkr.relock();
-        
+
         if (not d->result_packet.isNull())
             //the result came in while we were getting the progress
             return d->result_packet.progress();
@@ -345,7 +344,7 @@ float Promise::progress()
         return d->result_packet.progress();
 }
 
-/** Return the WorkPacket in the state it was in at the 
+/** Return the WorkPacket in the state it was in at the
     start of the job. You can use this to restart jobs that
     failed in error, or were aborted, or if you just want
     to try to run the job again */
@@ -353,9 +352,9 @@ WorkPacket Promise::input()
 {
     if (d.get() == 0)
         return WorkPacket();
-        
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (d->initial_data.isEmpty())
     {
         return d->initial_packet;
@@ -371,23 +370,23 @@ WorkPacket Promise::interimResult()
 {
     if (d.get() == 0)
         return WorkPacket();
-        
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     if (not d->result_packet.isNull())
         //we already have the final result!
         return d->result_packet;
-        
+
     else
     {
         Node my_node = d->node;
-        
+
         lkr.unlock();
-        
+
         WorkPacket interim_result = my_node.interimResult();
-        
+
         lkr.relock();
-        
+
         if (not d->result_packet.isNull())
             //we got the final result while waiting for the interim result
             return d->result_packet;
@@ -396,16 +395,16 @@ WorkPacket Promise::interimResult()
     }
 }
 
-/** Return the result of the work - this blocks until  
+/** Return the result of the work - this blocks until
     the work has completed */
 WorkPacket Promise::result()
 {
     if (d.get() == 0)
         return WorkPacket();
-        
+
     this->wait();
-    
+
     QMutexLocker lkr( &(d->datamutex) );
-    
+
     return d->result_packet;
 }

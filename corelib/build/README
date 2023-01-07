@@ -15,18 +15,18 @@ build/python) in which you are encouraged to compile Sire.
 Full install instructions are provided in the INSTALL file.
 
 Sire is provided freely under the GPL (see the COPYING file) and
-comes with NO WARRANTY and NO GUARANTEES. Sire is an 
-experimental code and you should not rely on it for 
+comes with NO WARRANTY and NO GUARANTEES. Sire is an
+experimental code and you should not rely on it for
 any commercial work.
 
 If you want to know more about Sire, please visit the website
-at http://siremol.org
+at https://sire.openbiosim.org
 
 If you want to learn a little on how to write Sire scripts,
 please take a look at the tutorial in corelib/docs/tutorial.
 
-If you want to learn the API, read the API docuentation at
-http://siremol.org/apidocs/sire
+If you want to learn the API, read the tutorial at
+https://sire.openbiosim.org/tutorial
 
 Alternatively, look at the help attached to the executables
 in the sire.app/bin directory, e.g. after installing Sire, run
@@ -36,5 +36,5 @@ sire.app/bin/waterswap --help
 to get help using the waterswap executable.
 
 If you need more information, then please get in contact using
-the links provided on the website (http://siremol.org)
+the links provided on the website (https://sire.openbiosim.org)
 

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -166,17 +165,17 @@ MultiInt::MultiInt(const qint32 *array, int size)
     else
     {
         qint32 tmp[MULTIFLOAT_SIZE];
-        
+
         for (int i=0; i<size; ++i)
         {
             tmp[i] = array[i];
         }
-        
+
         for (int i=size; i<MULTIFLOAT_SIZE; ++i)
         {
             tmp[i] = 0;
         }
-        
+
         #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
             #ifdef MULTIFLOAT_AVX2_IS_AVAILABLE
                 v.x = _mm256_set_epi32(tmp[7], tmp[6], tmp[5], tmp[4],
@@ -225,15 +224,15 @@ QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
 {
     if (size == 0)
         return QVector<MultiInt>();
-    
+
     int nvecs = size / MULTIFLOAT_SIZE;
     int nremain = size % MULTIFLOAT_SIZE;
-    
+
     QVector<MultiInt> marray(nvecs + ( (nremain > 0) ? 1 : 0 ));
     MultiInt *ma = marray.data();
-    
+
     int idx = 0;
-    
+
     #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
         if (isAligned16(array))
         {
@@ -242,7 +241,7 @@ QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
                 ma[i] = MultiInt(array+idx, MULTIFLOAT_SIZE);
                 idx += MULTIFLOAT_SIZE;
             }
-    
+
             if (nremain > 0)
             {
                 ma[marray.count()-1] = MultiInt(array+idx, nremain);
@@ -259,10 +258,10 @@ QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-            
+
                 ma[i] = MultiInt((qint32*)(&tmp), MULTIFLOAT_SIZE);
             }
-            
+
             if (nremain > 0)
             {
                 for (int j=0; j<nremain; ++j)
@@ -270,7 +269,7 @@ QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-                
+
                 ma[marray.count()-1] = MultiInt((qint32*)(&tmp), nremain);
             }
         }
@@ -282,7 +281,7 @@ QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
                 ma[i] = MultiInt(array+idx, MULTIFLOAT_SIZE);
                 idx += MULTIFLOAT_SIZE;
             }
-    
+
             if (nremain > 0)
             {
                 ma[marray.count()-1] = MultiInt(array+idx, nremain);
@@ -299,10 +298,10 @@ QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-            
+
                 ma[i] = MultiInt((qint32*)(&tmp), MULTIFLOAT_SIZE);
             }
-            
+
             if (nremain > 0)
             {
                 for (int j=0; j<nremain; ++j)
@@ -310,7 +309,7 @@ QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
                     tmp[j] = array[idx];
                     ++idx;
                 }
-                
+
                 ma[marray.count()-1] = MultiInt((qint32*)(&tmp), nremain);
             }
         }
@@ -325,7 +324,7 @@ QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
         assertAligned32(marray.constData(), CODELOC);
     #endif
     #endif
-    
+
     return marray;
 }
 
@@ -341,20 +340,20 @@ QVector<qint32> MultiInt::toArray(const QVector<MultiInt> &array)
 {
     if (array.isEmpty())
         return QVector<qint32>();
-    
+
     QVector<qint32> ret;
     ret.reserve( array.count() * MULTIFLOAT_SIZE );
-    
+
     for (int i=0; i<array.count(); ++i)
     {
         const MultiInt &f = array.constData()[i];
-        
+
         for (int j=0; j<MULTIFLOAT_SIZE; ++j)
         {
             ret.append(f[j]);
         }
     }
-    
+
     return ret;
 }
 
@@ -389,11 +388,11 @@ bool MultiInt::isBinaryZero() const
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_zero = 0x00000000;
-    
+
         if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) != bin_zero)
             return false;
     }
-    
+
     return true;
 }
 
@@ -411,11 +410,11 @@ bool MultiInt::hasBinaryZero() const
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_zero = 0x00000000;
-    
+
         if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) == bin_zero)
             return true;
     }
-    
+
     return false;
 }
 
@@ -426,11 +425,11 @@ bool MultiInt::isBinaryOne() const
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_one = 0xFFFFFFFF;
-    
+
         if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) != bin_one)
             return false;
     }
-    
+
     return true;
 }
 
@@ -448,11 +447,11 @@ bool MultiInt::hasBinaryOne() const
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_one = 0xFFFFFFFF;
-    
+
         if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) == bin_one)
             return true;
     }
-    
+
     return false;
 }
 
@@ -509,14 +508,14 @@ qint32 MultiInt::at(int i) const
 {
     if (i < 0)
         i = MULTIFLOAT_SIZE + i;
-    
+
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
         throw SireError::invalid_index( QObject::tr(
                 "Cannot access element %1 of MultiInt (holds only %2 values)")
                     .arg(i).arg(MULTIFLOAT_SIZE), CODELOC );
     }
-    
+
     return v.a[i];
 }
 
@@ -529,12 +528,12 @@ qint32 MultiInt::getitem(int i) const
 MultiInt MultiInt::operator-() const
 {
     MultiInt ret;
-    
+
     for (int i=0; i<MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = -v.a[i];
     }
-    
+
     return ret;
 }
 
@@ -543,7 +542,7 @@ void MultiInt::set(int i, qint32 value)
 {
     if (i < 0)
         i = MULTIFLOAT_SIZE + i;
-    
+
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
         throw SireError::invalid_index( QObject::tr(
@@ -554,7 +553,7 @@ void MultiInt::set(int i, qint32 value)
     v.a[i] = value;
 }
 
-/** Return the 
+/** Return the
 ith value in the MultiInt */
 qint32 MultiInt::get(int i) const
 {
@@ -574,32 +573,32 @@ const char* MultiInt::typeName()
 QString MultiInt::toString() const
 {
     QStringList vals;
-    
+
     for (int i=0; i<this->count(); ++i)
     {
         vals.append( QString::number(v.a[i]) );
     }
-    
+
     return QObject::tr("{ %1 }").arg(vals.join(", "));
 }
 
 QString MultiInt::toBinaryString() const
 {
     QStringList vals;
-    
+
     for (int i=0; i<this->count(); ++i)
     {
         const unsigned char *c = reinterpret_cast<const unsigned char*>(&(v.a[i]));
-        
+
         QString val("0x");
-        
+
         for (unsigned int j=0; j<sizeof(qint32); ++j)
         {
             val.append( QString("%1").arg((unsigned short)(c[j]), 2, 16, QChar('0')) );
         }
-        
+
         vals.append(val);
     }
-    
+
     return QObject::tr("{ %1 }").arg(vals.join(", "));
 }

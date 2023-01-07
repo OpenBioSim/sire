@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -54,7 +53,7 @@ namespace SireFF
 namespace detail
 {
 
-/** This class holds 3D parameters, one for each atom 
+/** This class holds 3D parameters, one for each atom
 
     @author Christopher Woods
 */
@@ -72,30 +71,30 @@ public:
     typedef typename AtomicParameters<PARAM>::Array Array;
 
     AtomicParameters3D();
-    
+
     AtomicParameters3D(const PartialMolecule &molecule,
                        const PropertyName &coords_property,
                        const Parameters &parameters);
-     
+
     AtomicParameters3D(const AtomicCoords3D &coords,
                        const AtomicParameters<PARAM> &parameters);
-    
+
     AtomicParameters3D(const AtomicParameters3D<PARAM> &other);
-    
+
     ~AtomicParameters3D();
-    
+
     AtomicParameters3D<PARAM>& operator=(const AtomicParameters3D<PARAM> &other);
-    
+
     bool operator==(const AtomicParameters3D<PARAM> &other) const;
     bool operator!=(const AtomicParameters3D<PARAM> &other) const;
 
     bool changedAllGroups(const AtomicParameters3D<PARAM> &params) const;
-    
+
     QSet<quint32> getChangedGroups(const AtomicParameters3D<PARAM> &params) const;
-    
+
     void addChangedGroups(const AtomicParameters3D<PARAM> &params,
                           QSet<quint32> &changed_groups) const;
-    
+
     AtomicParameters3D<PARAM> applyMask(const QSet<quint32> &idxs) const;
 };
 
@@ -111,7 +110,7 @@ AtomicParameters3D<PARAM>::AtomicParameters3D()
 
 /** Construct from the passed molecule (used to get the coordinates via
     the passed coordinates property) and passed parameters
-    
+
     \throw SireError::incompatible_error
 */
 template<class PARAM>
@@ -154,7 +153,7 @@ AtomicParameters3D<PARAM>& AtomicParameters3D<PARAM>::operator=(
 {
     AtomicParameters<PARAM>::operator=(other);
     AtomicCoords3D::operator=(other);
-    
+
     return *this;
 }
 
@@ -188,7 +187,7 @@ bool AtomicParameters3D<PARAM>::changedAllGroups(
     {
         return true;
     }
-    
+
     //get the list of groups that have changed...
     QSet<quint32> changed_idxs = this->getChangedGroups(other);
 
@@ -218,30 +217,30 @@ QSet<quint32> AtomicParameters3D<PARAM>::getChangedGroups(
 {
     QSet<quint32> changed_groups;
     changed_groups.reserve( this->nGroups() );
-    
+
     this->addChangedGroups(parameters, changed_groups);
-    
+
     return changed_groups;
 }
 
-/** Mask this set of parameters so that only the CutGroups at indicies 
-    'idxs' are present */ 
+/** Mask this set of parameters so that only the CutGroups at indicies
+    'idxs' are present */
 template<class PARAM>
 SIRE_OUTOFLINE_TEMPLATE
 AtomicParameters3D<PARAM> AtomicParameters3D<PARAM>::applyMask(
                                             const QSet<quint32> &idxs) const
 {
     AtomicCoords3D masked_coords = AtomicCoords3D::applyMask(idxs);
-    
+
     if (masked_coords.atomicCoordinates().count() == 0)
         //all of the groups are masked
         return AtomicParameters3D<PARAM>();
-    
-    else if (masked_coords.atomicCoordinates().count() 
+
+    else if (masked_coords.atomicCoordinates().count()
                     == this->atomicCoordinates().count())
         //none of the groups are masked
         return *this;
-        
+
     return AtomicParameters3D<PARAM>( masked_coords,
                                       AtomicParameters<PARAM>::applyMask(idxs) );
 }

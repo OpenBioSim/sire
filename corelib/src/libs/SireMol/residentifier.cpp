@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,9 +48,9 @@ static const RegisterMetaType<ResIdentifier> r_resid;
 QDataStream &operator<<(QDataStream &ds, const ResIdentifier &resid)
 {
     writeHeader(ds, r_resid, 1);
-    
+
     SireStream::savePolyPointer(ds, resid.d);
-    
+
     return ds;
 }
 
@@ -59,14 +58,14 @@ QDataStream &operator<<(QDataStream &ds, const ResIdentifier &resid)
 QDataStream &operator>>(QDataStream &ds, ResIdentifier &resid)
 {
     VersionID v = readHeader(ds, r_resid);
-    
+
     if (v == 1)
     {
         SireStream::loadPolyPointer(ds, resid.d);
     }
     else
         throw version_error( v, "1", r_resid, CODELOC );
-        
+
     return ds;
 }
 
@@ -107,7 +106,7 @@ uint ResIdentifier::hash() const
     else
         return d->hash();
 }
-            
+
 /** Return a string representatio of this ID */
 QString ResIdentifier::toString() const
 {
@@ -142,7 +141,7 @@ ResIdentifier& ResIdentifier::operator=(const ResID &other)
         d.reset();
     else
         d.reset(other.clone());
-    
+
     return *this;
 }
 
@@ -220,9 +219,9 @@ static const RegisterMetaType<ResIdx> r_residx;
 QDataStream &operator<<(QDataStream &ds, const ResIdx &residx)
 {
     writeHeader(ds, r_residx, 1);
-    
+
     ds << static_cast<const SireID::Index_T_<ResIdx>&>(residx);
-    
+
     return ds;
 }
 
@@ -230,25 +229,25 @@ QDataStream &operator<<(QDataStream &ds, const ResIdx &residx)
 QDataStream &operator>>(QDataStream &ds, ResIdx &residx)
 {
     VersionID v = readHeader(ds, r_residx);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Index_T_<ResIdx>&>(residx);
     }
     else
         throw version_error( v, "1", r_residx, CODELOC );
-        
+
     return ds;
 }
 
 ResIdx::ResIdx() : SireID::Index_T_<ResIdx>(), ResID()
 {}
 
-ResIdx::ResIdx(quint32 idx) 
+ResIdx::ResIdx(quint32 idx)
           : SireID::Index_T_<ResIdx>(idx), ResID()
 {}
 
-ResIdx::ResIdx(const ResIdx &other) 
+ResIdx::ResIdx(const ResIdx &other)
           : SireID::Index_T_<ResIdx>(other), ResID(other)
 {}
 
@@ -307,9 +306,9 @@ static const RegisterMetaType<ResName> r_resname;
 QDataStream &operator<<(QDataStream &ds, const ResName &resname)
 {
     writeHeader(ds, r_resname, 1);
-    
+
     ds << static_cast<const SireID::Name&>(resname);
-    
+
     return ds;
 }
 
@@ -317,14 +316,14 @@ QDataStream &operator<<(QDataStream &ds, const ResName &resname)
 QDataStream &operator>>(QDataStream &ds, ResName &resname)
 {
     VersionID v = readHeader(ds, r_resname);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Name&>(resname);
     }
     else
         throw version_error( v, "1", r_resname, CODELOC );
-        
+
     return ds;
 }
 
@@ -404,9 +403,9 @@ static const RegisterMetaType<ResNum> r_resnum;
 QDataStream &operator<<(QDataStream &ds, const ResNum &resnum)
 {
     writeHeader(ds, r_resnum, 1);
-    
+
     ds << static_cast<const SireID::Number&>(resnum);
-    
+
     return ds;
 }
 
@@ -414,14 +413,14 @@ QDataStream &operator<<(QDataStream &ds, const ResNum &resnum)
 QDataStream &operator>>(QDataStream &ds, ResNum &resnum)
 {
     VersionID v = readHeader(ds, r_resnum);
-    
+
     if (v == 1)
     {
         ds >> static_cast<SireID::Number&>(resnum);
     }
     else
         throw version_error( v, "1", r_resnum, CODELOC );
-        
+
     return ds;
 }
 

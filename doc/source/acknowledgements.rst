@@ -63,7 +63,7 @@ have to do anything yourself.
 
 Sire is itself distributed under the terms of the GPL version 3
 (or any later GPL license). The C++ source code is licensed
-under the GPL 2 or later, but linking with GPL3 dependencies
+under the GPL 3 or later, and linking with GPL3 dependencies
 (e.g. GSL) means that the entire package is licensed under GPL 3
 or later.
 

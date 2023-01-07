@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -96,9 +95,9 @@ namespace detail
 class ProtoMSWorkspace;
 }
 
-/** This class holds all of the source and default values of the 
+/** This class holds all of the source and default values of the
     properties used by the ProtoMS parameter reader
-    
+
     @author Christopher Woods
 */
 class SIREIO_EXPORT ProtoMSParameters
@@ -106,12 +105,12 @@ class SIREIO_EXPORT ProtoMSParameters
 public:
     ProtoMSParameters();
     ~ProtoMSParameters();
-    
+
     //// Locations of the properties into which to place data
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         partial atomic charges
-        
+
         default == "charge"
     */
     const PropertyName& charge() const
@@ -119,9 +118,9 @@ public:
         return charge_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         atomic Lennard Jones parameters
-        
+
         default == "LJ"
     */
     const PropertyName& lj() const
@@ -129,9 +128,9 @@ public:
         return lj_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         initial partial atomic charges
-        
+
         default == "initial_charge"
     */
     const PropertyName& initialCharge() const
@@ -139,9 +138,9 @@ public:
         return initial_charge_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         initial atomic Lennard Jones parameters
-        
+
         default == "initial_LJ"
     */
     const PropertyName& initialLJ() const
@@ -149,9 +148,9 @@ public:
         return initial_lj_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         final_partial atomic charges
-        
+
         default == "final_charge"
     */
     const PropertyName& finalCharge() const
@@ -159,9 +158,9 @@ public:
         return final_charge_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         final atomic Lennard Jones parameters
-        
+
         default == "final_LJ"
     */
     const PropertyName& finalLJ() const
@@ -169,9 +168,9 @@ public:
         return final_lj_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         molecular connectivity
-        
+
         default == "connectivity"
     */
     const PropertyName& connectivity() const
@@ -179,9 +178,9 @@ public:
         return connectivity_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         coordinates
-        
+
         default == "coordinates"
     */
     const PropertyName& coordinates() const
@@ -189,9 +188,9 @@ public:
         return coords_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         bond parameters
-        
+
         default == "bond"
     */
     const PropertyName& bond() const
@@ -199,9 +198,9 @@ public:
         return bond_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         angle parameters
-        
+
         default == "angle"
     */
     const PropertyName& angle() const
@@ -209,9 +208,9 @@ public:
         return angle_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         dihedral parameters
-        
+
         default == "dihedral"
     */
     const PropertyName& dihedral() const
@@ -219,9 +218,9 @@ public:
         return dihedral_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         Urey-Bradley parameters
-        
+
         default == "Urey-Bradley"
     */
     const PropertyName& ureyBradley() const
@@ -229,9 +228,9 @@ public:
         return ub_property;
     }
 
-    /** Return the name of the property that will contain the 
+    /** Return the name of the property that will contain the
         z-matrix
-        
+
         default == "zmatrix"
     */
     const PropertyName& zmatrix() const
@@ -241,7 +240,7 @@ public:
 
     /** Return the name of the property that will contain the
         non-bonded pairs
-        
+
         default == "intrascale"
     */
     const PropertyName& nonBonded() const
@@ -251,7 +250,7 @@ public:
 
     /** Return the name of the property that will contain
         the perturbations property
-        
+
         default == "perturbations"
     */
     const PropertyName& perturbations() const
@@ -263,19 +262,19 @@ private:
     ///////
     /////// Properties that hold the data of the molecule
     ///////
-    
+
     /** The default name of the partial charge property */
     static PropertyName charge_property;
 
     /** The default name of the LJ property */
     static PropertyName lj_property;
-    
+
     /** The default name of the initial partial charge property */
     static PropertyName initial_charge_property;
 
     /** The default name of the initial LJ property */
     static PropertyName initial_lj_property;
-    
+
     /** The default name of the final partial charge property */
     static PropertyName final_charge_property;
 
@@ -302,17 +301,17 @@ private:
 
     /** The default name of the zmatrix property */
     static PropertyName zmatrix_property;
-    
+
     /** The default name of the non-bonded property */
     static PropertyName nb_property;
-    
+
     /** The default name of the perturbations property */
     static PropertyName perts_property;
 };
 
 /** This class is used to read in ProtoMS parameter files and
     parameterise passed molecules.
- 
+
     @author Christopher Woods
 */
 class SIREIO_EXPORT ProtoMS
@@ -328,7 +327,7 @@ public:
 
     ProtoMS();
     ProtoMS(const QString &protoms);
-    
+
     ~ProtoMS();
 
     static const char* typeName();
@@ -337,7 +336,7 @@ public:
     {
         return ProtoMS::typeName();
     }
-    
+
     ProtoMS* clone() const;
 
     static const ProtoMSParameters& parameters()
@@ -348,12 +347,12 @@ public:
     void setExecutable(const QString &protoms);
 
     void addParameterFile(const QString &paramfile);
-    
+
     QStringList parameterFiles() const;
 
     QString parameterisationCommandFile(const Molecule &molecule,
                                         int type) const;
-    
+
     Molecule parameterise(const Molecule &molecule, int type,
                           const PropertyMap &map = PropertyMap());
 
@@ -363,20 +362,20 @@ public:
 private:
     QString writeShellFile(const SireBase::TempDir &tempdir,
                            const QString &cmdfile) const;
-    QString writeCommandFile(const SireBase::TempDir &tempdir, 
+    QString writeCommandFile(const SireBase::TempDir &tempdir,
                              const Molecule &molecule, int type) const;
-    
-    void processZMatrixLine(const QStringList &words, 
+
+    void processZMatrixLine(const QStringList &words,
                             const Molecule &mol, int type,
                             ZMatrix &zmatrix,
                             detail::ProtoMSWorkspace &workspace) const;
-                     
+
     void processZMatrixPertLine(const QStringList &words, const Molecule &mol, int type,
                                 QList<SireMol::GeomPertPtr> &geom_perturbations,
                                 const ZMatrix &zmatrix,
                                 const PropertyMap &pert_map,
                                 detail::ProtoMSWorkspace &workspace) const;
-                                          
+
     void processAtomLine(const QStringList &words,
                          MolEditor &editmol, int type,
                          const QString &charge_property,
@@ -386,16 +385,16 @@ private:
     void processAtomPertLine(const QStringList &words, MolEditor &mol, int type,
                              const QString &initial_charge_property,
                              const QString &final_charge_property,
-                             const QString &initial_lj_property, 
+                             const QString &initial_lj_property,
                              const QString &final_lj_property,
                              detail::ProtoMSWorkspace &workspace) const;
-    
+
     void processBondLine(const QStringList &words,
                          const Molecule &molecule, int type,
                          SireMM::TwoAtomFunctions &bondfuncs,
                          detail::ProtoMSWorkspace &workspace) const;
-    
-    SireMol::PerturbationPtr 
+
+    SireMol::PerturbationPtr
     processBondPertLine(const QStringList &words,
                         const Molecule &molecule, int type,
                         const PropertyName &bond_property,
@@ -405,18 +404,18 @@ private:
                             const Molecule &molecule, int type,
                             SireMol::ConnectivityEditor &connectivity,
                             detail::ProtoMSWorkspace &workspace) const;
-    
+
     void processAngleLine(const QStringList &words,
                           const Molecule &molecule, int type,
                           SireMM::ThreeAtomFunctions &anglefuncs,
                           detail::ProtoMSWorkspace &workspace) const;
-    
+
     SireMol::PerturbationPtr
     processAnglePertLine(const QStringList &words,
                          const Molecule &molecule, int type,
                          const PropertyName &angle_property,
                          detail::ProtoMSWorkspace &workspace) const;
-    
+
     QString processDihedralLine(QTextStream &ts,
                                 const QStringList &words,
                                 const Molecule &molecule, int type,
@@ -439,33 +438,33 @@ private:
                                   const Molecule &molecule, int type,
                                   ZMatrix &zmatrix,
                                   detail::ProtoMSWorkspace &workspace) const;
-    
+
     void processUBLine(const QStringList &words,
                        const Molecule &molecule, int type,
                        SireMM::TwoAtomFunctions &ubfuncs,
                        detail::ProtoMSWorkspace &workspace) const;
-    
-    SireMol::PerturbationPtr 
+
+    SireMol::PerturbationPtr
     processUBPertLine(const QStringList &words,
                       const Molecule &molecule, int type,
                       const PropertyName &ub_property,
                       detail::ProtoMSWorkspace &workspace) const;
-    
+
     void processNBLine(const QStringList &words,
                        const Molecule &molecule, int type,
                        SireMM::CLJNBPairs &nbpairs,
                        detail::ProtoMSWorkspace &workspace) const;
-    
+
     Molecule runProtoMS(const Molecule &molecule, int type,
                         const PropertyMap &map) const;
 
     /** The default properties used to store the parameters */
     static ProtoMSParameters protoms_parameters;
 
-    /** The list of parameter files that will be used to 
+    /** The list of parameter files that will be used to
         parameterise the molecules */
     QStringList paramfiles;
-    
+
     /** The full path to the ProtoMS executable that will
         be used to perform the parameterisation */
     QString protoms_exe;

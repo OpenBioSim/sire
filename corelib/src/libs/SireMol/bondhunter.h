@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -74,17 +73,17 @@ class SIREMOL_EXPORT BondHunter : public SireBase::Property
 public:
     BondHunter();
     BondHunter(const BondHunter &other);
-    
+
     virtual ~BondHunter();
-    
+
     static const char* typeName()
     {
         return "SireMol::BondHunter";
     }
 
     virtual BondHunter* clone() const=0;
-    
-    /** Return the connectivity of the molecule viewed in 'molview' 
+
+    /** Return the connectivity of the molecule viewed in 'molview'
         using this function to hunt for all of the bonded atoms.
         This only searches for the bonds between atoms that are
         part of this view */
@@ -99,15 +98,15 @@ class SIREMOL_EXPORT CovalentBondHunterParameters
 public:
     CovalentBondHunterParameters()
     {}
-    
+
     ~CovalentBondHunterParameters()
     {}
-    
+
     static const SireBase::PropertyName& coordinates()
     {
         return coords_param;
     }
-    
+
     static const SireBase::PropertyName& element()
     {
         return elements_param;
@@ -122,7 +121,7 @@ private:
     the distance between the atoms to the sum of their covalent radii.
     If the distance is less than the sum of the covalent radii then the atoms
     are bonded.
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT CovalentBondHunter
@@ -135,21 +134,21 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CovalentBondHunter
 public:
     CovalentBondHunter(double tolerance=1.1, double max_radius2=25);
     CovalentBondHunter(const CovalentBondHunter &other);
-    
+
     ~CovalentBondHunter();
-    
+
     static const char* typeName();
 
     CovalentBondHunter& operator=(const CovalentBondHunter &other);
-    
+
     bool operator==(const CovalentBondHunter &other) const;
     bool operator!=(const CovalentBondHunter &other) const;
-    
+
     static const CovalentBondHunterParameters& parameters()
     {
         return params;
     }
-    
+
     Connectivity operator()(const MoleculeView &molview,
                             const PropertyMap &map = PropertyMap()) const;
 
@@ -165,7 +164,7 @@ private:
 
 /** This is a null bond hunter. This finds no bonds in a molecule and is used
     when you want to create an empty connectivity object for a molecule
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT NullBondHunter
@@ -174,13 +173,13 @@ class SIREMOL_EXPORT NullBondHunter
 public:
     NullBondHunter();
     NullBondHunter(const NullBondHunter &other);
-    
+
     ~NullBondHunter();
-    
+
     static const char* typeName();
 
     const char* what() const;
-    
+
     Connectivity operator()(const MoleculeView &molview,
                             const PropertyMap &map = PropertyMap()) const;
 };
@@ -190,21 +189,21 @@ public:
     radii), but then it runs over each atom and ensures that the atom does
     not contain too many bonds. If it does, then only the n closest bonds
     are retained.
-    
+
     @author Christopher Woods
 */
-class SIREMOL_EXPORT ChemicalBondHunter 
+class SIREMOL_EXPORT ChemicalBondHunter
            : public SireBase::ConcreteProperty<ChemicalBondHunter,CovalentBondHunter>
 {
 public:
     ChemicalBondHunter();
     ChemicalBondHunter(double tolerance);
     ChemicalBondHunter(const ChemicalBondHunter &other);
-    
+
     ~ChemicalBondHunter();
-    
+
     static const char* typeName();
-    
+
     Connectivity operator()(const MoleculeView &molview,
                             const PropertyMap &map = PropertyMap()) const;
 };

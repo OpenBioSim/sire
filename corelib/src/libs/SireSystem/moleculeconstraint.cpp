@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,7 +43,7 @@ using namespace SireMol;
 using namespace SireBase;
 using namespace SireStream;
 
-static const RegisterMetaType<MoleculeConstraint> r_molconstraint( MAGIC_ONLY, 
+static const RegisterMetaType<MoleculeConstraint> r_molconstraint( MAGIC_ONLY,
                                                        MoleculeConstraint::typeName() );
 
 /** Serialise to a binary datastream */
@@ -52,18 +51,18 @@ QDataStream &operator<<(QDataStream &ds,
                                           const MoleculeConstraint &molconstraint)
 {
     writeHeader(ds, r_molconstraint, 2);
-    
+
     ds << static_cast<const Constraint&>(molconstraint);
-       
+
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds, 
+QDataStream &operator>>(QDataStream &ds,
                                           MoleculeConstraint &molconstraint)
 {
     VersionID v = readHeader(ds, r_molconstraint);
-    
+
     if (v == 2)
     {
         ds >> static_cast<Constraint&>(molconstraint);
@@ -71,7 +70,7 @@ QDataStream &operator>>(QDataStream &ds,
     else if (v == 1)
     {
         QUuid sysuid;
-    
+
         ds >> sysuid
            >> static_cast<Constraint&>(molconstraint);
     }
@@ -104,7 +103,7 @@ MoleculeConstraint& MoleculeConstraint::operator=(const MoleculeConstraint &othe
 {
     if (this != &other)
         Constraint::operator=(other);
-    
+
     return *this;
 }
 

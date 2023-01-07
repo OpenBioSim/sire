@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -57,13 +56,13 @@ QDataStream &operator<<(QDataStream &ds,
                                         const MolecularDynamics &moldyn)
 {
     writeHeader(ds, r_moldyn, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << moldyn.intgrator << moldyn.wspace << moldyn.timestep << moldyn.num_moves
         << moldyn.total_time
         << static_cast<const Dynamics&>(moldyn);
-        
+
     return ds;
 }
 
@@ -72,26 +71,26 @@ QDataStream &operator>>(QDataStream &ds,
                                         MolecularDynamics &moldyn)
 {
     VersionID v = readHeader(ds, r_moldyn);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-    
-        sds >> moldyn.intgrator >> moldyn.wspace >> moldyn.timestep 
+
+        sds >> moldyn.intgrator >> moldyn.wspace >> moldyn.timestep
             >> moldyn.num_moves >> moldyn.total_time
             >> static_cast<Dynamics&>(moldyn);
-             
+
     }
     else
         throw version_error(v, "1", r_moldyn, CODELOC);
-        
+
     return ds;
 }
 
 /** Constructor */
 MolecularDynamics::MolecularDynamics(const PropertyMap &map)
                   : ConcreteProperty<MolecularDynamics,Dynamics>(map),
-                    intgrator( Integrator::null() ), 
+                    intgrator( Integrator::null() ),
                     wspace( IntegratorWorkspace::null() ),
                     timestep(1*femtosecond),
                     num_moves(0), total_time(0)
@@ -104,16 +103,16 @@ MolecularDynamics::MolecularDynamics(const PropertyMap &map)
 MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
                                      const PropertyMap &map)
                   : ConcreteProperty<MolecularDynamics,Dynamics>(map),
-                    intgrator( VelocityVerlet() ), timestep(1*femtosecond), 
+                    intgrator( VelocityVerlet() ), timestep(1*femtosecond),
                     num_moves(0), total_time(0)
 {
     wspace = intgrator.read().createWorkspace(moleculegroup, map);
     Dynamics::setEnsemble( intgrator.read().ensemble() );
 }
-    
+
 /** Construct a move for the passed molecule group, integrated
     using the supplied integrator */
-MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup, 
+MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
                                      const Integrator &integrator,
                                      const PropertyMap &map)
                   : ConcreteProperty<MolecularDynamics,Dynamics>(map),
@@ -124,9 +123,9 @@ MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
     Dynamics::setEnsemble( intgrator.read().ensemble() );
 }
 
-/** Construct a move for the passed molecule group, integrated with 
+/** Construct a move for the passed molecule group, integrated with
     the passed timestep */
-MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup, 
+MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup,
                                      Time t, const PropertyMap &map)
                   : ConcreteProperty<MolecularDynamics,Dynamics>(map),
                     intgrator( VelocityVerlet() ), timestep(t), num_moves(0),
@@ -171,10 +170,10 @@ MolecularDynamics& MolecularDynamics::operator=(const MolecularDynamics &other)
         timestep = other.timestep;
         num_moves = other.num_moves;
         total_time = other.total_time;
-    
+
         Dynamics::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -184,7 +183,7 @@ bool MolecularDynamics::operator==(const MolecularDynamics &other) const
     return intgrator == other.intgrator and
            wspace == other.wspace and
            timestep == other.timestep and
-           num_moves == other.num_moves and 
+           num_moves == other.num_moves and
            total_time == other.total_time and
            Dynamics::operator==(other);
 }
@@ -203,19 +202,19 @@ QString MolecularDynamics::toString() const
                 .arg(timestep.to(femtosecond))
                 .arg(num_moves);
 }
-    
+
 /** Return the number of moves completed using this object */
 int MolecularDynamics::nMoves() const
 {
     return num_moves;
 }
-    
+
 /** Return the total amount of time simulated using these moves */
 SireUnits::Dimension::Time MolecularDynamics::totalTime() const
 {
     return total_time;
 }
-    
+
 /** Return the molecule group on which this move operates */
 const MoleculeGroup& MolecularDynamics::moleculeGroup() const
 {
@@ -252,7 +251,7 @@ void MolecularDynamics::setMoleculeGroup(const MoleculeGroup &new_molgroup,
     }
 }
 
-/** Set the integrator to be used to advance the coordinates from 
+/** Set the integrator to be used to advance the coordinates from
     one timestep to the next. */
 void MolecularDynamics::setIntegrator(const Integrator &integrator)
 {
@@ -337,7 +336,7 @@ PropertyName MolecularDynamics::elementsProperty() const
     return propertyMap()["element"];
 }
 
-/** Return the property used to find the generator for 
+/** Return the property used to find the generator for
     missing velocities */
 PropertyName MolecularDynamics::velocityGeneratorProperty() const
 {
@@ -367,13 +366,13 @@ Temperature MolecularDynamics::temperature() const
 {
   SireUnits::Dimension::MolarEnergy ekin = MolecularDynamics::kineticEnergy();
 
-  // NOTE THAT THIS ONLY WORKS FOR 3D SPACE WHEN THERE IS ONE ATOM PER MOLECULE 
+  // NOTE THAT THIS ONLY WORKS FOR 3D SPACE WHEN THERE IS ONE ATOM PER MOLECULE
   // AND NO CONSTRAINTS...IN OTHER WORDS..NEED TO FIX THIS
   //int ndofs = 3 * wspace.read().nMolecules();
   int ndofs = 3 * 256;
 
   SireUnits::Dimension::Temperature temp = ( ( 2 * ekin.value() ) / ( ndofs * k_boltz ) ) * kelvin ;
-  
+
   return temp;
 
 }
@@ -417,9 +416,9 @@ void MolecularDynamics::move(System &system, int nmoves, bool record_stats)
     system.energy();
 
     MolecularDynamics old_state(*this);
-        
+
     System old_system_state(system);
-    
+
     try
     {
         wspace.edit().setSystem(system);

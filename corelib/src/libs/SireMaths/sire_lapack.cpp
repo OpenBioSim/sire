@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -46,11 +45,11 @@ typedef int LAPACK_INT;
 extern "C"
 {
     /** This is dsyev - see LAPACK API for documentation */
-    void SireDSYEV(const char *JOBZ, const char *UPLO, 
-                   const LAPACK_INT *N, double *A, 
-                   const LAPACK_INT *LDA, 
-                   double *W, double *WORK, 
-                   const LAPACK_INT *LWORK, 
+    void SireDSYEV(const char *JOBZ, const char *UPLO,
+                   const LAPACK_INT *N, double *A,
+                   const LAPACK_INT *LDA,
+                   double *W, double *WORK,
+                   const LAPACK_INT *LWORK,
                    LAPACK_INT *INFO);
 
 } // end of extern "C"
@@ -79,37 +78,37 @@ std::pair<NVector,NMatrix> dsyev(const NMatrix &A, bool upper)
 
     char JOBZ, UPLO;
     LAPACK_INT N, LDA, LWORK, INFO;
-    
+
     JOBZ = 'V';
-    
+
     if (upper)
         UPLO = 'U';
     else
         UPLO = 'L';
-        
+
     N = A.nRows();
-    
+
     BOOST_ASSERT( A.nColumns() == N );
-    
+
     LDA = N;
-    
+
     NVector EIGVAL(N);
-    
+
     QVector<double> WORK( 5*N );
     LWORK = WORK.count();
-    
+
     INFO = 0;
-    
+
     NMatrix EIGVEC( A );
-    
+
     ::SireDSYEV(&JOBZ, &UPLO, &N, EIGVEC.data(),
                 &LDA, EIGVAL.data(), WORK.data(), &LWORK, &INFO);
-              
+
     if (INFO != 0)
         throw SireMaths::domain_error( QObject::tr(
                 "There was a problem running dsyev - INFO == %1. A ==\n%2.")
                     .arg(INFO).arg(A.toString()), CODELOC );
-    
+
     return std::pair<NVector,NMatrix>(EIGVAL, EIGVEC);
 
     #endif // SIRE_DISABLE_FORTRAN
@@ -118,7 +117,7 @@ std::pair<NVector,NMatrix> dsyev(const NMatrix &A, bool upper)
 NVector dsyev_eigenvalues(const NMatrix &A, bool upper)
 {
     #ifdef SIRE_DISABLE_FORTRAN
-    
+
     throw SireError::unsupported( QObject::tr(
             "dsyev_eigenvalues not available as LAPACK does not work "
             "with this version of Sire."),
@@ -136,39 +135,39 @@ NVector dsyev_eigenvalues(const NMatrix &A, bool upper)
 
     char JOBZ, UPLO;
     LAPACK_INT N, LDA, LWORK, INFO;
-    
+
     JOBZ = 'N';
-    
+
     if (upper)
         UPLO = 'U';
     else
         UPLO = 'L';
-        
+
     N = A.nRows();
-    
+
     BOOST_ASSERT( A.nColumns() == N );
-    
+
     LDA = N;
-    
+
     NVector EIGVAL(N);
-    
+
     QVector<double> WORK( 5*N );
     LWORK = WORK.count();
-    
+
     INFO = 0;
-    
+
     NMatrix A_COPY( A );
-    
+
     ::SireDSYEV(&JOBZ, &UPLO, &N, A_COPY.data(),
                 &LDA, EIGVAL.data(), WORK.data(), &LWORK, &INFO);
-              
+
     if (INFO != 0)
         throw SireMaths::domain_error( QObject::tr(
                 "There was a problem running dsyev - INFO == %1. A ==\n%2.")
                     .arg(INFO).arg(A.toString()), CODELOC );
-    
+
     return EIGVAL;
-    
+
     #endif // SIRE_DISABLE_FORTRAN
 }
 

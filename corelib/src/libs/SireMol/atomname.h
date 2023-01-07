@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,7 +48,7 @@ namespace SireMol
 
 /** This class holds the name of an atom. This can be used
     to identify an atom within a residue.
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT AtomName : public SireID::Name, public AtomID
@@ -60,36 +59,36 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomName&);
 
 public:
     AtomName();
-    
+
     explicit AtomName(const QString &name);
-    
+
     AtomName(const QString &name, SireID::CaseSensitivity case_sensitivity);
-    
+
     AtomName(const AtomName &other);
-    
+
     ~AtomName();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return AtomName::typeName();
     }
-    
+
     AtomName* clone() const;
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
-    
+
     QString toString() const;
-    
+
     AtomName& operator=(const AtomName &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     bool operator==(const AtomName &other) const;
-    
+
     bool operator!=(const AtomName &other) const;
 
     QList<AtomIdx> map(const MolInfo &molinfo) const;

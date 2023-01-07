@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -33,7 +32,7 @@
 using namespace SireBase;
 
 Q_GLOBAL_STATIC( QMutex, globalPointerMutex );
- 
+
 /** The registry of all global shared pointers */
 static QHash< QString,QSet<const void*> > *global_pointers(0);
 
@@ -52,6 +51,6 @@ QSet<const void*>& GlobalSharedPointerBase::getRegistry(const char *typname)
 {
     if (not global_pointers)
         global_pointers = new QHash< QString,QSet<const void*> >();
-        
+
     return (*global_pointers)[ QLatin1String(typname) ];
 }

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -37,8 +36,8 @@ using namespace SireBase::detail;
 
 using namespace SireStream;
 
-void 
-SireBase::detail::throwCannotConvertVariantError(const char *this_type, 
+void
+SireBase::detail::throwCannotConvertVariantError(const char *this_type,
                                                  const char *type_t,
                                                  const QString &codeloc)
 {
@@ -72,22 +71,22 @@ void SireBase::detail::throwPackedArray2D_Array_incompatibleError(
         "(number of objects in this array is %1, while the number of "
         "objects in the other array is %2.")
             .arg(this_sz).arg(other_sz), CODELOC );
-}       
+}
 
 static const RegisterMetaType<PackedArray2DDataBase> r_parray( MAGIC_ONLY, NO_ROOT,
                                                       "SireBase::PackedArray2D<T>" );
 
-void 
+void
 SireBase::detail::writePackedArray2DHeader(QDataStream &ds)
 {
     writeHeader(ds, r_parray, 2);
 }
 
-quint32 
+quint32
 SireBase::detail::readPackedArray2DHeader(QDataStream &ds)
 {
     VersionID v = readHeader(ds, r_parray);
-    
+
     if (v != 1 and v != 2)
         throw version_error(v, "1,2", r_parray, CODELOC);
 
@@ -97,17 +96,17 @@ SireBase::detail::readPackedArray2DHeader(QDataStream &ds)
 static const RegisterMetaType<PackedArray2D_ArrayDataBase> r_parrayarray( MAGIC_ONLY, NO_ROOT,
                                                 "SireBase::PackedArray2D<T>::Array" );
 
-void 
+void
 SireBase::detail::writePackedArray2DArrayHeader(QDataStream &ds, quint32 version)
 {
     writeHeader(ds, r_parrayarray, version);
 }
 
-void 
+void
 SireBase::detail::readPackedArray2DArrayHeader(QDataStream &ds, quint32 version)
 {
     VersionID v = readHeader(ds, r_parrayarray);
-    
+
     if (v != version)
         throw version_error(v, QString::number(version), r_parrayarray, CODELOC);
 }
@@ -117,7 +116,7 @@ SireBase::detail::readPackedArray2DArrayHeader(QDataStream &ds, quint32 version)
 ////////
 
 /** Return the number of bytes necessary to store the array of arrays */
-quint32 PackedArray2DMemoryBase::getSize(quint32 narrays, quint32 nvalues, 
+quint32 PackedArray2DMemoryBase::getSize(quint32 narrays, quint32 nvalues,
                                          quint32 sizeof_PackedArray2DData,
                                          quint32 sizeof_PackedArray2D_Array,
                                          quint32 sizeof_PackedArray2D_ArrayData,
@@ -134,7 +133,7 @@ quint32 PackedArray2DMemoryBase::getSize(quint32 narrays, quint32 nvalues,
 }
 
 /** Allocate the memory necessary to hold the array of arrays */
-char* PackedArray2DMemoryBase::create(quint32 narrays, quint32 nvalues, 
+char* PackedArray2DMemoryBase::create(quint32 narrays, quint32 nvalues,
                                       quint32 sizeof_PackedArray2DData,
                                       quint32 sizeof_PackedArray2D_Array,
                                       quint32 sizeof_PackedArray2D_ArrayData,
@@ -145,7 +144,7 @@ char* PackedArray2DMemoryBase::create(quint32 narrays, quint32 nvalues,
                                                   sizeof_PackedArray2D_Array,
                                                   sizeof_PackedArray2D_ArrayData,
                                                   sizeof_T);
-                                          
+
     return new char[sz];
 }
 

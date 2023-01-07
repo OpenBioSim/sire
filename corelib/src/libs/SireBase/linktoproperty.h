@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -53,7 +52,7 @@ namespace SireBase
     different names. Also, optional identifiers can be used
     so that this link only applies to properties in specifically
     identified objects.
-    
+
     @author Christopher Woods
 */
 class SIREBASE_EXPORT LinkToProperty : public ConcreteProperty<LinkToProperty,Property>
@@ -64,25 +63,25 @@ friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, LinkToProperty&);
 
 public:
     LinkToProperty();
-    
+
     LinkToProperty(const PropertyName &source);
     LinkToProperty(const PropertyName &source, const SireID::ID &filter);
-    
+
     LinkToProperty(const LinkToProperty &other);
-    
+
     ~LinkToProperty();
-    
+
     LinkToProperty& operator=(const LinkToProperty &other);
-    
+
     bool operator==(const LinkToProperty &other) const;
     bool operator!=(const LinkToProperty &other) const;
-    
+
     static const char* typeName();
 
     QString toString() const;
 
     const PropertyName& target() const;
-    
+
     const SireID::ID& filter() const;
 
     bool isFiltered() const;
@@ -90,7 +89,7 @@ public:
 private:
     /** The target of this alias */
     PropertyName target_source;
-    
+
     /** The object identity filter used to select
         only properties that match identified objects */
     SireID::Identifier id_filter;

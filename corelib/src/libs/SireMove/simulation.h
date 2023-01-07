@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,7 +43,7 @@ using SireCluster::Node;
 /** This class is used start and manage an active
     simulation. A simulation consists of a collection
     of moves that are being applied to a System
-    
+
     @author Christopher Woods
 */
 class SIREMOVE_EXPORT Simulation
@@ -56,33 +55,33 @@ public:
     ~Simulation();
 
     Simulation& operator=(const Simulation &other);
-    
+
     bool operator==(const Simulation &other) const;
     bool operator!=(const Simulation &other) const;
 
     static Simulation run( const System &system, const Moves &moves,
                            int nmoves, bool record_stats=true );
-                           
+
     static Simulation run( const System &system, const Moves &moves,
-                           int nmoves, int nmoves_per_chunk, 
+                           int nmoves, int nmoves_per_chunk,
                            bool record_stats=true );
 
     static Simulation run( const System &system, const Move &move,
                            int nmoves, bool record_stats=true );
-                           
+
     static Simulation run( const System &system, const Move &move,
                            int nmoves, int nmoves_per_chunk,
                            bool record_stats=true );
 
     static Simulation run( const SimStore &simstore,
                            int nmoves, bool record_stats=true );
-                           
+
     static Simulation run( const SimStore &simstore,
-                           int nmoves, int nmoves_per_chunk, 
+                           int nmoves, int nmoves_per_chunk,
                            bool record_stats=true );
-                           
+
     static Simulation run( const SimPacket &simpacket );
-                           
+
     static Simulation run( Node &node,
                            const System &system, const Moves &moves,
                            int nmoves, bool record_stats=true );
@@ -90,17 +89,17 @@ public:
     static Simulation run( Node &node,
                            const System &system, const Moves &moves,
                            int nmoves, int nmoves_per_chunk,
-                           bool record_stats=true );                           
+                           bool record_stats=true );
 
     static Simulation run( Node &node,
                            const System &system, const Move &move,
                            int nmoves, bool record_stats=true );
-                           
+
     static Simulation run( Node &node,
                            const System &system, const Move &move,
                            int nmoves, int nmoves_per_chunk,
                            bool record_stats=true );
-                           
+
     static Simulation run( Node &node,
                            const SimStore &simstore,
                            int nmoves, bool record_stats=true );
@@ -108,27 +107,27 @@ public:
     static Simulation run( Node &node,
                            const SimStore &simstore,
                            int nmoves, int nmoves_per_chunk,
-                           bool record_stats=true );                           
+                           bool record_stats=true );
 
     static Simulation run( Node &node, const SimPacket &simpacket );
-    
+
     void abort();
     void stop();
-    
+
     void wait();
     bool wait(int timeout);
-    
+
     bool isRunning();
-    
+
     bool isError();
     void throwError();
-    
+
     bool wasStopped();
-    
+
     bool wasAborted();
-    
+
     bool hasFinished();
-    
+
     float progress();
 
     SimPacket input();
@@ -137,10 +136,10 @@ public:
 
     System initialSystem();
     MovesPtr initialMoves();
-    
+
     System interimSystem();
     MovesPtr interimMoves();
-    
+
     System system();
     MovesPtr moves();
 

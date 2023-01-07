@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,9 +58,9 @@ static const RegisterMetaType<Constraint> r_constraint( MAGIC_ONLY,
 QDataStream &operator<<(QDataStream &ds, const Constraint &constraint)
 {
     writeHeader(ds, r_constraint, 1);
-    
+
     ds << static_cast<const Property&>(constraint);
-    
+
     return ds;
 }
 
@@ -69,7 +68,7 @@ QDataStream &operator<<(QDataStream &ds, const Constraint &constraint)
 QDataStream &operator>>(QDataStream &ds, Constraint &constraint)
 {
     VersionID v = readHeader(ds, r_constraint);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Property&>(constraint);
@@ -77,7 +76,7 @@ QDataStream &operator>>(QDataStream &ds, Constraint &constraint)
     }
     else
         throw version_error( v, "1", r_constraint, CODELOC );
-        
+
     return ds;
 }
 
@@ -86,9 +85,9 @@ Constraint::Constraint() : Property(), last_subversion(0), last_was_satisfied(fa
 {}
 
 /** Copy constructor */
-Constraint::Constraint(const Constraint &other) 
+Constraint::Constraint(const Constraint &other)
            : Property(other),
-             last_sysuid(other.last_sysuid), 
+             last_sysuid(other.last_sysuid),
              last_sysversion(other.last_sysversion),
              last_subversion(other.last_subversion),
              last_was_satisfied(other.last_was_satisfied)
@@ -109,7 +108,7 @@ Constraint& Constraint::operator=(const Constraint &other)
         last_was_satisfied = other.last_was_satisfied;
         last_subversion = other.last_subversion;
     }
-    
+
     return *this;
 }
 
@@ -149,7 +148,7 @@ bool Constraint::apply(Delta &delta)
             if ( not Constraint::wasLastSubVersion(system) )
             {
                 this->setSystem(system);
-            
+
                 if (not Constraint::wasLastSatisfied())
                     changed = this->fullApply(delta);
             }
@@ -166,10 +165,10 @@ bool Constraint::apply(Delta &delta)
             throw SireError::program_bug( QObject::tr(
                 "Constraint %1 is not satisfied despite having just been applied!!!")
                     .arg(this->toString()), CODELOC );
-    
+
         //the above function *MUST* have set the system to satisfy the constraint
         setSatisfied(delta.deltaSystem(), true);
-        
+
         return changed;
     }
     catch(...)
@@ -177,7 +176,7 @@ bool Constraint::apply(Delta &delta)
         clearLastSystem();
         throw;
     }
-    
+
     return false;
 }
 
@@ -186,11 +185,11 @@ bool Constraint::apply(Delta &delta)
 System Constraint::apply(const System &system)
 {
     this->setSystem(system);
-    
+
     if (wasLastSatisfied())
         //nothing to do
         return system;
-        
+
     Delta delta(system);
 
     System new_system = system;
@@ -208,24 +207,24 @@ System Constraint::apply(const System &system)
             return new_system;
         }
     }
-    
+
     throw SireSystem::constraint_error( QObject::tr(
             "The constraint %1 could not be satisfied in concert with the "
             "constraints already present in the system %2 (%3)")
-                .arg(this->toString(), system.toString(), 
+                .arg(this->toString(), system.toString(),
                      system.constraints().toString()), CODELOC );
-                     
+
     return System();
 }
 
-/** Function called by Delta to say that the passed system has just 
+/** Function called by Delta to say that the passed system has just
     been committed (which means that it has passed this constraint) */
 void Constraint::committed(const System &system)
 {
     this->setSatisfied(system, true);
 }
 
-/** Return whether or not this constraint is satisfied for 
+/** Return whether or not this constraint is satisfied for
     the passed system */
 bool Constraint::isSatisfied(const System &system) const
 {
@@ -238,10 +237,10 @@ bool Constraint::isSatisfied(const System &system) const
           std::auto_ptr<Constraint> copy( this->clone() );
         #else
           std::unique_ptr<Constraint> copy( this->clone() );
-        #endif 
-       
+        #endif
+
         copy->setSystem(system);
-        
+
         if (not (copy->wasLastSystem(system) and copy->wasLastSubVersion(system)))
         {
             throw SireError::program_bug( QObject::tr(
@@ -257,12 +256,12 @@ bool Constraint::isSatisfied(const System &system) const
                         .arg(copy->last_subversion)
                         .arg(copy->last_was_satisfied), CODELOC );
         }
-                 
+
         return copy->last_was_satisfied;
     }
 }
 
-/** Internal function called by the constraint to say 
+/** Internal function called by the constraint to say
     whether or not it is satisfied on the passed system */
 void Constraint::setSatisfied(const System &system, bool is_satisfied)
 {
@@ -305,7 +304,7 @@ bool Constraint::wasLastSatisfied() const
     return last_was_satisfied;
 }
 
-/** Assert that the constraint is satisfied in the passed system 
+/** Assert that the constraint is satisfied in the passed system
 
     \throw SireSystem::constraint_error
 */
@@ -325,29 +324,29 @@ void Constraint::assertSatisfied(const System &system) const
 static const RegisterMetaType<NullConstraint> r_nullconstraint;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                           const NullConstraint &nullconstraint)
 {
     writeHeader(ds, r_nullconstraint, 1);
-    
+
     ds << static_cast<const Constraint&>(nullconstraint);
-    
+
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds, 
+QDataStream &operator>>(QDataStream &ds,
                                           NullConstraint &nullconstraint)
 {
     VersionID v = readHeader(ds, r_nullconstraint);
-    
+
     if (v == 1)
     {
         ds >> static_cast<Constraint&>(nullconstraint);
     }
     else
         throw version_error(v, "1", r_nullconstraint, CODELOC);
-        
+
     return ds;
 }
 
@@ -389,7 +388,7 @@ QString NullConstraint::toString() const
     return QObject::tr("NullConstraint");
 }
 
-/** Set the baseline system for the constraint - this is 
+/** Set the baseline system for the constraint - this is
     used to pre-calculate everything for the system
     and to check if the constraint is satisfied */
 void NullConstraint::setSystem(const System &system)
@@ -412,8 +411,8 @@ bool NullConstraint::fullApply(Delta&)
     return false;
 }
 
-/** Apply this constraint based on the delta, knowing that the 
-    last application of this constraint was on this system, 
+/** Apply this constraint based on the delta, knowing that the
+    last application of this constraint was on this system,
     at subversion number last_subversion */
 bool NullConstraint::deltaApply(Delta&, quint32)
 {
@@ -437,17 +436,17 @@ const char* NullConstraint::typeName()
 static const RegisterMetaType<PropertyConstraint> r_propconstraint;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                           const PropertyConstraint &constraint)
 {
     writeHeader(ds, r_propconstraint, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << constraint.ffid << constraint.propname
         << constraint.eqn
         << static_cast<const Constraint&>(constraint);
-        
+
     return ds;
 }
 
@@ -456,23 +455,23 @@ QDataStream &operator>>(QDataStream &ds,
                                           PropertyConstraint &constraint)
 {
     VersionID v = readHeader(ds, r_propconstraint);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
 
         //completely clear any cached data
         constraint = PropertyConstraint();
-        
+
         sds >> constraint.ffid >> constraint.propname
             >> constraint.eqn
             >> static_cast<Constraint&>(constraint);
-            
+
         constraint.syms = constraint.eqn.symbols();
     }
     else
         throw version_error(v, "1", r_propconstraint, CODELOC);
-        
+
     return ds;
 }
 
@@ -484,7 +483,7 @@ PropertyConstraint::PropertyConstraint()
 
 /** Construct to constrain the property with name 'name' in all forcefields
     to have the value resulting from the expression 'expression' */
-PropertyConstraint::PropertyConstraint(const QString &name, 
+PropertyConstraint::PropertyConstraint(const QString &name,
                                        const SireCAS::Expression &expression)
                    : ConcreteProperty<PropertyConstraint,Constraint>(),
                      propname(name), eqn(expression), syms(expression.symbols()),
@@ -531,14 +530,14 @@ PropertyConstraint& PropertyConstraint::operator=(const PropertyConstraint &othe
         constrained_value = other.constrained_value;
         target_value = other.target_value;
     }
-    
+
     return *this;
 }
 
 /** Comparison operator */
 bool PropertyConstraint::operator==(const PropertyConstraint &other) const
 {
-    return ffid == other.ffid and propname == other.propname and 
+    return ffid == other.ffid and propname == other.propname and
            eqn == other.eqn;
 }
 
@@ -559,15 +558,15 @@ static PropertyPtr getProperty(const System &system, const QString &propname,
                                const QList<FFIdx> &ffidxs)
 {
     bool is_first = true;
-    
+
     PropertyPtr property;
-    
+
     foreach (FFIdx ffidx, ffidxs)
     {
         if (system.containsProperty(ffidx, propname))
         {
             const Property &p = system.property(ffidx, propname);
-            
+
             if (is_first)
             {
                 property = p;
@@ -577,7 +576,7 @@ static PropertyPtr getProperty(const System &system, const QString &propname,
             {
                 if (property.isNull())
                     return PropertyPtr();
-                
+
                 else if (not property.read().equals(p))
                     return PropertyPtr();
             }
@@ -588,7 +587,7 @@ static PropertyPtr getProperty(const System &system, const QString &propname,
                 return PropertyPtr();
         }
     }
-    
+
     return property;
 }
 
@@ -600,30 +599,30 @@ bool PropertyConstraint::mayChange(const Delta &delta, quint32 last_subversion) 
     BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) );
 
     return (not Constraint::wasLastSatisfied()) or
-           delta.sinceChanged(propname, last_subversion) or 
+           delta.sinceChanged(propname, last_subversion) or
            delta.sinceChanged(syms, last_subversion);
 }
 
-/** Set the baseline system for the constraint - this is 
+/** Set the baseline system for the constraint - this is
     used to pre-calculate everything for the system
     and to check if the constraint is satisfied */
 void PropertyConstraint::setSystem(const System &system)
 {
     if (Constraint::wasLastSystem(system) and Constraint::wasLastSubVersion(system))
         return;
-    
+
     Constraint::clearLastSystem();
-    
+
     if (not ffid.isNull())
         ffidxs = ffid.map(system.forceFields());
-        
+
     constrained_value = PropertyPtr();
-    
+
     if (not ffidxs.isEmpty())
     {
         constrained_value = ::getProperty(system, propname, ffidxs);
     }
-    else 
+    else
     {
         if (system.containsProperty(propname))
             constrained_value = system.property(propname);
@@ -637,12 +636,12 @@ void PropertyConstraint::setSystem(const System &system)
         constrained_val = constrained_value.read().asADouble();
         has_constrained_value = true;
     }
-    
+
     component_vals = system.constants(syms);
-    
+
     target_value = eqn(component_vals);
 
-    Constraint::setSatisfied(system, has_constrained_value and 
+    Constraint::setSatisfied(system, has_constrained_value and
                                      SireMaths::areEqual(constrained_val, target_value));
 }
 
@@ -659,15 +658,15 @@ bool PropertyConstraint::fullApply(Delta &delta)
         changed = delta.update(propname, wrap(target_value));
     else
         changed = delta.update(propname, ffidxs, wrap(target_value));
-    
+
     if (changed)
         this->setSystem( delta.deltaSystem() );
-    
+
     return changed;
 }
 
-/** Apply this constraint based on the delta, knowing that the 
-    last application of this constraint was on this system, 
+/** Apply this constraint based on the delta, knowing that the
+    last application of this constraint was on this system,
     at subversion number last_subversion */
 bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
 {
@@ -685,14 +684,14 @@ bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
         {
             component_vals = system.constants(syms);
             double new_target = eqn(component_vals);
-                
+
             if (new_target != target_value)
             {
                 target_value = new_target;
                 changed_target = true;
             }
         }
-            
+
         if (changed_prop)
         {
             if (ffidxs.isEmpty())
@@ -700,8 +699,8 @@ bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
                 if (system.containsProperty(propname))
                 {
                     const Property &new_property = system.property(propname);
-                        
-                    if (constrained_value.isNull() or 
+
+                    if (constrained_value.isNull() or
                           (not constrained_value.read().equals(new_property)))
                     {
                         constrained_value = new_property;
@@ -715,7 +714,7 @@ bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
             else
             {
                 PropertyPtr new_property = ::getProperty(system, propname, ffidxs);
-                                        
+
                 if ( constrained_value.isNull() or new_property.isNull() or
                       (not constrained_value.read().equals(new_property)) )
                 {
@@ -725,7 +724,7 @@ bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
                     changed_prop = false;
             }
         }
-            
+
         if (changed_target or changed_prop)
         {
             //get the current value of the property
@@ -736,7 +735,7 @@ bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
                     return false;
                 }
             }
-            
+
             if (ffidxs.isEmpty())
                 return delta.update(propname, wrap(target_value));
             else
@@ -763,17 +762,17 @@ const char* PropertyConstraint::typeName()
 static const RegisterMetaType<ComponentConstraint> r_compconstraint;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                           const ComponentConstraint &constraint)
 {
     writeHeader(ds, r_compconstraint, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << constraint.constrained_component
         << constraint.eqn
         << static_cast<const Constraint&>(constraint);
-        
+
     return ds;
 }
 
@@ -782,22 +781,22 @@ QDataStream &operator>>(QDataStream &ds,
                                           ComponentConstraint &constraint)
 {
     VersionID v = readHeader(ds, r_compconstraint);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         constraint = ComponentConstraint();
-        
+
         sds >> constraint.constrained_component
             >> constraint.eqn
             >> static_cast<Constraint&>(constraint);
-            
+
         constraint.syms = constraint.eqn.symbols();
     }
     else
         throw version_error(v, "1", r_compconstraint, CODELOC);
-        
+
     return ds;
 }
 
@@ -847,14 +846,14 @@ ComponentConstraint& ComponentConstraint::operator=(const ComponentConstraint &o
         target_value = other.target_value;
         has_constrained_value = other.has_constrained_value;
     }
-    
+
     return *this;
 }
 
 /** Comparison operator */
 bool ComponentConstraint::operator==(const ComponentConstraint &other) const
 {
-    return constrained_component == other.constrained_component and 
+    return constrained_component == other.constrained_component and
            eqn == other.eqn;
 }
 
@@ -897,14 +896,14 @@ bool ComponentConstraint::mayChange(const Delta &delta, quint32 last_subversion)
            delta.sinceChanged(syms, last_subversion);
 }
 
-/** Set the baseline system for the constraint - this is 
+/** Set the baseline system for the constraint - this is
     used to pre-calculate everything for the system
     and to check if the constraint is satisfied */
 void ComponentConstraint::setSystem(const System &system)
 {
     if ( Constraint::wasLastSystem(system) and Constraint::wasLastSubVersion(system) )
         return;
-    
+
     Constraint::clearLastSystem();
     constrained_value = 0;
     target_value = 0;
@@ -915,11 +914,11 @@ void ComponentConstraint::setSystem(const System &system)
         constrained_value = system.constant(constrained_component);
         has_constrained_value = true;
     }
-        
+
     component_vals = system.constants(syms);
-    
+
     target_value = eqn(component_vals);
-    
+
     Constraint::setSatisfied(system, has_constrained_value and
                                      SireMaths::areEqual(target_value, constrained_value));
 }
@@ -932,15 +931,15 @@ bool ComponentConstraint::fullApply(Delta &delta)
                   Constraint::wasLastSubVersion(delta.deltaSystem()) );
 
     bool changed = delta.update(constrained_component, target_value);
-    
+
     if (changed)
         this->setSystem(delta.deltaSystem());
-    
+
     return changed;
 }
 
-/** Apply this constraint based on the delta, knowing that the 
-    last application of this constraint was on this system, 
+/** Apply this constraint based on the delta, knowing that the
+    last application of this constraint was on this system,
     at subversion number last_subversion */
 bool ComponentConstraint::deltaApply(Delta &delta, quint32 last_subversion)
 {
@@ -949,26 +948,26 @@ bool ComponentConstraint::deltaApply(Delta &delta, quint32 last_subversion)
     bool changed_comp = delta.sinceChanged(constrained_component, last_subversion);
     bool changed_syms = delta.sinceChanged(syms, last_subversion);
     bool changed_target = false;
-    
+
     if (changed_comp or changed_syms)
     {
         const System &system = delta.deltaSystem();
-        
+
         if (changed_syms)
         {
             component_vals = system.constants(syms);
             double new_target = eqn(component_vals);
-            
+
             if (new_target != target_value)
             {
                 target_value = new_target;
                 changed_target = true;
             }
-            
+
             if (system.hasConstantComponent(constrained_component))
             {
                 double new_comp = system.constant(constrained_component);
-                
+
                 if ( (not has_constrained_value) or constrained_value != new_comp )
                 {
                     has_constrained_value = true;
@@ -990,7 +989,7 @@ bool ComponentConstraint::deltaApply(Delta &delta, quint32 last_subversion)
             if (system.hasConstantComponent(constrained_component))
             {
                 double new_comp = system.constant(constrained_component);
-                
+
                 if ( (not has_constrained_value) or constrained_value != new_comp )
                 {
                     has_constrained_value = true;
@@ -1018,7 +1017,7 @@ bool ComponentConstraint::deltaApply(Delta &delta, quint32 last_subversion)
     {
         return this->fullApply(delta);
     }
-    
+
     return false;
 }
 
@@ -1034,34 +1033,34 @@ const char* ComponentConstraint::typeName()
 static const RegisterMetaType<WindowedComponent> r_windowedcomp;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                           const WindowedComponent &windowedcomp)
 {
     writeHeader(ds, r_windowedcomp, 1);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << windowedcomp.constrained_component
         << windowedcomp.reference_component
         << windowedcomp.window_values
         << windowedcomp.step_size
         << static_cast<const Constraint&>(windowedcomp);
-        
+
     return ds;
 }
-              
+
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds, 
+QDataStream &operator>>(QDataStream &ds,
                                           WindowedComponent &windowedcomp)
 {
     VersionID v = readHeader(ds, r_windowedcomp);
-    
+
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         windowedcomp = WindowedComponent();
-        
+
         sds >> windowedcomp.constrained_component
             >> windowedcomp.reference_component
             >> windowedcomp.window_values
@@ -1070,7 +1069,7 @@ QDataStream &operator>>(QDataStream &ds,
     }
     else
         throw version_error(v, "1", r_windowedcomp, CODELOC);
-        
+
     return ds;
 }
 
@@ -1113,15 +1112,15 @@ WindowedComponent::WindowedComponent(const SireCAS::Symbol &component,
     {
         if (i >= window_values.count())
             break;
-    
+
         while (window_values.count( window_values[i] ) > 1)
         {
             window_values.remove( window_values.lastIndexOf(window_values[i]) );
         }
-        
+
         ++i;
     }
-} 
+}
 
 /** Copy constructor */
 WindowedComponent::WindowedComponent(const WindowedComponent &other)
@@ -1153,10 +1152,10 @@ WindowedComponent& WindowedComponent::operator=(const WindowedComponent &other)
         constrained_value = other.constrained_value;
         target_value = other.target_value;
         has_constrained_value = other.has_constrained_value;
-            
+
         Constraint::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -1202,8 +1201,8 @@ const QVector<double>& WindowedComponent::windowValues() const
     return window_values;
 }
 
-/** Return the step size for this windows - this is the number of 
-    windows above (or below if step_size is negative) for this 
+/** Return the step size for this windows - this is the number of
+    windows above (or below if step_size is negative) for this
     window compared to the window containing the reference component */
 int WindowedComponent::stepSize() const
 {
@@ -1215,16 +1214,16 @@ static double getNextWindow(double reference_value,
                             int step_size)
 {
     int idx = window_values.indexOf(reference_value);
-    
+
     if (idx == -1)
     {
         //find the closest value
         double del2 = std::numeric_limits<double>::max();
-        
+
         for (int i=0; i<window_values.count(); ++i)
         {
             double my_del2 = SireMaths::pow_2( reference_value - window_values.at(i) );
-            
+
             if (my_del2 < del2)
             {
                 del2 = my_del2;
@@ -1232,11 +1231,11 @@ static double getNextWindow(double reference_value,
             }
         }
     }
-    
+
     BOOST_ASSERT( idx != -1 );
-    
+
     idx += step_size;
-    
+
     if (idx < 0)
         idx = 0;
     else if (idx >= window_values.count())
@@ -1257,39 +1256,39 @@ bool WindowedComponent::mayChange(const Delta &delta, quint32 last_subversion) c
            delta.sinceChanged(constrained_component, last_subversion);
 }
 
-/** Set the baseline system for the constraint - this is 
+/** Set the baseline system for the constraint - this is
     used to pre-calculate everything for the system
     and to check if the constraint is satisfied */
 void WindowedComponent::setSystem(const System &system)
 {
     if ( Constraint::wasLastSystem(system) and Constraint::wasLastSubVersion(system) )
         return;
-    
+
     Constraint::clearLastSystem();
-    
+
     if (window_values.isEmpty())
     {
         Constraint::setSatisfied(system, true);
         return;
     }
-    
+
     has_constrained_value = false;
     constrained_value = 0;
     target_value = 0;
-    
+
     if (system.hasConstantComponent(constrained_component))
     {
         has_constrained_value = true;
         constrained_value = system.constant(constrained_component);
     }
-    
+
     component_val = system.constant(reference_component);
-    
+
     if (window_values.count() == 1)
         target_value = window_values.at(0);
     else
         target_value = ::getNextWindow(component_val, window_values, step_size);
-    
+
     Constraint::setSatisfied( system, has_constrained_value and
                                       SireMaths::areEqual(constrained_value,target_value) );
 }
@@ -1303,21 +1302,21 @@ bool WindowedComponent::fullApply(Delta &delta)
 
     BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) and
                   Constraint::wasLastSubVersion(delta.deltaSystem()) );
-    
+
     constrained_value = target_value;
-    
+
     bool changed = delta.update(constrained_component, target_value);
-    
+
     if (changed)
     {
         this->setSystem(delta.deltaSystem());
     }
-    
+
     return changed;
 }
 
-/** Apply this constraint based on the delta, knowing that the 
-    last application of this constraint was on this system, 
+/** Apply this constraint based on the delta, knowing that the
+    last application of this constraint was on this system,
     at subversion number last_subversion */
 bool WindowedComponent::deltaApply(Delta &delta, quint32 last_subversion)
 {
@@ -1329,21 +1328,21 @@ bool WindowedComponent::deltaApply(Delta &delta, quint32 last_subversion)
     bool changed_comp = delta.sinceChanged(constrained_component, last_subversion);
     bool changed_sym = delta.sinceChanged(reference_component, last_subversion);
     bool changed_target = false;
-    
+
     if (changed_comp or changed_sym or (constrained_value != target_value))
     {
         const System &system = delta.deltaSystem();
-        
+
         if (changed_sym)
         {
             component_val = system.constant(reference_component);
-            
+
             double new_target;
 
             if (window_values.count() == 1)
                 new_target = window_values.at(0);
             else
-                new_target = ::getNextWindow(component_val, window_values, step_size);            
+                new_target = ::getNextWindow(component_val, window_values, step_size);
 
             if (new_target != target_value)
             {
@@ -1351,13 +1350,13 @@ bool WindowedComponent::deltaApply(Delta &delta, quint32 last_subversion)
                 changed_target = true;
             }
         }
-        
+
         if (changed_comp)
         {
             if (system.hasConstantComponent(constrained_component))
             {
                 double new_comp = system.constant(constrained_component);
-                
+
                 if ( (not has_constrained_value) or constrained_value != new_comp )
                 {
                     has_constrained_value = true;

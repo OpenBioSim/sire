@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -44,9 +43,9 @@ static const RegisterMetaType<FFIdentifier> r_ffid;
 QDataStream &operator<<(QDataStream &ds, const FFIdentifier &ffid)
 {
     writeHeader(ds, r_ffid, 1);
-    
+
     SireStream::savePolyPointer(ds, ffid.d);
-    
+
     return ds;
 }
 
@@ -54,14 +53,14 @@ QDataStream &operator<<(QDataStream &ds, const FFIdentifier &ffid)
 QDataStream &operator>>(QDataStream &ds, FFIdentifier &ffid)
 {
     VersionID v = readHeader(ds, r_ffid);
-    
+
     if (v == 1)
     {
         SireStream::loadPolyPointer(ds, ffid.d);
     }
     else
         throw version_error( v, "1", r_ffid, CODELOC );
-        
+
     return ds;
 }
 
@@ -102,7 +101,7 @@ uint FFIdentifier::hash() const
     else
         return d->hash();
 }
-            
+
 /** Return a string representatio of this ID */
 QString FFIdentifier::toString() const
 {
@@ -137,7 +136,7 @@ FFIdentifier& FFIdentifier::operator=(const FFID &other)
         d.reset();
     else
         d.reset(other.clone());
-    
+
     return *this;
 }
 
@@ -190,18 +189,18 @@ bool FFIdentifier::operator!=(const FFID &other) const
 static QList<FFIdx> allFFIdxs(int n)
 {
     QList<FFIdx> ffidxs;
-    
+
     for (int i=0; i<n; ++i)
     {
         ffidxs.append( FFIdx(i) );
     }
-    
+
     return ffidxs;
 }
 
-/** Map this name to the index of the matching forcefield in the 
-    passed ForceFields object 
-    
+/** Map this name to the index of the matching forcefield in the
+    passed ForceFields object
+
     \throw SireFF::missing_forcefield
 */
 QList<FFIdx> FFName::map(const ForceFields &ffields) const
@@ -214,7 +213,7 @@ QList<FFIdx> FFName::map(const ForceFields &ffields) const
 
 /** Short cut function to map this index to the index of the
     matching forcefield in the passed ForceFields object
-    
+
     \throw SireError::invalid_index
 */
 QList<FFIdx> FFIdx::map(const ForceFields &ffields) const
@@ -226,8 +225,8 @@ QList<FFIdx> FFIdx::map(const ForceFields &ffields) const
 }
 
 /** Map this identifier to the indicies of the matching
-    forcefields in the passed ForceFields object 
-    
+    forcefields in the passed ForceFields object
+
     \throw SireFF::missing_forcefield
     \throw SireError::invalid_index
 */

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -84,10 +83,10 @@ class MoleculeInfoData;
 class MoleculeData;
 
 /** This is the virtual base class of the all beading properties.
-    These are used to divide a molecule into beads, and are the 
+    These are used to divide a molecule into beads, and are the
     key classes used by the SireMol::Bead and SireMol::Beads
     molecule views
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT Beading : public MolViewProperty
@@ -99,22 +98,22 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, Beading&);
 public:
     Beading();
     Beading(const Beading &other);
-    
+
     virtual ~Beading();
-    
+
     virtual Beading* clone() const=0;
-    
+
     static const char* typeName();
-    
+
     static NullBeading null();
-    
+
     bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
-    
+
 protected:
     Beading& operator=(const Beading &other);
     bool operator==(const Beading &other) const;
     bool operator!=(const Beading &other) const;
-    
+
     ////////////////////////////////////////////////////
     // Internal functions used only by Bead and Beads //
     // and BeadProp                                   //
@@ -133,9 +132,9 @@ protected:
 
     virtual SireBase::PropertyPtr atomProperty(const MoleculeData &moldata,
                                                const SireBase::PropertyName &key) const=0;
-                             
+
     virtual AtomSelection selection(const MoleculeInfoData &moldata) const=0;
-                             
+
     virtual AtomSelection selection(const MoleculeInfoData &moldata,
                                     const BeadIdx &bead) const=0;
 
@@ -147,10 +146,10 @@ protected:
 };
 
 /** MoleculeBeading is used to create a single bead that contains
-    all of the atoms of the molecule. This is typically used for 
+    all of the atoms of the molecule. This is typically used for
     small molecules, such as small solvents, where multiple beads
     per molecule would not be sensible
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT MoleculeBeading
@@ -163,16 +162,16 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MoleculeBeading&);
 public:
     MoleculeBeading();
     MoleculeBeading(const MoleculeBeading &other);
-    
+
     ~MoleculeBeading();
-    
+
     MoleculeBeading& operator=(const MoleculeBeading &other);
-    
+
     bool operator==(const MoleculeBeading &other) const;
     bool operator!=(const MoleculeBeading &other) const;
-    
+
     static const char* typeName();
-    
+
 protected:
     int nBeads(const MoleculeInfoData &moldata) const;
 
@@ -181,9 +180,9 @@ protected:
 
     SireBase::PropertyPtr atomProperty(const MoleculeData &moldata,
                                        const SireBase::PropertyName &key) const;
-                             
+
     AtomSelection selection(const MoleculeInfoData &moldata) const;
-                             
+
     AtomSelection selection(const MoleculeInfoData &moldata,
                             const BeadIdx &bead) const;
 
@@ -194,7 +193,7 @@ protected:
 
 /** This is a beading function that breaks a molecule into beads
     with one bead per residue
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT ResidueBeading
@@ -207,16 +206,16 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ResidueBeading&);
 public:
     ResidueBeading();
     ResidueBeading(const ResidueBeading &other);
-    
+
     ~ResidueBeading();
-    
+
     ResidueBeading& operator=(const ResidueBeading &other);
-    
+
     bool operator==(const ResidueBeading &other) const;
     bool operator!=(const ResidueBeading &other) const;
-    
+
     static const char* typeName();
-    
+
 protected:
     int nBeads(const MoleculeInfoData &moldata) const;
 
@@ -228,9 +227,9 @@ protected:
 
     SireBase::PropertyPtr atomProperty(const MoleculeData &moldata,
                                        const SireBase::PropertyName &key) const;
-                             
+
     AtomSelection selection(const MoleculeInfoData &moldata) const;
-                             
+
     AtomSelection selection(const MoleculeInfoData &moldata,
                             const BeadIdx &bead) const;
 
@@ -245,9 +244,9 @@ class UserBeadingInfo;
 class UserBeadingInfoRegistry;
 }
 
-/** This is a beading function that divides a molecule into 
+/** This is a beading function that divides a molecule into
     user-defined beads
-    
+
     @author Christopher Woods
 */
 class SIREMOL_EXPORT UserBeading
@@ -261,20 +260,20 @@ public:
     UserBeading();
     UserBeading(const AtomBeads &beads);
     UserBeading(const UserBeading &other);
-    
+
     ~UserBeading();
-    
+
     UserBeading& operator=(const UserBeading &other);
-    
+
     bool operator==(const UserBeading &other) const;
     bool operator!=(const UserBeading &other) const;
-    
+
     static const char* typeName();
-    
+
     const AtomBeads& atomBeads() const;
 
     bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
-    
+
 protected:
     int nBeads(const MoleculeInfoData &moldata) const;
 
@@ -286,9 +285,9 @@ protected:
 
     SireBase::PropertyPtr atomProperty(const MoleculeData &moldata,
                                        const SireBase::PropertyName &key) const;
-                             
+
     AtomSelection selection(const MoleculeInfoData &moldata) const;
-                             
+
     AtomSelection selection(const MoleculeInfoData &moldata,
                             const BeadIdx &bead) const;
 
@@ -299,7 +298,7 @@ protected:
 private:
     const detail::UserBeadingInfo& getUserBeadingInfo(
                                         const MoleculeInfoData &moldata) const;
-    
+
     /** Shared pointer to the UserBeadingInfo registry */
     boost::shared_ptr<detail::UserBeadingInfoRegistry> registry;
 };
@@ -315,16 +314,16 @@ friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, NullBeading&);
 public:
     NullBeading();
     NullBeading(const NullBeading &other);
-    
+
     ~NullBeading();
-    
+
     NullBeading& operator=(const NullBeading &other);
-    
+
     bool operator==(const NullBeading &other) const;
     bool operator!=(const NullBeading &other) const;
-    
+
     static const char* typeName();
-    
+
 protected:
     int nBeads(const MoleculeInfoData &moldata) const;
 
@@ -333,9 +332,9 @@ protected:
 
     SireBase::PropertyPtr atomProperty(const MoleculeData &moldata,
                                        const SireBase::PropertyName &key) const;
-                             
+
     AtomSelection selection(const MoleculeInfoData &moldata) const;
-                             
+
     AtomSelection selection(const MoleculeInfoData &moldata,
                             const BeadIdx &bead) const;
 

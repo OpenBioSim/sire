@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -59,7 +58,7 @@ namespace Squire
     used directly in an integral program (indeed, an orbital
     normally doesn't even have coordinate information, as
     this is provided by the molecule that holds the orbital).
-    
+
     Orbital classes are thus virtual and not designed for speed.
 
     @author Christopher Woods
@@ -72,20 +71,20 @@ friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, Orbital&);
 
 public:
     Orbital();
-    
+
     Orbital(const Orbital &other);
-    
+
     virtual ~Orbital();
-    
+
     static const char* typeName();
-    
+
     virtual Orbital* clone() const=0;
-    
+
     virtual QString toString() const=0;
 
 protected:
     Orbital& operator=(const Orbital &other);
-    
+
     bool operator==(const Orbital &other) const;
     bool operator!=(const Orbital &other) const;
 };
@@ -99,9 +98,9 @@ protected:
     used directly in an integral program (indeed, an orbital
     normally doesn't even have coordinate information, as
     this is provided by the molecule that holds the orbital).
-    
+
     Orbital classes are thus virtual and not designed for speed.
-    
+
     @author Christopher Woods
 */
 class SQUIRE_EXPORT OrbitalShell : public Orbital
@@ -113,19 +112,19 @@ friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, OrbitalShell&);
 public:
     OrbitalShell();
     OrbitalShell(const OrbitalShell &other);
-    
+
     virtual ~OrbitalShell();
-    
+
     static const char* typeName();
-    
+
     virtual OrbitalShell* clone() const=0;
-    
+
     virtual int angularMomentum() const=0;
     virtual int nOrbitals() const=0;
 
 protected:
     OrbitalShell& operator=(const OrbitalShell &other);
-    
+
     bool operator==(const OrbitalShell &other) const;
     bool operator!=(const OrbitalShell &other) const;
 };
@@ -140,22 +139,22 @@ friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, ShellPair&);
 public:
     ShellPair();
     ShellPair(const ShellPair &other);
-    
+
     virtual ~ShellPair();
-    
+
     static const char* typeName();
 
     virtual ShellPair* clone() const=0;
-    
+
     virtual int angularMomentum0() const=0;
     virtual int angularMomentum1() const=0;
-    
+
     virtual int nOrbitals0() const=0;
     virtual int nOrbitals1() const=0;
 
 protected:
     ShellPair& operator=(const ShellPair &other);
-    
+
     bool operator==(const ShellPair &other) const;
     bool operator!=(const ShellPair &other) const;
 };

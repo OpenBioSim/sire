@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -45,47 +44,47 @@ static const RegisterMetaType<CLJGroup> r_group(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const CLJGroup &group)
 {
     writeHeader(ds, r_group, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     sds << group.cljexts << group.cljboxes
         << group.cljworkspace << group.changed_mols
         << group.props << qint32(group.id_source) << qint32(group.extract_source);
-    
+
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, CLJGroup &group)
 {
     VersionID v = readHeader(ds, r_group);
-    
+
     if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         qint32 id_source;
         qint32 extract_source;
-        
+
         sds >> group.cljexts >> group.cljboxes
             >> group.cljworkspace >> group.changed_mols
             >> group.props >> id_source >> extract_source;
-        
+
         group.id_source = CLJAtoms::ID_SOURCE(id_source);
         group.extract_source = CLJExtractor::EXTRACT_SOURCE(extract_source);
     }
     else if (v == 1)
     {
         SharedDataStream sds(ds);
-        
+
         qint32 id_source;
         bool split_by_residue;
-        
+
         sds >> group.cljexts >> group.cljboxes
             >> group.cljworkspace >> group.changed_mols
             >> group.props >> id_source >> split_by_residue;
-        
+
         group.id_source = CLJAtoms::ID_SOURCE(id_source);
-        
+
         if (split_by_residue)
         {
             group.extract_source = CLJExtractor::EXTRACT_BY_RESIDUE;
@@ -97,7 +96,7 @@ QDataStream &operator>>(QDataStream &ds, CLJGroup &group)
     }
     else
         throw version_error(v, "1", r_group, CODELOC);
-    
+
     return ds;
 }
 
@@ -160,7 +159,7 @@ CLJGroup& CLJGroup::operator=(const CLJGroup &other)
         id_source = other.id_source;
         extract_source = other.extract_source;
     }
-    
+
     return *this;
 }
 
@@ -206,7 +205,7 @@ Molecules CLJGroup::molecules() const
     {
         mols.add( it.value().newMolecule() );
     }
-    
+
     for (ChunkedHash<MolNum,CLJExtractor>::const_iterator it = cljexts.constBegin();
          it != cljexts.constEnd(); ++it)
     {
@@ -215,7 +214,7 @@ Molecules CLJGroup::molecules() const
             mols.add( it.value().newMolecule() );
         }
     }
-    
+
     return mols;
 }
 
@@ -245,9 +244,9 @@ PropertyMap CLJGroup::mapForMolecule(MolNum molnum) const
 void CLJGroup::add(const MoleculeView &molview, const PropertyMap &map)
 {
     MolNum molnum = molview.data().number();
-    
+
     bool must_add_map = false;
-    
+
     if (cljexts.contains(molnum) or changed_mols.contains(molnum))
     {
         //we already contain this molecule - we should check that there is no
@@ -288,7 +287,7 @@ void CLJGroup::add(const MoleculeView &molview, const PropertyMap &map)
     else
     {
         CLJExtractor changed(molview, id_source, extract_source, map);
-        
+
         if (cljworkspace.recalculatingFromScratch())
         {
             changed.commit(cljboxes, cljworkspace);
@@ -298,7 +297,7 @@ void CLJGroup::add(const MoleculeView &molview, const PropertyMap &map)
         {
             changed_mols.insert(molnum, changed);
         }
-        
+
         if (must_add_map)
             props.insert(molnum, map);
     }
@@ -308,7 +307,7 @@ void CLJGroup::add(const MoleculeView &molview, const PropertyMap &map)
 void CLJGroup::add(const Molecules &molecules, const PropertyMap &map)
 {
     CLJGroup old_group(*this);
-    
+
     try
     {
         for (Molecules::const_iterator it = molecules.constBegin();
@@ -335,13 +334,13 @@ void CLJGroup::add(const MoleculeGroup &molecules, const PropertyMap &map)
 void CLJGroup::update(const MoleculeView &molview)
 {
     MolNum molnum = molview.data().number();
-    
+
     if (cljexts.contains(molnum) or changed_mols.contains(molnum))
     {
         if (cljexts.count() == 1)
         {
             const CLJExtractor &ext = cljexts.constBegin().value();
-            
+
             if (ext.extractingByMolecule() or
                 (ext.extractingByResidue() and molview.data().info().nResidues() == 1) or
                 (ext.extractingByCutGroup() and molview.data().info().nCutGroups() == 1))
@@ -369,7 +368,7 @@ void CLJGroup::update(const MoleculeView &molview)
             {
                 CLJExtractor changed = cljexts.value(molnum);
                 changed.update(molview, cljboxes, cljworkspace);
-                
+
                 if (changed.hasChangedAtoms())
                 {
                     changed_mols.insert(molnum,changed);
@@ -390,7 +389,7 @@ void CLJGroup::update(const MoleculeView &molview)
 void CLJGroup::update(const Molecules &molecules)
 {
     CLJGroup old_group(*this);
-    
+
     try
     {
         for (Molecules::const_iterator it = molecules.constBegin();
@@ -417,9 +416,9 @@ void CLJGroup::update(const MoleculeGroup &molecules)
 void CLJGroup::remove(const MoleculeView &molview)
 {
     MolNum molnum = molview.data().number();
-    
+
     PartialMolecule newmol;
-    
+
     if (changed_mols.contains(molnum))
     {
         changed_mols[molnum].remove(molview, cljboxes, cljworkspace);
@@ -431,7 +430,7 @@ void CLJGroup::remove(const MoleculeView &molview)
         {
             cljexts[molnum].remove(molview, cljboxes, cljworkspace);
             newmol = cljexts[molnum].newMolecule();
-            
+
             if (newmol.selection().nSelected() == 0)
                 cljexts.remove(molnum);
         }
@@ -454,7 +453,7 @@ void CLJGroup::remove(const MoleculeView &molview)
 void CLJGroup::remove(const Molecules &molecules)
 {
     CLJGroup old_group(*this);
-    
+
     try
     {
         for (Molecules::const_iterator it = molecules.constBegin();
@@ -497,7 +496,7 @@ void CLJGroup::remove(MolNum molnum)
             changed_mols.insert(molnum, changed);
         }
     }
-    
+
     if (props.contains(molnum))
     {
         props.remove(molnum);
@@ -515,7 +514,7 @@ void CLJGroup::removeAll()
     props.clear();
 }
 
-/** Return the number of molecules that have changed since the 
+/** Return the number of molecules that have changed since the
     last time this CLJGroup was accepted */
 int CLJGroup::nChangedMolecules() const
 {
@@ -541,13 +540,13 @@ Molecules CLJGroup::changedMolecules() const
     else
     {
         Molecules mols;
-        
+
         for (QHash<MolNum,CLJExtractor>::const_iterator it = changed_mols.constBegin();
              it != changed_mols.constEnd(); ++it)
         {
             mols.add( it.value().newMolecule() );
         }
-        
+
         return mols;
     }
 }
@@ -557,7 +556,7 @@ bool CLJGroup::needsAccepting() const
 {
     if (cljworkspace.needsAccepting() or (not changed_mols.isEmpty()))
         return true;
-    
+
     else
     {
         for (ChunkedHash<MolNum,CLJExtractor>::const_iterator it = cljexts.constBegin();
@@ -566,12 +565,12 @@ bool CLJGroup::needsAccepting() const
             if (it.value().needsCommitting())
                 return true;
         }
-        
+
         return false;
     }
 }
 
-/** Accept all of the changes in the group. This will ensure that 
+/** Accept all of the changes in the group. This will ensure that
     all deltas have been removed and all of the atoms are correctly
     added to the CLJBoxes boxes */
 void CLJGroup::accept()
@@ -587,7 +586,7 @@ void CLJGroup::accept()
              ++it)
         {
             it.value().commit(cljboxes, cljworkspace);
-            
+
             if (it.value().isEmpty())
                 removed_mols.insert(it.key());
         }
@@ -602,7 +601,7 @@ void CLJGroup::accept()
         {
             it.value().commit(cljboxes, cljworkspace);
             cljexts[it.key()] = it.value();
-            
+
             if (it.value().isEmpty())
                 removed_mols.insert(it.key());
         }
@@ -622,7 +621,7 @@ void CLJGroup::accept()
             cljexts.remove(removed_mol);
             props.remove(removed_mol);
         }
-        
+
         if (cljexts.isEmpty())
         {
             cljexts.clear();
@@ -667,8 +666,8 @@ tuple<CLJAtoms,CLJAtoms,CLJAtoms> CLJGroup::mergeChanges() const
         return cljworkspace.merge();
 }
 
-/** Return the set of all atoms that have changed since the last 
-    time 'accept()' was called. This will return an empty set if 
+/** Return the set of all atoms that have changed since the last
+    time 'accept()' was called. This will return an empty set if
     the workspace was told to "mustRecalculateFromScratch()" */
 CLJAtoms CLJGroup::changedAtoms() const
 {
@@ -679,7 +678,7 @@ CLJAtoms CLJGroup::changedAtoms() const
 }
 
 /** Return the set of all of the new atoms that have changed
-    since the last time 'accept()' was called. This, plus the 
+    since the last time 'accept()' was called. This, plus the
     negative of oldAtoms() will equal changedAtoms() */
 CLJAtoms CLJGroup::newAtoms() const
 {
@@ -718,9 +717,9 @@ void CLJGroup::mustReallyRecalculateFromScratch()
     cljboxes = CLJBoxes(this->boxLength());
 
     changed_mols.clear();
-    
+
     Molecules mols;
-    
+
     for (ChunkedHash<MolNum,CLJExtractor>::const_iterator it = cljexts.constBegin();
          it != cljexts.constEnd(); ++it)
     {
@@ -735,9 +734,9 @@ void CLJGroup::mustReallyRecalculateFromScratch()
     {
         CLJExtractor cljmol( it.value(), id_source, extract_source,
                              props.value(it.key(),PropertyMap()) );
-    
+
         cljmol.commit(cljboxes, cljworkspace);;
-    
+
         cljexts.insert( it.key(), cljmol );
     }
 }

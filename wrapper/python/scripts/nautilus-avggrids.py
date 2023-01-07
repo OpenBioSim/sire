@@ -18,7 +18,7 @@ import ast
 parser = argparse.ArgumentParser(description="avggrids averages grids in dx format.  Grids must be of identical dimensions and grid density",
                                  epilog="nautilus-avggrids is built using Sire, Numpy and mdtraj and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/nautilus",
+                                        "http://sire.openbiosim.org/nautilus",
                                  prog="nautilus")
 
 parser.add_argument('--author', action="store_true",

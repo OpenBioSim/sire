@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -56,9 +55,9 @@ SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::LJProbe&);
 namespace SireMM
 {
 
-/** This is a probe charge that can be used to probe the 
+/** This is a probe charge that can be used to probe the
     coulomb electric field or potential in a forcefield */
-class SIREMM_EXPORT CoulombProbe 
+class SIREMM_EXPORT CoulombProbe
         : public SireBase::ConcreteProperty<CoulombProbe,SireFF::Probe>
 {
 
@@ -70,32 +69,32 @@ public:
     CoulombProbe(SireUnits::Dimension::Charge charge);
     CoulombProbe(const CLJProbe &cljprobe);
     CoulombProbe(const SireFF::Probe &probe);
-    
+
     CoulombProbe(const CoulombProbe &other);
-    
+
     ~CoulombProbe();
-    
+
     CoulombProbe& operator=(const CoulombProbe &other);
-    
+
     bool operator==(const CoulombProbe &other) const;
     bool operator!=(const CoulombProbe &other) const;
-    
+
     static const char* typeName();
-    
+
     SireUnits::Dimension::Charge charge() const;
     double reducedCharge() const;
 
 private:
     /** The actual charge on the probe */
     SireUnits::Dimension::Charge chg;
-    
+
     /** The charge in reduced units */
     double reduced_chg;
 };
 
-/** This is a probe charge that can be used to probe the 
+/** This is a probe charge that can be used to probe the
     LJ field or potential in a forcefield */
-class SIREMM_EXPORT LJProbe 
+class SIREMM_EXPORT LJProbe
         : public SireBase::ConcreteProperty<LJProbe,SireFF::Probe>
 {
 
@@ -107,18 +106,18 @@ public:
     LJProbe(const LJParameter &ljparam);
     LJProbe(const CLJProbe &cljprobe);
     LJProbe(const SireFF::Probe &probe);
-    
+
     LJProbe(const LJProbe &other);
-    
+
     ~LJProbe();
-    
+
     LJProbe& operator=(const LJProbe &other);
-    
+
     bool operator==(const LJProbe &other) const;
     bool operator!=(const LJProbe &other) const;
-    
+
     static const char* typeName();
-    
+
     const LJParameter& lj() const;
 
 private:
@@ -128,7 +127,7 @@ private:
 
 /** This is a probe used to probe the coulomb+LJ field
     or potential at points in a forcefield */
-class SIREMM_EXPORT CLJProbe 
+class SIREMM_EXPORT CLJProbe
         : public SireBase::ConcreteProperty<CLJProbe,SireFF::Probe>
 {
 
@@ -144,21 +143,21 @@ public:
     CLJProbe(const CoulombProbe &probe);
     CLJProbe(const LJProbe &probe);
     CLJProbe(const SireFF::Probe &probe);
-    
+
     CLJProbe(const CLJProbe &cljprobe);
-    
+
     ~CLJProbe();
-    
+
     CLJProbe& operator=(const CLJProbe &other);
-    
+
     bool operator==(const CLJProbe &other) const;
     bool operator!=(const CLJProbe &other) const;
-    
+
     static const char* typeName();
-    
+
     SireUnits::Dimension::Charge charge() const;
     double reducedCharge() const;
-    
+
     const LJParameter& lj() const;
 
 private:
@@ -167,7 +166,7 @@ private:
 
     /** The charge on the probe */
     SireUnits::Dimension::Charge chg;
-    
+
     /** The charge in reduced units */
     double reduced_chg;
 };

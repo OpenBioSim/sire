@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(description=   " With given center and length o
                                                 " Defined by a cube of grid points ",
                                  epilog="nautilus-boxgrid is built using Sire, Numpy and mdtraj and is distributed "
                                         "under the GPL. For more information please visit "
-                                        "http://siremol.org/nautilus",
+                                        "http://sire.openbiosim.org/nautilus",
                                  prog="nautilus")
 
 parser.add_argument('-C', '--config', nargs="?",

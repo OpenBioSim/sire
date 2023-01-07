@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -81,7 +80,7 @@ using SireMaths::Vector;
 using SireVol::Grid;
 using SireVol::GridPtr;
 
-/** This class holds the field at the points of all of the atoms of 
+/** This class holds the field at the points of all of the atoms of
     selected CutGroups in a molecule. The MolFieldTable is used
     to accumulate all of the fields acting on these atoms during
     a field evaluation, and also to control which fields are
@@ -89,9 +88,9 @@ using SireVol::GridPtr;
     are evaluated). This allows you to provide some control over
     the calculation, e.g. only placing a few protein residues into
     the field table, thereby preventing the fields on all atoms
-    in a protein from being evaluated if they aren't actually 
+    in a protein from being evaluated if they aren't actually
     necessary.
-    
+
     @author Christopher Woods
 */
 class SIREFF_EXPORT MolFieldTable : public SireBase::PackedArray2D<SireMaths::Vector>
@@ -104,13 +103,13 @@ public:
     typedef SireBase::PackedArray2D<SireMaths::Vector>::Array Array;
 
     MolFieldTable();
-    
+
     MolFieldTable(const MoleculeView &molview);
-    
+
     MolFieldTable(const MolFieldTable &other);
-    
+
     ~MolFieldTable();
-    
+
     MolFieldTable& operator=(const MolFieldTable &other);
     MolFieldTable& operator=(const Vector &field);
 
@@ -119,13 +118,13 @@ public:
 
     MolFieldTable& operator+=(const MolFieldTable &other);
     MolFieldTable& operator-=(const MolFieldTable &other);
-    
+
     MolFieldTable operator+(const MolFieldTable &other) const;
     MolFieldTable operator-(const MolFieldTable &other) const;
 
     MolFieldTable& operator+=(const Vector &field);
     MolFieldTable& operator-=(const Vector &field);
-    
+
     MolFieldTable operator+(const Vector &field) const;
     MolFieldTable operator-(const Vector &field) const;
 
@@ -138,7 +137,7 @@ public:
     MolFieldTable operator-() const;
 
     static const char* typeName();
-    
+
     const char* what() const
     {
         return MolFieldTable::typeName();
@@ -156,12 +155,12 @@ public:
     MolNum molNum() const;
 
     const QUuid& molUID() const;
-    
+
     int map(CGIdx cgidx) const;
 
     QVector<Vector> toVector() const;
     QVector<Vector> toVector(const AtomSelection &selection) const;
-    
+
     bool add(const CGAtomIdx &cgatomidx, const Vector &field);
     bool subtract(const CGAtomIdx &cgatomidx, const Vector &field);
 
@@ -173,9 +172,9 @@ public:
 
     void add(const Vector &field);
     void subtract(const Vector &field);
-    
+
     void setAll(const Vector &value);
-    
+
     void multiply(double value);
     void divide(double value);
 
@@ -184,14 +183,14 @@ private:
 
     /** The number of this molecule */
     MolNum molnum;
-    
+
     /** The UID of the molecular layout that the molecule possessed
         when this table was last constructed */
     QUuid moluid;
-    
+
     /** The total number of CutGroups in this molecule */
     qint32 ncgroups;
-    
+
     /** Index mapping CGIdx to index in forcetable
         of that CutGroup. If this is empty then there
         is a one-to-one mapping (all CutGroups are present) */
@@ -212,62 +211,62 @@ public:
     GridFieldTable();
     GridFieldTable(const Grid &grid);
     GridFieldTable(const GridFieldTable &other);
-    
+
     ~GridFieldTable();
-    
+
     GridFieldTable& operator=(const GridFieldTable &other);
     GridFieldTable& operator=(const Vector &field);
-    
+
     bool operator==(const GridFieldTable &other) const;
     bool operator!=(const GridFieldTable &other) const;
-    
+
     GridFieldTable& operator+=(const GridFieldTable &other);
     GridFieldTable& operator-=(const GridFieldTable &other);
-    
+
     GridFieldTable operator+(const GridFieldTable &other) const;
     GridFieldTable operator-(const GridFieldTable &other) const;
-    
+
     GridFieldTable& operator+=(const Vector &field);
     GridFieldTable& operator-=(const Vector &field);
-    
+
     GridFieldTable operator+(const Vector &field) const;
     GridFieldTable operator-(const Vector &field) const;
-    
+
     GridFieldTable& operator*=(double value);
     GridFieldTable& operator/=(double value);
-    
+
     GridFieldTable operator*(double value) const;
     GridFieldTable operator/(double value) const;
-    
+
     GridFieldTable operator-() const;
-    
+
     Vector& operator[](int i);
     const Vector& operator[](int i) const;
-    
+
     const Vector& at(int i) const;
-    
+
     static const char* typeName();
-    
+
     void initialise();
-    
+
     int nPoints() const;
     int count() const;
-    
+
     const Grid& grid() const;
-    
+
     QVector<Vector> toVector() const;
-    
+
     void add(int ipoint, const Vector &field);
     void subtract(int ipoint, const Vector &field);
-    
+
     void add(const GridFieldTable &other);
     void subtract(const GridFieldTable &other);
-    
+
     void add(const Vector &field);
     void subtract(const Vector &field);
-    
+
     void setAll(const Vector &field);
-    
+
     void multiply(double value);
     void divide(double value);
 
@@ -278,39 +277,39 @@ public:
 
     iterator begin();
     iterator end();
-    
+
     const_iterator begin() const;
     const_iterator end() const;
-    
+
     const_iterator constBegin() const;
     const_iterator constEnd() const;
 
 private:
     /** The grid that contains the points at which the field is evaluated */
     GridPtr grd;
-    
+
     /** The potential at each of the grid points */
     QVector<Vector> fieldvals;
 };
 
-/** A FieldTable is a workspace within which all of the fields acting 
+/** A FieldTable is a workspace within which all of the fields acting
     at the points of atoms in molecules, or the points on a grid
-    may be stored. A FieldTable is used as storing the fields 
-    may require lots of memory, and continually 
-    creating a deleting such large amouts of memory would be inefficient. 
-    Also, using a FieldTable allows for fields to be accumalated directly, 
-    rather than requiring intermediate storage space for the 
+    may be stored. A FieldTable is used as storing the fields
+    may require lots of memory, and continually
+    creating a deleting such large amouts of memory would be inefficient.
+    Also, using a FieldTable allows for fields to be accumalated directly,
+    rather than requiring intermediate storage space for the
     individual components.
 
-    You create a fieldtable to hold all of the fields on all of 
+    You create a fieldtable to hold all of the fields on all of
     the atoms of all of the molecules in a specified MoleculeGroup,
     or at all of the points of a passed Grid.
-    
-    The fields are held in an array that holds the fields for 
+
+    The fields are held in an array that holds the fields for
     the molecules in the same order as the molecules appear
     in the molecule group, or in an array that holds the fields
-    in the same order as they appear in the grid. 
-    The fieldtable also comes with an index so you can quickly 
+    in the same order as they appear in the grid.
+    The fieldtable also comes with an index so you can quickly
     look up the field for a specific molecule.
 
     @author Christopher Woods
@@ -327,12 +326,12 @@ public:
 
     FieldTable(const Grid &grid);
     FieldTable(const QVector<GridPtr> &grids);
-    
+
     FieldTable(const MoleculeGroup &molgroup, const Grid &grid);
     FieldTable(const MoleculeGroup &molgroup, const QVector<GridPtr> &grids);
-    
+
     FieldTable(const FieldTable &other);
-    
+
     ~FieldTable();
 
     static const char* typeName();
@@ -350,19 +349,19 @@ public:
 
     FieldTable& operator+=(const FieldTable &other);
     FieldTable& operator-=(const FieldTable &other);
-    
+
     FieldTable operator+(const FieldTable &other) const;
     FieldTable operator-(const FieldTable &other) const;
 
     FieldTable& operator+=(const Vector &field);
     FieldTable& operator-=(const Vector &field);
-    
+
     FieldTable operator+(const Vector &field) const;
     FieldTable operator-(const Vector &field) const;
-    
+
     FieldTable& operator*=(double value);
     FieldTable& operator/=(double value);
-    
+
     FieldTable operator*(double value) const;
     FieldTable operator/(double value) const;
 
@@ -388,9 +387,9 @@ public:
     bool isEmpty() const;
 
     const QHash<MolNum,qint32>& index() const;
-    
+
     int indexOf(MolNum molnum) const;
-    
+
     QList<MolNum> molNums() const;
 
     int nMolecules() const;
@@ -407,15 +406,15 @@ public:
 
     void assertContainsTableFor(MolNum molnum) const;
     void assertContainsTableFor(const Grid &grid) const;
-    
+
     void add(const FieldTable &other);
     void subtract(const FieldTable &other);
-    
+
     void add(const Vector &field);
     void subtract(const Vector &field);
-    
+
     void setAll(const Vector &field);
-    
+
     void multiply(double value);
     void divide(double value);
 
@@ -428,7 +427,7 @@ private:
     /** All of the grid tables */
     QVector<GridFieldTable> gridtables;
 
-    /** Index mapping from the number of the Molecule to 
+    /** Index mapping from the number of the Molecule to
         the index of its force table in the above array */
     QHash<MolNum,qint32> molnum_to_idx;
 };
@@ -460,7 +459,7 @@ SIRE_ALWAYS_INLINE int MolFieldTable::nCutGroups() const
     return ncgroups;
 }
 
-/** Return the number of selected CutGroups in this table 
+/** Return the number of selected CutGroups in this table
     (the number of CutGroups for which fields are held) */
 SIRE_ALWAYS_INLINE int MolFieldTable::nSelectedCutGroups() const
 {
@@ -475,21 +474,21 @@ SIRE_ALWAYS_INLINE bool MolFieldTable::selectedAll() const
 }
 
 /** Return whether or not the CutGroup at index 'cgidx' has been
-    selected 
-    
+    selected
+
     \throw SireError::invalid_index
 */
 SIRE_ALWAYS_INLINE bool MolFieldTable::selected(CGIdx cgidx) const
 {
     cgidx = CGIdx(cgidx.map(this->nCutGroups()));
-    
+
     return this->selectedAll() or cgidx_to_idx.contains(cgidx);
 }
 
 /** Return the index of the fieldtable for the CutGroup at index
     'cgidx'. This returns -1 if there is no fieldtable for the
     specified CutGroup
-    
+
     \throw SireError::invalid_index
 */
 SIRE_ALWAYS_INLINE int MolFieldTable::map(CGIdx cgidx) const
@@ -504,7 +503,7 @@ SIRE_ALWAYS_INLINE int MolFieldTable::map(CGIdx cgidx) const
 ////// Inline functions for FieldTable
 //////
 
-/** Return whether or not this contains a table for the 
+/** Return whether or not this contains a table for the
     molecule with number 'molnum' */
 SIRE_ALWAYS_INLINE bool FieldTable::contains(MolNum molnum) const
 {
@@ -518,10 +517,10 @@ SIRE_ALWAYS_INLINE bool FieldTable::contains(MolNum molnum) const
 SIRE_ALWAYS_INLINE MolFieldTable& FieldTable::getTable(MolNum molnum)
 {
     QHash<MolNum,qint32>::const_iterator it = molnum_to_idx.constFind(molnum);
-    
+
     if (it == molnum_to_idx.constEnd())
         this->assertContainsTableFor(molnum);
-        
+
     return moltables_by_idx.data()[ it.value() ];
 }
 
@@ -532,10 +531,10 @@ SIRE_ALWAYS_INLINE MolFieldTable& FieldTable::getTable(MolNum molnum)
 SIRE_ALWAYS_INLINE const MolFieldTable& FieldTable::getTable(MolNum molnum) const
 {
     QHash<MolNum,qint32>::const_iterator it = molnum_to_idx.constFind(molnum);
-    
+
     if (it == molnum_to_idx.constEnd())
         this->assertContainsTableFor(molnum);
-        
+
     return moltables_by_idx.constData()[ it.value() ];
 }
 
@@ -560,7 +559,7 @@ SIRE_ALWAYS_INLINE int FieldTable::nGrids() const
     return gridtables.count();
 }
 
-/** Return the index used to find the index into the field tables array 
+/** Return the index used to find the index into the field tables array
     for the field table for the molecule with a specified number */
 SIRE_ALWAYS_INLINE const QHash<MolNum,qint32>& FieldTable::index() const
 {

@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -52,9 +51,9 @@ namespace SireID
 /** This class is used as a convenience class to held provide an
     ID that matches ALL items. This is useful when combining IDs
     of different types, e.g. to turn a ResID into an ID that
-    matches all atoms in that residues you could use 
+    matches all atoms in that residues you could use
     ResName("ALA") + AtomID.any()
- 
+
     @author Christopher Woods
 */
 template<class ID>
@@ -66,32 +65,32 @@ friend SIREID_EXPORT QDataStream& ::operator>><>(QDataStream&, MatchAll<ID>&);
 
 public:
     MatchAll();
-    
+
     MatchAll(const MatchAll<ID> &other);
-    
+
     ~MatchAll();
-    
+
     static const char* typeName();
-    
+
     const char* what() const;
-    
+
     MatchAll<ID>* clone() const;
 
     MatchAll<ID>& operator=(const MatchAll<ID> &other);
-    
+
     bool operator==(const MatchAll<ID> &other) const;
     bool operator==(const SireID::ID &other) const;
 
     bool operator!=(const MatchAll<ID> &other) const;
-    
+
     bool operator!=(const SireID::ID &other) const;
-    
+
     uint hash() const;
-    
+
     bool isNull() const;
-    
+
     QString toString() const;
-    
+
     QList<typename ID::Index> map(const typename ID::SearchObject &obj) const;
 };
 
@@ -102,15 +101,15 @@ template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 MatchAll<ID>::MatchAll() : ID()
 {}
-  
-/** Copy constructor */  
+
+/** Copy constructor */
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 MatchAll<ID>::MatchAll(const MatchAll<ID> &other)
             : ID(other)
 {}
-  
-/** Destructor */  
+
+/** Destructor */
 template<class ID>
 SIRE_OUTOFLINE_TEMPLATE
 MatchAll<ID>::~MatchAll()
@@ -125,7 +124,7 @@ MatchAll<ID>& MatchAll<ID>::operator=(const MatchAll<ID> &other)
     {
         ID::operator=(other);
     }
-    
+
     return *this;
 }
 

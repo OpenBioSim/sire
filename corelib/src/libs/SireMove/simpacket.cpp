@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -42,22 +41,22 @@ static const RegisterMetaType<SimPacket> r_simpacket;
 QDataStream &operator<<(QDataStream &ds, const SimPacket &simpacket)
 {
     writeHeader(ds, r_simpacket, 2);
-    
+
     SharedDataStream sds(ds);
-    
+
     if (simpacket.sim_store_was_packed)
     {
         SimStore packed_store = simpacket.sim_store;
         packed_store.pack();
-        
+
         sds << packed_store;
     }
     else
         sds << simpacket.sim_store;
-    
+
     sds << simpacket.nmoves << simpacket.ncompleted
         << simpacket.nmoves_per_chunk << simpacket.record_stats;
-        
+
     return ds;
 }
 
@@ -65,11 +64,11 @@ QDataStream &operator<<(QDataStream &ds, const SimPacket &simpacket)
 QDataStream &operator>>(QDataStream &ds, SimPacket &simpacket)
 {
     VersionID v = readHeader(ds, r_simpacket);
-    
+
     if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> simpacket.sim_store
             >> simpacket.nmoves >> simpacket.ncompleted
             >> simpacket.nmoves_per_chunk >> simpacket.record_stats;
@@ -80,27 +79,27 @@ QDataStream &operator>>(QDataStream &ds, SimPacket &simpacket)
 
         System sim_system;
         MovesPtr sim_moves;
-        
+
         sds >> sim_system >> sim_moves
             >> simpacket.nmoves >> simpacket.ncompleted
             >> simpacket.nmoves_per_chunk >> simpacket.record_stats;
-            
+
         simpacket.sim_store = SimStore(sim_system, sim_moves);
     }
     else
         throw version_error( v, "1", r_simpacket, CODELOC );
-        
+
     return ds;
 }
 
 /** Null constructor */
-SimPacket::SimPacket() 
+SimPacket::SimPacket()
           : WorkPacketBase(), nmoves(0), ncompleted(0),
             nmoves_per_chunk(0), record_stats(true),
             sim_store_was_packed(false)
 {}
 
-/** Construct a workpacket that runs 'nmoves' of the Moves 'moves' on the 
+/** Construct a workpacket that runs 'nmoves' of the Moves 'moves' on the
     passed System 'system', optionally recording simulation statistics
     if 'record_stats' is true */
 SimPacket::SimPacket(const System &system, const Moves &moves,
@@ -114,8 +113,8 @@ SimPacket::SimPacket(const System &system, const Moves &moves,
     else
         nmoves = 0;
 }
-          
-/** Construct a workpacket that runs 'nmoves' of the Moves 'moves' on the 
+
+/** Construct a workpacket that runs 'nmoves' of the Moves 'moves' on the
     passed System 'system', optionally recording simulation statistics
     if 'record_stats' is true, and running 'nmoves_per_chunk' moves
     for each chunk */
@@ -136,7 +135,7 @@ SimPacket::SimPacket(const System &system, const Moves &moves,
         nmoves_per_chunk = 1;
 }
 
-/** Construct a workpacket that runs 'nmoves' of the Moves on the 
+/** Construct a workpacket that runs 'nmoves' of the Moves on the
     System, both contained in 'simstore', optionally recording simulation statistics
     if 'record_stats' is true */
 SimPacket::SimPacket(const SimStore &simstore,
@@ -150,8 +149,8 @@ SimPacket::SimPacket(const SimStore &simstore,
     else
         nmoves = 0;
 }
-          
-/** Construct a workpacket that runs 'nmoves' of the Moves  on the 
+
+/** Construct a workpacket that runs 'nmoves' of the Moves  on the
     System, both contained in 'simstore', optionally recording simulation statistics
     if 'record_stats' is true, and running 'nmoves_per_chunk' moves
     for each chunk */
@@ -196,10 +195,10 @@ SimPacket& SimPacket::operator=(const SimPacket &other)
         nmoves_per_chunk = other.nmoves_per_chunk;
         record_stats = other.record_stats;
         sim_store_was_packed = other.sim_store_was_packed;
-        
+
         WorkPacketBase::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -227,7 +226,7 @@ bool SimPacket::shouldPack() const
 }
 
 /** Because it takes too long to calculate the size of this
-    packet, we say that it will be 32 MB - this is enough for 
+    packet, we say that it will be 32 MB - this is enough for
     most cases */
 int SimPacket::approximatePacketSize() const
 {
@@ -296,19 +295,19 @@ float SimPacket::chunk()
         if (sim_store.isPacked())
         {
             sim_store_was_packed = true;
-        
+
             //extract the system and moves from the store
             sim_store.unpack();
         }
-        
+
         System sim_system = sim_store.system();
         MovesPtr sim_moves = sim_store.moves();
-    
+
         //run a chunk of moves
         sim_system = sim_moves.edit().move(sim_system, n_to_run, record_stats);
-        
+
         sim_store.setSystemAndMoves(sim_system, sim_moves);
-        
+
         //it all completed successfully :-)
         ncompleted += n_to_run;
 

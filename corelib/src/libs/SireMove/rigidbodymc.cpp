@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -84,16 +83,16 @@ QDataStream &operator<<(QDataStream &ds,
         << rbmc.reflect_points
         << rbmc.reflect_moves
         << rbmc.sync_trans << rbmc.sync_rot << rbmc.common_center;
-    
+
     sds << quint32( rbmc.mol_reflectors.count() );
-    
+
     for (QHash< MolNum,QPair<Vector,double> >::const_iterator it = rbmc.mol_reflectors.constBegin();
          it != rbmc.mol_reflectors.constEnd();
          ++it)
     {
         sds << it.key() << it.value().first << it.value().second;
     }
-    
+
     sds << static_cast<const MonteCarlo&>(rbmc);
 
     return ds;
@@ -124,27 +123,27 @@ QDataStream &operator>>(QDataStream &ds, RigidBodyMC &rbmc)
             >> rbmc.reflect_moves
             >> rbmc.sync_trans >> rbmc.sync_rot
             >> rbmc.common_center;
-        
+
         quint32 nreflect;
-        
+
         sds >> nreflect;
-        
+
         if (nreflect > 0)
             rbmc.mol_reflectors.reserve(nreflect);
         else
             rbmc.mol_reflectors.clear();
-        
+
         for (int i=0; i<nreflect; ++i)
         {
             MolNum molnum;
             Vector center;
             double radius;
-            
+
             sds >> molnum >> center >> radius;
-            
+
             rbmc.mol_reflectors.insert(molnum, QPair<Vector,double>(center,radius));
         }
-        
+
         sds >> static_cast<MonteCarlo&>(rbmc);
     }
     else if (v == 6)
@@ -159,30 +158,30 @@ QDataStream &operator>>(QDataStream &ds, RigidBodyMC &rbmc)
             >> rbmc.reflect_moves
             >> rbmc.sync_trans >> rbmc.sync_rot
             >> rbmc.common_center;
-        
+
         if (rbmc.reflect_moves)
             rbmc.reflect_points.append(reflect_center);
-        
+
         quint32 nreflect;
-        
+
         sds >> nreflect;
-        
+
         if (nreflect > 0)
             rbmc.mol_reflectors.reserve(nreflect);
         else
             rbmc.mol_reflectors.clear();
-        
+
         for (int i=0; i<nreflect; ++i)
         {
             MolNum molnum;
             Vector center;
             double radius;
-            
+
             sds >> molnum >> center >> radius;
-            
+
             rbmc.mol_reflectors.insert(molnum, QPair<Vector,double>(center,radius));
         }
-        
+
         sds >> static_cast<MonteCarlo&>(rbmc);
     }
     else if (v == 5)
@@ -205,7 +204,7 @@ QDataStream &operator>>(QDataStream &ds, RigidBodyMC &rbmc)
     else if (v == 4)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> rbmc.smplr >> rbmc.center_function
             >> rbmc.adel >> rbmc.rdel
             >> rbmc.sync_trans >> rbmc.sync_rot
@@ -215,7 +214,7 @@ QDataStream &operator>>(QDataStream &ds, RigidBodyMC &rbmc)
     else if (v == 3)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> rbmc.smplr
             >> rbmc.adel >> rbmc.rdel
             >> rbmc.sync_trans >> rbmc.sync_rot
@@ -225,12 +224,12 @@ QDataStream &operator>>(QDataStream &ds, RigidBodyMC &rbmc)
     else if (v == 2)
     {
         SharedDataStream sds(ds);
-        
+
         sds >> rbmc.smplr
             >> rbmc.adel >> rbmc.rdel
             >> rbmc.sync_trans >> rbmc.sync_rot
             >> static_cast<MonteCarlo&>(rbmc);
-            
+
         rbmc.common_center = false;
     }
     else if (v == 1)
@@ -248,7 +247,7 @@ QDataStream &operator>>(QDataStream &ds, RigidBodyMC &rbmc)
 }
 
 /** Null constructor */
-RigidBodyMC::RigidBodyMC(const PropertyMap &map) 
+RigidBodyMC::RigidBodyMC(const PropertyMap &map)
             : ConcreteProperty<RigidBodyMC,MonteCarlo>(map),
               center_function( GetCOMPoint() ),
               adel( 0.15 * angstrom ), rdel( 15 * degrees ),
@@ -263,7 +262,7 @@ RigidBodyMC::RigidBodyMC(const Sampler &sampler, const PropertyMap &map)
             : ConcreteProperty<RigidBodyMC,MonteCarlo>(map),
               smplr(sampler), center_function( GetCOMPoint() ),
               adel( 0.15 * angstrom ),
-              rdel( 15 * degrees ), 
+              rdel( 15 * degrees ),
               reflect_radius(0), reflect_moves(false),
               sync_trans(false), sync_rot(false), common_center(false)
 {
@@ -274,9 +273,9 @@ RigidBodyMC::RigidBodyMC(const Sampler &sampler, const PropertyMap &map)
 /** Construct a move that moves molecule views from the molecule group 'molgroup',
     selecting views randomly, with each view having an equal chance of
     being chosen */
-RigidBodyMC::RigidBodyMC(const MoleculeGroup &molgroup, 
+RigidBodyMC::RigidBodyMC(const MoleculeGroup &molgroup,
                          const PropertyMap &map)
-            : ConcreteProperty<RigidBodyMC,MonteCarlo>(map), 
+            : ConcreteProperty<RigidBodyMC,MonteCarlo>(map),
               smplr( UniformSampler(molgroup) ),
               center_function( GetCOMPoint() ),
               adel( 0.15 * angstrom ), rdel( 15 * degrees ),
@@ -289,7 +288,7 @@ RigidBodyMC::RigidBodyMC(const MoleculeGroup &molgroup,
 
 /** Copy constructor */
 RigidBodyMC::RigidBodyMC(const RigidBodyMC &other)
-            : ConcreteProperty<RigidBodyMC,MonteCarlo>(other), 
+            : ConcreteProperty<RigidBodyMC,MonteCarlo>(other),
               smplr(other.smplr), center_function(other.center_function),
               adel(other.adel), rdel(other.rdel),
               reflect_radius(other.reflect_radius),
@@ -327,7 +326,7 @@ RigidBodyMC& RigidBodyMC::operator=(const RigidBodyMC &other)
         common_center = other.common_center;
         MonteCarlo::operator=(other);
     }
-    
+
     return *this;
 }
 
@@ -339,7 +338,7 @@ bool RigidBodyMC::operator==(const RigidBodyMC &other) const
            reflect_radius == other.reflect_radius and
            reflect_points == other.reflect_points and
            mol_reflectors == other.mol_reflectors and
-           reflect_moves == other.reflect_moves and 
+           reflect_moves == other.reflect_moves and
            sync_trans == other.sync_trans and sync_rot == other.sync_rot and
            common_center == other.common_center and
            MonteCarlo::operator==(other);
@@ -420,7 +419,7 @@ void RigidBodyMC::setSampler(const Sampler &sampler)
     smplr.edit().setGenerator( this->generator() );
 }
 
-/** Set the sampler to be one that selects views at random 
+/** Set the sampler to be one that selects views at random
     from the molecule group 'molgroup' (each view has an
     equal chance of being chosen) */
 void RigidBodyMC::setSampler(const MoleculeGroup &molgroup)
@@ -434,7 +433,7 @@ const Sampler& RigidBodyMC::sampler() const
     return smplr;
 }
 
-/** Return the molecule group from which random molecule views 
+/** Return the molecule group from which random molecule views
     are drawn */
 const MoleculeGroup& RigidBodyMC::moleculeGroup() const
 {
@@ -467,7 +466,7 @@ void RigidBodyMC::disableReflectionSphere()
 void RigidBodyMC::setSynchronisedTranslation(bool on)
 {
     sync_trans = on;
-    
+
     if (sync_trans)
         disableReflectionVolume();
 }
@@ -476,7 +475,7 @@ void RigidBodyMC::setSynchronisedTranslation(bool on)
 void RigidBodyMC::setSynchronisedRotation(bool on)
 {
     sync_rot = on;
-    
+
     if (sync_rot)
         disableReflectionVolume();
 }
@@ -490,7 +489,7 @@ void RigidBodyMC::setSharedRotationCenter(bool on)
 
 /** Turn on rigid body move reflections. This makes sure that only
     molecules within the specified sphere can be moved, and any moves
-    are reflected so that these molecules will always remain within 
+    are reflected so that these molecules will always remain within
     the sphere */
 void RigidBodyMC::setReflectionSphere(Vector sphere_center,
                                       SireUnits::Dimension::Length sphere_radius)
@@ -507,7 +506,7 @@ void RigidBodyMC::setReflectionSphere(Vector sphere_center,
         reflect_radius = sphere_radius.value();
         reflect_points.clear();
         reflect_points.append(sphere_center);
-        
+
         sync_trans = false;
         sync_rot = false;
     }
@@ -538,7 +537,7 @@ SireUnits::Dimension::Length RigidBodyMC::reflectionSphereRadius() const
 
 /** Turn on rigid body move reflections for molecule 'molnum'. This makes sure
     this molecule is moved only within the sphere centered at 'sphere_center'
-    with radius 'sphere_radius'. Any moves are reflected so that 
+    with radius 'sphere_radius'. Any moves are reflected so that
     this molecule will always remain within the sphere */
 void RigidBodyMC::setReflectionSphere(MolNum molnum, Vector sphere_center,
                                       SireUnits::Dimension::Length sphere_radius)
@@ -550,14 +549,14 @@ void RigidBodyMC::setReflectionSphere(MolNum molnum, Vector sphere_center,
         sphere_radius = SireUnits::Dimension::Length(0);
 
     mol_reflectors.insert( molnum, QPair<Vector,double>(sphere_center,sphere_radius.value()) );
-    
+
     sync_trans = false;
     sync_rot = false;
 }
 
 /** Turn on rigid body move reflections for molecule 'mol'. This makes sure
     this molecule is moved only within the sphere centered at 'sphere_center'
-    with radius 'sphere_radius'. Any moves are reflected so that 
+    with radius 'sphere_radius'. Any moves are reflected so that
     this molecule will always remain within the sphere */
 void RigidBodyMC::setReflectionSphere(const MoleculeView &mol, Vector sphere_center,
                                       SireUnits::Dimension::Length sphere_radius)
@@ -629,13 +628,13 @@ void RigidBodyMC::setReflectionVolume(const QVector<Vector> &points,
         reflect_moves = true;
         reflect_points = points;
         reflect_radius = radius.value();
-        
+
         sync_trans = false;
         sync_rot = false;
     }
 }
 
-/** Turn on and specify the reflection volume by using the coordinates of 
+/** Turn on and specify the reflection volume by using the coordinates of
     all of the atoms in the passed molecule view (excluding light atoms
     if "heavy_atoms_only" is true) */
 void RigidBodyMC::setReflectionVolume(const MoleculeView &mol,
@@ -645,25 +644,25 @@ void RigidBodyMC::setReflectionVolume(const MoleculeView &mol,
 {
     //get all of the coordinates
     QVector<Vector> points;
-    
+
     const AtomCoords &coords = mol.data().property( map["coordinates"] ).asA<AtomCoords>();
-    
+
     if (heavy_atoms_only)
     {
         if (mol.data().hasProperty( map["element"] ) and
             mol.data().property( map["element"] ).isA<AtomElements>())
         {
             const AtomElements &elems = mol.data().property( map["element"] ).asA<AtomElements>();
-            
+
             if (mol.selectedAll())
             {
                 for (int i=0; i<coords.nCutGroups(); ++i)
                 {
                     CGIdx ci(i);
-                
+
                     const Vector *coords_array = coords.constData(ci);
                     const Element *elems_array = elems.constData(ci);
-                
+
                     for (int j=0; j<coords.nAtoms(ci); ++j)
                     {
                         if (elems_array[j].nProtons() > 5)
@@ -674,12 +673,12 @@ void RigidBodyMC::setReflectionVolume(const MoleculeView &mol,
             else
             {
                 AtomSelection selected_atoms = mol.selection();
-                
+
                 foreach (CGIdx ci, selected_atoms.selectedCutGroups())
                 {
                     const Vector *coords_array = coords.constData(ci);
                     const Element *elems_array = elems.constData(ci);
-                    
+
                     foreach (Index j, selected_atoms.selectedAtoms(ci))
                     {
                         if (elems_array[j].nProtons() > 5)
@@ -691,16 +690,16 @@ void RigidBodyMC::setReflectionVolume(const MoleculeView &mol,
         else
         {
             const AtomMasses &masses = mol.data().property( map["mass"] ).asA<AtomMasses>();
-            
+
             if (mol.selectedAll())
             {
                 for (int i=0; i<coords.nCutGroups(); ++i)
                 {
                     CGIdx ci(i);
-                
+
                     const Vector *coords_array = coords.constData(ci);
                     const SireUnits::Dimension::MolarMass *masses_array = masses.constData(ci);
-                
+
                     for (int j=0; j<coords.nAtoms(ci); ++j)
                     {
                         if (masses_array[j] > Element(5).mass())
@@ -711,12 +710,12 @@ void RigidBodyMC::setReflectionVolume(const MoleculeView &mol,
             else
             {
                 AtomSelection selected_atoms = mol.selection();
-                
+
                 foreach (CGIdx ci, selected_atoms.selectedCutGroups())
                 {
                     const Vector *coords_array = coords.constData(ci);
                     const SireUnits::Dimension::MolarMass *masses_array = masses.constData(ci);
-                    
+
                     foreach (Index j, selected_atoms.selectedAtoms(ci))
                     {
                         if (masses_array[j] > Element(5).mass())
@@ -733,9 +732,9 @@ void RigidBodyMC::setReflectionVolume(const MoleculeView &mol,
             for (int i=0; i<coords.nCutGroups(); ++i)
             {
                 CGIdx ci(i);
-            
+
                 const Vector *coords_array = coords.constData(ci);
-            
+
                 for (int j=0; j<coords.nAtoms(ci); ++j)
                 {
                     points.append(coords_array[j]);
@@ -745,11 +744,11 @@ void RigidBodyMC::setReflectionVolume(const MoleculeView &mol,
         else
         {
             AtomSelection selected_atoms = mol.selection();
-            
+
             foreach (CGIdx ci, selected_atoms.selectedCutGroups())
             {
                 const Vector *coords_array = coords.constData(ci);
-                
+
                 foreach (Index j, selected_atoms.selectedAtoms(ci))
                 {
                     points.append(coords_array[j]);
@@ -761,7 +760,7 @@ void RigidBodyMC::setReflectionVolume(const MoleculeView &mol,
     this->setReflectionVolume(points, radius);
 }
 
-/** Turn on and specify the reflection volume by using the coordinates of 
+/** Turn on and specify the reflection volume by using the coordinates of
     all of the heavy atoms in the passed molecule view */
 void RigidBodyMC::setReflectionVolume(const MoleculeView &mol,
                                       SireUnits::Dimension::Length radius,
@@ -791,12 +790,12 @@ QVector<Vector> RigidBodyMC::reflectionVolumePoints() const
 QVector<Sphere> RigidBodyMC::reflectionVolume() const
 {
     QVector<Sphere> spheres;
-    
+
     for (int i=0; i<reflect_points.count(); ++i)
     {
         spheres.append( Sphere(reflect_points.at(i), reflect_radius) );
     }
-    
+
     return spheres;
 }
 
@@ -918,7 +917,7 @@ Vector getIntersectionPointWithSphere(const Vector &origin, const Vector &direct
 
     //the intersection point, X, is O + xD
     Vector X = O + x*D;
-    
+
     return X;
 }
 
@@ -938,7 +937,7 @@ PartialMolecule reflectMolecule(const PartialMolecule &oldmol, PartialMolecule n
     if (dist > reflect_rad)
     {
         Vector delta = new_center - old_center;
-    
+
         //this would move the molecule out of the sphere. We need
         //to work out where the molecule would intersect the surface
         //of the sphere, and then reflect the molecule back inside
@@ -1021,12 +1020,12 @@ PartialMolecule reflectMolecule(const PartialMolecule &oldmol, PartialMolecule n
 
         //qDebug() << "Reflect at " << X.toString() << (X-C).length() << std::sqrt(R2);
 
-        //ok - now we have the intersection point, the next step is to 
+        //ok - now we have the intersection point, the next step is to
         //get the normal (N) to the sphere at this point, as this defines the
         //reflection plane
         Vector N = (X - C).normalise();
 
-        //We want to reflect the unit vector that intersects with the 
+        //We want to reflect the unit vector that intersects with the
         //sphere about this normal
         Vector X1 = X - D;
         Vector X2 = X1 + 2 * ( (X - Vector::dot(D,N)*N) - X1 );
@@ -1038,9 +1037,9 @@ PartialMolecule reflectMolecule(const PartialMolecule &oldmol, PartialMolecule n
 
         if (dist_x2 < 0)
         {
-            qDebug() << "WEIRD. NEGATIVE REFLECTION DISTANCE??? " 
+            qDebug() << "WEIRD. NEGATIVE REFLECTION DISTANCE??? "
                      << dist_x2;
-            
+
             *ok = false;
             return oldmol;
         }
@@ -1061,9 +1060,9 @@ PartialMolecule reflectMolecule(const PartialMolecule &oldmol, PartialMolecule n
         }
 
         double dist = (new_center - reflect_cent).length();
-        
+
         int check_count = 0;
-        
+
         while (dist > reflect_rad)
         {
             if ( dist - reflect_rad > 0.2 )
@@ -1072,12 +1071,12 @@ PartialMolecule reflectMolecule(const PartialMolecule &oldmol, PartialMolecule n
                 qDebug()
                     << "FIXING THE PROBLEM (MOSTLY CAUSED BY NUMERICAL IMPRECISION)";
             }
-            
+
             //this will be due to a little numerical imprecision
-            newmol = newmol.move().translate( 
+            newmol = newmol.move().translate(
                     (1.01*(dist-reflect_rad))
                         * ((reflect_cent-new_center).normalise()) ).commit();
-            
+
             if (has_center_property)
             {
                 new_center = newmol.property(center_property).asA<VectorProperty>();
@@ -1086,22 +1085,22 @@ PartialMolecule reflectMolecule(const PartialMolecule &oldmol, PartialMolecule n
             {
                 new_center = center_function(newmol,map);
             }
-            
+
             dist = (new_center - reflect_cent).length();
-            
+
             check_count += 1;
-            
+
             if (check_count > 10)
             {
                 qDebug() << "WARNING: SOMETHING WEIRD GOING ON."
                          << "SKIPPING THIS MOVE.";
-                         
+
                 *ok = false;
                 return oldmol;
             }
         }
     }
-    
+
     return newmol;
 }
 
@@ -1112,7 +1111,7 @@ bool inVolume(const Vector &c, const QVector<Vector> &points, const double radiu
         if (Vector::distance( c, points.constData()[i] ) <= radius)
             return true;
     }
-    
+
     return false;
 }
 
@@ -1151,10 +1150,10 @@ void RigidBodyMC::performMove(System &system,
         tuple<PartialMolecule,double> mol_and_bias = smplr.read().sample();
 
         const PartialMolecule &oldmol = mol_and_bias.get<0>();
-        
+
         if (smplr.read().isBiased())
             old_bias = mol_and_bias.get<1>();
-        
+
         if (oldmol.isEmpty())
         {
             qDebug() << "Sampler returned an empty molecule in RigidBodyMC" << this->toString()
@@ -1162,7 +1161,7 @@ void RigidBodyMC::performMove(System &system,
                      << this->moleculeGroup().nMolecules() << smplr.read().toString();
             return;
         }
-        
+
         const bool has_center_property = (oldmol.selectedAll() and
                                           oldmol.hasProperty(center_property));
 
@@ -1180,12 +1179,12 @@ void RigidBodyMC::performMove(System &system,
                          << oldmol.number().toString();
                 return;
             }
-        
+
             const double reflect_rad = reflect_radius;
-        
+
             //make sure that the molecule starts from within this volume
             Vector old_center;
-            
+
             if (has_center_property)
             {
                 old_center = oldmol.property(center_property).asA<VectorProperty>();
@@ -1204,7 +1203,7 @@ void RigidBodyMC::performMove(System &system,
             }
 
             int nattempts = 0;
-        
+
             while (true)
             {
                 Vector new_center;
@@ -1231,7 +1230,7 @@ void RigidBodyMC::performMove(System &system,
 
                     new_center = center_function.read()(newmol,map);
                 }
-                
+
                 if (::inVolume(new_center,reflect_points,reflect_rad))
                 {
                     //we have successfully moved the molecule :-)
@@ -1241,10 +1240,10 @@ void RigidBodyMC::performMove(System &system,
                 {
                     //try to use the reflection sphere move to reflect the move back
                     //into the sphere
-                    
+
                     //work out which spheres contained the molecule before the move
                     QVarLengthArray<int> spheres_with_point;
-                    
+
                     for (int i=0; i<reflect_points.count(); ++i)
                     {
                         if (Vector::distance(reflect_points.constData()[i], old_center)
@@ -1253,24 +1252,24 @@ void RigidBodyMC::performMove(System &system,
                             spheres_with_point.append(i);
                         }
                     }
-                    
+
                     if (spheres_with_point.isEmpty())
                         throw SireError::program_bug( QObject::tr(
                                 "How can the molecule not be in a sphere???"), CODELOC );
-                    
+
                     //now find the point of intersection between the move and each sphere
                     QVarLengthArray<Vector> intersect_points;
-                    
+
                     for (int i=0; i<spheres_with_point.count(); ++i)
                     {
                         const Vector reflect_cent = reflect_points.at( spheres_with_point[i] );
-                        
+
                         bool ok;
-                        
+
                         Vector intersect = ::getIntersectionPointWithSphere(
                                                 old_center, new_center-old_center,
                                                 reflect_cent, reflect_rad, &ok);
-                        
+
                         if (ok)
                         {
                             intersect_points.append(intersect);
@@ -1280,15 +1279,15 @@ void RigidBodyMC::performMove(System &system,
                             spheres_with_point.remove(i);
                         }
                     }
-                    
+
                     //now, hopefully, only one of these points of intersection is at the
                     //boundary of all of these spheres (if not, we will try again as I
                     //don't want to work out the maths of bouncing off the intersection
                     //point of more than one sphere!)
                     int reflect_sphere_id = -1;
-                    
+
                     bool single_sphere = false;
-                    
+
                     for (int i=0; i<spheres_with_point.count(); ++i)
                     {
                         const Vector intersect = intersect_points[i];
@@ -1299,7 +1298,7 @@ void RigidBodyMC::performMove(System &system,
                             if (i != j)
                             {
                                 Vector cent = reflect_points.constData()[spheres_with_point[j]];
-                                
+
                                 if (Vector::distance(cent,intersect) <= reflect_rad)
                                 {
                                     in_spheres = true;
@@ -1328,7 +1327,7 @@ void RigidBodyMC::performMove(System &system,
                             }
                         }
                     }
-                    
+
                     bool ok = false;
 
                     if (single_sphere)
@@ -1341,7 +1340,7 @@ void RigidBodyMC::performMove(System &system,
                                                    old_center, new_center, has_center_property,
                                                    center_property, center_function, map, &ok);
                     }
-                
+
                     if (ok)
                     {
                         //now check that this new point is inside at least one of the spheres
@@ -1355,14 +1354,14 @@ void RigidBodyMC::performMove(System &system,
                         {
                             new_center = center_function.read()(newmol,map);
                         }
-                        
+
                         if (::inVolume(new_center,reflect_points,reflect_rad))
                         {
                             //yes - everything is ok
                             break;
                         }
                     }
-                    
+
                     nattempts += 1;
 
                     //randomly generate new amounts by which to translate and
@@ -1371,12 +1370,12 @@ void RigidBodyMC::performMove(System &system,
 
                     rotdelta = Quaternion( rdel * generator().rand(),
                                            generator().vectorOnSphere() );
-                    
+
                     if (nattempts > 50)
                     {
                         qDebug() << "Cannot move molecule as the number of volume reflection "
                                     "attempts has exceeded 50." << oldmol.number().toString();
-                        
+
                         return;
                     }
                 }
@@ -1409,12 +1408,12 @@ void RigidBodyMC::performMove(System &system,
             {
                 //moves are constrained into a sphere of radius reflect_radius
                 //around reflect_center. If the center of geometry moves outside
-                //the sphere, then the molecule will bounce off the edge of 
+                //the sphere, then the molecule will bounce off the edge of
                 //the sphere and back into the sphere volume
 
                 Vector reflect_cent;
                 double reflect_rad = 0;
-                
+
                 if (mol_reflectors.contains(oldmol.number()))
                 {
                     reflect_cent = mol_reflectors.value(oldmol.number()).first;
@@ -1432,7 +1431,7 @@ void RigidBodyMC::performMove(System &system,
                                     CODELOC );
 
                 Vector old_center;
-                
+
                 if (has_center_property)
                 {
                     old_center = oldmol.property(center_property).asA<VectorProperty>();
@@ -1451,7 +1450,7 @@ void RigidBodyMC::performMove(System &system,
                 }
 
                 Vector new_center;
-                
+
                 if (has_center_property)
                 {
                     new_center = newmol.property(center_property).asA<VectorProperty>();
@@ -1466,7 +1465,7 @@ void RigidBodyMC::performMove(System &system,
                 newmol = ::reflectMolecule(oldmol, newmol, reflect_cent, reflect_rad,
                                            old_center, new_center, has_center_property,
                                            center_property, center_function, map, &ok);
-            
+
                 if (not ok)
                 {
                     qDebug() << "Something went wrong with the reflection move...";
@@ -1497,7 +1496,7 @@ void RigidBodyMC::performMove(System &system,
             if (common_center)
             {
                 AABox box;
-            
+
                 //rotate all molecules around the same center
                 for (Molecules::const_iterator it = molecules.constBegin();
                      it != molecules.constEnd();
@@ -1512,7 +1511,7 @@ void RigidBodyMC::performMove(System &system,
                         box += center_function.read()(*it,map);
                     }
                 }
-                
+
                 for (Molecules::const_iterator it = molecules.constBegin();
                      it != molecules.constEnd();
                      ++it)
@@ -1521,10 +1520,10 @@ void RigidBodyMC::performMove(System &system,
                                                 .rotate(rotdelta, box.center(), map)
                                                 .translate(delta, map)
                                                 .commit();
-                    
+
                     new_molecules.update(newmol);
-                }            
-                
+                }
+
             }
             else
             {
@@ -1538,12 +1537,12 @@ void RigidBodyMC::performMove(System &system,
                                                         map)
                                                 .translate(delta, map)
                                                 .commit();
-                    
+
                     new_molecules.update(newmol);
-                }            
+                }
             }
-            
-            system.update(new_molecules);            
+
+            system.update(new_molecules);
         }
         else
         {
@@ -1571,12 +1570,12 @@ void RigidBodyMC::performMove(System &system,
             tuple<PartialMolecule,double> mol_and_bias = smplr.read().sample();
 
             const PartialMolecule &oldmol = mol_and_bias.get<0>();
-            
+
             if (smplr.read().isBiased())
                 old_bias = mol_and_bias.get<1>();
 
             PartialMolecule newmol;
-            
+
             if (oldmol.selectedAll() and oldmol.hasProperty(center_property))
             {
                 newmol = oldmol.move()
@@ -1614,16 +1613,16 @@ void RigidBodyMC::performMove(System &system,
         if (common_center)
         {
             //we cannot perform a move with synchronised rotation and
-            //individual rotation if a common center is used, as it 
-            //would be very hard to work out the probability of the 
+            //individual rotation if a common center is used, as it
+            //would be very hard to work out the probability of the
             //reverse move... So we will instead have a 50/50 chance
             //of performing rotation only or translation only
             perform_translation = generator().randBool();
-            
+
             if (not perform_translation)
             {
                 AABox box;
-                
+
                 for (Molecules::const_iterator it = molecules.constBegin();
                      it != molecules.constEnd();
                      ++it)
@@ -1637,7 +1636,7 @@ void RigidBodyMC::performMove(System &system,
                         box += center_function.read()(*it,map);
                     }
                 }
-            
+
                 for (Molecules::const_iterator it = molecules.constBegin();
                      it != molecules.constEnd();
                      ++it)
@@ -1664,7 +1663,7 @@ void RigidBodyMC::performMove(System &system,
                                                                 .asA<VectorProperty>(),
                                                         map)
                                                 .commit();
-                    
+
                     new_molecules.update(newmol);
                 }
                 else
@@ -1674,7 +1673,7 @@ void RigidBodyMC::performMove(System &system,
                                                         center_function.read()(*it,map),
                                                         map)
                                                 .commit();
-                    
+
                     new_molecules.update(newmol);
                 }
             }
@@ -1690,7 +1689,7 @@ void RigidBodyMC::performMove(System &system,
             tuple<PartialMolecule,double> mol_and_bias = smplr.read().sample();
 
             const PartialMolecule &oldmol = mol_and_bias.get<0>();
-            
+
             if (smplr.read().isBiased())
                 old_bias = mol_and_bias.get<1>();
 
@@ -1710,21 +1709,21 @@ void RigidBodyMC::performMove(System &system,
 
 /** Extract from 'mols' all molecules that are within the reflection sphere / volume
     described by this move. This allows the molecules that will be affected by this
-    move to be separated out from the rest. 
-    
+    move to be separated out from the rest.
+
     If 'buffer' is greater than zero, then this will also extract molecules that are
     within 'buffer' of the reflection volume, and will additionally translate those
     molecules so that they are moved into the volume. The buffer can be used
     to pack more molecules into the volume than would be achieved just with a simple
     selection.
-    
+
     Note that this returns all molecules if a reflection sphere or volume is not used
 */
 Molecules RigidBodyMC::extract(const Molecules &mols, SireUnits::Dimension::Length buffer) const
 {
     if (reflect_points.isEmpty())
         return mols;
-    
+
     Molecules extracted;
 
     const PropertyMap &map = propertyMap();
@@ -1737,7 +1736,7 @@ Molecules RigidBodyMC::extract(const Molecules &mols, SireUnits::Dimension::Leng
              ++it)
         {
             Vector center;
-        
+
             if (it.value().hasProperty(center_property))
             {
                 center = it.value().data().property(center_property).asA<VectorProperty>();
@@ -1746,10 +1745,10 @@ Molecules RigidBodyMC::extract(const Molecules &mols, SireUnits::Dimension::Leng
             {
                 center = center_function.read()(it.value(),map);
             }
-            
+
             //is this molecule within any of the spheres
             bool in_sphere = false;
-            
+
             for (int i=0; i<reflect_points.count(); ++i)
             {
                 if (Vector::distance(reflect_points.at(i),center) <= reflect_radius)
@@ -1758,7 +1757,7 @@ Molecules RigidBodyMC::extract(const Molecules &mols, SireUnits::Dimension::Leng
                     break;
                 }
             }
-            
+
             if (in_sphere)
             {
                 extracted.add(it.value());
@@ -1769,13 +1768,13 @@ Molecules RigidBodyMC::extract(const Molecules &mols, SireUnits::Dimension::Leng
     {
         //need to add on the buffer and move molecules if necessary
         double reflect_plus_buffer = reflect_radius + buffer.value();
-        
+
         for (Molecules::const_iterator it = mols.constBegin();
              it != mols.constEnd();
              ++it)
         {
             Vector center;
-        
+
             if (it.value().hasProperty(center_property))
             {
                 center = it.value().data().property(center_property).asA<VectorProperty>();
@@ -1784,19 +1783,19 @@ Molecules RigidBodyMC::extract(const Molecules &mols, SireUnits::Dimension::Leng
             {
                 center = center_function.read()(it.value(),map);
             }
-            
+
             //is this molecule within any of the spheres
             bool in_buffer = false;
             bool in_sphere = false;
-            
+
             for (int i=0; i<reflect_points.count(); ++i)
             {
                 double dist = Vector::distance(reflect_points.at(i),center);
-            
+
                 if (dist <= reflect_plus_buffer)
                 {
                     in_buffer = true;
-                    
+
                     if (dist <= reflect_radius)
                     {
                         in_sphere = true;
@@ -1804,7 +1803,7 @@ Molecules RigidBodyMC::extract(const Molecules &mols, SireUnits::Dimension::Leng
                     }
                 }
             }
-            
+
             if (in_sphere)
             {
                 extracted.add(it.value());
@@ -1816,38 +1815,38 @@ Molecules RigidBodyMC::extract(const Molecules &mols, SireUnits::Dimension::Leng
                 //sphere center to molecule center
                 double shortest_dist = -1;
                 int closest_sphere = -1;
-                
+
                 for (int i=0; i<reflect_points.count(); ++i)
                 {
                     double dist = Vector::distance(reflect_points.at(i),center);
-                    
+
                     if (closest_sphere == -1 or dist < shortest_dist)
                     {
                         shortest_dist = dist;
                         closest_sphere = i;
                     }
                 }
-                
+
                 //to move the molecule into the sphere, we need to translate by
                 // (reflect_radius - shortest_dist - 0.05) * vector(sphere_center -> mol_center)
                 // (we use 0.05 so that the molecule is placed 'just' inside the sphere)
                 Vector delta = (reflect_radius - shortest_dist - 0.05) *
                                 (center - reflect_points.at(closest_sphere)).normalise();
-                
+
                 ViewsOfMol mol = it.value().move().translate(delta).commit();
-                
+
                 extracted.add(mol);
             }
         }
     }
-    
+
     return extracted;
 }
 
 /** Extract from 'mols' all molecules that are within the reflection sphere / volume
     described by this move. This allows the molecules that will be affected by this
-    move to be separated out from the rest. 
- 
+    move to be separated out from the rest.
+
     Note that this returns all molecules if a reflection sphere or volume is not used
 */
 Molecules RigidBodyMC::extract(const Molecules &mols) const
@@ -1862,7 +1861,7 @@ void RigidBodyMC::move(System &system, int nmoves, bool record_stats)
         return;
 
     const PropertyMap &map = Move::propertyMap();
-    
+
     for (int i=0; i<nmoves; ++i)
     {
         //get the old total energy of the system
@@ -1881,7 +1880,7 @@ void RigidBodyMC::move(System &system, int nmoves, bool record_stats)
         //accept or reject the move based on the change of energy
         //and the biasing factors
         const bool accept_move = this->test(new_nrg, old_nrg, new_bias, old_bias);
-        
+
         if (accept_move)
         {
             //the move has been rejected. Destroy the old state and accept the move

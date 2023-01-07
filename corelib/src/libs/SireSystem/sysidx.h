@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -60,32 +59,32 @@ friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, SysIdx&);
 public:
     SysIdx();
     explicit SysIdx(qint32 idx);
-    
+
     SysIdx(const SysIdx &other);
-    
+
     ~SysIdx();
-    
+
     static const char* typeName();
-    
+
     const char* what() const
     {
         return SysIdx::typeName();
     }
-    
+
     SysIdx* clone() const;
-    
+
     static SysIdx null();
-    
+
     bool isNull() const;
-    
+
     uint hash() const;
 
     QString toString() const;
-    
+
     SysIdx& operator=(const SysIdx &other);
-    
+
     bool operator==(const SireID::ID &other) const;
-    
+
     using SireID::Index_T_<SysIdx>::operator=;
 
     using SireID::Index_T_<SysIdx>::operator==;
@@ -95,12 +94,12 @@ public:
     using SireID::Index_T_<SysIdx>::operator++;
     using SireID::Index_T_<SysIdx>::operator-=;
     using SireID::Index_T_<SysIdx>::operator--;
-    
+
     using SireID::Index_T_<SysIdx>::map;
-    
+
     QList<SysIdx> map(const Systems &systems) const;
 };
-    
+
 }
 
 Q_DECLARE_TYPEINFO(SireSystem::SysIdx, Q_MOVABLE_TYPE);

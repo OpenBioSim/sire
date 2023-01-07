@@ -6,7 +6,7 @@
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
+  *  the Free Software Foundation; either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
@@ -21,8 +21,7 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors via the developer's mailing list
-  *  at http://siremol.org
+  *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -49,7 +48,7 @@ using namespace SireStream;
 static const RegisterMetaType<DistVector> r_distvector(NO_ROOT);
 
 /** Serialise to a binary data stream */
-QDataStream &operator<<(QDataStream &ds, 
+QDataStream &operator<<(QDataStream &ds,
                                          const SireMaths::DistVector &vec)
 {
     writeHeader(ds, r_distvector, 1) << vec.sc[0] << vec.sc[1]
@@ -59,7 +58,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Deserialise from a binary data stream */
-QDataStream &operator>>(QDataStream &ds, 
+QDataStream &operator>>(QDataStream &ds,
                                          SireMaths::DistVector &vec)
 {
     VersionID v = readHeader(ds, r_distvector);
@@ -85,7 +84,7 @@ DistVector::DistVector() : Vector()
 DistVector::DistVector( const Vector &vec ) : Vector()
 {
     double dist = vec.length();
-    
+
     if (SireMaths::isZero(dist))
     {
         for (int i=0; i<4; ++i)
@@ -95,14 +94,14 @@ DistVector::DistVector( const Vector &vec ) : Vector()
     {
         sc[3] = dist;
         dist = 1 / dist;
-        
+
         sc[0] = vec.x() * dist;
         sc[1] = vec.y() * dist;
         sc[2] = vec.z() * dist;
     }
 }
 
-/** Construct a DistVector from the QString representation returned by 'toString()' 
+/** Construct a DistVector from the QString representation returned by 'toString()'
 
     \throw SireError::invalid_arg
 */
@@ -285,7 +284,7 @@ const Vector& DistVector::direction() const
 double DistVector::magnitude() const
 {
     return sc[3];
-} 
+}
 
 /** Return the bearing of this vector against (0,1,0) (north) on the xy plane */
 Angle DistVector::bearing() const
@@ -359,10 +358,10 @@ Angle DistVector::dihedral(const DistVector &v0, const DistVector &v1, const Dis
 {
     return Vector::dihedral( v0, v1, v2, v3 );
 }
-    
+
 /** Generate a vector, v0, that has distance 'dst' v0-v1, angle 'ang' v0-v1-v2,
     and dihedral 'dih' v0-v1-v2-v3 */
-DistVector DistVector::generate(double dst, const DistVector &v1, const Angle &ang, 
+DistVector DistVector::generate(double dst, const DistVector &v1, const Angle &ang,
                                 const DistVector &v2,
                                 const Angle &dih, const DistVector &v3)
 {
@@ -382,7 +381,7 @@ double DistVector::manhattanLength() const
 }
 
 /** Return the metric tensor of a vector, i.e.
-          
+
     | y*y + z*z,    -x*y    -x*z      |
     |    -y*x,   x*x + z*z  -y*z      |
     |    -z*x       -z*y    x*x + y*y |
@@ -418,7 +417,7 @@ const DistVector& DistVector::operator/=(const double &val)
     if ( SireMaths::isZero(val) )
         throw SireMaths::math_error(QObject::tr(
             "Cannot divide a vector by zero! %1 / 0 is a error!").arg(this->toString()),CODELOC);
-    
+
     sc[3] /= val;
     return *this;
 }
