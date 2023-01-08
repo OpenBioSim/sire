@@ -44,30 +44,30 @@ void register_NullIO_class(){
         NullIO_exposer.def( bp::init< SireIO::NullIO const & >(( bp::arg("other") ), "Copy constructor") );
         NullIO_exposer.def( bp::self != bp::self );
         { //::SireIO::NullIO::operator=
-
+        
             typedef ::SireIO::NullIO & ( ::SireIO::NullIO::*assign_function_type)( ::SireIO::NullIO const & ) ;
             assign_function_type assign_function_value( &::SireIO::NullIO::operator= );
-
-            NullIO_exposer.def(
+            
+            NullIO_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         NullIO_exposer.def( bp::self == bp::self );
         { //::SireIO::NullIO::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireIO::NullIO::typeName );
-
-            NullIO_exposer.def(
+            
+            NullIO_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullIO_exposer.staticmethod( "typeName" );
         NullIO_exposer.def( "__copy__", &__copy__);

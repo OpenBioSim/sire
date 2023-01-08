@@ -71,56 +71,56 @@ void register_Connectivity_class(){
         Connectivity_exposer.def( bp::init< SireMol::ConnectivityEditor const & >(( bp::arg("editor") ), "Construct the connectivity from the passed editor") );
         Connectivity_exposer.def( bp::init< SireMol::Connectivity const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::Connectivity::edit
-
+        
             typedef ::SireMol::ConnectivityEditor ( ::SireMol::Connectivity::*edit_function_type)(  ) const;
             edit_function_type edit_function_value( &::SireMol::Connectivity::edit );
-
-            Connectivity_exposer.def(
+            
+            Connectivity_exposer.def( 
                 "edit"
                 , edit_function_value
                 , bp::release_gil_policy()
                 , "Return an editor that can edit a copy of this connectivity" );
-
+        
         }
         Connectivity_exposer.def( bp::self != bp::self );
         { //::SireMol::Connectivity::operator=
-
+        
             typedef ::SireMol::Connectivity & ( ::SireMol::Connectivity::*assign_function_type)( ::SireMol::Connectivity const & ) ;
             assign_function_type assign_function_value( &::SireMol::Connectivity::operator= );
-
-            Connectivity_exposer.def(
+            
+            Connectivity_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Connectivity::operator=
-
+        
             typedef ::SireMol::Connectivity & ( ::SireMol::Connectivity::*assign_function_type)( ::SireMol::ConnectivityEditor const & ) ;
             assign_function_type assign_function_value( &::SireMol::Connectivity::operator= );
-
-            Connectivity_exposer.def(
+            
+            Connectivity_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("editor") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Connectivity_exposer.def( bp::self == bp::self );
         { //::SireMol::Connectivity::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::Connectivity::typeName );
-
-            Connectivity_exposer.def(
+            
+            Connectivity_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Connectivity_exposer.staticmethod( "typeName" );
         Connectivity_exposer.def( "__copy__", &__copy__);

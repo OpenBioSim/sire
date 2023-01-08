@@ -34,43 +34,43 @@ void register_LJProbe_class(){
         LJProbe_exposer.def( bp::init< SireFF::Probe const & >(( bp::arg("probe") ), "Construct from the passed probe") );
         LJProbe_exposer.def( bp::init< SireMM::LJProbe const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::LJProbe::lj
-
+        
             typedef ::SireMM::LJParameter const & ( ::SireMM::LJProbe::*lj_function_type)(  ) const;
             lj_function_type lj_function_value( &::SireMM::LJProbe::lj );
-
-            LJProbe_exposer.def(
+            
+            LJProbe_exposer.def( 
                 "lj"
                 , lj_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         LJProbe_exposer.def( bp::self != bp::self );
         { //::SireMM::LJProbe::operator=
-
+        
             typedef ::SireMM::LJProbe & ( ::SireMM::LJProbe::*assign_function_type)( ::SireMM::LJProbe const & ) ;
             assign_function_type assign_function_value( &::SireMM::LJProbe::operator= );
-
-            LJProbe_exposer.def(
+            
+            LJProbe_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         LJProbe_exposer.def( bp::self == bp::self );
         { //::SireMM::LJProbe::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::LJProbe::typeName );
-
-            LJProbe_exposer.def(
+            
+            LJProbe_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         LJProbe_exposer.staticmethod( "typeName" );
         LJProbe_exposer.def( "__copy__", &__copy__);

@@ -88,228 +88,228 @@ void register_SDF_class(){
         SDF_exposer.def( bp::init< SireSystem::System const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("system"), bp::arg("map")=SireBase::PropertyMap() ), "Construct this parser by extracting all necessary information from the\npassed SireSystem::System, looking for the properties that are specified\nin the passed property map") );
         SDF_exposer.def( bp::init< SireIO::SDF const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireIO::SDF::construct
-
+        
             typedef ::SireIO::MoleculeParserPtr ( ::SireIO::SDF::*construct_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
             construct_function_type construct_function_value( &::SireIO::SDF::construct );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "construct"
                 , construct_function_value
                 , ( bp::arg("filename"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Return the parser that has been constructed by reading in the passed\nfile using the passed properties" );
-
+        
         }
         { //::SireIO::SDF::construct
-
+        
             typedef ::SireIO::MoleculeParserPtr ( ::SireIO::SDF::*construct_function_type)( ::QStringList const &,::SireBase::PropertyMap const & ) const;
             construct_function_type construct_function_value( &::SireIO::SDF::construct );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "construct"
                 , construct_function_value
                 , ( bp::arg("lines"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Return the parser that has been constructed by reading in the passed\ntext lines using the passed properties" );
-
+        
         }
         { //::SireIO::SDF::construct
-
+        
             typedef ::SireIO::MoleculeParserPtr ( ::SireIO::SDF::*construct_function_type)( ::SireSystem::System const &,::SireBase::PropertyMap const & ) const;
             construct_function_type construct_function_value( &::SireIO::SDF::construct );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "construct"
                 , construct_function_value
                 , ( bp::arg("system"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Return the parser that has been constructed by extract all necessary\ndata from the passed SireSystem::System using the specified properties" );
-
+        
         }
         { //::SireIO::SDF::formatDescription
-
+        
             typedef ::QString ( ::SireIO::SDF::*formatDescription_function_type)(  ) const;
             formatDescription_function_type formatDescription_function_value( &::SireIO::SDF::formatDescription );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "formatDescription"
                 , formatDescription_function_value
                 , bp::release_gil_policy()
                 , "Return a description of the file format" );
-
+        
         }
         { //::SireIO::SDF::formatName
-
+        
             typedef ::QString ( ::SireIO::SDF::*formatName_function_type)(  ) const;
             formatName_function_type formatName_function_value( &::SireIO::SDF::formatName );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "formatName"
                 , formatName_function_value
                 , bp::release_gil_policy()
                 , "Return the format name that is used to identify this file format within Sire" );
-
+        
         }
         { //::SireIO::SDF::formatSuffix
-
+        
             typedef ::QStringList ( ::SireIO::SDF::*formatSuffix_function_type)(  ) const;
             formatSuffix_function_type formatSuffix_function_value( &::SireIO::SDF::formatSuffix );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "formatSuffix"
                 , formatSuffix_function_value
                 , bp::release_gil_policy()
                 , "Return the suffixes that these files are normally associated with" );
-
+        
         }
         { //::SireIO::SDF::getFrame
-
+        
             typedef ::SireMol::Frame ( ::SireIO::SDF::*getFrame_function_type)( int ) const;
             getFrame_function_type getFrame_function_value( &::SireIO::SDF::getFrame );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "getFrame"
                 , getFrame_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::SDF::isFrame
-
+        
             typedef bool ( ::SireIO::SDF::*isFrame_function_type)(  ) const;
             isFrame_function_type isFrame_function_value( &::SireIO::SDF::isFrame );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "isFrame"
                 , isFrame_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::SDF::isTopology
-
+        
             typedef bool ( ::SireIO::SDF::*isTopology_function_type)(  ) const;
             isTopology_function_type isTopology_function_value( &::SireIO::SDF::isTopology );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "isTopology"
                 , isTopology_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::SDF::nAtoms
-
+        
             typedef int ( ::SireIO::SDF::*nAtoms_function_type)(  ) const;
             nAtoms_function_type nAtoms_function_value( &::SireIO::SDF::nAtoms );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , bp::release_gil_policy()
                 , "Return the total number of atoms." );
-
+        
         }
         { //::SireIO::SDF::nAtoms
-
+        
             typedef int ( ::SireIO::SDF::*nAtoms_function_type)( int ) const;
             nAtoms_function_type nAtoms_function_value( &::SireIO::SDF::nAtoms );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the number of atoms in molecule i." );
-
+        
         }
         { //::SireIO::SDF::nFrames
-
+        
             typedef int ( ::SireIO::SDF::*nFrames_function_type)(  ) const;
             nFrames_function_type nFrames_function_value( &::SireIO::SDF::nFrames );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "nFrames"
                 , nFrames_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::SDF::nMolecules
-
+        
             typedef int ( ::SireIO::SDF::*nMolecules_function_type)(  ) const;
             nMolecules_function_type nMolecules_function_value( &::SireIO::SDF::nMolecules );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "nMolecules"
                 , nMolecules_function_value
                 , bp::release_gil_policy()
                 , "Return the number of molecules loaded in this file" );
-
+        
         }
         SDF_exposer.def( bp::self != bp::self );
         { //::SireIO::SDF::operator=
-
+        
             typedef ::SireIO::SDF & ( ::SireIO::SDF::*assign_function_type)( ::SireIO::SDF const & ) ;
             assign_function_type assign_function_value( &::SireIO::SDF::operator= );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SDF_exposer.def( bp::self == bp::self );
         { //::SireIO::SDF::parseWarnings
-
+        
             typedef ::QStringList ( ::SireIO::SDF::*parseWarnings_function_type)(  ) const;
             parseWarnings_function_type parseWarnings_function_value( &::SireIO::SDF::parseWarnings );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "parseWarnings"
                 , parseWarnings_function_value
                 , bp::release_gil_policy()
                 , "Return any warnings raised when parsing this file" );
-
+        
         }
         { //::SireIO::SDF::toString
-
+        
             typedef ::QString ( ::SireIO::SDF::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireIO::SDF::toString );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this parser" );
-
+        
         }
         { //::SireIO::SDF::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireIO::SDF::typeName );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "Return the C++ name for this class" );
-
+        
         }
         { //::SireIO::SDF::what
-
+        
             typedef char const * ( ::SireIO::SDF::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireIO::SDF::what );
-
-            SDF_exposer.def(
+            
+            SDF_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "Return the C++ name for this class" );
-
+        
         }
         SDF_exposer.staticmethod( "typeName" );
         SDF_exposer.def( "__copy__", &__copy__);

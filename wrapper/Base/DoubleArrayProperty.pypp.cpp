@@ -52,140 +52,140 @@ void register_DoubleArrayProperty_class(){
         DoubleArrayProperty_exposer.def( bp::init< SireBase::PropertyList const & >(( bp::arg("array") ), "") );
         DoubleArrayProperty_exposer.def( bp::init< SireBase::DoubleArrayProperty const & >(( bp::arg("other") ), "") );
         { //::SireBase::DoubleArrayProperty::asABoolean
-
+        
             typedef bool ( ::SireBase::DoubleArrayProperty::*asABoolean_function_type)(  ) const;
             asABoolean_function_type asABoolean_function_value( &::SireBase::DoubleArrayProperty::asABoolean );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "asABoolean"
                 , asABoolean_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::DoubleArrayProperty::asADouble
-
+        
             typedef double ( ::SireBase::DoubleArrayProperty::*asADouble_function_type)(  ) const;
             asADouble_function_type asADouble_function_value( &::SireBase::DoubleArrayProperty::asADouble );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "asADouble"
                 , asADouble_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::DoubleArrayProperty::asAString
-
+        
             typedef ::QString ( ::SireBase::DoubleArrayProperty::*asAString_function_type)(  ) const;
             asAString_function_type asAString_function_value( &::SireBase::DoubleArrayProperty::asAString );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "asAString"
                 , asAString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::DoubleArrayProperty::asAnArray
-
+        
             typedef ::SireBase::PropertyList ( ::SireBase::DoubleArrayProperty::*asAnArray_function_type)(  ) const;
             asAnArray_function_type asAnArray_function_value( &::SireBase::DoubleArrayProperty::asAnArray );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "asAnArray"
                 , asAnArray_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::DoubleArrayProperty::asAnInteger
-
+        
             typedef int ( ::SireBase::DoubleArrayProperty::*asAnInteger_function_type)(  ) const;
             asAnInteger_function_type asAnInteger_function_value( &::SireBase::DoubleArrayProperty::asAnInteger );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "asAnInteger"
                 , asAnInteger_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::DoubleArrayProperty::isABoolean
-
+        
             typedef bool ( ::SireBase::DoubleArrayProperty::*isABoolean_function_type)(  ) const;
             isABoolean_function_type isABoolean_function_value( &::SireBase::DoubleArrayProperty::isABoolean );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "isABoolean"
                 , isABoolean_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::DoubleArrayProperty::isADouble
-
+        
             typedef bool ( ::SireBase::DoubleArrayProperty::*isADouble_function_type)(  ) const;
             isADouble_function_type isADouble_function_value( &::SireBase::DoubleArrayProperty::isADouble );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "isADouble"
                 , isADouble_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::DoubleArrayProperty::isAString
-
+        
             typedef bool ( ::SireBase::DoubleArrayProperty::*isAString_function_type)(  ) const;
             isAString_function_type isAString_function_value( &::SireBase::DoubleArrayProperty::isAString );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "isAString"
                 , isAString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::DoubleArrayProperty::isAnInteger
-
+        
             typedef bool ( ::SireBase::DoubleArrayProperty::*isAnInteger_function_type)(  ) const;
             isAnInteger_function_type isAnInteger_function_value( &::SireBase::DoubleArrayProperty::isAnInteger );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "isAnInteger"
                 , isAnInteger_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         DoubleArrayProperty_exposer.def( bp::self != bp::self );
         DoubleArrayProperty_exposer.def( bp::self + bp::self );
         { //::SireBase::DoubleArrayProperty::operator=
-
+        
             typedef ::SireBase::DoubleArrayProperty & ( ::SireBase::DoubleArrayProperty::*assign_function_type)( ::SireBase::DoubleArrayProperty const & ) ;
             assign_function_type assign_function_value( &::SireBase::DoubleArrayProperty::operator= );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         DoubleArrayProperty_exposer.def( bp::self == bp::self );
         { //::SireBase::DoubleArrayProperty::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireBase::DoubleArrayProperty::typeName );
-
-            DoubleArrayProperty_exposer.def(
+            
+            DoubleArrayProperty_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         DoubleArrayProperty_exposer.staticmethod( "typeName" );
         DoubleArrayProperty_exposer.def( "__copy__", &__copy__);

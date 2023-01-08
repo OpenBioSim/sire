@@ -60,16 +60,16 @@ void register_StretchStretchParameterName_class(){
         StretchStretchParameterName_exposer_t StretchStretchParameterName_exposer = StretchStretchParameterName_exposer_t( "StretchStretchParameterName", "This class provides the default name of the\nproperty that contains the stretch-stretch parameters", bp::init< >("") );
         bp::scope StretchStretchParameterName_scope( StretchStretchParameterName_exposer );
         { //::SireMM::StretchStretchParameterName::stretchStretch
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMM::StretchStretchParameterName::*stretchStretch_function_type)(  ) const;
             stretchStretch_function_type stretchStretch_function_value( &::SireMM::StretchStretchParameterName::stretchStretch );
-
-            StretchStretchParameterName_exposer.def(
+            
+            StretchStretchParameterName_exposer.def( 
                 "stretchStretch"
                 , stretchStretch_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         StretchStretchParameterName_exposer.def( "__copy__", &__copy__);
         StretchStretchParameterName_exposer.def( "__deepcopy__", &__copy__);

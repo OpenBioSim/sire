@@ -60,127 +60,127 @@ void register_DofID_class(){
         DofID_exposer.def( bp::init< SireMol::AtomIdx const &, SireMol::AtomIdx const &, SireMol::AtomIdx const &, SireMol::AtomIdx const & >(( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("atom3") ), "Constructor for a set of 4 AtomIdxs") );
         DofID_exposer.def( bp::init< SireMove::DofID const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::DofID::atom0
-
+        
             typedef ::SireMol::AtomIdx ( ::SireMove::DofID::*atom0_function_type)(  ) const;
             atom0_function_type atom0_function_value( &::SireMove::DofID::atom0 );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "atom0"
                 , atom0_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::DofID::atom1
-
+        
             typedef ::SireMol::AtomIdx ( ::SireMove::DofID::*atom1_function_type)(  ) const;
             atom1_function_type atom1_function_value( &::SireMove::DofID::atom1 );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "atom1"
                 , atom1_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::DofID::atom2
-
+        
             typedef ::SireMol::AtomIdx ( ::SireMove::DofID::*atom2_function_type)(  ) const;
             atom2_function_type atom2_function_value( &::SireMove::DofID::atom2 );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "atom2"
                 , atom2_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::DofID::atom3
-
+        
             typedef ::SireMol::AtomIdx ( ::SireMove::DofID::*atom3_function_type)(  ) const;
             atom3_function_type atom3_function_value( &::SireMove::DofID::atom3 );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "atom3"
                 , atom3_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::DofID::isAngle
-
+        
             typedef bool ( ::SireMove::DofID::*isAngle_function_type)(  ) const;
             isAngle_function_type isAngle_function_value( &::SireMove::DofID::isAngle );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "isAngle"
                 , isAngle_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::DofID::isBond
-
+        
             typedef bool ( ::SireMove::DofID::*isBond_function_type)(  ) const;
             isBond_function_type isBond_function_value( &::SireMove::DofID::isBond );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "isBond"
                 , isBond_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::DofID::isDihedral
-
+        
             typedef bool ( ::SireMove::DofID::*isDihedral_function_type)(  ) const;
             isDihedral_function_type isDihedral_function_value( &::SireMove::DofID::isDihedral );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "isDihedral"
                 , isDihedral_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::DofID::isNull
-
+        
             typedef bool ( ::SireMove::DofID::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMove::DofID::isNull );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         DofID_exposer.def( bp::self != bp::self );
         { //::SireMove::DofID::operator=
-
+        
             typedef ::SireMove::DofID & ( ::SireMove::DofID::*assign_function_type)( ::SireMove::DofID const & ) ;
             assign_function_type assign_function_value( &::SireMove::DofID::operator= );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         DofID_exposer.def( bp::self == bp::self );
         { //::SireMove::DofID::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::DofID::typeName );
-
-            DofID_exposer.def(
+            
+            DofID_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         DofID_exposer.staticmethod( "typeName" );
         DofID_exposer.def( "__copy__", &__copy__);

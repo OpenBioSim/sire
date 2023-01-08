@@ -62,54 +62,54 @@ void register_ZmatrixMaker_class(){
         ZmatrixMaker_exposer_t ZmatrixMaker_exposer = ZmatrixMaker_exposer_t( "ZmatrixMaker", "This class is used to read templates describing how a residue can be moved using zmatrix moves\nand to create a zmatrix property for residues whose template is available.\n\nAuthor: Julien Michel\n", bp::init< >("Default constructor") );
         bp::scope ZmatrixMaker_scope( ZmatrixMaker_exposer );
         { //::SireIO::ZmatrixMaker::applyTemplates
-
+        
             typedef ::SireMol::Molecule ( ::SireIO::ZmatrixMaker::*applyTemplates_function_type)( ::SireMol::Molecule & ) ;
             applyTemplates_function_type applyTemplates_function_value( &::SireIO::ZmatrixMaker::applyTemplates );
-
-            ZmatrixMaker_exposer.def(
+            
+            ZmatrixMaker_exposer.def( 
                 "applyTemplates"
                 , applyTemplates_function_value
                 , ( bp::arg("molecule") )
                 , bp::release_gil_policy()
                 , "Add the property z-matrix to molecule" );
-
+        
         }
         { //::SireIO::ZmatrixMaker::loadTemplates
-
+        
             typedef void ( ::SireIO::ZmatrixMaker::*loadTemplates_function_type)( ::QString const & ) ;
             loadTemplates_function_type loadTemplates_function_value( &::SireIO::ZmatrixMaker::loadTemplates );
-
-            ZmatrixMaker_exposer.def(
+            
+            ZmatrixMaker_exposer.def( 
                 "loadTemplates"
                 , loadTemplates_function_value
                 , ( bp::arg("templatesfile") )
                 , bp::release_gil_policy()
                 , "Read the contents of an input file to create a set of ZmatrixResidues" );
-
+        
         }
         { //::SireIO::ZmatrixMaker::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireIO::ZmatrixMaker::typeName );
-
-            ZmatrixMaker_exposer.def(
+            
+            ZmatrixMaker_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::ZmatrixMaker::what
-
+        
             typedef char const * ( ::SireIO::ZmatrixMaker::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireIO::ZmatrixMaker::what );
-
-            ZmatrixMaker_exposer.def(
+            
+            ZmatrixMaker_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ZmatrixMaker_exposer.staticmethod( "typeName" );
         ZmatrixMaker_exposer.def( "__copy__", &__copy__);

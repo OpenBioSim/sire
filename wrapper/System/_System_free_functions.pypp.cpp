@@ -40,15 +40,15 @@ namespace bp = boost::python;
 void register_free_functions(){
 
     { //::SireSystem::create_test_molecule
-
+    
         typedef ::SireMol::Molecule ( *create_test_molecule_function_type )(  );
         create_test_molecule_function_type create_test_molecule_function_value( &::SireSystem::create_test_molecule );
-
-        bp::def(
+        
+        bp::def( 
             "create_test_molecule"
             , create_test_molecule_function_value
             , "" );
-
+    
     }
 
 }

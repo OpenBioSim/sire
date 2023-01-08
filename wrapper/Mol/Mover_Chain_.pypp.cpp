@@ -99,351 +99,351 @@ void register_Mover_Chain__class(){
         Mover_Chain__exposer.def( bp::init< SireMol::Chain const &, SireMol::AtomSelection const & >(( bp::arg("view"), bp::arg("movable_atoms") ), "") );
         Mover_Chain__exposer.def( bp::init< SireMol::Mover< SireMol::Chain > const & >(( bp::arg("other") ), "") );
         { //::SireMol::Mover< SireMol::Chain >::align
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*align_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) ;
             align_function_type align_function_value( &::SireMol::Mover< SireMol::Chain >::align );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "align"
                 , align_function_value
                 , ( bp::arg("other"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::align
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*align_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const & ) ;
             align_function_type align_function_value( &::SireMol::Mover< SireMol::Chain >::align );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "align"
                 , align_function_value
                 , ( bp::arg("other"), bp::arg("map0"), bp::arg("map1") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::align
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*align_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireBase::PropertyMap const & ) ;
             align_function_type align_function_value( &::SireMol::Mover< SireMol::Chain >::align );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "align"
                 , align_function_value
                 , ( bp::arg("other"), bp::arg("matcher"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::align
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*align_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const & ) ;
             align_function_type align_function_value( &::SireMol::Mover< SireMol::Chain >::align );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "align"
                 , align_function_value
                 , ( bp::arg("other"), bp::arg("matcher"), bp::arg("map0"), bp::arg("map1") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::change
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*change_function_type)( ::SireMol::BondID const &,::SireUnits::Dimension::Length,::SireBase::PropertyMap const & ) ;
             change_function_type change_function_value( &::SireMol::Mover< SireMol::Chain >::change );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "change"
                 , change_function_value
                 , ( bp::arg("bond"), bp::arg("delta"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::change
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*change_function_type)( ::SireMol::AngleID const &,::SireUnits::Dimension::Angle,::SireBase::PropertyMap const & ) ;
             change_function_type change_function_value( &::SireMol::Mover< SireMol::Chain >::change );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "change"
                 , change_function_value
                 , ( bp::arg("angle"), bp::arg("delta"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::change
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*change_function_type)( ::SireMol::DihedralID const &,::SireUnits::Dimension::Angle,::SireBase::PropertyMap const & ) ;
             change_function_type change_function_value( &::SireMol::Mover< SireMol::Chain >::change );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "change"
                 , change_function_value
                 , ( bp::arg("dihedral"), bp::arg("delta"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::change
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*change_function_type)( ::SireMol::BondID const &,::SireUnits::Dimension::Angle,::SireBase::PropertyMap const & ) ;
             change_function_type change_function_value( &::SireMol::Mover< SireMol::Chain >::change );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "change"
                 , change_function_value
                 , ( bp::arg("bond"), bp::arg("delta"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::change
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*change_function_type)( ::SireMol::ImproperID const &,::SireUnits::Dimension::Angle,::SireBase::PropertyMap const & ) ;
             change_function_type change_function_value( &::SireMol::Mover< SireMol::Chain >::change );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "change"
                 , change_function_value
                 , ( bp::arg("improper"), bp::arg("delta"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::changeFrame
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*changeFrame_function_type)( ::SireMaths::AxisSet const &,::SireMaths::AxisSet const &,::SireBase::PropertyMap const & ) ;
             changeFrame_function_type changeFrame_function_value( &::SireMol::Mover< SireMol::Chain >::changeFrame );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "changeFrame"
                 , changeFrame_function_value
                 , ( bp::arg("from_frame"), bp::arg("to_frame"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::commit
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Chain ( ::SireMol::Mover< SireMol::Chain >::*commit_function_type)(  ) const;
             commit_function_type commit_function_value( &::SireMol::Mover< SireMol::Chain >::commit );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "commit"
                 , commit_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::mapInto
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*mapInto_function_type)( ::SireMaths::AxisSet const &,::SireBase::PropertyMap const & ) ;
             mapInto_function_type mapInto_function_value( &::SireMol::Mover< SireMol::Chain >::mapInto );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "mapInto"
                 , mapInto_function_value
                 , ( bp::arg("axes"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::operator=
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*assign_function_type)( ::SireMol::Mover< SireMol::Chain > const & ) ;
             assign_function_type assign_function_value( &::SireMol::Mover< SireMol::Chain >::operator= );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::operator=
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*assign_function_type)( ::SireMol::Chain const & ) ;
             assign_function_type assign_function_value( &::SireMol::Mover< SireMol::Chain >::operator= );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::rotate
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*rotate_function_type)( ::SireMaths::Quaternion const &,::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
             rotate_function_type rotate_function_value( &::SireMol::Mover< SireMol::Chain >::rotate );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "rotate"
                 , rotate_function_value
                 , ( bp::arg("quat"), bp::arg("point"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::rotate
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*rotate_function_type)( ::SireMaths::Matrix const &,::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
             rotate_function_type rotate_function_value( &::SireMol::Mover< SireMol::Chain >::rotate );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "rotate"
                 , rotate_function_value
                 , ( bp::arg("rotmat"), bp::arg("point"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::set
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*set_function_type)( ::SireMol::BondID const &,::SireUnits::Dimension::Length,::SireBase::PropertyMap const & ) ;
             set_function_type set_function_value( &::SireMol::Mover< SireMol::Chain >::set );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("bond"), bp::arg("value"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::set
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*set_function_type)( ::SireMol::AngleID const &,::SireUnits::Dimension::Angle,::SireBase::PropertyMap const & ) ;
             set_function_type set_function_value( &::SireMol::Mover< SireMol::Chain >::set );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("angle"), bp::arg("value"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::set
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*set_function_type)( ::SireMol::DihedralID const &,::SireUnits::Dimension::Angle,::SireBase::PropertyMap const & ) ;
             set_function_type set_function_value( &::SireMol::Mover< SireMol::Chain >::set );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("dihedral"), bp::arg("value"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::set
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*set_function_type)( ::SireMol::ImproperID const &,::SireUnits::Dimension::Angle,::SireBase::PropertyMap const & ) ;
             set_function_type set_function_value( &::SireMol::Mover< SireMol::Chain >::set );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("improper"), bp::arg("value"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::setAll
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*setAll_function_type)( ::SireMol::DihedralID const &,::SireUnits::Dimension::Angle,::SireBase::PropertyMap const & ) ;
             setAll_function_type setAll_function_value( &::SireMol::Mover< SireMol::Chain >::setAll );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "setAll"
                 , setAll_function_value
                 , ( bp::arg("dihedral"), bp::arg("value"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::toString
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::QString ( ::SireMol::Mover< SireMol::Chain >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::Mover< SireMol::Chain >::toString );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::transform
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*transform_function_type)( ::SireMaths::Transform const &,::SireBase::PropertyMap const & ) ;
             transform_function_type transform_function_value( &::SireMol::Mover< SireMol::Chain >::transform );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "transform"
                 , transform_function_value
                 , ( bp::arg("transform"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::translate
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef ::SireMol::Mover< SireMol::Chain > & ( ::SireMol::Mover< SireMol::Chain >::*translate_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
             translate_function_type translate_function_value( &::SireMol::Mover< SireMol::Chain >::translate );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "translate"
                 , translate_function_value
                 , ( bp::arg("delta"), bp::arg("map")=SireBase::PropertyMap() )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Mover< SireMol::Chain >::typeName
-
+        
             typedef SireMol::Mover< SireMol::Chain > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::Mover< SireMol::Chain >::typeName );
-
-            Mover_Chain__exposer.def(
+            
+            Mover_Chain__exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Mover_Chain__exposer.staticmethod( "typeName" );
         Mover_Chain__exposer.def( "__copy__", &__copy__);

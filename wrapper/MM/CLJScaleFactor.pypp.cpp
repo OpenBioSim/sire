@@ -35,54 +35,54 @@ void register_CLJScaleFactor_class(){
         CLJScaleFactor_exposer.def( bp::init< SireMM::CLJScaleFactor const & >(( bp::arg("other") ), "Copy constructor") );
         CLJScaleFactor_exposer.def( bp::self != bp::self );
         { //::SireMM::CLJScaleFactor::operator=
-
+        
             typedef ::SireMM::CLJScaleFactor & ( ::SireMM::CLJScaleFactor::*assign_function_type)( ::SireMM::CLJScaleFactor const & ) ;
             assign_function_type assign_function_value( &::SireMM::CLJScaleFactor::operator= );
-
-            CLJScaleFactor_exposer.def(
+            
+            CLJScaleFactor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         CLJScaleFactor_exposer.def( bp::self == bp::self );
         { //::SireMM::CLJScaleFactor::toString
-
+        
             typedef ::QString ( ::SireMM::CLJScaleFactor::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMM::CLJScaleFactor::toString );
-
-            CLJScaleFactor_exposer.def(
+            
+            CLJScaleFactor_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJScaleFactor::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::CLJScaleFactor::typeName );
-
-            CLJScaleFactor_exposer.def(
+            
+            CLJScaleFactor_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJScaleFactor::what
-
+        
             typedef char const * ( ::SireMM::CLJScaleFactor::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::CLJScaleFactor::what );
-
-            CLJScaleFactor_exposer.def(
+            
+            CLJScaleFactor_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CLJScaleFactor_exposer.staticmethod( "typeName" );
         CLJScaleFactor_exposer.def( "__copy__", &__copy__);

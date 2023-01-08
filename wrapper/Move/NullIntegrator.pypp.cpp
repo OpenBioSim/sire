@@ -47,104 +47,104 @@ void register_NullIntegrator_class(){
         bp::scope NullIntegrator_scope( NullIntegrator_exposer );
         NullIntegrator_exposer.def( bp::init< SireMove::NullIntegrator const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::NullIntegrator::createWorkspace
-
+        
             typedef ::SireMove::IntegratorWorkspacePtr ( ::SireMove::NullIntegrator::*createWorkspace_function_type)( ::SireBase::PropertyMap const & ) const;
             createWorkspace_function_type createWorkspace_function_value( &::SireMove::NullIntegrator::createWorkspace );
-
-            NullIntegrator_exposer.def(
+            
+            NullIntegrator_exposer.def( 
                 "createWorkspace"
                 , createWorkspace_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "This returns a null workspace" );
-
+        
         }
         { //::SireMove::NullIntegrator::createWorkspace
-
+        
             typedef ::SireMove::IntegratorWorkspacePtr ( ::SireMove::NullIntegrator::*createWorkspace_function_type)( ::SireMol::MoleculeGroup const &,::SireBase::PropertyMap const & ) const;
             createWorkspace_function_type createWorkspace_function_value( &::SireMove::NullIntegrator::createWorkspace );
-
-            NullIntegrator_exposer.def(
+            
+            NullIntegrator_exposer.def( 
                 "createWorkspace"
                 , createWorkspace_function_value
                 , ( bp::arg("molgroup"), bp::arg("map")=SireBase::PropertyMap() )
                 , "This returns a null workspace" );
-
+        
         }
         { //::SireMove::NullIntegrator::ensemble
-
+        
             typedef ::SireMove::Ensemble ( ::SireMove::NullIntegrator::*ensemble_function_type)(  ) const;
             ensemble_function_type ensemble_function_value( &::SireMove::NullIntegrator::ensemble );
-
-            NullIntegrator_exposer.def(
+            
+            NullIntegrator_exposer.def( 
                 "ensemble"
                 , ensemble_function_value
                 , bp::release_gil_policy()
                 , "Return the ensemble of this integrator" );
-
+        
         }
         { //::SireMove::NullIntegrator::integrate
-
+        
             typedef void ( ::SireMove::NullIntegrator::*integrate_function_type)( ::SireMove::IntegratorWorkspace &,::SireCAS::Symbol const &,::SireUnits::Dimension::Time,int,bool ) ;
             integrate_function_type integrate_function_value( &::SireMove::NullIntegrator::integrate );
-
-            NullIntegrator_exposer.def(
+            
+            NullIntegrator_exposer.def( 
                 "integrate"
                 , integrate_function_value
                 , ( bp::arg("workspace"), bp::arg("nrg_component"), bp::arg("timestep"), bp::arg("nmoves"), bp::arg("record_stats") )
                 , bp::release_gil_policy()
                 , "The null integrator does nothing" );
-
+        
         }
         { //::SireMove::NullIntegrator::isTimeReversible
-
+        
             typedef bool ( ::SireMove::NullIntegrator::*isTimeReversible_function_type)(  ) const;
             isTimeReversible_function_type isTimeReversible_function_value( &::SireMove::NullIntegrator::isTimeReversible );
-
-            NullIntegrator_exposer.def(
+            
+            NullIntegrator_exposer.def( 
                 "isTimeReversible"
                 , isTimeReversible_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this integrator is time-reversible" );
-
+        
         }
         NullIntegrator_exposer.def( bp::self != bp::self );
         { //::SireMove::NullIntegrator::operator=
-
+        
             typedef ::SireMove::NullIntegrator & ( ::SireMove::NullIntegrator::*assign_function_type)( ::SireMove::NullIntegrator const & ) ;
             assign_function_type assign_function_value( &::SireMove::NullIntegrator::operator= );
-
-            NullIntegrator_exposer.def(
+            
+            NullIntegrator_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         NullIntegrator_exposer.def( bp::self == bp::self );
         { //::SireMove::NullIntegrator::toString
-
+        
             typedef ::QString ( ::SireMove::NullIntegrator::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMove::NullIntegrator::toString );
-
-            NullIntegrator_exposer.def(
+            
+            NullIntegrator_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this integrator" );
-
+        
         }
         { //::SireMove::NullIntegrator::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::NullIntegrator::typeName );
-
-            NullIntegrator_exposer.def(
+            
+            NullIntegrator_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullIntegrator_exposer.staticmethod( "typeName" );
         NullIntegrator_exposer.def( "__copy__", &__copy__);

@@ -71,93 +71,93 @@ void register_ChainName_class(){
         ChainName_exposer.def( bp::init< QString const &, SireID::CaseSensitivity >(( bp::arg("name"), bp::arg("case_sensitivity") ), "") );
         ChainName_exposer.def( bp::init< SireMol::ChainName const & >(( bp::arg("other") ), "") );
         { //::SireMol::ChainName::hash
-
+        
             typedef ::uint ( ::SireMol::ChainName::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::ChainName::hash );
-
-            ChainName_exposer.def(
+            
+            ChainName_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainName::isNull
-
+        
             typedef bool ( ::SireMol::ChainName::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::ChainName::isNull );
-
-            ChainName_exposer.def(
+            
+            ChainName_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainName::map
-
+        
             typedef ::QList< SireMol::ChainIdx > ( ::SireMol::ChainName::*map_function_type)( ::SireMol::MolInfo const & ) const;
             map_function_type map_function_value( &::SireMol::ChainName::map );
-
-            ChainName_exposer.def(
+            
+            ChainName_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ChainName_exposer.def( bp::self != bp::self );
         { //::SireMol::ChainName::operator=
-
+        
             typedef ::SireMol::ChainName & ( ::SireMol::ChainName::*assign_function_type)( ::SireMol::ChainName const & ) ;
             assign_function_type assign_function_value( &::SireMol::ChainName::operator= );
-
-            ChainName_exposer.def(
+            
+            ChainName_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         ChainName_exposer.def( bp::self == bp::other< SireID::ID >() );
         ChainName_exposer.def( bp::self == bp::self );
         { //::SireMol::ChainName::toString
-
+        
             typedef ::QString ( ::SireMol::ChainName::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::ChainName::toString );
-
-            ChainName_exposer.def(
+            
+            ChainName_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainName::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::ChainName::typeName );
-
-            ChainName_exposer.def(
+            
+            ChainName_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainName::what
-
+        
             typedef char const * ( ::SireMol::ChainName::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::ChainName::what );
-
-            ChainName_exposer.def(
+            
+            ChainName_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ChainName_exposer.staticmethod( "typeName" );
         ChainName_exposer.def( "__copy__", &__copy__);

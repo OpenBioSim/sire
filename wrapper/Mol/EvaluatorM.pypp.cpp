@@ -84,291 +84,291 @@ void register_EvaluatorM_class(){
         EvaluatorM_exposer.def( bp::init< SireMol::SelectorMol const & >(( bp::arg("mols") ), "") );
         EvaluatorM_exposer.def( bp::init< SireMol::EvaluatorM const & >(( bp::arg("other") ), "") );
         { //::SireMol::EvaluatorM::aaBox
-
+        
             typedef ::SireVol::AABox ( ::SireMol::EvaluatorM::*aaBox_function_type)(  ) const;
             aaBox_function_type aaBox_function_value( &::SireMol::EvaluatorM::aaBox );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "aaBox"
                 , aaBox_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::aaBox
-
+        
             typedef ::SireVol::AABox ( ::SireMol::EvaluatorM::*aaBox_function_type)( ::SireBase::PropertyMap const & ) const;
             aaBox_function_type aaBox_function_value( &::SireMol::EvaluatorM::aaBox );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "aaBox"
                 , aaBox_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::boundingSphere
-
+        
             typedef ::SireMaths::Sphere ( ::SireMol::EvaluatorM::*boundingSphere_function_type)(  ) const;
             boundingSphere_function_type boundingSphere_function_value( &::SireMol::EvaluatorM::boundingSphere );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "boundingSphere"
                 , boundingSphere_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::boundingSphere
-
+        
             typedef ::SireMaths::Sphere ( ::SireMol::EvaluatorM::*boundingSphere_function_type)( ::SireBase::PropertyMap const & ) const;
             boundingSphere_function_type boundingSphere_function_value( &::SireMol::EvaluatorM::boundingSphere );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "boundingSphere"
                 , boundingSphere_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::center
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::EvaluatorM::*center_function_type)(  ) const;
             center_function_type center_function_value( &::SireMol::EvaluatorM::center );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "center"
                 , center_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::center
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::EvaluatorM::*center_function_type)( ::SireBase::PropertyMap const & ) const;
             center_function_type center_function_value( &::SireMol::EvaluatorM::center );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "center"
                 , center_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::centerOfGeometry
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::EvaluatorM::*centerOfGeometry_function_type)(  ) const;
             centerOfGeometry_function_type centerOfGeometry_function_value( &::SireMol::EvaluatorM::centerOfGeometry );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "centerOfGeometry"
                 , centerOfGeometry_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::centerOfGeometry
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::EvaluatorM::*centerOfGeometry_function_type)( ::SireBase::PropertyMap const & ) const;
             centerOfGeometry_function_type centerOfGeometry_function_value( &::SireMol::EvaluatorM::centerOfGeometry );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "centerOfGeometry"
                 , centerOfGeometry_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::centerOfMass
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::EvaluatorM::*centerOfMass_function_type)(  ) const;
             centerOfMass_function_type centerOfMass_function_value( &::SireMol::EvaluatorM::centerOfMass );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "centerOfMass"
                 , centerOfMass_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::centerOfMass
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::EvaluatorM::*centerOfMass_function_type)( ::SireBase::PropertyMap const & ) const;
             centerOfMass_function_type centerOfMass_function_value( &::SireMol::EvaluatorM::centerOfMass );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "centerOfMass"
                 , centerOfMass_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::centroid
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::EvaluatorM::*centroid_function_type)(  ) const;
             centroid_function_type centroid_function_value( &::SireMol::EvaluatorM::centroid );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "centroid"
                 , centroid_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::centroid
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::EvaluatorM::*centroid_function_type)( ::SireBase::PropertyMap const & ) const;
             centroid_function_type centroid_function_value( &::SireMol::EvaluatorM::centroid );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "centroid"
                 , centroid_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Return the centroid of these atoms - this is the average\nof the coordinates\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\n" );
-
+        
         }
         { //::SireMol::EvaluatorM::charge
-
+        
             typedef ::SireUnits::Dimension::Charge ( ::SireMol::EvaluatorM::*charge_function_type)(  ) const;
             charge_function_type charge_function_value( &::SireMol::EvaluatorM::charge );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "charge"
                 , charge_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::charge
-
+        
             typedef ::SireUnits::Dimension::Charge ( ::SireMol::EvaluatorM::*charge_function_type)( ::SireBase::PropertyMap const & ) const;
             charge_function_type charge_function_value( &::SireMol::EvaluatorM::charge );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "charge"
                 , charge_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::isEmpty
-
+        
             typedef bool ( ::SireMol::EvaluatorM::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireMol::EvaluatorM::isEmpty );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::mass
-
+        
             typedef ::SireUnits::Dimension::MolarMass ( ::SireMol::EvaluatorM::*mass_function_type)(  ) const;
             mass_function_type mass_function_value( &::SireMol::EvaluatorM::mass );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "mass"
                 , mass_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::mass
-
+        
             typedef ::SireUnits::Dimension::MolarMass ( ::SireMol::EvaluatorM::*mass_function_type)( ::SireBase::PropertyMap const & ) const;
             mass_function_type mass_function_value( &::SireMol::EvaluatorM::mass );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "mass"
                 , mass_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::nAtoms
-
+        
             typedef int ( ::SireMol::EvaluatorM::*nAtoms_function_type)(  ) const;
             nAtoms_function_type nAtoms_function_value( &::SireMol::EvaluatorM::nAtoms );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::nMolecules
-
+        
             typedef int ( ::SireMol::EvaluatorM::*nMolecules_function_type)(  ) const;
             nMolecules_function_type nMolecules_function_value( &::SireMol::EvaluatorM::nMolecules );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "nMolecules"
                 , nMolecules_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         EvaluatorM_exposer.def( bp::self != bp::self );
         { //::SireMol::EvaluatorM::operator=
-
+        
             typedef ::SireMol::EvaluatorM & ( ::SireMol::EvaluatorM::*assign_function_type)( ::SireMol::EvaluatorM const & ) ;
             assign_function_type assign_function_value( &::SireMol::EvaluatorM::operator= );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         EvaluatorM_exposer.def( bp::self == bp::self );
         { //::SireMol::EvaluatorM::toString
-
+        
             typedef ::QString ( ::SireMol::EvaluatorM::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::EvaluatorM::toString );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::EvaluatorM::typeName );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::EvaluatorM::what
-
+        
             typedef char const * ( ::SireMol::EvaluatorM::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::EvaluatorM::what );
-
-            EvaluatorM_exposer.def(
+            
+            EvaluatorM_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         EvaluatorM_exposer.staticmethod( "typeName" );
         EvaluatorM_exposer.def( "__copy__", &__copy__);

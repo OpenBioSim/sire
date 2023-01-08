@@ -51,43 +51,43 @@ void register_NullVelocityGenerator_class(){
         bp::scope NullVelocityGenerator_scope( NullVelocityGenerator_exposer );
         NullVelocityGenerator_exposer.def( bp::init< SireMove::NullVelocityGenerator const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::NullVelocityGenerator::generate
-
+        
             typedef ::SireMol::AtomVelocities ( ::SireMove::NullVelocityGenerator::*generate_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
             generate_function_type generate_function_value( &::SireMove::NullVelocityGenerator::generate );
-
-            NullVelocityGenerator_exposer.def(
+            
+            NullVelocityGenerator_exposer.def( 
                 "generate"
                 , generate_function_value
                 , ( bp::arg("molview"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Zero velocities are generated" );
-
+        
         }
         NullVelocityGenerator_exposer.def( bp::self != bp::self );
         { //::SireMove::NullVelocityGenerator::operator=
-
+        
             typedef ::SireMove::NullVelocityGenerator & ( ::SireMove::NullVelocityGenerator::*assign_function_type)( ::SireMove::NullVelocityGenerator const & ) ;
             assign_function_type assign_function_value( &::SireMove::NullVelocityGenerator::operator= );
-
-            NullVelocityGenerator_exposer.def(
+            
+            NullVelocityGenerator_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         NullVelocityGenerator_exposer.def( bp::self == bp::self );
         { //::SireMove::NullVelocityGenerator::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::NullVelocityGenerator::typeName );
-
-            NullVelocityGenerator_exposer.def(
+            
+            NullVelocityGenerator_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullVelocityGenerator_exposer.staticmethod( "typeName" );
         NullVelocityGenerator_exposer.def( "__copy__", &__copy__);

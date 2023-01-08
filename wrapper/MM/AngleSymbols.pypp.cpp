@@ -45,16 +45,16 @@ void register_AngleSymbols_class(){
         AngleSymbols_exposer_t AngleSymbols_exposer = AngleSymbols_exposer_t( "AngleSymbols", "This class holds the symbols required for the angle parameters.\nThese are functions of the angle 0-1-2 (theta) of three\natoms (where atom 1 is the central atom of the angle)", bp::init< >("") );
         bp::scope AngleSymbols_scope( AngleSymbols_exposer );
         { //::SireMM::AngleSymbols::theta
-
+        
             typedef ::SireCAS::Symbol const & ( ::SireMM::AngleSymbols::*theta_function_type)(  ) const;
             theta_function_type theta_function_value( &::SireMM::AngleSymbols::theta );
-
-            AngleSymbols_exposer.def(
+            
+            AngleSymbols_exposer.def( 
                 "theta"
                 , theta_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the symbols representing the angle (theta)" );
-
+        
         }
         AngleSymbols_exposer.def( "__copy__", &__copy__);
         AngleSymbols_exposer.def( "__deepcopy__", &__copy__);

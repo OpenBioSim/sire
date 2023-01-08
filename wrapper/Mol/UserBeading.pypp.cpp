@@ -51,56 +51,56 @@ void register_UserBeading_class(){
         UserBeading_exposer.def( bp::init< SireMol::AtomBeads const & >(( bp::arg("beads") ), "Constructor used to specify the beads for each atom") );
         UserBeading_exposer.def( bp::init< SireMol::UserBeading const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::UserBeading::atomBeads
-
+        
             typedef ::SireMol::AtomBeads const & ( ::SireMol::UserBeading::*atomBeads_function_type)(  ) const;
             atomBeads_function_type atomBeads_function_value( &::SireMol::UserBeading::atomBeads );
-
-            UserBeading_exposer.def(
+            
+            UserBeading_exposer.def( 
                 "atomBeads"
                 , atomBeads_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the bead specification for each atom" );
-
+        
         }
         { //::SireMol::UserBeading::isCompatibleWith
-
+        
             typedef bool ( ::SireMol::UserBeading::*isCompatibleWith_function_type)( ::SireMol::MoleculeInfoData const & ) const;
             isCompatibleWith_function_type isCompatibleWith_function_value( &::SireMol::UserBeading::isCompatibleWith );
-
-            UserBeading_exposer.def(
+            
+            UserBeading_exposer.def( 
                 "isCompatibleWith"
                 , isCompatibleWith_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "Return whether or not this beading is compatible with the passed molecule info" );
-
+        
         }
         UserBeading_exposer.def( bp::self != bp::self );
         { //::SireMol::UserBeading::operator=
-
+        
             typedef ::SireMol::UserBeading & ( ::SireMol::UserBeading::*assign_function_type)( ::SireMol::UserBeading const & ) ;
             assign_function_type assign_function_value( &::SireMol::UserBeading::operator= );
-
-            UserBeading_exposer.def(
+            
+            UserBeading_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         UserBeading_exposer.def( bp::self == bp::self );
         { //::SireMol::UserBeading::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::UserBeading::typeName );
-
-            UserBeading_exposer.def(
+            
+            UserBeading_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         UserBeading_exposer.staticmethod( "typeName" );
         UserBeading_exposer.def( "__copy__", &__copy__);

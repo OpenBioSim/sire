@@ -51,91 +51,91 @@ void register_WindowedComponent_class(){
         WindowedComponent_exposer.def( bp::init< SireCAS::Symbol const &, SireCAS::Symbol const &, QVector< double > const &, bp::optional< int > >(( bp::arg("component"), bp::arg("reference"), bp::arg("values"), bp::arg("step_size")=(int)(1) ), "Construct a WindowedConstraint that constrains the component represented\nby the symbol component to lie step_size windows above (or below if\nstep_size is negative) the window in which the component represented\nby the symbol reference resides - where values contains all of\nthe values of the windows, in the order that you have arranged\nthem. Whilst this will not sort window_values, it will remove\nall duplicate values") );
         WindowedComponent_exposer.def( bp::init< SireSystem::WindowedComponent const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireSystem::WindowedComponent::component
-
+        
             typedef ::SireCAS::Symbol const & ( ::SireSystem::WindowedComponent::*component_function_type)(  ) const;
             component_function_type component_function_value( &::SireSystem::WindowedComponent::component );
-
-            WindowedComponent_exposer.def(
+            
+            WindowedComponent_exposer.def( 
                 "component"
                 , component_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the symbol representing the component being constrained" );
-
+        
         }
         WindowedComponent_exposer.def( bp::self != bp::self );
         { //::SireSystem::WindowedComponent::operator=
-
+        
             typedef ::SireSystem::WindowedComponent & ( ::SireSystem::WindowedComponent::*assign_function_type)( ::SireSystem::WindowedComponent const & ) ;
             assign_function_type assign_function_value( &::SireSystem::WindowedComponent::operator= );
-
-            WindowedComponent_exposer.def(
+            
+            WindowedComponent_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         WindowedComponent_exposer.def( bp::self == bp::self );
         { //::SireSystem::WindowedComponent::referenceComponent
-
+        
             typedef ::SireCAS::Symbol const & ( ::SireSystem::WindowedComponent::*referenceComponent_function_type)(  ) const;
             referenceComponent_function_type referenceComponent_function_value( &::SireSystem::WindowedComponent::referenceComponent );
-
-            WindowedComponent_exposer.def(
+            
+            WindowedComponent_exposer.def( 
                 "referenceComponent"
                 , referenceComponent_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the symbol representing the reference component" );
-
+        
         }
         { //::SireSystem::WindowedComponent::stepSize
-
+        
             typedef int ( ::SireSystem::WindowedComponent::*stepSize_function_type)(  ) const;
             stepSize_function_type stepSize_function_value( &::SireSystem::WindowedComponent::stepSize );
-
-            WindowedComponent_exposer.def(
+            
+            WindowedComponent_exposer.def( 
                 "stepSize"
                 , stepSize_function_value
                 , bp::release_gil_policy()
                 , "Return the step size for this windows - this is the number of\nwindows above (or below if step_size is negative) for this\nwindow compared to the window containing the reference component" );
-
+        
         }
         { //::SireSystem::WindowedComponent::toString
-
+        
             typedef ::QString ( ::SireSystem::WindowedComponent::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireSystem::WindowedComponent::toString );
-
-            WindowedComponent_exposer.def(
+            
+            WindowedComponent_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this constraint" );
-
+        
         }
         { //::SireSystem::WindowedComponent::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::WindowedComponent::typeName );
-
-            WindowedComponent_exposer.def(
+            
+            WindowedComponent_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireSystem::WindowedComponent::windowValues
-
+        
             typedef ::QVector< double > const & ( ::SireSystem::WindowedComponent::*windowValues_function_type)(  ) const;
             windowValues_function_type windowValues_function_value( &::SireSystem::WindowedComponent::windowValues );
-
-            WindowedComponent_exposer.def(
+            
+            WindowedComponent_exposer.def( 
                 "windowValues"
                 , windowValues_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the values of all of the windows" );
-
+        
         }
         WindowedComponent_exposer.staticmethod( "typeName" );
         WindowedComponent_exposer.def( "__copy__", &__copy__);

@@ -38,55 +38,55 @@ void register_Min_class(){
         Min_exposer.def( bp::init< SireCAS::Expression const &, SireCAS::Expression const & >(( bp::arg("x"), bp::arg("y") ), "Construct min(x(), y())") );
         Min_exposer.def( bp::init< SireCAS::Min const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::Min::evaluate
-
+        
             typedef double ( ::SireCAS::Min::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Min::evaluate );
-
-            Min_exposer.def(
+            
+            Min_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this function" );
-
+        
         }
         { //::SireCAS::Min::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::Min::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Min::evaluate );
-
-            Min_exposer.def(
+            
+            Min_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Complex evaluation" );
-
+        
         }
         Min_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::Min::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::Min::typeName );
-
-            Min_exposer.def(
+            
+            Min_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::Min::what
-
+        
             typedef char const * ( ::SireCAS::Min::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::Min::what );
-
-            Min_exposer.def(
+            
+            Min_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Min_exposer.staticmethod( "typeName" );
         Min_exposer.def( "__copy__", &__copy__);

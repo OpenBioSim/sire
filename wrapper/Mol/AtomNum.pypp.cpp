@@ -74,97 +74,97 @@ void register_AtomNum_class(){
         AtomNum_exposer.def( bp::init< quint32 >(( bp::arg("num") ), "") );
         AtomNum_exposer.def( bp::init< SireMol::AtomNum const & >(( bp::arg("other") ), "") );
         { //::SireMol::AtomNum::hash
-
+        
             typedef ::uint ( ::SireMol::AtomNum::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::AtomNum::hash );
-
-            AtomNum_exposer.def(
+            
+            AtomNum_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomNum::isNull
-
+        
             typedef bool ( ::SireMol::AtomNum::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::AtomNum::isNull );
-
-            AtomNum_exposer.def(
+            
+            AtomNum_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomNum::map
-
+        
             typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomNum::*map_function_type)( ::SireMol::MolInfo const & ) const;
             map_function_type map_function_value( &::SireMol::AtomNum::map );
-
-            AtomNum_exposer.def(
+            
+            AtomNum_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomNum_exposer.def( bp::self != bp::self );
         AtomNum_exposer.def( bp::self < bp::self );
         AtomNum_exposer.def( bp::self <= bp::self );
         { //::SireMol::AtomNum::operator=
-
+        
             typedef ::SireMol::AtomNum & ( ::SireMol::AtomNum::*assign_function_type)( ::SireMol::AtomNum const & ) ;
             assign_function_type assign_function_value( &::SireMol::AtomNum::operator= );
-
-            AtomNum_exposer.def(
+            
+            AtomNum_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         AtomNum_exposer.def( bp::self == bp::other< SireID::ID >() );
         AtomNum_exposer.def( bp::self == bp::self );
         AtomNum_exposer.def( bp::self > bp::self );
         AtomNum_exposer.def( bp::self >= bp::self );
         { //::SireMol::AtomNum::toString
-
+        
             typedef ::QString ( ::SireMol::AtomNum::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::AtomNum::toString );
-
-            AtomNum_exposer.def(
+            
+            AtomNum_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomNum::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::AtomNum::typeName );
-
-            AtomNum_exposer.def(
+            
+            AtomNum_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomNum::what
-
+        
             typedef char const * ( ::SireMol::AtomNum::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::AtomNum::what );
-
-            AtomNum_exposer.def(
+            
+            AtomNum_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomNum_exposer.staticmethod( "typeName" );
         AtomNum_exposer.def( "__copy__", &__copy__);

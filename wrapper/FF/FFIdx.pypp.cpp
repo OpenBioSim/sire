@@ -32,102 +32,102 @@ void register_FFIdx_class(){
         FFIdx_exposer.def( bp::init< qint32 >(( bp::arg("idx") ), "") );
         FFIdx_exposer.def( bp::init< SireFF::FFIdx const & >(( bp::arg("other") ), "") );
         { //::SireFF::FFIdx::hash
-
+        
             typedef ::uint ( ::SireFF::FFIdx::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireFF::FFIdx::hash );
-
-            FFIdx_exposer.def(
+            
+            FFIdx_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FFIdx::isNull
-
+        
             typedef bool ( ::SireFF::FFIdx::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireFF::FFIdx::isNull );
-
-            FFIdx_exposer.def(
+            
+            FFIdx_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FFIdx::map
-
+        
             typedef ::QList< SireFF::FFIdx > ( ::SireFF::FFIdx::*map_function_type)( ::SireFF::ForceFields const & ) const;
             map_function_type map_function_value( &::SireFF::FFIdx::map );
-
-            FFIdx_exposer.def(
+            
+            FFIdx_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("ffields") )
                 , bp::release_gil_policy()
                 , "Short cut function to map this index to the index of the\nmatching forcefield in the passed ForceFields object\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireFF::FFIdx::null
-
+        
             typedef ::SireFF::FFIdx ( *null_function_type )(  );
             null_function_type null_function_value( &::SireFF::FFIdx::null );
-
-            FFIdx_exposer.def(
+            
+            FFIdx_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FFIdx::operator=
-
+        
             typedef ::SireFF::FFIdx & ( ::SireFF::FFIdx::*assign_function_type)( ::SireFF::FFIdx const & ) ;
             assign_function_type assign_function_value( &::SireFF::FFIdx::operator= );
-
-            FFIdx_exposer.def(
+            
+            FFIdx_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireFF::FFIdx::toString
-
+        
             typedef ::QString ( ::SireFF::FFIdx::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireFF::FFIdx::toString );
-
-            FFIdx_exposer.def(
+            
+            FFIdx_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FFIdx::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireFF::FFIdx::typeName );
-
-            FFIdx_exposer.def(
+            
+            FFIdx_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FFIdx::what
-
+        
             typedef char const * ( ::SireFF::FFIdx::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireFF::FFIdx::what );
-
-            FFIdx_exposer.def(
+            
+            FFIdx_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         FFIdx_exposer.staticmethod( "null" );
         FFIdx_exposer.staticmethod( "typeName" );

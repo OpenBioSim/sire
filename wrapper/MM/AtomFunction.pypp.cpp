@@ -32,16 +32,16 @@ void register_AtomFunction_class(){
         AtomFunction_exposer_t AtomFunction_exposer = AtomFunction_exposer_t( "AtomFunction", "This is the base class of all objects that hold the raw data\nfor an AtomFunction (a function that acts between\na set number of atoms)\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope AtomFunction_scope( AtomFunction_exposer );
         { //::SireMM::AtomFunction::function
-
+        
             typedef ::SireCAS::Expression const & ( ::SireMM::AtomFunction::*function_function_type)(  ) const;
             function_function_type function_function_value( &::SireMM::AtomFunction::function );
-
-            AtomFunction_exposer.def(
+            
+            AtomFunction_exposer.def( 
                 "function"
                 , function_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         AtomFunction_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::AtomFunction >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );

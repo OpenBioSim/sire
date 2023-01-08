@@ -37,463 +37,463 @@ void register_ComponentGradients_class(){
         ComponentGradients_exposer.def( bp::init< QList< SireSystem::FreeEnergyMonitor > const &, bp::optional< bool > >(( bp::arg("gradients"), bp::arg("conserve_memory")=(bool)(true) ), "Construct from the passed list of component monitors") );
         ComponentGradients_exposer.def( bp::init< SireAnalysis::ComponentGradients const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireAnalysis::ComponentGradients::conserveMemory
-
+        
             typedef void ( ::SireAnalysis::ComponentGradients::*conserveMemory_function_type)(  ) ;
             conserveMemory_function_type conserveMemory_function_value( &::SireAnalysis::ComponentGradients::conserveMemory );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "conserveMemory"
                 , conserveMemory_function_value
                 , bp::release_gil_policy()
                 , "This function reduces the memory used by this object by ensuring that\nthe FreeEnergyMonitor at each lambda value uses the copy of the\nmolecules used at the first lambda value" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::conserveMemory
-
+        
             typedef void ( ::SireAnalysis::ComponentGradients::*conserveMemory_function_type)( ::SireAnalysis::ComponentGradients const & ) ;
             conserveMemory_function_type conserveMemory_function_value( &::SireAnalysis::ComponentGradients::conserveMemory );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "conserveMemory"
                 , conserveMemory_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "This function conserves memory by copying in all of the shared molecule\ndata etc. from other into this object" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::coulombGradientsAt
-
+        
             typedef ::SireAnalysis::Gradients ( ::SireAnalysis::ComponentGradients::*coulombGradientsAt_function_type)( int ) const;
             coulombGradientsAt_function_type coulombGradientsAt_function_value( &::SireAnalysis::ComponentGradients::coulombGradientsAt );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "coulombGradientsAt"
                 , coulombGradientsAt_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the set of coulomb free energy gradients for the ith free energy component" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::coulombValues
-
+        
             typedef ::QVector< SireAnalysis::DataPoint > ( ::SireAnalysis::ComponentGradients::*coulombValues_function_type)( int ) const;
             coulombValues_function_type coulombValues_function_value( &::SireAnalysis::ComponentGradients::coulombValues );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "coulombValues"
                 , coulombValues_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the actual values of the coulomb free energy gradients of the ith component" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::data
-
+        
             typedef ::QMap< double, SireSystem::FreeEnergyMonitor > ( ::SireAnalysis::ComponentGradients::*data_function_type)(  ) const;
             data_function_type data_function_value( &::SireAnalysis::ComponentGradients::data );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "data"
                 , data_function_value
                 , bp::release_gil_policy()
                 , "Return the raw data for all of the free energy components" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::deltaLambda
-
+        
             typedef double ( ::SireAnalysis::ComponentGradients::*deltaLambda_function_type)(  ) const;
             deltaLambda_function_type deltaLambda_function_value( &::SireAnalysis::ComponentGradients::deltaLambda );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "deltaLambda"
                 , deltaLambda_function_value
                 , bp::release_gil_policy()
                 , "Return the value of delta lambda used to approximate the free energy gradients" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::gradientsAt
-
+        
             typedef ::SireAnalysis::Gradients ( ::SireAnalysis::ComponentGradients::*gradientsAt_function_type)( int ) const;
             gradientsAt_function_type gradientsAt_function_value( &::SireAnalysis::ComponentGradients::gradientsAt );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "gradientsAt"
                 , gradientsAt_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the set of free energy gradients for the ith free energy component" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrate
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrate_function_type)( int ) const;
             integrate_function_type integrate_function_value( &::SireAnalysis::ComponentGradients::integrate );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrate"
                 , integrate_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Integrate the free energy gradients of the ith component\nand return the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrate
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrate_function_type)( int,int ) const;
             integrate_function_type integrate_function_value( &::SireAnalysis::ComponentGradients::integrate );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrate"
                 , integrate_function_value
                 , ( bp::arg("i"), bp::arg("order") )
                 , bp::release_gil_policy()
                 , "Integrate the free energy gradients of the ith component to order order and\nreturn the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrate
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrate_function_type)( int,double,double ) const;
             integrate_function_type integrate_function_value( &::SireAnalysis::ComponentGradients::integrate );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrate"
                 , integrate_function_value
                 , ( bp::arg("i"), bp::arg("range_min"), bp::arg("range_max") )
                 , bp::release_gil_policy()
                 , "Integrate the free energy gradients of the ith component between the range\nrange_min to range_max, and return the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrate
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrate_function_type)( int,double,double,int ) const;
             integrate_function_type integrate_function_value( &::SireAnalysis::ComponentGradients::integrate );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrate"
                 , integrate_function_value
                 , ( bp::arg("i"), bp::arg("range_min"), bp::arg("range_max"), bp::arg("order") )
                 , bp::release_gil_policy()
                 , "Integrate the free energy gradients of the ith component to order order\nbetween the range range_min to range_max and return the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrateCoulomb
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrateCoulomb_function_type)( int ) const;
             integrateCoulomb_function_type integrateCoulomb_function_value( &::SireAnalysis::ComponentGradients::integrateCoulomb );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrateCoulomb"
                 , integrateCoulomb_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Integrate the coulomb free energy gradients of the ith component\nand return the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrateCoulomb
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrateCoulomb_function_type)( int,int ) const;
             integrateCoulomb_function_type integrateCoulomb_function_value( &::SireAnalysis::ComponentGradients::integrateCoulomb );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrateCoulomb"
                 , integrateCoulomb_function_value
                 , ( bp::arg("i"), bp::arg("order") )
                 , bp::release_gil_policy()
                 , "Integrate the coulomb free energy gradients of the ith component to order order and\nreturn the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrateCoulomb
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrateCoulomb_function_type)( int,double,double ) const;
             integrateCoulomb_function_type integrateCoulomb_function_value( &::SireAnalysis::ComponentGradients::integrateCoulomb );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrateCoulomb"
                 , integrateCoulomb_function_value
                 , ( bp::arg("i"), bp::arg("range_min"), bp::arg("range_max") )
                 , bp::release_gil_policy()
                 , "Integrate the coulomb free energy gradients of the ith component between the range\nrange_min to range_max, and return the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrateCoulomb
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrateCoulomb_function_type)( int,double,double,int ) const;
             integrateCoulomb_function_type integrateCoulomb_function_value( &::SireAnalysis::ComponentGradients::integrateCoulomb );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrateCoulomb"
                 , integrateCoulomb_function_value
                 , ( bp::arg("i"), bp::arg("range_min"), bp::arg("range_max"), bp::arg("order") )
                 , bp::release_gil_policy()
                 , "Integrate the coulomb free energy gradients of the ith component to order order\nbetween the range range_min to range_max and return the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrateLJ
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrateLJ_function_type)( int ) const;
             integrateLJ_function_type integrateLJ_function_value( &::SireAnalysis::ComponentGradients::integrateLJ );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrateLJ"
                 , integrateLJ_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Integrate the LJ free energy gradients of the ith component\nand return the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrateLJ
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrateLJ_function_type)( int,int ) const;
             integrateLJ_function_type integrateLJ_function_value( &::SireAnalysis::ComponentGradients::integrateLJ );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrateLJ"
                 , integrateLJ_function_value
                 , ( bp::arg("i"), bp::arg("order") )
                 , bp::release_gil_policy()
                 , "Integrate the LJ free energy gradients of the ith component to order order and\nreturn the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrateLJ
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrateLJ_function_type)( int,double,double ) const;
             integrateLJ_function_type integrateLJ_function_value( &::SireAnalysis::ComponentGradients::integrateLJ );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrateLJ"
                 , integrateLJ_function_value
                 , ( bp::arg("i"), bp::arg("range_min"), bp::arg("range_max") )
                 , bp::release_gil_policy()
                 , "Integrate the LJ free energy gradients of the ith component between the range\nrange_min to range_max, and return the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::integrateLJ
-
+        
             typedef ::SireAnalysis::TIPMF ( ::SireAnalysis::ComponentGradients::*integrateLJ_function_type)( int,double,double,int ) const;
             integrateLJ_function_type integrateLJ_function_value( &::SireAnalysis::ComponentGradients::integrateLJ );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "integrateLJ"
                 , integrateLJ_function_value
                 , ( bp::arg("i"), bp::arg("range_min"), bp::arg("range_max"), bp::arg("order") )
                 , bp::release_gil_policy()
                 , "Integrate the LJ free energy gradients of the ith component to order order\nbetween the range range_min to range_max and return the resulting PMF" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::isCompatible
-
+        
             typedef bool ( ::SireAnalysis::ComponentGradients::*isCompatible_function_type)( ::SireAnalysis::ComponentGradients const & ) const;
             isCompatible_function_type isCompatible_function_value( &::SireAnalysis::ComponentGradients::isCompatible );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "isCompatible"
                 , isCompatible_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "Return whether or not this set of gradients is compatible with the ones\nprovided in other" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::isEmpty
-
+        
             typedef bool ( ::SireAnalysis::ComponentGradients::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireAnalysis::ComponentGradients::isEmpty );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this set is empty" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::lambdaValues
-
+        
             typedef ::QList< double > ( ::SireAnalysis::ComponentGradients::*lambdaValues_function_type)(  ) const;
             lambdaValues_function_type lambdaValues_function_value( &::SireAnalysis::ComponentGradients::lambdaValues );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "lambdaValues"
                 , lambdaValues_function_value
                 , bp::release_gil_policy()
                 , "Return the lambda values over which all of the components were collected" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::ljGradientsAt
-
+        
             typedef ::SireAnalysis::Gradients ( ::SireAnalysis::ComponentGradients::*ljGradientsAt_function_type)( int ) const;
             ljGradientsAt_function_type ljGradientsAt_function_value( &::SireAnalysis::ComponentGradients::ljGradientsAt );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "ljGradientsAt"
                 , ljGradientsAt_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the set of LJ free energy gradients for the ith free energy component" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::ljValues
-
+        
             typedef ::QVector< SireAnalysis::DataPoint > ( ::SireAnalysis::ComponentGradients::*ljValues_function_type)( int ) const;
             ljValues_function_type ljValues_function_value( &::SireAnalysis::ComponentGradients::ljValues );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "ljValues"
                 , ljValues_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the actual values of the LJ free energy gradients of the ith component" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::merge
-
+        
             typedef ::SireAnalysis::ComponentGradients ( *merge_function_type )( ::QList< SireAnalysis::ComponentGradients > const & );
             merge_function_type merge_function_value( &::SireAnalysis::ComponentGradients::merge );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "merge"
                 , merge_function_value
                 , ( bp::arg("gradients") )
                 , bp::release_gil_policy()
                 , "Merge together all of the passed gradients. Note that they must all be compatible\nwith one another, otherwise an exception will be raised" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::nComponents
-
+        
             typedef int ( ::SireAnalysis::ComponentGradients::*nComponents_function_type)(  ) const;
             nComponents_function_type nComponents_function_value( &::SireAnalysis::ComponentGradients::nComponents );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "nComponents"
                 , nComponents_function_value
                 , bp::release_gil_policy()
                 , "Return the number of free energy components (number of molecule views whose\nfree energy of interaction was recorded)" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::nLambdaValues
-
+        
             typedef int ( ::SireAnalysis::ComponentGradients::*nLambdaValues_function_type)(  ) const;
             nLambdaValues_function_type nLambdaValues_function_value( &::SireAnalysis::ComponentGradients::nLambdaValues );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "nLambdaValues"
                 , nLambdaValues_function_value
                 , bp::release_gil_policy()
                 , "Return the number of lambda values over which the free energy components have\nbeen recorded" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::nSamples
-
+        
             typedef ::qint64 ( ::SireAnalysis::ComponentGradients::*nSamples_function_type)(  ) const;
             nSamples_function_type nSamples_function_value( &::SireAnalysis::ComponentGradients::nSamples );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "nSamples"
                 , nSamples_function_value
                 , bp::release_gil_policy()
                 , "Return the number of samples used to form all of the average components" );
-
+        
         }
         ComponentGradients_exposer.def( bp::self != bp::self );
         ComponentGradients_exposer.def( bp::self + bp::self );
         { //::SireAnalysis::ComponentGradients::operator=
-
+        
             typedef ::SireAnalysis::ComponentGradients & ( ::SireAnalysis::ComponentGradients::*assign_function_type)( ::SireAnalysis::ComponentGradients const & ) ;
             assign_function_type assign_function_value( &::SireAnalysis::ComponentGradients::operator= );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         ComponentGradients_exposer.def( bp::self == bp::self );
         { //::SireAnalysis::ComponentGradients::temperature
-
+        
             typedef ::SireUnits::Dimension::Temperature ( ::SireAnalysis::ComponentGradients::*temperature_function_type)(  ) const;
             temperature_function_type temperature_function_value( &::SireAnalysis::ComponentGradients::temperature );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "temperature"
                 , temperature_function_value
                 , bp::release_gil_policy()
                 , "Return the temperature at which all of the components were collected" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::toString
-
+        
             typedef ::QString ( ::SireAnalysis::ComponentGradients::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireAnalysis::ComponentGradients::toString );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireAnalysis::ComponentGradients::typeName );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::values
-
+        
             typedef ::QVector< SireAnalysis::DataPoint > ( ::SireAnalysis::ComponentGradients::*values_function_type)( int ) const;
             values_function_type values_function_value( &::SireAnalysis::ComponentGradients::values );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "values"
                 , values_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the actual values of the free energy gradients of the ith component" );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::viewAt
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireAnalysis::ComponentGradients::*viewAt_function_type)( int ) const;
             viewAt_function_type viewAt_function_value( &::SireAnalysis::ComponentGradients::viewAt );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "viewAt"
                 , viewAt_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the ith view that corresponds to the ith free energy component.\nNote that this returns the view in the numerically first (lowest) lambda\nvalue. Use viewAt(int i, double lamval) if you want to specify the lambda\nvalue from which you want to extract the view." );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::viewAt
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireAnalysis::ComponentGradients::*viewAt_function_type)( int,double ) const;
             viewAt_function_type viewAt_function_value( &::SireAnalysis::ComponentGradients::viewAt );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "viewAt"
                 , viewAt_function_value
                 , ( bp::arg("i"), bp::arg("lamval") )
                 , bp::release_gil_policy()
                 , "Return the ith view from lambda value lamval that corresponds to the\nith free energy component." );
-
+        
         }
         { //::SireAnalysis::ComponentGradients::what
-
+        
             typedef char const * ( ::SireAnalysis::ComponentGradients::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireAnalysis::ComponentGradients::what );
-
-            ComponentGradients_exposer.def(
+            
+            ComponentGradients_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ComponentGradients_exposer.staticmethod( "merge" );
         ComponentGradients_exposer.staticmethod( "typeName" );

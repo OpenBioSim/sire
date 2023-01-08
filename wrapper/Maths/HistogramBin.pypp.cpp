@@ -38,67 +38,67 @@ void register_HistogramBin_class(){
         HistogramBin_exposer.def( bp::init< double, double >(( bp::arg("minval"), bp::arg("maxval") ), "Construct a bin that contains the values that match\nminval <= value < maxval") );
         HistogramBin_exposer.def( bp::init< SireMaths::HistogramBin const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMaths::HistogramBin::maximum
-
+        
             typedef double ( ::SireMaths::HistogramBin::*maximum_function_type)(  ) const;
             maximum_function_type maximum_function_value( &::SireMaths::HistogramBin::maximum );
-
-            HistogramBin_exposer.def(
+            
+            HistogramBin_exposer.def( 
                 "maximum"
                 , maximum_function_value
                 , bp::release_gil_policy()
                 , "Return the maximum value of the bin" );
-
+        
         }
         { //::SireMaths::HistogramBin::middle
-
+        
             typedef double ( ::SireMaths::HistogramBin::*middle_function_type)(  ) const;
             middle_function_type middle_function_value( &::SireMaths::HistogramBin::middle );
-
-            HistogramBin_exposer.def(
+            
+            HistogramBin_exposer.def( 
                 "middle"
                 , middle_function_value
                 , bp::release_gil_policy()
                 , "Return the value at the middle of the bin" );
-
+        
         }
         { //::SireMaths::HistogramBin::minimum
-
+        
             typedef double ( ::SireMaths::HistogramBin::*minimum_function_type)(  ) const;
             minimum_function_type minimum_function_value( &::SireMaths::HistogramBin::minimum );
-
-            HistogramBin_exposer.def(
+            
+            HistogramBin_exposer.def( 
                 "minimum"
                 , minimum_function_value
                 , bp::release_gil_policy()
                 , "Return the minimum value of the bin" );
-
+        
         }
         HistogramBin_exposer.def( bp::self != bp::self );
         { //::SireMaths::HistogramBin::operator=
-
+        
             typedef ::SireMaths::HistogramBin & ( ::SireMaths::HistogramBin::*assign_function_type)( ::SireMaths::HistogramBin const & ) ;
             assign_function_type assign_function_value( &::SireMaths::HistogramBin::operator= );
-
-            HistogramBin_exposer.def(
+            
+            HistogramBin_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         HistogramBin_exposer.def( bp::self == bp::self );
         { //::SireMaths::HistogramBin::toString
-
+        
             typedef ::QString ( ::SireMaths::HistogramBin::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::HistogramBin::toString );
-
-            HistogramBin_exposer.def(
+            
+            HistogramBin_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation" );
-
+        
         }
         HistogramBin_exposer.def( "__copy__", &__copy__);
         HistogramBin_exposer.def( "__deepcopy__", &__copy__);

@@ -58,155 +58,155 @@ void register_CLJRFFunction_class(){
         CLJRFFunction_exposer.def( bp::init< SireVol::Space const &, SireUnits::Dimension::Length, SireUnits::Dimension::Length, SireMM::CLJFunction::COMBINING_RULES >(( bp::arg("space"), bp::arg("coul_cutoff"), bp::arg("lj_cutoff"), bp::arg("combining_rules") ), "") );
         CLJRFFunction_exposer.def( bp::init< SireMM::CLJRFFunction const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::CLJRFFunction::containsProperty
-
+        
             typedef bool ( ::SireMM::CLJRFFunction::*containsProperty_function_type)( ::QString const & ) const;
             containsProperty_function_type containsProperty_function_value( &::SireMM::CLJRFFunction::containsProperty );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "containsProperty"
                 , containsProperty_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Return whether or not this function contains a property called name" );
-
+        
         }
         { //::SireMM::CLJRFFunction::defaultRFFunction
-
+        
             typedef ::SireMM::CLJFunctionPtr ( *defaultRFFunction_function_type )(  );
             defaultRFFunction_function_type defaultRFFunction_function_value( &::SireMM::CLJRFFunction::defaultRFFunction );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "defaultRFFunction"
                 , defaultRFFunction_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJRFFunction::dielectric
-
+        
             typedef float ( ::SireMM::CLJRFFunction::*dielectric_function_type)(  ) const;
             dielectric_function_type dielectric_function_value( &::SireMM::CLJRFFunction::dielectric );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "dielectric"
                 , dielectric_function_value
                 , bp::release_gil_policy()
                 , "Return the value of the dielectric constant" );
-
+        
         }
         CLJRFFunction_exposer.def( bp::self != bp::self );
         { //::SireMM::CLJRFFunction::operator=
-
+        
             typedef ::SireMM::CLJRFFunction & ( ::SireMM::CLJRFFunction::*assign_function_type)( ::SireMM::CLJRFFunction const & ) ;
             assign_function_type assign_function_value( &::SireMM::CLJRFFunction::operator= );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         CLJRFFunction_exposer.def( bp::self == bp::self );
         { //::SireMM::CLJRFFunction::properties
-
+        
             typedef ::SireBase::Properties ( ::SireMM::CLJRFFunction::*properties_function_type)(  ) const;
             properties_function_type properties_function_value( &::SireMM::CLJRFFunction::properties );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "properties"
                 , properties_function_value
                 , bp::release_gil_policy()
                 , "Return the properties of this function" );
-
+        
         }
         { //::SireMM::CLJRFFunction::property
-
+        
             typedef ::SireBase::PropertyPtr ( ::SireMM::CLJRFFunction::*property_function_type)( ::QString const & ) const;
             property_function_type property_function_value( &::SireMM::CLJRFFunction::property );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "property"
                 , property_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Return the value of the property with name name" );
-
+        
         }
         { //::SireMM::CLJRFFunction::setDielectric
-
+        
             typedef void ( ::SireMM::CLJRFFunction::*setDielectric_function_type)( float ) ;
             setDielectric_function_type setDielectric_function_value( &::SireMM::CLJRFFunction::setDielectric );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "setDielectric"
                 , setDielectric_function_value
                 , ( bp::arg("dielectric") )
                 , bp::release_gil_policy()
                 , "Set the dielectric constant to dielectric" );
-
+        
         }
         { //::SireMM::CLJRFFunction::setProperty
-
+        
             typedef ::SireMM::CLJFunctionPtr ( ::SireMM::CLJRFFunction::*setProperty_function_type)( ::QString const &,::SireBase::Property const & ) const;
             setProperty_function_type setProperty_function_value( &::SireMM::CLJRFFunction::setProperty );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "setProperty"
                 , setProperty_function_value
                 , ( bp::arg("name"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Return a copy of this function where the property name has been set to the\nvalue value" );
-
+        
         }
         { //::SireMM::CLJRFFunction::supportsGridCalculation
-
+        
             typedef bool ( ::SireMM::CLJRFFunction::*supportsGridCalculation_function_type)(  ) const;
             supportsGridCalculation_function_type supportsGridCalculation_function_value( &::SireMM::CLJRFFunction::supportsGridCalculation );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "supportsGridCalculation"
                 , supportsGridCalculation_function_value
                 , bp::release_gil_policy()
                 , "This function does support calculations using a grid" );
-
+        
         }
         { //::SireMM::CLJRFFunction::toString
-
+        
             typedef ::QString ( ::SireMM::CLJRFFunction::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMM::CLJRFFunction::toString );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJRFFunction::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::CLJRFFunction::typeName );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJRFFunction::what
-
+        
             typedef char const * ( ::SireMM::CLJRFFunction::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::CLJRFFunction::what );
-
-            CLJRFFunction_exposer.def(
+            
+            CLJRFFunction_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CLJRFFunction_exposer.staticmethod( "defaultRFFunction" );
         CLJRFFunction_exposer.staticmethod( "typeName" );

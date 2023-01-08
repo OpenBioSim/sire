@@ -34,374 +34,374 @@ void register_PackedArray2D_StringArrayProperty_class(){
         PackedArray2D_StringArrayProperty_exposer.def( bp::init< SireBase::PackedArray2D< SireBase::StringArrayProperty > const &, SireBase::PackedArray2D< SireBase::StringArrayProperty > const & >(( bp::arg("array0"), bp::arg("array1") ), "") );
         PackedArray2D_StringArrayProperty_exposer.def( bp::init< SireBase::PackedArray2D< SireBase::StringArrayProperty > const & >(( bp::arg("other") ), "") );
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::append
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*append_function_type)( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::Array const & ) ;
             append_function_type append_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::append );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "append"
                 , append_function_value
                 , ( bp::arg("array") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::append
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*append_function_type)( ::SireBase::PackedArray2D< SireBase::StringArrayProperty > const & ) ;
             append_function_type append_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::append );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "append"
                 , append_function_value
                 , ( bp::arg("arrays") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::append
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*append_function_type)( ::QVector< SireBase::StringArrayProperty > const & ) ;
             append_function_type append_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::append );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "append"
                 , append_function_value
                 , ( bp::arg("array") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::append
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*append_function_type)( ::QVector< QVector< SireBase::StringArrayProperty > > const & ) ;
             append_function_type append_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::append );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "append"
                 , append_function_value
                 , ( bp::arg("arrays") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::assertValidIndex
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*assertValidIndex_function_type)( ::quint32 ) const;
             assertValidIndex_function_type assertValidIndex_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::assertValidIndex );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "assertValidIndex"
                 , assertValidIndex_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::at
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::Array const & ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*at_function_type)( ::quint32 ) const;
             at_function_type at_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::at );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::at
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::SireBase::StringArrayProperty const & ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*at_function_type)( ::quint32,::quint32 ) const;
             at_function_type at_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::at );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::count
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*count_function_type)(  ) const;
             count_function_type count_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::count );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "count"
                 , count_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::detach
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*detach_function_type)(  ) ;
             detach_function_type detach_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::detach );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "detach"
                 , detach_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::fromVariant
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::SireBase::PackedArray2D< SireBase::StringArrayProperty > ( *fromVariant_function_type )( ::SireBase::PackedArray2D< QVariant > const & );
             fromVariant_function_type fromVariant_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::fromVariant );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "fromVariant"
                 , fromVariant_function_value
                 , ( bp::arg("variant") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::isEmpty
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef bool ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::isEmpty );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::nArrays
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*nArrays_function_type)(  ) const;
             nArrays_function_type nArrays_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::nArrays );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "nArrays"
                 , nArrays_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::nValues
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*nValues_function_type)(  ) const;
             nValues_function_type nValues_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::nValues );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "nValues"
                 , nValues_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::nValues
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*nValues_function_type)( ::quint32 ) const;
             nValues_function_type nValues_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::nValues );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "nValues"
                 , nValues_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         PackedArray2D_StringArrayProperty_exposer.def( bp::self != bp::self );
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::operator()
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::SireBase::StringArrayProperty const & ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*__call___function_type)( ::quint32,::quint32 ) const;
             __call___function_type __call___function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::operator() );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::operator=
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::SireBase::PackedArray2D< SireBase::StringArrayProperty > & ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*assign_function_type)( ::SireBase::PackedArray2D< SireBase::StringArrayProperty > const & ) ;
             assign_function_type assign_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::operator= );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         PackedArray2D_StringArrayProperty_exposer.def( bp::self == bp::self );
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::operator[]
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::Array const & ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*__getitem___function_type)( ::quint32 ) const;
             __getitem___function_type __getitem___function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::operator[] );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::remove
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*remove_function_type)( ::quint32 ) ;
             remove_function_type remove_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::remove );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::removeAll
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*removeAll_function_type)( ::QVarLengthArray< int, 256 > const & ) ;
             removeAll_function_type removeAll_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::removeAll );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("idxs") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::size
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*size_function_type)(  ) const;
             size_function_type size_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::size );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "size"
                 , size_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::toQVector
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::QVector< SireBase::StringArrayProperty > ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*toQVector_function_type)(  ) const;
             toQVector_function_type toQVector_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::toQVector );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "toQVector"
                 , toQVector_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::toQVectorVector
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::QVector< QVector< SireBase::StringArrayProperty > > ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*toQVectorVector_function_type)(  ) const;
             toQVectorVector_function_type toQVectorVector_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::toQVectorVector );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "toQVectorVector"
                 , toQVectorVector_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::toString
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::QString ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::toString );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::toVariant
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef ::SireBase::PackedArray2D< QVariant > ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*toVariant_function_type)(  ) const;
             toVariant_function_type toVariant_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::toVariant );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "toVariant"
                 , toVariant_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::update
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*update_function_type)( ::quint32,::SireBase::PackedArray2D< SireBase::StringArrayProperty >::Array const & ) ;
             update_function_type update_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::update );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("i"), bp::arg("array") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::update
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*update_function_type)( ::quint32,::QVector< SireBase::StringArrayProperty > const & ) ;
             update_function_type update_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::update );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("i"), bp::arg("array") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< SireBase::StringArrayProperty >::updateAll
-
+        
             typedef SireBase::PackedArray2D< SireBase::StringArrayProperty > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< SireBase::StringArrayProperty >::*updateAll_function_type)( ::QVarLengthArray< int, 256 > const &,::SireBase::PackedArray2D< SireBase::StringArrayProperty > const & ) ;
             updateAll_function_type updateAll_function_value( &::SireBase::PackedArray2D< SireBase::StringArrayProperty >::updateAll );
-
-            PackedArray2D_StringArrayProperty_exposer.def(
+            
+            PackedArray2D_StringArrayProperty_exposer.def( 
                 "updateAll"
                 , updateAll_function_value
                 , ( bp::arg("idxs"), bp::arg("arrays") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         PackedArray2D_StringArrayProperty_exposer.staticmethod( "fromVariant" );
         PackedArray2D_StringArrayProperty_exposer.def( "__copy__", &__copy__);

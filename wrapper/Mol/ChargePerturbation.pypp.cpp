@@ -44,67 +44,67 @@ void register_ChargePerturbation_class(){
         ChargePerturbation_exposer.def( bp::init< SireMol::ChargePerturbation const & >(( bp::arg("other") ), "Copy constructor") );
         ChargePerturbation_exposer.def( bp::self != bp::self );
         { //::SireMol::ChargePerturbation::operator=
-
+        
             typedef ::SireMol::ChargePerturbation & ( ::SireMol::ChargePerturbation::*assign_function_type)( ::SireMol::ChargePerturbation const & ) ;
             assign_function_type assign_function_value( &::SireMol::ChargePerturbation::operator= );
-
-            ChargePerturbation_exposer.def(
+            
+            ChargePerturbation_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         ChargePerturbation_exposer.def( bp::self == bp::self );
         { //::SireMol::ChargePerturbation::requiredProperties
-
+        
             typedef ::QSet< QString > ( ::SireMol::ChargePerturbation::*requiredProperties_function_type)(  ) const;
             requiredProperties_function_type requiredProperties_function_value( &::SireMol::ChargePerturbation::requiredProperties );
-
-            ChargePerturbation_exposer.def(
+            
+            ChargePerturbation_exposer.def( 
                 "requiredProperties"
                 , requiredProperties_function_value
                 , bp::release_gil_policy()
                 , "Return the properties required or changed by this perturbation" );
-
+        
         }
         { //::SireMol::ChargePerturbation::toString
-
+        
             typedef ::QString ( ::SireMol::ChargePerturbation::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::ChargePerturbation::toString );
-
-            ChargePerturbation_exposer.def(
+            
+            ChargePerturbation_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChargePerturbation::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::ChargePerturbation::typeName );
-
-            ChargePerturbation_exposer.def(
+            
+            ChargePerturbation_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChargePerturbation::wouldChange
-
+        
             typedef bool ( ::SireMol::ChargePerturbation::*wouldChange_function_type)( ::SireMol::Molecule const &,::SireCAS::Values const & ) const;
             wouldChange_function_type wouldChange_function_value( &::SireMol::ChargePerturbation::wouldChange );
-
-            ChargePerturbation_exposer.def(
+            
+            ChargePerturbation_exposer.def( 
                 "wouldChange"
                 , wouldChange_function_value
                 , ( bp::arg("molecule"), bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Return whether or not this perturbation with the passed values would\nchange the molecule molecule" );
-
+        
         }
         ChargePerturbation_exposer.staticmethod( "typeName" );
         ChargePerturbation_exposer.def( "__copy__", &__copy__);

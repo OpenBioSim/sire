@@ -62,318 +62,318 @@ void register_Molpro_class(){
         Molpro_exposer.def( bp::init< QString const & >(( bp::arg("molpro") ), "Construct, passing in the location of the Molpro executable") );
         Molpro_exposer.def( bp::init< Squire::Molpro const & >(( bp::arg("other") ), "Copy constructor") );
         { //::Squire::Molpro::basisSet
-
+        
             typedef ::QString const & ( ::Squire::Molpro::*basisSet_function_type)(  ) const;
             basisSet_function_type basisSet_function_value( &::Squire::Molpro::basisSet );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "basisSet"
                 , basisSet_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the basis set to be used during the calculation. This\nsubstitutes for @BASIS_SET@ in the energy and force command\nfile templates" );
-
+        
         }
         { //::Squire::Molpro::energyTemplate
-
+        
             typedef ::QString const & ( ::Squire::Molpro::*energyTemplate_function_type)(  ) const;
             energyTemplate_function_type energyTemplate_function_value( &::Squire::Molpro::energyTemplate );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "energyTemplate"
                 , energyTemplate_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the template for the command file to be used to get Molpro\nto calculate the energy." );
-
+        
         }
         { //::Squire::Molpro::environment
-
+        
             typedef ::QHash< QString, QString > const & ( ::Squire::Molpro::*environment_function_type)(  ) const;
             environment_function_type environment_function_value( &::Squire::Molpro::environment );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "environment"
                 , environment_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return all of the environmental variables that are to be set explicitly\nwhen Molpro is run. This does not include any environmental variables\nthat have not been explicitly set, but do have values" );
-
+        
         }
         { //::Squire::Molpro::environment
-
+        
             typedef ::QString ( ::Squire::Molpro::*environment_function_type)( ::QString const & ) const;
             environment_function_type environment_function_value( &::Squire::Molpro::environment );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "environment"
                 , environment_function_value
                 , ( bp::arg("variable") )
                 , bp::release_gil_policy()
                 , "Return the value of the explicitly set environmental variable variable.\nA null string is returned if this variable has not been set\nexplicitly (this does not mean the variable doesnt exist - merely\nthat a specific value has not been set)" );
-
+        
         }
         { //::Squire::Molpro::executable
-
+        
             typedef ::QString ( ::Squire::Molpro::*executable_function_type)(  ) const;
             executable_function_type executable_function_value( &::Squire::Molpro::executable );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "executable"
                 , executable_function_value
                 , bp::release_gil_policy()
                 , "Return the executable (full path and also arguments) to be used. This\nis null if the executable is searched for in the path" );
-
+        
         }
         { //::Squire::Molpro::forceTemplate
-
+        
             typedef ::QString const & ( ::Squire::Molpro::*forceTemplate_function_type)(  ) const;
             forceTemplate_function_type forceTemplate_function_value( &::Squire::Molpro::forceTemplate );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "forceTemplate"
                 , forceTemplate_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the template for the command file to be used to get Molpro\nto calculate the forces." );
-
+        
         }
         { //::Squire::Molpro::latticeInBohrRadii
-
+        
             typedef bool ( ::Squire::Molpro::*latticeInBohrRadii_function_type)(  ) const;
             latticeInBohrRadii_function_type latticeInBohrRadii_function_value( &::Squire::Molpro::latticeInBohrRadii );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "latticeInBohrRadii"
                 , latticeInBohrRadii_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not Sire will write the lattice charge coordinates in units\nof bohr radii (otherwise they will be in angstroms)" );
-
+        
         }
         { //::Squire::Molpro::maximumRunTime
-
+        
             typedef int ( ::Squire::Molpro::*maximumRunTime_function_type)(  ) const;
             maximumRunTime_function_type maximumRunTime_function_value( &::Squire::Molpro::maximumRunTime );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "maximumRunTime"
                 , maximumRunTime_function_value
                 , bp::release_gil_policy()
                 , "Return the maximum runtime allowed for a molpro job, in milliseconds" );
-
+        
         }
         { //::Squire::Molpro::memoryRequirement
-
+        
             typedef int ( ::Squire::Molpro::*memoryRequirement_function_type)(  ) const;
             memoryRequirement_function_type memoryRequirement_function_value( &::Squire::Molpro::memoryRequirement );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "memoryRequirement"
                 , memoryRequirement_function_value
                 , bp::release_gil_policy()
                 , "Return the memory requirement that has been set for this job (in bytes)" );
-
+        
         }
         { //::Squire::Molpro::method
-
+        
             typedef ::QString const & ( ::Squire::Molpro::*method_function_type)(  ) const;
             method_function_type method_function_value( &::Squire::Molpro::method );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "method"
                 , method_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the QM method to be used to calculate the energy or\nforce (e.g. HF, df-ks,b3lyp). This will substitute for\n@QM_METHOD@ in the energy and force command file templates" );
-
+        
         }
         Molpro_exposer.def( bp::self != bp::self );
         { //::Squire::Molpro::operator=
-
+        
             typedef ::Squire::Molpro & ( ::Squire::Molpro::*assign_function_type)( ::Squire::Molpro const & ) ;
             assign_function_type assign_function_value( &::Squire::Molpro::operator= );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Molpro_exposer.def( bp::self == bp::self );
         { //::Squire::Molpro::setBasisSet
-
+        
             typedef void ( ::Squire::Molpro::*setBasisSet_function_type)( ::QString const & ) ;
             setBasisSet_function_type setBasisSet_function_value( &::Squire::Molpro::setBasisSet );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setBasisSet"
                 , setBasisSet_function_value
                 , ( bp::arg("basis_set") )
                 , bp::release_gil_policy()
                 , "Set the string representation of the basis set to be used\nduring the calculation. This will substitute for @BASIS_SET@ in\nthe energy and force command file templates." );
-
+        
         }
         { //::Squire::Molpro::setEnergyTemplate
-
+        
             typedef void ( ::Squire::Molpro::*setEnergyTemplate_function_type)( ::QString const & ) ;
             setEnergyTemplate_function_type setEnergyTemplate_function_value( &::Squire::Molpro::setEnergyTemplate );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setEnergyTemplate"
                 , setEnergyTemplate_function_value
                 , ( bp::arg("energy_template") )
                 , bp::release_gil_policy()
                 , "Set the template for the command file to be used to get\nMolpro to calculate an energy. The following tags will\n" );
-
+        
         }
         { //::Squire::Molpro::setEnvironment
-
+        
             typedef void ( ::Squire::Molpro::*setEnvironment_function_type)( ::QString const &,::QString const & ) ;
             setEnvironment_function_type setEnvironment_function_value( &::Squire::Molpro::setEnvironment );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setEnvironment"
                 , setEnvironment_function_value
                 , ( bp::arg("variable"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Set the environmental variable variable to have the value value\nwhen the Molpro executable is run. This replaces any existing\nvalue of this environmental variable" );
-
+        
         }
         { //::Squire::Molpro::setExecutable
-
+        
             typedef void ( ::Squire::Molpro::*setExecutable_function_type)( ::QString const & ) ;
             setExecutable_function_type setExecutable_function_value( &::Squire::Molpro::setExecutable );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setExecutable"
                 , setExecutable_function_value
                 , ( bp::arg("molpro_exe") )
                 , bp::release_gil_policy()
                 , "Set the Molpro executable (full path and also arguments) to be used" );
-
+        
         }
         { //::Squire::Molpro::setForceTemplate
-
+        
             typedef void ( ::Squire::Molpro::*setForceTemplate_function_type)( ::QString const & ) ;
             setForceTemplate_function_type setForceTemplate_function_value( &::Squire::Molpro::setForceTemplate );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setForceTemplate"
                 , setForceTemplate_function_value
                 , ( bp::arg("force_template") )
                 , bp::release_gil_policy()
                 , "Set the template for the command file to be used to get\nMolpro to calculate the forces. The following tags will\n" );
-
+        
         }
         { //::Squire::Molpro::setLatticeInBohrRadii
-
+        
             typedef void ( ::Squire::Molpro::*setLatticeInBohrRadii_function_type)( bool ) ;
             setLatticeInBohrRadii_function_type setLatticeInBohrRadii_function_value( &::Squire::Molpro::setLatticeInBohrRadii );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setLatticeInBohrRadii"
                 , setLatticeInBohrRadii_function_value
                 , ( bp::arg("on") )
                 , bp::release_gil_policy()
                 , "Tell Sire that Molpro requires lattice charges to be in units of bohr radii\nin the command file (otherwise they are in angstroms)" );
-
+        
         }
         { //::Squire::Molpro::setMaximumRunTime
-
+        
             typedef void ( ::Squire::Molpro::*setMaximumRunTime_function_type)( int ) ;
             setMaximumRunTime_function_type setMaximumRunTime_function_value( &::Squire::Molpro::setMaximumRunTime );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setMaximumRunTime"
                 , setMaximumRunTime_function_value
                 , ( bp::arg("max_runtime") )
                 , bp::release_gil_policy()
                 , "Set the maximum allowed runtime for the molpro job - this is used\nto detect hangs - if the molpro job takes longer than this\ntime then it is killed and an exception raised. The maximum\nruntime is measured in milliseconds" );
-
+        
         }
         { //::Squire::Molpro::setMemoryRequirement
-
+        
             typedef void ( ::Squire::Molpro::*setMemoryRequirement_function_type)( int ) ;
             setMemoryRequirement_function_type setMemoryRequirement_function_value( &::Squire::Molpro::setMemoryRequirement );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setMemoryRequirement"
                 , setMemoryRequirement_function_value
                 , ( bp::arg("nbytes") )
                 , bp::release_gil_policy()
                 , "Set the memory requirement (in bytes) that will be reserved for use\nby molpro. You will need to set this if the default amount\n(8000000 floating point words ~ 32MB) is not enough. Be careful\nnot to allocate too much though or you will be swapping all of the time" );
-
+        
         }
         { //::Squire::Molpro::setMethod
-
+        
             typedef void ( ::Squire::Molpro::*setMethod_function_type)( ::QString const & ) ;
             setMethod_function_type setMethod_function_value( &::Squire::Molpro::setMethod );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setMethod"
                 , setMethod_function_value
                 , ( bp::arg("method") )
                 , bp::release_gil_policy()
                 , "Set the QM method to be used to calculate the energy or\nforce (e.g. HF, df-ks,b3lyp). This will substitute for\n@QM_METHOD@ in the energy and force command file templates" );
-
+        
         }
         { //::Squire::Molpro::setTotalCharge
-
+        
             typedef void ( ::Squire::Molpro::*setTotalCharge_function_type)( int ) ;
             setTotalCharge_function_type setTotalCharge_function_value( &::Squire::Molpro::setTotalCharge );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "setTotalCharge"
                 , setTotalCharge_function_value
                 , ( bp::arg("charge") )
                 , bp::release_gil_policy()
                 , "Set the total charge of the system (in unit charges)" );
-
+        
         }
         { //::Squire::Molpro::supportsLatticeCharges
-
+        
             typedef bool ( ::Squire::Molpro::*supportsLatticeCharges_function_type)(  ) const;
             supportsLatticeCharges_function_type supportsLatticeCharges_function_value( &::Squire::Molpro::supportsLatticeCharges );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "supportsLatticeCharges"
                 , supportsLatticeCharges_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::Squire::Molpro::toString
-
+        
             typedef ::QString ( ::Squire::Molpro::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::Squire::Molpro::toString );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::Squire::Molpro::totalCharge
-
+        
             typedef int ( ::Squire::Molpro::*totalCharge_function_type)(  ) const;
             totalCharge_function_type totalCharge_function_value( &::Squire::Molpro::totalCharge );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "totalCharge"
                 , totalCharge_function_value
                 , bp::release_gil_policy()
                 , "Return the total charge of the system" );
-
+        
         }
         { //::Squire::Molpro::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::Squire::Molpro::typeName );
-
-            Molpro_exposer.def(
+            
+            Molpro_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Molpro_exposer.staticmethod( "typeName" );
         Molpro_exposer.def( "__copy__", &__copy__);

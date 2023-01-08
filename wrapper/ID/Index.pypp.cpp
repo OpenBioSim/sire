@@ -33,40 +33,40 @@ void register_Index_class(){
         bp::scope Index_scope( Index_exposer );
         Index_exposer.def( bp::init< SireID::Index const & >(( bp::arg("other") ), "") );
         { //::SireID::Index::null
-
+        
             typedef ::SireID::Index ( *null_function_type )(  );
             null_function_type null_function_value( &::SireID::Index::null );
-
-            Index_exposer.def(
+            
+            Index_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::Index::toString
-
+        
             typedef ::QString ( ::SireID::Index::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireID::Index::toString );
-
-            Index_exposer.def(
+            
+            Index_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::Index::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireID::Index::typeName );
-
-            Index_exposer.def(
+            
+            Index_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Index_exposer.staticmethod( "null" );
         Index_exposer.staticmethod( "typeName" );

@@ -74,102 +74,102 @@ void register_ResIdx_class(){
         ResIdx_exposer.def( bp::init< quint32 >(( bp::arg("idx") ), "") );
         ResIdx_exposer.def( bp::init< SireMol::ResIdx const & >(( bp::arg("other") ), "") );
         { //::SireMol::ResIdx::hash
-
+        
             typedef ::uint ( ::SireMol::ResIdx::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::ResIdx::hash );
-
-            ResIdx_exposer.def(
+            
+            ResIdx_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ResIdx::isNull
-
+        
             typedef bool ( ::SireMol::ResIdx::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::ResIdx::isNull );
-
-            ResIdx_exposer.def(
+            
+            ResIdx_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ResIdx::map
-
+        
             typedef ::QList< SireMol::ResIdx > ( ::SireMol::ResIdx::*map_function_type)( ::SireMol::MolInfo const & ) const;
             map_function_type map_function_value( &::SireMol::ResIdx::map );
-
-            ResIdx_exposer.def(
+            
+            ResIdx_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ResIdx::null
-
+        
             typedef ::SireMol::ResIdx ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMol::ResIdx::null );
-
-            ResIdx_exposer.def(
+            
+            ResIdx_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ResIdx::operator=
-
+        
             typedef ::SireMol::ResIdx & ( ::SireMol::ResIdx::*assign_function_type)( ::SireMol::ResIdx const & ) ;
             assign_function_type assign_function_value( &::SireMol::ResIdx::operator= );
-
-            ResIdx_exposer.def(
+            
+            ResIdx_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::ResIdx::toString
-
+        
             typedef ::QString ( ::SireMol::ResIdx::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::ResIdx::toString );
-
-            ResIdx_exposer.def(
+            
+            ResIdx_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ResIdx::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::ResIdx::typeName );
-
-            ResIdx_exposer.def(
+            
+            ResIdx_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ResIdx::what
-
+        
             typedef char const * ( ::SireMol::ResIdx::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::ResIdx::what );
-
-            ResIdx_exposer.def(
+            
+            ResIdx_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ResIdx_exposer.staticmethod( "null" );
         ResIdx_exposer.staticmethod( "typeName" );

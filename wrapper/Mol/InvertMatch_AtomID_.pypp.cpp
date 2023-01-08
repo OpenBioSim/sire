@@ -70,101 +70,101 @@ void register_InvertMatch_AtomID__class(){
         InvertMatch_AtomID__exposer.def( bp::init< SireMol::AtomID const & >(( bp::arg("id") ), "") );
         InvertMatch_AtomID__exposer.def( bp::init< SireID::InvertMatch< SireMol::AtomID > const & >(( bp::arg("other") ), "") );
         { //::SireID::InvertMatch< SireMol::AtomID >::hash
-
+        
             typedef SireID::InvertMatch< SireMol::AtomID > exported_class_t;
             typedef ::uint ( ::SireID::InvertMatch< SireMol::AtomID >::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireID::InvertMatch< SireMol::AtomID >::hash );
-
-            InvertMatch_AtomID__exposer.def(
+            
+            InvertMatch_AtomID__exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::InvertMatch< SireMol::AtomID >::isNull
-
+        
             typedef SireID::InvertMatch< SireMol::AtomID > exported_class_t;
             typedef bool ( ::SireID::InvertMatch< SireMol::AtomID >::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireID::InvertMatch< SireMol::AtomID >::isNull );
-
-            InvertMatch_AtomID__exposer.def(
+            
+            InvertMatch_AtomID__exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::InvertMatch< SireMol::AtomID >::map
-
+        
             typedef SireID::InvertMatch< SireMol::AtomID > exported_class_t;
             typedef ::QList< SireMol::AtomIdx > ( ::SireID::InvertMatch< SireMol::AtomID >::*map_function_type)( ::SireMol::AtomID::SearchObject const & ) const;
             map_function_type map_function_value( &::SireID::InvertMatch< SireMol::AtomID >::map );
-
-            InvertMatch_AtomID__exposer.def(
+            
+            InvertMatch_AtomID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("obj") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         InvertMatch_AtomID__exposer.def( bp::self != bp::self );
         InvertMatch_AtomID__exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireID::InvertMatch< SireMol::AtomID >::operator=
-
+        
             typedef SireID::InvertMatch< SireMol::AtomID > exported_class_t;
             typedef ::SireID::InvertMatch< SireMol::AtomID > & ( ::SireID::InvertMatch< SireMol::AtomID >::*assign_function_type)( ::SireID::InvertMatch< SireMol::AtomID > const & ) ;
             assign_function_type assign_function_value( &::SireID::InvertMatch< SireMol::AtomID >::operator= );
-
-            InvertMatch_AtomID__exposer.def(
+            
+            InvertMatch_AtomID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         InvertMatch_AtomID__exposer.def( bp::self == bp::self );
         InvertMatch_AtomID__exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireID::InvertMatch< SireMol::AtomID >::toString
-
+        
             typedef SireID::InvertMatch< SireMol::AtomID > exported_class_t;
             typedef ::QString ( ::SireID::InvertMatch< SireMol::AtomID >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireID::InvertMatch< SireMol::AtomID >::toString );
-
-            InvertMatch_AtomID__exposer.def(
+            
+            InvertMatch_AtomID__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::InvertMatch< SireMol::AtomID >::typeName
-
+        
             typedef SireID::InvertMatch< SireMol::AtomID > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireID::InvertMatch< SireMol::AtomID >::typeName );
-
-            InvertMatch_AtomID__exposer.def(
+            
+            InvertMatch_AtomID__exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::InvertMatch< SireMol::AtomID >::what
-
+        
             typedef SireID::InvertMatch< SireMol::AtomID > exported_class_t;
             typedef char const * ( ::SireID::InvertMatch< SireMol::AtomID >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireID::InvertMatch< SireMol::AtomID >::what );
-
-            InvertMatch_AtomID__exposer.def(
+            
+            InvertMatch_AtomID__exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         InvertMatch_AtomID__exposer.staticmethod( "typeName" );
         InvertMatch_AtomID__exposer.def( "__copy__", &__copy__);

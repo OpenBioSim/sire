@@ -50,67 +50,67 @@ void register_EqualTo_class(){
         EqualTo_exposer.def( bp::init< SireCAS::Expression const &, SireCAS::Expression const & >(( bp::arg("left_hand_side"), bp::arg("right_hand_side") ), "Construct to compare left_hand_side with right_hand_side") );
         EqualTo_exposer.def( bp::init< SireCAS::EqualTo const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::EqualTo::alwaysFalse
-
+        
             typedef bool ( ::SireCAS::EqualTo::*alwaysFalse_function_type)(  ) const;
             alwaysFalse_function_type alwaysFalse_function_value( &::SireCAS::EqualTo::alwaysFalse );
-
-            EqualTo_exposer.def(
+            
+            EqualTo_exposer.def( 
                 "alwaysFalse"
                 , alwaysFalse_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not we can be absolutely sure that this\ncondition will always be false. Note that this doesnt try\ntoo hard, so some things that are always false may not\nbe reported here as being always false, e.g. x > x + 1" );
-
+        
         }
         { //::SireCAS::EqualTo::alwaysTrue
-
+        
             typedef bool ( ::SireCAS::EqualTo::*alwaysTrue_function_type)(  ) const;
             alwaysTrue_function_type alwaysTrue_function_value( &::SireCAS::EqualTo::alwaysTrue );
-
-            EqualTo_exposer.def(
+            
+            EqualTo_exposer.def( 
                 "alwaysTrue"
                 , alwaysTrue_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not we can be absolutely sure that this\ncondition will always be true. Note that this doesnt try\ntoo hard, so some things that are always true may not\nbe reported here as being always true, e.g. x + 1 > x" );
-
+        
         }
         { //::SireCAS::EqualTo::operator=
-
+        
             typedef ::SireCAS::EqualTo & ( ::SireCAS::EqualTo::*assign_function_type)( ::SireCAS::EqualTo const & ) ;
             assign_function_type assign_function_value( &::SireCAS::EqualTo::operator= );
-
-            EqualTo_exposer.def(
+            
+            EqualTo_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         EqualTo_exposer.def( bp::self == bp::self );
         EqualTo_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::EqualTo::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::EqualTo::typeName );
-
-            EqualTo_exposer.def(
+            
+            EqualTo_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::EqualTo::what
-
+        
             typedef char const * ( ::SireCAS::EqualTo::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::EqualTo::what );
-
-            EqualTo_exposer.def(
+            
+            EqualTo_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         EqualTo_exposer.staticmethod( "typeName" );
         EqualTo_exposer.def( "__copy__", &__copy__);

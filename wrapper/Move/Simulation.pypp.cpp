@@ -29,430 +29,430 @@ void register_Simulation_class(){
         bp::scope Simulation_scope( Simulation_exposer );
         Simulation_exposer.def( bp::init< SireMove::Simulation const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::Simulation::abort
-
+        
             typedef void ( ::SireMove::Simulation::*abort_function_type)(  ) ;
             abort_function_type abort_function_value( &::SireMove::Simulation::abort );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "abort"
                 , abort_function_value
                 , bp::release_gil_policy()
                 , "Abort the simulation" );
-
+        
         }
         { //::SireMove::Simulation::hasFinished
-
+        
             typedef bool ( ::SireMove::Simulation::*hasFinished_function_type)(  ) ;
             hasFinished_function_type hasFinished_function_value( &::SireMove::Simulation::hasFinished );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "hasFinished"
                 , hasFinished_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the simulation has finished\n(completed all of the moves)" );
-
+        
         }
         { //::SireMove::Simulation::initialMoves
-
+        
             typedef ::SireMove::MovesPtr ( ::SireMove::Simulation::*initialMoves_function_type)(  ) ;
             initialMoves_function_type initialMoves_function_value( &::SireMove::Simulation::initialMoves );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "initialMoves"
                 , initialMoves_function_value
                 , bp::release_gil_policy()
                 , "Return the Moves in the state they were in before the simulation started" );
-
+        
         }
         { //::SireMove::Simulation::initialSystem
-
+        
             typedef ::SireSystem::System ( ::SireMove::Simulation::*initialSystem_function_type)(  ) ;
             initialSystem_function_type initialSystem_function_value( &::SireMove::Simulation::initialSystem );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "initialSystem"
                 , initialSystem_function_value
                 , bp::release_gil_policy()
                 , "Return the System in the state it was in before the simulation started" );
-
+        
         }
         { //::SireMove::Simulation::input
-
+        
             typedef ::SireMove::SimPacket ( ::SireMove::Simulation::*input_function_type)(  ) ;
             input_function_type input_function_value( &::SireMove::Simulation::input );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "input"
                 , input_function_value
                 , bp::release_gil_policy()
                 , "Return the initial input simulation WorkPacket" );
-
+        
         }
         { //::SireMove::Simulation::interimMoves
-
+        
             typedef ::SireMove::MovesPtr ( ::SireMove::Simulation::*interimMoves_function_type)(  ) ;
             interimMoves_function_type interimMoves_function_value( &::SireMove::Simulation::interimMoves );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "interimMoves"
                 , interimMoves_function_value
                 , bp::release_gil_policy()
                 , "Return the current state of the moves (updated while the simulation\nis running). This will throw an exception if the system hits an\nerror state" );
-
+        
         }
         { //::SireMove::Simulation::interimResult
-
+        
             typedef ::SireMove::SimPacket ( ::SireMove::Simulation::*interimResult_function_type)(  ) ;
             interimResult_function_type interimResult_function_value( &::SireMove::Simulation::interimResult );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "interimResult"
                 , interimResult_function_value
                 , bp::release_gil_policy()
                 , "Return the simulation WorkPacket from an intermediate point along\nthe simulation. This will throw an error if the simulation is in an\nerror state, and the initial packet if the simulation\nwas aborted" );
-
+        
         }
         { //::SireMove::Simulation::interimSystem
-
+        
             typedef ::SireSystem::System ( ::SireMove::Simulation::*interimSystem_function_type)(  ) ;
             interimSystem_function_type interimSystem_function_value( &::SireMove::Simulation::interimSystem );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "interimSystem"
                 , interimSystem_function_value
                 , bp::release_gil_policy()
                 , "Return the current state of the System (updated while the simulation\nis running). This will throw an exception if the system hits an\nerror state" );
-
+        
         }
         { //::SireMove::Simulation::isError
-
+        
             typedef bool ( ::SireMove::Simulation::*isError_function_type)(  ) ;
             isError_function_type isError_function_value( &::SireMove::Simulation::isError );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "isError"
                 , isError_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this simulation is in an error state" );
-
+        
         }
         { //::SireMove::Simulation::isRunning
-
+        
             typedef bool ( ::SireMove::Simulation::*isRunning_function_type)(  ) ;
             isRunning_function_type isRunning_function_value( &::SireMove::Simulation::isRunning );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "isRunning"
                 , isRunning_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this simulation is running" );
-
+        
         }
         { //::SireMove::Simulation::moves
-
+        
             typedef ::SireMove::MovesPtr ( ::SireMove::Simulation::*moves_function_type)(  ) ;
             moves_function_type moves_function_value( &::SireMove::Simulation::moves );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "moves"
                 , moves_function_value
                 , bp::release_gil_policy()
                 , "Return the final state of the moves after the simulation. This\nblocks until the simulation has finished and will throw an\nexception if the system hits an error state" );
-
+        
         }
         Simulation_exposer.def( bp::self != bp::self );
         { //::SireMove::Simulation::operator=
-
+        
             typedef ::SireMove::Simulation & ( ::SireMove::Simulation::*assign_function_type)( ::SireMove::Simulation const & ) ;
             assign_function_type assign_function_value( &::SireMove::Simulation::operator= );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Simulation_exposer.def( bp::self == bp::self );
         { //::SireMove::Simulation::progress
-
+        
             typedef float ( ::SireMove::Simulation::*progress_function_type)(  ) ;
             progress_function_type progress_function_value( &::SireMove::Simulation::progress );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "progress"
                 , progress_function_value
                 , bp::release_gil_policy()
                 , "Return the progress of the simulation (as a percentage)" );
-
+        
         }
         { //::SireMove::Simulation::result
-
+        
             typedef ::SireMove::SimPacket ( ::SireMove::Simulation::*result_function_type)(  ) ;
             result_function_type result_function_value( &::SireMove::Simulation::result );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "result"
                 , result_function_value
                 , bp::release_gil_policy()
                 , "Return the final result of the simulation. This blocks until\nthe simulation has stopped, and will throw an exception if the\nsimulation is in an error state. This returns the initial\nsimulation WorkPacket if the simulation was aborted" );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireSystem::System const &,::SireMove::Moves const &,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("system"), bp::arg("moves"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves (in moves)\nof the System system, optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation in the current thread" );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireSystem::System const &,::SireMove::Moves const &,int,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("system"), bp::arg("moves"), bp::arg("nmoves"), bp::arg("nmoves_per_chunk"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves (in moves)\nof the System system, optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation in the current thread. This runs nmoves_per_chunk\nmoves in every chunk of the simulation." );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireSystem::System const &,::SireMove::Move const &,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("system"), bp::arg("move"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves (in moves)\nof the System system, optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation in the current thread" );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireSystem::System const &,::SireMove::Move const &,int,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("system"), bp::arg("move"), bp::arg("nmoves"), bp::arg("nmoves_per_chunk"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves (in moves)\nof the System system, optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation in the current thread. This runs nmoves_per_chunk\nmoves in every chunk of the simulation." );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireMove::SimStore const &,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("simstore"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves of the system\nin simstore (which also contains the moves) optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation in the current thread" );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireMove::SimStore const &,int,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("simstore"), bp::arg("nmoves"), bp::arg("nmoves_per_chunk"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves of the system\nin simstore (which also contains the moves) optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation in the current thread. This runs nmoves_per_chunk\nmoves in every chunk of the simulation." );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireMove::SimPacket const & );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("simpacket") )
                 , bp::release_gil_policy()
                 , "Run the simulation contained in the simulation WorkPacket simpacket\nin the current thread" );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireCluster::Node &,::SireSystem::System const &,::SireMove::Moves const &,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("system"), bp::arg("moves"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves (in moves)\nof the System system, optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation on the node node. This runs nmoves_per_chunk\nmoves in every chunk of the simulation." );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireCluster::Node &,::SireSystem::System const &,::SireMove::Moves const &,int,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("system"), bp::arg("moves"), bp::arg("nmoves"), bp::arg("nmoves_per_chunk"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves (in moves)\nof the System system, optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation on the node node. This runs nmoves_per_chunk\nmoves in every chunk of the simulation." );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireCluster::Node &,::SireSystem::System const &,::SireMove::Move const &,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("system"), bp::arg("move"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves (in moves)\nof the System system, optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation on the node node. This runs nmoves_per_chunk\nmoves in every chunk of the simulation." );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireCluster::Node &,::SireSystem::System const &,::SireMove::Move const &,int,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("system"), bp::arg("move"), bp::arg("nmoves"), bp::arg("nmoves_per_chunk"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves (in moves)\nof the System system, optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation on the node node. This runs nmoves_per_chunk\nmoves in every chunk of the simulation." );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireCluster::Node &,::SireMove::SimStore const &,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("simstore"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves of the system\nin simstore (which also contains the moves) optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation on the node node. This runs nmoves_per_chunk\nmoves in every chunk of the simulation." );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireCluster::Node &,::SireMove::SimStore const &,int,int,bool );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("simstore"), bp::arg("nmoves"), bp::arg("nmoves_per_chunk"), bp::arg("record_stats")=(bool)(true) )
                 , "Run a simulation consisting of nmoves moves  of the system\nin simstore (which also contains the moves) optionally recording simulation\nstatistics if record_stats is true. This runs the\nsimulation on the node node. This runs nmoves_per_chunk\nmoves in every chunk of the simulation." );
-
+        
         }
         { //::SireMove::Simulation::run
-
+        
             typedef ::SireMove::Simulation ( *run_function_type )( ::SireCluster::Node &,::SireMove::SimPacket const & );
             run_function_type run_function_value( &::SireMove::Simulation::run );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("simpacket") )
                 , bp::release_gil_policy()
                 , "Run the simulation contained in the simulation WorkPacket simpacket\non the node node" );
-
+        
         }
         { //::SireMove::Simulation::stop
-
+        
             typedef void ( ::SireMove::Simulation::*stop_function_type)(  ) ;
             stop_function_type stop_function_value( &::SireMove::Simulation::stop );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "stop"
                 , stop_function_value
                 , bp::release_gil_policy()
                 , "Stop the simulation" );
-
+        
         }
         { //::SireMove::Simulation::system
-
+        
             typedef ::SireSystem::System ( ::SireMove::Simulation::*system_function_type)(  ) ;
             system_function_type system_function_value( &::SireMove::Simulation::system );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "system"
                 , system_function_value
                 , bp::release_gil_policy()
                 , "Return the final state of the system after the simulation. This\nblocks until the simulation has finished and will throw an\nexception if the system hits an error state" );
-
+        
         }
         { //::SireMove::Simulation::throwError
-
+        
             typedef void ( ::SireMove::Simulation::*throwError_function_type)(  ) ;
             throwError_function_type throwError_function_value( &::SireMove::Simulation::throwError );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "throwError"
                 , throwError_function_value
                 , bp::release_gil_policy()
                 , "Throw any error associated with this simulation - this does\nnothing if we are not in an error state" );
-
+        
         }
         { //::SireMove::Simulation::wait
-
+        
             typedef void ( ::SireMove::Simulation::*wait_function_type)(  ) ;
             wait_function_type wait_function_value( &::SireMove::Simulation::wait );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "wait"
                 , wait_function_value
                 , bp::release_gil_policy()
                 , "Wait for the simulation to stop running\n(which can be either because it finished, was stopped,\nwas aborted or ended in error)" );
-
+        
         }
         { //::SireMove::Simulation::wait
-
+        
             typedef bool ( ::SireMove::Simulation::*wait_function_type)( int ) ;
             wait_function_type wait_function_value( &::SireMove::Simulation::wait );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "wait"
                 , wait_function_value
                 , ( bp::arg("timeout") )
                 , bp::release_gil_policy()
                 , "Wait for the simulation to stop running, or for timeout\nmilliseconds to pass, whichever comes soonest. This returns\nwhether or not the simulation has stopped" );
-
+        
         }
         { //::SireMove::Simulation::wasAborted
-
+        
             typedef bool ( ::SireMove::Simulation::*wasAborted_function_type)(  ) ;
             wasAborted_function_type wasAborted_function_value( &::SireMove::Simulation::wasAborted );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "wasAborted"
                 , wasAborted_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the simulation was aborted" );
-
+        
         }
         { //::SireMove::Simulation::wasStopped
-
+        
             typedef bool ( ::SireMove::Simulation::*wasStopped_function_type)(  ) ;
             wasStopped_function_type wasStopped_function_value( &::SireMove::Simulation::wasStopped );
-
-            Simulation_exposer.def(
+            
+            Simulation_exposer.def( 
                 "wasStopped"
                 , wasStopped_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the simulation was stopped" );
-
+        
         }
         Simulation_exposer.staticmethod( "run" );
         Simulation_exposer.def( "__copy__", &__copy__);

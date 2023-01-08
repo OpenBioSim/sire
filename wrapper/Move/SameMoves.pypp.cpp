@@ -61,166 +61,166 @@ void register_SameMoves_class(){
         SameMoves_exposer.def( bp::init< SireMove::Move const & >(( bp::arg("move") ), "Construct to run the move move multiple times") );
         SameMoves_exposer.def( bp::init< SireMove::SameMoves const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::SameMoves::clearStatistics
-
+        
             typedef void ( ::SireMove::SameMoves::*clearStatistics_function_type)(  ) ;
             clearStatistics_function_type clearStatistics_function_value( &::SireMove::SameMoves::clearStatistics );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "clearStatistics"
                 , clearStatistics_function_value
                 , bp::release_gil_policy()
                 , "Clear the move statistics" );
-
+        
         }
         { //::SireMove::SameMoves::clearTiming
-
+        
             typedef void ( ::SireMove::SameMoves::*clearTiming_function_type)(  ) ;
             clearTiming_function_type clearTiming_function_value( &::SireMove::SameMoves::clearTiming );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "clearTiming"
                 , clearTiming_function_value
                 , bp::release_gil_policy()
                 , "Clear all of the timing statistics" );
-
+        
         }
         { //::SireMove::SameMoves::energyComponent
-
+        
             typedef ::SireCAS::Symbol const & ( ::SireMove::SameMoves::*energyComponent_function_type)(  ) const;
             energyComponent_function_type energyComponent_function_value( &::SireMove::SameMoves::energyComponent );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "energyComponent"
                 , energyComponent_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the energy component used to calculate the system energy" );
-
+        
         }
         { //::SireMove::SameMoves::move
-
+        
             typedef ::SireSystem::System ( ::SireMove::SameMoves::*move_function_type)( ::SireSystem::System const &,int,bool ) ;
             move_function_type move_function_value( &::SireMove::SameMoves::move );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "move"
                 , move_function_value
                 , ( bp::arg("system"), bp::arg("nmoves")=(int)(1), bp::arg("record_stats")=(bool)(false) )
                 , "Apply the move nmoves times to the system system, returning\nthe result" );
-
+        
         }
         { //::SireMove::SameMoves::moves
-
+        
             typedef ::QList< SireBase::PropPtr< SireMove::Move > > ( ::SireMove::SameMoves::*moves_function_type)(  ) const;
             moves_function_type moves_function_value( &::SireMove::SameMoves::moves );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "moves"
                 , moves_function_value
                 , bp::release_gil_policy()
                 , "Return the moves used by this object" );
-
+        
         }
         SameMoves_exposer.def( bp::self != bp::self );
         { //::SireMove::SameMoves::operator=
-
+        
             typedef ::SireMove::SameMoves & ( ::SireMove::SameMoves::*assign_function_type)( ::SireMove::SameMoves const & ) ;
             assign_function_type assign_function_value( &::SireMove::SameMoves::operator= );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SameMoves_exposer.def( bp::self == bp::self );
         { //::SireMove::SameMoves::setEnergyComponent
-
+        
             typedef void ( ::SireMove::SameMoves::*setEnergyComponent_function_type)( ::SireCAS::Symbol const & ) ;
             setEnergyComponent_function_type setEnergyComponent_function_value( &::SireMove::SameMoves::setEnergyComponent );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "setEnergyComponent"
                 , setEnergyComponent_function_value
                 , ( bp::arg("component") )
                 , bp::release_gil_policy()
                 , "Set the energy component of all of the moves to component" );
-
+        
         }
         { //::SireMove::SameMoves::setGenerator
-
+        
             typedef void ( ::SireMove::SameMoves::*setGenerator_function_type)( ::SireMaths::RanGenerator const & ) ;
             setGenerator_function_type setGenerator_function_value( &::SireMove::SameMoves::setGenerator );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "setGenerator"
                 , setGenerator_function_value
                 , ( bp::arg("rangenerator") )
                 , bp::release_gil_policy()
                 , "Set the random number generator used at all points in all of the moves" );
-
+        
         }
         { //::SireMove::SameMoves::setSpaceProperty
-
+        
             typedef void ( ::SireMove::SameMoves::*setSpaceProperty_function_type)( ::SireBase::PropertyName const & ) ;
             setSpaceProperty_function_type setSpaceProperty_function_value( &::SireMove::SameMoves::setSpaceProperty );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "setSpaceProperty"
                 , setSpaceProperty_function_value
                 , ( bp::arg("spaceproperty") )
                 , bp::release_gil_policy()
                 , "Set the name of the property that all of the moves will use to\nfind the simulation space (simulation box) to spaceproperty" );
-
+        
         }
         { //::SireMove::SameMoves::spaceProperty
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMove::SameMoves::*spaceProperty_function_type)(  ) const;
             spaceProperty_function_type spaceProperty_function_value( &::SireMove::SameMoves::spaceProperty );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "spaceProperty"
                 , spaceProperty_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the space property used to calculate the system volume" );
-
+        
         }
         { //::SireMove::SameMoves::timing
-
+        
             typedef ::QList< SireUnits::Dimension::PhysUnit< 0, 0, 1, 0, 0, 0, 0 > > ( ::SireMove::SameMoves::*timing_function_type)(  ) const;
             timing_function_type timing_function_value( &::SireMove::SameMoves::timing );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "timing"
                 , timing_function_value
                 , bp::release_gil_policy()
                 , "Return the list of average times for the move" );
-
+        
         }
         { //::SireMove::SameMoves::toString
-
+        
             typedef ::QString ( ::SireMove::SameMoves::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMove::SameMoves::toString );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of these moves" );
-
+        
         }
         { //::SireMove::SameMoves::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::SameMoves::typeName );
-
-            SameMoves_exposer.def(
+            
+            SameMoves_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SameMoves_exposer.staticmethod( "typeName" );
         SameMoves_exposer.def( "__copy__", &__copy__);

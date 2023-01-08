@@ -48,54 +48,54 @@ void register_AbsFromMass_class(){
         AbsFromMass_exposer.def( bp::init< SireMol::AbsFromMass const & >(( bp::arg("other") ), "") );
         AbsFromMass_exposer.def( bp::self != bp::self );
         { //::SireMol::AbsFromMass::operator()
-
+        
             typedef double ( ::SireMol::AbsFromMass::*__call___function_type)( ::SireMol::MoleculeData const &,::SireMol::AtomSelection const &,::SireMol::AtomSelection const &,::SireBase::PropertyMap const & ) const;
             __call___function_type __call___function_value( &::SireMol::AbsFromMass::operator() );
-
-            AbsFromMass_exposer.def(
+            
+            AbsFromMass_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("moldata"), bp::arg("group0"), bp::arg("group1"), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
-
+        
         }
         { //::SireMol::AbsFromMass::operator()
-
+        
             typedef double ( ::SireMol::AbsFromMass::*__call___function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const &,::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
             __call___function_type __call___function_value( &::SireMol::AbsFromMass::operator() );
-
-            AbsFromMass_exposer.def(
+            
+            AbsFromMass_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("view0"), bp::arg("map0"), bp::arg("view1"), bp::arg("map1") )
                 , "" );
-
+        
         }
         { //::SireMol::AbsFromMass::operator=
-
+        
             typedef ::SireMol::AbsFromMass & ( ::SireMol::AbsFromMass::*assign_function_type)( ::SireMol::AbsFromMass const & ) ;
             assign_function_type assign_function_value( &::SireMol::AbsFromMass::operator= );
-
-            AbsFromMass_exposer.def(
+            
+            AbsFromMass_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("arg0") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         AbsFromMass_exposer.def( bp::self == bp::self );
         { //::SireMol::AbsFromMass::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::AbsFromMass::typeName );
-
-            AbsFromMass_exposer.def(
+            
+            AbsFromMass_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AbsFromMass_exposer.staticmethod( "typeName" );
         AbsFromMass_exposer.def( "__copy__", &__copy__);

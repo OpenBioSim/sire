@@ -40,240 +40,240 @@ void register_LJParameter_class(){
         LJParameter_exposer.def( bp::init< SireMM::LJPair const & >(( bp::arg("ljpair") ), "Construct from an LJPair") );
         LJParameter_exposer.def( bp::init< SireMM::LJParameter const & >(( bp::arg("param") ), "Copy constructor") );
         { //::SireMM::LJParameter::A
-
+        
             typedef double ( ::SireMM::LJParameter::*A_function_type)(  ) const;
             A_function_type A_function_value( &::SireMM::LJParameter::A );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "A"
                 , A_function_value
                 , bp::release_gil_policy()
                 , "Return the LJ A parameter" );
-
+        
         }
         { //::SireMM::LJParameter::B
-
+        
             typedef double ( ::SireMM::LJParameter::*B_function_type)(  ) const;
             B_function_type B_function_value( &::SireMM::LJParameter::B );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "B"
                 , B_function_value
                 , bp::release_gil_policy()
                 , "Return the LJ B parameter" );
-
+        
         }
         { //::SireMM::LJParameter::combine
-
+        
             typedef ::SireMM::LJParameter ( ::SireMM::LJParameter::*combine_function_type)( ::SireMM::LJParameter const &,::SireMM::LJParameter::CombiningRules ) const;
             combine_function_type combine_function_value( &::SireMM::LJParameter::combine );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "combine"
                 , combine_function_value
                 , ( bp::arg("other"), bp::arg("rules") )
                 , bp::release_gil_policy()
                 , "Return the LJParameter that is this parameter combined with other according\nto the passed combining rules" );
-
+        
         }
         { //::SireMM::LJParameter::combineArithmetic
-
+        
             typedef ::SireMM::LJParameter ( ::SireMM::LJParameter::*combineArithmetic_function_type)( ::SireMM::LJParameter const & ) const;
             combineArithmetic_function_type combineArithmetic_function_value( &::SireMM::LJParameter::combineArithmetic );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "combineArithmetic"
                 , combineArithmetic_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "Return the LJParameter that is this parameter combined with other\nusing arithmetic combining rules" );
-
+        
         }
         { //::SireMM::LJParameter::combineGeometric
-
+        
             typedef ::SireMM::LJParameter ( ::SireMM::LJParameter::*combineGeometric_function_type)( ::SireMM::LJParameter const & ) const;
             combineGeometric_function_type combineGeometric_function_value( &::SireMM::LJParameter::combineGeometric );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "combineGeometric"
                 , combineGeometric_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "Return the LJParameter that is this parameter combined with other\nusing geometric combining rules" );
-
+        
         }
         { //::SireMM::LJParameter::dummy
-
+        
             typedef ::SireMM::LJParameter ( *dummy_function_type )(  );
             dummy_function_type dummy_function_value( &::SireMM::LJParameter::dummy );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "dummy"
                 , dummy_function_value
                 , bp::release_gil_policy()
                 , "Return a dummy CLJParameter" );
-
+        
         }
         { //::SireMM::LJParameter::epsilon
-
+        
             typedef ::SireUnits::Dimension::MolarEnergy ( ::SireMM::LJParameter::*epsilon_function_type)(  ) const;
             epsilon_function_type epsilon_function_value( &::SireMM::LJParameter::epsilon );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "epsilon"
                 , epsilon_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::LJParameter::fromAAndB
-
+        
             typedef ::SireMM::LJParameter ( *fromAAndB_function_type )( double,double );
             fromAAndB_function_type fromAAndB_function_value( &::SireMM::LJParameter::fromAAndB );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "fromAAndB"
                 , fromAAndB_function_value
                 , ( bp::arg("a"), bp::arg("b") )
                 , bp::release_gil_policy()
                 , "Return a LJ parameter that corresponds to the passed LJ parameters A and B,\nE(r) = A r-12  - B r-6\n" );
-
+        
         }
         { //::SireMM::LJParameter::fromRMinAndEpsilon
-
+        
             typedef ::SireMM::LJParameter ( *fromRMinAndEpsilon_function_type )( ::SireUnits::Dimension::Length,::SireUnits::Dimension::MolarEnergy );
             fromRMinAndEpsilon_function_type fromRMinAndEpsilon_function_value( &::SireMM::LJParameter::fromRMinAndEpsilon );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "fromRMinAndEpsilon"
                 , fromRMinAndEpsilon_function_value
                 , ( bp::arg("rmin"), bp::arg("epsilon") )
                 , bp::release_gil_policy()
                 , "Return a LJ parameter that corresponds to the curve that has a minimum at\nrmin, and a well-depth of epsilon.\nE(r) = 4 epilson [ (sigmar)^12 - (sigmar)^6 ], where\nrmin = 2^(16) sigma\n" );
-
+        
         }
         { //::SireMM::LJParameter::fromSigmaAndEpsilon
-
+        
             typedef ::SireMM::LJParameter ( *fromSigmaAndEpsilon_function_type )( ::SireUnits::Dimension::Length,::SireUnits::Dimension::MolarEnergy );
             fromSigmaAndEpsilon_function_type fromSigmaAndEpsilon_function_value( &::SireMM::LJParameter::fromSigmaAndEpsilon );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "fromSigmaAndEpsilon"
                 , fromSigmaAndEpsilon_function_value
                 , ( bp::arg("sigma"), bp::arg("epsilon") )
                 , bp::release_gil_policy()
                 , "Return a LJ parameter that corresponds to the passed values of sigma and epsilon,\nE(r) = 4 epsilon [ (sigmar)^12 - (sigmar)^6 ]\n" );
-
+        
         }
         { //::SireMM::LJParameter::isDummy
-
+        
             typedef bool ( ::SireMM::LJParameter::*isDummy_function_type)(  ) const;
             isDummy_function_type isDummy_function_value( &::SireMM::LJParameter::isDummy );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "isDummy"
                 , isDummy_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         LJParameter_exposer.def( bp::self != bp::self );
         LJParameter_exposer.def( bp::self == bp::self );
         { //::SireMM::LJParameter::rmin
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMM::LJParameter::*rmin_function_type)(  ) const;
             rmin_function_type rmin_function_value( &::SireMM::LJParameter::rmin );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "rmin"
                 , rmin_function_value
                 , bp::release_gil_policy()
                 , "Return the LJ rmin parameter - this is the location of the minimum.\nrmin = 2^(16)  sigma\n" );
-
+        
         }
         { //::SireMM::LJParameter::sigma
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMM::LJParameter::*sigma_function_type)(  ) const;
             sigma_function_type sigma_function_value( &::SireMM::LJParameter::sigma );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "sigma"
                 , sigma_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::LJParameter::sqrtEpsilon
-
+        
             typedef double ( ::SireMM::LJParameter::*sqrtEpsilon_function_type)(  ) const;
             sqrtEpsilon_function_type sqrtEpsilon_function_value( &::SireMM::LJParameter::sqrtEpsilon );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "sqrtEpsilon"
                 , sqrtEpsilon_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::LJParameter::sqrtSigma
-
+        
             typedef double ( ::SireMM::LJParameter::*sqrtSigma_function_type)(  ) const;
             sqrtSigma_function_type sqrtSigma_function_value( &::SireMM::LJParameter::sqrtSigma );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "sqrtSigma"
                 , sqrtSigma_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::LJParameter::toString
-
+        
             typedef ::QString ( ::SireMM::LJParameter::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMM::LJParameter::toString );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of the CLJ parameter" );
-
+        
         }
         { //::SireMM::LJParameter::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::LJParameter::typeName );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::LJParameter::what
-
+        
             typedef char const * ( ::SireMM::LJParameter::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::LJParameter::what );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::LJParameter::zeroLJ
-
+        
             typedef bool ( ::SireMM::LJParameter::*zeroLJ_function_type)(  ) const;
             zeroLJ_function_type zeroLJ_function_value( &::SireMM::LJParameter::zeroLJ );
-
-            LJParameter_exposer.def(
+            
+            LJParameter_exposer.def( 
                 "zeroLJ"
                 , zeroLJ_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         LJParameter_exposer.staticmethod( "dummy" );
         LJParameter_exposer.staticmethod( "fromAAndB" );

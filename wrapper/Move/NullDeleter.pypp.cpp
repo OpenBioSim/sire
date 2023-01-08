@@ -39,69 +39,69 @@ void register_NullDeleter_class(){
         bp::scope NullDeleter_scope( NullDeleter_exposer );
         NullDeleter_exposer.def( bp::init< SireMove::NullDeleter const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::NullDeleter::deleteFrom
-
+        
             typedef ::boost::tuples::tuple< SireMol::Molecule, double, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireMove::NullDeleter::*deleteFrom_function_type)( ::SireSystem::System & ) ;
             deleteFrom_function_type deleteFrom_function_value( &::SireMove::NullDeleter::deleteFrom );
-
-            NullDeleter_exposer.def(
+            
+            NullDeleter_exposer.def( 
                 "deleteFrom"
                 , deleteFrom_function_value
                 , ( bp::arg("system") )
                 , bp::release_gil_policy()
                 , "Delete a molecule from the system - well this does nothing too" );
-
+        
         }
         { //::SireMove::NullDeleter::generator
-
+        
             typedef ::SireMaths::RanGenerator const & ( ::SireMove::NullDeleter::*generator_function_type)(  ) const;
             generator_function_type generator_function_value( &::SireMove::NullDeleter::generator );
-
-            NullDeleter_exposer.def(
+            
+            NullDeleter_exposer.def( 
                 "generator"
                 , generator_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the generator used to select random molecules\n(this just returns the global generator)" );
-
+        
         }
         NullDeleter_exposer.def( bp::self != bp::self );
         { //::SireMove::NullDeleter::operator=
-
+        
             typedef ::SireMove::NullDeleter & ( ::SireMove::NullDeleter::*assign_function_type)( ::SireMove::NullDeleter const & ) ;
             assign_function_type assign_function_value( &::SireMove::NullDeleter::operator= );
-
-            NullDeleter_exposer.def(
+            
+            NullDeleter_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         NullDeleter_exposer.def( bp::self == bp::self );
         { //::SireMove::NullDeleter::setGenerator
-
+        
             typedef void ( ::SireMove::NullDeleter::*setGenerator_function_type)( ::SireMaths::RanGenerator const & ) ;
             setGenerator_function_type setGenerator_function_value( &::SireMove::NullDeleter::setGenerator );
-
-            NullDeleter_exposer.def(
+            
+            NullDeleter_exposer.def( 
                 "setGenerator"
                 , setGenerator_function_value
                 , ( bp::arg("generator") )
                 , bp::release_gil_policy()
                 , "Set the generator used to select random molecules\n(this does nothing)" );
-
+        
         }
         { //::SireMove::NullDeleter::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::NullDeleter::typeName );
-
-            NullDeleter_exposer.def(
+            
+            NullDeleter_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullDeleter_exposer.staticmethod( "typeName" );
         NullDeleter_exposer.def( "__copy__", &__copy__);

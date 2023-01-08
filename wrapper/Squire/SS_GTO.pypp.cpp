@@ -44,79 +44,79 @@ void register_SS_GTO_class(){
         SS_GTO_exposer.def( bp::init< SireMaths::Vector const &, Squire::S_GTO const &, SireMaths::Vector const &, Squire::S_GTO const & >(( bp::arg("A"), bp::arg("a"), bp::arg("B"), bp::arg("b") ), "Construct between the passed two S GTOs at the specified points") );
         SS_GTO_exposer.def( bp::init< Squire::SS_GTO const & >(( bp::arg("other") ), "Copy constructor") );
         { //::Squire::SS_GTO::angularMomentum0
-
+        
             typedef int ( ::Squire::SS_GTO::*angularMomentum0_function_type)(  ) const;
             angularMomentum0_function_type angularMomentum0_function_value( &::Squire::SS_GTO::angularMomentum0 );
-
-            SS_GTO_exposer.def(
+            
+            SS_GTO_exposer.def( 
                 "angularMomentum0"
                 , angularMomentum0_function_value
                 , bp::release_gil_policy()
                 , "Return the angular momentum of the first GTO shell in this pair" );
-
+        
         }
         { //::Squire::SS_GTO::angularMomentum1
-
+        
             typedef int ( ::Squire::SS_GTO::*angularMomentum1_function_type)(  ) const;
             angularMomentum1_function_type angularMomentum1_function_value( &::Squire::SS_GTO::angularMomentum1 );
-
-            SS_GTO_exposer.def(
+            
+            SS_GTO_exposer.def( 
                 "angularMomentum1"
                 , angularMomentum1_function_value
                 , bp::release_gil_policy()
                 , "Return the angular momentum of the second GTO shell in this pair" );
-
+        
         }
         { //::Squire::SS_GTO::nOrbitals0
-
+        
             typedef int ( ::Squire::SS_GTO::*nOrbitals0_function_type)(  ) const;
             nOrbitals0_function_type nOrbitals0_function_value( &::Squire::SS_GTO::nOrbitals0 );
-
-            SS_GTO_exposer.def(
+            
+            SS_GTO_exposer.def( 
                 "nOrbitals0"
                 , nOrbitals0_function_value
                 , bp::release_gil_policy()
                 , "Return the number of orbitals in the first GTO shell in this pair" );
-
+        
         }
         { //::Squire::SS_GTO::nOrbitals1
-
+        
             typedef int ( ::Squire::SS_GTO::*nOrbitals1_function_type)(  ) const;
             nOrbitals1_function_type nOrbitals1_function_value( &::Squire::SS_GTO::nOrbitals1 );
-
-            SS_GTO_exposer.def(
+            
+            SS_GTO_exposer.def( 
                 "nOrbitals1"
                 , nOrbitals1_function_value
                 , bp::release_gil_policy()
                 , "Return the number of orbitals in the second GTO shell in this pair" );
-
+        
         }
         SS_GTO_exposer.def( bp::self != bp::self );
         { //::Squire::SS_GTO::operator=
-
+        
             typedef ::Squire::SS_GTO & ( ::Squire::SS_GTO::*assign_function_type)( ::Squire::SS_GTO const & ) ;
             assign_function_type assign_function_value( &::Squire::SS_GTO::operator= );
-
-            SS_GTO_exposer.def(
+            
+            SS_GTO_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SS_GTO_exposer.def( bp::self == bp::self );
         { //::Squire::SS_GTO::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::Squire::SS_GTO::typeName );
-
-            SS_GTO_exposer.def(
+            
+            SS_GTO_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SS_GTO_exposer.staticmethod( "typeName" );
         SS_GTO_exposer.def( "__copy__", &__copy__);

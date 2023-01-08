@@ -49,130 +49,130 @@ void register_TrigArray2D_Vector__class(){
         TrigArray2D_Vector__exposer.def( bp::init< int, SireMaths::Vector const & >(( bp::arg("dimension"), bp::arg("default_value") ), "") );
         TrigArray2D_Vector__exposer.def( bp::init< SireBase::TrigArray2D< SireMaths::Vector > const & >(( bp::arg("other") ), "") );
         { //::SireBase::TrigArray2D< SireMaths::Vector >::at
-
+        
             typedef SireBase::TrigArray2D< SireMaths::Vector > exported_class_t;
             typedef ::SireMaths::Vector const & ( ::SireBase::TrigArray2D< SireMaths::Vector >::*at_function_type)( int,int ) const;
             at_function_type at_function_value( &::SireBase::TrigArray2D< SireMaths::Vector >::at );
-
-            TrigArray2D_Vector__exposer.def(
+            
+            TrigArray2D_Vector__exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< SireMaths::Vector >::get
-
+        
             typedef SireBase::TrigArray2D< SireMaths::Vector > exported_class_t;
             typedef ::SireMaths::Vector const & ( ::SireBase::TrigArray2D< SireMaths::Vector >::*get_function_type)( int,int ) const;
             get_function_type get_function_value( &::SireBase::TrigArray2D< SireMaths::Vector >::get );
-
-            TrigArray2D_Vector__exposer.def(
+            
+            TrigArray2D_Vector__exposer.def( 
                 "get"
                 , get_function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         TrigArray2D_Vector__exposer.def( bp::self != bp::self );
         { //::SireBase::TrigArray2D< SireMaths::Vector >::operator()
-
+        
             typedef SireBase::TrigArray2D< SireMaths::Vector > exported_class_t;
             typedef ::SireMaths::Vector const & ( ::SireBase::TrigArray2D< SireMaths::Vector >::*__call___function_type)( int,int ) const;
             __call___function_type __call___function_value( &::SireBase::TrigArray2D< SireMaths::Vector >::operator() );
-
-            TrigArray2D_Vector__exposer.def(
+            
+            TrigArray2D_Vector__exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< SireMaths::Vector >::operator=
-
+        
             typedef SireBase::TrigArray2D< SireMaths::Vector > exported_class_t;
             typedef ::SireBase::TrigArray2D< SireMaths::Vector > & ( ::SireBase::TrigArray2D< SireMaths::Vector >::*assign_function_type)( ::SireBase::TrigArray2D< SireMaths::Vector > const & ) ;
             assign_function_type assign_function_value( &::SireBase::TrigArray2D< SireMaths::Vector >::operator= );
-
-            TrigArray2D_Vector__exposer.def(
+            
+            TrigArray2D_Vector__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         TrigArray2D_Vector__exposer.def( bp::self == bp::self );
         { //::SireBase::TrigArray2D< SireMaths::Vector >::redimension
-
+        
             typedef SireBase::TrigArray2D< SireMaths::Vector > exported_class_t;
             typedef void ( ::SireBase::TrigArray2D< SireMaths::Vector >::*redimension_function_type)( int ) ;
             redimension_function_type redimension_function_value( &::SireBase::TrigArray2D< SireMaths::Vector >::redimension );
-
-            TrigArray2D_Vector__exposer.def(
+            
+            TrigArray2D_Vector__exposer.def( 
                 "redimension"
                 , redimension_function_value
                 , ( bp::arg("dimension") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< SireMaths::Vector >::set
-
+        
             typedef SireBase::TrigArray2D< SireMaths::Vector > exported_class_t;
             typedef void ( ::SireBase::TrigArray2D< SireMaths::Vector >::*set_function_type)( int,int,::SireMaths::Vector const & ) ;
             set_function_type set_function_value( &::SireBase::TrigArray2D< SireMaths::Vector >::set );
-
-            TrigArray2D_Vector__exposer.def(
+            
+            TrigArray2D_Vector__exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("i"), bp::arg("j"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< SireMaths::Vector >::setAll
-
+        
             typedef SireBase::TrigArray2D< SireMaths::Vector > exported_class_t;
             typedef void ( ::SireBase::TrigArray2D< SireMaths::Vector >::*setAll_function_type)( ::SireMaths::Vector const & ) ;
             setAll_function_type setAll_function_value( &::SireBase::TrigArray2D< SireMaths::Vector >::setAll );
-
-            TrigArray2D_Vector__exposer.def(
+            
+            TrigArray2D_Vector__exposer.def( 
                 "setAll"
                 , setAll_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< SireMaths::Vector >::toString
-
+        
             typedef SireBase::TrigArray2D< SireMaths::Vector > exported_class_t;
             typedef ::QString ( ::SireBase::TrigArray2D< SireMaths::Vector >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::TrigArray2D< SireMaths::Vector >::toString );
-
-            TrigArray2D_Vector__exposer.def(
+            
+            TrigArray2D_Vector__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< SireMaths::Vector >::transpose
-
+        
             typedef SireBase::TrigArray2D< SireMaths::Vector > exported_class_t;
             typedef ::SireBase::TrigArray2D< SireMaths::Vector > ( ::SireBase::TrigArray2D< SireMaths::Vector >::*transpose_function_type)(  ) const;
             transpose_function_type transpose_function_value( &::SireBase::TrigArray2D< SireMaths::Vector >::transpose );
-
-            TrigArray2D_Vector__exposer.def(
+            
+            TrigArray2D_Vector__exposer.def( 
                 "transpose"
                 , transpose_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         TrigArray2D_Vector__exposer.def( "__copy__", &__copy__);
         TrigArray2D_Vector__exposer.def( "__deepcopy__", &__copy__);

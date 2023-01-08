@@ -35,127 +35,127 @@ void register_IntraSoftCLJFFBase_class(){
         IntraSoftCLJFFBase_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );
         IntraSoftCLJFFBase_exposer.def( bp::init< SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > const & >(( bp::arg("other") ), "") );
         { //::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::components
-
+        
             typedef SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > exported_class_t;
             typedef ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::Components const & ( ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::*components_function_type)(  ) const;
             components_function_type components_function_value( &::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::components );
-
-            IntraSoftCLJFFBase_exposer.def(
+            
+            IntraSoftCLJFFBase_exposer.def( 
                 "components"
                 , components_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::containsProperty
-
+        
             typedef SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > exported_class_t;
             typedef bool ( ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::*containsProperty_function_type)( ::QString const & ) const;
             containsProperty_function_type containsProperty_function_value( &::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::containsProperty );
-
-            IntraSoftCLJFFBase_exposer.def(
+            
+            IntraSoftCLJFFBase_exposer.def( 
                 "containsProperty"
                 , containsProperty_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::mustNowRecalculateFromScratch
-
+        
             typedef SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > exported_class_t;
             typedef void ( ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::*mustNowRecalculateFromScratch_function_type)(  ) ;
             mustNowRecalculateFromScratch_function_type mustNowRecalculateFromScratch_function_value( &::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::mustNowRecalculateFromScratch );
-
-            IntraSoftCLJFFBase_exposer.def(
+            
+            IntraSoftCLJFFBase_exposer.def( 
                 "mustNowRecalculateFromScratch"
                 , mustNowRecalculateFromScratch_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         IntraSoftCLJFFBase_exposer.def( bp::self != bp::self );
         { //::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::operator=
-
+        
             typedef SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > exported_class_t;
             typedef ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > & ( ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::*assign_function_type)( ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > const & ) ;
             assign_function_type assign_function_value( &::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::operator= );
-
-            IntraSoftCLJFFBase_exposer.def(
+            
+            IntraSoftCLJFFBase_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         IntraSoftCLJFFBase_exposer.def( bp::self == bp::self );
         { //::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::properties
-
+        
             typedef SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > exported_class_t;
             typedef ::SireBase::Properties const & ( ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::*properties_function_type)(  ) const;
             properties_function_type properties_function_value( &::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::properties );
-
-            IntraSoftCLJFFBase_exposer.def(
+            
+            IntraSoftCLJFFBase_exposer.def( 
                 "properties"
                 , properties_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::property
-
+        
             typedef SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > exported_class_t;
             typedef ::SireBase::Property const & ( ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::*property_function_type)( ::QString const & ) const;
             property_function_type property_function_value( &::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::property );
-
-            IntraSoftCLJFFBase_exposer.def(
+            
+            IntraSoftCLJFFBase_exposer.def( 
                 "property"
                 , property_function_value
                 , ( bp::arg("name") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::setProperty
-
+        
             typedef SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > exported_class_t;
             typedef bool ( ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::*setProperty_function_type)( ::QString const &,::SireBase::Property const & ) ;
             setProperty_function_type setProperty_function_value( &::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::setProperty );
-
-            IntraSoftCLJFFBase_exposer.def(
+            
+            IntraSoftCLJFFBase_exposer.def( 
                 "setProperty"
                 , setProperty_function_value
                 , ( bp::arg("name"), bp::arg("property") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::typeName
-
+        
             typedef SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::typeName );
-
-            IntraSoftCLJFFBase_exposer.def(
+            
+            IntraSoftCLJFFBase_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::what
-
+        
             typedef SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > > exported_class_t;
             typedef char const * ( ::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireFF::Intra2BFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >::what );
-
-            IntraSoftCLJFFBase_exposer.def(
+            
+            IntraSoftCLJFFBase_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         IntraSoftCLJFFBase_exposer.staticmethod( "typeName" );
         IntraSoftCLJFFBase_exposer.def( "__copy__", &__copy__);

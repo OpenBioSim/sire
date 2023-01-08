@@ -60,151 +60,151 @@ void register_CLJAtom_class(){
         CLJAtom_exposer.def( bp::init< SireMaths::Vector, SireUnits::Dimension::Charge, SireMM::LJParameter, bp::optional< qint32 > >(( bp::arg("coords"), bp::arg("charge"), bp::arg("ljparam"), bp::arg("idnum")=(::qint32)(1) ), "Construct from the passed coordinates, charge and LJ parameters") );
         CLJAtom_exposer.def( bp::init< SireMM::CLJAtom const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::CLJAtom::ID
-
+        
             typedef ::qint32 ( ::SireMM::CLJAtom::*ID_function_type)(  ) const;
             ID_function_type ID_function_value( &::SireMM::CLJAtom::ID );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "ID"
                 , ID_function_value
                 , bp::release_gil_policy()
                 , "Return the ID number for the atom" );
-
+        
         }
         { //::SireMM::CLJAtom::buildFrom
-
+        
             typedef ::QVector< SireMM::CLJAtom > ( *buildFrom_function_type )( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & );
             buildFrom_function_type buildFrom_function_value( &::SireMM::CLJAtom::buildFrom );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "buildFrom"
                 , buildFrom_function_value
                 , ( bp::arg("molecule"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Construct an array of CLJAtom atoms from the passed molecule view" );
-
+        
         }
         { //::SireMM::CLJAtom::charge
-
+        
             typedef ::SireUnits::Dimension::Charge ( ::SireMM::CLJAtom::*charge_function_type)(  ) const;
             charge_function_type charge_function_value( &::SireMM::CLJAtom::charge );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "charge"
                 , charge_function_value
                 , bp::release_gil_policy()
                 , "Return the partial charge of the atom" );
-
+        
         }
         { //::SireMM::CLJAtom::coordinates
-
+        
             typedef ::SireMaths::Vector ( ::SireMM::CLJAtom::*coordinates_function_type)(  ) const;
             coordinates_function_type coordinates_function_value( &::SireMM::CLJAtom::coordinates );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "coordinates"
                 , coordinates_function_value
                 , bp::release_gil_policy()
                 , "Return the coordinates of the atom" );
-
+        
         }
         { //::SireMM::CLJAtom::isDummy
-
+        
             typedef bool ( ::SireMM::CLJAtom::*isDummy_function_type)(  ) const;
             isDummy_function_type isDummy_function_value( &::SireMM::CLJAtom::isDummy );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "isDummy"
                 , isDummy_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a dummy atom (has no ID number)" );
-
+        
         }
         { //::SireMM::CLJAtom::isNull
-
+        
             typedef bool ( ::SireMM::CLJAtom::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMM::CLJAtom::isNull );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this atom is null (no information)" );
-
+        
         }
         { //::SireMM::CLJAtom::ljParameter
-
+        
             typedef ::SireMM::LJParameter ( ::SireMM::CLJAtom::*ljParameter_function_type)(  ) const;
             ljParameter_function_type ljParameter_function_value( &::SireMM::CLJAtom::ljParameter );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "ljParameter"
                 , ljParameter_function_value
                 , bp::release_gil_policy()
                 , "Return the LJ parameters of the atom" );
-
+        
         }
         { //::SireMM::CLJAtom::negate
-
+        
             typedef ::SireMM::CLJAtom ( ::SireMM::CLJAtom::*negate_function_type)(  ) const;
             negate_function_type negate_function_value( &::SireMM::CLJAtom::negate );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "negate"
                 , negate_function_value
                 , bp::release_gil_policy()
                 , "Return the negative of this atom - this returns a copy where\nthe reduced charge and reduced epsilon values have been negated" );
-
+        
         }
         CLJAtom_exposer.def( bp::self != bp::self );
         { //::SireMM::CLJAtom::operator=
-
+        
             typedef ::SireMM::CLJAtom & ( ::SireMM::CLJAtom::*assign_function_type)( ::SireMM::CLJAtom const & ) ;
             assign_function_type assign_function_value( &::SireMM::CLJAtom::operator= );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         CLJAtom_exposer.def( bp::self == bp::self );
         { //::SireMM::CLJAtom::toString
-
+        
             typedef ::QString ( ::SireMM::CLJAtom::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMM::CLJAtom::toString );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJAtom::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::CLJAtom::typeName );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJAtom::what
-
+        
             typedef char const * ( ::SireMM::CLJAtom::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::CLJAtom::what );
-
-            CLJAtom_exposer.def(
+            
+            CLJAtom_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CLJAtom_exposer.staticmethod( "buildFrom" );
         CLJAtom_exposer.staticmethod( "typeName" );

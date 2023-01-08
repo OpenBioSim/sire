@@ -52,290 +52,290 @@ void register_RBWorkspaceJM_class(){
         RBWorkspaceJM_exposer.def( bp::init< SireMol::MoleculeGroup const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("molgroup"), bp::arg("map")=SireBase::PropertyMap() ), "Construct a workspace for the passed molecule group") );
         RBWorkspaceJM_exposer.def( bp::init< SireMove::RBWorkspaceJM const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::RBWorkspaceJM::beadAtomIntCoords
-
+        
             typedef ::QVector< QVector< SireMaths::Vector > > ( ::SireMove::RBWorkspaceJM::*beadAtomIntCoords_function_type)(  ) const;
             beadAtomIntCoords_function_type beadAtomIntCoords_function_value( &::SireMove::RBWorkspaceJM::beadAtomIntCoords );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "beadAtomIntCoords"
                 , beadAtomIntCoords_function_value
                 , bp::release_gil_policy()
                 , "Return the array of bead orientations" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::beadCoordinatesArray
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireMove::RBWorkspaceJM::*beadCoordinatesArray_function_type)(  ) const;
             beadCoordinatesArray_function_type beadCoordinatesArray_function_value( &::SireMove::RBWorkspaceJM::beadCoordinatesArray );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "beadCoordinatesArray"
                 , beadCoordinatesArray_function_value
                 , bp::release_gil_policy()
                 , "Return the array of bead coordinates" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::beadEnergiesArray
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireMove::RBWorkspaceJM::*beadEnergiesArray_function_type)(  ) const;
             beadEnergiesArray_function_type beadEnergiesArray_function_value( &::SireMove::RBWorkspaceJM::beadEnergiesArray );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "beadEnergiesArray"
                 , beadEnergiesArray_function_value
                 , bp::release_gil_policy()
                 , "Return the array of bead energies" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::beadForcesArray
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireMove::RBWorkspaceJM::*beadForcesArray_function_type)(  ) const;
             beadForcesArray_function_type beadForcesArray_function_value( &::SireMove::RBWorkspaceJM::beadForcesArray );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "beadForcesArray"
                 , beadForcesArray_function_value
                 , bp::release_gil_policy()
                 , "const Vector beadForcesArray() const;" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::beadOrientationArray
-
+        
             typedef ::QVector< SireMaths::Quaternion > ( ::SireMove::RBWorkspaceJM::*beadOrientationArray_function_type)(  ) const;
             beadOrientationArray_function_type beadOrientationArray_function_value( &::SireMove::RBWorkspaceJM::beadOrientationArray );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "beadOrientationArray"
                 , beadOrientationArray_function_value
                 , bp::release_gil_policy()
                 , "Return the array of orientations of the beads (this is the rotation\nto be applied to the matrix that maps from the cartesian frame\nto the internal principle inertia frame)" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::beadToWorldMatrix
-
+        
             typedef ::QVector< SireMaths::Matrix > ( ::SireMove::RBWorkspaceJM::*beadToWorldMatrix_function_type)(  ) const;
             beadToWorldMatrix_function_type beadToWorldMatrix_function_value( &::SireMove::RBWorkspaceJM::beadToWorldMatrix );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "beadToWorldMatrix"
                 , beadToWorldMatrix_function_value
                 , bp::release_gil_policy()
                 , "Return the Matrix beadtoworld" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::beadTorquesArray
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireMove::RBWorkspaceJM::*beadTorquesArray_function_type)(  ) const;
             beadTorquesArray_function_type beadTorquesArray_function_value( &::SireMove::RBWorkspaceJM::beadTorquesArray );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "beadTorquesArray"
                 , beadTorquesArray_function_value
                 , bp::release_gil_policy()
                 , "const Vector beadTorquesArray() const;" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::beadingProperty
-
+        
             typedef ::SireBase::PropertyName ( ::SireMove::RBWorkspaceJM::*beadingProperty_function_type)(  ) const;
             beadingProperty_function_type beadingProperty_function_value( &::SireMove::RBWorkspaceJM::beadingProperty );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "beadingProperty"
                 , beadingProperty_function_value
                 , bp::release_gil_policy()
                 , "Return the property used to bead up a molecule" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::calculateForces
-
+        
             typedef bool ( ::SireMove::RBWorkspaceJM::*calculateForces_function_type)( ::SireCAS::Symbol const & ) ;
             calculateForces_function_type calculateForces_function_value( &::SireMove::RBWorkspaceJM::calculateForces );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "calculateForces"
                 , calculateForces_function_value
                 , ( bp::arg("nrg_component") )
                 , bp::release_gil_policy()
                 , "Calculate the forces and torques and energies" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::calculateRBForces
-
+        
             typedef bool ( ::SireMove::RBWorkspaceJM::*calculateRBForces_function_type)(  ) ;
             calculateRBForces_function_type calculateRBForces_function_value( &::SireMove::RBWorkspaceJM::calculateRBForces );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "calculateRBForces"
                 , calculateRBForces_function_value
                 , bp::release_gil_policy()
                 , "Calculate the RB forces and torques using the available atomic forces" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::commitCoordinates
-
+        
             typedef void ( ::SireMove::RBWorkspaceJM::*commitCoordinates_function_type)(  ) ;
             commitCoordinates_function_type commitCoordinates_function_value( &::SireMove::RBWorkspaceJM::commitCoordinates );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "commitCoordinates"
                 , commitCoordinates_function_value
                 , bp::release_gil_policy()
                 , "Commit the coordinates back to the system. This maps the bead coordinates\nand orientations back to atomic coordinates and position and\nupdates the system with these" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::commitCoordinatesAndVelocities
-
+        
             typedef void ( ::SireMove::RBWorkspaceJM::*commitCoordinatesAndVelocities_function_type)(  ) ;
             commitCoordinatesAndVelocities_function_type commitCoordinatesAndVelocities_function_value( &::SireMove::RBWorkspaceJM::commitCoordinatesAndVelocities );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "commitCoordinatesAndVelocities"
                 , commitCoordinatesAndVelocities_function_value
                 , bp::release_gil_policy()
                 , "Commit both the coordinates and velocities - this performs the\nequivalent of commitCoordinates() and commitVelocities() in\na single call" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::commitVelocities
-
+        
             typedef void ( ::SireMove::RBWorkspaceJM::*commitVelocities_function_type)(  ) ;
             commitVelocities_function_type commitVelocities_function_value( &::SireMove::RBWorkspaceJM::commitVelocities );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "commitVelocities"
                 , commitVelocities_function_value
                 , bp::release_gil_policy()
                 , "Commit the linear and angular velocities back to the system. This saves\nthe velocities as bead properties" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::kineticEnergy
-
+        
             typedef ::SireUnits::Dimension::MolarEnergy ( ::SireMove::RBWorkspaceJM::*kineticEnergy_function_type)(  ) const;
             kineticEnergy_function_type kineticEnergy_function_value( &::SireMove::RBWorkspaceJM::kineticEnergy );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "kineticEnergy"
                 , kineticEnergy_function_value
                 , bp::release_gil_policy()
                 , "Return the kinetic energy of all of the molecules being integrated" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::kineticEnergy
-
+        
             typedef ::SireUnits::Dimension::MolarEnergy ( ::SireMove::RBWorkspaceJM::*kineticEnergy_function_type)( ::SireMol::MolNum ) const;
             kineticEnergy_function_type kineticEnergy_function_value( &::SireMove::RBWorkspaceJM::kineticEnergy );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "kineticEnergy"
                 , kineticEnergy_function_value
                 , ( bp::arg("molnum") )
                 , bp::release_gil_policy()
                 , "Return the kinetic energy of the molecule with number molnum\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::kineticEnergy
-
+        
             typedef ::SireUnits::Dimension::MolarEnergy ( ::SireMove::RBWorkspaceJM::*kineticEnergy_function_type)( ::SireMol::MoleculeView const & ) const;
             kineticEnergy_function_type kineticEnergy_function_value( &::SireMove::RBWorkspaceJM::kineticEnergy );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "kineticEnergy"
                 , kineticEnergy_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Return the kinetic energy of the atoms in the view molview\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::nAtoms
-
+        
             typedef int ( ::SireMove::RBWorkspaceJM::*nAtoms_function_type)( int ) const;
             nAtoms_function_type nAtoms_function_value( &::SireMove::RBWorkspaceJM::nAtoms );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , ( bp::arg("ibead") )
                 , bp::release_gil_policy()
                 , "Return the number of atoms in the ith bead" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::nBeads
-
+        
             typedef int ( ::SireMove::RBWorkspaceJM::*nBeads_function_type)(  ) const;
             nBeads_function_type nBeads_function_value( &::SireMove::RBWorkspaceJM::nBeads );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "nBeads"
                 , nBeads_function_value
                 , bp::release_gil_policy()
                 , "Return the number of rigid body beads to be integrated" );
-
+        
         }
         RBWorkspaceJM_exposer.def( bp::self != bp::self );
         { //::SireMove::RBWorkspaceJM::operator=
-
+        
             typedef ::SireMove::RBWorkspaceJM & ( ::SireMove::RBWorkspaceJM::*assign_function_type)( ::SireMove::RBWorkspaceJM const & ) ;
             assign_function_type assign_function_value( &::SireMove::RBWorkspaceJM::operator= );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         RBWorkspaceJM_exposer.def( bp::self == bp::self );
         { //::SireMove::RBWorkspaceJM::regenerateVelocities
-
+        
             typedef void ( ::SireMove::RBWorkspaceJM::*regenerateVelocities_function_type)( ::SireMove::VelocityGenerator const & ) ;
             regenerateVelocities_function_type regenerateVelocities_function_value( &::SireMove::RBWorkspaceJM::regenerateVelocities );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "regenerateVelocities"
                 , regenerateVelocities_function_value
                 , ( bp::arg("generator") )
                 , bp::release_gil_policy()
                 , "Regenerate all of the linear and angular velocities using the passed generator" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::setForceTable
-
+        
             typedef void ( ::SireMove::RBWorkspaceJM::*setForceTable_function_type)( ::SireFF::ForceTable & ) ;
             setForceTable_function_type setForceTable_function_value( &::SireMove::RBWorkspaceJM::setForceTable );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "setForceTable"
                 , setForceTable_function_value
                 , ( bp::arg("forces") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::setSystem
-
+        
             typedef bool ( ::SireMove::RBWorkspaceJM::*setSystem_function_type)( ::SireSystem::System const & ) ;
             setSystem_function_type setSystem_function_value( &::SireMove::RBWorkspaceJM::setSystem );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "setSystem"
                 , setSystem_function_value
                 , ( bp::arg("system") )
                 , bp::release_gil_policy()
                 , "Set the system to be integrated" );
-
+        
         }
         { //::SireMove::RBWorkspaceJM::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::RBWorkspaceJM::typeName );
-
-            RBWorkspaceJM_exposer.def(
+            
+            RBWorkspaceJM_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         RBWorkspaceJM_exposer.staticmethod( "typeName" );
         RBWorkspaceJM_exposer.def( "__copy__", &__copy__);

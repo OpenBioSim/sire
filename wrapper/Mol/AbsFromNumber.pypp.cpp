@@ -48,54 +48,54 @@ void register_AbsFromNumber_class(){
         AbsFromNumber_exposer.def( bp::init< SireMol::AbsFromNumber const & >(( bp::arg("other") ), "") );
         AbsFromNumber_exposer.def( bp::self != bp::self );
         { //::SireMol::AbsFromNumber::operator()
-
+        
             typedef double ( ::SireMol::AbsFromNumber::*__call___function_type)( ::SireMol::MoleculeData const &,::SireMol::AtomSelection const &,::SireMol::AtomSelection const &,::SireBase::PropertyMap const & ) const;
             __call___function_type __call___function_value( &::SireMol::AbsFromNumber::operator() );
-
-            AbsFromNumber_exposer.def(
+            
+            AbsFromNumber_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("moldata"), bp::arg("group0"), bp::arg("group1"), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
-
+        
         }
         { //::SireMol::AbsFromNumber::operator()
-
+        
             typedef double ( ::SireMol::AbsFromNumber::*__call___function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const &,::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
             __call___function_type __call___function_value( &::SireMol::AbsFromNumber::operator() );
-
-            AbsFromNumber_exposer.def(
+            
+            AbsFromNumber_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("view0"), bp::arg("map0"), bp::arg("view1"), bp::arg("map1") )
                 , "" );
-
+        
         }
         { //::SireMol::AbsFromNumber::operator=
-
+        
             typedef ::SireMol::AbsFromNumber & ( ::SireMol::AbsFromNumber::*assign_function_type)( ::SireMol::AbsFromNumber const & ) ;
             assign_function_type assign_function_value( &::SireMol::AbsFromNumber::operator= );
-
-            AbsFromNumber_exposer.def(
+            
+            AbsFromNumber_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("arg0") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         AbsFromNumber_exposer.def( bp::self == bp::self );
         { //::SireMol::AbsFromNumber::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::AbsFromNumber::typeName );
-
-            AbsFromNumber_exposer.def(
+            
+            AbsFromNumber_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AbsFromNumber_exposer.staticmethod( "typeName" );
         AbsFromNumber_exposer.def( "__copy__", &__copy__);

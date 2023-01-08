@@ -58,29 +58,29 @@ void register_ThisThread_class(){
         ThisThread_exposer.def( bp::init< SireCluster::ThisThread const & >(( bp::arg("other") ), "Copy constructor") );
         ThisThread_exposer.def( bp::init< SireCluster::Nodes const & >(( bp::arg("nodes") ), "Construct a lock for this thread being added to\nthe nodes object nodes") );
         { //::SireCluster::ThisThread::operator=
-
+        
             typedef ::SireCluster::ThisThread & ( ::SireCluster::ThisThread::*assign_function_type)( ::SireCluster::ThisThread const & ) ;
             assign_function_type assign_function_value( &::SireCluster::ThisThread::operator= );
-
-            ThisThread_exposer.def(
+            
+            ThisThread_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireCluster::ThisThread::reclaim
-
+        
             typedef void ( ::SireCluster::ThisThread::*reclaim_function_type)(  ) ;
             reclaim_function_type reclaim_function_value( &::SireCluster::ThisThread::reclaim );
-
-            ThisThread_exposer.def(
+            
+            ThisThread_exposer.def( 
                 "reclaim"
                 , reclaim_function_value
                 , bp::release_gil_policy()
                 , "Reclaim this thread" );
-
+        
         }
         ThisThread_exposer.def( "__copy__", &__copy__);
         ThisThread_exposer.def( "__deepcopy__", &__copy__);

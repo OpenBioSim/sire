@@ -65,101 +65,101 @@ void register_MatchAll_ChainID__class(){
         bp::scope MatchAll_ChainID__scope( MatchAll_ChainID__exposer );
         MatchAll_ChainID__exposer.def( bp::init< SireID::MatchAll< SireMol::ChainID > const & >(( bp::arg("other") ), "") );
         { //::SireID::MatchAll< SireMol::ChainID >::hash
-
+        
             typedef SireID::MatchAll< SireMol::ChainID > exported_class_t;
             typedef ::uint ( ::SireID::MatchAll< SireMol::ChainID >::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireID::MatchAll< SireMol::ChainID >::hash );
-
-            MatchAll_ChainID__exposer.def(
+            
+            MatchAll_ChainID__exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::MatchAll< SireMol::ChainID >::isNull
-
+        
             typedef SireID::MatchAll< SireMol::ChainID > exported_class_t;
             typedef bool ( ::SireID::MatchAll< SireMol::ChainID >::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireID::MatchAll< SireMol::ChainID >::isNull );
-
-            MatchAll_ChainID__exposer.def(
+            
+            MatchAll_ChainID__exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::MatchAll< SireMol::ChainID >::map
-
+        
             typedef SireID::MatchAll< SireMol::ChainID > exported_class_t;
             typedef ::QList< SireMol::ChainIdx > ( ::SireID::MatchAll< SireMol::ChainID >::*map_function_type)( ::SireMol::ChainID::SearchObject const & ) const;
             map_function_type map_function_value( &::SireID::MatchAll< SireMol::ChainID >::map );
-
-            MatchAll_ChainID__exposer.def(
+            
+            MatchAll_ChainID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("obj") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MatchAll_ChainID__exposer.def( bp::self != bp::self );
         MatchAll_ChainID__exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireID::MatchAll< SireMol::ChainID >::operator=
-
+        
             typedef SireID::MatchAll< SireMol::ChainID > exported_class_t;
             typedef ::SireID::MatchAll< SireMol::ChainID > & ( ::SireID::MatchAll< SireMol::ChainID >::*assign_function_type)( ::SireID::MatchAll< SireMol::ChainID > const & ) ;
             assign_function_type assign_function_value( &::SireID::MatchAll< SireMol::ChainID >::operator= );
-
-            MatchAll_ChainID__exposer.def(
+            
+            MatchAll_ChainID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         MatchAll_ChainID__exposer.def( bp::self == bp::self );
         MatchAll_ChainID__exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireID::MatchAll< SireMol::ChainID >::toString
-
+        
             typedef SireID::MatchAll< SireMol::ChainID > exported_class_t;
             typedef ::QString ( ::SireID::MatchAll< SireMol::ChainID >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireID::MatchAll< SireMol::ChainID >::toString );
-
-            MatchAll_ChainID__exposer.def(
+            
+            MatchAll_ChainID__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::MatchAll< SireMol::ChainID >::typeName
-
+        
             typedef SireID::MatchAll< SireMol::ChainID > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireID::MatchAll< SireMol::ChainID >::typeName );
-
-            MatchAll_ChainID__exposer.def(
+            
+            MatchAll_ChainID__exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::MatchAll< SireMol::ChainID >::what
-
+        
             typedef SireID::MatchAll< SireMol::ChainID > exported_class_t;
             typedef char const * ( ::SireID::MatchAll< SireMol::ChainID >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireID::MatchAll< SireMol::ChainID >::what );
-
-            MatchAll_ChainID__exposer.def(
+            
+            MatchAll_ChainID__exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MatchAll_ChainID__exposer.staticmethod( "typeName" );
         MatchAll_ChainID__exposer.def( "__copy__", &__copy__);

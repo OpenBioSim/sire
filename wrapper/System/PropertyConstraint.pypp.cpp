@@ -52,42 +52,42 @@ void register_PropertyConstraint_class(){
         PropertyConstraint_exposer.def( bp::init< SireSystem::PropertyConstraint const & >(( bp::arg("other") ), "Copy constructor") );
         PropertyConstraint_exposer.def( bp::self != bp::self );
         { //::SireSystem::PropertyConstraint::operator=
-
+        
             typedef ::SireSystem::PropertyConstraint & ( ::SireSystem::PropertyConstraint::*assign_function_type)( ::SireSystem::PropertyConstraint const & ) ;
             assign_function_type assign_function_value( &::SireSystem::PropertyConstraint::operator= );
-
-            PropertyConstraint_exposer.def(
+            
+            PropertyConstraint_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         PropertyConstraint_exposer.def( bp::self == bp::self );
         { //::SireSystem::PropertyConstraint::toString
-
+        
             typedef ::QString ( ::SireSystem::PropertyConstraint::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireSystem::PropertyConstraint::toString );
-
-            PropertyConstraint_exposer.def(
+            
+            PropertyConstraint_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of the constraint" );
-
+        
         }
         { //::SireSystem::PropertyConstraint::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::PropertyConstraint::typeName );
-
-            PropertyConstraint_exposer.def(
+            
+            PropertyConstraint_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         PropertyConstraint_exposer.staticmethod( "typeName" );
         PropertyConstraint_exposer.def( "__copy__", &__copy__);

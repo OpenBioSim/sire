@@ -32,64 +32,64 @@ void register_TempDir_class(){
         TempDir_exposer_t TempDir_exposer = TempDir_exposer_t( "TempDir", "This class provides a temporary directory that is created in the\nconstructor, and deleted in the destructor.\n\nAuthor: Christopher Woods\n" );
         bp::scope TempDir_scope( TempDir_exposer );
         { //::SireBase::TempDir::doNotDelete
-
+        
             typedef void ( ::SireBase::TempDir::*doNotDelete_function_type)(  ) ;
             doNotDelete_function_type doNotDelete_function_value( &::SireBase::TempDir::doNotDelete );
-
-            TempDir_exposer.def(
+            
+            TempDir_exposer.def( 
                 "doNotDelete"
                 , doNotDelete_function_value
                 , bp::release_gil_policy()
                 , "Tell the TempDir not to delete the directory when this object\nis deleted - this can be used when you are debugging to prevent\nthe directory from disappearing" );
-
+        
         }
         { //::SireBase::TempDir::path
-
+        
             typedef ::QString ( ::SireBase::TempDir::*path_function_type)(  ) const;
             path_function_type path_function_value( &::SireBase::TempDir::path );
-
-            TempDir_exposer.def(
+            
+            TempDir_exposer.def( 
                 "path"
                 , path_function_value
                 , bp::release_gil_policy()
                 , "This returns the complete path to the temporary directory" );
-
+        
         }
         { //::SireBase::TempDir::toString
-
+        
             typedef ::QString ( ::SireBase::TempDir::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::TempDir::toString );
-
-            TempDir_exposer.def(
+            
+            TempDir_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this TempDir" );
-
+        
         }
         { //::SireBase::TempDir::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireBase::TempDir::typeName );
-
-            TempDir_exposer.def(
+            
+            TempDir_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TempDir::what
-
+        
             typedef char const * ( ::SireBase::TempDir::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireBase::TempDir::what );
-
-            TempDir_exposer.def(
+            
+            TempDir_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         TempDir_exposer.staticmethod( "typeName" );
         TempDir_exposer.def( "__str__", &__str__< ::SireBase::TempDir > );

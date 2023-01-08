@@ -42,55 +42,55 @@ void register_ArcTan_class(){
         ArcTan_exposer.def( bp::init< SireCAS::Expression const & >(( bp::arg("ex") ), "Construct cos(expression)") );
         ArcTan_exposer.def( bp::init< SireCAS::ArcTan const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::ArcTan::evaluate
-
+        
             typedef double ( ::SireCAS::ArcTan::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::ArcTan::evaluate );
-
-            ArcTan_exposer.def(
+            
+            ArcTan_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this function" );
-
+        
         }
         { //::SireCAS::ArcTan::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::ArcTan::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::ArcTan::evaluate );
-
-            ArcTan_exposer.def(
+            
+            ArcTan_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Complex evaluation" );
-
+        
         }
         ArcTan_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::ArcTan::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::ArcTan::typeName );
-
-            ArcTan_exposer.def(
+            
+            ArcTan_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::ArcTan::what
-
+        
             typedef char const * ( ::SireCAS::ArcTan::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::ArcTan::what );
-
-            ArcTan_exposer.def(
+            
+            ArcTan_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ArcTan_exposer.staticmethod( "typeName" );
         ArcTan_exposer.def( "__copy__", &__copy__);

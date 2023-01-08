@@ -32,103 +32,103 @@ void register_CGIdx_class(){
         CGIdx_exposer.def( bp::init< qint32 >(( bp::arg("idx") ), "") );
         CGIdx_exposer.def( bp::init< SireMol::CGIdx const & >(( bp::arg("other") ), "") );
         { //::SireMol::CGIdx::hash
-
+        
             typedef ::uint ( ::SireMol::CGIdx::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::CGIdx::hash );
-
-            CGIdx_exposer.def(
+            
+            CGIdx_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::CGIdx::isNull
-
+        
             typedef bool ( ::SireMol::CGIdx::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::CGIdx::isNull );
-
-            CGIdx_exposer.def(
+            
+            CGIdx_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::CGIdx::map
-
+        
             typedef ::QList< SireMol::CGIdx > ( ::SireMol::CGIdx::*map_function_type)( ::SireMol::MolInfo const & ) const;
             map_function_type map_function_value( &::SireMol::CGIdx::map );
-
-            CGIdx_exposer.def(
+            
+            CGIdx_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::CGIdx::null
-
+        
             typedef ::SireMol::CGIdx ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMol::CGIdx::null );
-
-            CGIdx_exposer.def(
+            
+            CGIdx_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CGIdx_exposer.def( bp::self + bp::other< SireID::Index >() );
         { //::SireMol::CGIdx::operator=
-
+        
             typedef ::SireMol::CGIdx & ( ::SireMol::CGIdx::*assign_function_type)( ::SireMol::CGIdx const & ) ;
             assign_function_type assign_function_value( &::SireMol::CGIdx::operator= );
-
-            CGIdx_exposer.def(
+            
+            CGIdx_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::CGIdx::toString
-
+        
             typedef ::QString ( ::SireMol::CGIdx::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::CGIdx::toString );
-
-            CGIdx_exposer.def(
+            
+            CGIdx_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::CGIdx::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::CGIdx::typeName );
-
-            CGIdx_exposer.def(
+            
+            CGIdx_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::CGIdx::what
-
+        
             typedef char const * ( ::SireMol::CGIdx::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::CGIdx::what );
-
-            CGIdx_exposer.def(
+            
+            CGIdx_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CGIdx_exposer.staticmethod( "null" );
         CGIdx_exposer.staticmethod( "typeName" );

@@ -42,104 +42,104 @@ void register_DistanceComponent_class(){
         DistanceComponent_exposer.def( bp::init< SireCAS::Symbol const &, SireFF::PointRef const &, SireFF::PointRef const &, SireCAS::Expression const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("constrained_symbol"), bp::arg("point0"), bp::arg("point1"), bp::arg("geometry_expression"), bp::arg("map")=SireBase::PropertyMap() ), "Construct to set the value of constrained_symbol equal to the\nexpression based on the distance between the two points\npoint0 and point1") );
         DistanceComponent_exposer.def( bp::init< SireSystem::DistanceComponent const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireSystem::DistanceComponent::nPoints
-
+        
             typedef int ( ::SireSystem::DistanceComponent::*nPoints_function_type)(  ) const;
             nPoints_function_type nPoints_function_value( &::SireSystem::DistanceComponent::nPoints );
-
-            DistanceComponent_exposer.def(
+            
+            DistanceComponent_exposer.def( 
                 "nPoints"
                 , nPoints_function_value
                 , bp::release_gil_policy()
                 , "Return the number of points (2)" );
-
+        
         }
         DistanceComponent_exposer.def( bp::self != bp::self );
         { //::SireSystem::DistanceComponent::operator=
-
+        
             typedef ::SireSystem::DistanceComponent & ( ::SireSystem::DistanceComponent::*assign_function_type)( ::SireSystem::DistanceComponent const & ) ;
             assign_function_type assign_function_value( &::SireSystem::DistanceComponent::operator= );
-
-            DistanceComponent_exposer.def(
+            
+            DistanceComponent_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         DistanceComponent_exposer.def( bp::self == bp::self );
         { //::SireSystem::DistanceComponent::point
-
+        
             typedef ::SireFF::Point const & ( ::SireSystem::DistanceComponent::*point_function_type)( int ) const;
             point_function_type point_function_value( &::SireSystem::DistanceComponent::point );
-
-            DistanceComponent_exposer.def(
+            
+            DistanceComponent_exposer.def( 
                 "point"
                 , point_function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the ith point\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireSystem::DistanceComponent::point0
-
+        
             typedef ::SireFF::Point const & ( ::SireSystem::DistanceComponent::*point0_function_type)(  ) const;
             point0_function_type point0_function_value( &::SireSystem::DistanceComponent::point0 );
-
-            DistanceComponent_exposer.def(
+            
+            DistanceComponent_exposer.def( 
                 "point0"
                 , point0_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the first point between which the distance is calculated" );
-
+        
         }
         { //::SireSystem::DistanceComponent::point1
-
+        
             typedef ::SireFF::Point const & ( ::SireSystem::DistanceComponent::*point1_function_type)(  ) const;
             point1_function_type point1_function_value( &::SireSystem::DistanceComponent::point1 );
-
-            DistanceComponent_exposer.def(
+            
+            DistanceComponent_exposer.def( 
                 "point1"
                 , point1_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the second point between which the distance is calculated" );
-
+        
         }
         { //::SireSystem::DistanceComponent::r
-
+        
             typedef ::SireCAS::Symbol const & ( *r_function_type )(  );
             r_function_type r_function_value( &::SireSystem::DistanceComponent::r );
-
-            DistanceComponent_exposer.def(
+            
+            DistanceComponent_exposer.def( 
                 "r"
                 , r_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the symbol that represents the distance between the\ntwo points (r)" );
-
+        
         }
         { //::SireSystem::DistanceComponent::toString
-
+        
             typedef ::QString ( ::SireSystem::DistanceComponent::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireSystem::DistanceComponent::toString );
-
-            DistanceComponent_exposer.def(
+            
+            DistanceComponent_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireSystem::DistanceComponent::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::DistanceComponent::typeName );
-
-            DistanceComponent_exposer.def(
+            
+            DistanceComponent_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         DistanceComponent_exposer.staticmethod( "r" );
         DistanceComponent_exposer.staticmethod( "typeName" );

@@ -60,16 +60,16 @@ void register_AngleParameterName_class(){
         AngleParameterName_exposer_t AngleParameterName_exposer = AngleParameterName_exposer_t( "AngleParameterName", "This class provides the default name of the\nproperty that contains the angle parameters", bp::init< >("") );
         bp::scope AngleParameterName_scope( AngleParameterName_exposer );
         { //::SireMM::AngleParameterName::angle
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMM::AngleParameterName::*angle_function_type)(  ) const;
             angle_function_type angle_function_value( &::SireMM::AngleParameterName::angle );
-
-            AngleParameterName_exposer.def(
+            
+            AngleParameterName_exposer.def( 
                 "angle"
                 , angle_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         AngleParameterName_exposer.def( "__copy__", &__copy__);
         AngleParameterName_exposer.def( "__deepcopy__", &__copy__);

@@ -39,42 +39,42 @@ void register_HistogramValue_class(){
         HistogramValue_exposer.def( bp::init< SireMaths::HistogramValue const & >(( bp::arg("other") ), "Copy constructor") );
         HistogramValue_exposer.def( bp::self != bp::self );
         { //::SireMaths::HistogramValue::operator=
-
+        
             typedef ::SireMaths::HistogramValue & ( ::SireMaths::HistogramValue::*assign_function_type)( ::SireMaths::HistogramValue const & ) ;
             assign_function_type assign_function_value( &::SireMaths::HistogramValue::operator= );
-
-            HistogramValue_exposer.def(
+            
+            HistogramValue_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         HistogramValue_exposer.def( bp::self == bp::self );
         { //::SireMaths::HistogramValue::toString
-
+        
             typedef ::QString ( ::SireMaths::HistogramValue::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::HistogramValue::toString );
-
-            HistogramValue_exposer.def(
+            
+            HistogramValue_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation" );
-
+        
         }
         { //::SireMaths::HistogramValue::value
-
+        
             typedef double ( ::SireMaths::HistogramValue::*value_function_type)(  ) const;
             value_function_type value_function_value( &::SireMaths::HistogramValue::value );
-
-            HistogramValue_exposer.def(
+            
+            HistogramValue_exposer.def( 
                 "value"
                 , value_function_value
                 , bp::release_gil_policy()
                 , "Return the value of the bin" );
-
+        
         }
         HistogramValue_exposer.def( "__copy__", &__copy__);
         HistogramValue_exposer.def( "__deepcopy__", &__copy__);

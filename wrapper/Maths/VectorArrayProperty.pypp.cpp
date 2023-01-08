@@ -39,30 +39,30 @@ void register_VectorArrayProperty_class(){
         VectorArrayProperty_exposer.def( bp::self != bp::self );
         VectorArrayProperty_exposer.def( bp::self + bp::self );
         { //::SireMaths::VectorArrayProperty::operator=
-
+        
             typedef ::SireMaths::VectorArrayProperty & ( ::SireMaths::VectorArrayProperty::*assign_function_type)( ::SireMaths::VectorArrayProperty const & ) ;
             assign_function_type assign_function_value( &::SireMaths::VectorArrayProperty::operator= );
-
-            VectorArrayProperty_exposer.def(
+            
+            VectorArrayProperty_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         VectorArrayProperty_exposer.def( bp::self == bp::self );
         { //::SireMaths::VectorArrayProperty::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMaths::VectorArrayProperty::typeName );
-
-            VectorArrayProperty_exposer.def(
+            
+            VectorArrayProperty_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         VectorArrayProperty_exposer.staticmethod( "typeName" );
         VectorArrayProperty_exposer.def( "__copy__", &__copy__);

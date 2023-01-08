@@ -54,67 +54,67 @@ void register_AtomResultMatcher_class(){
         AtomResultMatcher_exposer.def( bp::init< QHash< SireMol::AtomIdx, SireMol::AtomIdx > const &, bp::optional< bool > >(( bp::arg("results"), bp::arg("invert")=(bool)(false) ), "Constructor") );
         AtomResultMatcher_exposer.def( bp::init< SireMol::AtomResultMatcher const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::AtomResultMatcher::isNull
-
+        
             typedef bool ( ::SireMol::AtomResultMatcher::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::AtomResultMatcher::isNull );
-
-            AtomResultMatcher_exposer.def(
+            
+            AtomResultMatcher_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomResultMatcher_exposer.def( bp::self != bp::self );
         { //::SireMol::AtomResultMatcher::operator=
-
+        
             typedef ::SireMol::AtomResultMatcher & ( ::SireMol::AtomResultMatcher::*assign_function_type)( ::SireMol::AtomResultMatcher const & ) ;
             assign_function_type assign_function_value( &::SireMol::AtomResultMatcher::operator= );
-
-            AtomResultMatcher_exposer.def(
+            
+            AtomResultMatcher_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         AtomResultMatcher_exposer.def( bp::self == bp::self );
         { //::SireMol::AtomResultMatcher::toString
-
+        
             typedef ::QString ( ::SireMol::AtomResultMatcher::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::AtomResultMatcher::toString );
-
-            AtomResultMatcher_exposer.def(
+            
+            AtomResultMatcher_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomResultMatcher::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::AtomResultMatcher::typeName );
-
-            AtomResultMatcher_exposer.def(
+            
+            AtomResultMatcher_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomResultMatcher::what
-
+        
             typedef char const * ( ::SireMol::AtomResultMatcher::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::AtomResultMatcher::what );
-
-            AtomResultMatcher_exposer.def(
+            
+            AtomResultMatcher_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomResultMatcher_exposer.staticmethod( "typeName" );
         AtomResultMatcher_exposer.def( "__copy__", &__copy__);

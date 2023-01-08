@@ -48,42 +48,42 @@ void register_NullVolumeChanger_class(){
         NullVolumeChanger_exposer.def( bp::init< SireMove::NullVolumeChanger const & >(( bp::arg("other") ), "Copy constructor") );
         NullVolumeChanger_exposer.def( bp::self != bp::self );
         { //::SireMove::NullVolumeChanger::operator=
-
+        
             typedef ::SireMove::NullVolumeChanger & ( ::SireMove::NullVolumeChanger::*assign_function_type)( ::SireMove::NullVolumeChanger const & ) ;
             assign_function_type assign_function_value( &::SireMove::NullVolumeChanger::operator= );
-
-            NullVolumeChanger_exposer.def(
+            
+            NullVolumeChanger_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         NullVolumeChanger_exposer.def( bp::self == bp::self );
         { //::SireMove::NullVolumeChanger::setVolume
-
+        
             typedef int ( ::SireMove::NullVolumeChanger::*setVolume_function_type)( ::SireSystem::System &,::SireUnits::Dimension::Volume const &,::SireBase::PropertyMap const & ) const;
             setVolume_function_type setVolume_function_value( &::SireMove::NullVolumeChanger::setVolume );
-
-            NullVolumeChanger_exposer.def(
+            
+            NullVolumeChanger_exposer.def( 
                 "setVolume"
                 , setVolume_function_value
                 , ( bp::arg("system"), bp::arg("volume"), bp::arg("map")=SireBase::PropertyMap() )
                 , "The null volume changer doesnt change anything" );
-
+        
         }
         { //::SireMove::NullVolumeChanger::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::NullVolumeChanger::typeName );
-
-            NullVolumeChanger_exposer.def(
+            
+            NullVolumeChanger_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullVolumeChanger_exposer.staticmethod( "typeName" );
         NullVolumeChanger_exposer.def( "__copy__", &__copy__);

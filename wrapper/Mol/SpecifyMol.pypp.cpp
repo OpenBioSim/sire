@@ -44,120 +44,120 @@ void register_SpecifyMol_class(){
         SpecifyMol_exposer.def( bp::init< SireMol::MolID const &, int, int >(( bp::arg("molid"), bp::arg("i"), bp::arg("j") ), "Construct to math the range of molecules from i to j that\nmatch the ID molid") );
         SpecifyMol_exposer.def( bp::init< SireMol::SpecifyMol const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::SpecifyMol::hash
-
+        
             typedef ::uint ( ::SireMol::SpecifyMol::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::SpecifyMol::hash );
-
-            SpecifyMol_exposer.def(
+            
+            SpecifyMol_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "Hash this ID" );
-
+        
         }
         { //::SireMol::SpecifyMol::isNull
-
+        
             typedef bool ( ::SireMol::SpecifyMol::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::SpecifyMol::isNull );
-
-            SpecifyMol_exposer.def(
+            
+            SpecifyMol_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this ID is null" );
-
+        
         }
         { //::SireMol::SpecifyMol::map
-
+        
             typedef ::QList< SireMol::MolNum > ( ::SireMol::SpecifyMol::*map_function_type)( ::SireMol::Molecules const & ) const;
             map_function_type map_function_value( &::SireMol::SpecifyMol::map );
-
-            SpecifyMol_exposer.def(
+            
+            SpecifyMol_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "Map this ID to the list of molecule numbers that match" );
-
+        
         }
         { //::SireMol::SpecifyMol::map
-
+        
             typedef ::QList< SireMol::MolNum > ( ::SireMol::SpecifyMol::*map_function_type)( ::SireMol::MoleculeGroup const & ) const;
             map_function_type map_function_value( &::SireMol::SpecifyMol::map );
-
-            SpecifyMol_exposer.def(
+            
+            SpecifyMol_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molgroup") )
                 , bp::release_gil_policy()
                 , "Map this ID to the list of molecule numbers that match" );
-
+        
         }
         { //::SireMol::SpecifyMol::map
-
+        
             typedef ::QList< SireMol::MolNum > ( ::SireMol::SpecifyMol::*map_function_type)( ::SireMol::MolGroupsBase const & ) const;
             map_function_type map_function_value( &::SireMol::SpecifyMol::map );
-
-            SpecifyMol_exposer.def(
+            
+            SpecifyMol_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molgroups") )
                 , bp::release_gil_policy()
                 , "Map this ID to the list of molecule numbers that match" );
-
+        
         }
         SpecifyMol_exposer.def( bp::self != bp::self );
         SpecifyMol_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireMol::SpecifyMol::operator=
-
+        
             typedef ::SireMol::SpecifyMol & ( ::SireMol::SpecifyMol::*assign_function_type)( ::SireMol::SpecifyMol const & ) ;
             assign_function_type assign_function_value( &::SireMol::SpecifyMol::operator= );
-
-            SpecifyMol_exposer.def(
+            
+            SpecifyMol_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SpecifyMol_exposer.def( bp::self == bp::self );
         SpecifyMol_exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireMol::SpecifyMol::toString
-
+        
             typedef ::QString ( ::SireMol::SpecifyMol::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::SpecifyMol::toString );
-
-            SpecifyMol_exposer.def(
+            
+            SpecifyMol_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this ID" );
-
+        
         }
         { //::SireMol::SpecifyMol::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::SpecifyMol::typeName );
-
-            SpecifyMol_exposer.def(
+            
+            SpecifyMol_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::SpecifyMol::what
-
+        
             typedef char const * ( ::SireMol::SpecifyMol::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::SpecifyMol::what );
-
-            SpecifyMol_exposer.def(
+            
+            SpecifyMol_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SpecifyMol_exposer.staticmethod( "typeName" );
         SpecifyMol_exposer.def( "__copy__", &__copy__);

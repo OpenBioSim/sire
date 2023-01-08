@@ -42,86 +42,86 @@ void register_ChainAtomID_class(){
         ChainAtomID_exposer.def( bp::init< SireMol::ChainID const &, SireMol::AtomID const & >(( bp::arg("group"), bp::arg("atom") ), "") );
         ChainAtomID_exposer.def( bp::init< SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID > const & >(( bp::arg("other") ), "") );
         { //::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::hash
-
+        
             typedef SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID > exported_class_t;
             typedef ::uint ( ::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::hash );
-
-            ChainAtomID_exposer.def(
+            
+            ChainAtomID_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::isNull
-
+        
             typedef SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID > exported_class_t;
             typedef bool ( ::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::isNull );
-
-            ChainAtomID_exposer.def(
+            
+            ChainAtomID_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::map
-
+        
             typedef SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID > exported_class_t;
             typedef ::QList< SireMol::AtomIdx > ( ::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::*map_function_type)( ::SireMol::MolInfo const & ) const;
             map_function_type map_function_value( &::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::map );
-
-            ChainAtomID_exposer.def(
+            
+            ChainAtomID_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ChainAtomID_exposer.def( bp::self != bp::self );
         ChainAtomID_exposer.def( bp::self == bp::self );
         ChainAtomID_exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::toString
-
+        
             typedef SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID > exported_class_t;
             typedef ::QString ( ::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::toString );
-
-            ChainAtomID_exposer.def(
+            
+            ChainAtomID_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::typeName
-
+        
             typedef SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::typeName );
-
-            ChainAtomID_exposer.def(
+            
+            ChainAtomID_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::what
-
+        
             typedef SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID > exported_class_t;
             typedef char const * ( ::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::what );
-
-            ChainAtomID_exposer.def(
+            
+            ChainAtomID_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ChainAtomID_exposer.staticmethod( "typeName" );
         ChainAtomID_exposer.def( "__copy__", &__copy__);

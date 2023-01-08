@@ -31,334 +31,334 @@ void register_SupraSim_class(){
         bp::scope SupraSim_scope( SupraSim_exposer );
         SupraSim_exposer.def( bp::init< SireMove::SupraSim const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::SupraSim::abort
-
+        
             typedef void ( ::SireMove::SupraSim::*abort_function_type)(  ) ;
             abort_function_type abort_function_value( &::SireMove::SupraSim::abort );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "abort"
                 , abort_function_value
                 , bp::release_gil_policy()
                 , "Abort the simulation" );
-
+        
         }
         { //::SireMove::SupraSim::hasFinished
-
+        
             typedef bool ( ::SireMove::SupraSim::*hasFinished_function_type)(  ) ;
             hasFinished_function_type hasFinished_function_value( &::SireMove::SupraSim::hasFinished );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "hasFinished"
                 , hasFinished_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the simulation has finished\n(completed all of the moves)" );
-
+        
         }
         { //::SireMove::SupraSim::initialMoves
-
+        
             typedef ::SireMove::SupraMovesPtr ( ::SireMove::SupraSim::*initialMoves_function_type)(  ) ;
             initialMoves_function_type initialMoves_function_value( &::SireMove::SupraSim::initialMoves );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "initialMoves"
                 , initialMoves_function_value
                 , bp::release_gil_policy()
                 , "Return the Moves in the state they were in before the simulation started" );
-
+        
         }
         { //::SireMove::SupraSim::initialSystem
-
+        
             typedef ::SireMove::SupraSystemPtr ( ::SireMove::SupraSim::*initialSystem_function_type)(  ) ;
             initialSystem_function_type initialSystem_function_value( &::SireMove::SupraSim::initialSystem );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "initialSystem"
                 , initialSystem_function_value
                 , bp::release_gil_policy()
                 , "Return the System in the state it was in before the simulation started" );
-
+        
         }
         { //::SireMove::SupraSim::input
-
+        
             typedef ::SireMove::SupraSimPacket ( ::SireMove::SupraSim::*input_function_type)(  ) ;
             input_function_type input_function_value( &::SireMove::SupraSim::input );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "input"
                 , input_function_value
                 , bp::release_gil_policy()
                 , "Return the initial input simulation WorkPacket" );
-
+        
         }
         { //::SireMove::SupraSim::interimMoves
-
+        
             typedef ::SireMove::SupraMovesPtr ( ::SireMove::SupraSim::*interimMoves_function_type)(  ) ;
             interimMoves_function_type interimMoves_function_value( &::SireMove::SupraSim::interimMoves );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "interimMoves"
                 , interimMoves_function_value
                 , bp::release_gil_policy()
                 , "Return the current state of the moves (updated while the simulation\nis running). This will throw an exception if the system hits an\nerror state" );
-
+        
         }
         { //::SireMove::SupraSim::interimResult
-
+        
             typedef ::SireMove::SupraSimPacket ( ::SireMove::SupraSim::*interimResult_function_type)(  ) ;
             interimResult_function_type interimResult_function_value( &::SireMove::SupraSim::interimResult );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "interimResult"
                 , interimResult_function_value
                 , bp::release_gil_policy()
                 , "Return the simulation WorkPacket from an intermediate point along\nthe simulation. This will throw an error if the simulation is in an\nerror state, and the initial packet if the simulation\nwas aborted" );
-
+        
         }
         { //::SireMove::SupraSim::interimSystem
-
+        
             typedef ::SireMove::SupraSystemPtr ( ::SireMove::SupraSim::*interimSystem_function_type)(  ) ;
             interimSystem_function_type interimSystem_function_value( &::SireMove::SupraSim::interimSystem );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "interimSystem"
                 , interimSystem_function_value
                 , bp::release_gil_policy()
                 , "Return the current state of the System (updated while the simulation\nis running). This will throw an exception if the system hits an\nerror state" );
-
+        
         }
         { //::SireMove::SupraSim::isError
-
+        
             typedef bool ( ::SireMove::SupraSim::*isError_function_type)(  ) ;
             isError_function_type isError_function_value( &::SireMove::SupraSim::isError );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "isError"
                 , isError_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this simulation is in an error state" );
-
+        
         }
         { //::SireMove::SupraSim::isRunning
-
+        
             typedef bool ( ::SireMove::SupraSim::*isRunning_function_type)(  ) ;
             isRunning_function_type isRunning_function_value( &::SireMove::SupraSim::isRunning );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "isRunning"
                 , isRunning_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this simulation is running" );
-
+        
         }
         { //::SireMove::SupraSim::moves
-
+        
             typedef ::SireMove::SupraMovesPtr ( ::SireMove::SupraSim::*moves_function_type)(  ) ;
             moves_function_type moves_function_value( &::SireMove::SupraSim::moves );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "moves"
                 , moves_function_value
                 , bp::release_gil_policy()
                 , "Return the final state of the moves after the simulation. This\nblocks until the simulation has finished and will throw an\nexception if the system hits an error state" );
-
+        
         }
         SupraSim_exposer.def( bp::self != bp::self );
         { //::SireMove::SupraSim::operator=
-
+        
             typedef ::SireMove::SupraSim & ( ::SireMove::SupraSim::*assign_function_type)( ::SireMove::SupraSim const & ) ;
             assign_function_type assign_function_value( &::SireMove::SupraSim::operator= );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SupraSim_exposer.def( bp::self == bp::self );
         { //::SireMove::SupraSim::progress
-
+        
             typedef float ( ::SireMove::SupraSim::*progress_function_type)(  ) ;
             progress_function_type progress_function_value( &::SireMove::SupraSim::progress );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "progress"
                 , progress_function_value
                 , bp::release_gil_policy()
                 , "Return the progress of the simulation (as a percentage)" );
-
+        
         }
         { //::SireMove::SupraSim::result
-
+        
             typedef ::SireMove::SupraSimPacket ( ::SireMove::SupraSim::*result_function_type)(  ) ;
             result_function_type result_function_value( &::SireMove::SupraSim::result );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "result"
                 , result_function_value
                 , bp::release_gil_policy()
                 , "Return the final result of the simulation. This blocks until\nthe simulation has stopped, and will throw an exception if the\nsimulation is in an error state. This returns the initial\nsimulation WorkPacket if the simulation was aborted" );
-
+        
         }
         { //::SireMove::SupraSim::run
-
+        
             typedef ::SireMove::SupraSim ( *run_function_type )( ::SireMove::SupraSystem const &,::SireMove::SupraMoves const &,int,bool );
             run_function_type run_function_value( &::SireMove::SupraSim::run );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("system"), bp::arg("moves"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run the supra-system simulation applying nmoves moves from moves\non the supra-system system, recording statistics if record_stats\nis true. The simulation is run in the current thread" );
-
+        
         }
         { //::SireMove::SupraSim::run
-
+        
             typedef ::SireMove::SupraSim ( *run_function_type )( ::SireMove::SupraSystem const &,::SireMove::SupraMove const &,int,bool );
             run_function_type run_function_value( &::SireMove::SupraSim::run );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("system"), bp::arg("move"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run the supra-system simulation applying nmoves moves from moves\non the supra-system system, recording statistics if record_stats\nis true. The simulation is run in the current thread" );
-
+        
         }
         { //::SireMove::SupraSim::run
-
+        
             typedef ::SireMove::SupraSim ( *run_function_type )( ::SireMove::SupraSimPacket const & );
             run_function_type run_function_value( &::SireMove::SupraSim::run );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("simpacket") )
                 , bp::release_gil_policy()
                 , "Run the supra-system simulation described in simpacket in the\ncurrent thread" );
-
+        
         }
         { //::SireMove::SupraSim::run
-
+        
             typedef ::SireMove::SupraSim ( *run_function_type )( ::SireCluster::Node &,::SireMove::SupraSystem const &,::SireMove::SupraMoves const &,int,bool );
             run_function_type run_function_value( &::SireMove::SupraSim::run );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("system"), bp::arg("moves"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run the supra-system simulation applying nmoves moves from moves\non the supra-system system, recording statistics if record_stats\nis true. The simulation is run on the node node and a handle is\nreturned to the running simulation" );
-
+        
         }
         { //::SireMove::SupraSim::run
-
+        
             typedef ::SireMove::SupraSim ( *run_function_type )( ::SireCluster::Node &,::SireMove::SupraSystem const &,::SireMove::SupraMove const &,int,bool );
             run_function_type run_function_value( &::SireMove::SupraSim::run );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("system"), bp::arg("move"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Run the supra-system simulation applying nmoves moves from moves\non the supra-system system, recording statistics if record_stats\nis true. The simulation is run on the node node and a handle is\nreturned to the running simulation" );
-
+        
         }
         { //::SireMove::SupraSim::run
-
+        
             typedef ::SireMove::SupraSim ( *run_function_type )( ::SireCluster::Node &,::SireMove::SupraSimPacket const & );
             run_function_type run_function_value( &::SireMove::SupraSim::run );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "run"
                 , run_function_value
                 , ( bp::arg("node"), bp::arg("simpacket") )
                 , bp::release_gil_policy()
                 , "Run the supra-system simulation described in simpacket on the\nnode node, returning a handle to the running simulation" );
-
+        
         }
         { //::SireMove::SupraSim::stop
-
+        
             typedef void ( ::SireMove::SupraSim::*stop_function_type)(  ) ;
             stop_function_type stop_function_value( &::SireMove::SupraSim::stop );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "stop"
                 , stop_function_value
                 , bp::release_gil_policy()
                 , "Stop the simulation" );
-
+        
         }
         { //::SireMove::SupraSim::system
-
+        
             typedef ::SireMove::SupraSystemPtr ( ::SireMove::SupraSim::*system_function_type)(  ) ;
             system_function_type system_function_value( &::SireMove::SupraSim::system );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "system"
                 , system_function_value
                 , bp::release_gil_policy()
                 , "Return the final state of the system after the simulation. This\nblocks until the simulation has finished and will throw an\nexception if the system hits an error state" );
-
+        
         }
         { //::SireMove::SupraSim::throwError
-
+        
             typedef void ( ::SireMove::SupraSim::*throwError_function_type)(  ) ;
             throwError_function_type throwError_function_value( &::SireMove::SupraSim::throwError );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "throwError"
                 , throwError_function_value
                 , bp::release_gil_policy()
                 , "Throw any error associated with this simulation - this does\nnothing if we are not in an error state" );
-
+        
         }
         { //::SireMove::SupraSim::wait
-
+        
             typedef void ( ::SireMove::SupraSim::*wait_function_type)(  ) ;
             wait_function_type wait_function_value( &::SireMove::SupraSim::wait );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "wait"
                 , wait_function_value
                 , bp::release_gil_policy()
                 , "Wait until the simulation has finished" );
-
+        
         }
         { //::SireMove::SupraSim::wait
-
+        
             typedef bool ( ::SireMove::SupraSim::*wait_function_type)( int ) ;
             wait_function_type wait_function_value( &::SireMove::SupraSim::wait );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "wait"
                 , wait_function_value
                 , ( bp::arg("timeout") )
                 , bp::release_gil_policy()
                 , "Wait for the simulation to stop running, or for timeout\nmilliseconds to pass, whichever comes soonest. This returns\nwhether or not the simulation has stopped" );
-
+        
         }
         { //::SireMove::SupraSim::wasAborted
-
+        
             typedef bool ( ::SireMove::SupraSim::*wasAborted_function_type)(  ) ;
             wasAborted_function_type wasAborted_function_value( &::SireMove::SupraSim::wasAborted );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "wasAborted"
                 , wasAborted_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the simulation was aborted" );
-
+        
         }
         { //::SireMove::SupraSim::wasStopped
-
+        
             typedef bool ( ::SireMove::SupraSim::*wasStopped_function_type)(  ) ;
             wasStopped_function_type wasStopped_function_value( &::SireMove::SupraSim::wasStopped );
-
-            SupraSim_exposer.def(
+            
+            SupraSim_exposer.def( 
                 "wasStopped"
                 , wasStopped_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the simulation was stopped" );
-
+        
         }
         SupraSim_exposer.staticmethod( "run" );
         SupraSim_exposer.def( "__copy__", &__copy__);

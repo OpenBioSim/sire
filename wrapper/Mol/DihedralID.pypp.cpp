@@ -47,253 +47,253 @@ void register_DihedralID_class(){
         DihedralID_exposer.def( bp::init< SireMol::AtomID const &, SireMol::AtomID const &, SireMol::AtomID const &, SireMol::AtomID const & >(( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("atom3") ), "Construct a dihedral between the two specified atoms. The order\nis important, as this dihedral may be between two different\nmolecules") );
         DihedralID_exposer.def( bp::init< SireMol::DihedralID const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::DihedralID::atom0
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMol::DihedralID::*atom0_function_type)(  ) const;
             atom0_function_type atom0_function_value( &::SireMol::DihedralID::atom0 );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "atom0"
                 , atom0_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the ID of the first atom of the dihedral" );
-
+        
         }
         { //::SireMol::DihedralID::atom1
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMol::DihedralID::*atom1_function_type)(  ) const;
             atom1_function_type atom1_function_value( &::SireMol::DihedralID::atom1 );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "atom1"
                 , atom1_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the ID of the second atom of the dihedral" );
-
+        
         }
         { //::SireMol::DihedralID::atom2
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMol::DihedralID::*atom2_function_type)(  ) const;
             atom2_function_type atom2_function_value( &::SireMol::DihedralID::atom2 );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "atom2"
                 , atom2_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the ID of the third atom of the dihedral" );
-
+        
         }
         { //::SireMol::DihedralID::atom3
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMol::DihedralID::*atom3_function_type)(  ) const;
             atom3_function_type atom3_function_value( &::SireMol::DihedralID::atom3 );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "atom3"
                 , atom3_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the ID of the fourth atom of the dihedral" );
-
+        
         }
         { //::SireMol::DihedralID::hash
-
+        
             typedef ::uint ( ::SireMol::DihedralID::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::DihedralID::hash );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "Return a hash for this ID" );
-
+        
         }
         { //::SireMol::DihedralID::isNull
-
+        
             typedef bool ( ::SireMol::DihedralID::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::DihedralID::isNull );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "Return whether this is a null ID" );
-
+        
         }
         { //::SireMol::DihedralID::map
-
+        
             typedef ::boost::tuples::tuple< SireMol::AtomIdx, SireMol::AtomIdx, SireMol::AtomIdx, SireMol::AtomIdx, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireMol::DihedralID::*map_function_type)( ::SireMol::MoleculeInfoData const & ) const;
             map_function_type map_function_value( &::SireMol::DihedralID::map );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "Return the indicies of the four atoms in this dihedral - this returns\nthem in the order\ntuple(dihedral.atom0(),dihedral.atom1(),dihedral.atom2(),dihedral.atom3())\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::DihedralID::map
-
+        
             typedef ::boost::tuples::tuple< SireMol::AtomIdx, SireMol::AtomIdx, SireMol::AtomIdx, SireMol::AtomIdx, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireMol::DihedralID::*map_function_type)( ::SireMol::MoleculeInfoData const &,::SireMol::MoleculeInfoData const &,::SireMol::MoleculeInfoData const &,::SireMol::MoleculeInfoData const & ) const;
             map_function_type map_function_value( &::SireMol::DihedralID::map );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("mol0info"), bp::arg("mol1info"), bp::arg("mol2info"), bp::arg("mol3info") )
                 , bp::release_gil_policy()
                 , "Return the indicies of the four atoms of this dihedral, between the\ntwo molecules whose data is in mol0info (containing dihedral.atom0()),\nmol1info (containing dihedral.atom1()), mol2info (containing\ndihedral.atom2()) and mol3info (containing dihedral.atom3())\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::DihedralID::mirror
-
+        
             typedef ::SireMol::DihedralID ( ::SireMol::DihedralID::*mirror_function_type)(  ) const;
             mirror_function_type mirror_function_value( &::SireMol::DihedralID::mirror );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "mirror"
                 , mirror_function_value
                 , bp::release_gil_policy()
                 , "Return the mirror of this DihedralID - i.e. if this is\nDihedralID(atom0, atom1, atom2, atom3), this returns\nDihedralID(atom3, atom2, atom1, atom0).\nThis is useful if you know that DihedralID(atom0,atom1,atom2,atom3) equals\n" );
-
+        
         }
         DihedralID_exposer.def( bp::self != bp::self );
         { //::SireMol::DihedralID::operator=
-
+        
             typedef ::SireMol::DihedralID & ( ::SireMol::DihedralID::*assign_function_type)( ::SireMol::DihedralID const & ) ;
             assign_function_type assign_function_value( &::SireMol::DihedralID::operator= );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         DihedralID_exposer.def( bp::self == bp::other< SireID::ID >() );
         DihedralID_exposer.def( bp::self == bp::self );
         { //::SireMol::DihedralID::operator[]
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMol::DihedralID::*__getitem___function_type)( int ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::DihedralID::operator[] );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireMol::DihedralID::size
-
+        
             typedef ::SireUnits::Dimension::Angle ( ::SireMol::DihedralID::*size_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             size_function_type size_function_value( &::SireMol::DihedralID::size );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "size"
                 , size_function_value
                 , ( bp::arg("moldata"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the size of this dihedral in the molecule whose data\nis in moldata, using map to find the coordinates property\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::DihedralID::size
-
+        
             typedef ::SireUnits::Dimension::Angle ( ::SireMol::DihedralID::*size_function_type)( ::SireMol::MoleculeData const &,::SireMol::MoleculeData const &,::SireMol::MoleculeData const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             size_function_type size_function_value( &::SireMol::DihedralID::size );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "size"
                 , size_function_value
                 , ( bp::arg("mol0data"), bp::arg("mol1data"), bp::arg("mol2data"), bp::arg("mol3data"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the size of the dihedral between atom0() in the\nmolecule whose data is in mol0data, atom1() in the\nmolecule whose data is in mol1data, atom2() in\nthe molecule whose data is in mol2data, and\natom3() in the molecule whose data is in mol3data,\nusing map to find the coordinates property of the\nmolecules\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::DihedralID::size
-
+        
             typedef ::SireUnits::Dimension::Angle ( ::SireMol::DihedralID::*size_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             size_function_type size_function_value( &::SireMol::DihedralID::size );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "size"
                 , size_function_value
                 , ( bp::arg("mol0data"), bp::arg("map0"), bp::arg("mol1data"), bp::arg("map1"), bp::arg("mol2data"), bp::arg("map2"), bp::arg("mol3data"), bp::arg("map3") )
                 , bp::release_gil_policy()
                 , "Return the size of the dihedral between atom0() in the\nmolecule whose data is in mol0data, atom1() in the\nmolecule whose data is in mol1data, atom2() in\nthe molecule whose data is in mol2data, and\natom3() in the molecule whose data is in mol3data, using map0\nto the find the coordinates property of mol0,\nmap1 to find the coordinates property of mol1,\nmap2 to find the coordinates property of mol2 and\nmap3 to find the coordinates property of mol3\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::DihedralID::toString
-
+        
             typedef ::QString ( ::SireMol::DihedralID::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::DihedralID::toString );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this ID" );
-
+        
         }
         { //::SireMol::DihedralID::torsion
-
+        
             typedef ::SireMaths::Torsion ( ::SireMol::DihedralID::*torsion_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             torsion_function_type torsion_function_value( &::SireMol::DihedralID::torsion );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "torsion"
                 , torsion_function_value
                 , ( bp::arg("moldata"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the geometric torsion formed by the four atoms\nof this dihedral in the molecule whose data is in moldata,\nusing map to find the coordinates property.\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::DihedralID::torsion
-
+        
             typedef ::SireMaths::Torsion ( ::SireMol::DihedralID::*torsion_function_type)( ::SireMol::MoleculeData const &,::SireMol::MoleculeData const &,::SireMol::MoleculeData const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             torsion_function_type torsion_function_value( &::SireMol::DihedralID::torsion );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "torsion"
                 , torsion_function_value
                 , ( bp::arg("mol0data"), bp::arg("mol1data"), bp::arg("mol2data"), bp::arg("mol3data"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the geometric torsion formed by the four atoms,\natom0() in the molecule whose data is in mol0data,\natom1() from mol1data, atom2() from mol2data, and\natom3() from mol3data,\nusing map to find the coordinates property of\nthe molecules\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::DihedralID::torsion
-
+        
             typedef ::SireMaths::Torsion ( ::SireMol::DihedralID::*torsion_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             torsion_function_type torsion_function_value( &::SireMol::DihedralID::torsion );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "torsion"
                 , torsion_function_value
                 , ( bp::arg("mol0data"), bp::arg("map0"), bp::arg("mol1data"), bp::arg("map1"), bp::arg("mol2data"), bp::arg("map2"), bp::arg("mol3data"), bp::arg("map3") )
                 , bp::release_gil_policy()
                 , "Return the geometric torsion formed by the four atoms,\natom0() in the molecule whose data is in mol0data,\natom1() from mol1data, atom2() from mol2data, and\natom3() from mol3data,\nusing map0 to find the coordinates property of mol0,\nmap1 to find the coordinates property of mol1,\nmap2 to find the coordinates property of mol2 and\nmap3 to find the coordinates property of mol3.\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::DihedralID::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::DihedralID::typeName );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::DihedralID::what
-
+        
             typedef char const * ( ::SireMol::DihedralID::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::DihedralID::what );
-
-            DihedralID_exposer.def(
+            
+            DihedralID_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         DihedralID_exposer.staticmethod( "typeName" );
         DihedralID_exposer.def( "__copy__", &__copy__);

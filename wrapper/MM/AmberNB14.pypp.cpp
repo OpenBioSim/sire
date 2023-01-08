@@ -79,107 +79,107 @@ void register_AmberNB14_class(){
         bp::scope AmberNB14_scope( AmberNB14_exposer );
         AmberNB14_exposer.def( bp::init< SireMM::AmberNB14 const & >(( bp::arg("other") ), "") );
         { //::SireMM::AmberNB14::cscl
-
+        
             typedef double ( ::SireMM::AmberNB14::*cscl_function_type)(  ) const;
             cscl_function_type cscl_function_value( &::SireMM::AmberNB14::cscl );
-
-            AmberNB14_exposer.def(
+            
+            AmberNB14_exposer.def( 
                 "cscl"
                 , cscl_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::AmberNB14::ljscl
-
+        
             typedef double ( ::SireMM::AmberNB14::*ljscl_function_type)(  ) const;
             ljscl_function_type ljscl_function_value( &::SireMM::AmberNB14::ljscl );
-
-            AmberNB14_exposer.def(
+            
+            AmberNB14_exposer.def( 
                 "ljscl"
                 , ljscl_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AmberNB14_exposer.def( bp::self != bp::self );
         AmberNB14_exposer.def( bp::self < bp::self );
         AmberNB14_exposer.def( bp::self <= bp::self );
         { //::SireMM::AmberNB14::operator=
-
+        
             typedef ::SireMM::AmberNB14 & ( ::SireMM::AmberNB14::*assign_function_type)( ::SireMM::AmberNB14 const & ) ;
             assign_function_type assign_function_value( &::SireMM::AmberNB14::operator= );
-
-            AmberNB14_exposer.def(
+            
+            AmberNB14_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         AmberNB14_exposer.def( bp::self == bp::self );
         AmberNB14_exposer.def( bp::self > bp::self );
         AmberNB14_exposer.def( bp::self >= bp::self );
         { //::SireMM::AmberNB14::operator[]
-
+        
             typedef double ( ::SireMM::AmberNB14::*__getitem___function_type)( int ) const;
             __getitem___function_type __getitem___function_value( &::SireMM::AmberNB14::operator[] );
-
-            AmberNB14_exposer.def(
+            
+            AmberNB14_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , "" );
-
+        
         }
         { //::SireMM::AmberNB14::toScaleFactor
-
+        
             typedef ::SireMM::CLJScaleFactor ( ::SireMM::AmberNB14::*toScaleFactor_function_type)(  ) const;
             toScaleFactor_function_type toScaleFactor_function_value( &::SireMM::AmberNB14::toScaleFactor );
-
-            AmberNB14_exposer.def(
+            
+            AmberNB14_exposer.def( 
                 "toScaleFactor"
                 , toScaleFactor_function_value
                 , bp::release_gil_policy()
                 , "Return the value converted to a CLJScaleFactor" );
-
+        
         }
         { //::SireMM::AmberNB14::toString
-
+        
             typedef ::QString ( ::SireMM::AmberNB14::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMM::AmberNB14::toString );
-
-            AmberNB14_exposer.def(
+            
+            AmberNB14_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::AmberNB14::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::AmberNB14::typeName );
-
-            AmberNB14_exposer.def(
+            
+            AmberNB14_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::AmberNB14::what
-
+        
             typedef char const * ( ::SireMM::AmberNB14::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::AmberNB14::what );
-
-            AmberNB14_exposer.def(
+            
+            AmberNB14_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AmberNB14_exposer.staticmethod( "typeName" );
         AmberNB14_exposer.def( "__copy__", &__copy__);

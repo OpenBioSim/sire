@@ -41,67 +41,67 @@ void register_TitrationMove_class(){
         bp::scope TitrationMove_scope( TitrationMove_exposer );
         TitrationMove_exposer.def( bp::init< SireMove::TitrationMove const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::TitrationMove::move
-
+        
             typedef void ( ::SireMove::TitrationMove::*move_function_type)( ::SireSystem::System &,int,bool ) ;
             move_function_type move_function_value( &::SireMove::TitrationMove::move );
-
-            TitrationMove_exposer.def(
+            
+            TitrationMove_exposer.def( 
                 "move"
                 , move_function_value
                 , ( bp::arg("system"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Actually perform the move" );
-
+        
         }
         TitrationMove_exposer.def( bp::self != bp::self );
         { //::SireMove::TitrationMove::operator=
-
+        
             typedef ::SireMove::TitrationMove & ( ::SireMove::TitrationMove::*assign_function_type)( ::SireMove::TitrationMove const & ) ;
             assign_function_type assign_function_value( &::SireMove::TitrationMove::operator= );
-
-            TitrationMove_exposer.def(
+            
+            TitrationMove_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         TitrationMove_exposer.def( bp::self == bp::self );
         { //::SireMove::TitrationMove::toString
-
+        
             typedef ::QString ( ::SireMove::TitrationMove::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMove::TitrationMove::toString );
-
-            TitrationMove_exposer.def(
+            
+            TitrationMove_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of the move" );
-
+        
         }
         { //::SireMove::TitrationMove::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::TitrationMove::typeName );
-
-            TitrationMove_exposer.def(
+            
+            TitrationMove_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::TitrationMove::what
-
+        
             typedef char const * ( ::SireMove::TitrationMove::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMove::TitrationMove::what );
-
-            TitrationMove_exposer.def(
+            
+            TitrationMove_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         TitrationMove_exposer.staticmethod( "typeName" );
         TitrationMove_exposer.def( "__copy__", &__copy__);

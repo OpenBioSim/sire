@@ -45,16 +45,16 @@ void register_BondSymbols_class(){
         BondSymbols_exposer_t BondSymbols_exposer = BondSymbols_exposer_t( "BondSymbols", "This class holds the symbols required for the bond\nand Urey-Bradley parameters. These are functions\nthat act between two atoms, using the distance\nbetween the atoms (r) as the input variable", bp::init< >("") );
         bp::scope BondSymbols_scope( BondSymbols_exposer );
         { //::SireMM::BondSymbols::r
-
+        
             typedef ::SireCAS::Symbol const & ( ::SireMM::BondSymbols::*r_function_type)(  ) const;
             r_function_type r_function_value( &::SireMM::BondSymbols::r );
-
-            BondSymbols_exposer.def(
+            
+            BondSymbols_exposer.def( 
                 "r"
                 , r_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the symbol representing the vector along the bond (r)" );
-
+        
         }
         BondSymbols_exposer.def( "__copy__", &__copy__);
         BondSymbols_exposer.def( "__deepcopy__", &__copy__);

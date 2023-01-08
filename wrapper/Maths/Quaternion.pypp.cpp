@@ -46,266 +46,266 @@ void register_Quaternion_class(){
         Quaternion_exposer.def( bp::init< SireMaths::Matrix const & >(( bp::arg("m") ), "Construct from a Matrix") );
         Quaternion_exposer.def( bp::init< double, double, double, double >(( bp::arg("x"), bp::arg("y"), bp::arg("z"), bp::arg("w") ), "Construct a quaternion from x,y,z,w - this normalises the values, so could be slow") );
         { //::SireMaths::Quaternion::conjugate
-
+        
             typedef ::SireMaths::Quaternion ( ::SireMaths::Quaternion::*conjugate_function_type)(  ) const;
             conjugate_function_type conjugate_function_value( &::SireMaths::Quaternion::conjugate );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "conjugate"
                 , conjugate_function_value
                 , bp::release_gil_policy()
                 , "Return the conjugate of the quaternion" );
-
+        
         }
         { //::SireMaths::Quaternion::dot
-
+        
             typedef double ( ::SireMaths::Quaternion::*dot_function_type)( ::SireMaths::Quaternion const & ) const;
             dot_function_type dot_function_value( &::SireMaths::Quaternion::dot );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "dot"
                 , dot_function_value
                 , ( bp::arg("q") )
                 , bp::release_gil_policy()
                 , "Return the dot product of this with another quaternion" );
-
+        
         }
         { //::SireMaths::Quaternion::fromMatrix
-
+        
             typedef void ( ::SireMaths::Quaternion::*fromMatrix_function_type)( ::SireMaths::Matrix const & ) ;
             fromMatrix_function_type fromMatrix_function_value( &::SireMaths::Quaternion::fromMatrix );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "fromMatrix"
                 , fromMatrix_function_value
                 , ( bp::arg("m") )
                 , bp::release_gil_policy()
                 , "Get from a matrix" );
-
+        
         }
         { //::SireMaths::Quaternion::fromString
-
+        
             typedef ::SireMaths::Quaternion ( *fromString_function_type )( ::QString const & );
             fromString_function_type fromString_function_value( &::SireMaths::Quaternion::fromString );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "fromString"
                 , fromString_function_value
                 , ( bp::arg("str") )
                 , bp::release_gil_policy()
                 , "Construct a Vector from the QString representation returned by toString()" );
-
+        
         }
         { //::SireMaths::Quaternion::identity
-
+        
             typedef ::SireMaths::Quaternion ( *identity_function_type )(  );
             identity_function_type identity_function_value( &::SireMaths::Quaternion::identity );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "identity"
                 , identity_function_value
                 , bp::release_gil_policy()
                 , "Return a quaternion that represents the identity matrix" );
-
+        
         }
         { //::SireMaths::Quaternion::inverse
-
+        
             typedef ::SireMaths::Quaternion ( ::SireMaths::Quaternion::*inverse_function_type)(  ) const;
             inverse_function_type inverse_function_value( &::SireMaths::Quaternion::inverse );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "inverse"
                 , inverse_function_value
                 , bp::release_gil_policy()
                 , "Return the inverse of the quaternion\n- since the length=1 this is the same as the conjugate" );
-
+        
         }
         { //::SireMaths::Quaternion::isIdentity
-
+        
             typedef bool ( ::SireMaths::Quaternion::*isIdentity_function_type)(  ) const;
             isIdentity_function_type isIdentity_function_value( &::SireMaths::Quaternion::isIdentity );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "isIdentity"
                 , isIdentity_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Quaternion_exposer.def( bp::self != bp::self );
         { //::SireMaths::Quaternion::operator=
-
+        
             typedef ::SireMaths::Quaternion & ( ::SireMaths::Quaternion::*assign_function_type)( ::SireMaths::Quaternion const & ) ;
             assign_function_type assign_function_value( &::SireMaths::Quaternion::operator= );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("p") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Quaternion_exposer.def( bp::self == bp::self );
         { //::SireMaths::Quaternion::pow
-
+        
             typedef ::SireMaths::Quaternion ( ::SireMaths::Quaternion::*pow_function_type)( double ) const;
             pow_function_type pow_function_value( &::SireMaths::Quaternion::pow );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "pow"
                 , pow_function_value
                 , ( bp::arg("n") )
                 , bp::release_gil_policy()
                 , "Return this quaternion raised to the power n" );
-
+        
         }
         { //::SireMaths::Quaternion::renormalise
-
+        
             typedef void ( ::SireMaths::Quaternion::*renormalise_function_type)(  ) ;
             renormalise_function_type renormalise_function_value( &::SireMaths::Quaternion::renormalise );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "renormalise"
                 , renormalise_function_value
                 , bp::release_gil_policy()
                 , "Renormalise the quaternion" );
-
+        
         }
         { //::SireMaths::Quaternion::rotate
-
+        
             typedef ::SireMaths::Vector ( ::SireMaths::Quaternion::*rotate_function_type)( ::SireMaths::Vector const & ) const;
             rotate_function_type rotate_function_value( &::SireMaths::Quaternion::rotate );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "rotate"
                 , rotate_function_value
                 , ( bp::arg("p") )
                 , bp::release_gil_policy()
                 , "Use this quaternion to rotate p" );
-
+        
         }
         { //::SireMaths::Quaternion::rotate
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireMaths::Quaternion::*rotate_function_type)( ::QVector< SireMaths::Vector > const & ) const;
             rotate_function_type rotate_function_value( &::SireMaths::Quaternion::rotate );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "rotate"
                 , rotate_function_value
                 , ( bp::arg("points") )
                 , bp::release_gil_policy()
                 , "Use the quaternion to rotate all of the points in p" );
-
+        
         }
         { //::SireMaths::Quaternion::slerp
-
+        
             typedef ::SireMaths::Quaternion ( ::SireMaths::Quaternion::*slerp_function_type)( ::SireMaths::Quaternion const &,double ) const;
             slerp_function_type slerp_function_value( &::SireMaths::Quaternion::slerp );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "slerp"
                 , slerp_function_value
                 , ( bp::arg("q"), bp::arg("lambda") )
                 , bp::release_gil_policy()
                 , "Return the spherical linear interpolation (slerp) of this quaternion\nwith another for 0<=lambda<=1, with this quaternion returned\nat lambda=0 and the other returned at lambda=1" );
-
+        
         }
         { //::SireMaths::Quaternion::toMatrix
-
+        
             typedef ::SireMaths::Matrix ( ::SireMaths::Quaternion::*toMatrix_function_type)(  ) const;
             toMatrix_function_type toMatrix_function_value( &::SireMaths::Quaternion::toMatrix );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "toMatrix"
                 , toMatrix_function_value
                 , bp::release_gil_policy()
                 , "Convert into a matrix" );
-
+        
         }
         { //::SireMaths::Quaternion::toString
-
+        
             typedef ::QString ( ::SireMaths::Quaternion::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::Quaternion::toString );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this Quaternion" );
-
+        
         }
         { //::SireMaths::Quaternion::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMaths::Quaternion::typeName );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Quaternion::w
-
+        
             typedef double ( ::SireMaths::Quaternion::*w_function_type)(  ) const;
             w_function_type w_function_value( &::SireMaths::Quaternion::w );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "w"
                 , w_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Quaternion::what
-
+        
             typedef char const * ( ::SireMaths::Quaternion::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMaths::Quaternion::what );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Quaternion::x
-
+        
             typedef double ( ::SireMaths::Quaternion::*x_function_type)(  ) const;
             x_function_type x_function_value( &::SireMaths::Quaternion::x );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "x"
                 , x_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Quaternion::y
-
+        
             typedef double ( ::SireMaths::Quaternion::*y_function_type)(  ) const;
             y_function_type y_function_value( &::SireMaths::Quaternion::y );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "y"
                 , y_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Quaternion::z
-
+        
             typedef double ( ::SireMaths::Quaternion::*z_function_type)(  ) const;
             z_function_type z_function_value( &::SireMaths::Quaternion::z );
-
-            Quaternion_exposer.def(
+            
+            Quaternion_exposer.def( 
                 "z"
                 , z_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Quaternion_exposer.staticmethod( "fromString" );
         Quaternion_exposer.staticmethod( "identity" );

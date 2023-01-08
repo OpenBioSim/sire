@@ -45,67 +45,67 @@ void register_SpaceWrapper_class(){
         SpaceWrapper_exposer.def( bp::init< SireFF::PointRef const &, SireMol::MoleculeGroup const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("point"), bp::arg("molgroup"), bp::arg("map")=SireBase::PropertyMap() ), "Construct to wrap all of the molecules in the group molgroup\ninto the same periodic box as the point point using the\nsupplied property map to find the space and coordinate properties") );
         SpaceWrapper_exposer.def( bp::init< SireSystem::SpaceWrapper const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireSystem::SpaceWrapper::moleculeGroup
-
+        
             typedef ::SireMol::MoleculeGroup const & ( ::SireSystem::SpaceWrapper::*moleculeGroup_function_type)(  ) const;
             moleculeGroup_function_type moleculeGroup_function_value( &::SireSystem::SpaceWrapper::moleculeGroup );
-
-            SpaceWrapper_exposer.def(
+            
+            SpaceWrapper_exposer.def( 
                 "moleculeGroup"
                 , moleculeGroup_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the molecule group containing the molecules being wrapped" );
-
+        
         }
         SpaceWrapper_exposer.def( bp::self != bp::self );
         { //::SireSystem::SpaceWrapper::operator=
-
+        
             typedef ::SireSystem::SpaceWrapper & ( ::SireSystem::SpaceWrapper::*assign_function_type)( ::SireSystem::SpaceWrapper const & ) ;
             assign_function_type assign_function_value( &::SireSystem::SpaceWrapper::operator= );
-
-            SpaceWrapper_exposer.def(
+            
+            SpaceWrapper_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SpaceWrapper_exposer.def( bp::self == bp::self );
         { //::SireSystem::SpaceWrapper::point
-
+        
             typedef ::SireFF::Point const & ( ::SireSystem::SpaceWrapper::*point_function_type)(  ) const;
             point_function_type point_function_value( &::SireSystem::SpaceWrapper::point );
-
-            SpaceWrapper_exposer.def(
+            
+            SpaceWrapper_exposer.def( 
                 "point"
                 , point_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the point that defines the center of the periodic box\n(the molecules will be wrapped so that they are in the same\nbox as this point)" );
-
+        
         }
         { //::SireSystem::SpaceWrapper::propertyMap
-
+        
             typedef ::SireBase::PropertyMap const & ( ::SireSystem::SpaceWrapper::*propertyMap_function_type)(  ) const;
             propertyMap_function_type propertyMap_function_value( &::SireSystem::SpaceWrapper::propertyMap );
-
-            SpaceWrapper_exposer.def(
+            
+            SpaceWrapper_exposer.def( 
                 "propertyMap"
                 , propertyMap_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the property map used to find the coordinates and\nspace properties" );
-
+        
         }
         { //::SireSystem::SpaceWrapper::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::SpaceWrapper::typeName );
-
-            SpaceWrapper_exposer.def(
+            
+            SpaceWrapper_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SpaceWrapper_exposer.staticmethod( "typeName" );
         SpaceWrapper_exposer.def( "__copy__", &__copy__);

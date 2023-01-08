@@ -61,352 +61,352 @@ void register_CLJExtractor_class(){
         CLJExtractor_exposer.def( bp::init< SireMol::MoleculeView const &, SireMM::CLJAtoms::ID_SOURCE, SireMM::CLJExtractor::EXTRACT_SOURCE, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("mol"), bp::arg("id_source"), bp::arg("extract_source"), bp::arg("map")=SireBase::PropertyMap() ), "Construct to extract the CLJ properties from the passed molecule, specifying\nhow to extract atom information,\nand using the supplied property map to find the\ncorrect properties") );
         CLJExtractor_exposer.def( bp::init< SireMM::CLJExtractor const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::CLJExtractor::add
-
+        
             typedef void ( ::SireMM::CLJExtractor::*add_function_type)( ::SireMol::MoleculeView const &,::SireMM::CLJBoxes &,::SireMM::CLJWorkspace & ) ;
             add_function_type add_function_value( &::SireMM::CLJExtractor::add );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("new_molecule"), bp::arg("boxes"), bp::arg("workspace") )
                 , bp::release_gil_policy()
                 , "Add the extra atoms in new_molecule to the molecule" );
-
+        
         }
         { //::SireMM::CLJExtractor::add
-
+        
             typedef void ( ::SireMM::CLJExtractor::*add_function_type)( ::SireMol::AtomSelection const &,::SireMM::CLJBoxes &,::SireMM::CLJWorkspace & ) ;
             add_function_type add_function_value( &::SireMM::CLJExtractor::add );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("new_selection"), bp::arg("boxes"), bp::arg("workspace") )
                 , bp::release_gil_policy()
                 , "Add the extra atoms in new_selection to the molecule" );
-
+        
         }
         { //::SireMM::CLJExtractor::changed
-
+        
             typedef bool ( ::SireMM::CLJExtractor::*changed_function_type)(  ) const;
             changed_function_type changed_function_value( &::SireMM::CLJExtractor::changed );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "changed"
                 , changed_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this molecule has been changed during the move" );
-
+        
         }
         { //::SireMM::CLJExtractor::chargeProperty
-
+        
             typedef ::SireBase::PropertyName ( ::SireMM::CLJExtractor::*chargeProperty_function_type)(  ) const;
             chargeProperty_function_type chargeProperty_function_value( &::SireMM::CLJExtractor::chargeProperty );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "chargeProperty"
                 , chargeProperty_function_value
                 , bp::release_gil_policy()
                 , "Return the property used to find the charges" );
-
+        
         }
         { //::SireMM::CLJExtractor::commit
-
+        
             typedef void ( ::SireMM::CLJExtractor::*commit_function_type)( ::SireMM::CLJBoxes &,::SireMM::CLJWorkspace & ) ;
             commit_function_type commit_function_value( &::SireMM::CLJExtractor::commit );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "commit"
                 , commit_function_value
                 , ( bp::arg("boxes"), bp::arg("workspace") )
                 , bp::release_gil_policy()
                 , "Commit the changes" );
-
+        
         }
         { //::SireMM::CLJExtractor::coordinatesProperty
-
+        
             typedef ::SireBase::PropertyName ( ::SireMM::CLJExtractor::*coordinatesProperty_function_type)(  ) const;
             coordinatesProperty_function_type coordinatesProperty_function_value( &::SireMM::CLJExtractor::coordinatesProperty );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "coordinatesProperty"
                 , coordinatesProperty_function_value
                 , bp::release_gil_policy()
                 , "Return the property used to find the coordinates" );
-
+        
         }
         { //::SireMM::CLJExtractor::extractingByCutGroup
-
+        
             typedef bool ( ::SireMM::CLJExtractor::*extractingByCutGroup_function_type)(  ) const;
             extractingByCutGroup_function_type extractingByCutGroup_function_value( &::SireMM::CLJExtractor::extractingByCutGroup );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "extractingByCutGroup"
                 , extractingByCutGroup_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not atoms are extracted by cutgroup" );
-
+        
         }
         { //::SireMM::CLJExtractor::extractingByMolecule
-
+        
             typedef bool ( ::SireMM::CLJExtractor::*extractingByMolecule_function_type)(  ) const;
             extractingByMolecule_function_type extractingByMolecule_function_value( &::SireMM::CLJExtractor::extractingByMolecule );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "extractingByMolecule"
                 , extractingByMolecule_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not atoms are extracted by molecule" );
-
+        
         }
         { //::SireMM::CLJExtractor::extractingByResidue
-
+        
             typedef bool ( ::SireMM::CLJExtractor::*extractingByResidue_function_type)(  ) const;
             extractingByResidue_function_type extractingByResidue_function_value( &::SireMM::CLJExtractor::extractingByResidue );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "extractingByResidue"
                 , extractingByResidue_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not atoms are extracted by residue" );
-
+        
         }
         { //::SireMM::CLJExtractor::hasChangedAtoms
-
+        
             typedef bool ( ::SireMM::CLJExtractor::*hasChangedAtoms_function_type)(  ) const;
             hasChangedAtoms_function_type hasChangedAtoms_function_value( &::SireMM::CLJExtractor::hasChangedAtoms );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "hasChangedAtoms"
                 , hasChangedAtoms_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not there are any changes to the coordinates, charges\nor LJ properties of the atoms" );
-
+        
         }
         { //::SireMM::CLJExtractor::idSource
-
+        
             typedef ::SireMM::CLJAtoms::ID_SOURCE ( ::SireMM::CLJExtractor::*idSource_function_type)(  ) const;
             idSource_function_type idSource_function_value( &::SireMM::CLJExtractor::idSource );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "idSource"
                 , idSource_function_value
                 , bp::release_gil_policy()
                 , "Return the source of the ID property for each CLJAtom" );
-
+        
         }
         { //::SireMM::CLJExtractor::isEmpty
-
+        
             typedef bool ( ::SireMM::CLJExtractor::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireMM::CLJExtractor::isEmpty );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this extractor is empty (contains no atoms)" );
-
+        
         }
         { //::SireMM::CLJExtractor::isNull
-
+        
             typedef bool ( ::SireMM::CLJExtractor::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMM::CLJExtractor::isNull );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this extractor is null (contains no molecule information)" );
-
+        
         }
         { //::SireMM::CLJExtractor::ljProperty
-
+        
             typedef ::SireBase::PropertyName ( ::SireMM::CLJExtractor::*ljProperty_function_type)(  ) const;
             ljProperty_function_type ljProperty_function_value( &::SireMM::CLJExtractor::ljProperty );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "ljProperty"
                 , ljProperty_function_value
                 , bp::release_gil_policy()
                 , "Return the property used to find the LJ parameters" );
-
+        
         }
         { //::SireMM::CLJExtractor::needsCommitting
-
+        
             typedef bool ( ::SireMM::CLJExtractor::*needsCommitting_function_type)(  ) const;
             needsCommitting_function_type needsCommitting_function_value( &::SireMM::CLJExtractor::needsCommitting );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "needsCommitting"
                 , needsCommitting_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this extractor needs to be committed (i.e. whether\nor not the molecule has changed in any way)" );
-
+        
         }
         { //::SireMM::CLJExtractor::newMolecule
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireMM::CLJExtractor::*newMolecule_function_type)(  ) const;
             newMolecule_function_type newMolecule_function_value( &::SireMM::CLJExtractor::newMolecule );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "newMolecule"
                 , newMolecule_function_value
                 , bp::release_gil_policy()
                 , "Return the molecule as it exists after the changes have been made" );
-
+        
         }
         { //::SireMM::CLJExtractor::oldMolecule
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireMM::CLJExtractor::*oldMolecule_function_type)(  ) const;
             oldMolecule_function_type oldMolecule_function_value( &::SireMM::CLJExtractor::oldMolecule );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "oldMolecule"
                 , oldMolecule_function_value
                 , bp::release_gil_policy()
                 , "Return the molecule as it exists before any changes were made" );
-
+        
         }
         CLJExtractor_exposer.def( bp::self != bp::self );
         { //::SireMM::CLJExtractor::operator=
-
+        
             typedef ::SireMM::CLJExtractor & ( ::SireMM::CLJExtractor::*assign_function_type)( ::SireMM::CLJExtractor const & ) ;
             assign_function_type assign_function_value( &::SireMM::CLJExtractor::operator= );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         CLJExtractor_exposer.def( bp::self == bp::self );
         { //::SireMM::CLJExtractor::propertyMap
-
+        
             typedef ::SireBase::PropertyMap ( ::SireMM::CLJExtractor::*propertyMap_function_type)(  ) const;
             propertyMap_function_type propertyMap_function_value( &::SireMM::CLJExtractor::propertyMap );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "propertyMap"
                 , propertyMap_function_value
                 , bp::release_gil_policy()
                 , "Return the property map used to get the names of the coordinates,\ncharge and LJ properties from the molecule" );
-
+        
         }
         { //::SireMM::CLJExtractor::remove
-
+        
             typedef void ( ::SireMM::CLJExtractor::*remove_function_type)( ::SireMol::AtomSelection const &,::SireMM::CLJBoxes &,::SireMM::CLJWorkspace & ) ;
             remove_function_type remove_function_value( &::SireMM::CLJExtractor::remove );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("new_selection"), bp::arg("boxes"), bp::arg("workspace") )
                 , bp::release_gil_policy()
                 , "Remove the atoms in new_selection from the molecule" );
-
+        
         }
         { //::SireMM::CLJExtractor::remove
-
+        
             typedef void ( ::SireMM::CLJExtractor::*remove_function_type)( ::SireMol::MoleculeView const &,::SireMM::CLJBoxes &,::SireMM::CLJWorkspace & ) ;
             remove_function_type remove_function_value( &::SireMM::CLJExtractor::remove );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("new_molecule"), bp::arg("boxes"), bp::arg("workspace") )
                 , bp::release_gil_policy()
                 , "Remove the atoms in new_molecule from the molecule" );
-
+        
         }
         { //::SireMM::CLJExtractor::removeAll
-
+        
             typedef void ( ::SireMM::CLJExtractor::*removeAll_function_type)( ::SireMM::CLJBoxes &,::SireMM::CLJWorkspace & ) ;
             removeAll_function_type removeAll_function_value( &::SireMM::CLJExtractor::removeAll );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("boxes"), bp::arg("workspace") )
                 , bp::release_gil_policy()
                 , "Remove all of the atoms in this view from the molecule" );
-
+        
         }
         { //::SireMM::CLJExtractor::revert
-
+        
             typedef void ( ::SireMM::CLJExtractor::*revert_function_type)( ::SireMM::CLJBoxes &,::SireMM::CLJWorkspace & ) ;
             revert_function_type revert_function_value( &::SireMM::CLJExtractor::revert );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "revert"
                 , revert_function_value
                 , ( bp::arg("boxes"), bp::arg("workspace") )
                 , bp::release_gil_policy()
                 , "Revert the changes" );
-
+        
         }
         { //::SireMM::CLJExtractor::toString
-
+        
             typedef ::QString ( ::SireMM::CLJExtractor::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMM::CLJExtractor::toString );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJExtractor::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::CLJExtractor::typeName );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJExtractor::update
-
+        
             typedef void ( ::SireMM::CLJExtractor::*update_function_type)( ::SireMol::MoleculeView const &,::SireMM::CLJBoxes &,::SireMM::CLJWorkspace & ) ;
             update_function_type update_function_value( &::SireMM::CLJExtractor::update );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("new_molecule"), bp::arg("boxes"), bp::arg("workspace") )
                 , bp::release_gil_policy()
                 , "Update the molecule, calculating the change in CLJAtoms as a CLJDelta that is\nadded to the passed CLJWorkspace. Any atoms that have changed are removed\nfrom the passed CLJBoxes" );
-
+        
         }
         { //::SireMM::CLJExtractor::updateSelection
-
+        
             typedef void ( ::SireMM::CLJExtractor::*updateSelection_function_type)( ::SireMol::AtomSelection const &,::SireMM::CLJBoxes &,::SireMM::CLJWorkspace & ) ;
             updateSelection_function_type updateSelection_function_value( &::SireMM::CLJExtractor::updateSelection );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "updateSelection"
                 , updateSelection_function_value
                 , ( bp::arg("selection"), bp::arg("boxes"), bp::arg("workspace") )
                 , bp::release_gil_policy()
                 , "This function is used to update the molecule to use only the passed\nselection as the selected atoms" );
-
+        
         }
         { //::SireMM::CLJExtractor::what
-
+        
             typedef char const * ( ::SireMM::CLJExtractor::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::CLJExtractor::what );
-
-            CLJExtractor_exposer.def(
+            
+            CLJExtractor_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CLJExtractor_exposer.staticmethod( "typeName" );
         CLJExtractor_exposer.def( "__copy__", &__copy__);

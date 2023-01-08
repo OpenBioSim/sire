@@ -43,40 +43,40 @@ void register_PerturbationSymbols_class(){
         PerturbationSymbols_exposer_t PerturbationSymbols_exposer = PerturbationSymbols_exposer_t( "PerturbationSymbols", "", bp::init< >("") );
         bp::scope PerturbationSymbols_scope( PerturbationSymbols_exposer );
         { //::SireMol::PerturbationSymbols::final
-
+        
             typedef ::SireCAS::Symbol const & ( ::SireMol::PerturbationSymbols::*final_function_type)(  ) const;
             final_function_type final_function_value( &::SireMol::PerturbationSymbols::final );
-
-            PerturbationSymbols_exposer.def(
+            
+            PerturbationSymbols_exposer.def( 
                 "final"
                 , final_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the symbol used to represent the final state" );
-
+        
         }
         { //::SireMol::PerturbationSymbols::initial
-
+        
             typedef ::SireCAS::Symbol const & ( ::SireMol::PerturbationSymbols::*initial_function_type)(  ) const;
             initial_function_type initial_function_value( &::SireMol::PerturbationSymbols::initial );
-
-            PerturbationSymbols_exposer.def(
+            
+            PerturbationSymbols_exposer.def( 
                 "initial"
                 , initial_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the symbol used to represent the initial state" );
-
+        
         }
         { //::SireMol::PerturbationSymbols::lambda
-
+        
             typedef ::SireCAS::Symbol const & ( ::SireMol::PerturbationSymbols::*Lambda_function_type)(  ) const;
             Lambda_function_type Lambda_function_value( &::SireMol::PerturbationSymbols::lambda );
-
-            PerturbationSymbols_exposer.def(
+            
+            PerturbationSymbols_exposer.def( 
                 "Lambda"
                 , Lambda_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the symbol used to represent the driving (reaction)\ncoordinate" );
-
+        
         }
         PerturbationSymbols_exposer.def( "__copy__", &__copy__);
         PerturbationSymbols_exposer.def( "__deepcopy__", &__copy__);

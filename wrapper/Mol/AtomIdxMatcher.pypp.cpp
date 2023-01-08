@@ -62,54 +62,54 @@ void register_AtomIdxMatcher_class(){
         AtomIdxMatcher_exposer.def( bp::init< SireMol::AtomIdxMatcher const & >(( bp::arg("arg0") ), "Copy constructor") );
         AtomIdxMatcher_exposer.def( bp::self != bp::self );
         { //::SireMol::AtomIdxMatcher::operator=
-
+        
             typedef ::SireMol::AtomIdxMatcher & ( ::SireMol::AtomIdxMatcher::*assign_function_type)( ::SireMol::AtomIdxMatcher const & ) ;
             assign_function_type assign_function_value( &::SireMol::AtomIdxMatcher::operator= );
-
-            AtomIdxMatcher_exposer.def(
+            
+            AtomIdxMatcher_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         AtomIdxMatcher_exposer.def( bp::self == bp::self );
         { //::SireMol::AtomIdxMatcher::toString
-
+        
             typedef ::QString ( ::SireMol::AtomIdxMatcher::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::AtomIdxMatcher::toString );
-
-            AtomIdxMatcher_exposer.def(
+            
+            AtomIdxMatcher_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomIdxMatcher::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::AtomIdxMatcher::typeName );
-
-            AtomIdxMatcher_exposer.def(
+            
+            AtomIdxMatcher_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomIdxMatcher::what
-
+        
             typedef char const * ( ::SireMol::AtomIdxMatcher::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::AtomIdxMatcher::what );
-
-            AtomIdxMatcher_exposer.def(
+            
+            AtomIdxMatcher_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomIdxMatcher_exposer.staticmethod( "typeName" );
         AtomIdxMatcher_exposer.def( "__copy__", &__copy__);

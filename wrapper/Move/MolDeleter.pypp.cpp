@@ -36,66 +36,66 @@ void register_MolDeleter_class(){
         MolDeleter_exposer_t MolDeleter_exposer = MolDeleter_exposer_t( "MolDeleter", "This is the base class of all molecule deleters. A molecule deleter\nis a manipulator that deletes (removes) molecules from Systems\n(or just from molecule groups within a System)\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope MolDeleter_scope( MolDeleter_exposer );
         { //::SireMove::MolDeleter::deleteFrom
-
+        
             typedef ::boost::tuples::tuple< SireMol::Molecule, double, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireMove::MolDeleter::*deleteFrom_function_type)( ::SireSystem::System & ) ;
             deleteFrom_function_type deleteFrom_function_value( &::SireMove::MolDeleter::deleteFrom );
-
-            MolDeleter_exposer.def(
+            
+            MolDeleter_exposer.def( 
                 "deleteFrom"
                 , deleteFrom_function_value
                 , ( bp::arg("system") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::MolDeleter::generator
-
+        
             typedef ::SireMaths::RanGenerator const & ( ::SireMove::MolDeleter::*generator_function_type)(  ) const;
             generator_function_type generator_function_value( &::SireMove::MolDeleter::generator );
-
-            MolDeleter_exposer.def(
+            
+            MolDeleter_exposer.def( 
                 "generator"
                 , generator_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMove::MolDeleter::null
-
+        
             typedef ::SireMove::NullDeleter const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMove::MolDeleter::null );
-
-            MolDeleter_exposer.def(
+            
+            MolDeleter_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the global null MolDeleter" );
-
+        
         }
         { //::SireMove::MolDeleter::setGenerator
-
+        
             typedef void ( ::SireMove::MolDeleter::*setGenerator_function_type)( ::SireMaths::RanGenerator const & ) ;
             setGenerator_function_type setGenerator_function_value( &::SireMove::MolDeleter::setGenerator );
-
-            MolDeleter_exposer.def(
+            
+            MolDeleter_exposer.def( 
                 "setGenerator"
                 , setGenerator_function_value
                 , ( bp::arg("generator") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::MolDeleter::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::MolDeleter::typeName );
-
-            MolDeleter_exposer.def(
+            
+            MolDeleter_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MolDeleter_exposer.staticmethod( "null" );
         MolDeleter_exposer.staticmethod( "typeName" );

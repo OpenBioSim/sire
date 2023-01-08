@@ -25,16 +25,16 @@ void register_Incremint_class(){
         bp::scope Incremint_scope( Incremint_exposer );
         Incremint_exposer.def( bp::init< SireBase::Incremint const & >(( bp::arg("other") ), "") );
         { //::SireBase::Incremint::increment
-
+        
             typedef int ( ::SireBase::Incremint::*increment_function_type)(  ) ;
             increment_function_type increment_function_value( &::SireBase::Incremint::increment );
-
-            Incremint_exposer.def(
+            
+            Incremint_exposer.def( 
                 "increment"
                 , increment_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Incremint_exposer.def( "__copy__", &__copy__);
         Incremint_exposer.def( "__deepcopy__", &__copy__);

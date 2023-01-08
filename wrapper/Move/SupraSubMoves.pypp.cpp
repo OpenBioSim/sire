@@ -35,126 +35,126 @@ void register_SupraSubMoves_class(){
         SupraSubMoves_exposer_t SupraSubMoves_exposer = SupraSubMoves_exposer_t( "SupraSubMoves", "This is the base class of holders of collections of SupraSubMove objects\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope SupraSubMoves_scope( SupraSubMoves_exposer );
         { //::SireMove::SupraSubMoves::clearStatistics
-
+        
             typedef void ( ::SireMove::SupraSubMoves::*clearStatistics_function_type)(  ) ;
             clearStatistics_function_type clearStatistics_function_value( &::SireMove::SupraSubMoves::clearStatistics );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "clearStatistics"
                 , clearStatistics_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::SupraSubMoves::count
-
+        
             typedef int ( ::SireMove::SupraSubMoves::*count_function_type)(  ) const;
             count_function_type count_function_value( &::SireMove::SupraSubMoves::count );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "count"
                 , count_function_value
                 , bp::release_gil_policy()
                 , "Return the number of types of SupraSubMove objects in this set" );
-
+        
         }
         { //::SireMove::SupraSubMoves::move
-
+        
             typedef void ( ::SireMove::SupraSubMoves::*move_function_type)( ::SireMove::SupraSubSystem &,int,int,bool ) ;
             move_function_type move_function_value( &::SireMove::SupraSubMoves::move );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "move"
                 , move_function_value
                 , ( bp::arg("system"), bp::arg("nsubmoves"), bp::arg("nsubmoves_per_block"), bp::arg("record_substats") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::SupraSubMoves::nSubMoveTypes
-
+        
             typedef int ( ::SireMove::SupraSubMoves::*nSubMoveTypes_function_type)(  ) const;
             nSubMoveTypes_function_type nSubMoveTypes_function_value( &::SireMove::SupraSubMoves::nSubMoveTypes );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "nSubMoveTypes"
                 , nSubMoveTypes_function_value
                 , bp::release_gil_policy()
                 , "Return the number of types of SupraSubMove objects in this set" );
-
+        
         }
         { //::SireMove::SupraSubMoves::null
-
+        
             typedef ::SireMove::SameSupraSubMoves const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMove::SupraSubMoves::null );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the global null SupraSubMoves object" );
-
+        
         }
         { //::SireMove::SupraSubMoves::operator[]
-
+        
             typedef ::SireMove::SupraSubMove const & ( ::SireMove::SupraSubMoves::*__getitem___function_type)( int ) const;
             __getitem___function_type __getitem___function_value( &::SireMove::SupraSubMoves::operator[] );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireMove::SupraSubMoves::size
-
+        
             typedef int ( ::SireMove::SupraSubMoves::*size_function_type)(  ) const;
             size_function_type size_function_value( &::SireMove::SupraSubMoves::size );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "size"
                 , size_function_value
                 , bp::release_gil_policy()
                 , "Return the number of types of SupraSubMove objects in this set" );
-
+        
         }
         { //::SireMove::SupraSubMoves::subMoves
-
+        
             typedef ::QList< SireBase::PropPtr< SireMove::SupraSubMove > > ( ::SireMove::SupraSubMoves::*subMoves_function_type)(  ) const;
             subMoves_function_type subMoves_function_value( &::SireMove::SupraSubMoves::subMoves );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "subMoves"
                 , subMoves_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::SupraSubMoves::toString
-
+        
             typedef ::QString ( ::SireMove::SupraSubMoves::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMove::SupraSubMoves::toString );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::SupraSubMoves::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::SupraSubMoves::typeName );
-
-            SupraSubMoves_exposer.def(
+            
+            SupraSubMoves_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SupraSubMoves_exposer.staticmethod( "null" );
         SupraSubMoves_exposer.staticmethod( "typeName" );

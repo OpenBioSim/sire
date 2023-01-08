@@ -40,93 +40,93 @@ void register_NullGrid_class(){
         NullGrid_exposer.def( bp::init< SireVol::NullGrid const & >(( bp::arg("other") ), "Copy constructor") );
         NullGrid_exposer.def( bp::self != bp::self );
         { //::SireVol::NullGrid::operator=
-
+        
             typedef ::SireVol::NullGrid & ( ::SireVol::NullGrid::*assign_function_type)( ::SireVol::NullGrid const & ) ;
             assign_function_type assign_function_value( &::SireVol::NullGrid::operator= );
-
-            NullGrid_exposer.def(
+            
+            NullGrid_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         NullGrid_exposer.def( bp::self == bp::self );
         { //::SireVol::NullGrid::recenter
-
+        
             typedef ::SireVol::GridPtr ( ::SireVol::NullGrid::*recenter_function_type)( ::SireMaths::Vector const & ) const;
             recenter_function_type recenter_function_value( &::SireVol::NullGrid::recenter );
-
-            NullGrid_exposer.def(
+            
+            NullGrid_exposer.def( 
                 "recenter"
                 , recenter_function_value
                 , ( bp::arg("center") )
                 , bp::release_gil_policy()
                 , "Return a copy of this grid that has been recentered to center" );
-
+        
         }
         { //::SireVol::NullGrid::rotate
-
+        
             typedef ::SireVol::GridPtr ( ::SireVol::NullGrid::*rotate_function_type)( ::SireMaths::Matrix const &,::SireMaths::Vector const & ) const;
             rotate_function_type rotate_function_value( &::SireVol::NullGrid::rotate );
-
-            NullGrid_exposer.def(
+            
+            NullGrid_exposer.def( 
                 "rotate"
                 , rotate_function_value
                 , ( bp::arg("rotmat"), bp::arg("center")=SireMaths::Vector(0) )
                 , "Return a copy of this grid that has been rotated using the passed rotation\nmatrix about center" );
-
+        
         }
         { //::SireVol::NullGrid::rotate
-
+        
             typedef ::SireVol::GridPtr ( ::SireVol::NullGrid::*rotate_function_type)( ::SireMaths::Quaternion const &,::SireMaths::Vector const & ) const;
             rotate_function_type rotate_function_value( &::SireVol::NullGrid::rotate );
-
-            NullGrid_exposer.def(
+            
+            NullGrid_exposer.def( 
                 "rotate"
                 , rotate_function_value
                 , ( bp::arg("quat"), bp::arg("center")=SireMaths::Vector(0) )
                 , "Return a copy of this grid that has been rotated using the passed rotation\nquaternion about center" );
-
+        
         }
         { //::SireVol::NullGrid::scale
-
+        
             typedef ::SireVol::GridPtr ( ::SireVol::NullGrid::*scale_function_type)( double ) const;
             scale_function_type scale_function_value( &::SireVol::NullGrid::scale );
-
-            NullGrid_exposer.def(
+            
+            NullGrid_exposer.def( 
                 "scale"
                 , scale_function_value
                 , ( bp::arg("scalefactor") )
                 , bp::release_gil_policy()
                 , "Return a copy of this grid that has been scaled uniformly by scalefactor" );
-
+        
         }
         { //::SireVol::NullGrid::translate
-
+        
             typedef ::SireVol::GridPtr ( ::SireVol::NullGrid::*translate_function_type)( ::SireMaths::Vector const & ) const;
             translate_function_type translate_function_value( &::SireVol::NullGrid::translate );
-
-            NullGrid_exposer.def(
+            
+            NullGrid_exposer.def( 
                 "translate"
                 , translate_function_value
                 , ( bp::arg("delta") )
                 , bp::release_gil_policy()
                 , "Return a copy of this grid that has been translated by delta" );
-
+        
         }
         { //::SireVol::NullGrid::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireVol::NullGrid::typeName );
-
-            NullGrid_exposer.def(
+            
+            NullGrid_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullGrid_exposer.staticmethod( "typeName" );
         NullGrid_exposer.def( "__copy__", &__copy__);

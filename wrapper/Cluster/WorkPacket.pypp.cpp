@@ -39,186 +39,186 @@ void register_WorkPacket_class(){
         WorkPacket_exposer.def( bp::init< SireCluster::WorkPacketBase const & >(( bp::arg("work") ), "Construct from the passed work object") );
         WorkPacket_exposer.def( bp::init< SireCluster::WorkPacket const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCluster::WorkPacket::abort
-
+        
             typedef void ( ::SireCluster::WorkPacket::*abort_function_type)(  ) ;
             abort_function_type abort_function_value( &::SireCluster::WorkPacket::abort );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "abort"
                 , abort_function_value
                 , bp::release_gil_policy()
                 , "Abort the work" );
-
+        
         }
         { //::SireCluster::WorkPacket::base
-
+        
             typedef ::SireCluster::WorkPacketBase const & ( ::SireCluster::WorkPacket::*base_function_type)(  ) const;
             base_function_type base_function_value( &::SireCluster::WorkPacket::base );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "base"
                 , base_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return a reference to the underlying Worker object" );
-
+        
         }
         { //::SireCluster::WorkPacket::hasFinished
-
+        
             typedef bool ( ::SireCluster::WorkPacket::*hasFinished_function_type)(  ) const;
             hasFinished_function_type hasFinished_function_value( &::SireCluster::WorkPacket::hasFinished );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "hasFinished"
                 , hasFinished_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the work has finished (or is in an\nerror state, or was aborted) - essentially, is there any\nmore of this work packet to run?" );
-
+        
         }
         { //::SireCluster::WorkPacket::isError
-
+        
             typedef bool ( ::SireCluster::WorkPacket::*isError_function_type)(  ) const;
             isError_function_type isError_function_value( &::SireCluster::WorkPacket::isError );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "isError"
                 , isError_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this work is in an error state" );
-
+        
         }
         { //::SireCluster::WorkPacket::isNull
-
+        
             typedef bool ( ::SireCluster::WorkPacket::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireCluster::WorkPacket::isNull );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is the null (empty) work packet" );
-
+        
         }
         { //::SireCluster::WorkPacket::operator=
-
+        
             typedef ::SireCluster::WorkPacket & ( ::SireCluster::WorkPacket::*assign_function_type)( ::SireCluster::WorkPacket const & ) ;
             assign_function_type assign_function_value( &::SireCluster::WorkPacket::operator= );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireCluster::WorkPacket::pack
-
+        
             typedef ::QByteArray ( ::SireCluster::WorkPacket::*pack_function_type)(  ) const;
             pack_function_type pack_function_value( &::SireCluster::WorkPacket::pack );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "pack"
                 , pack_function_value
                 , bp::release_gil_policy()
                 , "Pack this WorkPacket into a binary array" );
-
+        
         }
         { //::SireCluster::WorkPacket::progress
-
+        
             typedef float ( ::SireCluster::WorkPacket::*progress_function_type)(  ) const;
             progress_function_type progress_function_value( &::SireCluster::WorkPacket::progress );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "progress"
                 , progress_function_value
                 , bp::release_gil_policy()
                 , "Return the current progress of the calculation (percentage)" );
-
+        
         }
         { //::SireCluster::WorkPacket::runChunk
-
+        
             typedef void ( ::SireCluster::WorkPacket::*runChunk_function_type)(  ) ;
             runChunk_function_type runChunk_function_value( &::SireCluster::WorkPacket::runChunk );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "runChunk"
                 , runChunk_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCluster::WorkPacket::shouldPack
-
+        
             typedef bool ( ::SireCluster::WorkPacket::*shouldPack_function_type)(  ) const;
             shouldPack_function_type shouldPack_function_value( &::SireCluster::WorkPacket::shouldPack );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "shouldPack"
                 , shouldPack_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not we should pack this WorkPacket when\nwe are storing it." );
-
+        
         }
         { //::SireCluster::WorkPacket::throwError
-
+        
             typedef void ( ::SireCluster::WorkPacket::*throwError_function_type)(  ) const;
             throwError_function_type throwError_function_value( &::SireCluster::WorkPacket::throwError );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "throwError"
                 , throwError_function_value
                 , bp::release_gil_policy()
                 , "Throw any error associated with this WorkPacket\n(this does nothing if there is no error)" );
-
+        
         }
         { //::SireCluster::WorkPacket::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCluster::WorkPacket::typeName );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCluster::WorkPacket::unpack
-
+        
             typedef ::SireCluster::WorkPacket ( *unpack_function_type )( ::QByteArray const & );
             unpack_function_type unpack_function_value( &::SireCluster::WorkPacket::unpack );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "unpack"
                 , unpack_function_value
                 , ( bp::arg("data") )
                 , bp::release_gil_policy()
                 , "Unpack a WorkPacket from the passed binary data. This binary\ndata MUST have been created by WorkPacket::pack()" );
-
+        
         }
         { //::SireCluster::WorkPacket::wasAborted
-
+        
             typedef bool ( ::SireCluster::WorkPacket::*wasAborted_function_type)(  ) const;
             wasAborted_function_type wasAborted_function_value( &::SireCluster::WorkPacket::wasAborted );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "wasAborted"
                 , wasAborted_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the work was aborted" );
-
+        
         }
         { //::SireCluster::WorkPacket::what
-
+        
             typedef char const * ( ::SireCluster::WorkPacket::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCluster::WorkPacket::what );
-
-            WorkPacket_exposer.def(
+            
+            WorkPacket_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         WorkPacket_exposer.staticmethod( "typeName" );
         WorkPacket_exposer.staticmethod( "unpack" );

@@ -48,53 +48,53 @@ void register_VelocityGenerator_class(){
         VelocityGenerator_exposer_t VelocityGenerator_exposer = VelocityGenerator_exposer_t( "VelocityGenerator", "This is the base class of generators that are used\nto get velocities for molecules\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope VelocityGenerator_scope( VelocityGenerator_exposer );
         { //::SireMove::VelocityGenerator::generate
-
+        
             typedef ::SireMol::AtomVelocities ( ::SireMove::VelocityGenerator::*generate_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
             generate_function_type generate_function_value( &::SireMove::VelocityGenerator::generate );
-
-            VelocityGenerator_exposer.def(
+            
+            VelocityGenerator_exposer.def( 
                 "generate"
                 , generate_function_value
                 , ( bp::arg("molview"), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
-
+        
         }
         { //::SireMove::VelocityGenerator::null
-
+        
             typedef ::SireMove::NullVelocityGenerator const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMove::VelocityGenerator::null );
-
-            VelocityGenerator_exposer.def(
+            
+            VelocityGenerator_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the global null generator" );
-
+        
         }
         { //::SireMove::VelocityGenerator::setGenerator
-
+        
             typedef void ( ::SireMove::VelocityGenerator::*setGenerator_function_type)( ::SireMaths::RanGenerator const & ) ;
             setGenerator_function_type setGenerator_function_value( &::SireMove::VelocityGenerator::setGenerator );
-
-            VelocityGenerator_exposer.def(
+            
+            VelocityGenerator_exposer.def( 
                 "setGenerator"
                 , setGenerator_function_value
                 , ( bp::arg("generator") )
                 , bp::release_gil_policy()
                 , "Set the random number generator that may be used to help\ngenerate the initial velocities" );
-
+        
         }
         { //::SireMove::VelocityGenerator::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::VelocityGenerator::typeName );
-
-            VelocityGenerator_exposer.def(
+            
+            VelocityGenerator_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         VelocityGenerator_exposer.staticmethod( "null" );
         VelocityGenerator_exposer.staticmethod( "typeName" );
