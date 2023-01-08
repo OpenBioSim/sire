@@ -436,7 +436,7 @@ if ( ${SIRE_CXX_COMPILER_ID} MATCHES "GNU" )
     set ( SIRE_PLATFORM_FLAGS "-pipe -DSIRE_ALWAYS_INLINE=inline" )
     set ( SIRE_STATIC_LINK_FLAGS "-static" )
 
-    GET_SIRE_VECTOR_FLAGS( "-fopenmp-simd" "-msse2" "-mavx" "-mavx512f" )
+    GET_SIRE_VECTOR_FLAGS( "-fopenmp-simd" "-msse2" "-mavx" "-mavx512f" "-march=armv8-a+fp+simd" )
 
     # support for ppc64le architecture
     if ( CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "ppc64le" )
