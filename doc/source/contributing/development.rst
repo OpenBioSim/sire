@@ -2,7 +2,7 @@
 Developer's guide
 =================
 
-The source code for :mod:`sire`` is available on
+The source code for :mod:`sire` is available on
 `GitHub <https://github.com/openbiosim/sire>`__.
 
 Setting up your computer
@@ -446,7 +446,7 @@ For information, see the documentation
 Thanks
 ======
 
-First, thanks to you for your interest in :mod:`sire`` and for reading this
+First, thanks to you for your interest in :mod:`sire` and for reading this
 far. We hope you enjoy having a play with the code and having a go
 at adding new functionality, fixing bugs, writing docs etc.
 

@@ -5,7 +5,7 @@ Importing sire
 Start a Python session (e.g. an interactive python console or a
 Jupyter notebook).
 
-You import ``sire`` by typing
+You import :mod:`sire` by typing
 
 >>> import sire
 

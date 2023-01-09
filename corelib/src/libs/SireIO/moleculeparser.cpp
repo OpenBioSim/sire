@@ -1802,8 +1802,8 @@ System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others,
             cout << topology.read().warnings().join("\n");
             cout << "====\n\n";
         }
-        else
-            has_warnings = true;
+
+        has_warnings = true;
     }
 
     if (parsers.value("frame").count() > 0)
@@ -1825,8 +1825,8 @@ System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others,
                     cout << frames[0].read().warnings().join("\n");
                     cout << "====\n\n";
                 }
-                else
-                    has_warnings = true;
+
+                has_warnings = true;
             }
         }
 
@@ -1857,8 +1857,8 @@ System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others,
                         cout << frame.read().warnings().join("\n");
                         cout << "====\n\n";
                     }
-                    else
-                        has_warnings = true;
+
+                    has_warnings = true;
                 }
             }
 

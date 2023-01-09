@@ -1223,41 +1223,120 @@ def _to_molecules(obj):
         return m
 
 
-def _energy(obj, obj1=None, map=None):
+def _energy(obj, other=None, map=None):
+    """
+    Calculate the total energy of the molecule view(s) in this
+    collection.
+
+    other: (view or views, optional)
+        An optional second view (or collection of views).
+        If this is passed, then the energy between the
+        views in this collections and others will be calculated.
+
+    map: (dictionary, optional)
+        An optional property map that will be used to find
+        or map the properties used for this energy calculation.
+
+    Returns
+    -------
+
+    sire.units.GeneralUnit (energy per quantity):
+        Returns an energy, with attached components for the
+        sub-components (if any) for this energy.
+    """
     from ..mm import calculate_energy
 
     if map is None:
-        if obj1 is None:
+        if other is None:
             return calculate_energy(obj)
         else:
-            return calculate_energy(obj, _to_molecules(obj1))
-    elif obj1 is None:
+            return calculate_energy(obj, _to_molecules(other))
+    elif other is None:
         return calculate_energy(obj, map=map)
     else:
-        return calculate_energy(obj, _to_molecules(obj1), map=map)
+        return calculate_energy(obj, _to_molecules(other), map=map)
 
 
-def _energies(obj, obj1=None, map=None):
-    return obj.apply("energy", obj1=obj1, map=map)
+def _energies(obj, other=None, map=None):
+    """
+    Calculate the total energy of the molecule view(s) in this
+    collection.
+
+    other: (view or views, optional)
+        An optional second view (or collection of views).
+        If this is passed, then the energy between the
+        views in this collections and others will be calculated.
+
+    map: (dictionary, optional)
+        An optional property map that will be used to find
+        or map the properties used for this energy calculation.
+
+    Returns
+    -------
+
+    sire.units.GeneralUnit (energy per quantity):
+        Returns an energy, with attached components for the
+        sub-components (if any) for this energy.
+    """
+    return obj.apply("energy", other=other, map=map)
 
 
-def _atom_energy(obj, obj1=None, map=None):
-    # An individual atom has a zero energy
-    if obj1 is None:
+def _atom_energy(obj, other=None, map=None):
+    """
+    Calculate the total energy of the molecule view(s) in this
+    collection.
+
+    other: (view or views, optional)
+        An optional second view (or collection of views).
+        If this is passed, then the energy between the
+        views in this collections and others will be calculated.
+
+    map: (dictionary, optional)
+        An optional property map that will be used to find
+        or map the properties used for this energy calculation.
+
+    Returns
+    -------
+
+    sire.units.GeneralUnit (energy per quantity):
+        Returns an energy, with attached components for the
+        sub-components (if any) for this energy.
+    """
+    if other is None:
         from ..units import GeneralUnit
 
         return GeneralUnit(0)
     elif map is None:
         from ..mm import calculate_energy
 
-        return calculate_energy(obj, _to_molecules(obj1))
+        return calculate_energy(obj, _to_molecules(other))
     else:
         from ..mm import calculate_energy
 
-        return calculate_energy(obj, _to_molecules(obj1), map=map)
+        return calculate_energy(obj, _to_molecules(other), map=map)
 
 
-def _total_energy(obj, obj1=None, map=None):
+def _total_energy(obj, other=None, map=None):
+    """
+    Calculate the total energy of the molecule view(s) in this
+    collection.
+
+    other: (view or views, optional)
+        An optional second view (or collection of views).
+        If this is passed, then the energy between the
+        views in this collections and others will be calculated.
+
+    map: (dictionary, optional)
+        An optional property map that will be used to find
+        or map the properties used for this energy calculation.
+
+    Returns
+    -------
+
+    sire.units.GeneralUnit (energy per quantity):
+        Returns an energy, with attached components for the
+        sub-components (if any) for this energy.
+    """
     if hasattr(obj, "to_molecule_group"):
         mols = obj.to_molecule_group()
     else:
@@ -1269,14 +1348,14 @@ def _total_energy(obj, obj1=None, map=None):
     from ..mm import calculate_energy
 
     if map is None:
-        if obj1 is None:
+        if other is None:
             return calculate_energy(mols.molecules())
         else:
-            return calculate_energy(mols.molecules(), _to_molecules(obj1))
-    elif obj1 is None:
+            return calculate_energy(mols.molecules(), _to_molecules(other))
+    elif other is None:
         return calculate_energy(mols.molecules(), map=map)
     else:
-        return calculate_energy(mols.molecules(), _to_molecules(obj1), map=map)
+        return calculate_energy(mols.molecules(), _to_molecules(other), map=map)
 
 
 Atom.energy = _atom_energy

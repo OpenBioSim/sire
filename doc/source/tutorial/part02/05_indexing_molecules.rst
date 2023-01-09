@@ -14,7 +14,7 @@ is no requirement for this atom to be placed into a residue, chain
 or segment, and so it is possible for a molecule to have zero
 residues, chains or segments.
 
-There are several classes in ``sire`` that can act as molecular containers
+There are several classes in :mod:`sire` that can act as molecular containers
 for molecule objects. You have already encountered one, which is the
 :class:`~sire.system.System` class, into which the molecules were first
 loaded.
@@ -353,11 +353,11 @@ Uniquely identifying a molecule
 -------------------------------
 
 Molecules are uniquely identified by their molecule number. This is a number
-that ``sire`` assigns to molecules when they are loaded. ``sire`` ensures
+that :mod:`sire` assigns to molecules when they are loaded. :mod:`sire` ensures
 that each molecule that it loads will have its own unique number. You have
 no control over the number, and should not assume that the number will be
 the same every time you run your script. The number is the count of the
-molecules that have been loaded during a ``sire`` session, e.g. molecule
+molecules that have been loaded during a :mod:`sire` session, e.g. molecule
 number 2 refers to the second molecule that has been loaded. You can assume
 that the first molecule loaded from a file will have the smallest molecule
 number.
@@ -371,7 +371,7 @@ You can get all of the numbers of the molecules in a container using
 
    You can use ``mols.names()`` to get all of the molecule names.
 
-``sire`` uses the molecule number as it is the only identifier that can
+:mod:`sire` uses the molecule number as it is the only identifier that can
 be guaranteed to be unique in the program. Molecules can be moved and copied
 into multiple containers, and its index will depend on its container.
 Molecule names are assigned from the file, and multiple molecules can

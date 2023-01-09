@@ -7,7 +7,7 @@ You save molecules using the :func:`sire.save` function;
 >>> sr.save(mol, "cholesterol.pdb")
 ['/path/to/cholesterol.pdb']
 
-``sire`` will automatically try to guess the file format from the file
+:mod:`sire` will automatically try to guess the file format from the file
 extension. In this case, the molecule is saved in PDB format.
 
 You can specify the format using the ``format`` argument.

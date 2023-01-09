@@ -20,7 +20,7 @@ The development process should be;
   instructions.
 
 The result of this is that "devel" should contain the fully-working and
-tested, and most up-to-date version of ``Sire``. However, this
+tested, and most up-to-date version of :mod:`sire`. However, this
 version should not be used for production runs.
 
 .. note::
@@ -40,7 +40,7 @@ version should not be used for production runs.
 Defining a release
 ------------------
 
-We will release ``Sire`` regularly. Releases aim to be backwards
+We will release :mod:`sire` regularly. Releases aim to be backwards
 compatible and capable of being used for production runs, at least for
 the functionality that is fully described in the tutorial.
 
