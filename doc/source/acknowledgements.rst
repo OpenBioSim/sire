@@ -2,7 +2,7 @@
 Acknowledgements
 ================
 
-We give huge thanks to everyone who has contributed to Sire development,
+We give huge thanks to everyone who has contributed to :mod:`sire` development,
 whether directly in the form of writing code, tests or documentation,
 or indirectly via support, discussions or submitting issues or
 bug reports.
@@ -10,12 +10,12 @@ bug reports.
 We gratefully acknowledge funding from the
 `EPSRC <https://epsrc.ukri.org>`__ and
 `BBSRC <https://bbsrc.ukri.org>`__ who contributed
-funding to the initial development of Sire. We are also thankful
+funding to the initial development of :mod:`sire`. We are also thankful
 to `UCB <https://www.ucb.com>`__, `Cresset <https://www.cresset-group.com>`__,
 `Exscientia <https://www.exscientia.ai>`__ and
 `Evotec <https://www.evotec.com/en>`__ who have all either
 directly funded development, or have funded researchers
-who have contributed to Sire.
+who have contributed to :mod:`sire`.
 
 We also thank the `Software Sustainability Institute <https://software.ac.uk>`__
 for many useful discussions.
@@ -23,7 +23,7 @@ for many useful discussions.
 We thank the Universities of
 `Bristol <https://bristol.ac.uk>`__ and
 `Edinburgh <https://ed.ac.uk>`__ for providing the
-time to the members of staff who have contributed to Sire's development.
+time to the members of staff who have contributed to :mod:`sire`'s development.
 
 We thank `CCP-BioSim <https://ccpbiosim.ac.uk>`__ who have also provided
 guidance and encouragement during the development of this software.
@@ -37,16 +37,17 @@ using a modified version of the `furo theme <https://pradyunsg.me/furo/>`__.
 Hosting
 =======
 
-Sire is developed on `GitHub <https://github.com>`__, making extensive
+:mod:`sire` is developed on `GitHub <https://github.com>`__, making extensive
 use of its many excellent features. This include using
-GitHub pages for hosting this website, and GitHub actions for
+GitHub pages for hosting this website, and
+`GitHub actions <https://github.com/OpenBioSim/sire/actions>`__ for
 CI/CD.
 
-Sire binary packages are hosted on `conda-forge <https://conda-forge.org>`__.
+:mod:`sire` binary packages are hosted on `conda-forge <https://conda-forge.org>`__.
 
-Sire containers are hosted on `docker hub <https://hub.docker.com>`__.
+:mod:`sire` containers are hosted on `docker hub <https://hub.docker.com>`__.
 
-The Sire `notebook service <https://try.openbiosim.org>`__ is hosted
+The :mod:`sire` `notebook service <https://try.openbiosim.org>`__ is hosted
 in a `JupyterHub <https://jupyterhub.readthedocs.io/en/stable/>`__ cluster,
 built following the instructions on
 `Zero to JupyterHub <https://jupyterhub.readthedocs.io/en/stable/>`__.
@@ -56,12 +57,12 @@ on `Microsoft Azure <https://azure.microsoft.com/en-gb/>`__.
 Third Party Software
 ====================
 
-Sire depends on a lot of third party software, the details and licenses of
+:mod:`sire` depends on a lot of third party software, the details and licenses of
 which can be found below. The software will be installed automatically
-as part of the installing the Sire conda package, so you shouldn't
+as part of the installing the :mod:`sire` conda package, so you shouldn't
 have to do anything yourself.
 
-Sire is itself distributed under the terms of the GPL version 3
+:mod:`sire` is itself distributed under the terms of the GPL version 3
 (or any later GPL license). The C++ source code is licensed
 under the GPL 3 or later, and linking with GPL3 dependencies
 (e.g. GSL) means that the entire package is licensed under GPL 3
@@ -73,16 +74,16 @@ C++ Dependencies
 Qt 5
 ----
 
-Sire is built on top of Qt.Core from Qt 5. This is used under the terms
+:mod:`sire` is built on top of Qt.Core from Qt 5. This is used under the terms
 of the `LGPL 2 <http://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html>`__
-or later. Sire does not modify Qt, so this license allows both
+or later. :mod:`sire` does not modify Qt, so this license allows both
 commercial and non-commercial use without fee. You can find out more
 about Qt and its license `from here <https://www.qt.io/terms-conditions/>`__.
 
 Python
 ------
 
-The Sire C++ library is wrapped up and made available for use within Python 3.
+The :mod:`sire` C++ library is wrapped up and made available for use within Python 3.
 This is used under the terms of the `PSF license <https://docs.python.org/3/license.html>`__,
 which is compatible with
 the GPLv3. The license allows both commercial and non-commercial use
@@ -92,7 +93,7 @@ without fee. You can find out more about Python and its license
 boost
 -----
 
-Sire uses many of the components from the boost libraries, in particular
+:mod:`sire` uses many of the components from the boost libraries, in particular
 the boost::python module that is used to wrap up the C++ code.
 This is used under the terms of the
 `Boost Software License <http://www.boost.org/users/license.html>`__,
@@ -103,34 +104,34 @@ more about boost and its license `from here <http://www.boost.org/>`__.
 Py++
 ----
 
-Sire uses Py++ to auto-generate all of the C++ python wrappers. Py++ uses
+:mod:`sire` uses Py++ to auto-generate all of the C++ python wrappers. Py++ uses
 either GCCXML or CastXML, and, as it is used as a tool, its license does
-not affect Sire. You can read more about Py++
+not affect :mod:`sire`. You can read more about Py++
 `from here <http://pyplusplus.readthedocs.io/en/latest/>`__.
 
 cmake
 -----
 
-Sire uses cmake as its build system. As it is used as a tool, its license
-does not affect Sire. CMake is excellent. You can read more about it
+:mod:`sire` uses cmake as its build system. As it is used as a tool, its license
+does not affect :mod:`sire`. CMake is excellent. You can read more about it
 `from here <https://cmake.org/>`__.
 
 Anaconda
 ---------
 
-Sire uses Anaconda Python (specifically mambaforge and conda-forge) to
+:mod:`sire` uses Anaconda Python (specifically mambaforge and conda-forge) to
 simplify the management and installation of Python and the various
-modules on which Sire depends.
+modules on which :mod:`sire` depends.
 
 Anaconda (and miniconda) are distributed as
 `open source projects <https://www.continuum.io/open-source-core-modern-software>`__.
-As Sire does not explicitly link with them, the license is not an issue.
+As :mod:`sire` does not explicitly link with them, the license is not an issue.
 You can find out more about Anaconda `from here <https://www.continuum.io/>`__.
 
 Threading Building Blocks (tbb)
 -------------------------------
 
-Sire uses the `Threading Building Blocks <https://www.threadingbuildingblocks.org/>`__
+:mod:`sire` uses the `Threading Building Blocks <https://www.threadingbuildingblocks.org/>`__
 library for within-node
 parallelisation. This is licensed under the open source
 `Apache 2.0 license <https://www.threadingbuildingblocks.org/faq/10>`__.
@@ -138,7 +139,7 @@ parallelisation. This is licensed under the open source
 Gnu Scientific Library (GSL)
 ----------------------------
 
-Sire uses some of the routines from the Gnu Scientific Library.
+:mod:`sire` uses some of the routines from the Gnu Scientific Library.
 This is used under the terms of the `GPL v3 <http://www.gnu.org/copyleft/gpl.html>`__
 license. More information
 about GSL and its license can be `found here <http://www.gnu.org/software/gsl/>`__.
@@ -146,7 +147,7 @@ about GSL and its license can be `found here <http://www.gnu.org/software/gsl/>`
 NetCDF
 ------
 
-Sire links to the `NetCDF <https://docs.unidata.ucar.edu/netcdf-c/current/copyright.html>`__
+:mod:`sire` links to the `NetCDF <https://docs.unidata.ucar.edu/netcdf-c/current/copyright.html>`__
 library so that it can read/write Amber binary files. NetCDF
 is openly licensed under a BSD-style license, and is compatible
 with the GPL.
@@ -154,35 +155,35 @@ with the GPL.
 OpenMM
 ------
 
-Sire links to `OpenMM <https://openmm.org>`__ to perform accelerated
+:mod:`sire` links to `OpenMM <https://openmm.org>`__ to perform accelerated
 dynamics (e.g. as part of the ``somd`` program). This is licensed
 under either the MIT or LGPL licenses, so compatible with the GPL.
 
 Regress
 -------
 
-Sire uses the linear least squares regression library, `regress`, for
+:mod:`sire` uses the linear least squares regression library, `regress`, for
 polynomial least squares fitting. This is used under the terms of
 the GPLv3 license.
 
 The source code for this module can be
-`found here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/SireAnalysis/third_party/regress.cpp>`__.
+`found here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/:mod:`sire`Analysis/third_party/regress.cpp>`__.
 
 eig3
 ----
 
-Sire uses the eig3 library for eigenvector/eigenmatrix calculations by
+:mod:`sire` uses the eig3 library for eigenvector/eigenmatrix calculations by
 Connelly Barnes. This is in the public domain, and is derived itself
 from the Java matrix library JAMA (also public domain).
 
 Information about this can be
 `found here <http://barnesc.blogspot.co.uk/2007/02/eigenvectors-of-3x3-symmetric-matrix.html>`__,
-with the license within Sire `found here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/SireMaths/third_party/eig3/readme.txt>`__.
+with the license within :mod:`sire` `found here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/:mod:`sire`Maths/third_party/eig3/readme.txt>`__.
 
 Mersenne Twister
 ----------------
 
-Sire uses the Mersenne Twister program by Richard Wagner for the generation
+:mod:`sire` uses the Mersenne Twister program by Richard Wagner for the generation
 of random numbers. This is used under a BSD-style license, shown below.
 
 ::
@@ -247,11 +248,11 @@ I must remember to send them an email…
 More information about Mersenne Twister can be
 `found here <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/VERSIONS/C-LANG/c-lang.html>`__.
 
-sse_mathfun and neon_mathfun
-----------------------------
+sse_mathfun
+-----------
 
-Sire uses sse_mathfun and neon_mathfun for vectorising intrinsic maths
-functions on processors that support SSE or Neon. These libraries were written
+:mod:`sire` uses sse_mathfun for vectorising intrinsic maths
+functions on processors that support SSE. These libraries were written
 by Julien Pommier, and released under the BSD-style zlib license,
 which is given here.
 
@@ -307,10 +308,19 @@ and is also under a BSD-style zlib license.
   3. This notice may not be removed or altered from any source distribution.
   (this is the zlib license)
 
+sse2neon
+--------
+
+:mod:`sire` uses `sse2neon <https://github.com/DLTcollab/sse2neon>`__ to
+convert the hand-vectorised SSE2 code to ARM NEON instructions. This
+worked amazingly well, and we sincerely thank
+this project for producing such a well-documented and performant
+header-only library. This is used under a MIT license.
+
 LAP (Linear Assignment Problem Solver)
 --------------------------------------
 
-Sire implements its own C++ version of the LAP library for solving the
+:mod:`sire` implements its own C++ version of the LAP library for solving the
 linear assignment problem. This is `available here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/SireMaths/linearap.cpp>`__.
 
 The original code is Freeware, with more information about it available
@@ -319,7 +329,7 @@ The original code is Freeware, with more information about it available
 MD5
 ---
 
-Sire uses the MD5 library written by L. Peter Deutsch.
+:mod:`sire` uses the MD5 library written by L. Peter Deutsch.
 It is used under a BSD-style license, given below.
 
 ::
@@ -385,7 +395,7 @@ Python Dependencies
 ap (ascii plot)
 ---------------
 
-Sire bundles the Python “ap” library for drawing ascii graphs.
+:mod:`sire` bundles the Python “ap” library for drawing ascii graphs.
 This is available as “Sire.Tools.ap”
 
 Version 0.9 written by M. Fouesneau is included, available
@@ -417,19 +427,19 @@ The header documentation reads;
 lazy_import
 -----------
 
-Sire uses `lazy_import <https://github.com/mnmelo/lazy_import>`__ to
+:mod:`sire` uses `lazy_import <https://github.com/mnmelo/lazy_import>`__ to
 lazy load the modules. This is licensed under the GPLv3.
 
 rich
 ----
 
-Sire uses `rich <https://github.com/Textualize/rich>`__ to provide
+:mod:`sire` uses `rich <https://github.com/Textualize/rich>`__ to provide
 rich console output when printing. This is licensed under the
 GPL-compatible MIT license.
 
 pandas
 ------
 
-Sire uses `pandas <https://pandas.pydata.org/docs/>`__ to output
+:mod:`sire` uses `pandas <https://pandas.pydata.org/docs/>`__ to output
 data in DataFrames that can be more easily operated on and explored
 by users. Pandas is BSD-licensed, so compatible with the GPL.

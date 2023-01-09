@@ -33,7 +33,8 @@ version should not be used for production runs.
   by submitting good issues and pull requests from
   a personal fork of the repository. Please get in touch if you find
   this difficult, or follow
-  `this workshop <https://chryswoods.com/beginning_git>`__ if you need
+  `this workshop <https://chryswoods.com/introducing_git>`__
+  and `this workshop <https://chryswoods.com/git_collaboration>`__ if you need
   to learn how to use Git, GitHub, feature branching, merging, pull
   requests etc.
 
@@ -59,7 +60,7 @@ will automatically trigger the GitHub Action to build the conda packages
 for the platforms and python versions that we currently support.
 These will be pushed automatically to conda-forge.
 
-Please remember to update the :doc:`../changelog` with details about this release. This
-should include the link at the top of the release that shows the commit
-differences between versions. This can be easily copied from a previous
+Please remember to update the :doc:`../changelog` with details about this
+release. This should include the link at the top of the release that shows the
+commit differences between versions. This can be easily copied from a previous
 release and updated.

@@ -5,6 +5,8 @@ Public API
 .. automodule:: sire.cas
    :members:
 
+   :doc:`View Module Index <index_cas>`
+
 .. autodata:: sire.cas.lam
    :annotation: A Symbol representing λ.
 

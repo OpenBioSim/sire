@@ -9,7 +9,6 @@ Sire. Ways you can help include:
 * Writing new tutorials, short how-to guides or blog posts.
 * Creating more tests and adding them to the
   `pytest library <https://github.com/openbiosim/sire/tree/devel/tests>`__.
-* Taking on some of the tasks in the :doc:`snaglist`.
 * Porting and testing :mod:`sire` on different computers.
 * Proposing and helping write or test new features.
 * Funding development by donating to `OpenBioSim <https://openbiosim.org>`__.
@@ -47,4 +46,3 @@ can be forever recognised :-)
    codestyle
    packaging
    roadmap
-   snaglist

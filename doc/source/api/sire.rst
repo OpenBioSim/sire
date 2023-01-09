@@ -13,7 +13,12 @@ in the other :mod:`sire` sub-modules.
 Public API
 ==========
 
+
 .. automodule:: sire
    :members:
 
+   :doc:`View Module Index <index>`
+
 .. autodata:: sire.tutorial_url
+
+   :doc:`View Module Index <index>`
