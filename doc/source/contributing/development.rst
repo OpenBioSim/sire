@@ -62,11 +62,15 @@ Python-exposed or Python-native code in the public API is written
 in a Pythonic style. We aim to be fully
 `PEP8-compliant <https://pep8.org>`__ and ask that all new
 Python code contributed to :mod:`sire` is written to be
-`PEP8-compliant <https://pep8.org>`__. We plan to move to
-enforcing this by asking contributers to use a PEP8
-autoformatter
-(e.g. `black <https://black.readthedocs.io/en/stable/>`__)
-and will add a linting test to our CI/CD pipeline.
+`PEP8-compliant <https://pep8.org>`__. We code using
+`flake8 <https://flake8.pycqa.org/en/latest/>`__ as a linter, and use
+`black <https://black.readthedocs.io/en/stable/>`__ as a code
+autoformatter (format on save). We encourage all developers to
+use `flake8 <https://flake8.pycqa.org/en/latest/>`__
+and `black <https://black.readthedocs.io/en/stable/>`__. These
+are easy to configure and use via your IDE (i.e. we run them
+automatically in `VSCode <https://code.visualstudio.com>`__).
+The will help ensure we have a consistent code style.
 
 C++ Coding Style
 ================

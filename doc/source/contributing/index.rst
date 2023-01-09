@@ -23,8 +23,8 @@ When contributing, please keep in mind our
 
 Please also ensure that your contribution is compatible with our
 license. :mod:`sire` is licensed under the GPLv3 or later. Please
-ensure your contribution is similarly licensed (i.e. GPLv2 or later
-for the C++ code, MIT, BSD, Apache or GPLv2 or GPLv3 or later
+ensure your contribution is similarly licensed (i.e. GPLv3 or later
+for the C++ code, MIT, BSD, Apache or GPLv3 or later
 for the Python code). Please ensure that your employer (if you
 are writing code as an employee) gives permission for you
 to contribute your code.

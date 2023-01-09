@@ -20,7 +20,7 @@ Unzipping './3NSS.pdb.gz'...
 System( name=3NSS num_molecules=1 num_residues=1679 num_atoms=6984 )
 
 If you are running in a Jupyter Notebook (or similar) you can view
-the molecule by calling the :func:`~sire.mol.MoleculeView.view` function,
+the molecule by calling the :func:`~sire.mol.SelectorMol.view` function,
 e.g.
 
 >>> mols.view()
@@ -50,7 +50,8 @@ search on the `alphafold website <https://www.alphafold.ebi.ac.uk>`__.
 Downloading from 'https://alphafold.ebi.ac.uk/files/AF-A0A538R8Y3-F1-model_v3.pdb'...
 System( name=AF-A0A538R8Y3-F1-model_v3 num_molecules=1 num_residues=1190 num_atoms=9417 )
 
-Again, you can use ``mols.view()`` to view the molecules.
+Again, you can use :func:`mols.view() <sire.mol.SelectorMol.view>` to view
+the molecules.
 
 >>> mols.view()
 
@@ -83,8 +84,8 @@ Accessing the molecules
 =======================
 
 Molecules are loaded into a :class:`~sire.system.System`. You can see how
-many molecules have been loaded using the :func:`~sire.mol.Molecule.num_molecules`
-function;
+many molecules have been loaded using the
+:func:`~sire.mol.SelectorMol.num_molecules` function;
 
 >>> print(mols.num_molecules())
 1
