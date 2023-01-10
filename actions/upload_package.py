@@ -1,4 +1,3 @@
-
 import os
 import sys
 import glob
@@ -9,7 +8,7 @@ script = os.path.abspath(sys.argv[0])
 # (this script is in Sire/actions/)
 srcdir = os.path.dirname(os.path.dirname(script))
 
-print(f"Sire source is in {srcdir}\n")
+print(f"sire source is in {srcdir}\n")
 
 # Get the anaconda token to authorise uploads
 if "ANACONDA_TOKEN" in os.environ:
@@ -17,11 +16,11 @@ if "ANACONDA_TOKEN" in os.environ:
 else:
     conda_token = "TEST"
 
-# get the build directory
-if "BUILD_DIR" in os.environ:
-    conda_bld = os.environ["BUILD_DIR"]
-else:
-    conda_bld = os.path.join("..", "build")
+# get the root conda directory
+conda = os.environ["CONDA"]
+
+# Set the path to the conda-bld directory.
+conda_bld = os.path.join(conda, "envs", "sire_build", "conda-bld")
 
 print(f"conda_bld = {conda_bld}")
 
@@ -42,8 +41,10 @@ packages = " ".join(packages)
 
 def run_cmd(cmd):
     import subprocess
+
     p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
     return str(p.stdout.read().decode("utf-8")).lstrip().rstrip()
+
 
 gitdir = os.path.join(srcdir, ".git")
 
