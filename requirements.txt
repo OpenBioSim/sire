@@ -12,6 +12,5 @@ tbb-devel
 rich
 pandas
 
-# This is not available on ARM64 Linux
-pymbar<4; platform_machine == "x86_64"
-pymbar<4; sys_platform == "darwin"
+# This is not available on aarch64 Linux
+pymbar<4; platform_machine != "aarch64"

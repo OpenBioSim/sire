@@ -27,16 +27,12 @@ print(f"conda_bld = {conda_bld}")
 
 # Find the packages to upload
 sire_pkg = glob.glob(os.path.join(conda_bld, "*-*", "sire-*.tar.bz2"))
-fkcombu_pkg = glob.glob(os.path.join(conda_bld, "*-*", "fkcombu-*.tar.bz2"))
 
 if len(sire_pkg) == 0:
     print("No sire packages to upload?")
     sys.exit(-1)
 
 packages = sire_pkg
-
-if len(fkcombu_pkg) == 0:
-    packages = packages + fkcombu_pkg
 
 print(f"Uploading packages:")
 print(" * ", "\n *  ".join(packages))
@@ -68,8 +64,7 @@ cmd = f"anaconda --token {conda_token} upload --user openbiosim {label} --force 
 print(f"\nUpload command:\n\n{cmd}\n")
 
 # Label release packages with main and dev so that dev is at least as new as
-# main. Only need to uncomment the libcpuid and fkcombu package uploads when
-# there new versions are released.
+# main.
 if conda_token == "TEST":
     print("Not uploading as the ANACONDA_TOKEN is not set!")
     sys.exit(-1)
