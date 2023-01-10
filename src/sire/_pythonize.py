@@ -242,6 +242,10 @@ def use_new_api():
     """
     global _is_using_new_api, _is_using_old_api
 
+    # load up the new console - ensure this is done once
+    from .utils import Console as _Console
+    _Console._get_console()
+
     if _is_using_new_api:
         # already done
         return
