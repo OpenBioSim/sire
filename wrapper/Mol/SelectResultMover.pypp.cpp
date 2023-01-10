@@ -40,80 +40,80 @@ void register_SelectResultMover_class(){
         SelectResultMover_exposer.def( bp::init< SireMol::SelectResult const & >(( bp::arg("other") ), "Construct from the passed SelectResult") );
         SelectResultMover_exposer.def( bp::init< SireMol::SelectResultMover const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::SelectResultMover::commit
-
+        
             typedef ::SireMol::SelectResult ( ::SireMol::SelectResultMover::*commit_function_type)(  ) const;
             commit_function_type commit_function_value( &::SireMol::SelectResultMover::commit );
-
-            SelectResultMover_exposer.def(
+            
+            SelectResultMover_exposer.def( 
                 "commit"
                 , commit_function_value
                 , bp::release_gil_policy()
                 , "Commit all of the moves" );
-
+        
         }
         SelectResultMover_exposer.def( bp::self != bp::self );
         { //::SireMol::SelectResultMover::operator=
-
+        
             typedef ::SireMol::SelectResultMover & ( ::SireMol::SelectResultMover::*assign_function_type)( ::SireMol::SelectResultMover const & ) ;
             assign_function_type assign_function_value( &::SireMol::SelectResultMover::operator= );
-
-            SelectResultMover_exposer.def(
+            
+            SelectResultMover_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SelectResultMover_exposer.def( bp::self == bp::self );
         { //::SireMol::SelectResultMover::toString
-
+        
             typedef ::QString ( ::SireMol::SelectResultMover::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::SelectResultMover::toString );
-
-            SelectResultMover_exposer.def(
+            
+            SelectResultMover_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::SelectResultMover::translate
-
+        
             typedef ::SireMol::SelectResultMover & ( ::SireMol::SelectResultMover::*translate_function_type)( ::SireMaths::Vector const & ) ;
             translate_function_type translate_function_value( &::SireMol::SelectResultMover::translate );
-
-            SelectResultMover_exposer.def(
+            
+            SelectResultMover_exposer.def( 
                 "translate"
                 , translate_function_value
                 , ( bp::arg("delta") )
                 , bp::return_self< >()
                 , "Translate all of the views by delta" );
-
+        
         }
         { //::SireMol::SelectResultMover::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::SelectResultMover::typeName );
-
-            SelectResultMover_exposer.def(
+            
+            SelectResultMover_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::SelectResultMover::what
-
+        
             typedef char const * ( ::SireMol::SelectResultMover::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::SelectResultMover::what );
-
-            SelectResultMover_exposer.def(
+            
+            SelectResultMover_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SelectResultMover_exposer.staticmethod( "typeName" );
         SelectResultMover_exposer.def( "__copy__", &__copy__);

@@ -72,151 +72,151 @@ void register_IdentityConstraint_class(){
         IdentityConstraint_exposer.def( bp::init< QVector< SireBase::PropPtr< SireFF::Point > > const &, SireMol::MoleculeGroup const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("points"), bp::arg("molgroup"), bp::arg("map")=SireBase::PropertyMap() ), "Construct the constraint that constrains the identities of the\npoints.count() molecules from the passed molecule group so that\nthe first molecule is identified by the first point, the second\nmolecule is identified by the second point, and the nth molecule\nis identified by the nth point. The (optionally supplied) property\nmap is used to find the properties required of this constraint") );
         IdentityConstraint_exposer.def( bp::init< SireSystem::IdentityConstraint const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireSystem::IdentityConstraint::constrain
-
+        
             typedef ::SireMol::MolGroupPtr ( *constrain_function_type )( ::SireMol::MoleculeGroup const &,::SireFF::PointRef const &,::SireBase::PropertyMap const & );
             constrain_function_type constrain_function_value( &::SireSystem::IdentityConstraint::constrain );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "constrain"
                 , constrain_function_value
                 , ( bp::arg("molgroup"), bp::arg("point"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Static function used to constrain the identities of the molecules\nin molgroup against the point point. This makes the first molecule\nin the group have the identity that matches this point" );
-
+        
         }
         { //::SireSystem::IdentityConstraint::constrain
-
+        
             typedef ::SireMol::MolGroupPtr ( *constrain_function_type )( ::SireMol::MoleculeGroup const &,::QVector< SireBase::PropPtr< SireFF::Point > > const &,::SireBase::PropertyMap const & );
             constrain_function_type constrain_function_value( &::SireSystem::IdentityConstraint::constrain );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "constrain"
                 , constrain_function_value
                 , ( bp::arg("molgroup"), bp::arg("points"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Static function used to constrain the identities of the molecules\nin molgroup against the identity points in points - the\nfirst npoints molecules in the group are constrained in order\nagainst the points" );
-
+        
         }
         { //::SireSystem::IdentityConstraint::constrain
-
+        
             typedef ::SireMol::MolGroupPtr ( *constrain_function_type )( ::SireMol::MoleculeGroup const &,::QList< SireBase::PropPtr< SireFF::Point > > const &,::SireBase::PropertyMap const & );
             constrain_function_type constrain_function_value( &::SireSystem::IdentityConstraint::constrain );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "constrain"
                 , constrain_function_value
                 , ( bp::arg("molgroup"), bp::arg("points"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Static function used to constrain the identities of the molecules\nin molgroup against the identity points in points - the\nfirst npoints molecules in the group are constrained in order\nagainst the points" );
-
+        
         }
         { //::SireSystem::IdentityConstraint::moleculeGroup
-
+        
             typedef ::SireMol::MoleculeGroup const & ( ::SireSystem::IdentityConstraint::*moleculeGroup_function_type)(  ) const;
             moleculeGroup_function_type moleculeGroup_function_value( &::SireSystem::IdentityConstraint::moleculeGroup );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "moleculeGroup"
                 , moleculeGroup_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the molecule group acted on by this constraint" );
-
+        
         }
         IdentityConstraint_exposer.def( bp::self != bp::self );
         { //::SireSystem::IdentityConstraint::operator=
-
+        
             typedef ::SireSystem::IdentityConstraint & ( ::SireSystem::IdentityConstraint::*assign_function_type)( ::SireSystem::IdentityConstraint const & ) ;
             assign_function_type assign_function_value( &::SireSystem::IdentityConstraint::operator= );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         IdentityConstraint_exposer.def( bp::self == bp::self );
         { //::SireSystem::IdentityConstraint::points
-
+        
             typedef ::QVector< SireBase::PropPtr< SireFF::Point > > ( ::SireSystem::IdentityConstraint::*points_function_type)(  ) const;
             points_function_type points_function_value( &::SireSystem::IdentityConstraint::points );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "points"
                 , points_function_value
                 , bp::release_gil_policy()
                 , "Return the points used to identify the molecules" );
-
+        
         }
         { //::SireSystem::IdentityConstraint::propertyMap
-
+        
             typedef ::SireBase::PropertyMap const & ( ::SireSystem::IdentityConstraint::*propertyMap_function_type)(  ) const;
             propertyMap_function_type propertyMap_function_value( &::SireSystem::IdentityConstraint::propertyMap );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "propertyMap"
                 , propertyMap_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the property map used to find the properties used\nby this constraint" );
-
+        
         }
         { //::SireSystem::IdentityConstraint::toString
-
+        
             typedef ::QString ( ::SireSystem::IdentityConstraint::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireSystem::IdentityConstraint::toString );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this constraint" );
-
+        
         }
         { //::SireSystem::IdentityConstraint::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::IdentityConstraint::typeName );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireSystem::IdentityConstraint::useFewPointsAlgorithm
-
+        
             typedef void ( ::SireSystem::IdentityConstraint::*useFewPointsAlgorithm_function_type)(  ) ;
             useFewPointsAlgorithm_function_type useFewPointsAlgorithm_function_value( &::SireSystem::IdentityConstraint::useFewPointsAlgorithm );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "useFewPointsAlgorithm"
                 , useFewPointsAlgorithm_function_value
                 , bp::release_gil_policy()
                 , "Function used for debugging that switches this object over\nto using the few points algorithm to apply the constraint" );
-
+        
         }
         { //::SireSystem::IdentityConstraint::useManyPointsAlgorithm
-
+        
             typedef void ( ::SireSystem::IdentityConstraint::*useManyPointsAlgorithm_function_type)(  ) ;
             useManyPointsAlgorithm_function_type useManyPointsAlgorithm_function_value( &::SireSystem::IdentityConstraint::useManyPointsAlgorithm );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "useManyPointsAlgorithm"
                 , useManyPointsAlgorithm_function_value
                 , bp::release_gil_policy()
                 , "Function used for debugging that switches this object over\nto using the many points algorithm to apply the constraint" );
-
+        
         }
         { //::SireSystem::IdentityConstraint::useSinglePointAlgorithm
-
+        
             typedef void ( ::SireSystem::IdentityConstraint::*useSinglePointAlgorithm_function_type)(  ) ;
             useSinglePointAlgorithm_function_type useSinglePointAlgorithm_function_value( &::SireSystem::IdentityConstraint::useSinglePointAlgorithm );
-
-            IdentityConstraint_exposer.def(
+            
+            IdentityConstraint_exposer.def( 
                 "useSinglePointAlgorithm"
                 , useSinglePointAlgorithm_function_value
                 , bp::release_gil_policy()
                 , "Function used for debugging that switches this object over\nto using the single point algorithm to apply the constraint\nThrow: SireError::invalid_state\n" );
-
+        
         }
         IdentityConstraint_exposer.staticmethod( "constrain" );
         IdentityConstraint_exposer.staticmethod( "typeName" );

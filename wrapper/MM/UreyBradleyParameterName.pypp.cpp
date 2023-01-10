@@ -60,16 +60,16 @@ void register_UreyBradleyParameterName_class(){
         UreyBradleyParameterName_exposer_t UreyBradleyParameterName_exposer = UreyBradleyParameterName_exposer_t( "UreyBradleyParameterName", "This class provides the default name of the\nproperty that contains the Urey-Bradley parameters", bp::init< >("") );
         bp::scope UreyBradleyParameterName_scope( UreyBradleyParameterName_exposer );
         { //::SireMM::UreyBradleyParameterName::ureyBradley
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMM::UreyBradleyParameterName::*ureyBradley_function_type)(  ) const;
             ureyBradley_function_type ureyBradley_function_value( &::SireMM::UreyBradleyParameterName::ureyBradley );
-
-            UreyBradleyParameterName_exposer.def(
+            
+            UreyBradleyParameterName_exposer.def( 
                 "ureyBradley"
                 , ureyBradley_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         UreyBradleyParameterName_exposer.def( "__copy__", &__copy__);
         UreyBradleyParameterName_exposer.def( "__deepcopy__", &__copy__);

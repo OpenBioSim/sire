@@ -33,56 +33,56 @@ void register_NullSupraSubMove_class(){
         bp::scope NullSupraSubMove_scope( NullSupraSubMove_exposer );
         NullSupraSubMove_exposer.def( bp::init< SireMove::NullSupraSubMove const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::NullSupraSubMove::move
-
+        
             typedef void ( ::SireMove::NullSupraSubMove::*move_function_type)( ::SireMove::SupraSubSystem &,int,int,bool ) ;
             move_function_type move_function_value( &::SireMove::NullSupraSubMove::move );
-
-            NullSupraSubMove_exposer.def(
+            
+            NullSupraSubMove_exposer.def( 
                 "move"
                 , move_function_value
                 , ( bp::arg("system"), bp::arg("n_supra_moves"), bp::arg("n_supra_moves_per_block"), bp::arg("record_stats") )
                 , bp::release_gil_policy()
                 , "Null move, so doesnt do anything" );
-
+        
         }
         NullSupraSubMove_exposer.def( bp::self != bp::self );
         { //::SireMove::NullSupraSubMove::operator=
-
+        
             typedef ::SireMove::NullSupraSubMove & ( ::SireMove::NullSupraSubMove::*assign_function_type)( ::SireMove::NullSupraSubMove const & ) ;
             assign_function_type assign_function_value( &::SireMove::NullSupraSubMove::operator= );
-
-            NullSupraSubMove_exposer.def(
+            
+            NullSupraSubMove_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         NullSupraSubMove_exposer.def( bp::self == bp::self );
         { //::SireMove::NullSupraSubMove::toString
-
+        
             typedef ::QString ( ::SireMove::NullSupraSubMove::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMove::NullSupraSubMove::toString );
-
-            NullSupraSubMove_exposer.def(
+            
+            NullSupraSubMove_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this move" );
-
+        
         }
         { //::SireMove::NullSupraSubMove::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::NullSupraSubMove::typeName );
-
-            NullSupraSubMove_exposer.def(
+            
+            NullSupraSubMove_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullSupraSubMove_exposer.staticmethod( "typeName" );
         NullSupraSubMove_exposer.def( "__copy__", &__copy__);

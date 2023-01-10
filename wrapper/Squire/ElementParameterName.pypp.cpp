@@ -42,16 +42,16 @@ void register_ElementParameterName_class(){
         ElementParameterName_exposer_t ElementParameterName_exposer = ElementParameterName_exposer_t( "ElementParameterName", "This class provides the default name of the\nproperty that contains the element parameters", bp::init< >("") );
         bp::scope ElementParameterName_scope( ElementParameterName_exposer );
         { //::Squire::ElementParameterName::element
-
+        
             typedef ::QString const & ( ::Squire::ElementParameterName::*element_function_type)(  ) const;
             element_function_type element_function_value( &::Squire::ElementParameterName::element );
-
-            ElementParameterName_exposer.def(
+            
+            ElementParameterName_exposer.def( 
                 "element"
                 , element_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         ElementParameterName_exposer.def( "__copy__", &__copy__);
         ElementParameterName_exposer.def( "__deepcopy__", &__copy__);

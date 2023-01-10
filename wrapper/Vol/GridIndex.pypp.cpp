@@ -39,115 +39,115 @@ void register_GridIndex_class(){
         bp::scope GridIndex_scope( GridIndex_exposer );
         GridIndex_exposer.def( bp::init< SireVol::GridIndex const & >(( bp::arg("other") ), "") );
         { //::SireVol::GridIndex::i
-
+        
             typedef ::qint32 ( ::SireVol::GridIndex::*i_function_type)(  ) const;
             i_function_type i_function_value( &::SireVol::GridIndex::i );
-
-            GridIndex_exposer.def(
+            
+            GridIndex_exposer.def( 
                 "i"
                 , i_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireVol::GridIndex::isNull
-
+        
             typedef bool ( ::SireVol::GridIndex::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireVol::GridIndex::isNull );
-
-            GridIndex_exposer.def(
+            
+            GridIndex_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireVol::GridIndex::j
-
+        
             typedef ::qint32 ( ::SireVol::GridIndex::*j_function_type)(  ) const;
             j_function_type j_function_value( &::SireVol::GridIndex::j );
-
-            GridIndex_exposer.def(
+            
+            GridIndex_exposer.def( 
                 "j"
                 , j_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireVol::GridIndex::k
-
+        
             typedef ::qint32 ( ::SireVol::GridIndex::*k_function_type)(  ) const;
             k_function_type k_function_value( &::SireVol::GridIndex::k );
-
-            GridIndex_exposer.def(
+            
+            GridIndex_exposer.def( 
                 "k"
                 , k_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireVol::GridIndex::null
-
+        
             typedef ::SireVol::GridIndex ( *null_function_type )(  );
             null_function_type null_function_value( &::SireVol::GridIndex::null );
-
-            GridIndex_exposer.def(
+            
+            GridIndex_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         GridIndex_exposer.def( bp::self != bp::self );
         { //::SireVol::GridIndex::operator=
-
+        
             typedef ::SireVol::GridIndex & ( ::SireVol::GridIndex::*assign_function_type)( ::SireVol::GridIndex const & ) ;
             assign_function_type assign_function_value( &::SireVol::GridIndex::operator= );
-
-            GridIndex_exposer.def(
+            
+            GridIndex_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         GridIndex_exposer.def( bp::self == bp::self );
         { //::SireVol::GridIndex::toString
-
+        
             typedef ::QString ( ::SireVol::GridIndex::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireVol::GridIndex::toString );
-
-            GridIndex_exposer.def(
+            
+            GridIndex_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireVol::GridIndex::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireVol::GridIndex::typeName );
-
-            GridIndex_exposer.def(
+            
+            GridIndex_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireVol::GridIndex::what
-
+        
             typedef char const * ( ::SireVol::GridIndex::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireVol::GridIndex::what );
-
-            GridIndex_exposer.def(
+            
+            GridIndex_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         GridIndex_exposer.staticmethod( "null" );
         GridIndex_exposer.staticmethod( "typeName" );

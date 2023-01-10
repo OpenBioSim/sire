@@ -33,44 +33,44 @@ void register_LowerCaseString_class(){
         bp::scope LowerCaseString_scope( LowerCaseString_exposer );
         LowerCaseString_exposer.def( bp::init< SireBase::LowerCaseString const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireBase::LowerCaseString::mangle
-
+        
             typedef ::QString ( ::SireBase::LowerCaseString::*mangle_function_type)( ::QString const & ) const;
             mangle_function_type mangle_function_value( &::SireBase::LowerCaseString::mangle );
-
-            LowerCaseString_exposer.def(
+            
+            LowerCaseString_exposer.def( 
                 "mangle"
                 , mangle_function_value
                 , ( bp::arg("input") )
                 , bp::release_gil_policy()
                 , "Mangle the string - remove all initial and trailing spaces" );
-
+        
         }
         LowerCaseString_exposer.def( bp::self != bp::self );
         { //::SireBase::LowerCaseString::operator=
-
+        
             typedef ::SireBase::LowerCaseString & ( ::SireBase::LowerCaseString::*assign_function_type)( ::SireBase::LowerCaseString const & ) ;
             assign_function_type assign_function_value( &::SireBase::LowerCaseString::operator= );
-
-            LowerCaseString_exposer.def(
+            
+            LowerCaseString_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         LowerCaseString_exposer.def( bp::self == bp::self );
         { //::SireBase::LowerCaseString::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireBase::LowerCaseString::typeName );
-
-            LowerCaseString_exposer.def(
+            
+            LowerCaseString_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         LowerCaseString_exposer.staticmethod( "typeName" );
         LowerCaseString_exposer.def( "__copy__", &__copy__);

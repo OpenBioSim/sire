@@ -62,319 +62,319 @@ void register_CGStructureEditor_class(){
         CGStructureEditor_exposer.def( bp::init< SireMol::StructureEditor const &, SireMol::CGIdx >(( bp::arg("data"), bp::arg("cgidx") ), "Construct to edit the CutGroup at index cgidx in the molecule\nalso being edited in data\nThrow: SireError::invalid_index\n") );
         CGStructureEditor_exposer.def( bp::init< SireMol::CGStructureEditor const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::CGStructureEditor::add
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::CGStructureEditor::*add_function_type)( ::SireMol::AtomName const & ) ;
             add_function_type add_function_value( &::SireMol::CGStructureEditor::add );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("atomname") )
                 , bp::release_gil_policy()
                 , "Add an atom called atomname to this CutGroup and return\nan editor for that atom" );
-
+        
         }
         { //::SireMol::CGStructureEditor::add
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::CGStructureEditor::*add_function_type)( ::SireMol::AtomNum ) ;
             add_function_type add_function_value( &::SireMol::CGStructureEditor::add );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("atomnum") )
                 , bp::release_gil_policy()
                 , "Add an atom with number atomnum to this CutGroup and return\nan editor for that atom" );
-
+        
         }
         { //::SireMol::CGStructureEditor::atom
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::CGStructureEditor::*atom_function_type)( int ) ;
             atom_function_type atom_function_value( &::SireMol::CGStructureEditor::atom );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "atom"
                 , atom_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return an editor for the ith atom of this CutGroup\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::CGStructureEditor::atom
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::CGStructureEditor::*atom_function_type)( ::SireMol::AtomID const & ) ;
             atom_function_type atom_function_value( &::SireMol::CGStructureEditor::atom );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "atom"
                 , atom_function_value
                 , ( bp::arg("atomid") )
                 , bp::release_gil_policy()
                 , "Return an editor for the atom that matches the ID atomid in\nthis CutGroup\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::CGStructureEditor::commit
-
+        
             typedef ::SireMol::CutGroup ( ::SireMol::CGStructureEditor::*commit_function_type)(  ) const;
             commit_function_type commit_function_value( &::SireMol::CGStructureEditor::commit );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "commit"
                 , commit_function_value
                 , bp::release_gil_policy()
                 , "Commit the changes made by this editor and return the\nupdated CutGroup" );
-
+        
         }
         { //::SireMol::CGStructureEditor::index
-
+        
             typedef ::SireMol::CGIdx ( ::SireMol::CGStructureEditor::*index_function_type)(  ) const;
             index_function_type index_function_value( &::SireMol::CGStructureEditor::index );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "index"
                 , index_function_value
                 , bp::release_gil_policy()
                 , "Return the index of this CutGroup in the molecule" );
-
+        
         }
         { //::SireMol::CGStructureEditor::molecule
-
+        
             typedef ::SireMol::MolStructureEditor ( ::SireMol::CGStructureEditor::*molecule_function_type)(  ) ;
             molecule_function_type molecule_function_value( &::SireMol::CGStructureEditor::molecule );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "molecule"
                 , molecule_function_value
                 , bp::release_gil_policy()
                 , "Return an editor for the molecule that contains this CutGroup" );
-
+        
         }
         { //::SireMol::CGStructureEditor::nAtoms
-
+        
             typedef int ( ::SireMol::CGStructureEditor::*nAtoms_function_type)(  ) const;
             nAtoms_function_type nAtoms_function_value( &::SireMol::CGStructureEditor::nAtoms );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , bp::release_gil_policy()
                 , "Return the number of atoms in this CutGroup (could be zero)" );
-
+        
         }
         { //::SireMol::CGStructureEditor::name
-
+        
             typedef ::SireMol::CGName const & ( ::SireMol::CGStructureEditor::*name_function_type)(  ) const;
             name_function_type name_function_value( &::SireMol::CGStructureEditor::name );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "name"
                 , name_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the name of this CutGroup" );
-
+        
         }
         { //::SireMol::CGStructureEditor::operator=
-
+        
             typedef ::SireMol::CGStructureEditor & ( ::SireMol::CGStructureEditor::*assign_function_type)( ::SireMol::CutGroup const & ) ;
             assign_function_type assign_function_value( &::SireMol::CGStructureEditor::operator= );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("cutgroup") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::CGStructureEditor::operator=
-
+        
             typedef ::SireMol::CGStructureEditor & ( ::SireMol::CGStructureEditor::*assign_function_type)( ::SireMol::CGStructureEditor const & ) ;
             assign_function_type assign_function_value( &::SireMol::CGStructureEditor::operator= );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::CGStructureEditor::reindex
-
+        
             typedef ::SireMol::CGStructureEditor & ( ::SireMol::CGStructureEditor::*reindex_function_type)( ::SireMol::CGIdx ) ;
             reindex_function_type reindex_function_value( &::SireMol::CGStructureEditor::reindex );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "reindex"
                 , reindex_function_value
                 , ( bp::arg("index") )
                 , bp::return_self< >()
                 , "Move this CutGroup to index newidx - this will move it\nto the start or end if this index is out of range" );
-
+        
         }
         { //::SireMol::CGStructureEditor::remove
-
+        
             typedef ::SireMol::MolStructureEditor ( ::SireMol::CGStructureEditor::*remove_function_type)(  ) ;
             remove_function_type remove_function_value( &::SireMol::CGStructureEditor::remove );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , bp::return_self< >()
                 , "Complete remove this CutGroup, and return an editor\nfor the molecule that contained it" );
-
+        
         }
         { //::SireMol::CGStructureEditor::remove
-
+        
             typedef ::SireMol::CGStructureEditor & ( ::SireMol::CGStructureEditor::*remove_function_type)( ::SireMol::AtomID const & ) ;
             remove_function_type remove_function_value( &::SireMol::CGStructureEditor::remove );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("atomid") )
                 , bp::return_self< >()
                 , "Completely remove all atoms that match the ID atomid from\nthis CutGroup\nThrow: SireMol::missing_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::CGStructureEditor::remove
-
+        
             typedef ::SireMol::CGStructureEditor & ( ::SireMol::CGStructureEditor::*remove_function_type)( int ) ;
             remove_function_type remove_function_value( &::SireMol::CGStructureEditor::remove );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("i") )
                 , bp::return_self< >()
                 , "Remove the ith atom from this CutGroup\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::CGStructureEditor::rename
-
+        
             typedef ::SireMol::CGStructureEditor & ( ::SireMol::CGStructureEditor::*rename_function_type)( ::SireMol::CGName const & ) ;
             rename_function_type rename_function_value( &::SireMol::CGStructureEditor::rename );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "rename"
                 , rename_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
                 , "Rename this CutGroup to newname" );
-
+        
         }
         { //::SireMol::CGStructureEditor::select
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::CGStructureEditor::*select_function_type)( int ) ;
             select_function_type select_function_value( &::SireMol::CGStructureEditor::select );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "select"
                 , select_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return an editor for the ith atom of this CutGroup\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::CGStructureEditor::select
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::CGStructureEditor::*select_function_type)( ::SireMol::AtomID const & ) ;
             select_function_type select_function_value( &::SireMol::CGStructureEditor::select );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "select"
                 , select_function_value
                 , ( bp::arg("atomid") )
                 , bp::release_gil_policy()
                 , "Return an editor for the atom that matches the ID atomid in\nthis CutGroup\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::CGStructureEditor::selectedAll
-
+        
             typedef bool ( ::SireMol::CGStructureEditor::*selectedAll_function_type)(  ) const;
             selectedAll_function_type selectedAll_function_value( &::SireMol::CGStructureEditor::selectedAll );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "selectedAll"
                 , selectedAll_function_value
                 , bp::release_gil_policy()
                 , "Does this hold the entire molecule" );
-
+        
         }
         { //::SireMol::CGStructureEditor::toString
-
+        
             typedef ::QString ( ::SireMol::CGStructureEditor::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::CGStructureEditor::toString );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this editor" );
-
+        
         }
         { //::SireMol::CGStructureEditor::transfer
-
+        
             typedef ::SireMol::CGStructureEditor & ( ::SireMol::CGStructureEditor::*transfer_function_type)( ::SireMol::AtomID const &,::SireMol::CGID const & ) ;
             transfer_function_type transfer_function_value( &::SireMol::CGStructureEditor::transfer );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "transfer"
                 , transfer_function_value
                 , ( bp::arg("atomid"), bp::arg("cgid") )
                 , bp::return_self< >()
                 , "Transfer all atoms that match the ID atomid in this CutGroup\nto the CutGroup that matches the ID cgid\nThrow: SireMol::missing_atom\nThrow: SireMol::missing_cutgroup\nThrow: SireMol::duplicate_cutgroup\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::CGStructureEditor::transfer
-
+        
             typedef ::SireMol::CGStructureEditor & ( ::SireMol::CGStructureEditor::*transfer_function_type)( int,::SireMol::CGID const & ) ;
             transfer_function_type transfer_function_value( &::SireMol::CGStructureEditor::transfer );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "transfer"
                 , transfer_function_value
                 , ( bp::arg("i"), bp::arg("cgid") )
                 , bp::return_self< >()
                 , "Transfer the ith atom of this CutGroup into the CutGroup identified\nby the ID cgid\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::CGStructureEditor::transferAll
-
+        
             typedef ::SireMol::CGStructureEditor & ( ::SireMol::CGStructureEditor::*transferAll_function_type)( ::SireMol::CGID const & ) ;
             transferAll_function_type transferAll_function_value( &::SireMol::CGStructureEditor::transferAll );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "transferAll"
                 , transferAll_function_value
                 , ( bp::arg("cgid") )
                 , bp::return_self< >()
                 , "Completely transfer all of the atoms in this CutGroup to\nthe CutGroup that matches the ID cgid\nThrow: SireMol::missing_cutgroup\nThrow: SireMol::duplicate_cutgroup\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::CGStructureEditor::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::CGStructureEditor::typeName );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::CGStructureEditor::what
-
+        
             typedef char const * ( ::SireMol::CGStructureEditor::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::CGStructureEditor::what );
-
-            CGStructureEditor_exposer.def(
+            
+            CGStructureEditor_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CGStructureEditor_exposer.staticmethod( "typeName" );
         CGStructureEditor_exposer.def( "__copy__", &__copy__);

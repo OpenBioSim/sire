@@ -60,28 +60,28 @@ void register_ChemicalBondHunter_class(){
         ChemicalBondHunter_exposer.def( bp::init< double >(( bp::arg("tolerance") ), "Construct with the specified tolerance") );
         ChemicalBondHunter_exposer.def( bp::init< SireMol::ChemicalBondHunter const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::ChemicalBondHunter::operator()
-
+        
             typedef ::SireMol::Connectivity ( ::SireMol::ChemicalBondHunter::*__call___function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
             __call___function_type __call___function_value( &::SireMol::ChemicalBondHunter::operator() );
-
-            ChemicalBondHunter_exposer.def(
+            
+            ChemicalBondHunter_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("molview"), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
-
+        
         }
         { //::SireMol::ChemicalBondHunter::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::ChemicalBondHunter::typeName );
-
-            ChemicalBondHunter_exposer.def(
+            
+            ChemicalBondHunter_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ChemicalBondHunter_exposer.staticmethod( "typeName" );
         ChemicalBondHunter_exposer.def( "__copy__", &__copy__);

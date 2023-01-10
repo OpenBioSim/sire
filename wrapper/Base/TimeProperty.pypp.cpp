@@ -40,54 +40,54 @@ void register_TimeProperty_class(){
         TimeProperty_exposer.def( bp::init< SireBase::Property const & >(( bp::arg("other") ), "Construct from a Property") );
         TimeProperty_exposer.def( bp::self != bp::self );
         { //::SireBase::TimeProperty::operator=
-
+        
             typedef ::SireBase::TimeProperty & ( ::SireBase::TimeProperty::*assign_function_type)( ::SireBase::TimeProperty const & ) ;
             assign_function_type assign_function_value( &::SireBase::TimeProperty::operator= );
-
-            TimeProperty_exposer.def(
+            
+            TimeProperty_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         TimeProperty_exposer.def( bp::self == bp::self );
         { //::SireBase::TimeProperty::toString
-
+        
             typedef ::QString ( ::SireBase::TimeProperty::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::TimeProperty::toString );
-
-            TimeProperty_exposer.def(
+            
+            TimeProperty_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TimeProperty::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireBase::TimeProperty::typeName );
-
-            TimeProperty_exposer.def(
+            
+            TimeProperty_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TimeProperty::value
-
+        
             typedef ::SireUnits::Dimension::Time ( ::SireBase::TimeProperty::*value_function_type)(  ) const;
             value_function_type value_function_value( &::SireBase::TimeProperty::value );
-
-            TimeProperty_exposer.def(
+            
+            TimeProperty_exposer.def( 
                 "value"
                 , value_function_value
                 , bp::release_gil_policy()
                 , "Return this number cast as a Time" );
-
+        
         }
         TimeProperty_exposer.staticmethod( "typeName" );
         TimeProperty_exposer.def( "__copy__", &__copy__);

@@ -40,55 +40,55 @@ void register_Cosh_class(){
         Cosh_exposer.def( bp::init< SireCAS::Expression const & >(( bp::arg("ex") ), "Construct cos(expression)") );
         Cosh_exposer.def( bp::init< SireCAS::Cosh const & >(( bp::arg("other") ), "Create cos(cos(expression))") );
         { //::SireCAS::Cosh::evaluate
-
+        
             typedef double ( ::SireCAS::Cosh::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Cosh::evaluate );
-
-            Cosh_exposer.def(
+            
+            Cosh_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this function" );
-
+        
         }
         { //::SireCAS::Cosh::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::Cosh::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Cosh::evaluate );
-
-            Cosh_exposer.def(
+            
+            Cosh_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Complex evaluation" );
-
+        
         }
         Cosh_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::Cosh::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::Cosh::typeName );
-
-            Cosh_exposer.def(
+            
+            Cosh_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::Cosh::what
-
+        
             typedef char const * ( ::SireCAS::Cosh::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::Cosh::what );
-
-            Cosh_exposer.def(
+            
+            Cosh_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Cosh_exposer.staticmethod( "typeName" );
         Cosh_exposer.def( "__copy__", &__copy__);

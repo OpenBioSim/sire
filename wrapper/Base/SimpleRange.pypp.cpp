@@ -37,92 +37,92 @@ void register_SimpleRange_class(){
         SimpleRange_exposer.def( bp::init< qint64, qint64, bp::optional< qint64 > >(( bp::arg("start"), bp::arg("end"), bp::arg("increment")=(::qint64)(1) ), "Construct a range from [start,end) in units of increment") );
         SimpleRange_exposer.def( bp::init< SireBase::SimpleRange const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireBase::SimpleRange::atEnd
-
+        
             typedef bool ( ::SireBase::SimpleRange::*atEnd_function_type)(  ) const;
             atEnd_function_type atEnd_function_value( &::SireBase::SimpleRange::atEnd );
-
-            SimpleRange_exposer.def(
+            
+            SimpleRange_exposer.def( 
                 "atEnd"
                 , atEnd_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this range is at its end" );
-
+        
         }
         { //::SireBase::SimpleRange::next
-
+        
             typedef ::qint64 ( ::SireBase::SimpleRange::*next_function_type)(  ) ;
             next_function_type next_function_value( &::SireBase::SimpleRange::next );
-
-            SimpleRange_exposer.def(
+            
+            SimpleRange_exposer.def( 
                 "next"
                 , next_function_value
                 , bp::release_gil_policy()
                 , "Return the next value in the range" );
-
+        
         }
         SimpleRange_exposer.def( bp::self != bp::self );
         { //::SireBase::SimpleRange::operator=
-
+        
             typedef ::SireBase::SimpleRange & ( ::SireBase::SimpleRange::*assign_function_type)( ::SireBase::SimpleRange const & ) ;
             assign_function_type assign_function_value( &::SireBase::SimpleRange::operator= );
-
-            SimpleRange_exposer.def(
+            
+            SimpleRange_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SimpleRange_exposer.def( bp::self == bp::self );
         { //::SireBase::SimpleRange::populate
-
+        
             typedef ::SireBase::RangePtr ( ::SireBase::SimpleRange::*populate_function_type)( int ) const;
             populate_function_type populate_function_value( &::SireBase::SimpleRange::populate );
-
-            SimpleRange_exposer.def(
+            
+            SimpleRange_exposer.def( 
                 "populate"
                 , populate_function_value
                 , ( bp::arg("nvalues") )
                 , bp::release_gil_policy()
                 , "Return a copy of this range that is populate with passed number of values" );
-
+        
         }
         { //::SireBase::SimpleRange::toString
-
+        
             typedef ::QString ( ::SireBase::SimpleRange::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::SimpleRange::toString );
-
-            SimpleRange_exposer.def(
+            
+            SimpleRange_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation" );
-
+        
         }
         { //::SireBase::SimpleRange::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireBase::SimpleRange::typeName );
-
-            SimpleRange_exposer.def(
+            
+            SimpleRange_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::SimpleRange::what
-
+        
             typedef char const * ( ::SireBase::SimpleRange::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireBase::SimpleRange::what );
-
-            SimpleRange_exposer.def(
+            
+            SimpleRange_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SimpleRange_exposer.staticmethod( "typeName" );
         SimpleRange_exposer.def( "__copy__", &__copy__);

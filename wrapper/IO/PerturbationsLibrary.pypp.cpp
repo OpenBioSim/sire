@@ -90,97 +90,97 @@ void register_PerturbationsLibrary_class(){
         PerturbationsLibrary_exposer.def( bp::init< QString const & >(( bp::arg("file") ), "Construct, loading the library from the passed file") );
         PerturbationsLibrary_exposer.def( bp::init< SireIO::PerturbationsLibrary const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireIO::PerturbationsLibrary::add
-
+        
             typedef void ( ::SireIO::PerturbationsLibrary::*add_function_type)( ::SireIO::PerturbationsLibrary const & ) ;
             add_function_type add_function_value( &::SireIO::PerturbationsLibrary::add );
-
-            PerturbationsLibrary_exposer.def(
+            
+            PerturbationsLibrary_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "Add the templates in other into this library" );
-
+        
         }
         { //::SireIO::PerturbationsLibrary::applyTemplate
-
+        
             typedef ::SireMol::Molecule ( ::SireIO::PerturbationsLibrary::*applyTemplate_function_type)( ::SireMol::Molecule const & ) const;
             applyTemplate_function_type applyTemplate_function_value( &::SireIO::PerturbationsLibrary::applyTemplate );
-
-            PerturbationsLibrary_exposer.def(
+            
+            PerturbationsLibrary_exposer.def( 
                 "applyTemplate"
                 , applyTemplate_function_value
                 , ( bp::arg("molecule") )
                 , bp::release_gil_policy()
                 , "Generate the perturbations property and associated properties for the passed molecule" );
-
+        
         }
         { //::SireIO::PerturbationsLibrary::getTemplate
-
+        
             typedef ::SireIO::PerturbationsTemplate const & ( ::SireIO::PerturbationsLibrary::*getTemplate_function_type)( ::QString const & ) ;
             getTemplate_function_type getTemplate_function_value( &::SireIO::PerturbationsLibrary::getTemplate );
-
-            PerturbationsLibrary_exposer.def(
+            
+            PerturbationsLibrary_exposer.def( 
                 "getTemplate"
                 , getTemplate_function_value
                 , ( bp::arg("key") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the template for the specified key\nThrow: SireError::invalid_key\n" );
-
+        
         }
         { //::SireIO::PerturbationsLibrary::loadTemplates
-
+        
             typedef void ( ::SireIO::PerturbationsLibrary::*loadTemplates_function_type)( ::QString const & ) ;
             loadTemplates_function_type loadTemplates_function_value( &::SireIO::PerturbationsLibrary::loadTemplates );
-
-            PerturbationsLibrary_exposer.def(
+            
+            PerturbationsLibrary_exposer.def( 
                 "loadTemplates"
                 , loadTemplates_function_value
                 , ( bp::arg("file") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         PerturbationsLibrary_exposer.def( bp::self != bp::self );
         PerturbationsLibrary_exposer.def( bp::self + bp::self );
         { //::SireIO::PerturbationsLibrary::operator=
-
+        
             typedef ::SireIO::PerturbationsLibrary & ( ::SireIO::PerturbationsLibrary::*assign_function_type)( ::SireIO::PerturbationsLibrary const & ) ;
             assign_function_type assign_function_value( &::SireIO::PerturbationsLibrary::operator= );
-
-            PerturbationsLibrary_exposer.def(
+            
+            PerturbationsLibrary_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         PerturbationsLibrary_exposer.def( bp::self == bp::self );
         { //::SireIO::PerturbationsLibrary::setTemplate
-
+        
             typedef void ( ::SireIO::PerturbationsLibrary::*setTemplate_function_type)( ::QString const &,::SireIO::PerturbationsTemplate const & ) ;
             setTemplate_function_type setTemplate_function_value( &::SireIO::PerturbationsLibrary::setTemplate );
-
-            PerturbationsLibrary_exposer.def(
+            
+            PerturbationsLibrary_exposer.def( 
                 "setTemplate"
                 , setTemplate_function_value
                 , ( bp::arg("key"), bp::arg("tmplate") )
                 , bp::release_gil_policy()
                 , "Set the template associated with the passed key" );
-
+        
         }
         { //::SireIO::PerturbationsLibrary::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireIO::PerturbationsLibrary::typeName );
-
-            PerturbationsLibrary_exposer.def(
+            
+            PerturbationsLibrary_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         PerturbationsLibrary_exposer.staticmethod( "typeName" );
         PerturbationsLibrary_exposer.def( "__copy__", &__copy__);

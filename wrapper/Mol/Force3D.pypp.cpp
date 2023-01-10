@@ -32,31 +32,31 @@ void register_Force3D_class(){
         Force3D_exposer.def( bp::init< SireMaths::Vector const & >(( bp::arg("v") ), "") );
         Force3D_exposer.def( bp::init< SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > const & >(( bp::arg("other") ), "") );
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::at
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef ::SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > const & ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*at_function_type)( int ) const;
             at_function_type at_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::at );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::count
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef int ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*count_function_type)(  ) const;
             count_function_type count_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::count );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "count"
                 , count_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Force3D_exposer.def( bp::self != bp::self );
         Force3D_exposer.def( bp::self * bp::other< double >() );
@@ -65,138 +65,138 @@ void register_Force3D_class(){
         Force3D_exposer.def( bp::self - bp::self );
         Force3D_exposer.def( bp::self / bp::other< double >() );
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::operator=
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > & ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*assign_function_type)( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > const & ) ;
             assign_function_type assign_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::operator= );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Force3D_exposer.def( bp::self == bp::self );
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::operator[]
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef ::SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > const & ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*__getitem___function_type)( int ) const;
             __getitem___function_type __getitem___function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::operator[] );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::set
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef void ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*set_function_type)( int,::SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > const & ) ;
             set_function_type set_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::set );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("i"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::toString
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef ::QString ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::toString );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::typeName
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::typeName );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::value
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef ::SireMaths::Vector ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*value_function_type)(  ) const;
             value_function_type value_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::value );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "value"
                 , value_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::what
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef char const * ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::what );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::x
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef ::SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > const & ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*x_function_type)(  ) const;
             x_function_type x_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::x );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "x"
                 , x_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::y
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef ::SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > const & ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*y_function_type)(  ) const;
             y_function_type y_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::y );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "y"
                 , y_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::z
-
+        
             typedef SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > exported_class_t;
             typedef ::SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > const & ( ::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::*z_function_type)(  ) const;
             z_function_type z_function_value( &::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > >::z );
-
-            Force3D_exposer.def(
+            
+            Force3D_exposer.def( 
                 "z"
                 , z_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         Force3D_exposer.staticmethod( "typeName" );
         Force3D_exposer.def( "__copy__", &__copy__);

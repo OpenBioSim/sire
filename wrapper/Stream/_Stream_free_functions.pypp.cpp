@@ -170,55 +170,55 @@ namespace bp = boost::python;
 void register_free_functions(){
 
     { //::SireStream::getDataHeader
-
+    
         typedef ::SireStream::FileHeader ( *getDataHeader_function_type )( ::QByteArray const & );
         getDataHeader_function_type getDataHeader_function_value( &::SireStream::getDataHeader );
-
-        bp::def(
+        
+        bp::def( 
             "getDataHeader"
             , getDataHeader_function_value
             , ( bp::arg("data") )
             , "" );
-
+    
     }
 
     { //::SireStream::getDataHeader
-
+    
         typedef ::SireStream::FileHeader ( *getDataHeader_function_type )( ::QString const & );
         getDataHeader_function_type getDataHeader_function_value( &::SireStream::getDataHeader );
-
-        bp::def(
+        
+        bp::def( 
             "getDataHeader"
             , getDataHeader_function_value
             , ( bp::arg("filename") )
             , "" );
-
+    
     }
 
     { //::SireStream::getLibraryVersion
-
+    
         typedef ::quint32 ( *getLibraryVersion_function_type )( ::QString const & );
         getLibraryVersion_function_type getLibraryVersion_function_value( &::SireStream::getLibraryVersion );
-
-        bp::def(
+        
+        bp::def( 
             "getLibraryVersion"
             , getLibraryVersion_function_value
             , ( bp::arg("library") )
             , "" );
-
+    
     }
 
     { //::SireStream::getMinimumSupportedVersion
-
+    
         typedef ::quint32 ( *getMinimumSupportedVersion_function_type )( ::QString const & );
         getMinimumSupportedVersion_function_type getMinimumSupportedVersion_function_value( &::SireStream::getMinimumSupportedVersion );
-
-        bp::def(
+        
+        bp::def( 
             "getMinimumSupportedVersion"
             , getMinimumSupportedVersion_function_value
             , ( bp::arg("library") )
             , "" );
-
+    
     }
 
 }

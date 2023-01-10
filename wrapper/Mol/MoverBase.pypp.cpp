@@ -65,17 +65,17 @@ void register_MoverBase_class(){
         bp::scope MoverBase_scope( MoverBase_exposer );
         MoverBase_exposer.def( bp::init< SireMol::MoverBase const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::MoverBase::operator=
-
+        
             typedef ::SireMol::MoverBase & ( ::SireMol::MoverBase::*assign_function_type)( ::SireMol::MoverBase const & ) ;
             assign_function_type assign_function_value( &::SireMol::MoverBase::operator= );
-
-            MoverBase_exposer.def(
+            
+            MoverBase_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         MoverBase_exposer.def( "__copy__", &__copy__);
         MoverBase_exposer.def( "__deepcopy__", &__copy__);

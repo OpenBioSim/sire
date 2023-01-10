@@ -15,7 +15,7 @@ Load a molecule from a URL, via :func:`sire.load`.
    :data:`sire.tutorial_url` expands to the base URL that contains
    all tutorial files.
 
-View molecules using :func:`~sire.mol.Molecule.view`.
+View molecules using :func:`~sire.mol.SelectorMol.view`.
 
 >>> mols.view()
 
@@ -116,23 +116,29 @@ you can get the number of frames using
 and can view the movie using
 
 >>> mols.view()
-NEED PICTURE
 
-The :func:`~sire.mol.Molecule.view` function can be called on any
+.. image:: images/qs02.jpg
+   :alt: View of the aladip movie
+
+The :func:`~sire.mol.SelectorMol.view` function can be called on any
 selection, so you can view the movie of the first molecule using
 
 >>> mols[0].view()
-NEED PICTURE
+
+.. image:: images/qs03.jpg
+   :alt: View of first molecule in the aladip movie
 
 You can extract a subset of trajectory frames by indexing, e.g.
 
 >>> mols[0].trajectory()[0::100].view()
-NEED PICTURE
+
+.. image:: images/qs04.jpg
+   :alt: View of first molecule the subset of the aladip movie
 
 views every 100 frames of the trajectory.
 
 If the molecule was loaded with forcefield parameters, then you can
-calculate its energy using the :func:`~sire.mol.Molecule.energy`
+calculate its energy using the :func:`~sire.mol.SelectorMol.energy`
 function.
 
 >>> mols[0].energy()
@@ -154,16 +160,18 @@ You can calculate the energy across a trajectory, with the results
 returned as a pandas dataframe!
 
 >>> mols[0].trajectory().energy()
-	frame	time	1-4_LJ	    1-4_coulomb	angle	bond	dihedral	improper	intra_LJ	intra_coulomb	total
-0	0	0.200000	3.509838	44.810452	7.570059	4.224970	9.800343	0.485545	-1.311255	-45.398214	23.691738
-1	1	0.400000	2.700506	47.698455	12.470519	2.785874	11.776295	1.131481	-1.617496	-48.137253	28.808383
-2	2	0.600000	2.801076	43.486411	11.607753	2.023439	11.614774	0.124729	-1.103966	-44.458051	26.096165
-3	3	0.800000	3.365638	47.483966	6.524609	0.663454	11.383852	0.339333	-0.983872	-48.191509	20.585472
-4	4	1.000000	3.534830	48.596027	6.517530	2.190370	10.214994	0.255331	-1.699613	-48.393881	21.215588
-...	...	...	...	...	...	...	...	...	...	...	...
-495	495	99.199997	2.665994	42.866319	11.339087	4.172684	9.875872	0.356887	-1.584093	-44.220004	25.472747
-496	496	99.400002	3.062467	44.852774	9.268408	1.878366	10.548897	0.327064	-1.814718	-44.419100	23.704159
-497	497	99.599998	3.530233	44.908117	10.487378	4.454670	10.223964	1.006034	-0.692972	-44.902055	29.015369
-498	498	99.800003	3.511116	42.976288	9.017446	0.809064	10.841436	0.518190	-1.862433	-43.205035	22.606072
-499	499	100.000000	3.768998	41.625135	13.629923	1.089916	11.889372	0.846805	-1.897328	-44.306434	26.646387
+     frame        time    1-4_LJ  1-4_coulomb      angle      bond   dihedral  improper  intra_LJ  intra_coulomb      total
+0        0    0.200000  3.509838    44.810452   7.570059  4.224970   9.800343  0.485545 -1.311255     -45.398213  23.691740
+1        1    0.400000  2.700506    47.698455  12.470519  2.785874  11.776295  1.131481 -1.617496     -48.137252  28.808384
+2        2    0.600000  2.801076    43.486411  11.607753  2.023439  11.614774  0.124729 -1.103966     -44.458051  26.096165
+3        3    0.800000  3.365638    47.483966   6.524609  0.663454  11.383852  0.339333 -0.983872     -48.191512  20.585469
+4        4    1.000000  3.534830    48.596027   6.517530  2.190370  10.214994  0.255331 -1.699613     -48.393889  21.215580
+..     ...         ...       ...          ...        ...       ...        ...       ...       ...            ...        ...
+495    495   99.199997  2.665994    42.866319  11.339087  4.172684   9.875872  0.356887 -1.584092     -44.220005  25.472747
+496    496   99.400002  3.062467    44.852774   9.268408  1.878366  10.548897  0.327064 -1.814718     -44.419100  23.704158
+497    497   99.599998  3.530233    44.908117  10.487378  4.454670  10.223964  1.006034 -0.692972     -44.902056  29.015369
+498    498   99.800003  3.511116    42.976288   9.017446  0.809064  10.841436  0.518190 -1.862433     -43.205034  22.606073
+499    499  100.000000  3.768998    41.625135  13.629923  1.089916  11.889372  0.846805 -1.897328     -44.306437  26.646384
 
+This is just the beginning of what :mod:`sire` can do! To learn more,
+please take a look at :doc:`the tutorial <../tutorial/index>`.

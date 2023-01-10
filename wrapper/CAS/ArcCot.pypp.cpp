@@ -42,55 +42,55 @@ void register_ArcCot_class(){
         ArcCot_exposer.def( bp::init< SireCAS::Expression const & >(( bp::arg("ex") ), "Construct cos(expression)") );
         ArcCot_exposer.def( bp::init< SireCAS::ArcCot const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::ArcCot::evaluate
-
+        
             typedef double ( ::SireCAS::ArcCot::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::ArcCot::evaluate );
-
-            ArcCot_exposer.def(
+            
+            ArcCot_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this function" );
-
+        
         }
         { //::SireCAS::ArcCot::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::ArcCot::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::ArcCot::evaluate );
-
-            ArcCot_exposer.def(
+            
+            ArcCot_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Complex evaluation" );
-
+        
         }
         ArcCot_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::ArcCot::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::ArcCot::typeName );
-
-            ArcCot_exposer.def(
+            
+            ArcCot_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::ArcCot::what
-
+        
             typedef char const * ( ::SireCAS::ArcCot::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::ArcCot::what );
-
-            ArcCot_exposer.def(
+            
+            ArcCot_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ArcCot_exposer.staticmethod( "typeName" );
         ArcCot_exposer.def( "__copy__", &__copy__);

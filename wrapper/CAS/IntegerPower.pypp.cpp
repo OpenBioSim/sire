@@ -48,79 +48,79 @@ void register_IntegerPower_class(){
         IntegerPower_exposer.def( bp::init< SireCAS::Expression const &, int >(( bp::arg("expression"), bp::arg("power") ), "Construct expression^power") );
         IntegerPower_exposer.def( bp::init< SireCAS::IntegerPower const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::IntegerPower::evaluate
-
+        
             typedef double ( ::SireCAS::IntegerPower::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::IntegerPower::evaluate );
-
-            IntegerPower_exposer.def(
+            
+            IntegerPower_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this power" );
-
+        
         }
         { //::SireCAS::IntegerPower::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::IntegerPower::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::IntegerPower::evaluate );
-
-            IntegerPower_exposer.def(
+            
+            IntegerPower_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this power" );
-
+        
         }
         { //::SireCAS::IntegerPower::hash
-
+        
             typedef ::uint ( ::SireCAS::IntegerPower::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireCAS::IntegerPower::hash );
-
-            IntegerPower_exposer.def(
+            
+            IntegerPower_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "Return a hash of this power" );
-
+        
         }
         IntegerPower_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::IntegerPower::power
-
+        
             typedef ::SireCAS::Expression ( ::SireCAS::IntegerPower::*power_function_type)(  ) const;
             power_function_type power_function_value( &::SireCAS::IntegerPower::power );
-
-            IntegerPower_exposer.def(
+            
+            IntegerPower_exposer.def( 
                 "power"
                 , power_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::IntegerPower::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::IntegerPower::typeName );
-
-            IntegerPower_exposer.def(
+            
+            IntegerPower_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::IntegerPower::what
-
+        
             typedef char const * ( ::SireCAS::IntegerPower::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::IntegerPower::what );
-
-            IntegerPower_exposer.def(
+            
+            IntegerPower_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         IntegerPower_exposer.staticmethod( "typeName" );
         IntegerPower_exposer.def( "__copy__", &__copy__);

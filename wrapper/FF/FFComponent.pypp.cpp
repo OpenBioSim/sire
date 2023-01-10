@@ -33,76 +33,76 @@ void register_FFComponent_class(){
         FFComponent_exposer_t FFComponent_exposer = FFComponent_exposer_t( "FFComponent", "This is the base class of all Symbols that represent forcefield\ncomponents.\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope FFComponent_scope( FFComponent_exposer );
         { //::SireFF::FFComponent::componentName
-
+        
             typedef ::QString ( ::SireFF::FFComponent::*componentName_function_type)(  ) const;
             componentName_function_type componentName_function_value( &::SireFF::FFComponent::componentName );
-
-            FFComponent_exposer.def(
+            
+            FFComponent_exposer.def( 
                 "componentName"
                 , componentName_function_value
                 , bp::release_gil_policy()
                 , "Return the name of the component of the potential energy\nsurface that this symbol represents" );
-
+        
         }
         { //::SireFF::FFComponent::forceFieldName
-
+        
             typedef ::SireFF::FFName ( ::SireFF::FFComponent::*forceFieldName_function_type)(  ) const;
             forceFieldName_function_type forceFieldName_function_value( &::SireFF::FFComponent::forceFieldName );
-
-            FFComponent_exposer.def(
+            
+            FFComponent_exposer.def( 
                 "forceFieldName"
                 , forceFieldName_function_value
                 , bp::release_gil_policy()
                 , "Return the name of the forcefield that owns this component" );
-
+        
         }
         { //::SireFF::FFComponent::symbols
-
+        
             typedef ::SireCAS::Symbols ( ::SireFF::FFComponent::*symbols_function_type)(  ) const;
             symbols_function_type symbols_function_value( &::SireFF::FFComponent::symbols );
-
-            FFComponent_exposer.def(
+            
+            FFComponent_exposer.def( 
                 "symbols"
                 , symbols_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FFComponent::total
-
+        
             typedef ::SireFF::FFComponent const & ( ::SireFF::FFComponent::*total_function_type)(  ) const;
             total_function_type total_function_value( &::SireFF::FFComponent::total );
-
-            FFComponent_exposer.def(
+            
+            FFComponent_exposer.def( 
                 "total"
                 , total_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireFF::FFComponent::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireFF::FFComponent::typeName );
-
-            FFComponent_exposer.def(
+            
+            FFComponent_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FFComponent::what
-
+        
             typedef char const * ( ::SireFF::FFComponent::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireFF::FFComponent::what );
-
-            FFComponent_exposer.def(
+            
+            FFComponent_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         FFComponent_exposer.staticmethod( "typeName" );
         FFComponent_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireFF::FFComponent >,

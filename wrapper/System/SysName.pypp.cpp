@@ -28,93 +28,93 @@ void register_SysName_class(){
         SysName_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );
         SysName_exposer.def( bp::init< SireSystem::SysName const & >(( bp::arg("other") ), "") );
         { //::SireSystem::SysName::hash
-
+        
             typedef ::uint ( ::SireSystem::SysName::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireSystem::SysName::hash );
-
-            SysName_exposer.def(
+            
+            SysName_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireSystem::SysName::isNull
-
+        
             typedef bool ( ::SireSystem::SysName::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireSystem::SysName::isNull );
-
-            SysName_exposer.def(
+            
+            SysName_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireSystem::SysName::map
-
+        
             typedef ::QList< SireSystem::SysIdx > ( ::SireSystem::SysName::*map_function_type)( ::SireSystem::Systems const & ) const;
             map_function_type map_function_value( &::SireSystem::SysName::map );
-
-            SysName_exposer.def(
+            
+            SysName_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("systems") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SysName_exposer.def( bp::self != bp::self );
         { //::SireSystem::SysName::operator=
-
+        
             typedef ::SireSystem::SysName & ( ::SireSystem::SysName::*assign_function_type)( ::SireSystem::SysName const & ) ;
             assign_function_type assign_function_value( &::SireSystem::SysName::operator= );
-
-            SysName_exposer.def(
+            
+            SysName_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SysName_exposer.def( bp::self == bp::other< SireID::ID >() );
         SysName_exposer.def( bp::self == bp::self );
         { //::SireSystem::SysName::toString
-
+        
             typedef ::QString ( ::SireSystem::SysName::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireSystem::SysName::toString );
-
-            SysName_exposer.def(
+            
+            SysName_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireSystem::SysName::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::SysName::typeName );
-
-            SysName_exposer.def(
+            
+            SysName_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireSystem::SysName::what
-
+        
             typedef char const * ( ::SireSystem::SysName::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireSystem::SysName::what );
-
-            SysName_exposer.def(
+            
+            SysName_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SysName_exposer.staticmethod( "typeName" );
         SysName_exposer.def( "__copy__", &__copy__);

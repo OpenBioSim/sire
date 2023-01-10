@@ -70,102 +70,102 @@ void register_ChainIdx_class(){
         ChainIdx_exposer.def( bp::init< qint32 >(( bp::arg("idx") ), "") );
         ChainIdx_exposer.def( bp::init< SireMol::ChainIdx const & >(( bp::arg("other") ), "") );
         { //::SireMol::ChainIdx::hash
-
+        
             typedef ::uint ( ::SireMol::ChainIdx::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::ChainIdx::hash );
-
-            ChainIdx_exposer.def(
+            
+            ChainIdx_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainIdx::isNull
-
+        
             typedef bool ( ::SireMol::ChainIdx::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::ChainIdx::isNull );
-
-            ChainIdx_exposer.def(
+            
+            ChainIdx_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainIdx::map
-
+        
             typedef ::QList< SireMol::ChainIdx > ( ::SireMol::ChainIdx::*map_function_type)( ::SireMol::MolInfo const & ) const;
             map_function_type map_function_value( &::SireMol::ChainIdx::map );
-
-            ChainIdx_exposer.def(
+            
+            ChainIdx_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainIdx::null
-
+        
             typedef ::SireMol::ChainIdx ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMol::ChainIdx::null );
-
-            ChainIdx_exposer.def(
+            
+            ChainIdx_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainIdx::operator=
-
+        
             typedef ::SireMol::ChainIdx & ( ::SireMol::ChainIdx::*assign_function_type)( ::SireMol::ChainIdx const & ) ;
             assign_function_type assign_function_value( &::SireMol::ChainIdx::operator= );
-
-            ChainIdx_exposer.def(
+            
+            ChainIdx_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainIdx::toString
-
+        
             typedef ::QString ( ::SireMol::ChainIdx::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::ChainIdx::toString );
-
-            ChainIdx_exposer.def(
+            
+            ChainIdx_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainIdx::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::ChainIdx::typeName );
-
-            ChainIdx_exposer.def(
+            
+            ChainIdx_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainIdx::what
-
+        
             typedef char const * ( ::SireMol::ChainIdx::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::ChainIdx::what );
-
-            ChainIdx_exposer.def(
+            
+            ChainIdx_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ChainIdx_exposer.staticmethod( "null" );
         ChainIdx_exposer.staticmethod( "typeName" );

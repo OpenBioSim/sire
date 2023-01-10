@@ -74,102 +74,102 @@ void register_AtomIdx_class(){
         AtomIdx_exposer.def( bp::init< qint32 >(( bp::arg("idx") ), "") );
         AtomIdx_exposer.def( bp::init< SireMol::AtomIdx const & >(( bp::arg("other") ), "") );
         { //::SireMol::AtomIdx::hash
-
+        
             typedef ::uint ( ::SireMol::AtomIdx::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::AtomIdx::hash );
-
-            AtomIdx_exposer.def(
+            
+            AtomIdx_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomIdx::isNull
-
+        
             typedef bool ( ::SireMol::AtomIdx::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::AtomIdx::isNull );
-
-            AtomIdx_exposer.def(
+            
+            AtomIdx_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomIdx::map
-
+        
             typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomIdx::*map_function_type)( ::SireMol::MolInfo const & ) const;
             map_function_type map_function_value( &::SireMol::AtomIdx::map );
-
-            AtomIdx_exposer.def(
+            
+            AtomIdx_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomIdx::null
-
+        
             typedef ::SireMol::AtomIdx ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMol::AtomIdx::null );
-
-            AtomIdx_exposer.def(
+            
+            AtomIdx_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomIdx::operator=
-
+        
             typedef ::SireMol::AtomIdx & ( ::SireMol::AtomIdx::*assign_function_type)( ::SireMol::AtomIdx const & ) ;
             assign_function_type assign_function_value( &::SireMol::AtomIdx::operator= );
-
-            AtomIdx_exposer.def(
+            
+            AtomIdx_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::AtomIdx::toString
-
+        
             typedef ::QString ( ::SireMol::AtomIdx::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::AtomIdx::toString );
-
-            AtomIdx_exposer.def(
+            
+            AtomIdx_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomIdx::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::AtomIdx::typeName );
-
-            AtomIdx_exposer.def(
+            
+            AtomIdx_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomIdx::what
-
+        
             typedef char const * ( ::SireMol::AtomIdx::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::AtomIdx::what );
-
-            AtomIdx_exposer.def(
+            
+            AtomIdx_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomIdx_exposer.staticmethod( "null" );
         AtomIdx_exposer.staticmethod( "typeName" );

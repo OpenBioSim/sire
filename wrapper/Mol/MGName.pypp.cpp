@@ -39,93 +39,93 @@ void register_MGName_class(){
         MGName_exposer.def( bp::init< QString const &, SireID::CaseSensitivity >(( bp::arg("name"), bp::arg("case_sensitivity") ), "") );
         MGName_exposer.def( bp::init< SireMol::MGName const & >(( bp::arg("other") ), "") );
         { //::SireMol::MGName::hash
-
+        
             typedef ::uint ( ::SireMol::MGName::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::MGName::hash );
-
-            MGName_exposer.def(
+            
+            MGName_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MGName::isNull
-
+        
             typedef bool ( ::SireMol::MGName::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::MGName::isNull );
-
-            MGName_exposer.def(
+            
+            MGName_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MGName::map
-
+        
             typedef ::QList< SireMol::MGNum > ( ::SireMol::MGName::*map_function_type)( ::SireMol::MolGroupsBase const & ) const;
             map_function_type map_function_value( &::SireMol::MGName::map );
-
-            MGName_exposer.def(
+            
+            MGName_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molgroups") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MGName_exposer.def( bp::self != bp::self );
         { //::SireMol::MGName::operator=
-
+        
             typedef ::SireMol::MGName & ( ::SireMol::MGName::*assign_function_type)( ::SireMol::MGName const & ) ;
             assign_function_type assign_function_value( &::SireMol::MGName::operator= );
-
-            MGName_exposer.def(
+            
+            MGName_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         MGName_exposer.def( bp::self == bp::other< SireID::ID >() );
         MGName_exposer.def( bp::self == bp::self );
         { //::SireMol::MGName::toString
-
+        
             typedef ::QString ( ::SireMol::MGName::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::MGName::toString );
-
-            MGName_exposer.def(
+            
+            MGName_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MGName::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::MGName::typeName );
-
-            MGName_exposer.def(
+            
+            MGName_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MGName::what
-
+        
             typedef char const * ( ::SireMol::MGName::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::MGName::what );
-
-            MGName_exposer.def(
+            
+            MGName_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MGName_exposer.staticmethod( "typeName" );
         MGName_exposer.def( "__copy__", &__copy__);

@@ -56,67 +56,67 @@ void register_CLJSoftShiftFunction_class(){
         CLJSoftShiftFunction_exposer.def( bp::init< SireVol::Space const &, SireUnits::Dimension::Length, SireUnits::Dimension::Length, SireMM::CLJFunction::COMBINING_RULES >(( bp::arg("space"), bp::arg("coul_cutoff"), bp::arg("lj_cutoff"), bp::arg("combining_rules") ), "") );
         CLJSoftShiftFunction_exposer.def( bp::init< SireMM::CLJSoftShiftFunction const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::CLJSoftShiftFunction::defaultShiftFunction
-
+        
             typedef ::SireMM::CLJFunctionPtr ( *defaultShiftFunction_function_type )(  );
             defaultShiftFunction_function_type defaultShiftFunction_function_value( &::SireMM::CLJSoftShiftFunction::defaultShiftFunction );
-
-            CLJSoftShiftFunction_exposer.def(
+            
+            CLJSoftShiftFunction_exposer.def( 
                 "defaultShiftFunction"
                 , defaultShiftFunction_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CLJSoftShiftFunction_exposer.def( bp::self != bp::self );
         { //::SireMM::CLJSoftShiftFunction::operator=
-
+        
             typedef ::SireMM::CLJSoftShiftFunction & ( ::SireMM::CLJSoftShiftFunction::*assign_function_type)( ::SireMM::CLJSoftShiftFunction const & ) ;
             assign_function_type assign_function_value( &::SireMM::CLJSoftShiftFunction::operator= );
-
-            CLJSoftShiftFunction_exposer.def(
+            
+            CLJSoftShiftFunction_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         CLJSoftShiftFunction_exposer.def( bp::self == bp::self );
         { //::SireMM::CLJSoftShiftFunction::toString
-
+        
             typedef ::QString ( ::SireMM::CLJSoftShiftFunction::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMM::CLJSoftShiftFunction::toString );
-
-            CLJSoftShiftFunction_exposer.def(
+            
+            CLJSoftShiftFunction_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJSoftShiftFunction::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::CLJSoftShiftFunction::typeName );
-
-            CLJSoftShiftFunction_exposer.def(
+            
+            CLJSoftShiftFunction_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJSoftShiftFunction::what
-
+        
             typedef char const * ( ::SireMM::CLJSoftShiftFunction::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::CLJSoftShiftFunction::what );
-
-            CLJSoftShiftFunction_exposer.def(
+            
+            CLJSoftShiftFunction_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CLJSoftShiftFunction_exposer.staticmethod( "defaultShiftFunction" );
         CLJSoftShiftFunction_exposer.staticmethod( "typeName" );

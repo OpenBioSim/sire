@@ -60,16 +60,16 @@ void register_ImproperParameterName_class(){
         ImproperParameterName_exposer_t ImproperParameterName_exposer = ImproperParameterName_exposer_t( "ImproperParameterName", "This class provides the default name of the\nproperty that contains the improper parameters", bp::init< >("") );
         bp::scope ImproperParameterName_scope( ImproperParameterName_exposer );
         { //::SireMM::ImproperParameterName::improper
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMM::ImproperParameterName::*improper_function_type)(  ) const;
             improper_function_type improper_function_value( &::SireMM::ImproperParameterName::improper );
-
-            ImproperParameterName_exposer.def(
+            
+            ImproperParameterName_exposer.def( 
                 "improper"
                 , improper_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         ImproperParameterName_exposer.def( "__copy__", &__copy__);
         ImproperParameterName_exposer.def( "__deepcopy__", &__copy__);

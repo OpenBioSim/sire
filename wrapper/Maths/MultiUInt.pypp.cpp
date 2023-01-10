@@ -46,345 +46,345 @@ void register_MultiUInt_class(){
         MultiUInt_exposer.def( bp::init< QVector< unsigned int > const & >(( bp::arg("array") ), "Construct from the passed array - this must be the same size as the vector") );
         MultiUInt_exposer.def( bp::init< SireMaths::MultiUInt const & >(( bp::arg("other") ), "Construct from the passed array - this must be the same size as the vector") );
         { //::SireMaths::MultiUInt::at
-
+        
             typedef ::quint32 ( ::SireMaths::MultiUInt::*at_function_type)( int ) const;
             at_function_type at_function_value( &::SireMaths::MultiUInt::at );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the ith value in the multifloat" );
-
+        
         }
         { //::SireMaths::MultiUInt::compareEqual
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*compareEqual_function_type)( ::SireMaths::MultiUInt const & ) const;
             compareEqual_function_type compareEqual_function_value( &::SireMaths::MultiUInt::compareEqual );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "compareEqual"
                 , compareEqual_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::compareGreater
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*compareGreater_function_type)( ::SireMaths::MultiUInt const & ) const;
             compareGreater_function_type compareGreater_function_value( &::SireMaths::MultiUInt::compareGreater );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "compareGreater"
                 , compareGreater_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::compareGreaterEqual
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*compareGreaterEqual_function_type)( ::SireMaths::MultiUInt const & ) const;
             compareGreaterEqual_function_type compareGreaterEqual_function_value( &::SireMaths::MultiUInt::compareGreaterEqual );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "compareGreaterEqual"
                 , compareGreaterEqual_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::compareLess
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*compareLess_function_type)( ::SireMaths::MultiUInt const & ) const;
             compareLess_function_type compareLess_function_value( &::SireMaths::MultiUInt::compareLess );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "compareLess"
                 , compareLess_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::compareLessEqual
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*compareLessEqual_function_type)( ::SireMaths::MultiUInt const & ) const;
             compareLessEqual_function_type compareLessEqual_function_value( &::SireMaths::MultiUInt::compareLessEqual );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "compareLessEqual"
                 , compareLessEqual_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::compareNotEqual
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*compareNotEqual_function_type)( ::SireMaths::MultiUInt const & ) const;
             compareNotEqual_function_type compareNotEqual_function_value( &::SireMaths::MultiUInt::compareNotEqual );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "compareNotEqual"
                 , compareNotEqual_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::count
-
+        
             typedef int ( *count_function_type )(  );
             count_function_type count_function_value( &::SireMaths::MultiUInt::count );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "count"
                 , count_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::doubleSum
-
+        
             typedef ::quint64 ( ::SireMaths::MultiUInt::*doubleSum_function_type)(  ) const;
             doubleSum_function_type doubleSum_function_value( &::SireMaths::MultiUInt::doubleSum );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "doubleSum"
                 , doubleSum_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::fromArray
-
+        
             typedef ::QVector< SireMaths::MultiUInt > ( *fromArray_function_type )( ::QVector< unsigned int > const & );
             fromArray_function_type fromArray_function_value( &::SireMaths::MultiUInt::fromArray );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "fromArray"
                 , fromArray_function_value
                 , ( bp::arg("array") )
                 , bp::release_gil_policy()
                 , "Create an array of MultiInts from the passed array of integers. This will\npad the end of the array with zeroes if necessary" );
-
+        
         }
         { //::SireMaths::MultiUInt::fromArray
-
+        
             typedef ::QVector< SireMaths::MultiUInt > ( *fromArray_function_type )( ::quint32 const *,int );
             fromArray_function_type fromArray_function_value( &::SireMaths::MultiUInt::fromArray );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "fromArray"
                 , fromArray_function_value
                 , ( bp::arg("array"), bp::arg("size") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::get
-
+        
             typedef ::quint32 ( ::SireMaths::MultiUInt::*get_function_type)( int ) const;
             get_function_type get_function_value( &::SireMaths::MultiUInt::get );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "get"
                 , get_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the\nith value in the MultiInt" );
-
+        
         }
         { //::SireMaths::MultiUInt::getitem
-
+        
             typedef ::quint32 ( ::SireMaths::MultiUInt::*getitem_function_type)( int ) const;
             getitem_function_type getitem_function_value( &::SireMaths::MultiUInt::getitem );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "getitem"
                 , getitem_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::hasBinaryOne
-
+        
             typedef bool ( ::SireMaths::MultiUInt::*hasBinaryOne_function_type)(  ) const;
             hasBinaryOne_function_type hasBinaryOne_function_value( &::SireMaths::MultiUInt::hasBinaryOne );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "hasBinaryOne"
                 , hasBinaryOne_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not at least one of the elements of this vector\nis binary one (the float is equal to 0xFFFFFFFF)" );
-
+        
         }
         { //::SireMaths::MultiUInt::hasBinaryZero
-
+        
             typedef bool ( ::SireMaths::MultiUInt::*hasBinaryZero_function_type)(  ) const;
             hasBinaryZero_function_type hasBinaryZero_function_value( &::SireMaths::MultiUInt::hasBinaryZero );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "hasBinaryZero"
                 , hasBinaryZero_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not at least one of the elements of this vector\nis binary zero (the float is equal to 0x00000000)" );
-
+        
         }
         { //::SireMaths::MultiUInt::isAligned
-
+        
             typedef bool ( ::SireMaths::MultiUInt::*isAligned_function_type)(  ) const;
             isAligned_function_type isAligned_function_value( &::SireMaths::MultiUInt::isAligned );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "isAligned"
                 , isAligned_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this MultiInt is correctly aligned. If it is not,\nthen any SSE operations will fail" );
-
+        
         }
         { //::SireMaths::MultiUInt::isBinaryOne
-
+        
             typedef bool ( ::SireMaths::MultiUInt::*isBinaryOne_function_type)(  ) const;
             isBinaryOne_function_type isBinaryOne_function_value( &::SireMaths::MultiUInt::isBinaryOne );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "isBinaryOne"
                 , isBinaryOne_function_value
                 , bp::release_gil_policy()
                 , "Return whether all of the elements of this MultiInt are\nequal to 0xFFFFFFFF (e.g. every bit in the entire vector is 1)" );
-
+        
         }
         { //::SireMaths::MultiUInt::isBinaryZero
-
+        
             typedef bool ( ::SireMaths::MultiUInt::*isBinaryZero_function_type)(  ) const;
             isBinaryZero_function_type isBinaryZero_function_value( &::SireMaths::MultiUInt::isBinaryZero );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "isBinaryZero"
                 , isBinaryZero_function_value
                 , bp::release_gil_policy()
                 , "Return whether all of the elements of this MultiInt are\nequal to 0x00000000 (e.g. every bit in the entire vector is 0)" );
-
+        
         }
         { //::SireMaths::MultiUInt::isNotBinaryOne
-
+        
             typedef bool ( ::SireMaths::MultiUInt::*isNotBinaryOne_function_type)(  ) const;
             isNotBinaryOne_function_type isNotBinaryOne_function_value( &::SireMaths::MultiUInt::isNotBinaryOne );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "isNotBinaryOne"
                 , isNotBinaryOne_function_value
                 , bp::release_gil_policy()
                 , "Return whether all of the elements of this MultiInt are\nnot equal to 0xFFFFFFFF (e.g. at least one bit in the entire vector is 0)" );
-
+        
         }
         { //::SireMaths::MultiUInt::isNotBinaryZero
-
+        
             typedef bool ( ::SireMaths::MultiUInt::*isNotBinaryZero_function_type)(  ) const;
             isNotBinaryZero_function_type isNotBinaryZero_function_value( &::SireMaths::MultiUInt::isNotBinaryZero );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "isNotBinaryZero"
                 , isNotBinaryZero_function_value
                 , bp::release_gil_policy()
                 , "Return whether all of the elements of this MultiInt are\nnot equal to 0x00000000 (e.g. at least one bit in the entire vector is 1)" );
-
+        
         }
         { //::SireMaths::MultiUInt::logicalAnd
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*logicalAnd_function_type)( ::SireMaths::MultiUInt const & ) const;
             logicalAnd_function_type logicalAnd_function_value( &::SireMaths::MultiUInt::logicalAnd );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "logicalAnd"
                 , logicalAnd_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::logicalAndNot
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*logicalAndNot_function_type)( ::SireMaths::MultiUInt const & ) const;
             logicalAndNot_function_type logicalAndNot_function_value( &::SireMaths::MultiUInt::logicalAndNot );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "logicalAndNot"
                 , logicalAndNot_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::logicalNot
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*logicalNot_function_type)(  ) const;
             logicalNot_function_type logicalNot_function_value( &::SireMaths::MultiUInt::logicalNot );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "logicalNot"
                 , logicalNot_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::logicalOr
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*logicalOr_function_type)( ::SireMaths::MultiUInt const & ) const;
             logicalOr_function_type logicalOr_function_value( &::SireMaths::MultiUInt::logicalOr );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "logicalOr"
                 , logicalOr_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::logicalXor
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*logicalXor_function_type)( ::SireMaths::MultiUInt const & ) const;
             logicalXor_function_type logicalXor_function_value( &::SireMaths::MultiUInt::logicalXor );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "logicalXor"
                 , logicalXor_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::max
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*max_function_type)( ::SireMaths::MultiUInt const & ) const;
             max_function_type max_function_value( &::SireMaths::MultiUInt::max );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "max"
                 , max_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::min
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*min_function_type)( ::SireMaths::MultiUInt const & ) const;
             min_function_type min_function_value( &::SireMaths::MultiUInt::min );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "min"
                 , min_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MultiUInt_exposer.def( !bp::self );
         MultiUInt_exposer.def( bp::self != bp::self );
@@ -394,169 +394,169 @@ void register_MultiUInt_class(){
         MultiUInt_exposer.def( bp::self < bp::self );
         MultiUInt_exposer.def( bp::self <= bp::self );
         { //::SireMaths::MultiUInt::operator=
-
+        
             typedef ::SireMaths::MultiUInt & ( ::SireMaths::MultiUInt::*assign_function_type)( ::SireMaths::MultiUInt const & ) ;
             assign_function_type assign_function_value( &::SireMaths::MultiUInt::operator= );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::operator=
-
+        
             typedef ::SireMaths::MultiUInt & ( ::SireMaths::MultiUInt::*assign_function_type)( ::quint32 ) ;
             assign_function_type assign_function_value( &::SireMaths::MultiUInt::operator= );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("value") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         MultiUInt_exposer.def( bp::self == bp::self );
         MultiUInt_exposer.def( bp::self > bp::self );
         MultiUInt_exposer.def( bp::self >= bp::self );
         { //::SireMaths::MultiUInt::operator[]
-
+        
             typedef ::quint32 ( ::SireMaths::MultiUInt::*__getitem___function_type)( int ) const;
             __getitem___function_type __getitem___function_value( &::SireMaths::MultiUInt::operator[] );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , "" );
-
+        
         }
         MultiUInt_exposer.def( bp::self ^ bp::self );
         MultiUInt_exposer.def( bp::self | bp::self );
         { //::SireMaths::MultiUInt::reinterpretCastToFloat
-
+        
             typedef ::SireMaths::MultiFloat ( ::SireMaths::MultiUInt::*reinterpretCastToFloat_function_type)(  ) const;
             reinterpretCastToFloat_function_type reinterpretCastToFloat_function_value( &::SireMaths::MultiUInt::reinterpretCastToFloat );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "reinterpretCastToFloat"
                 , reinterpretCastToFloat_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::rotate
-
+        
             typedef ::SireMaths::MultiUInt ( ::SireMaths::MultiUInt::*rotate_function_type)(  ) const;
             rotate_function_type rotate_function_value( &::SireMaths::MultiUInt::rotate );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "rotate"
                 , rotate_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::set
-
+        
             typedef void ( ::SireMaths::MultiUInt::*set_function_type)( int,::quint32 ) ;
             set_function_type set_function_value( &::SireMaths::MultiUInt::set );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("i"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Set the ith value of the MultiInt to value" );
-
+        
         }
         { //::SireMaths::MultiUInt::size
-
+        
             typedef int ( *size_function_type )(  );
             size_function_type size_function_value( &::SireMaths::MultiUInt::size );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "size"
                 , size_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::sum
-
+        
             typedef ::quint32 ( ::SireMaths::MultiUInt::*sum_function_type)(  ) const;
             sum_function_type sum_function_value( &::SireMaths::MultiUInt::sum );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "sum"
                 , sum_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::toArray
-
+        
             typedef ::QVector< unsigned int > ( *toArray_function_type )( ::QVector< SireMaths::MultiUInt > const & );
             toArray_function_type toArray_function_value( &::SireMaths::MultiUInt::toArray );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "toArray"
                 , toArray_function_value
                 , ( bp::arg("array") )
                 , bp::release_gil_policy()
                 , "Return the passed MultiUInt converted back into a normal array" );
-
+        
         }
         { //::SireMaths::MultiUInt::toBinaryString
-
+        
             typedef ::QString ( ::SireMaths::MultiUInt::*toBinaryString_function_type)(  ) const;
             toBinaryString_function_type toBinaryString_function_value( &::SireMaths::MultiUInt::toBinaryString );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "toBinaryString"
                 , toBinaryString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::toString
-
+        
             typedef ::QString ( ::SireMaths::MultiUInt::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::MultiUInt::toString );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMaths::MultiUInt::typeName );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::MultiUInt::what
-
+        
             typedef char const * ( ::SireMaths::MultiUInt::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMaths::MultiUInt::what );
-
-            MultiUInt_exposer.def(
+            
+            MultiUInt_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MultiUInt_exposer.staticmethod( "count" );
         MultiUInt_exposer.staticmethod( "fromArray" );

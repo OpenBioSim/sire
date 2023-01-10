@@ -32,29 +32,29 @@ void register_AtomFunctions_class(){
         AtomFunctions_exposer_t AtomFunctions_exposer = AtomFunctions_exposer_t( "AtomFunctions", "This is the base class of all of the AtomFunctions molecular\nproperties (these are properties that contain lots of AtomFunction\nfunctions for the atoms in a molecule)\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope AtomFunctions_scope( AtomFunctions_exposer );
         { //::SireMM::AtomFunctions::isCompatibleWith
-
+        
             typedef bool ( ::SireMM::AtomFunctions::*isCompatibleWith_function_type)( ::SireMol::MoleculeInfoData const & ) const;
             isCompatibleWith_function_type isCompatibleWith_function_value( &::SireMM::AtomFunctions::isCompatibleWith );
-
-            AtomFunctions_exposer.def(
+            
+            AtomFunctions_exposer.def( 
                 "isCompatibleWith"
                 , isCompatibleWith_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "Return whether or not this property is compatible with the molecule\nwhose layout information is in molinfo" );
-
+        
         }
         { //::SireMM::AtomFunctions::symbols
-
+        
             typedef ::QSet< SireCAS::Symbol > const & ( ::SireMM::AtomFunctions::*symbols_function_type)(  ) const;
             symbols_function_type symbols_function_value( &::SireMM::AtomFunctions::symbols );
-
-            AtomFunctions_exposer.def(
+            
+            AtomFunctions_exposer.def( 
                 "symbols"
                 , symbols_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         AtomFunctions_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::AtomFunctions >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );

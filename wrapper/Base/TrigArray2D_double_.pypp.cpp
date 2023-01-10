@@ -37,130 +37,130 @@ void register_TrigArray2D_double__class(){
         TrigArray2D_double__exposer.def( bp::init< int, double const & >(( bp::arg("dimension"), bp::arg("default_value") ), "") );
         TrigArray2D_double__exposer.def( bp::init< SireBase::TrigArray2D< double > const & >(( bp::arg("other") ), "") );
         { //::SireBase::TrigArray2D< double >::at
-
+        
             typedef SireBase::TrigArray2D< double > exported_class_t;
             typedef double const & ( ::SireBase::TrigArray2D< double >::*at_function_type)( int,int ) const;
             at_function_type at_function_value( &::SireBase::TrigArray2D< double >::at );
-
-            TrigArray2D_double__exposer.def(
+            
+            TrigArray2D_double__exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< double >::get
-
+        
             typedef SireBase::TrigArray2D< double > exported_class_t;
             typedef double const & ( ::SireBase::TrigArray2D< double >::*get_function_type)( int,int ) const;
             get_function_type get_function_value( &::SireBase::TrigArray2D< double >::get );
-
-            TrigArray2D_double__exposer.def(
+            
+            TrigArray2D_double__exposer.def( 
                 "get"
                 , get_function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         TrigArray2D_double__exposer.def( bp::self != bp::self );
         { //::SireBase::TrigArray2D< double >::operator()
-
+        
             typedef SireBase::TrigArray2D< double > exported_class_t;
             typedef double const & ( ::SireBase::TrigArray2D< double >::*__call___function_type)( int,int ) const;
             __call___function_type __call___function_value( &::SireBase::TrigArray2D< double >::operator() );
-
-            TrigArray2D_double__exposer.def(
+            
+            TrigArray2D_double__exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< double >::operator=
-
+        
             typedef SireBase::TrigArray2D< double > exported_class_t;
             typedef ::SireBase::TrigArray2D< double > & ( ::SireBase::TrigArray2D< double >::*assign_function_type)( ::SireBase::TrigArray2D< double > const & ) ;
             assign_function_type assign_function_value( &::SireBase::TrigArray2D< double >::operator= );
-
-            TrigArray2D_double__exposer.def(
+            
+            TrigArray2D_double__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         TrigArray2D_double__exposer.def( bp::self == bp::self );
         { //::SireBase::TrigArray2D< double >::redimension
-
+        
             typedef SireBase::TrigArray2D< double > exported_class_t;
             typedef void ( ::SireBase::TrigArray2D< double >::*redimension_function_type)( int ) ;
             redimension_function_type redimension_function_value( &::SireBase::TrigArray2D< double >::redimension );
-
-            TrigArray2D_double__exposer.def(
+            
+            TrigArray2D_double__exposer.def( 
                 "redimension"
                 , redimension_function_value
                 , ( bp::arg("dimension") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< double >::set
-
+        
             typedef SireBase::TrigArray2D< double > exported_class_t;
             typedef void ( ::SireBase::TrigArray2D< double >::*set_function_type)( int,int,double const & ) ;
             set_function_type set_function_value( &::SireBase::TrigArray2D< double >::set );
-
-            TrigArray2D_double__exposer.def(
+            
+            TrigArray2D_double__exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("i"), bp::arg("j"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< double >::setAll
-
+        
             typedef SireBase::TrigArray2D< double > exported_class_t;
             typedef void ( ::SireBase::TrigArray2D< double >::*setAll_function_type)( double const & ) ;
             setAll_function_type setAll_function_value( &::SireBase::TrigArray2D< double >::setAll );
-
-            TrigArray2D_double__exposer.def(
+            
+            TrigArray2D_double__exposer.def( 
                 "setAll"
                 , setAll_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< double >::toString
-
+        
             typedef SireBase::TrigArray2D< double > exported_class_t;
             typedef ::QString ( ::SireBase::TrigArray2D< double >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::TrigArray2D< double >::toString );
-
-            TrigArray2D_double__exposer.def(
+            
+            TrigArray2D_double__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::TrigArray2D< double >::transpose
-
+        
             typedef SireBase::TrigArray2D< double > exported_class_t;
             typedef ::SireBase::TrigArray2D< double > ( ::SireBase::TrigArray2D< double >::*transpose_function_type)(  ) const;
             transpose_function_type transpose_function_value( &::SireBase::TrigArray2D< double >::transpose );
-
-            TrigArray2D_double__exposer.def(
+            
+            TrigArray2D_double__exposer.def( 
                 "transpose"
                 , transpose_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         TrigArray2D_double__exposer.def( "__copy__", &__copy__);
         TrigArray2D_double__exposer.def( "__deepcopy__", &__copy__);

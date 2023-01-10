@@ -48,66 +48,66 @@ void register_BeadEditor_class(){
         BeadEditor_exposer.def( bp::init< SireMol::Bead const & >(( bp::arg("bead") ), "Constructor an editor for the passed bead") );
         BeadEditor_exposer.def( bp::init< SireMol::BeadEditor const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::BeadEditor::commit
-
+        
             typedef ::SireMol::Bead ( ::SireMol::BeadEditor::*commit_function_type)(  ) const;
             commit_function_type commit_function_value( &::SireMol::BeadEditor::commit );
-
-            BeadEditor_exposer.def(
+            
+            BeadEditor_exposer.def( 
                 "commit"
                 , commit_function_value
                 , bp::release_gil_policy()
                 , "Commit the changes" );
-
+        
         }
         { //::SireMol::BeadEditor::operator=
-
+        
             typedef ::SireMol::BeadEditor & ( ::SireMol::BeadEditor::*assign_function_type)( ::SireMol::Bead const & ) ;
             assign_function_type assign_function_value( &::SireMol::BeadEditor::operator= );
-
-            BeadEditor_exposer.def(
+            
+            BeadEditor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("bead") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::BeadEditor::operator=
-
+        
             typedef ::SireMol::BeadEditor & ( ::SireMol::BeadEditor::*assign_function_type)( ::SireMol::BeadEditor const & ) ;
             assign_function_type assign_function_value( &::SireMol::BeadEditor::operator= );
-
-            BeadEditor_exposer.def(
+            
+            BeadEditor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::BeadEditor::toString
-
+        
             typedef ::QString ( ::SireMol::BeadEditor::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::BeadEditor::toString );
-
-            BeadEditor_exposer.def(
+            
+            BeadEditor_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this editor" );
-
+        
         }
         { //::SireMol::BeadEditor::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::BeadEditor::typeName );
-
-            BeadEditor_exposer.def(
+            
+            BeadEditor_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         BeadEditor_exposer.staticmethod( "typeName" );
         BeadEditor_exposer.def( "__copy__", &__copy__);

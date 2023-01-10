@@ -2,8 +2,10 @@
 Installation
 ============
 
-Binary packages for sire are available on MacOS, Linux and Windows.
-Sire can be compiled on any UNIX or Windows-compatible operating system
+Binary packages for :mod:`sire` are available on MacOS, Linux and Windows
+running on Intel (X86-64) or ARM64 processors.
+
+:mod:`sire` can be compiled on any UNIX or Windows-compatible operating system
 running on X86-64, ARM64 or PowerPC processors.
 
 You have a range of options for installing the software.
@@ -21,16 +23,17 @@ used to log into the server.
 Simply go to `try.openbiosim.org <https://try.openbiosim.org>`__ in your
 web browser, and log in using your `GitHub account <https://github.com>`__.
 This will start a Jupyter Lab instance. In here you can start a terminal,
-and then use ``sire`` directly via ``ipython``. Or you can start a Jupyter
-notebook and use ``sire`` there.
+and then use :mod:`sire` directly via ``ipython``. Or you can start a Jupyter
+notebook and use :mod:`sire` there.
 
-To import ``sire``, at a Python prompt type
+To import :mod:`sire`, at a Python prompt type
 
 >>> import sire as sr
 
 If this imports without errors, then everything is working.
 We encourage you to take a look at :doc:`the tutorial <tutorial/index>`
-to learn how to use ``sire``.
+to learn how to use :mod:`sire` or the
+:doc:`quickstart guide <quickstart/index>` if you want an overview.
 
 .. note::
 
@@ -39,13 +42,13 @@ to learn how to use ``sire``.
    and any data will be lost when you log out. Because it only
    supports a limited number of concurrent users, inactive sessions will be
    automatically stopped and logged out after 20 minutes. Please only
-   use this service to explore and learn ``sire``.
+   use this service to explore and learn :mod:`sire`.
    Do not use it for production work.
 
 Easy installation - Run in a conda environment
 ==============================================
 
-The easiest way to install ``sire`` is in a new
+The easiest way to install :mod:`sire` is in a new
 `conda environment <https://anaconda.org>`__.
 
 You can use any conda environment or installation. We recommend using
@@ -100,7 +103,7 @@ on how to use the ``mamba`` command).
 Installing sire into a new environment
 --------------------------------------
 
-We recommend that ``sire`` is installed into a new (clean) environment.
+We recommend that :mod:`sire` is installed into a new (clean) environment.
 This minimises the risk of failures caused by incompatible dependencies.
 
 Sire is currently packaged for Python 3.8 and Python 3.9. We will start
@@ -108,9 +111,14 @@ by creating a Python 3.9 environment that we will call ``openbiosim``.
 
 .. code-block:: bash
 
-   $ mamba create -n openbiosim python==3.9
+   $ mamba create -n openbiosim "python<3.10"
 
-We can now install ``sire`` into that environment by typing
+.. note::
+
+   We use ``python<3.10`` as this will install the most recent 3.9
+   release of python.
+
+We can now install :mod:`sire` into that environment by typing
 
 .. code-block:: bash
 
@@ -118,10 +126,16 @@ We can now install ``sire`` into that environment by typing
 
 .. note::
 
-   The option ``-n openbiosim`` tells ``mamba`` to install ``sire``
+   The option ``-n openbiosim`` tells ``mamba`` to install :mod:`sire`
    into the ``openbiosim`` environment. The option ``-c openbiosim``
-   tells ``mamba`` to install ``sire`` from the ``openbiosim``
+   tells ``mamba`` to install :mod:`sire` from the ``openbiosim``
    conda channel.
+
+If you want the latest development release, then install by typing
+
+.. code-block:: bash
+
+   $ mamba install -n openbiosim -c "openbiosim/label/dev" sire
 
 You may (optionally) want to install additional tools such as
 ``ipython`` and ``jupyterlab``. To do this, type
@@ -130,7 +144,7 @@ You may (optionally) want to install additional tools such as
 
    $ mamba install -n openbiosim ipython jupyterlab
 
-To run ``sire``, you must now activate the ``openbiosim`` environment.
+To run :mod:`sire`, you must now activate the ``openbiosim`` environment.
 You can do this by typing
 
 .. code-block:: bash
@@ -139,21 +153,23 @@ You can do this by typing
 
 You can now start a Python session (e.g. running ``python``, or
 ``ipython`` or ``jupyter lab`` if you installed those). At the
-Python prompt you can import ``sire`` by typing
+Python prompt you can import :mod:`sire` by typing
 
 >>> import sire as sr
 
 If this imports without errors, then everything is working.
 We encourage you to take a look at :doc:`the tutorial <tutorial/index>`
-to learn how to use ``sire``.
+to learn how to use :mod:`sire` or the
+:doc:`quickstart guide <quickstart/index>` if you want an overview.
 
 Also easy installation - Run in a container
 ===========================================
 
-Another route to install ``sire`` is to download and run our
+Another route to install :mod:`sire` is to download and run our
 pre-built containers. These can be run via
 `docker <https://www.docker.com>`__ (on Linux, MacOS and Windows)
-or via `podman <https://podman.io>`__ (on Linux).
+or via `podman <https://podman.io>`__ (on Linux) on Intel (X86-64)
+or ARM64 processors.
 
 To run via `docker <https://www.docker.com>`__, simply type;
 
@@ -168,7 +184,7 @@ or, via `podman <https://podman.io>`__, type;
    $ podman run -p 8888:8888 -it openbiosim/sire:latest
 
 This will download the container from
-`hub.docker.com <https://hub.docker.com/r/openbiosim/sire>`__ and
+`hub.docker.com <https://anaconda.org/openbiosim/sire>`__ and
 will start a command prompt in that container.
 
 You can now type ``python``, ``ipython`` or ``jupyter lab``
@@ -189,42 +205,43 @@ to start a python, ipython or jupyter lab session.
    by using the ``-v`` option. For example,
    ``-v $HOME/input:/home/openbiosim/input`` would map your
    ``input`` folder in your home directory to the ``input`` folder
-   in the home directory of the container. This will let ``sire``
+   in the home directory of the container. This will let :mod:`sire`
    read and write files on your computer.
 
 You can now start a Python session (e.g. running ``python``, or
 ``ipython`` or ``jupyter lab`` if you installed those). At the
-Python prompt you can import ``sire`` by typing
+Python prompt you can import :mod:`sire` by typing
 
 >>> import sire as sr
 
 If this imports without errors, then everything is working.
 We encourage you to take a look at :doc:`the tutorial <tutorial/index>`
-to learn how to use ``sire``.
+to learn how to use :mod:`sire` or the
+:doc:`quickstart guide <quickstart/index>` if you want an overview.
 
 Harder installation - Compile from source
 =========================================
 
-Sometimes you will want to compile and run ``sire`` from source.
+Sometimes you will want to compile and run :mod:`sire` from source.
 This could be because we don't distribute a binary package for your
 operating system, or because you want to use a newer version
 (e.g. code from the ``devel`` branch, or from your own feature
 branch if you are a developer).
 
-You compile ``sire`` into an existing anaconda / miniconda environment.
+You compile :mod:`sire` into an existing anaconda / miniconda environment.
 Please create and activate an environment, e.g. by following
 the "Option 1" instructions to install a fresh ``mambaforge`` and
 then creating and activating Python 3.9 environment called
 ``openbiosim``.
 
 Next, download the source code. You could download the latest development
-version of ``sire`` by typing;
+version of :mod:`sire` by typing;
 
 .. code-block:: bash
 
    $ git clone https://github.com/openbiosim/sire
 
-This will download into a directory called ``sire``. Navigate into
+This will download into a directory called :mod:`sire`. Navigate into
 this directory (e.g. ``cd sire``).
 
 .. note::
@@ -240,8 +257,8 @@ command, e.g.
 
    $ git checkout main
 
-will check out the ``main`` branch of ``sire``. This always corresponds
-to the last released version of ``sire``. Or, you can check out a
+will check out the ``main`` branch of :mod:`sire`. This always corresponds
+to the last released version of :mod:`sire`. Or, you can check out a
 feature branch using
 
 .. code-block:: bash
@@ -251,7 +268,7 @@ feature branch using
 where ``feat_name`` should be replaced by the name of the feature
 branch you want to compile.
 
-Compilation and installation of ``sire`` is managed via the
+Compilation and installation of :mod:`sire` is managed via the
 `setup.py <https://github.com/openbiosim/sire/blob/devel/setup.py>`__
 script.
 
@@ -263,7 +280,7 @@ Run
 
 to get a help on all of the options.
 
-Typically, you just want to compile and install ``sire``. To do this,
+Typically, you just want to compile and install :mod:`sire`. To do this,
 type
 
 .. code-block:: bash
@@ -272,7 +289,7 @@ type
 
 This will download and install all of the dependencies via ``mamba``
 (or ``conda`` if you haven't installed ``mamba``). It will then compile
-the ``sire`` C++ libraries, and then the Python wrappers. Be patient,
+the :mod:`sire` C++ libraries, and then the Python wrappers. Be patient,
 as compilation can take quite a while!
 
 .. note::
@@ -281,10 +298,16 @@ as compilation can take quite a while!
    The easiest way to do this is to `install chocolatey <https://chocolatey.org/install>`__
    and then install the compilers using the command
    ``choco install visualstudio2017-workload-vctools``. This is all free, but
-   you will need admin access to install chocolatey.
+   you will need admin access to install chocolatey. If this doesn't work, then
+   go to `this page <https://visualstudio.microsoft.com/vs/older-downloads>`__
+   and download the "Build Tools for Visual Studio 2017". Use the installer
+   to select and install only the build tools. You will need a free Microsoft
+   developer account to access this page. If this doesn't work, then
+   follow the `excellent guidance here <https://beenje.github.io/blog/posts/how-to-setup-a-windows-vm-to-build-conda-packages/>`__
+   to set up your Windows computer for compiling conda packages.
 
 If you plan to install `BioSimSpace <https://biosimspace.org>`__ on
-top of ``sire``, then you should install using;
+top of :mod:`sire`, then you should install using;
 
 .. code-block:: bash
 
@@ -294,11 +317,16 @@ This will use ``mamba`` (or ``conda``) to download and install all of
 BioSimSpace's dependencies as well. This ensures that incompatible versions
 of shared dependencies are not accidentally installed.
 
-Once ``sire`` has installed, you can import it in a ``python``,
+Once :mod:`sire` has installed, you can import it in a ``python``,
 ``ipython`` or ``jupyter lab`` session by typing
 
 >>> import sire as sr
 
 If this imports without errors, then everything is working.
 We encourage you to take a look at :doc:`the tutorial <tutorial/index>`
-to learn how to use ``sire``.
+to learn how to use :mod:`sire` or the
+:doc:`quickstart guide <quickstart/index>` if you want an overview.
+
+Please take a look at our :doc:`developer guide <contributing/development>`
+for more information on how to develop and contribute new code
+to :mod:`sire`.

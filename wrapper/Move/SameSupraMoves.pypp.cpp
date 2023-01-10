@@ -40,91 +40,91 @@ void register_SameSupraMoves_class(){
         SameSupraMoves_exposer.def( bp::init< SireMove::SupraMove const & >(( bp::arg("move") ), "Construct to run the move move repeatedly") );
         SameSupraMoves_exposer.def( bp::init< SireMove::SameSupraMoves const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::SameSupraMoves::clearStatistics
-
+        
             typedef void ( ::SireMove::SameSupraMoves::*clearStatistics_function_type)(  ) ;
             clearStatistics_function_type clearStatistics_function_value( &::SireMove::SameSupraMoves::clearStatistics );
-
-            SameSupraMoves_exposer.def(
+            
+            SameSupraMoves_exposer.def( 
                 "clearStatistics"
                 , clearStatistics_function_value
                 , bp::release_gil_policy()
                 , "Clear all move statistics" );
-
+        
         }
         { //::SireMove::SameSupraMoves::move
-
+        
             typedef void ( ::SireMove::SameSupraMoves::*move_function_type)( ::SireMove::SupraSystem &,int,bool ) ;
             move_function_type move_function_value( &::SireMove::SameSupraMoves::move );
-
-            SameSupraMoves_exposer.def(
+            
+            SameSupraMoves_exposer.def( 
                 "move"
                 , move_function_value
                 , ( bp::arg("system"), bp::arg("nmoves"), bp::arg("record_stats")=(bool)(true) )
                 , "Perform the moves nmoves times" );
-
+        
         }
         { //::SireMove::SameSupraMoves::moves
-
+        
             typedef ::QList< SireBase::PropPtr< SireMove::SupraMove > > ( ::SireMove::SameSupraMoves::*moves_function_type)(  ) const;
             moves_function_type moves_function_value( &::SireMove::SameSupraMoves::moves );
-
-            SameSupraMoves_exposer.def(
+            
+            SameSupraMoves_exposer.def( 
                 "moves"
                 , moves_function_value
                 , bp::release_gil_policy()
                 , "Return a list of all of the moves" );
-
+        
         }
         { //::SireMove::SameSupraMoves::nMoves
-
+        
             typedef int ( ::SireMove::SameSupraMoves::*nMoves_function_type)(  ) const;
             nMoves_function_type nMoves_function_value( &::SireMove::SameSupraMoves::nMoves );
-
-            SameSupraMoves_exposer.def(
+            
+            SameSupraMoves_exposer.def( 
                 "nMoves"
                 , nMoves_function_value
                 , bp::release_gil_policy()
                 , "Return the total number of moves that have been performed" );
-
+        
         }
         SameSupraMoves_exposer.def( bp::self != bp::self );
         { //::SireMove::SameSupraMoves::operator=
-
+        
             typedef ::SireMove::SameSupraMoves & ( ::SireMove::SameSupraMoves::*assign_function_type)( ::SireMove::SameSupraMoves const & ) ;
             assign_function_type assign_function_value( &::SireMove::SameSupraMoves::operator= );
-
-            SameSupraMoves_exposer.def(
+            
+            SameSupraMoves_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SameSupraMoves_exposer.def( bp::self == bp::self );
         { //::SireMove::SameSupraMoves::toString
-
+        
             typedef ::QString ( ::SireMove::SameSupraMoves::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMove::SameSupraMoves::toString );
-
-            SameSupraMoves_exposer.def(
+            
+            SameSupraMoves_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this moves set" );
-
+        
         }
         { //::SireMove::SameSupraMoves::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::SameSupraMoves::typeName );
-
-            SameSupraMoves_exposer.def(
+            
+            SameSupraMoves_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SameSupraMoves_exposer.staticmethod( "typeName" );
         SameSupraMoves_exposer.def( "__copy__", &__copy__);

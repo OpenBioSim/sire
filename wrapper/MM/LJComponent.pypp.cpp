@@ -32,78 +32,78 @@ void register_LJComponent_class(){
         LJComponent_exposer.def( bp::init< SireCAS::Symbol const & >(( bp::arg("symbol") ), "Construct from a symbol\nThrow: SireError::incompatible_error\n") );
         LJComponent_exposer.def( bp::init< SireMM::LJComponent const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::LJComponent::changeEnergy
-
+        
             typedef void ( ::SireMM::LJComponent::*changeEnergy_function_type)( ::SireFF::FF &,::SireMM::LJEnergy const & ) const;
             changeEnergy_function_type changeEnergy_function_value( &::SireMM::LJComponent::changeEnergy );
-
-            LJComponent_exposer.def(
+            
+            LJComponent_exposer.def( 
                 "changeEnergy"
                 , changeEnergy_function_value
                 , ( bp::arg("ff"), bp::arg("ljnrg") )
                 , bp::release_gil_policy()
                 , "Change the LJ component of the energy in the forcefield ff\nby delta" );
-
+        
         }
         { //::SireMM::LJComponent::setEnergy
-
+        
             typedef void ( ::SireMM::LJComponent::*setEnergy_function_type)( ::SireFF::FF &,::SireMM::LJEnergy const & ) const;
             setEnergy_function_type setEnergy_function_value( &::SireMM::LJComponent::setEnergy );
-
-            LJComponent_exposer.def(
+            
+            LJComponent_exposer.def( 
                 "setEnergy"
                 , setEnergy_function_value
                 , ( bp::arg("ff"), bp::arg("ljnrg") )
                 , bp::release_gil_policy()
                 , "Set the LJ component of the energy in the forcefield ff\nto equal to the passed LJEnergy" );
-
+        
         }
         { //::SireMM::LJComponent::symbols
-
+        
             typedef ::SireCAS::Symbols ( ::SireMM::LJComponent::*symbols_function_type)(  ) const;
             symbols_function_type symbols_function_value( &::SireMM::LJComponent::symbols );
-
-            LJComponent_exposer.def(
+            
+            LJComponent_exposer.def( 
                 "symbols"
                 , symbols_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::LJComponent::total
-
+        
             typedef ::SireMM::LJComponent const & ( ::SireMM::LJComponent::*total_function_type)(  ) const;
             total_function_type total_function_value( &::SireMM::LJComponent::total );
-
-            LJComponent_exposer.def(
+            
+            LJComponent_exposer.def( 
                 "total"
                 , total_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireMM::LJComponent::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::LJComponent::typeName );
-
-            LJComponent_exposer.def(
+            
+            LJComponent_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::LJComponent::what
-
+        
             typedef char const * ( ::SireMM::LJComponent::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::LJComponent::what );
-
-            LJComponent_exposer.def(
+            
+            LJComponent_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         LJComponent_exposer.staticmethod( "typeName" );
         LJComponent_exposer.def( "__copy__", &__copy__);

@@ -37,163 +37,163 @@ void register_Stereoscopy_class(){
         Stereoscopy_exposer.def( bp::init< int >(( bp::arg("sdf_value") ), "Construct from the the passed number") );
         Stereoscopy_exposer.def( bp::init< SireMol::Stereoscopy const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::Stereoscopy::down
-
+        
             typedef ::SireMol::Stereoscopy ( *down_function_type )(  );
             down_function_type down_function_value( &::SireMol::Stereoscopy::down );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "down"
                 , down_function_value
                 , bp::release_gil_policy()
                 , "Return a down Stereoscopy" );
-
+        
         }
         { //::SireMol::Stereoscopy::isDefined
-
+        
             typedef bool ( ::SireMol::Stereoscopy::*isDefined_function_type)(  ) const;
             isDefined_function_type isDefined_function_value( &::SireMol::Stereoscopy::isDefined );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "isDefined"
                 , isDefined_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the stereoscopy is defined" );
-
+        
         }
         { //::SireMol::Stereoscopy::isDown
-
+        
             typedef bool ( ::SireMol::Stereoscopy::*isDown_function_type)(  ) const;
             isDown_function_type isDown_function_value( &::SireMol::Stereoscopy::isDown );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "isDown"
                 , isDown_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a down bond" );
-
+        
         }
         { //::SireMol::Stereoscopy::isNotStereo
-
+        
             typedef bool ( ::SireMol::Stereoscopy::*isNotStereo_function_type)(  ) const;
             isNotStereo_function_type isNotStereo_function_value( &::SireMol::Stereoscopy::isNotStereo );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "isNotStereo"
                 , isNotStereo_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a not stereo bond" );
-
+        
         }
         { //::SireMol::Stereoscopy::isUp
-
+        
             typedef bool ( ::SireMol::Stereoscopy::*isUp_function_type)(  ) const;
             isUp_function_type isUp_function_value( &::SireMol::Stereoscopy::isUp );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "isUp"
                 , isUp_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is an up bond" );
-
+        
         }
         { //::SireMol::Stereoscopy::notStereo
-
+        
             typedef ::SireMol::Stereoscopy ( *notStereo_function_type )(  );
             notStereo_function_type notStereo_function_value( &::SireMol::Stereoscopy::notStereo );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "notStereo"
                 , notStereo_function_value
                 , bp::release_gil_policy()
                 , "Return a not stereo Stereoscopy" );
-
+        
         }
         Stereoscopy_exposer.def( bp::self != bp::self );
         { //::SireMol::Stereoscopy::operator=
-
+        
             typedef ::SireMol::Stereoscopy & ( ::SireMol::Stereoscopy::*assign_function_type)( ::SireMol::Stereoscopy const & ) ;
             assign_function_type assign_function_value( &::SireMol::Stereoscopy::operator= );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Stereoscopy_exposer.def( bp::self == bp::self );
         { //::SireMol::Stereoscopy::sdfValue
-
+        
             typedef int ( ::SireMol::Stereoscopy::*sdfValue_function_type)(  ) const;
             sdfValue_function_type sdfValue_function_value( &::SireMol::Stereoscopy::sdfValue );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "sdfValue"
                 , sdfValue_function_value
                 , bp::release_gil_policy()
                 , "Return the SDF-format value for this bond. This returns\n0 if the stereoscopy is undefined\n" );
-
+        
         }
         { //::SireMol::Stereoscopy::toString
-
+        
             typedef ::QString ( ::SireMol::Stereoscopy::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::Stereoscopy::toString );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Stereoscopy::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::Stereoscopy::typeName );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Stereoscopy::undefined
-
+        
             typedef ::SireMol::Stereoscopy ( *undefined_function_type )(  );
             undefined_function_type undefined_function_value( &::SireMol::Stereoscopy::undefined );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "undefined"
                 , undefined_function_value
                 , bp::release_gil_policy()
                 , "Return an undefined Stereoscopy" );
-
+        
         }
         { //::SireMol::Stereoscopy::up
-
+        
             typedef ::SireMol::Stereoscopy ( *up_function_type )(  );
             up_function_type up_function_value( &::SireMol::Stereoscopy::up );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "up"
                 , up_function_value
                 , bp::release_gil_policy()
                 , "Return an up Stereoscopy" );
-
+        
         }
         { //::SireMol::Stereoscopy::value
-
+        
             typedef int ( ::SireMol::Stereoscopy::*value_function_type)(  ) const;
             value_function_type value_function_value( &::SireMol::Stereoscopy::value );
-
-            Stereoscopy_exposer.def(
+            
+            Stereoscopy_exposer.def( 
                 "value"
                 , value_function_value
                 , bp::release_gil_policy()
                 , "Return the stereo type (uses SDF values, e.g. 0 is not stereo,\n1 is up, 6 is down. We have added -1 to mean undefined)\n" );
-
+        
         }
         Stereoscopy_exposer.staticmethod( "down" );
         Stereoscopy_exposer.staticmethod( "notStereo" );

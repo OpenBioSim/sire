@@ -32,53 +32,53 @@ void register_SystemMonitor_class(){
         SystemMonitor_exposer_t SystemMonitor_exposer = SystemMonitor_exposer_t( "SystemMonitor", "This is the virtual base class of all system monitors. A system\nmonitor is an object that monitors a system during a simulation,\ne.g. collecting the average energy, saving a radial distribution\nfunction etc.\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope SystemMonitor_scope( SystemMonitor_exposer );
         { //::SireSystem::SystemMonitor::clearStatistics
-
+        
             typedef void ( ::SireSystem::SystemMonitor::*clearStatistics_function_type)(  ) ;
             clearStatistics_function_type clearStatistics_function_value( &::SireSystem::SystemMonitor::clearStatistics );
-
-            SystemMonitor_exposer.def(
+            
+            SystemMonitor_exposer.def( 
                 "clearStatistics"
                 , clearStatistics_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireSystem::SystemMonitor::monitor
-
+        
             typedef void ( ::SireSystem::SystemMonitor::*monitor_function_type)( ::SireSystem::System & ) ;
             monitor_function_type monitor_function_value( &::SireSystem::SystemMonitor::monitor );
-
-            SystemMonitor_exposer.def(
+            
+            SystemMonitor_exposer.def( 
                 "monitor"
                 , monitor_function_value
                 , ( bp::arg("system") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireSystem::SystemMonitor::null
-
+        
             typedef ::SireSystem::NullMonitor const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireSystem::SystemMonitor::null );
-
-            SystemMonitor_exposer.def(
+            
+            SystemMonitor_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireSystem::SystemMonitor::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::SystemMonitor::typeName );
-
-            SystemMonitor_exposer.def(
+            
+            SystemMonitor_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SystemMonitor_exposer.staticmethod( "null" );
         SystemMonitor_exposer.staticmethod( "typeName" );

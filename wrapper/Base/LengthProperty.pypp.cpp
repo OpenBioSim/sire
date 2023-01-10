@@ -40,54 +40,54 @@ void register_LengthProperty_class(){
         LengthProperty_exposer.def( bp::init< SireBase::Property const & >(( bp::arg("other") ), "Construct from a VariantProperty") );
         LengthProperty_exposer.def( bp::self != bp::self );
         { //::SireBase::LengthProperty::operator=
-
+        
             typedef ::SireBase::LengthProperty & ( ::SireBase::LengthProperty::*assign_function_type)( ::SireBase::LengthProperty const & ) ;
             assign_function_type assign_function_value( &::SireBase::LengthProperty::operator= );
-
-            LengthProperty_exposer.def(
+            
+            LengthProperty_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         LengthProperty_exposer.def( bp::self == bp::self );
         { //::SireBase::LengthProperty::toString
-
+        
             typedef ::QString ( ::SireBase::LengthProperty::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::LengthProperty::toString );
-
-            LengthProperty_exposer.def(
+            
+            LengthProperty_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::LengthProperty::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireBase::LengthProperty::typeName );
-
-            LengthProperty_exposer.def(
+            
+            LengthProperty_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::LengthProperty::value
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireBase::LengthProperty::*value_function_type)(  ) const;
             value_function_type value_function_value( &::SireBase::LengthProperty::value );
-
-            LengthProperty_exposer.def(
+            
+            LengthProperty_exposer.def( 
                 "value"
                 , value_function_value
                 , bp::release_gil_policy()
                 , "Return this number cast as a double" );
-
+        
         }
         LengthProperty_exposer.staticmethod( "typeName" );
         LengthProperty_exposer.def( "__copy__", &__copy__);

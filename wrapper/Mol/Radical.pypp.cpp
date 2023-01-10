@@ -37,163 +37,163 @@ void register_Radical_class(){
         Radical_exposer.def( bp::init< int >(( bp::arg("value") ), "Construct from the the passed number") );
         Radical_exposer.def( bp::init< SireMol::Radical const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::Radical::doublet
-
+        
             typedef ::SireMol::Radical ( *doublet_function_type )(  );
             doublet_function_type doublet_function_value( &::SireMol::Radical::doublet );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "doublet"
                 , doublet_function_value
                 , bp::release_gil_policy()
                 , "Return a doublet Radical" );
-
+        
         }
         { //::SireMol::Radical::isDefined
-
+        
             typedef bool ( ::SireMol::Radical::*isDefined_function_type)(  ) const;
             isDefined_function_type isDefined_function_value( &::SireMol::Radical::isDefined );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "isDefined"
                 , isDefined_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the Radical is defined" );
-
+        
         }
         { //::SireMol::Radical::isDoublet
-
+        
             typedef bool ( ::SireMol::Radical::*isDoublet_function_type)(  ) const;
             isDoublet_function_type isDoublet_function_value( &::SireMol::Radical::isDoublet );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "isDoublet"
                 , isDoublet_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a doublet" );
-
+        
         }
         { //::SireMol::Radical::isSinglet
-
+        
             typedef bool ( ::SireMol::Radical::*isSinglet_function_type)(  ) const;
             isSinglet_function_type isSinglet_function_value( &::SireMol::Radical::isSinglet );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "isSinglet"
                 , isSinglet_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a singlet" );
-
+        
         }
         { //::SireMol::Radical::isTriplet
-
+        
             typedef bool ( ::SireMol::Radical::*isTriplet_function_type)(  ) const;
             isTriplet_function_type isTriplet_function_value( &::SireMol::Radical::isTriplet );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "isTriplet"
                 , isTriplet_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a triplet" );
-
+        
         }
         Radical_exposer.def( bp::self != bp::self );
         { //::SireMol::Radical::operator=
-
+        
             typedef ::SireMol::Radical & ( ::SireMol::Radical::*assign_function_type)( ::SireMol::Radical const & ) ;
             assign_function_type assign_function_value( &::SireMol::Radical::operator= );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Radical_exposer.def( bp::self == bp::self );
         { //::SireMol::Radical::sdfValue
-
+        
             typedef int ( ::SireMol::Radical::*sdfValue_function_type)(  ) const;
             sdfValue_function_type sdfValue_function_value( &::SireMol::Radical::sdfValue );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "sdfValue"
                 , sdfValue_function_value
                 , bp::release_gil_policy()
                 , "Return the SDF-format value for this radical. This returns\n4 if this is a double radical, or 0 otherwise\n" );
-
+        
         }
         { //::SireMol::Radical::singlet
-
+        
             typedef ::SireMol::Radical ( *singlet_function_type )(  );
             singlet_function_type singlet_function_value( &::SireMol::Radical::singlet );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "singlet"
                 , singlet_function_value
                 , bp::release_gil_policy()
                 , "Return a single Radical" );
-
+        
         }
         { //::SireMol::Radical::toString
-
+        
             typedef ::QString ( ::SireMol::Radical::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::Radical::toString );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Radical::triplet
-
+        
             typedef ::SireMol::Radical ( *triplet_function_type )(  );
             triplet_function_type triplet_function_value( &::SireMol::Radical::triplet );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "triplet"
                 , triplet_function_value
                 , bp::release_gil_policy()
                 , "Return a triplet Radical" );
-
+        
         }
         { //::SireMol::Radical::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::Radical::typeName );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Radical::undefined
-
+        
             typedef ::SireMol::Radical ( *undefined_function_type )(  );
             undefined_function_type undefined_function_value( &::SireMol::Radical::undefined );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "undefined"
                 , undefined_function_value
                 , bp::release_gil_policy()
                 , "Return an undefined Radical" );
-
+        
         }
         { //::SireMol::Radical::value
-
+        
             typedef int ( ::SireMol::Radical::*value_function_type)(  ) const;
             value_function_type value_function_value( &::SireMol::Radical::value );
-
-            Radical_exposer.def(
+            
+            Radical_exposer.def( 
                 "value"
                 , value_function_value
                 , bp::release_gil_policy()
                 , "Return the radical type. 0 is undefined, 1 is singlet, 2 is doublet\nand 3 is triplet\n" );
-
+        
         }
         Radical_exposer.staticmethod( "doublet" );
         Radical_exposer.staticmethod( "singlet" );

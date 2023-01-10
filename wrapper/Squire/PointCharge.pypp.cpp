@@ -33,55 +33,55 @@ void register_PointCharge_class(){
         PointCharge_exposer.def( bp::init< SireUnits::Dimension::Charge const &, SireMaths::Vector const & >(( bp::arg("charge"), bp::arg("coords") ), "Construct a point charge at the specified location with the\nspecified charge") );
         PointCharge_exposer.def( bp::init< Squire::PointCharge const & >(( bp::arg("other") ), "Copy constructor") );
         { //::Squire::PointCharge::center
-
+        
             typedef ::SireMaths::Vector const & ( ::Squire::PointCharge::*center_function_type)(  ) const;
             center_function_type center_function_value( &::Squire::PointCharge::center );
-
-            PointCharge_exposer.def(
+            
+            PointCharge_exposer.def( 
                 "center"
                 , center_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the location of this point charge" );
-
+        
         }
         { //::Squire::PointCharge::charge
-
+        
             typedef double ( ::Squire::PointCharge::*charge_function_type)(  ) const;
             charge_function_type charge_function_value( &::Squire::PointCharge::charge );
-
-            PointCharge_exposer.def(
+            
+            PointCharge_exposer.def( 
                 "charge"
                 , charge_function_value
                 , bp::release_gil_policy()
                 , "Return the magnitude of this point charge (in internal units)" );
-
+        
         }
         PointCharge_exposer.def( bp::self != bp::self );
         { //::Squire::PointCharge::operator=
-
+        
             typedef ::Squire::PointCharge & ( ::Squire::PointCharge::*assign_function_type)( ::Squire::PointCharge const & ) ;
             assign_function_type assign_function_value( &::Squire::PointCharge::operator= );
-
-            PointCharge_exposer.def(
+            
+            PointCharge_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         PointCharge_exposer.def( bp::self == bp::self );
         { //::Squire::PointCharge::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::Squire::PointCharge::typeName );
-
-            PointCharge_exposer.def(
+            
+            PointCharge_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         PointCharge_exposer.staticmethod( "typeName" );
         PointCharge_exposer.def( "__copy__", &__copy__);

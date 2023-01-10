@@ -38,65 +38,65 @@ void register_WorkTest_class(){
         WorkTest_exposer.def( bp::init< int, int, bp::optional< int > >(( bp::arg("start"), bp::arg("end"), bp::arg("step")=(int)(1) ), "Construct a work test that counts from start to end in steps of step") );
         WorkTest_exposer.def( bp::init< SireCluster::WorkTest const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCluster::WorkTest::approximatePacketSize
-
+        
             typedef int ( ::SireCluster::WorkTest::*approximatePacketSize_function_type)(  ) const;
             approximatePacketSize_function_type approximatePacketSize_function_value( &::SireCluster::WorkTest::approximatePacketSize );
-
-            WorkTest_exposer.def(
+            
+            WorkTest_exposer.def( 
                 "approximatePacketSize"
                 , approximatePacketSize_function_value
                 , bp::release_gil_policy()
                 , "Return the approximate maximum size (in bytes) of the WorkPacket. This\ndoesnt have to exact (or indeed accurate) - it is used\nto help the WorkPacket::pack() function reserve enough\nspace when serialising this packet to a binary array.\nThe only penalty of getting this wrong is that youll\neither allocate too much space, or be reallocating while\nthe packet is being written" );
-
+        
         }
         { //::SireCluster::WorkTest::hasFinished
-
+        
             typedef bool ( ::SireCluster::WorkTest::*hasFinished_function_type)(  ) const;
             hasFinished_function_type hasFinished_function_value( &::SireCluster::WorkTest::hasFinished );
-
-            WorkTest_exposer.def(
+            
+            WorkTest_exposer.def( 
                 "hasFinished"
                 , hasFinished_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the work has finished" );
-
+        
         }
         { //::SireCluster::WorkTest::operator=
-
+        
             typedef ::SireCluster::WorkTest & ( ::SireCluster::WorkTest::*assign_function_type)( ::SireCluster::WorkTest const & ) ;
             assign_function_type assign_function_value( &::SireCluster::WorkTest::operator= );
-
-            WorkTest_exposer.def(
+            
+            WorkTest_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireCluster::WorkTest::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCluster::WorkTest::typeName );
-
-            WorkTest_exposer.def(
+            
+            WorkTest_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCluster::WorkTest::what
-
+        
             typedef char const * ( ::SireCluster::WorkTest::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCluster::WorkTest::what );
-
-            WorkTest_exposer.def(
+            
+            WorkTest_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         WorkTest_exposer.staticmethod( "typeName" );
         WorkTest_exposer.def( "__copy__", &__copy__);

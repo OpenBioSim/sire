@@ -60,369 +60,369 @@ void register_ResStructureEditor_class(){
         ResStructureEditor_exposer.def( bp::init< SireMol::StructureEditor const &, SireMol::ResIdx >(( bp::arg("data"), bp::arg("residx") ), "Construct an editor to edit the residue at index residx in the\neditor whose data is in data\nThrow: SireError::invalid_index\n") );
         ResStructureEditor_exposer.def( bp::init< SireMol::ResStructureEditor const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::ResStructureEditor::add
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::ResStructureEditor::*add_function_type)( ::SireMol::AtomName const & ) ;
             add_function_type add_function_value( &::SireMol::ResStructureEditor::add );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("atomname") )
                 , bp::release_gil_policy()
                 , "Add a new atom called name to this residue - this returns\nan editor that can be used to further edit this atom" );
-
+        
         }
         { //::SireMol::ResStructureEditor::add
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::ResStructureEditor::*add_function_type)( ::SireMol::AtomNum ) ;
             add_function_type add_function_value( &::SireMol::ResStructureEditor::add );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("atomnum") )
                 , bp::release_gil_policy()
                 , "Add a new atom with the number number to this residue - this\nreturns an editor that can be used to further edit this atom" );
-
+        
         }
         { //::SireMol::ResStructureEditor::atom
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::ResStructureEditor::*atom_function_type)( int ) ;
             atom_function_type atom_function_value( &::SireMol::ResStructureEditor::atom );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "atom"
                 , atom_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return an editor for the ith atom in this residue\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::atom
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::ResStructureEditor::*atom_function_type)( ::SireMol::AtomID const & ) ;
             atom_function_type atom_function_value( &::SireMol::ResStructureEditor::atom );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "atom"
                 , atom_function_value
                 , ( bp::arg("atomid") )
                 , bp::release_gil_policy()
                 , "Return an editor for the atom with ID == atomid in\nthis residue\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::chain
-
+        
             typedef ::SireMol::ChainStructureEditor ( ::SireMol::ResStructureEditor::*chain_function_type)(  ) ;
             chain_function_type chain_function_value( &::SireMol::ResStructureEditor::chain );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "chain"
                 , chain_function_value
                 , bp::release_gil_policy()
                 , "Return an editor for the chain that contains this residue" );
-
+        
         }
         { //::SireMol::ResStructureEditor::commit
-
+        
             typedef ::SireMol::Residue ( ::SireMol::ResStructureEditor::*commit_function_type)(  ) const;
             commit_function_type commit_function_value( &::SireMol::ResStructureEditor::commit );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "commit"
                 , commit_function_value
                 , bp::release_gil_policy()
                 , "Commit the changes made by this editor and return the updated residue" );
-
+        
         }
         { //::SireMol::ResStructureEditor::index
-
+        
             typedef ::SireMol::ResIdx ( ::SireMol::ResStructureEditor::*index_function_type)(  ) const;
             index_function_type index_function_value( &::SireMol::ResStructureEditor::index );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "index"
                 , index_function_value
                 , bp::release_gil_policy()
                 , "Return the index of this residue in the molecule" );
-
+        
         }
         { //::SireMol::ResStructureEditor::molecule
-
+        
             typedef ::SireMol::MolStructureEditor ( ::SireMol::ResStructureEditor::*molecule_function_type)(  ) ;
             molecule_function_type molecule_function_value( &::SireMol::ResStructureEditor::molecule );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "molecule"
                 , molecule_function_value
                 , bp::release_gil_policy()
                 , "Return an editor for the molecule that contains this residue" );
-
+        
         }
         { //::SireMol::ResStructureEditor::nAtoms
-
+        
             typedef int ( ::SireMol::ResStructureEditor::*nAtoms_function_type)(  ) const;
             nAtoms_function_type nAtoms_function_value( &::SireMol::ResStructureEditor::nAtoms );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , bp::release_gil_policy()
                 , "Return the number of atoms in this residue - this may be zero" );
-
+        
         }
         { //::SireMol::ResStructureEditor::name
-
+        
             typedef ::SireMol::ResName const & ( ::SireMol::ResStructureEditor::*name_function_type)(  ) const;
             name_function_type name_function_value( &::SireMol::ResStructureEditor::name );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "name"
                 , name_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the name of this residue" );
-
+        
         }
         { //::SireMol::ResStructureEditor::number
-
+        
             typedef ::SireMol::ResNum ( ::SireMol::ResStructureEditor::*number_function_type)(  ) const;
             number_function_type number_function_value( &::SireMol::ResStructureEditor::number );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "number"
                 , number_function_value
                 , bp::release_gil_policy()
                 , "Return the number of this residue" );
-
+        
         }
         { //::SireMol::ResStructureEditor::operator=
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*assign_function_type)( ::SireMol::Residue const & ) ;
             assign_function_type assign_function_value( &::SireMol::ResStructureEditor::operator= );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("residue") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::ResStructureEditor::operator=
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*assign_function_type)( ::SireMol::ResStructureEditor const & ) ;
             assign_function_type assign_function_value( &::SireMol::ResStructureEditor::operator= );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::ResStructureEditor::reindex
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*reindex_function_type)( ::SireMol::ResIdx ) ;
             reindex_function_type reindex_function_value( &::SireMol::ResStructureEditor::reindex );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "reindex"
                 , reindex_function_value
                 , ( bp::arg("index") )
                 , bp::return_self< >()
                 , "Change the index of this residue to newidx. If this\nis larger than the number of residues in the molecule\nthen this residue is moved to the end" );
-
+        
         }
         { //::SireMol::ResStructureEditor::remove
-
+        
             typedef ::SireMol::MolStructureEditor ( ::SireMol::ResStructureEditor::*remove_function_type)(  ) ;
             remove_function_type remove_function_value( &::SireMol::ResStructureEditor::remove );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , bp::return_self< >()
                 , "Completely remove this residue from the molecule - this returns\na MolStructureEditor that can be used to further edit the molecule" );
-
+        
         }
         { //::SireMol::ResStructureEditor::remove
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*remove_function_type)( ::SireMol::AtomID const & ) ;
             remove_function_type remove_function_value( &::SireMol::ResStructureEditor::remove );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("atomid") )
                 , bp::return_self< >()
                 , "Remove all atoms with ID atomid from this residue\nThrow: SireMol::missing_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::remove
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*remove_function_type)( int ) ;
             remove_function_type remove_function_value( &::SireMol::ResStructureEditor::remove );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("i") )
                 , bp::return_self< >()
                 , "Remove the ith atom from this residue\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::rename
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*rename_function_type)( ::SireMol::ResName const & ) ;
             rename_function_type rename_function_value( &::SireMol::ResStructureEditor::rename );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "rename"
                 , rename_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
                 , "Rename this residue to newname" );
-
+        
         }
         { //::SireMol::ResStructureEditor::renumber
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*renumber_function_type)( ::SireMol::ResNum ) ;
             renumber_function_type renumber_function_value( &::SireMol::ResStructureEditor::renumber );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "renumber"
                 , renumber_function_value
                 , ( bp::arg("number") )
                 , bp::return_self< >()
                 , "Renumber this residue to newnum" );
-
+        
         }
         { //::SireMol::ResStructureEditor::reparent
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*reparent_function_type)( ::SireMol::ChainID const & ) ;
             reparent_function_type reparent_function_value( &::SireMol::ResStructureEditor::reparent );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "reparent"
                 , reparent_function_value
                 , ( bp::arg("chainid") )
                 , bp::return_self< >()
                 , "Move this residue into the chain with ID chainid\nThrow: SireMol::missing_chain\nThrow: SireMol::duplicate_chain\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::select
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::ResStructureEditor::*select_function_type)( int ) ;
             select_function_type select_function_value( &::SireMol::ResStructureEditor::select );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "select"
                 , select_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return an editor for the ith atom in this residue\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::select
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::ResStructureEditor::*select_function_type)( ::SireMol::AtomID const & ) ;
             select_function_type select_function_value( &::SireMol::ResStructureEditor::select );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "select"
                 , select_function_value
                 , ( bp::arg("atomid") )
                 , bp::release_gil_policy()
                 , "Return an editor for the atom with ID == atomid in\nthis residue\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::selectedAll
-
+        
             typedef bool ( ::SireMol::ResStructureEditor::*selectedAll_function_type)(  ) const;
             selectedAll_function_type selectedAll_function_value( &::SireMol::ResStructureEditor::selectedAll );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "selectedAll"
                 , selectedAll_function_value
                 , bp::release_gil_policy()
                 , "Is this editor editing the entire molecule?" );
-
+        
         }
         { //::SireMol::ResStructureEditor::toString
-
+        
             typedef ::QString ( ::SireMol::ResStructureEditor::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::ResStructureEditor::toString );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this editor" );
-
+        
         }
         { //::SireMol::ResStructureEditor::transfer
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*transfer_function_type)( ::SireMol::AtomID const &,::SireMol::ResID const & ) ;
             transfer_function_type transfer_function_value( &::SireMol::ResStructureEditor::transfer );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "transfer"
                 , transfer_function_value
                 , ( bp::arg("atomid"), bp::arg("resid") )
                 , bp::return_self< >()
                 , "Transfer all atoms that match the ID atomid into the residue that\nmatches the ID resid\nThrow: SireMol::missing_atom\nThrow: SireMol::missing_residue\nThrow: SireMol::duplicate_residue\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::transfer
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*transfer_function_type)( int,::SireMol::ResID const & ) ;
             transfer_function_type transfer_function_value( &::SireMol::ResStructureEditor::transfer );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "transfer"
                 , transfer_function_value
                 , ( bp::arg("i"), bp::arg("resid") )
                 , bp::return_self< >()
                 , "Transfer the ith atom from this residue into the residue that\nmatches the ID resid\nThrow: SireMol::missing_residue\nThrow: SireMol::duplicate_residue\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::transferAll
-
+        
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*transferAll_function_type)( ::SireMol::ResID const & ) ;
             transferAll_function_type transferAll_function_value( &::SireMol::ResStructureEditor::transferAll );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "transferAll"
                 , transferAll_function_value
                 , ( bp::arg("resid") )
                 , bp::return_self< >()
                 , "Transfer all atoms from this residue into the residue with ID resid\nThrow: SireMol::missing_residue\nThrow: SireMol::duplicate_residue\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ResStructureEditor::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::ResStructureEditor::typeName );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ResStructureEditor::what
-
+        
             typedef char const * ( ::SireMol::ResStructureEditor::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::ResStructureEditor::what );
-
-            ResStructureEditor_exposer.def(
+            
+            ResStructureEditor_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ResStructureEditor_exposer.staticmethod( "typeName" );
         ResStructureEditor_exposer.def( "__copy__", &__copy__);

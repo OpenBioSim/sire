@@ -43,81 +43,81 @@ void register_Average_class(){
         bp::scope Average_scope( Average_exposer );
         Average_exposer.def( bp::init< SireMaths::Average const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMaths::Average::accumulate
-
+        
             typedef void ( ::SireMaths::Average::*accumulate_function_type)( double ) ;
             accumulate_function_type accumulate_function_value( &::SireMaths::Average::accumulate );
-
-            Average_exposer.def(
+            
+            Average_exposer.def( 
                 "accumulate"
                 , accumulate_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Accumulate the passed value onto the average" );
-
+        
         }
         { //::SireMaths::Average::average
-
+        
             typedef double ( ::SireMaths::Average::*average_function_type)(  ) const;
             average_function_type average_function_value( &::SireMaths::Average::average );
-
-            Average_exposer.def(
+            
+            Average_exposer.def( 
                 "average"
                 , average_function_value
                 , bp::release_gil_policy()
                 , "Return the average value" );
-
+        
         }
         { //::SireMaths::Average::clear
-
+        
             typedef void ( ::SireMaths::Average::*clear_function_type)(  ) ;
             clear_function_type clear_function_value( &::SireMaths::Average::clear );
-
-            Average_exposer.def(
+            
+            Average_exposer.def( 
                 "clear"
                 , clear_function_value
                 , bp::release_gil_policy()
                 , "Completely clear the statistics in this accumulator" );
-
+        
         }
         Average_exposer.def( bp::self != bp::self );
         Average_exposer.def( bp::self + bp::self );
         { //::SireMaths::Average::operator=
-
+        
             typedef ::SireMaths::Average & ( ::SireMaths::Average::*assign_function_type)( ::SireMaths::Average const & ) ;
             assign_function_type assign_function_value( &::SireMaths::Average::operator= );
-
-            Average_exposer.def(
+            
+            Average_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Average_exposer.def( bp::self == bp::self );
         { //::SireMaths::Average::toString
-
+        
             typedef ::QString ( ::SireMaths::Average::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::Average::toString );
-
-            Average_exposer.def(
+            
+            Average_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Average::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMaths::Average::typeName );
-
-            Average_exposer.def(
+            
+            Average_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Average_exposer.staticmethod( "typeName" );
         Average_exposer.def( "__copy__", &__copy__);

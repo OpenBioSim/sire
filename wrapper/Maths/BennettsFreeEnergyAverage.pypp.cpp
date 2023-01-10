@@ -45,130 +45,130 @@ void register_BennettsFreeEnergyAverage_class(){
         BennettsFreeEnergyAverage_exposer.def( bp::init< SireUnits::Dimension::MolarEnergy const &, SireUnits::Dimension::Temperature const &, SireUnits::Dimension::MolarEnergy const &, bp::optional< bool > >(( bp::arg("constant"), bp::arg("temperature"), bp::arg("binwidth"), bp::arg("forwards_free_energy")=(bool)(true) ), "Construct at the specified temperature, using the specificed constant (C value),\nusing a histogram of the specified bin width") );
         BennettsFreeEnergyAverage_exposer.def( bp::init< SireMaths::BennettsFreeEnergyAverage const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMaths::BennettsFreeEnergyAverage::accumulate
-
+        
             typedef void ( ::SireMaths::BennettsFreeEnergyAverage::*accumulate_function_type)( double ) ;
             accumulate_function_type accumulate_function_value( &::SireMaths::BennettsFreeEnergyAverage::accumulate );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "accumulate"
                 , accumulate_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Accumulate the passed value onto the average" );
-
+        
         }
         { //::SireMaths::BennettsFreeEnergyAverage::bennettsRatio
-
+        
             typedef double ( ::SireMaths::BennettsFreeEnergyAverage::*bennettsRatio_function_type)(  ) const;
             bennettsRatio_function_type bennettsRatio_function_value( &::SireMaths::BennettsFreeEnergyAverage::bennettsRatio );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "bennettsRatio"
                 , bennettsRatio_function_value
                 , bp::release_gil_policy()
                 , "Return the Bennetts ratio. This is the ensemble average\nof 1 \n{1 + exp( beta dE - C ) } if this is a backwards ratio" );
-
+        
         }
         { //::SireMaths::BennettsFreeEnergyAverage::bennettsStandardError
-
+        
             typedef double ( ::SireMaths::BennettsFreeEnergyAverage::*bennettsStandardError_function_type)( double ) const;
             bennettsStandardError_function_type bennettsStandardError_function_value( &::SireMaths::BennettsFreeEnergyAverage::bennettsStandardError );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "bennettsStandardError"
                 , bennettsStandardError_function_value
                 , ( bp::arg("level") )
                 , bp::release_gil_policy()
                 , "Return the standard error on the Bennetts ratio to the passed confidence level" );
-
+        
         }
         { //::SireMaths::BennettsFreeEnergyAverage::clear
-
+        
             typedef void ( ::SireMaths::BennettsFreeEnergyAverage::*clear_function_type)(  ) ;
             clear_function_type clear_function_value( &::SireMaths::BennettsFreeEnergyAverage::clear );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "clear"
                 , clear_function_value
                 , bp::release_gil_policy()
                 , "Clear this accumulator" );
-
+        
         }
         { //::SireMaths::BennettsFreeEnergyAverage::constant
-
+        
             typedef ::SireUnits::Dimension::MolarEnergy ( ::SireMaths::BennettsFreeEnergyAverage::*constant_function_type)(  ) const;
             constant_function_type constant_function_value( &::SireMaths::BennettsFreeEnergyAverage::constant );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "constant"
                 , constant_function_value
                 , bp::release_gil_policy()
                 , "Return the value of the constant offset to the energy used in the Bennetts average" );
-
+        
         }
         { //::SireMaths::BennettsFreeEnergyAverage::isBackwardsRatio
-
+        
             typedef bool ( ::SireMaths::BennettsFreeEnergyAverage::*isBackwardsRatio_function_type)(  ) const;
             isBackwardsRatio_function_type isBackwardsRatio_function_value( &::SireMaths::BennettsFreeEnergyAverage::isBackwardsRatio );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "isBackwardsRatio"
                 , isBackwardsRatio_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a backwards ratio (the denominator in the expression)" );
-
+        
         }
         { //::SireMaths::BennettsFreeEnergyAverage::isForwardsRatio
-
+        
             typedef bool ( ::SireMaths::BennettsFreeEnergyAverage::*isForwardsRatio_function_type)(  ) const;
             isForwardsRatio_function_type isForwardsRatio_function_value( &::SireMaths::BennettsFreeEnergyAverage::isForwardsRatio );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "isForwardsRatio"
                 , isForwardsRatio_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a forwards ratio (the numerator in the expression)" );
-
+        
         }
         BennettsFreeEnergyAverage_exposer.def( bp::self != bp::self );
         BennettsFreeEnergyAverage_exposer.def( bp::self + bp::self );
         { //::SireMaths::BennettsFreeEnergyAverage::operator=
-
+        
             typedef ::SireMaths::BennettsFreeEnergyAverage & ( ::SireMaths::BennettsFreeEnergyAverage::*assign_function_type)( ::SireMaths::BennettsFreeEnergyAverage const & ) ;
             assign_function_type assign_function_value( &::SireMaths::BennettsFreeEnergyAverage::operator= );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         BennettsFreeEnergyAverage_exposer.def( bp::self == bp::self );
         { //::SireMaths::BennettsFreeEnergyAverage::toString
-
+        
             typedef ::QString ( ::SireMaths::BennettsFreeEnergyAverage::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::BennettsFreeEnergyAverage::toString );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::BennettsFreeEnergyAverage::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMaths::BennettsFreeEnergyAverage::typeName );
-
-            BennettsFreeEnergyAverage_exposer.def(
+            
+            BennettsFreeEnergyAverage_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         BennettsFreeEnergyAverage_exposer.staticmethod( "typeName" );
         BennettsFreeEnergyAverage_exposer.def( "__copy__", &__copy__);

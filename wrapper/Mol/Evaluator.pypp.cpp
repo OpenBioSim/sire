@@ -91,804 +91,804 @@ void register_Evaluator_class(){
         Evaluator_exposer.def( bp::init< SireMol::MoleculeData const &, SireMol::AtomSelection const & >(( bp::arg("moldata"), bp::arg("selected_atoms") ), "Construct to evaluate properties of the selected atoms of the\npassed molecule") );
         Evaluator_exposer.def( bp::init< SireMol::Evaluator const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::Evaluator::aaBox
-
+        
             typedef ::SireVol::AABox ( ::SireMol::Evaluator::*aaBox_function_type)( ::SireBase::PropertyMap const & ) const;
             aaBox_function_type aaBox_function_value( &::SireMol::Evaluator::aaBox );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "aaBox"
                 , aaBox_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the axis-aligned box that just contains all of the\natoms in this view\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\n" );
-
+        
         }
         { //::SireMol::Evaluator::boundingSphere
-
+        
             typedef ::SireMaths::Sphere ( ::SireMol::Evaluator::*boundingSphere_function_type)( ::SireBase::PropertyMap const & ) const;
             boundingSphere_function_type boundingSphere_function_value( &::SireMol::Evaluator::boundingSphere );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "boundingSphere"
                 , boundingSphere_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the sphere that just encloses all of the atoms in this view\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\n" );
-
+        
         }
         { //::SireMol::Evaluator::center
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::Evaluator::*center_function_type)( ::SireBase::PropertyMap const & ) const;
             center_function_type center_function_value( &::SireMol::Evaluator::center );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "center"
                 , center_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the center of the selected atoms,\nusing the passed property map to find the coordinates\nproperty of the molecule (the center is the point\nthat is exactly in the middle of the atoms - i.e.\nhalfway between the maximum and minimum coordinates\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\n" );
-
+        
         }
         { //::SireMol::Evaluator::centerOfGeometry
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::Evaluator::*centerOfGeometry_function_type)( ::SireBase::PropertyMap const & ) const;
             centerOfGeometry_function_type centerOfGeometry_function_value( &::SireMol::Evaluator::centerOfGeometry );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "centerOfGeometry"
                 , centerOfGeometry_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the center of geometry of this part of the molecule.\nThis is the mid-point between the maximum coordinates and\nminimum coordinates\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\n" );
-
+        
         }
         { //::SireMol::Evaluator::centerOfMass
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::Evaluator::*centerOfMass_function_type)( ::SireBase::PropertyMap const & ) const;
             centerOfMass_function_type centerOfMass_function_value( &::SireMol::Evaluator::centerOfMass );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "centerOfMass"
                 , centerOfMass_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the center of mass of this part of the molecule\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\n" );
-
+        
         }
         { //::SireMol::Evaluator::centroid
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::Evaluator::*centroid_function_type)( ::SireBase::PropertyMap const & ) const;
             centroid_function_type centroid_function_value( &::SireMol::Evaluator::centroid );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "centroid"
                 , centroid_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the centroid of these atoms - this is the average\nof the coordinates\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\n" );
-
+        
         }
         { //::SireMol::Evaluator::charge
-
+        
             typedef ::SireUnits::Dimension::Charge ( ::SireMol::Evaluator::*charge_function_type)( ::SireBase::PropertyMap const & ) const;
             charge_function_type charge_function_value( &::SireMol::Evaluator::charge );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "charge"
                 , charge_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the total charge of the selected part of the molecule, using\nthe supplied map to find the charge property\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const &,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireBase::PropertyMap const &,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("map0"), bp::arg("map1"), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing map0 and map1 to find the elements, masses,\nconnectivity and coordinates of the two molecules respectively" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("map0"), bp::arg("map1"), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireUnits::Dimension::Time const &,::SireBase::PropertyMap const &,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("timeout"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules. Terminate the calculation\nreturning the best match found within timeout." );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireUnits::Dimension::Time const &,::SireBase::PropertyMap const &,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("timeout"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts). Terminate the calculation\nreturning the best match found within timeout." );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireUnits::Dimension::Time const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("timeout"), bp::arg("map0"), bp::arg("map1"), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing map0 and map1 to find the elements, masses,\nconnectivity and coordinates of the two molecules respectively. Terminate the calculation\nreturning the best match found within timeout." );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireUnits::Dimension::Time const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("timeout"), bp::arg("map0"), bp::arg("map1"), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,bool,::SireBase::PropertyMap const &,int,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("match_light_atoms"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,bool,::SireBase::PropertyMap const &,int,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("match_light_atoms"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,bool,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,int,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("match_light_atoms"), bp::arg("map0"), bp::arg("map1"), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing map0 and map1 to find the elements, masses,\nconnectivity and coordinates of the two molecules respectively\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,bool,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,int,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("match_light_atoms"), bp::arg("map0"), bp::arg("map1"), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts).\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireUnits::Dimension::Time const &,bool,::SireBase::PropertyMap const &,int,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("timeout"), bp::arg("match_light_atoms"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules. Terminate the calculation\nreturning the best match found within timeout.\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireUnits::Dimension::Time const &,bool,::SireBase::PropertyMap const &,int,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("timeout"), bp::arg("match_light_atoms"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts). Terminate the calculation\nreturning the best match found within timeout.\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireUnits::Dimension::Time const &,bool,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,int,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("timeout"), bp::arg("match_light_atoms"), bp::arg("map0"), bp::arg("map1"), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing map0 and map1 to find the elements, masses,\nconnectivity and coordinates of the two molecules respectively. Terminate the calculation\nreturning the best match found within timeout.\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCS
-
+        
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::Evaluator::*findMCS_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireUnits::Dimension::Time const &,bool,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,int,bool ) const;
             findMCS_function_type findMCS_function_value( &::SireMol::Evaluator::findMCS );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCS"
                 , findMCS_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("timeout"), bp::arg("match_light_atoms"), bp::arg("map0"), bp::arg("map1"), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns the mapping from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\nThe argument min_heavy_protons specifies the number of protons above which an\natom is considered as being heaviy, e.g. 6 means that heavy atoms\nare the elements including Carbon and above. By setting min_heavy_protons to\nzero allows the user to match heavy atoms against light atoms.\nThe verbose flag can be used to print status messages.\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const &,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireBase::PropertyMap const &,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("map0"), bp::arg("map1"), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing map0 and map1 to find the elements, masses,\nconnectivity and coordinates of the two molecules respectively" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("map0"), bp::arg("map1"), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireUnits::Dimension::Time const &,::SireBase::PropertyMap const &,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("timeout"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules. Terminate the calculation\nreturning the best match found within timeout." );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireUnits::Dimension::Time const &,::SireBase::PropertyMap const &,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("timeout"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts). Terminate the calculation\nreturning the best match found within timeout." );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireUnits::Dimension::Time const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("timeout"), bp::arg("map0"), bp::arg("map1"), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing map0 and map1 to find the elements, masses,\nconnectivity and coordinates of the two molecules respectively. Terminate the calculation\nreturning the best match found within timeout." );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireUnits::Dimension::Time const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("timeout"), bp::arg("map0"), bp::arg("map1"), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,bool,::SireBase::PropertyMap const &,int,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("match_light_atoms"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,bool,::SireBase::PropertyMap const &,int,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("match_light_atoms"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,bool,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,int,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("match_light_atoms"), bp::arg("map0"), bp::arg("map1"), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing map0 and map1 to find the elements, masses,\nconnectivity and coordinates of the two molecules respectively\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,bool,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,int,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("match_light_atoms"), bp::arg("map0"), bp::arg("map1"), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts).\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireUnits::Dimension::Time const &,bool,::SireBase::PropertyMap const &,int,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("timeout"), bp::arg("match_light_atoms"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules. Terminate the calculation\nreturning the best match found within timeout.\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireUnits::Dimension::Time const &,bool,::SireBase::PropertyMap const &,int,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("timeout"), bp::arg("match_light_atoms"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts). Terminate the calculation\nreturning the best match found within timeout.\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireUnits::Dimension::Time const &,bool,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,int,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("timeout"), bp::arg("match_light_atoms"), bp::arg("map0"), bp::arg("map1"), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing map0 and map1 to find the elements, masses,\nconnectivity and coordinates of the two molecules respectively. Terminate the calculation\nreturning the best match found within timeout.\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\n" );
-
+        
         }
         { //::SireMol::Evaluator::findMCSmatches
-
+        
             typedef ::QVector< QHash< SireMol::AtomIdx, SireMol::AtomIdx > > ( ::SireMol::Evaluator::*findMCSmatches_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireUnits::Dimension::Time const &,bool,::SireBase::PropertyMap const &,::SireBase::PropertyMap const &,int,bool ) const;
             findMCSmatches_function_type findMCSmatches_function_value( &::SireMol::Evaluator::findMCSmatches );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "findMCSmatches"
                 , findMCSmatches_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("timeout"), bp::arg("match_light_atoms"), bp::arg("map0"), bp::arg("map1"), bp::arg("min_heavy_protons")=(int)(6), bp::arg("verbose")=(bool)(false) )
                 , "Find the maximum common substructure of this molecule view with other. This\nreturns all mappings from this structure to other for the matching parts,\nusing the optionally supplied propertymap to find the elements, masses,\nconnectivity and coordinates of the two molecules, with the passed atommatcher\nused to pre-match atoms before the common substructure search (useful to speed\nup the search and to enforce matching sub-parts)\nIf match_light_atoms is true, then include light atoms (e.g. hydrogen)\nin the match. This may make things slower...\nThe argument min_heavy_protons specifies the number of protons above which an\natom is considered as being heaviy, e.g. 6 means that heavy atoms\nare the elements including Carbon and above. By setting min_heavy_protons to\nzero allows the user to match heavy atoms against light atoms.\nThe verbose flag can be used to print status messages.\n" );
-
+        
         }
         { //::SireMol::Evaluator::hasMetadata
-
+        
             typedef bool ( ::SireMol::Evaluator::*hasMetadata_function_type)( ::SireBase::PropertyName const & ) const;
             hasMetadata_function_type hasMetadata_function_value( &::SireMol::Evaluator::hasMetadata );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "hasMetadata"
                 , hasMetadata_function_value
                 , ( bp::arg("arg0") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Evaluator::hasMetadata
-
+        
             typedef bool ( ::SireMol::Evaluator::*hasMetadata_function_type)( ::SireBase::PropertyName const &,::SireBase::PropertyName const & ) const;
             hasMetadata_function_type hasMetadata_function_value( &::SireMol::Evaluator::hasMetadata );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "hasMetadata"
                 , hasMetadata_function_value
                 , ( bp::arg("arg0"), bp::arg("arg1") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Evaluator::hasProperty
-
+        
             typedef bool ( ::SireMol::Evaluator::*hasProperty_function_type)( ::SireBase::PropertyName const & ) const;
             hasProperty_function_type hasProperty_function_value( &::SireMol::Evaluator::hasProperty );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "hasProperty"
                 , hasProperty_function_value
                 , ( bp::arg("arg0") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Evaluator::isEmpty
-
+        
             typedef bool ( ::SireMol::Evaluator::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireMol::Evaluator::isEmpty );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is empty" );
-
+        
         }
         { //::SireMol::Evaluator::mass
-
+        
             typedef ::SireUnits::Dimension::MolarMass ( ::SireMol::Evaluator::*mass_function_type)( ::SireBase::PropertyMap const & ) const;
             mass_function_type mass_function_value( &::SireMol::Evaluator::mass );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "mass"
                 , mass_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the mass of the selected part of this molecule, using\nthe supplied map to find either the mass property, or if that\ndoes not exist, using the element property\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\n" );
-
+        
         }
         { //::SireMol::Evaluator::measure
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMol::Evaluator::*measure_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireBase::PropertyMap const & ) const;
             measure_function_type measure_function_value( &::SireMol::Evaluator::measure );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "measure"
                 , measure_function_value
                 , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Measure the distance between the atoms atom0 and atom1\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::Evaluator::measure
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMol::Evaluator::*measure_function_type)( ::SireMol::BondID const &,::SireBase::PropertyMap const & ) const;
             measure_function_type measure_function_value( &::SireMol::Evaluator::measure );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "measure"
                 , measure_function_value
                 , ( bp::arg("bond"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Measure the length of the bond bond\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::Evaluator::measure
-
+        
             typedef ::SireUnits::Dimension::Angle ( ::SireMol::Evaluator::*measure_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireBase::PropertyMap const & ) const;
             measure_function_type measure_function_value( &::SireMol::Evaluator::measure );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "measure"
                 , measure_function_value
                 , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Measure the angle between the atoms atom0, atom1 and atom2\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::Evaluator::measure
-
+        
             typedef ::SireUnits::Dimension::Angle ( ::SireMol::Evaluator::*measure_function_type)( ::SireMol::AngleID const &,::SireBase::PropertyMap const & ) const;
             measure_function_type measure_function_value( &::SireMol::Evaluator::measure );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "measure"
                 , measure_function_value
                 , ( bp::arg("angle"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Measure the size of the angle angle\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::Evaluator::measure
-
+        
             typedef ::SireUnits::Dimension::Angle ( ::SireMol::Evaluator::*measure_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireBase::PropertyMap const & ) const;
             measure_function_type measure_function_value( &::SireMol::Evaluator::measure );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "measure"
                 , measure_function_value
                 , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("atom3"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Measure the dihedral between the atoms atom0, atom1, atom2 and atom3\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::Evaluator::measure
-
+        
             typedef ::SireUnits::Dimension::Angle ( ::SireMol::Evaluator::*measure_function_type)( ::SireMol::DihedralID const &,::SireBase::PropertyMap const & ) const;
             measure_function_type measure_function_value( &::SireMol::Evaluator::measure );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "measure"
                 , measure_function_value
                 , ( bp::arg("dihedral"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Measure the size of the dihedral dihedral\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::Evaluator::metadataKeys
-
+        
             typedef ::QStringList ( ::SireMol::Evaluator::*metadataKeys_function_type)(  ) const;
             metadataKeys_function_type metadataKeys_function_value( &::SireMol::Evaluator::metadataKeys );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "metadataKeys"
                 , metadataKeys_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Evaluator::metadataKeys
-
+        
             typedef ::QStringList ( ::SireMol::Evaluator::*metadataKeys_function_type)( ::SireBase::PropertyName const & ) const;
             metadataKeys_function_type metadataKeys_function_value( &::SireMol::Evaluator::metadataKeys );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "metadataKeys"
                 , metadataKeys_function_value
                 , ( bp::arg("arg0") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Evaluator::operator=
-
+        
             typedef ::SireMol::Evaluator & ( ::SireMol::Evaluator::*assign_function_type)( ::SireMol::Evaluator const & ) ;
             assign_function_type assign_function_value( &::SireMol::Evaluator::operator= );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Evaluator::operator=
-
+        
             typedef ::SireMol::Evaluator & ( ::SireMol::Evaluator::*assign_function_type)( ::SireMol::MoleculeView const & ) ;
             assign_function_type assign_function_value( &::SireMol::Evaluator::operator= );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::Evaluator::propertyKeys
-
+        
             typedef ::QStringList ( ::SireMol::Evaluator::*propertyKeys_function_type)(  ) const;
             propertyKeys_function_type propertyKeys_function_value( &::SireMol::Evaluator::propertyKeys );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "propertyKeys"
                 , propertyKeys_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Evaluator::radius
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMol::Evaluator::*radius_function_type)( ::SireBase::PropertyMap const & ) const;
             radius_function_type radius_function_value( &::SireMol::Evaluator::radius );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "radius"
                 , radius_function_value
                 , ( bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the radius of the sphere that encloses all of the atoms\n  in this view, assuming it is centered on the center of geometry" );
-
+        
         }
         { //::SireMol::Evaluator::radius
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMol::Evaluator::*radius_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) const;
             radius_function_type radius_function_value( &::SireMol::Evaluator::radius );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "radius"
                 , radius_function_value
                 , ( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the radius of the sphere that encloses all of the atoms\n  assuming that it is centered at center" );
-
+        
         }
         { //::SireMol::Evaluator::rmsd
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMol::Evaluator::*rmsd_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
             rmsd_function_type rmsd_function_value( &::SireMol::Evaluator::rmsd );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "rmsd"
                 , rmsd_function_value
                 , ( bp::arg("other"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the root mean square deviation (RMSD) of the atoms in this view against\nthe atoms in other, using the passed property map to find the required\nproperties" );
-
+        
         }
         { //::SireMol::Evaluator::rmsd
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMol::Evaluator::*rmsd_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const & ) const;
             rmsd_function_type rmsd_function_value( &::SireMol::Evaluator::rmsd );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "rmsd"
                 , rmsd_function_value
                 , ( bp::arg("other"), bp::arg("map0"), bp::arg("map1") )
                 , bp::release_gil_policy()
                 , "Return the root mean square deviation (RMSD) of the atoms in this view against\nthe atoms in other, using the passed property maps to find the required\nproperties" );
-
+        
         }
         { //::SireMol::Evaluator::rmsd
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMol::Evaluator::*rmsd_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireBase::PropertyMap const & ) const;
             rmsd_function_type rmsd_function_value( &::SireMol::Evaluator::rmsd );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "rmsd"
                 , rmsd_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the root mean square deviation (RMSD) of the atoms in this view against\nthe atoms in other, using the passed AtomMatcher to match atoms in this\nview against other, and using the passed property map to find the required\nproperties" );
-
+        
         }
         { //::SireMol::Evaluator::rmsd
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMol::Evaluator::*rmsd_function_type)( ::SireMol::MoleculeView const &,::SireMol::AtomMatcher const &,::SireBase::PropertyMap const &,::SireBase::PropertyMap const & ) const;
             rmsd_function_type rmsd_function_value( &::SireMol::Evaluator::rmsd );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "rmsd"
                 , rmsd_function_value
                 , ( bp::arg("other"), bp::arg("atommatcher"), bp::arg("map0"), bp::arg("map1") )
                 , bp::release_gil_policy()
                 , "Return the root mean square deviation (RMSD) of the atoms in this view against\nthe atoms in other, using the passed AtomMatcher to match atoms in this\nview against other, and using the passed property maps to find the required\nproperties" );
-
+        
         }
         { //::SireMol::Evaluator::selectedAll
-
+        
             typedef bool ( ::SireMol::Evaluator::*selectedAll_function_type)(  ) const;
             selectedAll_function_type selectedAll_function_value( &::SireMol::Evaluator::selectedAll );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "selectedAll"
                 , selectedAll_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this contains the whole molecule" );
-
+        
         }
         { //::SireMol::Evaluator::selection
-
+        
             typedef ::SireMol::AtomSelection ( ::SireMol::Evaluator::*selection_function_type)(  ) const;
             selection_function_type selection_function_value( &::SireMol::Evaluator::selection );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "selection"
                 , selection_function_value
                 , bp::release_gil_policy()
                 , "Return the selected atoms over which the properties\nwill be evaluated" );
-
+        
         }
         { //::SireMol::Evaluator::toSelector
-
+        
             typedef ::SireMol::MolViewPtr ( ::SireMol::Evaluator::*toSelector_function_type)(  ) const;
             toSelector_function_type toSelector_function_value( &::SireMol::Evaluator::toSelector );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "toSelector"
                 , toSelector_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Evaluator::toString
-
+        
             typedef ::QString ( ::SireMol::Evaluator::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::Evaluator::toString );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this evaluator" );
-
+        
         }
         { //::SireMol::Evaluator::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::Evaluator::typeName );
-
-            Evaluator_exposer.def(
+            
+            Evaluator_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Evaluator_exposer.staticmethod( "typeName" );
         Evaluator_exposer.def( "__copy__", &__copy__);

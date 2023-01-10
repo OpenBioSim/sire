@@ -28,42 +28,42 @@ void register_Fahrenheit_class(){
         Fahrenheit_exposer.def( bp::init< SireUnits::Dimension::TempBase const & >(( bp::arg("other") ), "") );
         Fahrenheit_exposer.def( bp::init< SireUnits::Fahrenheit const & >(( bp::arg("other") ), "") );
         { //::SireUnits::Fahrenheit::convertFromInternal
-
+        
             typedef double ( ::SireUnits::Fahrenheit::*convertFromInternal_function_type)( double ) const;
             convertFromInternal_function_type convertFromInternal_function_value( &::SireUnits::Fahrenheit::convertFromInternal );
-
-            Fahrenheit_exposer.def(
+            
+            Fahrenheit_exposer.def( 
                 "convertFromInternal"
                 , convertFromInternal_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireUnits::Fahrenheit::convertFromInternal
-
+        
             typedef double ( ::SireUnits::Fahrenheit::*convertFromInternal_function_type)(  ) const;
             convertFromInternal_function_type convertFromInternal_function_value( &::SireUnits::Fahrenheit::convertFromInternal );
-
-            Fahrenheit_exposer.def(
+            
+            Fahrenheit_exposer.def( 
                 "convertFromInternal"
                 , convertFromInternal_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireUnits::Fahrenheit::convertToInternal
-
+        
             typedef double ( ::SireUnits::Fahrenheit::*convertToInternal_function_type)( double ) const;
             convertToInternal_function_type convertToInternal_function_value( &::SireUnits::Fahrenheit::convertToInternal );
-
-            Fahrenheit_exposer.def(
+            
+            Fahrenheit_exposer.def( 
                 "convertToInternal"
                 , convertToInternal_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Fahrenheit_exposer.def( bp::self * bp::other< double >() );
         Fahrenheit_exposer.def( bp::self * bp::other< int >() );
@@ -75,30 +75,30 @@ void register_Fahrenheit_class(){
         Fahrenheit_exposer.def( bp::self / bp::other< double >() );
         Fahrenheit_exposer.def( bp::self / bp::other< int >() );
         { //::SireUnits::Fahrenheit::operator=
-
+        
             typedef ::SireUnits::Fahrenheit & ( ::SireUnits::Fahrenheit::*assign_function_type)( ::SireUnits::Fahrenheit const & ) ;
             assign_function_type assign_function_value( &::SireUnits::Fahrenheit::operator= );
-
-            Fahrenheit_exposer.def(
+            
+            Fahrenheit_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireUnits::Fahrenheit::operator=
-
+        
             typedef ::SireUnits::Fahrenheit & ( ::SireUnits::Fahrenheit::*assign_function_type)( ::SireUnits::Dimension::Temperature const & ) ;
             assign_function_type assign_function_value( &::SireUnits::Fahrenheit::operator= );
-
-            Fahrenheit_exposer.def(
+            
+            Fahrenheit_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("temp") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Fahrenheit_exposer.def( bp::other<double>() + bp::self );
         Fahrenheit_exposer.def( bp::other<double>() - bp::self );

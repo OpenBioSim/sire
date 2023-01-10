@@ -34,79 +34,79 @@ void register_LinkToProperty_class(){
         LinkToProperty_exposer.def( bp::init< SireBase::PropertyName const &, SireID::ID const & >(( bp::arg("source"), bp::arg("filter") ), "Construct to link to the property source in the objects\nidentified by filter") );
         LinkToProperty_exposer.def( bp::init< SireBase::LinkToProperty const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireBase::LinkToProperty::filter
-
+        
             typedef ::SireID::ID const & ( ::SireBase::LinkToProperty::*filter_function_type)(  ) const;
             filter_function_type filter_function_value( &::SireBase::LinkToProperty::filter );
-
-            LinkToProperty_exposer.def(
+            
+            LinkToProperty_exposer.def( 
                 "filter"
                 , filter_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return any filter for this link (this is null if there is no filter)" );
-
+        
         }
         { //::SireBase::LinkToProperty::isFiltered
-
+        
             typedef bool ( ::SireBase::LinkToProperty::*isFiltered_function_type)(  ) const;
             isFiltered_function_type isFiltered_function_value( &::SireBase::LinkToProperty::isFiltered );
-
-            LinkToProperty_exposer.def(
+            
+            LinkToProperty_exposer.def( 
                 "isFiltered"
                 , isFiltered_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this link is filtered" );
-
+        
         }
         LinkToProperty_exposer.def( bp::self != bp::self );
         { //::SireBase::LinkToProperty::operator=
-
+        
             typedef ::SireBase::LinkToProperty & ( ::SireBase::LinkToProperty::*assign_function_type)( ::SireBase::LinkToProperty const & ) ;
             assign_function_type assign_function_value( &::SireBase::LinkToProperty::operator= );
-
-            LinkToProperty_exposer.def(
+            
+            LinkToProperty_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         LinkToProperty_exposer.def( bp::self == bp::self );
         { //::SireBase::LinkToProperty::target
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireBase::LinkToProperty::*target_function_type)(  ) const;
             target_function_type target_function_value( &::SireBase::LinkToProperty::target );
-
-            LinkToProperty_exposer.def(
+            
+            LinkToProperty_exposer.def( 
                 "target"
                 , target_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the target of this link" );
-
+        
         }
         { //::SireBase::LinkToProperty::toString
-
+        
             typedef ::QString ( ::SireBase::LinkToProperty::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::LinkToProperty::toString );
-
-            LinkToProperty_exposer.def(
+            
+            LinkToProperty_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this link" );
-
+        
         }
         { //::SireBase::LinkToProperty::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireBase::LinkToProperty::typeName );
-
-            LinkToProperty_exposer.def(
+            
+            LinkToProperty_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         LinkToProperty_exposer.staticmethod( "typeName" );
         LinkToProperty_exposer.def( "__copy__", &__copy__);

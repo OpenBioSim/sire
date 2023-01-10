@@ -60,370 +60,370 @@ void register_ChainStructureEditor_class(){
         ChainStructureEditor_exposer.def( bp::init< SireMol::StructureEditor const &, SireMol::ChainIdx >(( bp::arg("data"), bp::arg("chainidx") ), "Construct to edit the Chain at index cgidx in the molecule\nalso being edited in data\nThrow: SireError::invalid_index\n") );
         ChainStructureEditor_exposer.def( bp::init< SireMol::ChainStructureEditor const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::ChainStructureEditor::add
-
+        
             typedef ::SireMol::ResStructureEditor ( ::SireMol::ChainStructureEditor::*add_function_type)( ::SireMol::ResName const & ) ;
             add_function_type add_function_value( &::SireMol::ChainStructureEditor::add );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("resname") )
                 , bp::release_gil_policy()
                 , "Add a residue called resname to this Chain and return\nan editor for that residue" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::add
-
+        
             typedef ::SireMol::ResStructureEditor ( ::SireMol::ChainStructureEditor::*add_function_type)( ::SireMol::ResNum ) ;
             add_function_type add_function_value( &::SireMol::ChainStructureEditor::add );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("resnum") )
                 , bp::release_gil_policy()
                 , "Add a residue with number resnum to this Chain and return\nan editor for that residue" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::atom
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::ChainStructureEditor::*atom_function_type)( ::SireMol::AtomID const & ) ;
             atom_function_type atom_function_value( &::SireMol::ChainStructureEditor::atom );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "atom"
                 , atom_function_value
                 , ( bp::arg("atomid") )
                 , bp::release_gil_policy()
                 , "Return an editor for the atom that matches the ID atomid in\nthis Chain\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::commit
-
+        
             typedef ::SireMol::Chain ( ::SireMol::ChainStructureEditor::*commit_function_type)(  ) const;
             commit_function_type commit_function_value( &::SireMol::ChainStructureEditor::commit );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "commit"
                 , commit_function_value
                 , bp::release_gil_policy()
                 , "Commit the changes made by this editor and return the\nupdated Chain" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::index
-
+        
             typedef ::SireMol::ChainIdx ( ::SireMol::ChainStructureEditor::*index_function_type)(  ) const;
             index_function_type index_function_value( &::SireMol::ChainStructureEditor::index );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "index"
                 , index_function_value
                 , bp::release_gil_policy()
                 , "Return the index of this Chain in the molecule" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::molecule
-
+        
             typedef ::SireMol::MolStructureEditor ( ::SireMol::ChainStructureEditor::*molecule_function_type)(  ) ;
             molecule_function_type molecule_function_value( &::SireMol::ChainStructureEditor::molecule );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "molecule"
                 , molecule_function_value
                 , bp::release_gil_policy()
                 , "Return an editor for the molecule that contains this Chain" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::nAtoms
-
+        
             typedef int ( ::SireMol::ChainStructureEditor::*nAtoms_function_type)(  ) const;
             nAtoms_function_type nAtoms_function_value( &::SireMol::ChainStructureEditor::nAtoms );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , bp::release_gil_policy()
                 , "Return the number of atoms in this Chain (could be zero)" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::nResidues
-
+        
             typedef int ( ::SireMol::ChainStructureEditor::*nResidues_function_type)(  ) const;
             nResidues_function_type nResidues_function_value( &::SireMol::ChainStructureEditor::nResidues );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "nResidues"
                 , nResidues_function_value
                 , bp::release_gil_policy()
                 , "Return the number of residues in this Chain (could be zero)" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::name
-
+        
             typedef ::SireMol::ChainName const & ( ::SireMol::ChainStructureEditor::*name_function_type)(  ) const;
             name_function_type name_function_value( &::SireMol::ChainStructureEditor::name );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "name"
                 , name_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the name of this Chain" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::operator=
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*assign_function_type)( ::SireMol::Chain const & ) ;
             assign_function_type assign_function_value( &::SireMol::ChainStructureEditor::operator= );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("chain") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::operator=
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*assign_function_type)( ::SireMol::ChainStructureEditor const & ) ;
             assign_function_type assign_function_value( &::SireMol::ChainStructureEditor::operator= );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::reindex
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*reindex_function_type)( ::SireMol::ChainIdx ) ;
             reindex_function_type reindex_function_value( &::SireMol::ChainStructureEditor::reindex );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "reindex"
                 , reindex_function_value
                 , ( bp::arg("index") )
                 , bp::return_self< >()
                 , "Move this Chain to index newidx - this will move it\nto the start or end if this index is out of range" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::remove
-
+        
             typedef ::SireMol::MolStructureEditor ( ::SireMol::ChainStructureEditor::*remove_function_type)(  ) ;
             remove_function_type remove_function_value( &::SireMol::ChainStructureEditor::remove );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , bp::return_self< >()
                 , "Complete remove this Chain, and return an editor\nfor the molecule that contained it" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::remove
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*remove_function_type)( ::SireMol::ResID const & ) ;
             remove_function_type remove_function_value( &::SireMol::ChainStructureEditor::remove );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("resid") )
                 , bp::return_self< >()
                 , "Completely remove all residues that match the ID resid from\nthis Chain\nThrow: SireMol::missing_residue\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::remove
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*remove_function_type)( ::SireMol::AtomID const & ) ;
             remove_function_type remove_function_value( &::SireMol::ChainStructureEditor::remove );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("atomid") )
                 , bp::return_self< >()
                 , "Completely remove all atoms that match the ID atomid from\nall of the residues that are part of this chain\nThrow: SireMol::missing_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::remove
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*remove_function_type)( int ) ;
             remove_function_type remove_function_value( &::SireMol::ChainStructureEditor::remove );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("i") )
                 , bp::return_self< >()
                 , "Remove the ith residue from this Chain\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::rename
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*rename_function_type)( ::SireMol::ChainName const & ) ;
             rename_function_type rename_function_value( &::SireMol::ChainStructureEditor::rename );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "rename"
                 , rename_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
                 , "Rename this Chain to newname" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::residue
-
+        
             typedef ::SireMol::ResStructureEditor ( ::SireMol::ChainStructureEditor::*residue_function_type)( int ) ;
             residue_function_type residue_function_value( &::SireMol::ChainStructureEditor::residue );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "residue"
                 , residue_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return an editor for the ith residue of this Chain\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::residue
-
+        
             typedef ::SireMol::ResStructureEditor ( ::SireMol::ChainStructureEditor::*residue_function_type)( ::SireMol::ResID const & ) ;
             residue_function_type residue_function_value( &::SireMol::ChainStructureEditor::residue );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "residue"
                 , residue_function_value
                 , ( bp::arg("resid") )
                 , bp::release_gil_policy()
                 , "Return an editor for the residue that matches the ID resid in\nthis chain\nThrow: SireMol::missing_residue\nThrow: SireMol::duplicate_residue\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::select
-
+        
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::ChainStructureEditor::*select_function_type)( ::SireMol::AtomID const & ) ;
             select_function_type select_function_value( &::SireMol::ChainStructureEditor::select );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "select"
                 , select_function_value
                 , ( bp::arg("atomid") )
                 , bp::release_gil_policy()
                 , "Return an editor for the atom that matches the ID atomid in\nthis Chain\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::select
-
+        
             typedef ::SireMol::ResStructureEditor ( ::SireMol::ChainStructureEditor::*select_function_type)( int ) ;
             select_function_type select_function_value( &::SireMol::ChainStructureEditor::select );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "select"
                 , select_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return an editor for the ith residue of this Chain\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::select
-
+        
             typedef ::SireMol::ResStructureEditor ( ::SireMol::ChainStructureEditor::*select_function_type)( ::SireMol::ResID const & ) ;
             select_function_type select_function_value( &::SireMol::ChainStructureEditor::select );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "select"
                 , select_function_value
                 , ( bp::arg("resid") )
                 , bp::release_gil_policy()
                 , "Return an editor for the residue that matches the ID resid in\nthis chain\nThrow: SireMol::missing_residue\nThrow: SireMol::duplicate_residue\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::selectedAll
-
+        
             typedef bool ( ::SireMol::ChainStructureEditor::*selectedAll_function_type)(  ) const;
             selectedAll_function_type selectedAll_function_value( &::SireMol::ChainStructureEditor::selectedAll );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "selectedAll"
                 , selectedAll_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this chain is the whole molecule" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::toString
-
+        
             typedef ::QString ( ::SireMol::ChainStructureEditor::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::ChainStructureEditor::toString );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this chain" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::transfer
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*transfer_function_type)( ::SireMol::ResID const &,::SireMol::ChainID const & ) ;
             transfer_function_type transfer_function_value( &::SireMol::ChainStructureEditor::transfer );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "transfer"
                 , transfer_function_value
                 , ( bp::arg("resid"), bp::arg("chainid") )
                 , bp::return_self< >()
                 , "Transfer all residues that match the ID resid in this Chain\nto the Chain that matches the ID chainid\nThrow: SireMol::missing_residue\nThrow: SireMol::missing_chain\nThrow: SireMol::duplicate_chain\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::transfer
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*transfer_function_type)( int,::SireMol::ChainID const & ) ;
             transfer_function_type transfer_function_value( &::SireMol::ChainStructureEditor::transfer );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "transfer"
                 , transfer_function_value
                 , ( bp::arg("i"), bp::arg("resid") )
                 , bp::return_self< >()
                 , "Transfer the ith residue of this Chain into the Chain identified\nby the ID chainid\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::transferAll
-
+        
             typedef ::SireMol::ChainStructureEditor & ( ::SireMol::ChainStructureEditor::*transferAll_function_type)( ::SireMol::ChainID const & ) ;
             transferAll_function_type transferAll_function_value( &::SireMol::ChainStructureEditor::transferAll );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "transferAll"
                 , transferAll_function_value
                 , ( bp::arg("chainid") )
                 , bp::return_self< >()
                 , "Completely transfer all of the residues in this Chain to\nthe Chain that matches the ID cgid\nThrow: SireMol::missing_chain\nThrow: SireMol::duplicate_chain\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::ChainStructureEditor::typeName );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainStructureEditor::what
-
+        
             typedef char const * ( ::SireMol::ChainStructureEditor::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::ChainStructureEditor::what );
-
-            ChainStructureEditor_exposer.def(
+            
+            ChainStructureEditor_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ChainStructureEditor_exposer.staticmethod( "typeName" );
         ChainStructureEditor_exposer.def( "__copy__", &__copy__);

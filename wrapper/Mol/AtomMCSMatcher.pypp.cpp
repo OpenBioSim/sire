@@ -70,103 +70,103 @@ void register_AtomMCSMatcher_class(){
         AtomMCSMatcher_exposer.def( bp::init< SireMol::AtomMatcher const &, SireUnits::Dimension::Time const &, bool, bool >(( bp::arg("prematcher"), bp::arg("timeout"), bp::arg("match_light_atoms"), bp::arg("verbose") ), "Construct specifying the timeout and prematcher for the MCS match,\nand specifying whether or not to match light atoms\n") );
         AtomMCSMatcher_exposer.def( bp::init< SireMol::AtomMCSMatcher const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::AtomMCSMatcher::isVerbose
-
+        
             typedef bool ( ::SireMol::AtomMCSMatcher::*isVerbose_function_type)(  ) const;
             isVerbose_function_type isVerbose_function_value( &::SireMol::AtomMCSMatcher::isVerbose );
-
-            AtomMCSMatcher_exposer.def(
+            
+            AtomMCSMatcher_exposer.def( 
                 "isVerbose"
                 , isVerbose_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this will report progress to stdout." );
-
+        
         }
         { //::SireMol::AtomMCSMatcher::matchingLightAtoms
-
+        
             typedef bool ( ::SireMol::AtomMCSMatcher::*matchingLightAtoms_function_type)(  ) const;
             matchingLightAtoms_function_type matchingLightAtoms_function_value( &::SireMol::AtomMCSMatcher::matchingLightAtoms );
-
-            AtomMCSMatcher_exposer.def(
+            
+            AtomMCSMatcher_exposer.def( 
                 "matchingLightAtoms"
                 , matchingLightAtoms_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this will include light atoms (e.g. hydrogen)\nwhen searching for the maximum common substructure" );
-
+        
         }
         AtomMCSMatcher_exposer.def( bp::self != bp::self );
         { //::SireMol::AtomMCSMatcher::operator=
-
+        
             typedef ::SireMol::AtomMCSMatcher & ( ::SireMol::AtomMCSMatcher::*assign_function_type)( ::SireMol::AtomMCSMatcher const & ) ;
             assign_function_type assign_function_value( &::SireMol::AtomMCSMatcher::operator= );
-
-            AtomMCSMatcher_exposer.def(
+            
+            AtomMCSMatcher_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         AtomMCSMatcher_exposer.def( bp::self == bp::self );
         { //::SireMol::AtomMCSMatcher::preMatcher
-
+        
             typedef ::SireMol::AtomMatcher const & ( ::SireMol::AtomMCSMatcher::*preMatcher_function_type)(  ) const;
             preMatcher_function_type preMatcher_function_value( &::SireMol::AtomMCSMatcher::preMatcher );
-
-            AtomMCSMatcher_exposer.def(
+            
+            AtomMCSMatcher_exposer.def( 
                 "preMatcher"
                 , preMatcher_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the prematcher (if any) that is used to pre-match atoms\nbefore the MCS match" );
-
+        
         }
         { //::SireMol::AtomMCSMatcher::timeout
-
+        
             typedef ::SireUnits::Dimension::Time ( ::SireMol::AtomMCSMatcher::*timeout_function_type)(  ) const;
             timeout_function_type timeout_function_value( &::SireMol::AtomMCSMatcher::timeout );
-
-            AtomMCSMatcher_exposer.def(
+            
+            AtomMCSMatcher_exposer.def( 
                 "timeout"
                 , timeout_function_value
                 , bp::release_gil_policy()
                 , "Return the timeout before the MCS match is abandoned" );
-
+        
         }
         { //::SireMol::AtomMCSMatcher::toString
-
+        
             typedef ::QString ( ::SireMol::AtomMCSMatcher::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::AtomMCSMatcher::toString );
-
-            AtomMCSMatcher_exposer.def(
+            
+            AtomMCSMatcher_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomMCSMatcher::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::AtomMCSMatcher::typeName );
-
-            AtomMCSMatcher_exposer.def(
+            
+            AtomMCSMatcher_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomMCSMatcher::what
-
+        
             typedef char const * ( ::SireMol::AtomMCSMatcher::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::AtomMCSMatcher::what );
-
-            AtomMCSMatcher_exposer.def(
+            
+            AtomMCSMatcher_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomMCSMatcher_exposer.staticmethod( "typeName" );
         AtomMCSMatcher_exposer.def( "__copy__", &__copy__);

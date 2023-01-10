@@ -49,11 +49,11 @@ SelectorBond( size=301
 300: Bond( N:300 => H1:301 )
 )
 
-(and you could do the same for `residues`, `chains`, `segments` or
-`molecules`).
+(and you could do the same for ``residues``, ``chains``, ``segments`` or
+``molecules``).
 
 You can search for things that match specified numbers of atoms, residues
-etc using `count( X )`. This counts the number of things within the
+etc using ``count( X )``. This counts the number of things within the
 contained search, e.g.
 
 >>> print(mols["count(atoms) == 3"])
@@ -156,7 +156,7 @@ SireMol::SelectorM<SireMol::Atom>( size=7370
 7369: MolNum(3605) Atom( HW2:11099 [  37.23,   47.15,   40.56] )
 )
 
-will find all atoms that have a mass of less than `2 g mol-1`. You can
+will find all atoms that have a mass of less than ``2 g mol-1``. You can
 add the units, e.g.
 
 >>> print(mols["mass < 2 g_per_mol"])
@@ -192,7 +192,7 @@ SireMol::SelectorM<SireMol::Atom>( size=3638
 )
 
 and also search for larger units by mass, e.g. finding all residues
-that are greater than `100 g_per_mol`
+that are greater than ``100 g_per_mol``
 
 >>> print(mols["residue mass > 50 g_per_mol"])
 Selector<SireMol::Residue>( size=18
@@ -209,7 +209,7 @@ Selector<SireMol::Residue>( size=18
 17:  Residue( ILE:18  num_atoms=19 )
 )
 
-or molecules that are less than `20 g_per_mol`
+or molecules that are less than ``20 g_per_mol``
 
 >>> print(mols["molecule mass < 20 g_per_mol"])
 SelectorMol( size=3599
@@ -278,7 +278,7 @@ SireMol::SelectorM<SireMol::Atom>( size=7370
 7369: MolNum(3605) Atom( HW2:11099 [  37.23,   47.15,   40.56] )
 )
 
-where `=~` means "approximately equal to". The
+where ``=~`` means "approximately equal to". The
 `pytest algorithm <https://docs.pytest.org/en/latest/reference/reference.html#pytest-approx>`__
 is used for approximate comparison. You can get the epsilon for
 comparison via
@@ -346,7 +346,7 @@ SireMol::SelectorM<SireMol::Atom>( size=25
 24: MolNum(3612) Atom( NA:11106 [  45.27,   32.64,   46.48] )
 )
 
-You can also use the same `residue`, `molecule` etc terms to search
+You can also use the same ``residue``, ``molecule`` etc terms to search
 based on the total charge on a residue, molecule etc.
 
 >>> print(mols["residue charge 0"])
@@ -376,7 +376,7 @@ SelectorBond( size=5
 )
 
 finds all of the bonds where the total charge on the two atoms is
-less than `-0.5 e`.
+less than ``-0.5 e``.
 
 Searching by coordinates
 ------------------------
@@ -399,7 +399,7 @@ SireMol::SelectorM<SireMol::Atom>( size=268
 267: MolNum(827) Atom( HW1:2764 [  14.66,   29.74,   19.60] )
 )
 
-finds all atoms that are within `2 angstrom` of any carbon atom.
+finds all atoms that are within ``2 angstrom`` of any carbon atom.
 The default unit of distance is angstrom, so you could also write
 
 >>> print(mols["atoms within 2 of element C"])
@@ -419,9 +419,9 @@ SireMol::SelectorM<SireMol::Atom>( size=268
 
 .. note::
 
-    Note that we used `atoms` in this search rather than `atom`. Both are
+    Note that we used ``atoms`` in this search rather than ``atom``. Both are
     equivalent and can be used interchangeably. In this case, it feels better
-    to write `atoms within` rather than `atom within`, but both will
+    to write ``atoms within`` rather than ``atom within``, but both will
     do the same thing.
 
 You can also search by residue or other units, such as
@@ -442,7 +442,7 @@ SireMol::SelectorM<SireMol::Residue>( size=18
 )
 
 returns all residues where any atom in that residue is within
-`3 angstrom` of any atom in the residue with `resnum 1`.
+``3 angstrom`` of any atom in the residue with ``resnum 1``.
 
 You can also search for atoms within a point in space, e.g.
 
@@ -459,7 +459,7 @@ SireMol::SelectorM<SireMol::Atom>( size=9
 8: MolNum(185) Atom( HW2:839 [   1.62,    1.29,    2.96] )
 )
 
-finds all atoms within `5 angstroms` of the point `(0, 0, 0)`, while
+finds all atoms within ``5 angstroms`` of the point ``(0, 0, 0)``, while
 
 >>> print(mols["molecules within 5.0 of (0, 0, 0)"])
 SelectorMol( size=3
@@ -468,8 +468,8 @@ SelectorMol( size=3
 2: Molecule( SOL:185 num_atoms=3 num_residues=1 )
 )
 
-finds all molecules which have any atom that is within `5 angstroms`
-of the point `(0, 0, 0)`.
+finds all molecules which have any atom that is within ``5 angstroms``
+of the point ``(0, 0, 0)``.
 
 Searching by molecule type
 --------------------------
@@ -530,7 +530,7 @@ You can get the set of protein residue names using;
  'lys', 'ser', 'gln', 'arg', 'asn', 'asp', 'cys', 'met', 'phe',
  'leu', 'glu', 'hid', 'hie', 'cyx', 'gly', 'val', 'thr']
 
-Names are matched ignoring case, so `ALA` will be identified as a
+Names are matched ignoring case, so ``ALA`` will be identified as a
 protein residue. You can set protein residue names using
 
 >>> sr.search.set_protein_residue_names(["ala", "ash"])
@@ -558,8 +558,8 @@ Searching by custom tokens
 --------------------------
 
 It is common when searching that you will have a term that you will
-want to repeat. For example, you can match proteins using `protein`,
-and water molecules using `water`. You could thus match all
+want to repeat. For example, you can match proteins using ``protein``,
+and water molecules using ``water``. You could thus match all
 other molecules using
 
 >>> print(mols["not (protein or water)"])
@@ -582,8 +582,8 @@ using :func:`sire.search.set_token`, e.g.
 
 >>> sr.search.set_token("other", "not (protein or water)")
 
-This creates the token `other` that represents the search
-`not (protein or water)`. You can now use `other` as a search term, e.g.
+This creates the token ``other`` that represents the search
+``not (protein or water)``. You can now use ``other`` as a search term, e.g.
 
 >>> print(mols["other"])
 SelectorMol( size=21
@@ -634,14 +634,14 @@ You can find out what a token refers to via
 >>> print(sr.search.get_token("positive_ions"))
 ({ other => not ((protein or water)) } and charge > 0 |e|)
 
-Note how the `other` token has been expanded into its parts.
+Note how the ``other`` token has been expanded into its parts.
 This is because the token is expanded when it is created.
 This means that the token is unaffected by what you do to
-the `other` token, e.g. deleting it via
+the ``other`` token, e.g. deleting it via
 
 >>> sr.search.delete_token("other")
 
-will not affect `positive_ions`
+will not affect ``positive_ions``
 
 >>> print(mols["positive_ions"])
 SelectorMol( size=7
@@ -660,22 +660,26 @@ Indexing within searches
 It is often the case that multiple items will match your search. You
 can request only a sub-set by indexing your search, e.g.
 
->>> print(mols["{positive_ions}[0]"])
+>>> print(mols["positive_ions[0]"])
 Molecule( NA:3606 num_atoms=1 num_residues=1 )
 
-returns the first item that matched the custom `positive_ions` token
+returns the first item that matched the custom ``positive_ions`` token
 you created above.
 
 Indexing can be used with any search term. The general format is
-`{search_term}[index]`. The index behaves like a python index, so can
+``search_term[index]``. The index behaves like a python index, so can
 be negative indexed or sliced, e.g.
 
->>> print(mols["{positive_ions}[-1]"])
+>>> print(mols["positive_ions[-1]"])
 Molecule( NA:3612 num_atoms=1 num_residues=1 )
 
->>> print(mols["{positive_ions}[0:6:2]"])
+>>> print(mols["positive_ions[0:6:2]"])
 SelectorMol( size=3
 0: Molecule( NA:3606 num_atoms=1 num_residues=1 )
 1: Molecule( NA:3608 num_atoms=1 num_residues=1 )
 2: Molecule( NA:3610 num_atoms=1 num_residues=1 )
 )
+
+Please take a look at the
+:doc:`detailed guide to search <../../cheatsheet/search>` for more
+information and the syntax of the search engine built into :mod:`sire`.

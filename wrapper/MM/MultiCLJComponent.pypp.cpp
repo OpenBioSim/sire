@@ -36,293 +36,293 @@ void register_MultiCLJComponent_class(){
         bp::scope MultiCLJComponent_scope( MultiCLJComponent_exposer );
         MultiCLJComponent_exposer.def( bp::init< SireMM::MultiCLJComponent const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::MultiCLJComponent::add
-
+        
             typedef int ( ::SireMM::MultiCLJComponent::*add_function_type)( ::QString ) ;
             add_function_type add_function_value( &::SireMM::MultiCLJComponent::add );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "Add new CLJ components with the passed key. This returns the index\nof the new component" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::changeEnergy
-
+        
             typedef void ( ::SireMM::MultiCLJComponent::*changeEnergy_function_type)( ::SireFF::FF &,::SireMM::MultiCLJEnergy const & ) const;
             changeEnergy_function_type changeEnergy_function_value( &::SireMM::MultiCLJComponent::changeEnergy );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "changeEnergy"
                 , changeEnergy_function_value
                 , ( bp::arg("ff"), bp::arg("cljnrg") )
                 , bp::release_gil_policy()
                 , "Change the energy in the forcefield from the passed cljnrg object" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::coulomb
-
+        
             typedef ::SireMM::CoulombComponent const & ( ::SireMM::MultiCLJComponent::*coulomb_function_type)(  ) const;
             coulomb_function_type coulomb_function_value( &::SireMM::MultiCLJComponent::coulomb );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "coulomb"
                 , coulomb_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the default coulomb component" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::coulomb
-
+        
             typedef ::SireMM::CoulombComponent const & ( ::SireMM::MultiCLJComponent::*coulomb_function_type)( ::QString ) const;
             coulomb_function_type coulomb_function_value( &::SireMM::MultiCLJComponent::coulomb );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "coulomb"
                 , coulomb_function_value
                 , ( bp::arg("key") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the coulomb component for the key key" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::count
-
+        
             typedef int ( ::SireMM::MultiCLJComponent::*count_function_type)(  ) const;
             count_function_type count_function_value( &::SireMM::MultiCLJComponent::count );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "count"
                 , count_function_value
                 , bp::release_gil_policy()
                 , "Return the number of CLJComponents  number of keys" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::hasKey
-
+        
             typedef bool ( ::SireMM::MultiCLJComponent::*hasKey_function_type)( ::QString ) const;
             hasKey_function_type hasKey_function_value( &::SireMM::MultiCLJComponent::hasKey );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "hasKey"
                 , hasKey_function_value
                 , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "Return whether or not there is a function with the associated key" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::indexOf
-
+        
             typedef int ( ::SireMM::MultiCLJComponent::*indexOf_function_type)( ::QString ) const;
             indexOf_function_type indexOf_function_value( &::SireMM::MultiCLJComponent::indexOf );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "indexOf"
                 , indexOf_function_value
                 , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "Return the index of the component with key key" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::keys
-
+        
             typedef ::QStringList ( ::SireMM::MultiCLJComponent::*keys_function_type)(  ) const;
             keys_function_type keys_function_value( &::SireMM::MultiCLJComponent::keys );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "keys"
                 , keys_function_value
                 , bp::release_gil_policy()
                 , "Return all of the keys for the different CLJComponents" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::lj
-
+        
             typedef ::SireMM::LJComponent const & ( ::SireMM::MultiCLJComponent::*lj_function_type)(  ) const;
             lj_function_type lj_function_value( &::SireMM::MultiCLJComponent::lj );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "lj"
                 , lj_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the default LJ component" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::lj
-
+        
             typedef ::SireMM::LJComponent const & ( ::SireMM::MultiCLJComponent::*lj_function_type)( ::QString ) const;
             lj_function_type lj_function_value( &::SireMM::MultiCLJComponent::lj );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "lj"
                 , lj_function_value
                 , ( bp::arg("key") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the LJ component for the key key" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::nKeys
-
+        
             typedef int ( ::SireMM::MultiCLJComponent::*nKeys_function_type)(  ) const;
             nKeys_function_type nKeys_function_value( &::SireMM::MultiCLJComponent::nKeys );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "nKeys"
                 , nKeys_function_value
                 , bp::release_gil_policy()
                 , "Return the number of CLJComponents  number of keys" );
-
+        
         }
         MultiCLJComponent_exposer.def( bp::self != bp::self );
         { //::SireMM::MultiCLJComponent::operator=
-
+        
             typedef ::SireMM::MultiCLJComponent & ( ::SireMM::MultiCLJComponent::*assign_function_type)( ::SireMM::MultiCLJComponent const & ) ;
             assign_function_type assign_function_value( &::SireMM::MultiCLJComponent::operator= );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         MultiCLJComponent_exposer.def( bp::self == bp::self );
         { //::SireMM::MultiCLJComponent::remove
-
+        
             typedef int ( ::SireMM::MultiCLJComponent::*remove_function_type)( ::QString ) ;
             remove_function_type remove_function_value( &::SireMM::MultiCLJComponent::remove );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "Remove the component with key key. This returns the index of the component\nthat was removed, or -1 if there was no such component" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::removeAll
-
+        
             typedef void ( ::SireMM::MultiCLJComponent::*removeAll_function_type)(  ) ;
             removeAll_function_type removeAll_function_value( &::SireMM::MultiCLJComponent::removeAll );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , bp::release_gil_policy()
                 , "Remove all keys from the index (except default)" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::rename
-
+        
             typedef ::SireMM::MultiCLJComponent ( ::SireMM::MultiCLJComponent::*rename_function_type)( ::SireFF::FFName const & ) const;
             rename_function_type rename_function_value( &::SireMM::MultiCLJComponent::rename );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "rename"
                 , rename_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Return a copy of this MultiCLJComponent that has been renamed for\nthe passed forcefield" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::setEnergy
-
+        
             typedef void ( ::SireMM::MultiCLJComponent::*setEnergy_function_type)( ::SireFF::FF &,::SireMM::MultiCLJEnergy const & ) const;
             setEnergy_function_type setEnergy_function_value( &::SireMM::MultiCLJComponent::setEnergy );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "setEnergy"
                 , setEnergy_function_value
                 , ( bp::arg("ff"), bp::arg("cljnrg") )
                 , bp::release_gil_policy()
                 , "Set the energy in the forcefield from the passed cljnrg object" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::size
-
+        
             typedef int ( ::SireMM::MultiCLJComponent::*size_function_type)(  ) const;
             size_function_type size_function_value( &::SireMM::MultiCLJComponent::size );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "size"
                 , size_function_value
                 , bp::release_gil_policy()
                 , "Return the number of CLJComponents  number of keys" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::symbols
-
+        
             typedef ::SireCAS::Symbols ( ::SireMM::MultiCLJComponent::*symbols_function_type)(  ) const;
             symbols_function_type symbols_function_value( &::SireMM::MultiCLJComponent::symbols );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "symbols"
                 , symbols_function_value
                 , bp::release_gil_policy()
                 , "Return all of the symbols used by these components" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::toString
-
+        
             typedef ::QString ( ::SireMM::MultiCLJComponent::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMM::MultiCLJComponent::toString );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of these components" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::total
-
+        
             typedef ::SireMM::CLJComponent const & ( ::SireMM::MultiCLJComponent::*total_function_type)(  ) const;
             total_function_type total_function_value( &::SireMM::MultiCLJComponent::total );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "total"
                 , total_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the default total component" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::total
-
+        
             typedef ::SireMM::CLJComponent const & ( ::SireMM::MultiCLJComponent::*total_function_type)( ::QString ) const;
             total_function_type total_function_value( &::SireMM::MultiCLJComponent::total );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "total"
                 , total_function_value
                 , ( bp::arg("key") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the total component for the key key" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::MultiCLJComponent::typeName );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::MultiCLJComponent::what
-
+        
             typedef char const * ( ::SireMM::MultiCLJComponent::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::MultiCLJComponent::what );
-
-            MultiCLJComponent_exposer.def(
+            
+            MultiCLJComponent_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MultiCLJComponent_exposer.staticmethod( "typeName" );
         MultiCLJComponent_exposer.def( "__copy__", &__copy__);

@@ -52,93 +52,93 @@ void register_MaxwellBoltzmann_class(){
         MaxwellBoltzmann_exposer.def( bp::init< SireUnits::Dimension::Temperature >(( bp::arg("temperature") ), "Construct to generate velocities correct for the passed temperature") );
         MaxwellBoltzmann_exposer.def( bp::init< SireMove::MaxwellBoltzmann const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::MaxwellBoltzmann::generate
-
+        
             typedef ::SireMol::AtomVelocities ( ::SireMove::MaxwellBoltzmann::*generate_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
             generate_function_type generate_function_value( &::SireMove::MaxwellBoltzmann::generate );
-
-            MaxwellBoltzmann_exposer.def(
+            
+            MaxwellBoltzmann_exposer.def( 
                 "generate"
                 , generate_function_value
                 , ( bp::arg("molview"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Generate completely random velocities" );
-
+        
         }
         { //::SireMove::MaxwellBoltzmann::generator
-
+        
             typedef ::SireMaths::RanGenerator const & ( ::SireMove::MaxwellBoltzmann::*generator_function_type)(  ) const;
             generator_function_type generator_function_value( &::SireMove::MaxwellBoltzmann::generator );
-
-            MaxwellBoltzmann_exposer.def(
+            
+            MaxwellBoltzmann_exposer.def( 
                 "generator"
                 , generator_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the random number generator used to generate random velocities" );
-
+        
         }
         MaxwellBoltzmann_exposer.def( bp::self != bp::self );
         { //::SireMove::MaxwellBoltzmann::operator=
-
+        
             typedef ::SireMove::MaxwellBoltzmann & ( ::SireMove::MaxwellBoltzmann::*assign_function_type)( ::SireMove::MaxwellBoltzmann const & ) ;
             assign_function_type assign_function_value( &::SireMove::MaxwellBoltzmann::operator= );
-
-            MaxwellBoltzmann_exposer.def(
+            
+            MaxwellBoltzmann_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         MaxwellBoltzmann_exposer.def( bp::self == bp::self );
         { //::SireMove::MaxwellBoltzmann::setGenerator
-
+        
             typedef void ( ::SireMove::MaxwellBoltzmann::*setGenerator_function_type)( ::SireMaths::RanGenerator const & ) ;
             setGenerator_function_type setGenerator_function_value( &::SireMove::MaxwellBoltzmann::setGenerator );
-
-            MaxwellBoltzmann_exposer.def(
+            
+            MaxwellBoltzmann_exposer.def( 
                 "setGenerator"
                 , setGenerator_function_value
                 , ( bp::arg("rangenerator") )
                 , bp::release_gil_policy()
                 , "Set the random number generator used to generate the random velocities" );
-
+        
         }
         { //::SireMove::MaxwellBoltzmann::setTemperature
-
+        
             typedef void ( ::SireMove::MaxwellBoltzmann::*setTemperature_function_type)( ::SireUnits::Dimension::Temperature ) ;
             setTemperature_function_type setTemperature_function_value( &::SireMove::MaxwellBoltzmann::setTemperature );
-
-            MaxwellBoltzmann_exposer.def(
+            
+            MaxwellBoltzmann_exposer.def( 
                 "setTemperature"
                 , setTemperature_function_value
                 , ( bp::arg("temperature") )
                 , bp::release_gil_policy()
                 , "Set the temperature at which the velocities will be generated" );
-
+        
         }
         { //::SireMove::MaxwellBoltzmann::temperature
-
+        
             typedef ::SireUnits::Dimension::Temperature ( ::SireMove::MaxwellBoltzmann::*temperature_function_type)(  ) const;
             temperature_function_type temperature_function_value( &::SireMove::MaxwellBoltzmann::temperature );
-
-            MaxwellBoltzmann_exposer.def(
+            
+            MaxwellBoltzmann_exposer.def( 
                 "temperature"
                 , temperature_function_value
                 , bp::release_gil_policy()
                 , "Return the temperature for which the velocities will be generated" );
-
+        
         }
         { //::SireMove::MaxwellBoltzmann::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::MaxwellBoltzmann::typeName );
-
-            MaxwellBoltzmann_exposer.def(
+            
+            MaxwellBoltzmann_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MaxwellBoltzmann_exposer.staticmethod( "typeName" );
         MaxwellBoltzmann_exposer.def( "__copy__", &__copy__);

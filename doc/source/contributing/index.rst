@@ -9,7 +9,6 @@ Sire. Ways you can help include:
 * Writing new tutorials, short how-to guides or blog posts.
 * Creating more tests and adding them to the
   `pytest library <https://github.com/openbiosim/sire/tree/devel/tests>`__.
-* Taking on some of the tasks in the :doc:`snaglist`.
 * Porting and testing :mod:`sire` on different computers.
 * Proposing and helping write or test new features.
 * Funding development by donating to `OpenBioSim <https://openbiosim.org>`__.
@@ -23,8 +22,8 @@ When contributing, please keep in mind our
 
 Please also ensure that your contribution is compatible with our
 license. :mod:`sire` is licensed under the GPLv3 or later. Please
-ensure your contribution is similarly licensed (i.e. GPLv2 or later
-for the C++ code, MIT, BSD, Apache or GPLv2 or GPLv3 or later
+ensure your contribution is similarly licensed (i.e. GPLv3 or later
+for the C++ code, MIT, BSD, Apache or GPLv3 or later
 for the Python code). Please ensure that your employer (if you
 are writing code as an employee) gives permission for you
 to contribute your code.
@@ -47,4 +46,3 @@ can be forever recognised :-)
    codestyle
    packaging
    roadmap
-   snaglist

@@ -140,7 +140,7 @@ def _fix_generalunit():
     GeneralUnit.__int__ = __generalunit__int__
 
 
-if not hasattr(GeneralUnit, "approx_equal"):
+if not hasattr(GeneralUnit, "to_default"):
     _fix_generalunit()
 
 

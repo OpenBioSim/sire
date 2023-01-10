@@ -50,30 +50,30 @@ void register_ResidueBeading_class(){
         ResidueBeading_exposer.def( bp::init< SireMol::ResidueBeading const & >(( bp::arg("other") ), "Copy constructor") );
         ResidueBeading_exposer.def( bp::self != bp::self );
         { //::SireMol::ResidueBeading::operator=
-
+        
             typedef ::SireMol::ResidueBeading & ( ::SireMol::ResidueBeading::*assign_function_type)( ::SireMol::ResidueBeading const & ) ;
             assign_function_type assign_function_value( &::SireMol::ResidueBeading::operator= );
-
-            ResidueBeading_exposer.def(
+            
+            ResidueBeading_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         ResidueBeading_exposer.def( bp::self == bp::self );
         { //::SireMol::ResidueBeading::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::ResidueBeading::typeName );
-
-            ResidueBeading_exposer.def(
+            
+            ResidueBeading_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ResidueBeading_exposer.staticmethod( "typeName" );
         ResidueBeading_exposer.def( "__copy__", &__copy__);

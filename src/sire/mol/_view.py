@@ -114,7 +114,8 @@ if _has_nglview:
             return coords
 
     def view(obj, representations=None, stage_parameters=None, map=None):
-        """Return an NGLView viewer for this view. The returned
+        """
+        Return an NGLView viewer for this view. The returned
         viewer can be passed directly to, e.g. a Jupyter notebook
         to directly view the molecule(s), or it can be captured
         in a variable so that it's NGLViewer member functions

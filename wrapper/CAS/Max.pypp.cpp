@@ -38,55 +38,55 @@ void register_Max_class(){
         Max_exposer.def( bp::init< SireCAS::Expression const &, SireCAS::Expression const & >(( bp::arg("x"), bp::arg("y") ), "Construct min(x(), y())") );
         Max_exposer.def( bp::init< SireCAS::Max const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::Max::evaluate
-
+        
             typedef double ( ::SireCAS::Max::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Max::evaluate );
-
-            Max_exposer.def(
+            
+            Max_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this function" );
-
+        
         }
         { //::SireCAS::Max::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::Max::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Max::evaluate );
-
-            Max_exposer.def(
+            
+            Max_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Complex evaluation" );
-
+        
         }
         Max_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::Max::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::Max::typeName );
-
-            Max_exposer.def(
+            
+            Max_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::Max::what
-
+        
             typedef char const * ( ::SireCAS::Max::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::Max::what );
-
-            Max_exposer.def(
+            
+            Max_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Max_exposer.staticmethod( "typeName" );
         Max_exposer.def( "__copy__", &__copy__);

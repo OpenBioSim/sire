@@ -47,130 +47,130 @@ void register_Array2D_Matrix__class(){
         Array2D_Matrix__exposer.def( bp::init< int, int, SireMaths::Matrix const & >(( bp::arg("nrows"), bp::arg("ncolumns"), bp::arg("default_value") ), "") );
         Array2D_Matrix__exposer.def( bp::init< SireBase::Array2D< SireMaths::Matrix > const & >(( bp::arg("other") ), "") );
         { //::SireBase::Array2D< SireMaths::Matrix >::at
-
+        
             typedef SireBase::Array2D< SireMaths::Matrix > exported_class_t;
             typedef ::SireMaths::Matrix const & ( ::SireBase::Array2D< SireMaths::Matrix >::*at_function_type)( int,int ) const;
             at_function_type at_function_value( &::SireBase::Array2D< SireMaths::Matrix >::at );
-
-            Array2D_Matrix__exposer.def(
+            
+            Array2D_Matrix__exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::Array2D< SireMaths::Matrix >::get
-
+        
             typedef SireBase::Array2D< SireMaths::Matrix > exported_class_t;
             typedef ::SireMaths::Matrix const & ( ::SireBase::Array2D< SireMaths::Matrix >::*get_function_type)( int,int ) const;
             get_function_type get_function_value( &::SireBase::Array2D< SireMaths::Matrix >::get );
-
-            Array2D_Matrix__exposer.def(
+            
+            Array2D_Matrix__exposer.def( 
                 "get"
                 , get_function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         Array2D_Matrix__exposer.def( bp::self != bp::self );
         { //::SireBase::Array2D< SireMaths::Matrix >::operator()
-
+        
             typedef SireBase::Array2D< SireMaths::Matrix > exported_class_t;
             typedef ::SireMaths::Matrix const & ( ::SireBase::Array2D< SireMaths::Matrix >::*__call___function_type)( int,int ) const;
             __call___function_type __call___function_value( &::SireBase::Array2D< SireMaths::Matrix >::operator() );
-
-            Array2D_Matrix__exposer.def(
+            
+            Array2D_Matrix__exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::Array2D< SireMaths::Matrix >::operator=
-
+        
             typedef SireBase::Array2D< SireMaths::Matrix > exported_class_t;
             typedef ::SireBase::Array2D< SireMaths::Matrix > & ( ::SireBase::Array2D< SireMaths::Matrix >::*assign_function_type)( ::SireBase::Array2D< SireMaths::Matrix > const & ) ;
             assign_function_type assign_function_value( &::SireBase::Array2D< SireMaths::Matrix >::operator= );
-
-            Array2D_Matrix__exposer.def(
+            
+            Array2D_Matrix__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Array2D_Matrix__exposer.def( bp::self == bp::self );
         { //::SireBase::Array2D< SireMaths::Matrix >::redimension
-
+        
             typedef SireBase::Array2D< SireMaths::Matrix > exported_class_t;
             typedef void ( ::SireBase::Array2D< SireMaths::Matrix >::*redimension_function_type)( int,int ) ;
             redimension_function_type redimension_function_value( &::SireBase::Array2D< SireMaths::Matrix >::redimension );
-
-            Array2D_Matrix__exposer.def(
+            
+            Array2D_Matrix__exposer.def( 
                 "redimension"
                 , redimension_function_value
                 , ( bp::arg("nrows"), bp::arg("ncolumns") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::Array2D< SireMaths::Matrix >::set
-
+        
             typedef SireBase::Array2D< SireMaths::Matrix > exported_class_t;
             typedef void ( ::SireBase::Array2D< SireMaths::Matrix >::*set_function_type)( int,int,::SireMaths::Matrix const & ) ;
             set_function_type set_function_value( &::SireBase::Array2D< SireMaths::Matrix >::set );
-
-            Array2D_Matrix__exposer.def(
+            
+            Array2D_Matrix__exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("i"), bp::arg("j"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::Array2D< SireMaths::Matrix >::setAll
-
+        
             typedef SireBase::Array2D< SireMaths::Matrix > exported_class_t;
             typedef void ( ::SireBase::Array2D< SireMaths::Matrix >::*setAll_function_type)( ::SireMaths::Matrix const & ) ;
             setAll_function_type setAll_function_value( &::SireBase::Array2D< SireMaths::Matrix >::setAll );
-
-            Array2D_Matrix__exposer.def(
+            
+            Array2D_Matrix__exposer.def( 
                 "setAll"
                 , setAll_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::Array2D< SireMaths::Matrix >::toString
-
+        
             typedef SireBase::Array2D< SireMaths::Matrix > exported_class_t;
             typedef ::QString ( ::SireBase::Array2D< SireMaths::Matrix >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::Array2D< SireMaths::Matrix >::toString );
-
-            Array2D_Matrix__exposer.def(
+            
+            Array2D_Matrix__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::Array2D< SireMaths::Matrix >::transpose
-
+        
             typedef SireBase::Array2D< SireMaths::Matrix > exported_class_t;
             typedef ::SireBase::Array2D< SireMaths::Matrix > ( ::SireBase::Array2D< SireMaths::Matrix >::*transpose_function_type)(  ) const;
             transpose_function_type transpose_function_value( &::SireBase::Array2D< SireMaths::Matrix >::transpose );
-
-            Array2D_Matrix__exposer.def(
+            
+            Array2D_Matrix__exposer.def( 
                 "transpose"
                 , transpose_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Array2D_Matrix__exposer.def( "__copy__", &__copy__);
         Array2D_Matrix__exposer.def( "__deepcopy__", &__copy__);

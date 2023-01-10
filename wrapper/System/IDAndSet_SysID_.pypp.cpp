@@ -39,130 +39,130 @@ void register_IDAndSet_SysID__class(){
         IDAndSet_SysID__exposer.def( bp::init< SireID::IDAndSet< SireSystem::SysID > const & >(( bp::arg("ids") ), "") );
         IDAndSet_SysID__exposer.def( bp::init< SireID::IDAndSet< SireSystem::SysID > const & >(( bp::arg("other") ), "") );
         { //::SireID::IDAndSet< SireSystem::SysID >::IDs
-
+        
             typedef SireID::IDAndSet< SireSystem::SysID > exported_class_t;
             typedef ::QSet< SireSystem::SysIdentifier > const & ( ::SireID::IDAndSet< SireSystem::SysID >::*IDs_function_type)(  ) const;
             IDs_function_type IDs_function_value( &::SireID::IDAndSet< SireSystem::SysID >::IDs );
-
-            IDAndSet_SysID__exposer.def(
+            
+            IDAndSet_SysID__exposer.def( 
                 "IDs"
                 , IDs_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireID::IDAndSet< SireSystem::SysID >::hash
-
+        
             typedef SireID::IDAndSet< SireSystem::SysID > exported_class_t;
             typedef ::uint ( ::SireID::IDAndSet< SireSystem::SysID >::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireID::IDAndSet< SireSystem::SysID >::hash );
-
-            IDAndSet_SysID__exposer.def(
+            
+            IDAndSet_SysID__exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDAndSet< SireSystem::SysID >::isNull
-
+        
             typedef SireID::IDAndSet< SireSystem::SysID > exported_class_t;
             typedef bool ( ::SireID::IDAndSet< SireSystem::SysID >::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireID::IDAndSet< SireSystem::SysID >::isNull );
-
-            IDAndSet_SysID__exposer.def(
+            
+            IDAndSet_SysID__exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDAndSet< SireSystem::SysID >::map
-
+        
             typedef SireID::IDAndSet< SireSystem::SysID > exported_class_t;
             typedef ::QList< SireSystem::SysIdx > ( ::SireID::IDAndSet< SireSystem::SysID >::*map_function_type)( ::SireID::IDAndSet< SireSystem::SysID >::SearchObject const & ) const;
             map_function_type map_function_value( &::SireID::IDAndSet< SireSystem::SysID >::map );
-
-            IDAndSet_SysID__exposer.def(
+            
+            IDAndSet_SysID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("obj") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         IDAndSet_SysID__exposer.def( bp::self != bp::other< SireID::ID >() );
         IDAndSet_SysID__exposer.def( bp::self != bp::self );
         IDAndSet_SysID__exposer.def( bp::self != bp::other< SireSystem::SysID >() );
         { //::SireID::IDAndSet< SireSystem::SysID >::operator=
-
+        
             typedef SireID::IDAndSet< SireSystem::SysID > exported_class_t;
             typedef ::SireID::IDAndSet< SireSystem::SysID > & ( ::SireID::IDAndSet< SireSystem::SysID >::*assign_function_type)( ::SireID::IDAndSet< SireSystem::SysID > const & ) ;
             assign_function_type assign_function_value( &::SireID::IDAndSet< SireSystem::SysID >::operator= );
-
-            IDAndSet_SysID__exposer.def(
+            
+            IDAndSet_SysID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireID::IDAndSet< SireSystem::SysID >::operator=
-
+        
             typedef SireID::IDAndSet< SireSystem::SysID > exported_class_t;
             typedef ::SireID::IDAndSet< SireSystem::SysID > & ( ::SireID::IDAndSet< SireSystem::SysID >::*assign_function_type)( ::SireSystem::SysID const & ) ;
             assign_function_type assign_function_value( &::SireID::IDAndSet< SireSystem::SysID >::operator= );
-
-            IDAndSet_SysID__exposer.def(
+            
+            IDAndSet_SysID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         IDAndSet_SysID__exposer.def( bp::self == bp::other< SireID::ID >() );
         IDAndSet_SysID__exposer.def( bp::self == bp::self );
         IDAndSet_SysID__exposer.def( bp::self == bp::other< SireSystem::SysID >() );
         { //::SireID::IDAndSet< SireSystem::SysID >::toString
-
+        
             typedef SireID::IDAndSet< SireSystem::SysID > exported_class_t;
             typedef ::QString ( ::SireID::IDAndSet< SireSystem::SysID >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireID::IDAndSet< SireSystem::SysID >::toString );
-
-            IDAndSet_SysID__exposer.def(
+            
+            IDAndSet_SysID__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDAndSet< SireSystem::SysID >::typeName
-
+        
             typedef SireID::IDAndSet< SireSystem::SysID > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireID::IDAndSet< SireSystem::SysID >::typeName );
-
-            IDAndSet_SysID__exposer.def(
+            
+            IDAndSet_SysID__exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDAndSet< SireSystem::SysID >::what
-
+        
             typedef SireID::IDAndSet< SireSystem::SysID > exported_class_t;
             typedef char const * ( ::SireID::IDAndSet< SireSystem::SysID >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireID::IDAndSet< SireSystem::SysID >::what );
-
-            IDAndSet_SysID__exposer.def(
+            
+            IDAndSet_SysID__exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         IDAndSet_SysID__exposer.staticmethod( "typeName" );
         IDAndSet_SysID__exposer.def( "__copy__", &__copy__);

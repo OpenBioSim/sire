@@ -70,101 +70,101 @@ void register_InvertMatch_ResID__class(){
         InvertMatch_ResID__exposer.def( bp::init< SireMol::ResID const & >(( bp::arg("id") ), "") );
         InvertMatch_ResID__exposer.def( bp::init< SireID::InvertMatch< SireMol::ResID > const & >(( bp::arg("other") ), "") );
         { //::SireID::InvertMatch< SireMol::ResID >::hash
-
+        
             typedef SireID::InvertMatch< SireMol::ResID > exported_class_t;
             typedef ::uint ( ::SireID::InvertMatch< SireMol::ResID >::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireID::InvertMatch< SireMol::ResID >::hash );
-
-            InvertMatch_ResID__exposer.def(
+            
+            InvertMatch_ResID__exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::InvertMatch< SireMol::ResID >::isNull
-
+        
             typedef SireID::InvertMatch< SireMol::ResID > exported_class_t;
             typedef bool ( ::SireID::InvertMatch< SireMol::ResID >::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireID::InvertMatch< SireMol::ResID >::isNull );
-
-            InvertMatch_ResID__exposer.def(
+            
+            InvertMatch_ResID__exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::InvertMatch< SireMol::ResID >::map
-
+        
             typedef SireID::InvertMatch< SireMol::ResID > exported_class_t;
             typedef ::QList< SireMol::ResIdx > ( ::SireID::InvertMatch< SireMol::ResID >::*map_function_type)( ::SireMol::ResID::SearchObject const & ) const;
             map_function_type map_function_value( &::SireID::InvertMatch< SireMol::ResID >::map );
-
-            InvertMatch_ResID__exposer.def(
+            
+            InvertMatch_ResID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("obj") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         InvertMatch_ResID__exposer.def( bp::self != bp::self );
         InvertMatch_ResID__exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireID::InvertMatch< SireMol::ResID >::operator=
-
+        
             typedef SireID::InvertMatch< SireMol::ResID > exported_class_t;
             typedef ::SireID::InvertMatch< SireMol::ResID > & ( ::SireID::InvertMatch< SireMol::ResID >::*assign_function_type)( ::SireID::InvertMatch< SireMol::ResID > const & ) ;
             assign_function_type assign_function_value( &::SireID::InvertMatch< SireMol::ResID >::operator= );
-
-            InvertMatch_ResID__exposer.def(
+            
+            InvertMatch_ResID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         InvertMatch_ResID__exposer.def( bp::self == bp::self );
         InvertMatch_ResID__exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireID::InvertMatch< SireMol::ResID >::toString
-
+        
             typedef SireID::InvertMatch< SireMol::ResID > exported_class_t;
             typedef ::QString ( ::SireID::InvertMatch< SireMol::ResID >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireID::InvertMatch< SireMol::ResID >::toString );
-
-            InvertMatch_ResID__exposer.def(
+            
+            InvertMatch_ResID__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::InvertMatch< SireMol::ResID >::typeName
-
+        
             typedef SireID::InvertMatch< SireMol::ResID > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireID::InvertMatch< SireMol::ResID >::typeName );
-
-            InvertMatch_ResID__exposer.def(
+            
+            InvertMatch_ResID__exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::InvertMatch< SireMol::ResID >::what
-
+        
             typedef SireID::InvertMatch< SireMol::ResID > exported_class_t;
             typedef char const * ( ::SireID::InvertMatch< SireMol::ResID >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireID::InvertMatch< SireMol::ResID >::what );
-
-            InvertMatch_ResID__exposer.def(
+            
+            InvertMatch_ResID__exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         InvertMatch_ResID__exposer.staticmethod( "typeName" );
         InvertMatch_ResID__exposer.def( "__copy__", &__copy__);

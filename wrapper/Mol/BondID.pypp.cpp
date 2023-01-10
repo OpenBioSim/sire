@@ -45,266 +45,266 @@ void register_BondID_class(){
         BondID_exposer.def( bp::init< SireMol::AtomID const &, SireMol::AtomID const & >(( bp::arg("atom0"), bp::arg("atom1") ), "Construct a bond between the two specified atoms. The order\nis important, as this bond may be between two different\nmolecules") );
         BondID_exposer.def( bp::init< SireMol::BondID const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::BondID::atom0
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMol::BondID::*atom0_function_type)(  ) const;
             atom0_function_type atom0_function_value( &::SireMol::BondID::atom0 );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "atom0"
                 , atom0_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the ID of the first atom of the bond" );
-
+        
         }
         { //::SireMol::BondID::atom1
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMol::BondID::*atom1_function_type)(  ) const;
             atom1_function_type atom1_function_value( &::SireMol::BondID::atom1 );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "atom1"
                 , atom1_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the ID of the second atom of the bond" );
-
+        
         }
         { //::SireMol::BondID::hash
-
+        
             typedef ::uint ( ::SireMol::BondID::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::BondID::hash );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "Return a hash for this ID" );
-
+        
         }
         { //::SireMol::BondID::isNull
-
+        
             typedef bool ( ::SireMol::BondID::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::BondID::isNull );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "Return whether this is a null ID" );
-
+        
         }
         { //::SireMol::BondID::length
-
+        
             typedef double ( ::SireMol::BondID::*length_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             length_function_type length_function_value( &::SireMol::BondID::length );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "length"
                 , length_function_value
                 , ( bp::arg("moldata"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the length of this bond in the molecule whose data\nis in moldata, using map to find the coordinates property\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::length
-
+        
             typedef double ( ::SireMol::BondID::*length_function_type)( ::SireMol::MoleculeData const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             length_function_type length_function_value( &::SireMol::BondID::length );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "length"
                 , length_function_value
                 , ( bp::arg("mol0data"), bp::arg("mol1data"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the length of the bond from atom0() in the\nmolecule whose data is in mol0data to atom1() in the\nmolecule whose data is in mol1data, using map\nto the find the coordinates properties both molecules\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::length
-
+        
             typedef double ( ::SireMol::BondID::*length_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             length_function_type length_function_value( &::SireMol::BondID::length );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "length"
                 , length_function_value
                 , ( bp::arg("mol0data"), bp::arg("map0"), bp::arg("mol1data"), bp::arg("map1") )
                 , bp::release_gil_policy()
                 , "Return the length of the bond from atom0() in the\nmolecule whose data is in mol0data to atom1() in the\nmolecule whose data is in mol1data, using map0\nto the find the coordinates property of mol0 and\nmap1 to find the coordinates property of mol1\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::map
-
+        
             typedef ::boost::tuples::tuple< SireMol::AtomIdx, SireMol::AtomIdx, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireMol::BondID::*map_function_type)( ::SireMol::MoleculeInfoData const & ) const;
             map_function_type map_function_value( &::SireMol::BondID::map );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "Return the indicies of the two atoms in this bond - this returns\nthem in the order tuple(bond.atom0(),bond.atom1())\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::map
-
+        
             typedef ::boost::tuples::tuple< SireMol::AtomIdx, SireMol::AtomIdx, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireMol::BondID::*map_function_type)( ::SireMol::MoleculeInfoData const &,::SireMol::MoleculeInfoData const & ) const;
             map_function_type map_function_value( &::SireMol::BondID::map );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("mol0info"), bp::arg("mol1info") )
                 , bp::release_gil_policy()
                 , "Return the indicies of the two atoms of this bond, between the\ntwo molecules whose data is in mol0info (containing bond.atom0())\nand mol1info (containing bond.atom1())\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::mirror
-
+        
             typedef ::SireMol::BondID ( ::SireMol::BondID::*mirror_function_type)(  ) const;
             mirror_function_type mirror_function_value( &::SireMol::BondID::mirror );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "mirror"
                 , mirror_function_value
                 , bp::release_gil_policy()
                 , "Return the mirror of this BondID - i.e. if this is\nBond(atom0, atom1), this returns Bond(atom1, atom0).\nThis is useful if you know that Bond(atom0,atom1) equals\n" );
-
+        
         }
         BondID_exposer.def( bp::self != bp::self );
         { //::SireMol::BondID::operator=
-
+        
             typedef ::SireMol::BondID & ( ::SireMol::BondID::*assign_function_type)( ::SireMol::BondID const & ) ;
             assign_function_type assign_function_value( &::SireMol::BondID::operator= );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         BondID_exposer.def( bp::self == bp::other< SireID::ID >() );
         BondID_exposer.def( bp::self == bp::self );
         { //::SireMol::BondID::operator[]
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMol::BondID::*__getitem___function_type)( int ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::BondID::operator[] );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireMol::BondID::size
-
+        
             typedef double ( ::SireMol::BondID::*size_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             size_function_type size_function_value( &::SireMol::BondID::size );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "size"
                 , size_function_value
                 , ( bp::arg("moldata"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Synonym for BondID::length(const MoleculeData&, const PropertyMap&)\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::size
-
+        
             typedef double ( ::SireMol::BondID::*size_function_type)( ::SireMol::MoleculeData const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             size_function_type size_function_value( &::SireMol::BondID::size );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "size"
                 , size_function_value
                 , ( bp::arg("mol0data"), bp::arg("mol1data"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Synonym for BondID::length(const MoleculeData&, const MoleculeData&,\nconst PropertyMap&)\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::size
-
+        
             typedef double ( ::SireMol::BondID::*size_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             size_function_type size_function_value( &::SireMol::BondID::size );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "size"
                 , size_function_value
                 , ( bp::arg("mol0data"), bp::arg("map0"), bp::arg("mol1data"), bp::arg("map1") )
                 , bp::release_gil_policy()
                 , "Synonym for BondID::length(const MoleculeData&, const PropertyMap&,\nconst MoleculeData&, const PropertyMap&)\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::toString
-
+        
             typedef ::QString ( ::SireMol::BondID::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::BondID::toString );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this ID" );
-
+        
         }
         { //::SireMol::BondID::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::BondID::typeName );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::BondID::vector
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::BondID::*vector_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             vector_function_type vector_function_value( &::SireMol::BondID::vector );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "vector"
                 , vector_function_value
                 , ( bp::arg("moldata"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the vector that goes from atom0() to atom1() in the\nmolecule whose data is in moldata, using the supplied\nproperty map to find the property that contains the\ncoordinates to be used\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::vector
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::BondID::*vector_function_type)( ::SireMol::MoleculeData const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             vector_function_type vector_function_value( &::SireMol::BondID::vector );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "vector"
                 , vector_function_value
                 , ( bp::arg("mol0data"), bp::arg("mol1data"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Return the vector that goes from atom0() in the molecule\nwhose data is in mol0data to atom1() in the molecule\nwhose data is in mol1data, using the supplied map\nto find the coordinates property in both molecules.\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::vector
-
+        
             typedef ::SireMaths::Vector ( ::SireMol::BondID::*vector_function_type)( ::SireMol::MoleculeData const &,::SireBase::PropertyMap const &,::SireMol::MoleculeData const &,::SireBase::PropertyMap const & ) const;
             vector_function_type vector_function_value( &::SireMol::BondID::vector );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "vector"
                 , vector_function_value
                 , ( bp::arg("mol0data"), bp::arg("map0"), bp::arg("mol1data"), bp::arg("map1") )
                 , bp::release_gil_policy()
                 , "Return the vector that goes from atom0() in the molecule\nwhose data is in mol0data to atom1() in the molecule\nwhose data is in mol1data, using map0 to find the\ncoordinates property of mol0 and map1 to find the\ncoordinates property of mol1\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::BondID::what
-
+        
             typedef char const * ( ::SireMol::BondID::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::BondID::what );
-
-            BondID_exposer.def(
+            
+            BondID_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         BondID_exposer.staticmethod( "typeName" );
         BondID_exposer.def( "__copy__", &__copy__);

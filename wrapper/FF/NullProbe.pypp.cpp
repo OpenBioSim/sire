@@ -32,30 +32,30 @@ void register_NullProbe_class(){
         NullProbe_exposer.def( bp::init< SireFF::NullProbe const & >(( bp::arg("other") ), "Copy constructor") );
         NullProbe_exposer.def( bp::self != bp::self );
         { //::SireFF::NullProbe::operator=
-
+        
             typedef ::SireFF::NullProbe & ( ::SireFF::NullProbe::*assign_function_type)( ::SireFF::NullProbe const & ) ;
             assign_function_type assign_function_value( &::SireFF::NullProbe::operator= );
-
-            NullProbe_exposer.def(
+            
+            NullProbe_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         NullProbe_exposer.def( bp::self == bp::self );
         { //::SireFF::NullProbe::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireFF::NullProbe::typeName );
-
-            NullProbe_exposer.def(
+            
+            NullProbe_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullProbe_exposer.staticmethod( "typeName" );
         NullProbe_exposer.def( "__copy__", &__copy__);

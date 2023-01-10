@@ -36,69 +36,69 @@ void register_MonitorID_class(){
         MonitorID_exposer_t MonitorID_exposer = MonitorID_exposer_t( "MonitorID", "The base class of all system monitor identifiers\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope MonitorID_scope( MonitorID_exposer );
         { //::SireSystem::MonitorID::map
-
+        
             typedef ::QList< SireSystem::MonitorName > ( ::SireSystem::MonitorID::*map_function_type)( ::SireSystem::SystemMonitors const & ) const;
             map_function_type map_function_value( &::SireSystem::MonitorID::map );
-
-            MonitorID_exposer.def(
+            
+            MonitorID_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("monitors") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MonitorID_exposer.def( bp::self & bp::self );
         { //::SireSystem::MonitorID::operator()
-
+        
             typedef ::SireID::Specify< SireSystem::MonitorID > ( ::SireSystem::MonitorID::*__call___function_type)( int ) const;
             __call___function_type __call___function_value( &::SireSystem::MonitorID::operator() );
-
-            MonitorID_exposer.def(
+            
+            MonitorID_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("i") )
                 , "" );
-
+        
         }
         { //::SireSystem::MonitorID::operator()
-
+        
             typedef ::SireID::Specify< SireSystem::MonitorID > ( ::SireSystem::MonitorID::*__call___function_type)( int,int ) const;
             __call___function_type __call___function_value( &::SireSystem::MonitorID::operator() );
-
-            MonitorID_exposer.def(
+            
+            MonitorID_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , "" );
-
+        
         }
         MonitorID_exposer.def( bp::self * bp::self );
         MonitorID_exposer.def( bp::self + bp::self );
         { //::SireSystem::MonitorID::operator[]
-
+        
             typedef ::SireID::Specify< SireSystem::MonitorID > ( ::SireSystem::MonitorID::*__getitem___function_type)( int ) const;
             __getitem___function_type __getitem___function_value( &::SireSystem::MonitorID::operator[] );
-
-            MonitorID_exposer.def(
+            
+            MonitorID_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , "" );
-
+        
         }
         MonitorID_exposer.def( bp::self | bp::self );
         { //::SireSystem::MonitorID::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::MonitorID::typeName );
-
-            MonitorID_exposer.def(
+            
+            MonitorID_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MonitorID_exposer.staticmethod( "typeName" );
         MonitorID_exposer.def( "__str__", &__str__< ::SireSystem::MonitorID > );

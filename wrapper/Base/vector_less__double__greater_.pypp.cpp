@@ -10,7 +10,7 @@ namespace bp = boost::python;
 
 void register_vector_less__double__greater__class(){
 
-    bp::class_< std::vector< double > >("vector_less__double__greater_")
+    bp::class_< std::vector< double > >("vector_less__double__greater_")    
         .def( bp::vector_indexing_suite< ::std::vector< double >, true >() );
 
 }

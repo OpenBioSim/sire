@@ -50,68 +50,68 @@ void register_HF_class(){
         HF_exposer_t HF_exposer = HF_exposer_t( "HF", "This is my first attempt at a small HF program", bp::init< >("Constructor") );
         bp::scope HF_scope( HF_exposer );
         { //::Squire::HF::add
-
+        
             typedef void ( ::Squire::HF::*add_function_type)( ::Squire::Orbital const & ) ;
             add_function_type add_function_value( &::Squire::HF::add );
-
-            HF_exposer.def(
+            
+            HF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("orbital") )
                 , bp::release_gil_policy()
                 , "Add an orbital that does not to be located at a particular\npoint in space" );
-
+        
         }
         { //::Squire::HF::add
-
+        
             typedef void ( ::Squire::HF::*add_function_type)( ::SireMaths::Vector const &,::Squire::Orbital const & ) ;
             add_function_type add_function_value( &::Squire::HF::add );
-
-            HF_exposer.def(
+            
+            HF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("point"), bp::arg("orbital") )
                 , bp::release_gil_policy()
                 , "Add an orbital that needs to be placed at center" );
-
+        
         }
         { //::Squire::HF::add
-
+        
             typedef void ( ::Squire::HF::*add_function_type)( ::SireMaths::Vector const &,::SireUnits::Dimension::Charge const & ) ;
             add_function_type add_function_value( &::Squire::HF::add );
-
-            HF_exposer.def(
+            
+            HF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("point"), bp::arg("charge") )
                 , bp::release_gil_policy()
                 , "Add an orbital that needs to be placed at center" );
-
+        
         }
         { //::Squire::HF::add
-
+        
             typedef void ( ::Squire::HF::*add_function_type)( ::SireMaths::Vector const &,::SireMaths::Vector const & ) ;
             add_function_type add_function_value( &::Squire::HF::add );
-
-            HF_exposer.def(
+            
+            HF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("point"), bp::arg("dipole") )
                 , bp::release_gil_policy()
                 , "Add an orbital that needs to be placed at center" );
-
+        
         }
         { //::Squire::HF::solve
-
+        
             typedef void ( ::Squire::HF::*solve_function_type)(  ) ;
             solve_function_type solve_function_value( &::Squire::HF::solve );
-
-            HF_exposer.def(
+            
+            HF_exposer.def( 
                 "solve"
                 , solve_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         HF_exposer.def( "__copy__", &__copy__);
         HF_exposer.def( "__deepcopy__", &__copy__);

@@ -41,179 +41,179 @@ void register_Specify_FFID__class(){
         Specify_FFID__exposer.def( bp::init< SireFF::FFID const &, SireBase::Range const & >(( bp::arg("id"), bp::arg("range") ), "") );
         Specify_FFID__exposer.def( bp::init< SireID::Specify< SireFF::FFID > const & >(( bp::arg("other") ), "") );
         { //::SireID::Specify< SireFF::FFID >::hash
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::uint ( ::SireID::Specify< SireFF::FFID >::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireID::Specify< SireFF::FFID >::hash );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::isNull
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef bool ( ::SireID::Specify< SireFF::FFID >::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireID::Specify< SireFF::FFID >::isNull );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::map
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::QList< SireFF::FFIdx > ( ::SireID::Specify< SireFF::FFID >::*map_function_type)( ::SireFF::FFID::SearchObject const & ) const;
             map_function_type map_function_value( &::SireID::Specify< SireFF::FFID >::map );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("obj") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Specify_FFID__exposer.def( bp::self != bp::self );
         Specify_FFID__exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireID::Specify< SireFF::FFID >::operator()
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::SireID::Specify< SireFF::FFID > ( ::SireID::Specify< SireFF::FFID >::*__call___function_type)( ::qint64 ) const;
             __call___function_type __call___function_value( &::SireID::Specify< SireFF::FFID >::operator() );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("i") )
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::operator()
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::SireID::Specify< SireFF::FFID > ( ::SireID::Specify< SireFF::FFID >::*__call___function_type)( ::qint64,::qint64 ) const;
             __call___function_type __call___function_value( &::SireID::Specify< SireFF::FFID >::operator() );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("start"), bp::arg("end") )
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::operator()
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::SireID::Specify< SireFF::FFID > ( ::SireID::Specify< SireFF::FFID >::*__call___function_type)( ::qint64,::qint64,::qint64 ) const;
             __call___function_type __call___function_value( &::SireID::Specify< SireFF::FFID >::operator() );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("start"), bp::arg("end"), bp::arg("increment") )
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::operator()
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::SireID::Specify< SireFF::FFID > ( ::SireID::Specify< SireFF::FFID >::*__call___function_type)( ::SireBase::Range const & ) const;
             __call___function_type __call___function_value( &::SireID::Specify< SireFF::FFID >::operator() );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("range") )
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::operator=
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::SireID::Specify< SireFF::FFID > & ( ::SireID::Specify< SireFF::FFID >::*assign_function_type)( ::SireID::Specify< SireFF::FFID > const & ) ;
             assign_function_type assign_function_value( &::SireID::Specify< SireFF::FFID >::operator= );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Specify_FFID__exposer.def( bp::self == bp::self );
         Specify_FFID__exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireID::Specify< SireFF::FFID >::operator[]
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::SireID::Specify< SireFF::FFID > ( ::SireID::Specify< SireFF::FFID >::*__getitem___function_type)( ::qint64 ) const;
             __getitem___function_type __getitem___function_value( &::SireID::Specify< SireFF::FFID >::operator[] );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::operator[]
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::SireID::Specify< SireFF::FFID > ( ::SireID::Specify< SireFF::FFID >::*__getitem___function_type)( ::SireBase::Range const & ) const;
             __getitem___function_type __getitem___function_value( &::SireID::Specify< SireFF::FFID >::operator[] );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("range") )
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::toString
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef ::QString ( ::SireID::Specify< SireFF::FFID >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireID::Specify< SireFF::FFID >::toString );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::typeName
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireID::Specify< SireFF::FFID >::typeName );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::Specify< SireFF::FFID >::what
-
+        
             typedef SireID::Specify< SireFF::FFID > exported_class_t;
             typedef char const * ( ::SireID::Specify< SireFF::FFID >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireID::Specify< SireFF::FFID >::what );
-
-            Specify_FFID__exposer.def(
+            
+            Specify_FFID__exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Specify_FFID__exposer.staticmethod( "typeName" );
         Specify_FFID__exposer.def( "__copy__", &__copy__);

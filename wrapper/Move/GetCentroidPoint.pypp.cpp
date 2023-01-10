@@ -53,55 +53,55 @@ void register_GetCentroidPoint_class(){
         GetCentroidPoint_exposer.def( bp::init< QList< SireMol::AtomIdentifier > const & >(( bp::arg("atomids") ), "Construct to get the centroid of the atoms in the molecule that\nmatch any of the passed AtomIDs") );
         GetCentroidPoint_exposer.def( bp::init< SireMove::GetCentroidPoint const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::GetCentroidPoint::atomID
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMove::GetCentroidPoint::*atomID_function_type)(  ) const;
             atomID_function_type atomID_function_value( &::SireMove::GetCentroidPoint::atomID );
-
-            GetCentroidPoint_exposer.def(
+            
+            GetCentroidPoint_exposer.def( 
                 "atomID"
                 , atomID_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the AtomID(s) used to limit the search for the point" );
-
+        
         }
         { //::SireMove::GetCentroidPoint::getPoint
-
+        
             typedef ::SireMaths::Vector ( ::SireMove::GetCentroidPoint::*getPoint_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
             getPoint_function_type getPoint_function_value( &::SireMove::GetCentroidPoint::getPoint );
-
-            GetCentroidPoint_exposer.def(
+            
+            GetCentroidPoint_exposer.def( 
                 "getPoint"
                 , getPoint_function_value
                 , ( bp::arg("molecule"), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
-
+        
         }
         GetCentroidPoint_exposer.def( bp::self != bp::self );
         { //::SireMove::GetCentroidPoint::operator=
-
+        
             typedef ::SireMove::GetCentroidPoint & ( ::SireMove::GetCentroidPoint::*assign_function_type)( ::SireMove::GetCentroidPoint const & ) ;
             assign_function_type assign_function_value( &::SireMove::GetCentroidPoint::operator= );
-
-            GetCentroidPoint_exposer.def(
+            
+            GetCentroidPoint_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         GetCentroidPoint_exposer.def( bp::self == bp::self );
         { //::SireMove::GetCentroidPoint::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::GetCentroidPoint::typeName );
-
-            GetCentroidPoint_exposer.def(
+            
+            GetCentroidPoint_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         GetCentroidPoint_exposer.staticmethod( "typeName" );
         GetCentroidPoint_exposer.def( "__copy__", &__copy__);

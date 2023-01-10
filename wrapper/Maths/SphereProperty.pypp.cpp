@@ -30,59 +30,59 @@ void register_SphereProperty_class(){
         SphereProperty_exposer.def( bp::self != bp::self );
         SphereProperty_exposer.def( bp::self != bp::other< SireMaths::Sphere >() );
         { //::SireBase::PODProperty< SireMaths::Sphere >::operator=
-
+        
             typedef SireBase::PODProperty< SireMaths::Sphere > exported_class_t;
             typedef ::SireBase::PODProperty< SireMaths::Sphere > & ( ::SireBase::PODProperty< SireMaths::Sphere >::*assign_function_type)( ::SireBase::PODProperty< SireMaths::Sphere > const & ) ;
             assign_function_type assign_function_value( &::SireBase::PODProperty< SireMaths::Sphere >::operator= );
-
-            SphereProperty_exposer.def(
+            
+            SphereProperty_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SphereProperty_exposer.def( bp::self == bp::self );
         SphereProperty_exposer.def( bp::self == bp::other< SireMaths::Sphere >() );
         { //::SireBase::PODProperty< SireMaths::Sphere >::toString
-
+        
             typedef SireBase::PODProperty< SireMaths::Sphere > exported_class_t;
             typedef ::QString ( ::SireBase::PODProperty< SireMaths::Sphere >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::PODProperty< SireMaths::Sphere >::toString );
-
-            SphereProperty_exposer.def(
+            
+            SphereProperty_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PODProperty< SireMaths::Sphere >::typeName
-
+        
             typedef SireBase::PODProperty< SireMaths::Sphere > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireBase::PODProperty< SireMaths::Sphere >::typeName );
-
-            SphereProperty_exposer.def(
+            
+            SphereProperty_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PODProperty< SireMaths::Sphere >::what
-
+        
             typedef SireBase::PODProperty< SireMaths::Sphere > exported_class_t;
             typedef char const * ( ::SireBase::PODProperty< SireMaths::Sphere >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireBase::PODProperty< SireMaths::Sphere >::what );
-
-            SphereProperty_exposer.def(
+            
+            SphereProperty_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SphereProperty_exposer.staticmethod( "typeName" );
         SphereProperty_exposer.def( "__copy__", &__copy__);

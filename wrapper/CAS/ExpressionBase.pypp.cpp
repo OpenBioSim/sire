@@ -46,280 +46,280 @@ void register_ExpressionBase_class(){
         ExpressionBase_exposer.def( bp::init< SireCAS::ExBase const & >(( bp::arg("ex") ), "Construct an expression from an ExBase") );
         ExpressionBase_exposer.def( bp::init< SireCAS::ExpressionBase const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::ExpressionBase::children
-
+        
             typedef ::SireCAS::Expressions ( ::SireCAS::ExpressionBase::*children_function_type)(  ) const;
             children_function_type children_function_value( &::SireCAS::ExpressionBase::children );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "children"
                 , children_function_value
                 , bp::release_gil_policy()
                 , "Return the child expressions of this Expression" );
-
+        
         }
         { //::SireCAS::ExpressionBase::conjugate
-
+        
             typedef ::SireCAS::Expression ( ::SireCAS::ExpressionBase::*conjugate_function_type)(  ) const;
             conjugate_function_type conjugate_function_value( &::SireCAS::ExpressionBase::conjugate );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "conjugate"
                 , conjugate_function_value
                 , bp::release_gil_policy()
                 , "Return the complex conjugate of this expression" );
-
+        
         }
         { //::SireCAS::ExpressionBase::differentiate
-
+        
             typedef ::SireCAS::Expression ( ::SireCAS::ExpressionBase::*differentiate_function_type)( ::SireCAS::Symbol const & ) const;
             differentiate_function_type differentiate_function_value( &::SireCAS::ExpressionBase::differentiate );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "differentiate"
                 , differentiate_function_value
                 , ( bp::arg("symbol") )
                 , bp::release_gil_policy()
                 , "Return an expression that the differential of this expression\nwith respect to symbol. Note an exception may\nbe thrown if this cannot be differentiated.\nThrow: SireCAS::unavailable_differential\n" );
-
+        
         }
         { //::SireCAS::ExpressionBase::evaluate
-
+        
             typedef double ( ::SireCAS::ExpressionBase::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::ExpressionBase::evaluate );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this ExBase using values values. Any\nmissing symbols are assumed to equal zero.\nNote that an exception will be thrown if the result of the\nevaluation of this, or one of its children, is complex.\nThrow: SireMaths::math_error\nThrow: SireMaths::domain_error\n" );
-
+        
         }
         { //::SireCAS::ExpressionBase::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::ExpressionBase::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::ExpressionBase::evaluate );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this ExBase using the complex values values.\nAny missing symbols are assumed to equal zero.\nThrow: SireMaths::math_error\n" );
-
+        
         }
         { //::SireCAS::ExpressionBase::expand
-
+        
             typedef ::QList< SireCAS::Factor > ( ::SireCAS::ExpressionBase::*expand_function_type)( ::SireCAS::Symbol const & ) const;
             expand_function_type expand_function_value( &::SireCAS::ExpressionBase::expand );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "expand"
                 , expand_function_value
                 , ( bp::arg("symbol") )
                 , bp::release_gil_policy()
                 , "Return the factors and powers for the symbol symbol, given the values of the\nother symbols in values. This attempts to rearrange this equation\nso that it is of the form m  symbol^i + n  symbol^j ... + constant,\nand it returns the values of m,i, n,j etc..\nNote that this will fail if such a rearrangement is not possible\nThrow: SireCAS::rearrangement_error\n" );
-
+        
         }
         { //::SireCAS::ExpressionBase::functions
-
+        
             typedef ::SireCAS::Functions ( ::SireCAS::ExpressionBase::*functions_function_type)(  ) const;
             functions_function_type functions_function_value( &::SireCAS::ExpressionBase::functions );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "functions"
                 , functions_function_value
                 , bp::release_gil_policy()
                 , "Return the set of Functions that appear in this ExBase" );
-
+        
         }
         { //::SireCAS::ExpressionBase::hash
-
+        
             typedef ::uint ( ::SireCAS::ExpressionBase::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireCAS::ExpressionBase::hash );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "Return a hash of this object - return a combination of the\nidentifying magic for the class and a hash for its contents." );
-
+        
         }
         { //::SireCAS::ExpressionBase::integrate
-
+        
             typedef ::SireCAS::Expression ( ::SireCAS::ExpressionBase::*integrate_function_type)( ::SireCAS::Symbol const & ) const;
             integrate_function_type integrate_function_value( &::SireCAS::ExpressionBase::integrate );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "integrate"
                 , integrate_function_value
                 , ( bp::arg("symbol") )
                 , bp::release_gil_policy()
                 , "Return the indefinite integral of this expression with respect to\nsymbol. This is not guaranteed to work() and will return an\nexpression of the form Sum( integral(exbase) + integral_constant ).\nIf it doesnt work then an exception will be throw.\nThrow: SireCAS::unavailable_integral\n" );
-
+        
         }
         { //::SireCAS::ExpressionBase::isComplex
-
+        
             typedef bool ( ::SireCAS::ExpressionBase::*isComplex_function_type)(  ) const;
             isComplex_function_type isComplex_function_value( &::SireCAS::ExpressionBase::isComplex );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "isComplex"
                 , isComplex_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this expression contains any complex (imaginary)\nparts" );
-
+        
         }
         { //::SireCAS::ExpressionBase::isCompound
-
+        
             typedef bool ( ::SireCAS::ExpressionBase::*isCompound_function_type)(  ) const;
             isCompound_function_type isCompound_function_value( &::SireCAS::ExpressionBase::isCompound );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "isCompound"
                 , isCompound_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a compound expression, and thus as such\nrequires brackets placed around it when it is printed. Examples include\nSum, Product and Power. For most other functions it is safe to leave\nthis as false." );
-
+        
         }
         { //::SireCAS::ExpressionBase::isConstant
-
+        
             typedef bool ( ::SireCAS::ExpressionBase::*isConstant_function_type)(  ) const;
             isConstant_function_type isConstant_function_value( &::SireCAS::ExpressionBase::isConstant );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "isConstant"
                 , isConstant_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a constant expression (does not\ndepend on any symbols)" );
-
+        
         }
         { //::SireCAS::ExpressionBase::isFunction
-
+        
             typedef bool ( ::SireCAS::ExpressionBase::*isFunction_function_type)( ::SireCAS::Symbol const & ) const;
             isFunction_function_type isFunction_function_value( &::SireCAS::ExpressionBase::isFunction );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "isFunction"
                 , isFunction_function_value
                 , ( bp::arg("arg0") )
                 , bp::release_gil_policy()
                 , "Return whether or not this is a function of the passed Symbol" );
-
+        
         }
         ExpressionBase_exposer.def( bp::self != bp::self );
         { //::SireCAS::ExpressionBase::operator=
-
+        
             typedef ::SireCAS::ExpressionBase & ( ::SireCAS::ExpressionBase::*assign_function_type)( ::SireCAS::ExpressionBase const & ) ;
             assign_function_type assign_function_value( &::SireCAS::ExpressionBase::operator= );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireCAS::ExpressionBase::operator=
-
+        
             typedef ::SireCAS::ExpressionBase & ( ::SireCAS::ExpressionBase::*assign_function_type)( ::SireCAS::ExBase const & ) ;
             assign_function_type assign_function_value( &::SireCAS::ExpressionBase::operator= );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         ExpressionBase_exposer.def( bp::self == bp::self );
         { //::SireCAS::ExpressionBase::series
-
+        
             typedef ::SireCAS::Expression ( ::SireCAS::ExpressionBase::*series_function_type)( ::SireCAS::Symbol const &,int ) const;
             series_function_type series_function_value( &::SireCAS::ExpressionBase::series );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "series"
                 , series_function_value
                 , ( bp::arg("symbol"), bp::arg("n") )
                 , bp::release_gil_policy()
                 , "Return a series expansion of this expression with respect to\nsymbol, if possible, to order\nn. This is not guaranteed to work, and will return this expression\nunchanged if it doesnt work. If it is expanded, then a series\nwill be returned, together with an estimate of the error (e.g. O(x^2))" );
-
+        
         }
         { //::SireCAS::ExpressionBase::simplify
-
+        
             typedef ::SireCAS::Expression ( ::SireCAS::ExpressionBase::*simplify_function_type)( int ) const;
             simplify_function_type simplify_function_value( &::SireCAS::ExpressionBase::simplify );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "simplify"
                 , simplify_function_value
                 , ( bp::arg("options")=(int)(0) )
                 , "Try to simplify this expression. This will try to use known mathematical\nidentities to convert complex expressions down to more simple ones.\nIf SireCAS::UNSAFE_COMPLEX_SIMPLIFICATIONS is true, then identities\nthat are not safe for complex math are used, e.g. z = sin(arcsin(z))." );
-
+        
         }
         { //::SireCAS::ExpressionBase::substitute
-
+        
             typedef ::SireCAS::Expression ( ::SireCAS::ExpressionBase::*substitute_function_type)( ::SireCAS::Identities const & ) const;
             substitute_function_type substitute_function_value( &::SireCAS::ExpressionBase::substitute );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "substitute"
                 , substitute_function_value
                 , ( bp::arg("identities") )
                 , bp::release_gil_policy()
                 , "Return an expression that has the identities in identities\nsubstituted into this expression" );
-
+        
         }
         { //::SireCAS::ExpressionBase::symbols
-
+        
             typedef ::SireCAS::Symbols ( ::SireCAS::ExpressionBase::*symbols_function_type)(  ) const;
             symbols_function_type symbols_function_value( &::SireCAS::ExpressionBase::symbols );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "symbols"
                 , symbols_function_value
                 , bp::release_gil_policy()
                 , "Return the set of Symbols that appear in this ExBase" );
-
+        
         }
         { //::SireCAS::ExpressionBase::toOpenMMString
-
+        
             typedef ::QString ( ::SireCAS::ExpressionBase::*toOpenMMString_function_type)(  ) const;
             toOpenMMString_function_type toOpenMMString_function_value( &::SireCAS::ExpressionBase::toOpenMMString );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "toOpenMMString"
                 , toOpenMMString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::ExpressionBase::toString
-
+        
             typedef ::QString ( ::SireCAS::ExpressionBase::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireCAS::ExpressionBase::toString );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this object" );
-
+        
         }
         { //::SireCAS::ExpressionBase::what
-
+        
             typedef char const * ( ::SireCAS::ExpressionBase::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::ExpressionBase::what );
-
-            ExpressionBase_exposer.def(
+            
+            ExpressionBase_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "Return the name of the type of this ExBase object" );
-
+        
         }
         ExpressionBase_exposer.def( "__copy__", &__copy__);
         ExpressionBase_exposer.def( "__deepcopy__", &__copy__);

@@ -34,374 +34,374 @@ void register_PackedArray2D_QVariant__class(){
         PackedArray2D_QVariant__exposer.def( bp::init< SireBase::PackedArray2D< QVariant > const &, SireBase::PackedArray2D< QVariant > const & >(( bp::arg("array0"), bp::arg("array1") ), "") );
         PackedArray2D_QVariant__exposer.def( bp::init< SireBase::PackedArray2D< QVariant > const & >(( bp::arg("other") ), "") );
         { //::SireBase::PackedArray2D< QVariant >::append
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*append_function_type)( ::SireBase::PackedArray2D< QVariant >::Array const & ) ;
             append_function_type append_function_value( &::SireBase::PackedArray2D< QVariant >::append );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "append"
                 , append_function_value
                 , ( bp::arg("array") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::append
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*append_function_type)( ::SireBase::PackedArray2D< QVariant > const & ) ;
             append_function_type append_function_value( &::SireBase::PackedArray2D< QVariant >::append );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "append"
                 , append_function_value
                 , ( bp::arg("arrays") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::append
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*append_function_type)( ::QVector< QVariant > const & ) ;
             append_function_type append_function_value( &::SireBase::PackedArray2D< QVariant >::append );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "append"
                 , append_function_value
                 , ( bp::arg("array") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::append
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*append_function_type)( ::QVector< QVector< QVariant > > const & ) ;
             append_function_type append_function_value( &::SireBase::PackedArray2D< QVariant >::append );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "append"
                 , append_function_value
                 , ( bp::arg("arrays") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::assertValidIndex
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*assertValidIndex_function_type)( ::quint32 ) const;
             assertValidIndex_function_type assertValidIndex_function_value( &::SireBase::PackedArray2D< QVariant >::assertValidIndex );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "assertValidIndex"
                 , assertValidIndex_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::at
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::SireBase::PackedArray2D< QVariant >::Array const & ( ::SireBase::PackedArray2D< QVariant >::*at_function_type)( ::quint32 ) const;
             at_function_type at_function_value( &::SireBase::PackedArray2D< QVariant >::at );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::at
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::QVariant const & ( ::SireBase::PackedArray2D< QVariant >::*at_function_type)( ::quint32,::quint32 ) const;
             at_function_type at_function_value( &::SireBase::PackedArray2D< QVariant >::at );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::count
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< QVariant >::*count_function_type)(  ) const;
             count_function_type count_function_value( &::SireBase::PackedArray2D< QVariant >::count );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "count"
                 , count_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::detach
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*detach_function_type)(  ) ;
             detach_function_type detach_function_value( &::SireBase::PackedArray2D< QVariant >::detach );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "detach"
                 , detach_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::fromVariant
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::SireBase::PackedArray2D< QVariant > ( *fromVariant_function_type )( ::SireBase::PackedArray2D< QVariant > const & );
             fromVariant_function_type fromVariant_function_value( &::SireBase::PackedArray2D< QVariant >::fromVariant );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "fromVariant"
                 , fromVariant_function_value
                 , ( bp::arg("variant") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::isEmpty
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef bool ( ::SireBase::PackedArray2D< QVariant >::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireBase::PackedArray2D< QVariant >::isEmpty );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::nArrays
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< QVariant >::*nArrays_function_type)(  ) const;
             nArrays_function_type nArrays_function_value( &::SireBase::PackedArray2D< QVariant >::nArrays );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "nArrays"
                 , nArrays_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::nValues
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< QVariant >::*nValues_function_type)(  ) const;
             nValues_function_type nValues_function_value( &::SireBase::PackedArray2D< QVariant >::nValues );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "nValues"
                 , nValues_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::nValues
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< QVariant >::*nValues_function_type)( ::quint32 ) const;
             nValues_function_type nValues_function_value( &::SireBase::PackedArray2D< QVariant >::nValues );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "nValues"
                 , nValues_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         PackedArray2D_QVariant__exposer.def( bp::self != bp::self );
         { //::SireBase::PackedArray2D< QVariant >::operator()
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::QVariant const & ( ::SireBase::PackedArray2D< QVariant >::*__call___function_type)( ::quint32,::quint32 ) const;
             __call___function_type __call___function_value( &::SireBase::PackedArray2D< QVariant >::operator() );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("i"), bp::arg("j") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::operator=
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::SireBase::PackedArray2D< QVariant > & ( ::SireBase::PackedArray2D< QVariant >::*assign_function_type)( ::SireBase::PackedArray2D< QVariant > const & ) ;
             assign_function_type assign_function_value( &::SireBase::PackedArray2D< QVariant >::operator= );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         PackedArray2D_QVariant__exposer.def( bp::self == bp::self );
         { //::SireBase::PackedArray2D< QVariant >::operator[]
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::SireBase::PackedArray2D< QVariant >::Array const & ( ::SireBase::PackedArray2D< QVariant >::*__getitem___function_type)( ::quint32 ) const;
             __getitem___function_type __getitem___function_value( &::SireBase::PackedArray2D< QVariant >::operator[] );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::remove
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*remove_function_type)( ::quint32 ) ;
             remove_function_type remove_function_value( &::SireBase::PackedArray2D< QVariant >::remove );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::removeAll
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*removeAll_function_type)( ::QVarLengthArray< int, 256 > const & ) ;
             removeAll_function_type removeAll_function_value( &::SireBase::PackedArray2D< QVariant >::removeAll );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("idxs") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::size
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef int ( ::SireBase::PackedArray2D< QVariant >::*size_function_type)(  ) const;
             size_function_type size_function_value( &::SireBase::PackedArray2D< QVariant >::size );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "size"
                 , size_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::toQVector
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::QVector< QVariant > ( ::SireBase::PackedArray2D< QVariant >::*toQVector_function_type)(  ) const;
             toQVector_function_type toQVector_function_value( &::SireBase::PackedArray2D< QVariant >::toQVector );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "toQVector"
                 , toQVector_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::toQVectorVector
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::QVector< QVector< QVariant > > ( ::SireBase::PackedArray2D< QVariant >::*toQVectorVector_function_type)(  ) const;
             toQVectorVector_function_type toQVectorVector_function_value( &::SireBase::PackedArray2D< QVariant >::toQVectorVector );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "toQVectorVector"
                 , toQVectorVector_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::toString
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::QString ( ::SireBase::PackedArray2D< QVariant >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireBase::PackedArray2D< QVariant >::toString );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::toVariant
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef ::SireBase::PackedArray2D< QVariant > ( ::SireBase::PackedArray2D< QVariant >::*toVariant_function_type)(  ) const;
             toVariant_function_type toVariant_function_value( &::SireBase::PackedArray2D< QVariant >::toVariant );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "toVariant"
                 , toVariant_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::update
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*update_function_type)( ::quint32,::SireBase::PackedArray2D< QVariant >::Array const & ) ;
             update_function_type update_function_value( &::SireBase::PackedArray2D< QVariant >::update );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("i"), bp::arg("array") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::update
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*update_function_type)( ::quint32,::QVector< QVariant > const & ) ;
             update_function_type update_function_value( &::SireBase::PackedArray2D< QVariant >::update );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("i"), bp::arg("array") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireBase::PackedArray2D< QVariant >::updateAll
-
+        
             typedef SireBase::PackedArray2D< QVariant > exported_class_t;
             typedef void ( ::SireBase::PackedArray2D< QVariant >::*updateAll_function_type)( ::QVarLengthArray< int, 256 > const &,::SireBase::PackedArray2D< QVariant > const & ) ;
             updateAll_function_type updateAll_function_value( &::SireBase::PackedArray2D< QVariant >::updateAll );
-
-            PackedArray2D_QVariant__exposer.def(
+            
+            PackedArray2D_QVariant__exposer.def( 
                 "updateAll"
                 , updateAll_function_value
                 , ( bp::arg("idxs"), bp::arg("arrays") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         PackedArray2D_QVariant__exposer.staticmethod( "fromVariant" );
         PackedArray2D_QVariant__exposer.def( "__copy__", &__copy__);

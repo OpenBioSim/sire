@@ -50,103 +50,103 @@ void register_Power_class(){
         Power_exposer.def( bp::init< SireCAS::Expression const &, SireCAS::Expression const & >(( bp::arg("base"), bp::arg("power") ), "Construct a power that represents core^power") );
         Power_exposer.def( bp::init< SireCAS::Power const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::Power::core
-
+        
             typedef ::SireCAS::Expression ( ::SireCAS::Power::*core_function_type)(  ) const;
             core_function_type core_function_value( &::SireCAS::Power::core );
-
-            Power_exposer.def(
+            
+            Power_exposer.def( 
                 "core"
                 , core_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::Power::evaluate
-
+        
             typedef double ( ::SireCAS::Power::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Power::evaluate );
-
-            Power_exposer.def(
+            
+            Power_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this power - this could be dodgy for negative bases with\nnon-integer powers" );
-
+        
         }
         { //::SireCAS::Power::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::Power::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Power::evaluate );
-
-            Power_exposer.def(
+            
+            Power_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this power - this could be dodgy for negative bases with\nnon-integer powers" );
-
+        
         }
         { //::SireCAS::Power::hash
-
+        
             typedef ::uint ( ::SireCAS::Power::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireCAS::Power::hash );
-
-            Power_exposer.def(
+            
+            Power_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "Return a hash for this power" );
-
+        
         }
         { //::SireCAS::Power::isCompound
-
+        
             typedef bool ( ::SireCAS::Power::*isCompound_function_type)(  ) const;
             isCompound_function_type isCompound_function_value( &::SireCAS::Power::isCompound );
-
-            Power_exposer.def(
+            
+            Power_exposer.def( 
                 "isCompound"
                 , isCompound_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Power_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::Power::power
-
+        
             typedef ::SireCAS::Expression ( ::SireCAS::Power::*power_function_type)(  ) const;
             power_function_type power_function_value( &::SireCAS::Power::power );
-
-            Power_exposer.def(
+            
+            Power_exposer.def( 
                 "power"
                 , power_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::Power::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::Power::typeName );
-
-            Power_exposer.def(
+            
+            Power_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::Power::what
-
+        
             typedef char const * ( ::SireCAS::Power::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::Power::what );
-
-            Power_exposer.def(
+            
+            Power_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Power_exposer.staticmethod( "typeName" );
         Power_exposer.def( "__copy__", &__copy__);

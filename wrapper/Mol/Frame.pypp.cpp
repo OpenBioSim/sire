@@ -53,213 +53,213 @@ void register_Frame_class(){
         Frame_exposer.def( bp::init< QVector< SireMaths::Vector > const &, QVector< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > const &, QVector< SireMaths::Vector3D< SireUnits::Dimension::Force > > const &, SireVol::Space const &, SireUnits::Dimension::Time >(( bp::arg("coordinates"), bp::arg("velocites"), bp::arg("forces"), bp::arg("space"), bp::arg("time") ), "") );
         Frame_exposer.def( bp::init< SireMol::Frame const & >(( bp::arg("other") ), "") );
         { //::SireMol::Frame::coordinates
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireMol::Frame::*coordinates_function_type)(  ) const;
             coordinates_function_type coordinates_function_value( &::SireMol::Frame::coordinates );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "coordinates"
                 , coordinates_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::forces
-
+        
             typedef ::QVector< SireMaths::Vector3D< SireUnits::Dimension::Force > > ( ::SireMol::Frame::*forces_function_type)(  ) const;
             forces_function_type forces_function_value( &::SireMol::Frame::forces );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "forces"
                 , forces_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::hasCoordinates
-
+        
             typedef bool ( ::SireMol::Frame::*hasCoordinates_function_type)(  ) const;
             hasCoordinates_function_type hasCoordinates_function_value( &::SireMol::Frame::hasCoordinates );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "hasCoordinates"
                 , hasCoordinates_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::hasForces
-
+        
             typedef bool ( ::SireMol::Frame::*hasForces_function_type)(  ) const;
             hasForces_function_type hasForces_function_value( &::SireMol::Frame::hasForces );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "hasForces"
                 , hasForces_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::hasVelocities
-
+        
             typedef bool ( ::SireMol::Frame::*hasVelocities_function_type)(  ) const;
             hasVelocities_function_type hasVelocities_function_value( &::SireMol::Frame::hasVelocities );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "hasVelocities"
                 , hasVelocities_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::isCompatibleWith
-
+        
             typedef bool ( ::SireMol::Frame::*isCompatibleWith_function_type)( ::SireMol::MoleculeInfoData const & ) const;
             isCompatibleWith_function_type isCompatibleWith_function_value( &::SireMol::Frame::isCompatibleWith );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "isCompatibleWith"
                 , isCompatibleWith_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::isEmpty
-
+        
             typedef bool ( ::SireMol::Frame::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireMol::Frame::isEmpty );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::nAtoms
-
+        
             typedef int ( ::SireMol::Frame::*nAtoms_function_type)(  ) const;
             nAtoms_function_type nAtoms_function_value( &::SireMol::Frame::nAtoms );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::numBytes
-
+        
             typedef int ( ::SireMol::Frame::*numBytes_function_type)(  ) const;
             numBytes_function_type numBytes_function_value( &::SireMol::Frame::numBytes );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "numBytes"
                 , numBytes_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Frame_exposer.def( bp::self != bp::self );
         { //::SireMol::Frame::operator=
-
+        
             typedef ::SireMol::Frame & ( ::SireMol::Frame::*assign_function_type)( ::SireMol::Frame const & ) ;
             assign_function_type assign_function_value( &::SireMol::Frame::operator= );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Frame_exposer.def( bp::self == bp::self );
         { //::SireMol::Frame::space
-
+        
             typedef ::SireVol::Space const & ( ::SireMol::Frame::*space_function_type)(  ) const;
             space_function_type space_function_value( &::SireMol::Frame::space );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "space"
                 , space_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::subset
-
+        
             typedef ::SireMol::Frame ( ::SireMol::Frame::*subset_function_type)( int,int ) const;
             subset_function_type subset_function_value( &::SireMol::Frame::subset );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "subset"
                 , subset_function_value
                 , ( bp::arg("start_atom"), bp::arg("natoms") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::time
-
+        
             typedef ::SireUnits::Dimension::Time ( ::SireMol::Frame::*time_function_type)(  ) const;
             time_function_type time_function_value( &::SireMol::Frame::time );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "time"
                 , time_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::toString
-
+        
             typedef ::QString ( ::SireMol::Frame::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::Frame::toString );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::Frame::typeName );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::velocities
-
+        
             typedef ::QVector< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > ( ::SireMol::Frame::*velocities_function_type)(  ) const;
             velocities_function_type velocities_function_value( &::SireMol::Frame::velocities );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "velocities"
                 , velocities_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::Frame::what
-
+        
             typedef char const * ( ::SireMol::Frame::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::Frame::what );
-
-            Frame_exposer.def(
+            
+            Frame_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Frame_exposer.staticmethod( "typeName" );
         Frame_exposer.def( "__copy__", &__copy__);

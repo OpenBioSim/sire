@@ -75,93 +75,93 @@ void register_AtomName_class(){
         AtomName_exposer.def( bp::init< QString const &, SireID::CaseSensitivity >(( bp::arg("name"), bp::arg("case_sensitivity") ), "") );
         AtomName_exposer.def( bp::init< SireMol::AtomName const & >(( bp::arg("other") ), "") );
         { //::SireMol::AtomName::hash
-
+        
             typedef ::uint ( ::SireMol::AtomName::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireMol::AtomName::hash );
-
-            AtomName_exposer.def(
+            
+            AtomName_exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomName::isNull
-
+        
             typedef bool ( ::SireMol::AtomName::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireMol::AtomName::isNull );
-
-            AtomName_exposer.def(
+            
+            AtomName_exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomName::map
-
+        
             typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomName::*map_function_type)( ::SireMol::MolInfo const & ) const;
             map_function_type map_function_value( &::SireMol::AtomName::map );
-
-            AtomName_exposer.def(
+            
+            AtomName_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomName_exposer.def( bp::self != bp::self );
         { //::SireMol::AtomName::operator=
-
+        
             typedef ::SireMol::AtomName & ( ::SireMol::AtomName::*assign_function_type)( ::SireMol::AtomName const & ) ;
             assign_function_type assign_function_value( &::SireMol::AtomName::operator= );
-
-            AtomName_exposer.def(
+            
+            AtomName_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         AtomName_exposer.def( bp::self == bp::other< SireID::ID >() );
         AtomName_exposer.def( bp::self == bp::self );
         { //::SireMol::AtomName::toString
-
+        
             typedef ::QString ( ::SireMol::AtomName::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::AtomName::toString );
-
-            AtomName_exposer.def(
+            
+            AtomName_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomName::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::AtomName::typeName );
-
-            AtomName_exposer.def(
+            
+            AtomName_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::AtomName::what
-
+        
             typedef char const * ( ::SireMol::AtomName::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::AtomName::what );
-
-            AtomName_exposer.def(
+            
+            AtomName_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomName_exposer.staticmethod( "typeName" );
         AtomName_exposer.def( "__copy__", &__copy__);

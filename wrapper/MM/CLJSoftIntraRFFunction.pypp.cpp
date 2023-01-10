@@ -58,131 +58,131 @@ void register_CLJSoftIntraRFFunction_class(){
         CLJSoftIntraRFFunction_exposer.def( bp::init< SireVol::Space const &, SireUnits::Dimension::Length, SireUnits::Dimension::Length, SireMM::CLJFunction::COMBINING_RULES >(( bp::arg("space"), bp::arg("coul_cutoff"), bp::arg("lj_cutoff"), bp::arg("combining_rules") ), "") );
         CLJSoftIntraRFFunction_exposer.def( bp::init< SireMM::CLJSoftIntraRFFunction const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::CLJSoftIntraRFFunction::containsProperty
-
+        
             typedef bool ( ::SireMM::CLJSoftIntraRFFunction::*containsProperty_function_type)( ::QString const & ) const;
             containsProperty_function_type containsProperty_function_value( &::SireMM::CLJSoftIntraRFFunction::containsProperty );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "containsProperty"
                 , containsProperty_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Return whether or not this function contains a property called name" );
-
+        
         }
         { //::SireMM::CLJSoftIntraRFFunction::defaultRFFunction
-
+        
             typedef ::SireMM::CLJFunctionPtr ( *defaultRFFunction_function_type )(  );
             defaultRFFunction_function_type defaultRFFunction_function_value( &::SireMM::CLJSoftIntraRFFunction::defaultRFFunction );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "defaultRFFunction"
                 , defaultRFFunction_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJSoftIntraRFFunction::dielectric
-
+        
             typedef float ( ::SireMM::CLJSoftIntraRFFunction::*dielectric_function_type)(  ) const;
             dielectric_function_type dielectric_function_value( &::SireMM::CLJSoftIntraRFFunction::dielectric );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "dielectric"
                 , dielectric_function_value
                 , bp::release_gil_policy()
                 , "Return the value of the dielectric constant" );
-
+        
         }
         CLJSoftIntraRFFunction_exposer.def( bp::self != bp::self );
         { //::SireMM::CLJSoftIntraRFFunction::operator=
-
+        
             typedef ::SireMM::CLJSoftIntraRFFunction & ( ::SireMM::CLJSoftIntraRFFunction::*assign_function_type)( ::SireMM::CLJSoftIntraRFFunction const & ) ;
             assign_function_type assign_function_value( &::SireMM::CLJSoftIntraRFFunction::operator= );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         CLJSoftIntraRFFunction_exposer.def( bp::self == bp::self );
         { //::SireMM::CLJSoftIntraRFFunction::properties
-
+        
             typedef ::SireBase::Properties ( ::SireMM::CLJSoftIntraRFFunction::*properties_function_type)(  ) const;
             properties_function_type properties_function_value( &::SireMM::CLJSoftIntraRFFunction::properties );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "properties"
                 , properties_function_value
                 , bp::release_gil_policy()
                 , "Return the properties of this function" );
-
+        
         }
         { //::SireMM::CLJSoftIntraRFFunction::property
-
+        
             typedef ::SireBase::PropertyPtr ( ::SireMM::CLJSoftIntraRFFunction::*property_function_type)( ::QString const & ) const;
             property_function_type property_function_value( &::SireMM::CLJSoftIntraRFFunction::property );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "property"
                 , property_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Return the value of the property with name name" );
-
+        
         }
         { //::SireMM::CLJSoftIntraRFFunction::setDielectric
-
+        
             typedef void ( ::SireMM::CLJSoftIntraRFFunction::*setDielectric_function_type)( float ) ;
             setDielectric_function_type setDielectric_function_value( &::SireMM::CLJSoftIntraRFFunction::setDielectric );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "setDielectric"
                 , setDielectric_function_value
                 , ( bp::arg("dielectric") )
                 , bp::release_gil_policy()
                 , "Set the dielectric constant to dielectric" );
-
+        
         }
         { //::SireMM::CLJSoftIntraRFFunction::setProperty
-
+        
             typedef ::SireMM::CLJFunctionPtr ( ::SireMM::CLJSoftIntraRFFunction::*setProperty_function_type)( ::QString const &,::SireBase::Property const & ) const;
             setProperty_function_type setProperty_function_value( &::SireMM::CLJSoftIntraRFFunction::setProperty );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "setProperty"
                 , setProperty_function_value
                 , ( bp::arg("name"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Return a copy of this function where the property name has been set to the\nvalue value" );
-
+        
         }
         { //::SireMM::CLJSoftIntraRFFunction::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::CLJSoftIntraRFFunction::typeName );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::CLJSoftIntraRFFunction::what
-
+        
             typedef char const * ( ::SireMM::CLJSoftIntraRFFunction::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::CLJSoftIntraRFFunction::what );
-
-            CLJSoftIntraRFFunction_exposer.def(
+            
+            CLJSoftIntraRFFunction_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         CLJSoftIntraRFFunction_exposer.staticmethod( "defaultRFFunction" );
         CLJSoftIntraRFFunction_exposer.staticmethod( "typeName" );

@@ -56,28 +56,28 @@ void register_CovalentBondHunterParameters_class(){
         CovalentBondHunterParameters_exposer_t CovalentBondHunterParameters_exposer = CovalentBondHunterParameters_exposer_t( "CovalentBondHunterParameters", "", bp::init< >("") );
         bp::scope CovalentBondHunterParameters_scope( CovalentBondHunterParameters_exposer );
         { //::SireMol::CovalentBondHunterParameters::coordinates
-
+        
             typedef ::SireBase::PropertyName const & ( *coordinates_function_type )(  );
             coordinates_function_type coordinates_function_value( &::SireMol::CovalentBondHunterParameters::coordinates );
-
-            CovalentBondHunterParameters_exposer.def(
+            
+            CovalentBondHunterParameters_exposer.def( 
                 "coordinates"
                 , coordinates_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::CovalentBondHunterParameters::element
-
+        
             typedef ::SireBase::PropertyName const & ( *element_function_type )(  );
             element_function_type element_function_value( &::SireMol::CovalentBondHunterParameters::element );
-
-            CovalentBondHunterParameters_exposer.def(
+            
+            CovalentBondHunterParameters_exposer.def( 
                 "element"
                 , element_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         CovalentBondHunterParameters_exposer.staticmethod( "coordinates" );
         CovalentBondHunterParameters_exposer.staticmethod( "element" );

@@ -46,55 +46,55 @@ void register_ArcTanh_class(){
         ArcTanh_exposer.def( bp::init< SireCAS::Expression const & >(( bp::arg("ex") ), "Construct cos(expression)") );
         ArcTanh_exposer.def( bp::init< SireCAS::ArcTanh const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::ArcTanh::evaluate
-
+        
             typedef double ( ::SireCAS::ArcTanh::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::ArcTanh::evaluate );
-
-            ArcTanh_exposer.def(
+            
+            ArcTanh_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this function" );
-
+        
         }
         { //::SireCAS::ArcTanh::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::ArcTanh::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::ArcTanh::evaluate );
-
-            ArcTanh_exposer.def(
+            
+            ArcTanh_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Complex evaluation" );
-
+        
         }
         ArcTanh_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::ArcTanh::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::ArcTanh::typeName );
-
-            ArcTanh_exposer.def(
+            
+            ArcTanh_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::ArcTanh::what
-
+        
             typedef char const * ( ::SireCAS::ArcTanh::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::ArcTanh::what );
-
-            ArcTanh_exposer.def(
+            
+            ArcTanh_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ArcTanh_exposer.staticmethod( "typeName" );
         ArcTanh_exposer.def( "__copy__", &__copy__);

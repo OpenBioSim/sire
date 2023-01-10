@@ -32,284 +32,284 @@ void register_SupraSubSystem_class(){
         bp::scope SupraSubSystem_scope( SupraSubSystem_exposer );
         SupraSubSystem_exposer.def( bp::init< SireMove::SupraSubSystem const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::SupraSubSystem::clearAllStatistics
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*clearAllStatistics_function_type)(  ) ;
             clearAllStatistics_function_type clearAllStatistics_function_value( &::SireMove::SupraSubSystem::clearAllStatistics );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "clearAllStatistics"
                 , clearAllStatistics_function_value
                 , bp::release_gil_policy()
                 , "Completely clear all statistics from this system (this\ncalls both clearStatistics and clearSubStatistics)" );
-
+        
         }
         { //::SireMove::SupraSubSystem::clearStatistics
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*clearStatistics_function_type)(  ) ;
             clearStatistics_function_type clearStatistics_function_value( &::SireMove::SupraSubSystem::clearStatistics );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "clearStatistics"
                 , clearStatistics_function_value
                 , bp::release_gil_policy()
                 , "Clear the SupraSubSystem level statistics (this clears the monitors\nthat are applied at the end of blocks of sub-moves)" );
-
+        
         }
         { //::SireMove::SupraSubSystem::clearSubStatistics
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*clearSubStatistics_function_type)(  ) ;
             clearSubStatistics_function_type clearSubStatistics_function_value( &::SireMove::SupraSubSystem::clearSubStatistics );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "clearSubStatistics"
                 , clearSubStatistics_function_value
                 , bp::release_gil_policy()
                 , "Clear the system level statistics (this clears the monitors\nthat are applied to the sub-system as it is being acted on\nby the sub-moves)" );
-
+        
         }
         { //::SireMove::SupraSubSystem::isPacked
-
+        
             typedef bool ( ::SireMove::SupraSubSystem::*isPacked_function_type)(  ) const;
             isPacked_function_type isPacked_function_value( &::SireMove::SupraSubSystem::isPacked );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "isPacked"
                 , isPacked_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not the system is packed" );
-
+        
         }
         { //::SireMove::SupraSubSystem::isPackedToDisk
-
+        
             typedef bool ( ::SireMove::SupraSubSystem::*isPackedToDisk_function_type)(  ) const;
             isPackedToDisk_function_type isPackedToDisk_function_value( &::SireMove::SupraSubSystem::isPackedToDisk );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "isPackedToDisk"
                 , isPackedToDisk_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this system is packed to disk" );
-
+        
         }
         { //::SireMove::SupraSubSystem::isPackedToMemory
-
+        
             typedef bool ( ::SireMove::SupraSubSystem::*isPackedToMemory_function_type)(  ) const;
             isPackedToMemory_function_type isPackedToMemory_function_value( &::SireMove::SupraSubSystem::isPackedToMemory );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "isPackedToMemory"
                 , isPackedToMemory_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this system is packed to memory" );
-
+        
         }
         { //::SireMove::SupraSubSystem::monitors
-
+        
             typedef ::SireSystem::SystemMonitors const & ( ::SireMove::SupraSubSystem::*monitors_function_type)(  ) const;
             monitors_function_type monitors_function_value( &::SireMove::SupraSubSystem::monitors );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "monitors"
                 , monitors_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the monitors that are applied to this sub-system. These\nare the monitors that are applied between blocks of sub-moves.\ne.g.\nsubsys.monitors()\nsubsys.system().monitors()\n" );
-
+        
         }
         { //::SireMove::SupraSubSystem::mustNowRecalculateFromScratch
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*mustNowRecalculateFromScratch_function_type)(  ) ;
             mustNowRecalculateFromScratch_function_type mustNowRecalculateFromScratch_function_value( &::SireMove::SupraSubSystem::mustNowRecalculateFromScratch );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "mustNowRecalculateFromScratch"
                 , mustNowRecalculateFromScratch_function_value
                 , bp::release_gil_policy()
                 , "Tell the system that the next energy to be calculated\nshould be recalculated from scratch. This is mainly\nuseful for debugging" );
-
+        
         }
         { //::SireMove::SupraSubSystem::nSubMoves
-
+        
             typedef int ( ::SireMove::SupraSubSystem::*nSubMoves_function_type)(  ) const;
             nSubMoves_function_type nSubMoves_function_value( &::SireMove::SupraSubSystem::nSubMoves );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "nSubMoves"
                 , nSubMoves_function_value
                 , bp::release_gil_policy()
                 , "Return the number of moves to be applied to this system" );
-
+        
         }
         { //::SireMove::SupraSubSystem::null
-
+        
             typedef ::SireMove::SupraSubSystem const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMove::SupraSubSystem::null );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the global null SupraSubSystem" );
-
+        
         }
         SupraSubSystem_exposer.def( bp::self != bp::self );
         { //::SireMove::SupraSubSystem::operator=
-
+        
             typedef ::SireMove::SupraSubSystem & ( ::SireMove::SupraSubSystem::*assign_function_type)( ::SireMove::SupraSubSystem const & ) ;
             assign_function_type assign_function_value( &::SireMove::SupraSubSystem::operator= );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         SupraSubSystem_exposer.def( bp::self == bp::self );
         { //::SireMove::SupraSubSystem::pack
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*pack_function_type)(  ) ;
             pack_function_type pack_function_value( &::SireMove::SupraSubSystem::pack );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "pack"
                 , pack_function_value
                 , bp::release_gil_policy()
                 , "Pack the system. This does nothing if the system is already packed" );
-
+        
         }
         { //::SireMove::SupraSubSystem::packToDisk
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*packToDisk_function_type)(  ) ;
             packToDisk_function_type packToDisk_function_value( &::SireMove::SupraSubSystem::packToDisk );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "packToDisk"
                 , packToDisk_function_value
                 , bp::release_gil_policy()
                 , "Pack the system to disk. This does nothing if the system\nis already packed to disk" );
-
+        
         }
         { //::SireMove::SupraSubSystem::packToDisk
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*packToDisk_function_type)( ::QString const & ) ;
             packToDisk_function_type packToDisk_function_value( &::SireMove::SupraSubSystem::packToDisk );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "packToDisk"
                 , packToDisk_function_value
                 , ( bp::arg("tempdir") )
                 , bp::release_gil_policy()
                 , "Pack the system to disk, into the directory tempdir.\nThis does nothing if the system is already packed to\ndisk (even if the system is packed into a different\ndirectory)" );
-
+        
         }
         { //::SireMove::SupraSubSystem::packToMemory
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*packToMemory_function_type)(  ) ;
             packToMemory_function_type packToMemory_function_value( &::SireMove::SupraSubSystem::packToMemory );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "packToMemory"
                 , packToMemory_function_value
                 , bp::release_gil_policy()
                 , "Pack the system to memory. This does nothing if the system\nis already packed to memory" );
-
+        
         }
         { //::SireMove::SupraSubSystem::recordingStatistics
-
+        
             typedef bool ( ::SireMove::SupraSubSystem::*recordingStatistics_function_type)(  ) const;
             recordingStatistics_function_type recordingStatistics_function_value( &::SireMove::SupraSubSystem::recordingStatistics );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "recordingStatistics"
                 , recordingStatistics_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not we are recording statistics\nbetween blocks of sub-moves" );
-
+        
         }
         { //::SireMove::SupraSubSystem::recordingSubStatistics
-
+        
             typedef bool ( ::SireMove::SupraSubSystem::*recordingSubStatistics_function_type)(  ) const;
             recordingSubStatistics_function_type recordingSubStatistics_function_value( &::SireMove::SupraSubSystem::recordingSubStatistics );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "recordingSubStatistics"
                 , recordingSubStatistics_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not we are recording statistics within\nthe sub-system" );
-
+        
         }
         { //::SireMove::SupraSubSystem::subMove
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*subMove_function_type)( bool ) ;
             subMove_function_type subMove_function_value( &::SireMove::SupraSubSystem::subMove );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "subMove"
                 , subMove_function_value
                 , ( bp::arg("record_stats")=(bool)(true) )
                 , "Perform the sub-system moves on this sub-system. This performs\nthe moves in this->subMoves() on this->subSystem(), collecting\nstatistics both during the block of sub-moves, and then after\nthe block of sub-moves if recording_statistics is true,\nand if sysmon.recordingSubStatistics() and\nsysmon.recordingStatistics() are true respectively.\nThrow: SireError::invalid_state\n" );
-
+        
         }
         { //::SireMove::SupraSubSystem::subMoves
-
+        
             typedef ::SireMove::Moves const & ( ::SireMove::SupraSubSystem::*subMoves_function_type)(  ) const;
             subMoves_function_type subMoves_function_value( &::SireMove::SupraSubSystem::subMoves );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "subMoves"
                 , subMoves_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the moves that will be applied to the sub-system\nThrow: SireError::invalid_state\n" );
-
+        
         }
         { //::SireMove::SupraSubSystem::subSystem
-
+        
             typedef ::SireSystem::System const & ( ::SireMove::SupraSubSystem::*subSystem_function_type)(  ) const;
             subSystem_function_type subSystem_function_value( &::SireMove::SupraSubSystem::subSystem );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "subSystem"
                 , subSystem_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the system that is part of this sub-system\nThrow: SireError::invalid_state\n" );
-
+        
         }
         { //::SireMove::SupraSubSystem::subSystemAndMoves
-
+        
             typedef ::SireMove::SimStore const & ( ::SireMove::SupraSubSystem::*subSystemAndMoves_function_type)(  ) const;
             subSystemAndMoves_function_type subSystemAndMoves_function_value( &::SireMove::SupraSubSystem::subSystemAndMoves );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "subSystemAndMoves"
                 , subSystemAndMoves_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return both the system and moves that are part of this sub-system" );
-
+        
         }
         { //::SireMove::SupraSubSystem::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::SupraSubSystem::typeName );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::SupraSubSystem::unpack
-
+        
             typedef void ( ::SireMove::SupraSubSystem::*unpack_function_type)(  ) ;
             unpack_function_type unpack_function_value( &::SireMove::SupraSubSystem::unpack );
-
-            SupraSubSystem_exposer.def(
+            
+            SupraSubSystem_exposer.def( 
                 "unpack"
                 , unpack_function_value
                 , bp::release_gil_policy()
                 , "Unpack the system. This does nothing if the system is already unpacked" );
-
+        
         }
         SupraSubSystem_exposer.staticmethod( "null" );
         SupraSubSystem_exposer.staticmethod( "typeName" );

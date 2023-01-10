@@ -1,5 +1,8 @@
 __all__ = ["TrajectoryIterator"]
 
+# make sure that GeneralUnit has been modernised
+from ..units import GeneralUnit as _GeneralUnit
+
 
 class TrajectoryIterator:
     """

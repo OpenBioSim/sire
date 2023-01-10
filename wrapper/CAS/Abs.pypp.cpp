@@ -38,55 +38,55 @@ void register_Abs_class(){
         Abs_exposer.def( bp::init< SireCAS::Expression const & >(( bp::arg("power") ), "Construct abs(expression)") );
         Abs_exposer.def( bp::init< SireCAS::Abs const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::Abs::evaluate
-
+        
             typedef double ( ::SireCAS::Abs::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Abs::evaluate );
-
-            Abs_exposer.def(
+            
+            Abs_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this function" );
-
+        
         }
         { //::SireCAS::Abs::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::Abs::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Abs::evaluate );
-
-            Abs_exposer.def(
+            
+            Abs_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Complex evaluation" );
-
+        
         }
         Abs_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::Abs::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::Abs::typeName );
-
-            Abs_exposer.def(
+            
+            Abs_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::Abs::what
-
+        
             typedef char const * ( ::SireCAS::Abs::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::Abs::what );
-
-            Abs_exposer.def(
+            
+            Abs_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Abs_exposer.staticmethod( "typeName" );
         Abs_exposer.def( "__copy__", &__copy__);

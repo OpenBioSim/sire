@@ -52,92 +52,92 @@ void register_TwoAtomPerturbation_class(){
         TwoAtomPerturbation_exposer.def( bp::init< SireMol::AtomID const &, SireMol::AtomID const &, SireCAS::Expression const &, SireCAS::Identities const &, SireCAS::Identities const &, SireCAS::Expression const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("atom0"), bp::arg("atom1"), bp::arg("base_expression"), bp::arg("initial_forms"), bp::arg("final_forms"), bp::arg("mapping_function"), bp::arg("map")=SireBase::PropertyMap() ), "Construct to perturb the function between the atoms atom0 and atom1\nto use base_expression populated with the identities in initial_forms\nat the initial state, and populated with the identities in final_forms\nat the final state, where the identities are mapped between the initial\nand final states using mapping_function") );
         TwoAtomPerturbation_exposer.def( bp::init< SireMM::TwoAtomPerturbation const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::TwoAtomPerturbation::atom0
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMM::TwoAtomPerturbation::*atom0_function_type)(  ) const;
             atom0_function_type atom0_function_value( &::SireMM::TwoAtomPerturbation::atom0 );
-
-            TwoAtomPerturbation_exposer.def(
+            
+            TwoAtomPerturbation_exposer.def( 
                 "atom0"
                 , atom0_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the first of the two atoms whose potential is being changed" );
-
+        
         }
         { //::SireMM::TwoAtomPerturbation::atom1
-
+        
             typedef ::SireMol::AtomID const & ( ::SireMM::TwoAtomPerturbation::*atom1_function_type)(  ) const;
             atom1_function_type atom1_function_value( &::SireMM::TwoAtomPerturbation::atom1 );
-
-            TwoAtomPerturbation_exposer.def(
+            
+            TwoAtomPerturbation_exposer.def( 
                 "atom1"
                 , atom1_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the second of the two atoms whose potential is being changed" );
-
+        
         }
         TwoAtomPerturbation_exposer.def( bp::self != bp::self );
         { //::SireMM::TwoAtomPerturbation::operator=
-
+        
             typedef ::SireMM::TwoAtomPerturbation & ( ::SireMM::TwoAtomPerturbation::*assign_function_type)( ::SireMM::TwoAtomPerturbation const & ) ;
             assign_function_type assign_function_value( &::SireMM::TwoAtomPerturbation::operator= );
-
-            TwoAtomPerturbation_exposer.def(
+            
+            TwoAtomPerturbation_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         TwoAtomPerturbation_exposer.def( bp::self == bp::self );
         { //::SireMM::TwoAtomPerturbation::requiredProperties
-
+        
             typedef ::QSet< QString > ( ::SireMM::TwoAtomPerturbation::*requiredProperties_function_type)(  ) const;
             requiredProperties_function_type requiredProperties_function_value( &::SireMM::TwoAtomPerturbation::requiredProperties );
-
-            TwoAtomPerturbation_exposer.def(
+            
+            TwoAtomPerturbation_exposer.def( 
                 "requiredProperties"
                 , requiredProperties_function_value
                 , bp::release_gil_policy()
                 , "Return the properties required or changed by this perturbation" );
-
+        
         }
         { //::SireMM::TwoAtomPerturbation::toString
-
+        
             typedef ::QString ( ::SireMM::TwoAtomPerturbation::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMM::TwoAtomPerturbation::toString );
-
-            TwoAtomPerturbation_exposer.def(
+            
+            TwoAtomPerturbation_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this perturbation" );
-
+        
         }
         { //::SireMM::TwoAtomPerturbation::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::TwoAtomPerturbation::typeName );
-
-            TwoAtomPerturbation_exposer.def(
+            
+            TwoAtomPerturbation_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::TwoAtomPerturbation::wouldChange
-
+        
             typedef bool ( ::SireMM::TwoAtomPerturbation::*wouldChange_function_type)( ::SireMol::Molecule const &,::SireCAS::Values const & ) const;
             wouldChange_function_type wouldChange_function_value( &::SireMM::TwoAtomPerturbation::wouldChange );
-
-            TwoAtomPerturbation_exposer.def(
+            
+            TwoAtomPerturbation_exposer.def( 
                 "wouldChange"
                 , wouldChange_function_value
                 , ( bp::arg("molecule"), bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Return whether or not this perturbation with the passed values would\nchange the molecule molecule" );
-
+        
         }
         TwoAtomPerturbation_exposer.staticmethod( "typeName" );
         TwoAtomPerturbation_exposer.def( "__copy__", &__copy__);

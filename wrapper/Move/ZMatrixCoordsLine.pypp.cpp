@@ -65,130 +65,130 @@ void register_ZMatrixCoordsLine_class(){
         ZMatrixCoordsLine_exposer.def( bp::init< SireMove::ZMatrixLine const &, SireUnits::Dimension::Length const &, SireUnits::Dimension::Angle const &, SireUnits::Dimension::Angle const & >(( bp::arg("line"), bp::arg("bond"), bp::arg("angle"), bp::arg("dihedral") ), "Construct from the passed line and coordinates") );
         ZMatrixCoordsLine_exposer.def( bp::init< SireMove::ZMatrixCoordsLine const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::ZMatrixCoordsLine::angleSize
-
+        
             typedef ::SireUnits::Dimension::Angle ( ::SireMove::ZMatrixCoordsLine::*angleSize_function_type)(  ) const;
             angleSize_function_type angleSize_function_value( &::SireMove::ZMatrixCoordsLine::angleSize );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "angleSize"
                 , angleSize_function_value
                 , bp::release_gil_policy()
                 , "Return the size of the angle" );
-
+        
         }
         { //::SireMove::ZMatrixCoordsLine::bondLength
-
+        
             typedef ::SireUnits::Dimension::Length ( ::SireMove::ZMatrixCoordsLine::*bondLength_function_type)(  ) const;
             bondLength_function_type bondLength_function_value( &::SireMove::ZMatrixCoordsLine::bondLength );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "bondLength"
                 , bondLength_function_value
                 , bp::release_gil_policy()
                 , "Return the length of the bond" );
-
+        
         }
         { //::SireMove::ZMatrixCoordsLine::dihedralSize
-
+        
             typedef ::SireUnits::Dimension::Angle ( ::SireMove::ZMatrixCoordsLine::*dihedralSize_function_type)(  ) const;
             dihedralSize_function_type dihedralSize_function_value( &::SireMove::ZMatrixCoordsLine::dihedralSize );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "dihedralSize"
                 , dihedralSize_function_value
                 , bp::release_gil_policy()
                 , "Return the size of the dihedral" );
-
+        
         }
         ZMatrixCoordsLine_exposer.def( bp::self != bp::self );
         { //::SireMove::ZMatrixCoordsLine::operator=
-
+        
             typedef ::SireMove::ZMatrixCoordsLine & ( ::SireMove::ZMatrixCoordsLine::*assign_function_type)( ::SireMove::ZMatrixCoordsLine const & ) ;
             assign_function_type assign_function_value( &::SireMove::ZMatrixCoordsLine::operator= );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         ZMatrixCoordsLine_exposer.def( bp::self == bp::self );
         { //::SireMove::ZMatrixCoordsLine::setAngle
-
+        
             typedef void ( ::SireMove::ZMatrixCoordsLine::*setAngle_function_type)( ::SireUnits::Dimension::Angle const & ) ;
             setAngle_function_type setAngle_function_value( &::SireMove::ZMatrixCoordsLine::setAngle );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "setAngle"
                 , setAngle_function_value
                 , ( bp::arg("size") )
                 , bp::release_gil_policy()
                 , "Set the size of the angle" );
-
+        
         }
         { //::SireMove::ZMatrixCoordsLine::setBond
-
+        
             typedef void ( ::SireMove::ZMatrixCoordsLine::*setBond_function_type)( ::SireUnits::Dimension::Length const & ) ;
             setBond_function_type setBond_function_value( &::SireMove::ZMatrixCoordsLine::setBond );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "setBond"
                 , setBond_function_value
                 , ( bp::arg("length") )
                 , bp::release_gil_policy()
                 , "Set the length of the bond" );
-
+        
         }
         { //::SireMove::ZMatrixCoordsLine::setDihedral
-
+        
             typedef void ( ::SireMove::ZMatrixCoordsLine::*setDihedral_function_type)( ::SireUnits::Dimension::Angle const & ) ;
             setDihedral_function_type setDihedral_function_value( &::SireMove::ZMatrixCoordsLine::setDihedral );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "setDihedral"
                 , setDihedral_function_value
                 , ( bp::arg("size") )
                 , bp::release_gil_policy()
                 , "Set the size of the dihedral" );
-
+        
         }
         { //::SireMove::ZMatrixCoordsLine::toString
-
+        
             typedef ::QString ( ::SireMove::ZMatrixCoordsLine::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMove::ZMatrixCoordsLine::toString );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation" );
-
+        
         }
         { //::SireMove::ZMatrixCoordsLine::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::ZMatrixCoordsLine::typeName );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::ZMatrixCoordsLine::what
-
+        
             typedef char const * ( ::SireMove::ZMatrixCoordsLine::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMove::ZMatrixCoordsLine::what );
-
-            ZMatrixCoordsLine_exposer.def(
+            
+            ZMatrixCoordsLine_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ZMatrixCoordsLine_exposer.staticmethod( "typeName" );
         ZMatrixCoordsLine_exposer.def( "__copy__", &__copy__);

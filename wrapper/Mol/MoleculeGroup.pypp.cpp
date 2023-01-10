@@ -85,1569 +85,1569 @@ void register_MoleculeGroup_class(){
         MoleculeGroup_exposer.def( bp::init< QString const &, SireMol::SelectResult const & >(( bp::arg("name"), bp::arg("result") ), "Construct a group called name that holds the passed search result.") );
         MoleculeGroup_exposer.def( bp::init< SireMol::MoleculeGroup const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::MoleculeGroup::accept
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*accept_function_type)(  ) ;
             accept_function_type accept_function_value( &::SireMol::MoleculeGroup::accept );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "accept"
                 , accept_function_value
                 , bp::release_gil_policy()
                 , "Tell the molecule group that the last move was accepted. This tells the\ngroup to make permanent any temporary changes that were used a workspace\nto avoid memory allocation during a move" );
-
+        
         }
         { //::SireMol::MoleculeGroup::add
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*add_function_type)( ::SireMol::MoleculeView const & ) ;
             add_function_type add_function_value( &::SireMol::MoleculeGroup::add );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Add the view of the molecule in molview to this group.\nThis adds the view as a duplicate if it already exists\nin this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::add
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*add_function_type)( ::SireMol::ViewsOfMol const & ) ;
             add_function_type add_function_value( &::SireMol::MoleculeGroup::add );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molviews") )
                 , bp::release_gil_policy()
                 , "Add the views of the molecule in molviews to this group.\nThis adds the views as duplicates if they already exist\nin this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::add
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*add_function_type)( ::SireMol::Molecules const & ) ;
             add_function_type add_function_value( &::SireMol::MoleculeGroup::add );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "Add all of the molecules in molecules to this group.\nThis duplicates any molecules that already exist in this\ngroup." );
-
+        
         }
         { //::SireMol::MoleculeGroup::add
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*add_function_type)( ::SireMol::MoleculeGroup const & ) ;
             add_function_type add_function_value( &::SireMol::MoleculeGroup::add );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("MoleculeGroup") )
                 , bp::release_gil_policy()
                 , "Add the molecules in MoleculeGroup to this set. This adds the\nmolecules and views in the same order as they appear in\nMoleculeGroup, adding them as duplicates if they already\nexist in this set. Note that the version of the molecule\nwill be taken from this set." );
-
+        
         }
         { //::SireMol::MoleculeGroup::addIfUnique
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*addIfUnique_function_type)( ::SireMol::MoleculeView const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireMol::MoleculeGroup::addIfUnique );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Add the view of the molecule in molview to this group.\nThis only adds the view if it does not already exist in\nthis group, and returns whether or not the view was added" );
-
+        
         }
         { //::SireMol::MoleculeGroup::addIfUnique
-
+        
             typedef ::SireMol::ViewsOfMol ( ::SireMol::MoleculeGroup::*addIfUnique_function_type)( ::SireMol::ViewsOfMol const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireMol::MoleculeGroup::addIfUnique );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molviews") )
                 , bp::release_gil_policy()
                 , "Add the views of the molecule molviews to this group,\nadding the views only if they dont already exist in this\ngroup. This returns the views that were added successfully\nto this group." );
-
+        
         }
         { //::SireMol::MoleculeGroup::addIfUnique
-
+        
             typedef ::QList< SireMol::ViewsOfMol > ( ::SireMol::MoleculeGroup::*addIfUnique_function_type)( ::SireMol::Molecules const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireMol::MoleculeGroup::addIfUnique );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "Add the views of the molecules in molecules to this group. This\nonly adds views that dont already exist in this group. This\nreturns all of the views that were successfully added." );
-
+        
         }
         { //::SireMol::MoleculeGroup::addIfUnique
-
+        
             typedef ::QList< SireMol::ViewsOfMol > ( ::SireMol::MoleculeGroup::*addIfUnique_function_type)( ::SireMol::MoleculeGroup const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireMol::MoleculeGroup::addIfUnique );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("MoleculeGroup") )
                 , bp::release_gil_policy()
                 , "Add the viewsmolecules in MoleculeGroup to this group, but\nonly if they dont already exist in this group. This has\nthe same action as MoleculeGroup::addIfUnique(molecules), but\nit ensures that the added views are in the same order as\nin MoleculeGroup. This is costly, so if you dont care\nabout the added order, then use\nMoleculeGroup::addIfUnique(MoleculeGroup.molecules()) instead.\nThis returns the added views.\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::assertContains
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*assertContains_function_type)( ::SireMol::MolNum ) const;
             assertContains_function_type assertContains_function_value( &::SireMol::MoleculeGroup::assertContains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "assertContains"
                 , assertContains_function_value
                 , ( bp::arg("molnum") )
                 , bp::release_gil_policy()
                 , "Assert that this group contains a view of any part of the\nmolecule with number molnum\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::assertContains
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*assertContains_function_type)( ::SireMol::MolName const & ) const;
             assertContains_function_type assertContains_function_value( &::SireMol::MoleculeGroup::assertContains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "assertContains"
                 , assertContains_function_value
                 , ( bp::arg("molname") )
                 , bp::release_gil_policy()
                 , "Assert that this group contains a molecule called molname\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::at
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*at_function_type)( ::SireMol::MolNum ) const;
             at_function_type at_function_value( &::SireMol::MoleculeGroup::at );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("molnum") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the views of the molecule with number molnum from this group.\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::at
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*at_function_type)( ::SireMol::MolIdx ) const;
             at_function_type at_function_value( &::SireMol::MoleculeGroup::at );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("molidx") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the views of the molecule at index molidx\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::at
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*at_function_type)( ::SireMol::MolName const & ) const;
             at_function_type at_function_value( &::SireMol::MoleculeGroup::at );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("molname") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the views of the molecule called molname\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\nThrow: SireMol::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::at
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*at_function_type)( ::SireMol::MolID const & ) const;
             at_function_type at_function_value( &::SireMol::MoleculeGroup::at );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("molid") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the views of the molecule that is identified by molid\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::at
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireMol::MoleculeGroup::*at_function_type)( ::boost::tuples::tuple< SireMol::MolNum, SireID::Index, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > const & ) const;
             at_function_type at_function_value( &::SireMol::MoleculeGroup::at );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("viewidx") )
                 , bp::release_gil_policy()
                 , "Return the specified view of the specified molecule in this group.\nThrow: SireMol::missing_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::at
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireMol::MoleculeGroup::*at_function_type)( ::boost::tuples::tuple< SireMol::MolIdentifier, SireID::Index, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > const & ) const;
             at_function_type at_function_value( &::SireMol::MoleculeGroup::at );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("viewidx") )
                 , bp::release_gil_policy()
                 , "Return the view of hte molecule at viewidx\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::at
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireMol::MoleculeGroup::*at_function_type)( ::SireMol::MolNum,int ) const;
             at_function_type at_function_value( &::SireMol::MoleculeGroup::at );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("molnum"), bp::arg("viewidx") )
                 , bp::release_gil_policy()
                 , "Return the specified view of the specified molecule in this group.\nThrow: SireMol::missing_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::at
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireMol::MoleculeGroup::*at_function_type)( ::SireMol::MolID const &,int ) const;
             at_function_type at_function_value( &::SireMol::MoleculeGroup::at );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("molid"), bp::arg("viewidx") )
                 , bp::release_gil_policy()
                 , "Return the specified view of the molecule identified by\nthe ID molid\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::back
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*back_function_type)(  ) const;
             back_function_type back_function_value( &::SireMol::MoleculeGroup::back );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "back"
                 , back_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return a reference to the last molecule in the group\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::contains
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*contains_function_type)( ::SireMol::MolNum ) const;
             contains_function_type contains_function_value( &::SireMol::MoleculeGroup::contains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "contains"
                 , contains_function_value
                 , ( bp::arg("molnum") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains any views of the\nmolecule with number molnum" );
-
+        
         }
         { //::SireMol::MoleculeGroup::contains
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*contains_function_type)( ::SireMol::MolIdx ) const;
             contains_function_type contains_function_value( &::SireMol::MoleculeGroup::contains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "contains"
                 , contains_function_value
                 , ( bp::arg("molidx") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains a molecule at index molidx" );
-
+        
         }
         { //::SireMol::MoleculeGroup::contains
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*contains_function_type)( ::SireMol::MolName const & ) const;
             contains_function_type contains_function_value( &::SireMol::MoleculeGroup::contains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "contains"
                 , contains_function_value
                 , ( bp::arg("molname") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains any molecules called molname" );
-
+        
         }
         { //::SireMol::MoleculeGroup::contains
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*contains_function_type)( ::SireMol::MolID const & ) const;
             contains_function_type contains_function_value( &::SireMol::MoleculeGroup::contains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "contains"
                 , contains_function_value
                 , ( bp::arg("molid") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains any molecules that\nmatch the ID molid" );
-
+        
         }
         { //::SireMol::MoleculeGroup::contains
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*contains_function_type)( ::SireMol::MoleculeView const & ) const;
             contains_function_type contains_function_value( &::SireMol::MoleculeGroup::contains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "contains"
                 , contains_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains any version of\nthe view of the molecule in molview" );
-
+        
         }
         { //::SireMol::MoleculeGroup::contains
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*contains_function_type)( ::SireMol::ViewsOfMol const & ) const;
             contains_function_type contains_function_value( &::SireMol::MoleculeGroup::contains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "contains"
                 , contains_function_value
                 , ( bp::arg("molviews") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains all of the views\nof any version of the molecule in molviews" );
-
+        
         }
         { //::SireMol::MoleculeGroup::contains
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*contains_function_type)( ::SireMol::Molecules const & ) const;
             contains_function_type contains_function_value( &::SireMol::MoleculeGroup::contains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "contains"
                 , contains_function_value
                 , ( bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains all of the\nviews of any version of all of the molecules contained\nin molecules" );
-
+        
         }
         { //::SireMol::MoleculeGroup::contains
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*contains_function_type)( ::SireMol::MoleculeGroup const & ) const;
             contains_function_type contains_function_value( &::SireMol::MoleculeGroup::contains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "contains"
                 , contains_function_value
                 , ( bp::arg("MoleculeGroup") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains all of the\nviews of any version of all of the molecules contained\nin molecules" );
-
+        
         }
         { //::SireMol::MoleculeGroup::deleteFrame
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*deleteFrame_function_type)( int ) ;
             deleteFrame_function_type deleteFrame_function_value( &::SireMol::MoleculeGroup::deleteFrame );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "deleteFrame"
                 , deleteFrame_function_value
                 , ( bp::arg("frame") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::deleteFrame
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*deleteFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
             deleteFrame_function_type deleteFrame_function_value( &::SireMol::MoleculeGroup::deleteFrame );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "deleteFrame"
                 , deleteFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::first
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*first_function_type)(  ) const;
             first_function_type first_function_value( &::SireMol::MoleculeGroup::first );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "first"
                 , first_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return a reference to the first molecule in the group\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::front
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*front_function_type)(  ) const;
             front_function_type front_function_value( &::SireMol::MoleculeGroup::front );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "front"
                 , front_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return a reference to the first molecule in the group\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::getMoleculeNumber
-
+        
             typedef ::SireMol::MolNum ( ::SireMol::MoleculeGroup::*getMoleculeNumber_function_type)( ::SireMol::MolNum ) const;
             getMoleculeNumber_function_type getMoleculeNumber_function_value( &::SireMol::MoleculeGroup::getMoleculeNumber );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "getMoleculeNumber"
                 , getMoleculeNumber_function_value
                 , ( bp::arg("molnum") )
                 , bp::release_gil_policy()
                 , "Obvious function used to shortcut the getMoleculeNumber(const MolID&)\nfunction\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::getMoleculeNumber
-
+        
             typedef ::SireMol::MolNum ( ::SireMol::MoleculeGroup::*getMoleculeNumber_function_type)( ::SireMol::MolIdx ) const;
             getMoleculeNumber_function_type getMoleculeNumber_function_value( &::SireMol::MoleculeGroup::getMoleculeNumber );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "getMoleculeNumber"
                 , getMoleculeNumber_function_value
                 , ( bp::arg("molidx") )
                 , bp::release_gil_policy()
                 , "Return the number of the molecule at index molidx\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::getMoleculeNumber
-
+        
             typedef ::SireMol::MolNum ( ::SireMol::MoleculeGroup::*getMoleculeNumber_function_type)( ::SireMol::MolName const & ) const;
             getMoleculeNumber_function_type getMoleculeNumber_function_value( &::SireMol::MoleculeGroup::getMoleculeNumber );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "getMoleculeNumber"
                 , getMoleculeNumber_function_value
                 , ( bp::arg("molname") )
                 , bp::release_gil_policy()
                 , "Return the number of the molecule with name molname\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::getMoleculeNumber
-
+        
             typedef ::SireMol::MolNum ( ::SireMol::MoleculeGroup::*getMoleculeNumber_function_type)( ::SireMol::MolID const & ) const;
             getMoleculeNumber_function_type getMoleculeNumber_function_value( &::SireMol::MoleculeGroup::getMoleculeNumber );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "getMoleculeNumber"
                 , getMoleculeNumber_function_value
                 , ( bp::arg("molid") )
                 , bp::release_gil_policy()
                 , "Return the number of the molecule that matches the ID molid\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::getMoleculeVersion
-
+        
             typedef ::quint64 ( ::SireMol::MoleculeGroup::*getMoleculeVersion_function_type)( ::SireMol::MolNum ) const;
             getMoleculeVersion_function_type getMoleculeVersion_function_value( &::SireMol::MoleculeGroup::getMoleculeVersion );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "getMoleculeVersion"
                 , getMoleculeVersion_function_value
                 , ( bp::arg("molnum") )
                 , bp::release_gil_policy()
                 , "Return the version number of the molecule with number molnum\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::getMoleculeVersion
-
+        
             typedef ::quint64 ( ::SireMol::MoleculeGroup::*getMoleculeVersion_function_type)( ::SireMol::MolID const & ) const;
             getMoleculeVersion_function_type getMoleculeVersion_function_value( &::SireMol::MoleculeGroup::getMoleculeVersion );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "getMoleculeVersion"
                 , getMoleculeVersion_function_value
                 , ( bp::arg("molid") )
                 , bp::release_gil_policy()
                 , "Return the version number of the molecule with ID molid\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::indexOf
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*indexOf_function_type)( ::SireMol::MoleculeView const & ) const;
             indexOf_function_type indexOf_function_value( &::SireMol::MoleculeGroup::indexOf );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "indexOf"
                 , indexOf_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Return the index of the view of the molecule viewed in molview. This\nis the index of this specific view, so you use this index with the\nMoleculeGroup::viewAt(int i) function. This returns -1 if this\nview is not in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::indexOf
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*indexOf_function_type)( ::SireMol::MolNum ) const;
             indexOf_function_type indexOf_function_value( &::SireMol::MoleculeGroup::indexOf );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "indexOf"
                 , indexOf_function_value
                 , ( bp::arg("molnum") )
                 , bp::release_gil_policy()
                 , "Return the index of the molecule with number molnum. This is the index\nof the molecule itself, so you use this index with the MoleculeGroup::at(int i)\nfunction. This returns -1 if this molecule isnt in this group.\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::intersects
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*intersects_function_type)( ::SireMol::MoleculeView const & ) const;
             intersects_function_type intersects_function_value( &::SireMol::MoleculeGroup::intersects );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "intersects"
                 , intersects_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains any version\nof any of the atoms of the molecule in molview" );
-
+        
         }
         { //::SireMol::MoleculeGroup::intersects
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*intersects_function_type)( ::SireMol::Molecules const & ) const;
             intersects_function_type intersects_function_value( &::SireMol::MoleculeGroup::intersects );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "intersects"
                 , intersects_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains any version\nof any of the atoms in any of the molecules in molecules" );
-
+        
         }
         { //::SireMol::MoleculeGroup::intersects
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*intersects_function_type)( ::SireMol::MoleculeGroup const & ) const;
             intersects_function_type intersects_function_value( &::SireMol::MoleculeGroup::intersects );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "intersects"
                 , intersects_function_value
                 , ( bp::arg("MoleculeGroup") )
                 , bp::release_gil_policy()
                 , "Return whether or not this group contains any version\nof any of the atoms in any of the molecules contained in\nthe group other" );
-
+        
         }
         { //::SireMol::MoleculeGroup::isEmpty
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireMol::MoleculeGroup::isEmpty );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this group is empty" );
-
+        
         }
         { //::SireMol::MoleculeGroup::last
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*last_function_type)(  ) const;
             last_function_type last_function_value( &::SireMol::MoleculeGroup::last );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "last"
                 , last_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return a reference to the last molecule in the group\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::loadFrame
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*loadFrame_function_type)( int ) ;
             loadFrame_function_type loadFrame_function_value( &::SireMol::MoleculeGroup::loadFrame );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::loadFrame
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*loadFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
             loadFrame_function_type loadFrame_function_value( &::SireMol::MoleculeGroup::loadFrame );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::majorVersion
-
+        
             typedef ::quint64 ( ::SireMol::MoleculeGroup::*majorVersion_function_type)(  ) const;
             majorVersion_function_type majorVersion_function_value( &::SireMol::MoleculeGroup::majorVersion );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "majorVersion"
                 , majorVersion_function_value
                 , bp::release_gil_policy()
                 , "Return the major version number of this group. This number\nchanges whenever views are added or removed from this group,\nor when the name of this group changes" );
-
+        
         }
         { //::SireMol::MoleculeGroup::map
-
+        
             typedef ::QList< SireMol::MolNum > ( ::SireMol::MoleculeGroup::*map_function_type)( ::SireMol::MolNum ) const;
             map_function_type map_function_value( &::SireMol::MoleculeGroup::map );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molnum") )
                 , bp::release_gil_policy()
                 , "Obvious overload that shortcuts the map(const MolID&) function\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::map
-
+        
             typedef ::QList< SireMol::MolNum > ( ::SireMol::MoleculeGroup::*map_function_type)( ::SireMol::MolIdx ) const;
             map_function_type map_function_value( &::SireMol::MoleculeGroup::map );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molidx") )
                 , bp::release_gil_policy()
                 , "Return the number of the molecule at index molidx\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::map
-
+        
             typedef ::QList< SireMol::MolNum > ( ::SireMol::MoleculeGroup::*map_function_type)( ::SireMol::MolName const & ) const;
             map_function_type map_function_value( &::SireMol::MoleculeGroup::map );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molname") )
                 , bp::release_gil_policy()
                 , "Return the numbers of the molecules that are called molname\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::map
-
+        
             typedef ::QList< SireMol::MolNum > ( ::SireMol::MoleculeGroup::*map_function_type)( ::SireMol::MolID const & ) const;
             map_function_type map_function_value( &::SireMol::MoleculeGroup::map );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molid") )
                 , bp::release_gil_policy()
                 , "Return the numbers of the molecules that match the ID molid\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::minorVersion
-
+        
             typedef ::quint64 ( ::SireMol::MoleculeGroup::*minorVersion_function_type)(  ) const;
             minorVersion_function_type minorVersion_function_value( &::SireMol::MoleculeGroup::minorVersion );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "minorVersion"
                 , minorVersion_function_value
                 , bp::release_gil_policy()
                 , "Return the minor version number of this group. This number\nchanges whenever any of the versions of molecules in this group\nare changed. This number is reset to zero whenever the major\nversion number of this group is changed." );
-
+        
         }
         { //::SireMol::MoleculeGroup::molNames
-
+        
             typedef ::QSet< SireMol::MolName > ( ::SireMol::MoleculeGroup::*molNames_function_type)(  ) const;
             molNames_function_type molNames_function_value( &::SireMol::MoleculeGroup::molNames );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molNames"
                 , molNames_function_value
                 , bp::release_gil_policy()
                 , "Return the set of all names of the molecules in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molNumAt
-
+        
             typedef ::SireMol::MolNum ( ::SireMol::MoleculeGroup::*molNumAt_function_type)( int ) const;
             molNumAt_function_type molNumAt_function_value( &::SireMol::MoleculeGroup::molNumAt );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molNumAt"
                 , molNumAt_function_value
                 , ( bp::arg("idx") )
                 , bp::release_gil_policy()
                 , "Return the number of the ith molecule in this group\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molNums
-
+        
             typedef ::QVector< SireMol::MolNum > const & ( ::SireMol::MoleculeGroup::*molNums_function_type)(  ) const;
             molNums_function_type molNums_function_value( &::SireMol::MoleculeGroup::molNums );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molNums"
                 , molNums_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the numbers of all molecules present in this group,\nin the order that the molecules appear in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molViewIndexAt
-
+        
             typedef ::boost::tuples::tuple< SireMol::MolNum, SireID::Index, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > const & ( ::SireMol::MoleculeGroup::*molViewIndexAt_function_type)( int ) const;
             molViewIndexAt_function_type molViewIndexAt_function_value( &::SireMol::MoleculeGroup::molViewIndexAt );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molViewIndexAt"
                 , molViewIndexAt_function_value
                 , ( bp::arg("idx") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the MolNumIndex index of the ith view in this group\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molViewIndicies
-
+        
             typedef ::QVector< boost::tuples::tuple< SireMol::MolNum, SireID::Index, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > > const & ( ::SireMol::MoleculeGroup::*molViewIndicies_function_type)(  ) const;
             molViewIndicies_function_type molViewIndicies_function_value( &::SireMol::MoleculeGroup::molViewIndicies );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molViewIndicies"
                 , molViewIndicies_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the numbers and view indicies of all views in this group,\nin the order that the views appear in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molecule
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*molecule_function_type)( ::SireMol::MolNum ) const;
             molecule_function_type molecule_function_value( &::SireMol::MoleculeGroup::molecule );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molecule"
                 , molecule_function_value
                 , ( bp::arg("molnum") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the views of the molecule with number molnum from\nthis group\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molecule
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*molecule_function_type)( ::SireMol::MolIdx ) const;
             molecule_function_type molecule_function_value( &::SireMol::MoleculeGroup::molecule );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molecule"
                 , molecule_function_value
                 , ( bp::arg("molidx") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the views of the molecule at index molidx\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molecule
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*molecule_function_type)( ::SireMol::MolName const & ) const;
             molecule_function_type molecule_function_value( &::SireMol::MoleculeGroup::molecule );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molecule"
                 , molecule_function_value
                 , ( bp::arg("molname") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the views of the molecule with name molname\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molecule
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*molecule_function_type)( ::SireMol::MolID const & ) const;
             molecule_function_type molecule_function_value( &::SireMol::MoleculeGroup::molecule );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molecule"
                 , molecule_function_value
                 , ( bp::arg("molid") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the views of the molecule that matches the ID molid\nThrow: SireMol::missing_molecule\nThrow: SireMol::duplicate_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::moleculeAt
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*moleculeAt_function_type)( int ) const;
             moleculeAt_function_type moleculeAt_function_value( &::SireMol::MoleculeGroup::moleculeAt );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "moleculeAt"
                 , moleculeAt_function_value
                 , ( bp::arg("idx") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the views of the molecule at index idx in this group.\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molecules
-
+        
             typedef ::SireMol::Molecules ( ::SireMol::MoleculeGroup::*molecules_function_type)( ::SireMol::MolID const & ) const;
             molecules_function_type molecules_function_value( &::SireMol::MoleculeGroup::molecules );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molecules"
                 , molecules_function_value
                 , ( bp::arg("molid") )
                 , bp::release_gil_policy()
                 , "Return all of the molecules that match the ID molid\nThrow: SireMol::missing_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::molecules
-
+        
             typedef ::SireMol::Molecules const & ( ::SireMol::MoleculeGroup::*molecules_function_type)(  ) const;
             molecules_function_type molecules_function_value( &::SireMol::MoleculeGroup::molecules );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "molecules"
                 , molecules_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return all views of all of the molecules in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nAtoms
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nAtoms_function_type)(  ) const;
             nAtoms_function_type nAtoms_function_value( &::SireMol::MoleculeGroup::nAtoms );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , bp::release_gil_policy()
                 , "Return the number of atoms in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nChains
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nChains_function_type)(  ) const;
             nChains_function_type nChains_function_value( &::SireMol::MoleculeGroup::nChains );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nChains"
                 , nChains_function_value
                 , bp::release_gil_policy()
                 , "Return the total number of chains in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nFrames
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nFrames_function_type)(  ) const;
             nFrames_function_type nFrames_function_value( &::SireMol::MoleculeGroup::nFrames );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nFrames"
                 , nFrames_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nFrames
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nFrames_function_type)( ::SireBase::PropertyMap const & ) const;
             nFrames_function_type nFrames_function_value( &::SireMol::MoleculeGroup::nFrames );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nFrames"
                 , nFrames_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nMolecules
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nMolecules_function_type)(  ) const;
             nMolecules_function_type nMolecules_function_value( &::SireMol::MoleculeGroup::nMolecules );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nMolecules"
                 , nMolecules_function_value
                 , bp::release_gil_policy()
                 , "Return the number of molecules in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nResidues
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nResidues_function_type)(  ) const;
             nResidues_function_type nResidues_function_value( &::SireMol::MoleculeGroup::nResidues );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nResidues"
                 , nResidues_function_value
                 , bp::release_gil_policy()
                 , "Return the total number of residues in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nSegments
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nSegments_function_type)(  ) const;
             nSegments_function_type nSegments_function_value( &::SireMol::MoleculeGroup::nSegments );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nSegments"
                 , nSegments_function_value
                 , bp::release_gil_policy()
                 , "Return the total number of segments in this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nViews
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nViews_function_type)(  ) const;
             nViews_function_type nViews_function_value( &::SireMol::MoleculeGroup::nViews );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nViews"
                 , nViews_function_value
                 , bp::release_gil_policy()
                 , "Return the number of views of molecules in this group -\nthis must always be greater or equal to the number of\nmolecules" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nViews
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nViews_function_type)( ::SireMol::MolNum ) const;
             nViews_function_type nViews_function_value( &::SireMol::MoleculeGroup::nViews );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nViews"
                 , nViews_function_value
                 , ( bp::arg("molnum") )
                 , bp::release_gil_policy()
                 , "Return the number of views of the molecule with number molnum\nthat are present in this group.\nThrow: SireMol::missing_molecule\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nViews
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nViews_function_type)( ::SireMol::MolID const & ) const;
             nViews_function_type nViews_function_value( &::SireMol::MoleculeGroup::nViews );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nViews"
                 , nViews_function_value
                 , ( bp::arg("molid") )
                 , bp::release_gil_policy()
                 , "Return the number of views of the molecule(s) that match\nthe ID molid\nThrow: SireMol::missing_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::nViews
-
+        
             typedef int ( ::SireMol::MoleculeGroup::*nViews_function_type)( ::SireID::Index ) const;
             nViews_function_type nViews_function_value( &::SireMol::MoleculeGroup::nViews );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "nViews"
                 , nViews_function_value
                 , ( bp::arg("idx") )
                 , bp::release_gil_policy()
                 , "Return the number of views of the molecule at index idx\nin this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::name
-
+        
             typedef ::SireMol::MGName const & ( ::SireMol::MoleculeGroup::*name_function_type)(  ) const;
             name_function_type name_function_value( &::SireMol::MoleculeGroup::name );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "name"
                 , name_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the name of this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::needsAccepting
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*needsAccepting_function_type)(  ) const;
             needsAccepting_function_type needsAccepting_function_value( &::SireMol::MoleculeGroup::needsAccepting );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "needsAccepting"
                 , needsAccepting_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this molecule group has a temporary workspace that needs accepting" );
-
+        
         }
         { //::SireMol::MoleculeGroup::null
-
+        
             typedef ::SireMol::MoleculeGroup const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMol::MoleculeGroup::null );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::number
-
+        
             typedef ::SireMol::MGNum ( ::SireMol::MoleculeGroup::*number_function_type)(  ) const;
             number_function_type number_function_value( &::SireMol::MoleculeGroup::number );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "number"
                 , number_function_value
                 , bp::release_gil_policy()
                 , "Return the ID number of this group" );
-
+        
         }
         MoleculeGroup_exposer.def( bp::self != bp::self );
         { //::SireMol::MoleculeGroup::operator=
-
+        
             typedef ::SireMol::MoleculeGroup & ( ::SireMol::MoleculeGroup::*assign_function_type)( ::SireMol::MoleculeGroup const & ) ;
             assign_function_type assign_function_value( &::SireMol::MoleculeGroup::operator= );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         MoleculeGroup_exposer.def( bp::self == bp::self );
         { //::SireMol::MoleculeGroup::operator[]
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*__getitem___function_type)( ::SireMol::MolNum ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::MoleculeGroup::operator[] );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("molnum") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::operator[]
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*__getitem___function_type)( ::SireMol::MolIdx ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::MoleculeGroup::operator[] );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("molidx") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::operator[]
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*__getitem___function_type)( ::SireMol::MolName const & ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::MoleculeGroup::operator[] );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("molname") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::operator[]
-
+        
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*__getitem___function_type)( ::SireMol::MolID const & ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::MoleculeGroup::operator[] );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("molid") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::operator[]
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireMol::MoleculeGroup::*__getitem___function_type)( ::boost::tuples::tuple< SireMol::MolNum, SireID::Index, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > const & ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::MoleculeGroup::operator[] );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("viewidx") )
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::operator[]
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireMol::MoleculeGroup::*__getitem___function_type)( ::boost::tuples::tuple< SireMol::MolIdentifier, SireID::Index, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > const & ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::MoleculeGroup::operator[] );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("viewidx") )
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::remove
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*remove_function_type)( ::SireMol::MoleculeView const & ) ;
             remove_function_type remove_function_value( &::SireMol::MoleculeGroup::remove );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Remove the view of the molecule in molview from this set.\nThis only removes the first such view from the set, and\nreturns whether or not any view was removed" );
-
+        
         }
         { //::SireMol::MoleculeGroup::remove
-
+        
             typedef ::SireMol::ViewsOfMol ( ::SireMol::MoleculeGroup::*remove_function_type)( ::SireMol::ViewsOfMol const & ) ;
             remove_function_type remove_function_value( &::SireMol::MoleculeGroup::remove );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molviews") )
                 , bp::release_gil_policy()
                 , "Remove all of the views of the molecule in molviews from this\nset. This only removes the first such view of any duplicates\nfrom this set, and returns the views that were removed" );
-
+        
         }
         { //::SireMol::MoleculeGroup::remove
-
+        
             typedef ::QList< SireMol::ViewsOfMol > ( ::SireMol::MoleculeGroup::*remove_function_type)( ::SireMol::Molecules const & ) ;
             remove_function_type remove_function_value( &::SireMol::MoleculeGroup::remove );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "Remove all of the molecules listed in molecules from this set.\nThis only removes the first of any duplicated views in this set.\nThis returns the viewsmolecules that were successfully removed." );
-
+        
         }
         { //::SireMol::MoleculeGroup::remove
-
+        
             typedef ::QList< SireMol::ViewsOfMol > ( ::SireMol::MoleculeGroup::*remove_function_type)( ::SireMol::MoleculeGroup const & ) ;
             remove_function_type remove_function_value( &::SireMol::MoleculeGroup::remove );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("MoleculeGroup") )
                 , bp::release_gil_policy()
                 , "Remove all of the molecules from the group MoleculeGroup from this set.\nThis only removes the first of any duplicated views in this set.\nThis returns the viewsmolecules that were sucessfully removed." );
-
+        
         }
         { //::SireMol::MoleculeGroup::remove
-
+        
             typedef ::SireMol::ViewsOfMol ( ::SireMol::MoleculeGroup::*remove_function_type)( ::SireMol::MolNum ) ;
             remove_function_type remove_function_value( &::SireMol::MoleculeGroup::remove );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molnum") )
                 , bp::release_gil_policy()
                 , "Completely remove all views of the molecule with number molnum\nfrom this group. This returns the views that were removed" );
-
+        
         }
         { //::SireMol::MoleculeGroup::remove
-
+        
             typedef ::QList< SireMol::ViewsOfMol > ( ::SireMol::MoleculeGroup::*remove_function_type)( ::QSet< SireMol::MolNum > const & ) ;
             remove_function_type remove_function_value( &::SireMol::MoleculeGroup::remove );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molnums") )
                 , bp::release_gil_policy()
                 , "Remove all views of the molecules whose numbers are in molnums.\nThis returns the views that were removed." );
-
+        
         }
         { //::SireMol::MoleculeGroup::removeAll
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*removeAll_function_type)( ::SireMol::MoleculeView const & ) ;
             removeAll_function_type removeAll_function_value( &::SireMol::MoleculeGroup::removeAll );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Remove all copies of the view of the molecule in molview from this\ngroup. This removes all copies if this view is duplicated in this\ngroup, and returns whether or not any views were removed." );
-
+        
         }
         { //::SireMol::MoleculeGroup::removeAll
-
+        
             typedef ::SireMol::ViewsOfMol ( ::SireMol::MoleculeGroup::*removeAll_function_type)( ::SireMol::ViewsOfMol const & ) ;
             removeAll_function_type removeAll_function_value( &::SireMol::MoleculeGroup::removeAll );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("molviews") )
                 , bp::release_gil_policy()
                 , "Remove all copies of all of the views of the molecule in molviews.\nThis removes all copies of any duplicated views in this group,\nand returns the views that were successfully removed." );
-
+        
         }
         { //::SireMol::MoleculeGroup::removeAll
-
+        
             typedef ::QList< SireMol::ViewsOfMol > ( ::SireMol::MoleculeGroup::*removeAll_function_type)( ::SireMol::Molecules const & ) ;
             removeAll_function_type removeAll_function_value( &::SireMol::MoleculeGroup::removeAll );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "Remove all copies of all of the views of the molecules in molecules.\nThis removes all copies of any duplicated views in this group.\nThis returns the moleculesviews that were removed." );
-
+        
         }
         { //::SireMol::MoleculeGroup::removeAll
-
+        
             typedef ::QList< SireMol::ViewsOfMol > ( ::SireMol::MoleculeGroup::*removeAll_function_type)( ::SireMol::MoleculeGroup const & ) ;
             removeAll_function_type removeAll_function_value( &::SireMol::MoleculeGroup::removeAll );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("MoleculeGroup") )
                 , bp::release_gil_policy()
                 , "Remove all copies of all of the views of the molecules in the\ngroup MoleculeGroup. This removes all copies of any duplicated\nviews in this group. This returns the moleculesviews that\nwere removed\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::removeAll
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*removeAll_function_type)(  ) ;
             removeAll_function_type removeAll_function_value( &::SireMol::MoleculeGroup::removeAll );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , bp::release_gil_policy()
                 , "Remove all of the molecules from this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::saveFrame
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*saveFrame_function_type)( int ) ;
             saveFrame_function_type saveFrame_function_value( &::SireMol::MoleculeGroup::saveFrame );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "saveFrame"
                 , saveFrame_function_value
                 , ( bp::arg("frame") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::saveFrame
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*saveFrame_function_type)(  ) ;
             saveFrame_function_type saveFrame_function_value( &::SireMol::MoleculeGroup::saveFrame );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "saveFrame"
                 , saveFrame_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::saveFrame
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*saveFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
             saveFrame_function_type saveFrame_function_value( &::SireMol::MoleculeGroup::saveFrame );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "saveFrame"
                 , saveFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::saveFrame
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*saveFrame_function_type)( ::SireBase::PropertyMap const & ) ;
             saveFrame_function_type saveFrame_function_value( &::SireMol::MoleculeGroup::saveFrame );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "saveFrame"
                 , saveFrame_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::search
-
+        
             typedef ::SireMol::SelectResult ( ::SireMol::MoleculeGroup::*search_function_type)( ::QString const & ) const;
             search_function_type search_function_value( &::SireMol::MoleculeGroup::search );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "search"
                 , search_function_value
                 , ( bp::arg("search_term") )
                 , bp::release_gil_policy()
                 , "Return the result of searching this molecule group with search_term" );
-
+        
         }
         { //::SireMol::MoleculeGroup::setContents
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*setContents_function_type)( ::SireMol::MoleculeView const & ) ;
             setContents_function_type setContents_function_value( &::SireMol::MoleculeGroup::setContents );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Set the contents of this group so that it only contains the\nview molview. This clears any existing contents of this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::setContents
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*setContents_function_type)( ::SireMol::ViewsOfMol const & ) ;
             setContents_function_type setContents_function_value( &::SireMol::MoleculeGroup::setContents );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("molviews") )
                 , bp::release_gil_policy()
                 , "Set the contents of this group so that it only contains the\nviews of the molecule in molviews. This clears any existing\ncontents of this group." );
-
+        
         }
         { //::SireMol::MoleculeGroup::setContents
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*setContents_function_type)( ::SireMol::Molecules const & ) ;
             setContents_function_type setContents_function_value( &::SireMol::MoleculeGroup::setContents );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "Set the contents of this group to molecules. This clears\nany existing contents of this group." );
-
+        
         }
         { //::SireMol::MoleculeGroup::setContents
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*setContents_function_type)( ::SireMol::MoleculeGroup const & ) ;
             setContents_function_type setContents_function_value( &::SireMol::MoleculeGroup::setContents );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("MoleculeGroup") )
                 , bp::release_gil_policy()
                 , "Set the contents of this group so that it equals that\nof the group MoleculeGroup. This sets the contents and\nalso preserves the same order of moleculesviews as\nin MoleculeGroup\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::setName
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*setName_function_type)( ::QString const & ) ;
             setName_function_type setName_function_value( &::SireMol::MoleculeGroup::setName );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "setName"
                 , setName_function_value
                 , ( bp::arg("new_name") )
                 , bp::release_gil_policy()
                 , "Change the name of this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::setNewNumber
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*setNewNumber_function_type)(  ) ;
             setNewNumber_function_type setNewNumber_function_value( &::SireMol::MoleculeGroup::setNewNumber );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "setNewNumber"
                 , setNewNumber_function_value
                 , bp::release_gil_policy()
                 , "Give this group a new, unique number" );
-
+        
         }
         { //::SireMol::MoleculeGroup::setNumber
-
+        
             typedef void ( ::SireMol::MoleculeGroup::*setNumber_function_type)( ::quint32 ) ;
             setNumber_function_type setNumber_function_value( &::SireMol::MoleculeGroup::setNumber );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "setNumber"
                 , setNumber_function_value
                 , ( bp::arg("new_number") )
                 , bp::release_gil_policy()
                 , "Change the number of this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::toString
-
+        
             typedef ::QString ( ::SireMol::MoleculeGroup::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::MoleculeGroup::toString );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this MoleculeGroup" );
-
+        
         }
         { //::SireMol::MoleculeGroup::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::MoleculeGroup::typeName );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::MoleculeGroup::unite
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*unite_function_type)( ::SireMol::MoleculeView const & ) ;
             unite_function_type unite_function_value( &::SireMol::MoleculeGroup::unite );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "unite"
                 , unite_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeGroup::addIfUnique(molview)" );
-
+        
         }
         { //::SireMol::MoleculeGroup::unite
-
+        
             typedef ::SireMol::ViewsOfMol ( ::SireMol::MoleculeGroup::*unite_function_type)( ::SireMol::ViewsOfMol const & ) ;
             unite_function_type unite_function_value( &::SireMol::MoleculeGroup::unite );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "unite"
                 , unite_function_value
                 , ( bp::arg("molviews") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeGroup::addIfUnique(molviews)" );
-
+        
         }
         { //::SireMol::MoleculeGroup::unite
-
+        
             typedef ::QList< SireMol::ViewsOfMol > ( ::SireMol::MoleculeGroup::*unite_function_type)( ::SireMol::Molecules const & ) ;
             unite_function_type unite_function_value( &::SireMol::MoleculeGroup::unite );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "unite"
                 , unite_function_value
                 , ( bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeGroup::addIfUnique(molecules)" );
-
+        
         }
         { //::SireMol::MoleculeGroup::unite
-
+        
             typedef ::QList< SireMol::ViewsOfMol > ( ::SireMol::MoleculeGroup::*unite_function_type)( ::SireMol::MoleculeGroup const & ) ;
             unite_function_type unite_function_value( &::SireMol::MoleculeGroup::unite );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "unite"
                 , unite_function_value
                 , ( bp::arg("MoleculeGroup") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeGroup::addIfUnique(MoleculeGroup). The\nfunction MoleculeGroup::addIfUnique(MoleculeGroup.molecules()) is\nquicker if you dont care about the order in which\nthe views are added." );
-
+        
         }
         { //::SireMol::MoleculeGroup::update
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*update_function_type)( ::SireMol::MoleculeData const &,bool ) ;
             update_function_type update_function_value( &::SireMol::MoleculeGroup::update );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("moldata"), bp::arg("auto_commit")=(bool)(true) )
                 , "Update this group so that the molecule in this group whose\ndata is in moldata is also at the same version as moldata.\nThis does nothing if there is no such molecule in this\ngroup, or if it is already at this version, and this returns\nwhether or not this changes the group." );
-
+        
         }
         { //::SireMol::MoleculeGroup::update
-
+        
             typedef bool ( ::SireMol::MoleculeGroup::*update_function_type)( ::SireMol::MoleculeView const &,bool ) ;
             update_function_type update_function_value( &::SireMol::MoleculeGroup::update );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("molview"), bp::arg("auto_commit")=(bool)(true) )
                 , "Update this group so that the molecule in this group that\nis also viewed in molview is updated to the same\nversion as molview.\nThis does nothing if there is no such molecule in this\ngroup, or if it is already at this version, and this returns\nwhether or not this changes the group." );
-
+        
         }
         { //::SireMol::MoleculeGroup::update
-
+        
             typedef ::QList< SireMol::Molecule > ( ::SireMol::MoleculeGroup::*update_function_type)( ::SireMol::Molecules const &,bool ) ;
             update_function_type update_function_value( &::SireMol::MoleculeGroup::update );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("molecules"), bp::arg("auto_commit")=(bool)(true) )
                 , "Update this group so that the contained molecules have the\nsame versions as the molecules in molecules. This does\nnothing if none of these molecules are in this group, or\nif they are already at the same versions. This returns\nthe list of molecules that were changed by this update." );
-
+        
         }
         { //::SireMol::MoleculeGroup::update
-
+        
             typedef ::QList< SireMol::Molecule > ( ::SireMol::MoleculeGroup::*update_function_type)( ::SireMol::MoleculeGroup const &,bool ) ;
             update_function_type update_function_value( &::SireMol::MoleculeGroup::update );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("MoleculeGroup"), bp::arg("auto_commit")=(bool)(true) )
                 , "Update this group so that it has the same version of molecules\nas those in MoleculeGroup. This does nothing if this group\ndoesnt contain any of the molecules in MoleculeGroup, or\nif it already has the molecules at the same version. This\nreturns the list of molecules that were changed by this\nupdate\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::version
-
+        
             typedef ::SireBase::Version const & ( ::SireMol::MoleculeGroup::*version_function_type)(  ) const;
             version_function_type version_function_value( &::SireMol::MoleculeGroup::version );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "version"
                 , version_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the version number of this group" );
-
+        
         }
         { //::SireMol::MoleculeGroup::viewAt
-
+        
             typedef ::SireMol::PartialMolecule ( ::SireMol::MoleculeGroup::*viewAt_function_type)( int ) const;
             viewAt_function_type viewAt_function_value( &::SireMol::MoleculeGroup::viewAt );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "viewAt"
                 , viewAt_function_value
                 , ( bp::arg("idx") )
                 , bp::release_gil_policy()
                 , "Return the view of the molecule at index idx in this group.\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMol::MoleculeGroup::what
-
+        
             typedef char const * ( ::SireMol::MoleculeGroup::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::MoleculeGroup::what );
-
-            MoleculeGroup_exposer.def(
+            
+            MoleculeGroup_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MoleculeGroup_exposer.staticmethod( "null" );
         MoleculeGroup_exposer.staticmethod( "typeName" );

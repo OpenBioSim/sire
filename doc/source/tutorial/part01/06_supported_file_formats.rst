@@ -2,7 +2,7 @@
 Supported file formats
 ======================
 
-``sire`` supports reading and writing to many common molecular file formats.
+:mod:`sire` supports reading and writing to many common molecular file formats.
 You can print the list of supported formats using
 
 .. code-block:: python
@@ -63,9 +63,9 @@ Symmetric Input / Output
 ------------------------
 
 One of our design principles is that molecular file input and output
-is symmetrical. This means that ``sire`` can read in and write out the same
+is symmetrical. This means that :mod:`sire` can read in and write out the same
 amount of information from a file (i.e. it can always read what it writes).
 
 Another design principle is that information should not be lost. As much
-as possible, ``sire`` will load and preserve all information it can
+as possible, :mod:`sire` will load and preserve all information it can
 read from a molecular file.

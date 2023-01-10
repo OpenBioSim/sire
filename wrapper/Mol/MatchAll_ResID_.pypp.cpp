@@ -69,101 +69,101 @@ void register_MatchAll_ResID__class(){
         bp::scope MatchAll_ResID__scope( MatchAll_ResID__exposer );
         MatchAll_ResID__exposer.def( bp::init< SireID::MatchAll< SireMol::ResID > const & >(( bp::arg("other") ), "") );
         { //::SireID::MatchAll< SireMol::ResID >::hash
-
+        
             typedef SireID::MatchAll< SireMol::ResID > exported_class_t;
             typedef ::uint ( ::SireID::MatchAll< SireMol::ResID >::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireID::MatchAll< SireMol::ResID >::hash );
-
-            MatchAll_ResID__exposer.def(
+            
+            MatchAll_ResID__exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::MatchAll< SireMol::ResID >::isNull
-
+        
             typedef SireID::MatchAll< SireMol::ResID > exported_class_t;
             typedef bool ( ::SireID::MatchAll< SireMol::ResID >::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireID::MatchAll< SireMol::ResID >::isNull );
-
-            MatchAll_ResID__exposer.def(
+            
+            MatchAll_ResID__exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::MatchAll< SireMol::ResID >::map
-
+        
             typedef SireID::MatchAll< SireMol::ResID > exported_class_t;
             typedef ::QList< SireMol::ResIdx > ( ::SireID::MatchAll< SireMol::ResID >::*map_function_type)( ::SireMol::ResID::SearchObject const & ) const;
             map_function_type map_function_value( &::SireID::MatchAll< SireMol::ResID >::map );
-
-            MatchAll_ResID__exposer.def(
+            
+            MatchAll_ResID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("obj") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MatchAll_ResID__exposer.def( bp::self != bp::self );
         MatchAll_ResID__exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireID::MatchAll< SireMol::ResID >::operator=
-
+        
             typedef SireID::MatchAll< SireMol::ResID > exported_class_t;
             typedef ::SireID::MatchAll< SireMol::ResID > & ( ::SireID::MatchAll< SireMol::ResID >::*assign_function_type)( ::SireID::MatchAll< SireMol::ResID > const & ) ;
             assign_function_type assign_function_value( &::SireID::MatchAll< SireMol::ResID >::operator= );
-
-            MatchAll_ResID__exposer.def(
+            
+            MatchAll_ResID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         MatchAll_ResID__exposer.def( bp::self == bp::self );
         MatchAll_ResID__exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireID::MatchAll< SireMol::ResID >::toString
-
+        
             typedef SireID::MatchAll< SireMol::ResID > exported_class_t;
             typedef ::QString ( ::SireID::MatchAll< SireMol::ResID >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireID::MatchAll< SireMol::ResID >::toString );
-
-            MatchAll_ResID__exposer.def(
+            
+            MatchAll_ResID__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::MatchAll< SireMol::ResID >::typeName
-
+        
             typedef SireID::MatchAll< SireMol::ResID > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireID::MatchAll< SireMol::ResID >::typeName );
-
-            MatchAll_ResID__exposer.def(
+            
+            MatchAll_ResID__exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::MatchAll< SireMol::ResID >::what
-
+        
             typedef SireID::MatchAll< SireMol::ResID > exported_class_t;
             typedef char const * ( ::SireID::MatchAll< SireMol::ResID >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireID::MatchAll< SireMol::ResID >::what );
-
-            MatchAll_ResID__exposer.def(
+            
+            MatchAll_ResID__exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MatchAll_ResID__exposer.staticmethod( "typeName" );
         MatchAll_ResID__exposer.def( "__copy__", &__copy__);

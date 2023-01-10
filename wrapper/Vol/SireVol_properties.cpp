@@ -25,6 +25,7 @@
 #include "cartesian.h"
 #include "space.h"
 #include <QMutex>
+#include <limits>
 #include "space.h"
 void register_SireVol_properties()
 {

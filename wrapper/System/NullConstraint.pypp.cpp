@@ -50,42 +50,42 @@ void register_NullConstraint_class(){
         NullConstraint_exposer.def( bp::init< SireSystem::NullConstraint const & >(( bp::arg("other") ), "Copy constructor") );
         NullConstraint_exposer.def( bp::self != bp::self );
         { //::SireSystem::NullConstraint::operator=
-
+        
             typedef ::SireSystem::NullConstraint & ( ::SireSystem::NullConstraint::*assign_function_type)( ::SireSystem::NullConstraint const & ) ;
             assign_function_type assign_function_value( &::SireSystem::NullConstraint::operator= );
-
-            NullConstraint_exposer.def(
+            
+            NullConstraint_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         NullConstraint_exposer.def( bp::self == bp::self );
         { //::SireSystem::NullConstraint::toString
-
+        
             typedef ::QString ( ::SireSystem::NullConstraint::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireSystem::NullConstraint::toString );
-
-            NullConstraint_exposer.def(
+            
+            NullConstraint_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation" );
-
+        
         }
         { //::SireSystem::NullConstraint::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::NullConstraint::typeName );
-
-            NullConstraint_exposer.def(
+            
+            NullConstraint_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullConstraint_exposer.staticmethod( "typeName" );
         NullConstraint_exposer.def( "__copy__", &__copy__);

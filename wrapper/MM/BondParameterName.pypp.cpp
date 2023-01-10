@@ -60,16 +60,16 @@ void register_BondParameterName_class(){
         BondParameterName_exposer_t BondParameterName_exposer = BondParameterName_exposer_t( "BondParameterName", "This class provides the default name of the\nproperty that contains the bond parameters", bp::init< >("") );
         bp::scope BondParameterName_scope( BondParameterName_exposer );
         { //::SireMM::BondParameterName::bond
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMM::BondParameterName::*bond_function_type)(  ) const;
             bond_function_type bond_function_value( &::SireMM::BondParameterName::bond );
-
-            BondParameterName_exposer.def(
+            
+            BondParameterName_exposer.def( 
                 "bond"
                 , bond_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         BondParameterName_exposer.def( "__copy__", &__copy__);
         BondParameterName_exposer.def( "__deepcopy__", &__copy__);

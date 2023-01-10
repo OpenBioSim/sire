@@ -59,40 +59,40 @@ void register_NullBondHunter_class(){
         bp::scope NullBondHunter_scope( NullBondHunter_exposer );
         NullBondHunter_exposer.def( bp::init< SireMol::NullBondHunter const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::NullBondHunter::operator()
-
+        
             typedef ::SireMol::Connectivity ( ::SireMol::NullBondHunter::*__call___function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
             __call___function_type __call___function_value( &::SireMol::NullBondHunter::operator() );
-
-            NullBondHunter_exposer.def(
+            
+            NullBondHunter_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("molview"), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
-
+        
         }
         { //::SireMol::NullBondHunter::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::NullBondHunter::typeName );
-
-            NullBondHunter_exposer.def(
+            
+            NullBondHunter_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::NullBondHunter::what
-
+        
             typedef char const * ( ::SireMol::NullBondHunter::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMol::NullBondHunter::what );
-
-            NullBondHunter_exposer.def(
+            
+            NullBondHunter_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         NullBondHunter_exposer.staticmethod( "typeName" );
         NullBondHunter_exposer.def( "__copy__", &__copy__);

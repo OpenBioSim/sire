@@ -36,293 +36,293 @@ void register_Complex_class(){
         Complex_exposer.def( bp::init< gsl_complex const & >(( bp::arg("complex") ), "Construct from a gsl_complex struct") );
         Complex_exposer.def( bp::init< SireMaths::Complex const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMaths::Complex::abs
-
+        
             typedef double ( ::SireMaths::Complex::*abs_function_type)(  ) const;
             abs_function_type abs_function_value( &::SireMaths::Complex::abs );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "abs"
                 , abs_function_value
                 , bp::release_gil_policy()
                 , "This function returns the magnitude of the complex number z, |z|." );
-
+        
         }
         { //::SireMaths::Complex::abs2
-
+        
             typedef double ( ::SireMaths::Complex::*abs2_function_type)(  ) const;
             abs2_function_type abs2_function_value( &::SireMaths::Complex::abs2 );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "abs2"
                 , abs2_function_value
                 , bp::release_gil_policy()
                 , "This function returns the squared magnitude of the complex number z, |z|^2." );
-
+        
         }
         { //::SireMaths::Complex::arg
-
+        
             typedef double ( ::SireMaths::Complex::*arg_function_type)(  ) const;
             arg_function_type arg_function_value( &::SireMaths::Complex::arg );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "arg"
                 , arg_function_value
                 , bp::release_gil_policy()
                 , "This function returns the argument of the complex number z,\nArg:(z), where -\pi < Arg:(z) <= \pi." );
-
+        
         }
         { //::SireMaths::Complex::conjugate
-
+        
             typedef ::SireMaths::Complex ( ::SireMaths::Complex::*conjugate_function_type)(  ) const;
             conjugate_function_type conjugate_function_value( &::SireMaths::Complex::conjugate );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "conjugate"
                 , conjugate_function_value
                 , bp::release_gil_policy()
                 , "This function returns the complex conjugate of the complex\nnumber z, z^ = x - i y." );
-
+        
         }
         { //::SireMaths::Complex::imag
-
+        
             typedef double ( ::SireMaths::Complex::*imag_function_type)(  ) const;
             imag_function_type imag_function_value( &::SireMaths::Complex::imag );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "imag"
                 , imag_function_value
                 , bp::release_gil_policy()
                 , "Return the imaginary part of this number" );
-
+        
         }
         { //::SireMaths::Complex::inverse
-
+        
             typedef ::SireMaths::Complex ( ::SireMaths::Complex::*inverse_function_type)(  ) const;
             inverse_function_type inverse_function_value( &::SireMaths::Complex::inverse );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "inverse"
                 , inverse_function_value
                 , bp::release_gil_policy()
                 , "This function returns the inverse, or reciprocal, of the\ncomplex number z, 1z = (x - i y)(x^2 + y^2)." );
-
+        
         }
         { //::SireMaths::Complex::isPurelyComplex
-
+        
             typedef bool ( ::SireMaths::Complex::*isPurelyComplex_function_type)(  ) const;
             isPurelyComplex_function_type isPurelyComplex_function_value( &::SireMaths::Complex::isPurelyComplex );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "isPurelyComplex"
                 , isPurelyComplex_function_value
                 , bp::release_gil_policy()
                 , "Is this a pure complex number (real == 0)" );
-
+        
         }
         { //::SireMaths::Complex::isReal
-
+        
             typedef bool ( ::SireMaths::Complex::*isReal_function_type)(  ) const;
             isReal_function_type isReal_function_value( &::SireMaths::Complex::isReal );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "isReal"
                 , isReal_function_value
                 , bp::release_gil_policy()
                 , "Is this a real number (imag == 0) ?" );
-
+        
         }
         { //::SireMaths::Complex::isZero
-
+        
             typedef bool ( ::SireMaths::Complex::*isZero_function_type)(  ) const;
             isZero_function_type isZero_function_value( &::SireMaths::Complex::isZero );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "isZero"
                 , isZero_function_value
                 , bp::release_gil_policy()
                 , "Is this zero?" );
-
+        
         }
         { //::SireMaths::Complex::logAbs
-
+        
             typedef double ( ::SireMaths::Complex::*logAbs_function_type)(  ) const;
             logAbs_function_type logAbs_function_value( &::SireMaths::Complex::logAbs );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "logAbs"
                 , logAbs_function_value
                 , bp::release_gil_policy()
                 , "This function returns the natural logarithm of the magnitude of the\ncomplex number z, iog|z|. It allows an accurate evaluation of iog|z|\nwhen |z| is close to one. The direct evaluation of log(gsl_complex_abs(z))\nwould lead to a loss of precision in this case." );
-
+        
         }
         { //::SireMaths::Complex::negative
-
+        
             typedef ::SireMaths::Complex ( ::SireMaths::Complex::*negative_function_type)(  ) const;
             negative_function_type negative_function_value( &::SireMaths::Complex::negative );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "negative"
                 , negative_function_value
                 , bp::release_gil_policy()
                 , "This function returns the negative of the complex\nnumber z, -z = (-x) + i(-y)." );
-
+        
         }
         Complex_exposer.def( bp::self != bp::self );
         Complex_exposer.def( bp::self != bp::other< double >() );
         Complex_exposer.def( -bp::self );
         { //::SireMaths::Complex::operator=
-
+        
             typedef ::SireMaths::Complex & ( ::SireMaths::Complex::*assign_function_type)( ::SireMaths::Complex const & ) ;
             assign_function_type assign_function_value( &::SireMaths::Complex::operator= );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMaths::Complex::operator=
-
+        
             typedef ::SireMaths::Complex & ( ::SireMaths::Complex::*assign_function_type)( double ) ;
             assign_function_type assign_function_value( &::SireMaths::Complex::operator= );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("r") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         Complex_exposer.def( bp::self == bp::self );
         Complex_exposer.def( bp::self == bp::other< double >() );
         { //::SireMaths::Complex::polar
-
+        
             typedef ::SireMaths::Complex ( *polar_function_type )( double,double );
             polar_function_type polar_function_value( &::SireMaths::Complex::polar );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "polar"
                 , polar_function_value
                 , ( bp::arg("r"), bp::arg("theta") )
                 , bp::release_gil_policy()
                 , "This function returns the complex number\nz = r E:xp(i \theta) = r (os(\theta) + i ain(\theta))\nfrom the polar representation (r,theta)." );
-
+        
         }
         { //::SireMaths::Complex::real
-
+        
             typedef double ( ::SireMaths::Complex::*real_function_type)(  ) const;
             real_function_type real_function_value( &::SireMaths::Complex::real );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "real"
                 , real_function_value
                 , bp::release_gil_policy()
                 , "Return the real part of this number" );
-
+        
         }
         { //::SireMaths::Complex::rect
-
+        
             typedef ::SireMaths::Complex ( *rect_function_type )( double,double );
             rect_function_type rect_function_value( &::SireMaths::Complex::rect );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "rect"
                 , rect_function_value
                 , ( bp::arg("x"), bp::arg("y") )
                 , bp::release_gil_policy()
                 , "This function uses the rectangular cartesian components (x,y) to\nreturn the complex number z = x + i y." );
-
+        
         }
         { //::SireMaths::Complex::setImag
-
+        
             typedef void ( ::SireMaths::Complex::*setImag_function_type)( double ) ;
             setImag_function_type setImag_function_value( &::SireMaths::Complex::setImag );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "setImag"
                 , setImag_function_value
                 , ( bp::arg("y") )
                 , bp::release_gil_policy()
                 , "This function set the imaginary part of the complex number" );
-
+        
         }
         { //::SireMaths::Complex::setPolar
-
+        
             typedef void ( ::SireMaths::Complex::*setPolar_function_type)( double,double ) ;
             setPolar_function_type setPolar_function_value( &::SireMaths::Complex::setPolar );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "setPolar"
                 , setPolar_function_value
                 , ( bp::arg("r"), bp::arg("theta") )
                 , bp::release_gil_policy()
                 , "This function sets the complex number to\nz = r E:xp(i \theta) = r (os(\theta) + i ain(\theta))\nfrom the polar representation (r,theta)." );
-
+        
         }
         { //::SireMaths::Complex::setReal
-
+        
             typedef void ( ::SireMaths::Complex::*setReal_function_type)( double ) ;
             setReal_function_type setReal_function_value( &::SireMaths::Complex::setReal );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "setReal"
                 , setReal_function_value
                 , ( bp::arg("x") )
                 , bp::release_gil_policy()
                 , "This function sets the real part of the complex number" );
-
+        
         }
         { //::SireMaths::Complex::setRectangular
-
+        
             typedef void ( ::SireMaths::Complex::*setRectangular_function_type)( double,double ) ;
             setRectangular_function_type setRectangular_function_value( &::SireMaths::Complex::setRectangular );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "setRectangular"
                 , setRectangular_function_value
                 , ( bp::arg("x"), bp::arg("y") )
                 , bp::release_gil_policy()
                 , "This function sets the rectangular cartesian components (x,y) to\nthe complex number z = x + i y." );
-
+        
         }
         { //::SireMaths::Complex::toString
-
+        
             typedef ::QString ( ::SireMaths::Complex::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::Complex::toString );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this Complex number" );
-
+        
         }
         { //::SireMaths::Complex::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMaths::Complex::typeName );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::Complex::what
-
+        
             typedef char const * ( ::SireMaths::Complex::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMaths::Complex::what );
-
-            Complex_exposer.def(
+            
+            Complex_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Complex_exposer.staticmethod( "polar" );
         Complex_exposer.staticmethod( "rect" );

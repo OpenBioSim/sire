@@ -43,93 +43,93 @@ void register_ExpAverage_class(){
         bp::scope ExpAverage_scope( ExpAverage_exposer );
         ExpAverage_exposer.def( bp::init< SireMaths::ExpAverage const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMaths::ExpAverage::accumulate
-
+        
             typedef void ( ::SireMaths::ExpAverage::*accumulate_function_type)( double ) ;
             accumulate_function_type accumulate_function_value( &::SireMaths::ExpAverage::accumulate );
-
-            ExpAverage_exposer.def(
+            
+            ExpAverage_exposer.def( 
                 "accumulate"
                 , accumulate_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Accumulate the passed value onto the average" );
-
+        
         }
         { //::SireMaths::ExpAverage::average
-
+        
             typedef double ( ::SireMaths::ExpAverage::*average_function_type)(  ) const;
             average_function_type average_function_value( &::SireMaths::ExpAverage::average );
-
-            ExpAverage_exposer.def(
+            
+            ExpAverage_exposer.def( 
                 "average"
                 , average_function_value
                 , bp::release_gil_policy()
                 , "Return the average value" );
-
+        
         }
         { //::SireMaths::ExpAverage::average2
-
+        
             typedef double ( ::SireMaths::ExpAverage::*average2_function_type)(  ) const;
             average2_function_type average2_function_value( &::SireMaths::ExpAverage::average2 );
-
-            ExpAverage_exposer.def(
+            
+            ExpAverage_exposer.def( 
                 "average2"
                 , average2_function_value
                 , bp::release_gil_policy()
                 , "Return the average of the squared value" );
-
+        
         }
         { //::SireMaths::ExpAverage::clear
-
+        
             typedef void ( ::SireMaths::ExpAverage::*clear_function_type)(  ) ;
             clear_function_type clear_function_value( &::SireMaths::ExpAverage::clear );
-
-            ExpAverage_exposer.def(
+            
+            ExpAverage_exposer.def( 
                 "clear"
                 , clear_function_value
                 , bp::release_gil_policy()
                 , "Completely clear the statistics in this accumulator" );
-
+        
         }
         ExpAverage_exposer.def( bp::self != bp::self );
         ExpAverage_exposer.def( bp::self + bp::self );
         { //::SireMaths::ExpAverage::operator=
-
+        
             typedef ::SireMaths::ExpAverage & ( ::SireMaths::ExpAverage::*assign_function_type)( ::SireMaths::ExpAverage const & ) ;
             assign_function_type assign_function_value( &::SireMaths::ExpAverage::operator= );
-
-            ExpAverage_exposer.def(
+            
+            ExpAverage_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         ExpAverage_exposer.def( bp::self == bp::self );
         { //::SireMaths::ExpAverage::toString
-
+        
             typedef ::QString ( ::SireMaths::ExpAverage::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::ExpAverage::toString );
-
-            ExpAverage_exposer.def(
+            
+            ExpAverage_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::ExpAverage::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMaths::ExpAverage::typeName );
-
-            ExpAverage_exposer.def(
+            
+            ExpAverage_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ExpAverage_exposer.staticmethod( "typeName" );
         ExpAverage_exposer.def( "__copy__", &__copy__);

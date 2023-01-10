@@ -57,464 +57,464 @@ void register_RestraintFF_class(){
         RestraintFF_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "Construct, giving the forcefield the specified name") );
         RestraintFF_exposer.def( bp::init< SireMM::RestraintFF const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::RestraintFF::add
-
+        
             typedef bool ( ::SireMM::RestraintFF::*add_function_type)( ::SireMM::Restraint3D const & ) ;
             add_function_type add_function_value( &::SireMM::RestraintFF::add );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("restraint") )
                 , bp::release_gil_policy()
                 , "Add the passed restraint to this forcefield. This does nothing\nif this restraint is already part of this forcefield. This returns\nwhether or not this changes this forcefield" );
-
+        
         }
         { //::SireMM::RestraintFF::builtinSymbols
-
+        
             typedef ::SireCAS::Symbols ( ::SireMM::RestraintFF::*builtinSymbols_function_type)(  ) const;
             builtinSymbols_function_type builtinSymbols_function_value( &::SireMM::RestraintFF::builtinSymbols );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "builtinSymbols"
                 , builtinSymbols_function_value
                 , bp::release_gil_policy()
                 , "Return all of the built-in symbols used by the restraints\nin this forcefield" );
-
+        
         }
         { //::SireMM::RestraintFF::components
-
+        
             typedef ::SireMM::RestraintComponent const & ( ::SireMM::RestraintFF::*components_function_type)(  ) const;
             components_function_type components_function_value( &::SireMM::RestraintFF::components );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "components"
                 , components_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the components of this forcefield" );
-
+        
         }
         { //::SireMM::RestraintFF::contains
-
+        
             typedef bool ( ::SireMM::RestraintFF::*contains_function_type)( ::SireMM::Restraint3D const & ) const;
             contains_function_type contains_function_value( &::SireMM::RestraintFF::contains );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "contains"
                 , contains_function_value
                 , ( bp::arg("restraint") )
                 , bp::release_gil_policy()
                 , "Return whether or not this forcefield contains the restraint\nrestraint" );
-
+        
         }
         { //::SireMM::RestraintFF::containsProperty
-
+        
             typedef bool ( ::SireMM::RestraintFF::*containsProperty_function_type)( ::QString const & ) const;
             containsProperty_function_type containsProperty_function_value( &::SireMM::RestraintFF::containsProperty );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "containsProperty"
                 , containsProperty_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Return whether or not this forcefield contains a property called name" );
-
+        
         }
         { //::SireMM::RestraintFF::differentiate
-
+        
             typedef ::SireMM::RestraintFF ( ::SireMM::RestraintFF::*differentiate_function_type)( ::SireCAS::Symbol const & ) const;
             differentiate_function_type differentiate_function_value( &::SireMM::RestraintFF::differentiate );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "differentiate"
                 , differentiate_function_value
                 , ( bp::arg("symbol") )
                 , bp::release_gil_policy()
                 , "Return a copy of this forcefield where all of the restraints\nhave been differentiated with respect to symbol. The returned\nforcefield will contain the same molecules in the same state\nas they are in this forcefield, and will be called\nd(forcefield_name)d(symbol)\n" );
-
+        
         }
         { //::SireMM::RestraintFF::energy
-
+        
             typedef void ( ::SireMM::RestraintFF::*energy_function_type)( ::SireFF::EnergyTable &,double ) ;
             energy_function_type energy_function_value( &::SireMM::RestraintFF::energy );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "energy"
                 , energy_function_value
                 , ( bp::arg("energytable"), bp::arg("scale_energy")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::energy
-
+        
             typedef void ( ::SireMM::RestraintFF::*energy_function_type)( ::SireFF::EnergyTable &,::SireCAS::Symbol const &,double ) ;
             energy_function_type energy_function_value( &::SireMM::RestraintFF::energy );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "energy"
                 , energy_function_value
                 , ( bp::arg("energytable"), bp::arg("symbol"), bp::arg("scale_energy")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::field
-
+        
             typedef void ( ::SireMM::RestraintFF::*field_function_type)( ::SireFF::FieldTable &,double ) ;
             field_function_type field_function_value( &::SireMM::RestraintFF::field );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "field"
                 , field_function_value
                 , ( bp::arg("fieldtable"), bp::arg("scale_field")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::field
-
+        
             typedef void ( ::SireMM::RestraintFF::*field_function_type)( ::SireFF::FieldTable &,::SireCAS::Symbol const &,double ) ;
             field_function_type field_function_value( &::SireMM::RestraintFF::field );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "field"
                 , field_function_value
                 , ( bp::arg("fieldtable"), bp::arg("component"), bp::arg("scale_field")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::field
-
+        
             typedef void ( ::SireMM::RestraintFF::*field_function_type)( ::SireFF::FieldTable &,::SireFF::Probe const &,double ) ;
             field_function_type field_function_value( &::SireMM::RestraintFF::field );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "field"
                 , field_function_value
                 , ( bp::arg("fieldtable"), bp::arg("probe"), bp::arg("scale_field")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::field
-
+        
             typedef void ( ::SireMM::RestraintFF::*field_function_type)( ::SireFF::FieldTable &,::SireCAS::Symbol const &,::SireFF::Probe const &,double ) ;
             field_function_type field_function_value( &::SireMM::RestraintFF::field );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "field"
                 , field_function_value
                 , ( bp::arg("fieldtable"), bp::arg("component"), bp::arg("probe"), bp::arg("scale_field")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::force
-
+        
             typedef void ( ::SireMM::RestraintFF::*force_function_type)( ::SireFF::ForceTable &,double ) ;
             force_function_type force_function_value( &::SireMM::RestraintFF::force );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "force"
                 , force_function_value
                 , ( bp::arg("forcetable"), bp::arg("scale_force")=1 )
                 , "Calculate the forces on the molecules in forcetable caused\nby the restraints in this forcefield and add them onto the\nforcetable, optionally scaled by scale_force" );
-
+        
         }
         { //::SireMM::RestraintFF::force
-
+        
             typedef void ( ::SireMM::RestraintFF::*force_function_type)( ::SireFF::ForceTable &,::SireCAS::Symbol const &,double ) ;
             force_function_type force_function_value( &::SireMM::RestraintFF::force );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "force"
                 , force_function_value
                 , ( bp::arg("forcetable"), bp::arg("symbol"), bp::arg("scale_force")=1 )
                 , "Calculate the forces on the molecules in forcetable caused by\nthe energy component symbol in this forcefield, and add them\nonto the forcetable, optionally scaled by scale_force\nThrow: SireFF::missing_component\n" );
-
+        
         }
         { //::SireMM::RestraintFF::getValue
-
+        
             typedef double ( ::SireMM::RestraintFF::*getValue_function_type)( ::SireCAS::Symbol const & ) const;
             getValue_function_type getValue_function_value( &::SireMM::RestraintFF::getValue );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "getValue"
                 , getValue_function_value
                 , ( bp::arg("symbol") )
                 , bp::release_gil_policy()
                 , "Return the value of the user-supplied symbol symbol" );
-
+        
         }
         { //::SireMM::RestraintFF::hasValue
-
+        
             typedef bool ( ::SireMM::RestraintFF::*hasValue_function_type)( ::SireCAS::Symbol const & ) const;
             hasValue_function_type hasValue_function_value( &::SireMM::RestraintFF::hasValue );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "hasValue"
                 , hasValue_function_value
                 , ( bp::arg("symbol") )
                 , bp::release_gil_policy()
                 , "Return whether or not there is a user-supplied value with the\nsymbol symbol" );
-
+        
         }
         { //::SireMM::RestraintFF::mustNowRecalculateFromScratch
-
+        
             typedef void ( ::SireMM::RestraintFF::*mustNowRecalculateFromScratch_function_type)(  ) ;
             mustNowRecalculateFromScratch_function_type mustNowRecalculateFromScratch_function_value( &::SireMM::RestraintFF::mustNowRecalculateFromScratch );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "mustNowRecalculateFromScratch"
                 , mustNowRecalculateFromScratch_function_value
                 , bp::release_gil_policy()
                 , "Force recalculation of the restraint energy from scratch" );
-
+        
         }
         { //::SireMM::RestraintFF::nRestraints
-
+        
             typedef int ( ::SireMM::RestraintFF::*nRestraints_function_type)(  ) const;
             nRestraints_function_type nRestraints_function_value( &::SireMM::RestraintFF::nRestraints );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "nRestraints"
                 , nRestraints_function_value
                 , bp::release_gil_policy()
                 , "Return the number of restraints in this forcefield" );
-
+        
         }
         RestraintFF_exposer.def( bp::self != bp::self );
         { //::SireMM::RestraintFF::operator=
-
+        
             typedef ::SireMM::RestraintFF & ( ::SireMM::RestraintFF::*assign_function_type)( ::SireMM::RestraintFF const & ) ;
             assign_function_type assign_function_value( &::SireMM::RestraintFF::operator= );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         RestraintFF_exposer.def( bp::self == bp::self );
         { //::SireMM::RestraintFF::potential
-
+        
             typedef void ( ::SireMM::RestraintFF::*potential_function_type)( ::SireFF::PotentialTable &,double ) ;
             potential_function_type potential_function_value( &::SireMM::RestraintFF::potential );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "potential"
                 , potential_function_value
                 , ( bp::arg("potentialtable"), bp::arg("scale_potential")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::potential
-
+        
             typedef void ( ::SireMM::RestraintFF::*potential_function_type)( ::SireFF::PotentialTable &,::SireCAS::Symbol const &,double ) ;
             potential_function_type potential_function_value( &::SireMM::RestraintFF::potential );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "potential"
                 , potential_function_value
                 , ( bp::arg("potentialtable"), bp::arg("component"), bp::arg("scale_potential")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::potential
-
+        
             typedef void ( ::SireMM::RestraintFF::*potential_function_type)( ::SireFF::PotentialTable &,::SireFF::Probe const &,double ) ;
             potential_function_type potential_function_value( &::SireMM::RestraintFF::potential );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "potential"
                 , potential_function_value
                 , ( bp::arg("potentialtable"), bp::arg("probe"), bp::arg("scale_potential")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::potential
-
+        
             typedef void ( ::SireMM::RestraintFF::*potential_function_type)( ::SireFF::PotentialTable &,::SireCAS::Symbol const &,::SireFF::Probe const &,double ) ;
             potential_function_type potential_function_value( &::SireMM::RestraintFF::potential );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "potential"
                 , potential_function_value
                 , ( bp::arg("potentialtable"), bp::arg("component"), bp::arg("probe"), bp::arg("scale_potential")=1 )
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::properties
-
+        
             typedef ::SireBase::Properties const & ( ::SireMM::RestraintFF::*properties_function_type)(  ) const;
             properties_function_type properties_function_value( &::SireMM::RestraintFF::properties );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "properties"
                 , properties_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return all of the properties of this forcefield" );
-
+        
         }
         { //::SireMM::RestraintFF::property
-
+        
             typedef ::SireBase::Property const & ( ::SireMM::RestraintFF::*property_function_type)( ::QString const & ) const;
             property_function_type property_function_value( &::SireMM::RestraintFF::property );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "property"
                 , property_function_value
                 , ( bp::arg("name") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the property called name\nThrow: SireBase::missing_property\n" );
-
+        
         }
         { //::SireMM::RestraintFF::remove
-
+        
             typedef bool ( ::SireMM::RestraintFF::*remove_function_type)( ::SireMM::Restraint3D const & ) ;
             remove_function_type remove_function_value( &::SireMM::RestraintFF::remove );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("restraint") )
                 , bp::release_gil_policy()
                 , "Remove the restraint restraint from this forcefield. This does\nnothing if this restraint is not in this forcefield. This returns\nwhether or not the restraint was removed." );
-
+        
         }
         { //::SireMM::RestraintFF::removeRestraintAt
-
+        
             typedef void ( ::SireMM::RestraintFF::*removeRestraintAt_function_type)( int ) ;
             removeRestraintAt_function_type removeRestraintAt_function_value( &::SireMM::RestraintFF::removeRestraintAt );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "removeRestraintAt"
                 , removeRestraintAt_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Remove the ith restraint\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMM::RestraintFF::restraintAt
-
+        
             typedef ::SireMM::Restraint3D const & ( ::SireMM::RestraintFF::*restraintAt_function_type)( int ) const;
             restraintAt_function_type restraintAt_function_value( &::SireMM::RestraintFF::restraintAt );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "restraintAt"
                 , restraintAt_function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the ith restraint\nThrow: SireError::index_error\n" );
-
+        
         }
         { //::SireMM::RestraintFF::restraints
-
+        
             typedef ::QVector< SireBase::PropPtr< SireMM::Restraint3D > > ( ::SireMM::RestraintFF::*restraints_function_type)(  ) const;
             restraints_function_type restraints_function_value( &::SireMM::RestraintFF::restraints );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "restraints"
                 , restraints_function_value
                 , bp::release_gil_policy()
                 , "Return the array of all restraints" );
-
+        
         }
         { //::SireMM::RestraintFF::setProperty
-
+        
             typedef bool ( ::SireMM::RestraintFF::*setProperty_function_type)( ::QString const &,::SireBase::Property const & ) ;
             setProperty_function_type setProperty_function_value( &::SireMM::RestraintFF::setProperty );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "setProperty"
                 , setProperty_function_value
                 , ( bp::arg("name"), bp::arg("property") )
                 , bp::release_gil_policy()
                 , "Set the property name to the value property\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireMM::RestraintFF::setSpace
-
+        
             typedef bool ( ::SireMM::RestraintFF::*setSpace_function_type)( ::SireVol::Space const & ) ;
             setSpace_function_type setSpace_function_value( &::SireMM::RestraintFF::setSpace );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "setSpace"
                 , setSpace_function_value
                 , ( bp::arg("space") )
                 , bp::release_gil_policy()
                 , "Set the space used by all of the restraints in this forcefield.\nThrow: SireVol::incompatible_space\n" );
-
+        
         }
         { //::SireMM::RestraintFF::setValue
-
+        
             typedef bool ( ::SireMM::RestraintFF::*setValue_function_type)( ::SireCAS::Symbol const &,double ) ;
             setValue_function_type setValue_function_value( &::SireMM::RestraintFF::setValue );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "setValue"
                 , setValue_function_value
                 , ( bp::arg("symbol"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Set the value of the user symbol symbol to the value value.\nThis will only work if there is a restraint in this forcefield\nthat has this symbol. This returns whether or not this\nchanges the forcefield. This raises an exception if you\nare trying to set the value of a built-in symbol\nThrow: SireError::invalid_arg\n" );
-
+        
         }
         { //::SireMM::RestraintFF::space
-
+        
             typedef ::SireVol::Space const & ( ::SireMM::RestraintFF::*space_function_type)(  ) const;
             space_function_type space_function_value( &::SireMM::RestraintFF::space );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "space"
                 , space_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the space used by this forcefield" );
-
+        
         }
         { //::SireMM::RestraintFF::symbols
-
+        
             typedef ::SireCAS::Symbols ( ::SireMM::RestraintFF::*symbols_function_type)(  ) const;
             symbols_function_type symbols_function_value( &::SireMM::RestraintFF::symbols );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "symbols"
                 , symbols_function_value
                 , bp::release_gil_policy()
                 , "Return all of the symbols used in this forcefield - this includes\nboth the user-supplied symbols and the built-in symbols" );
-
+        
         }
         { //::SireMM::RestraintFF::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::RestraintFF::typeName );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::RestraintFF::userSymbols
-
+        
             typedef ::SireCAS::Symbols ( ::SireMM::RestraintFF::*userSymbols_function_type)(  ) const;
             userSymbols_function_type userSymbols_function_value( &::SireMM::RestraintFF::userSymbols );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "userSymbols"
                 , userSymbols_function_value
                 , bp::release_gil_policy()
                 , "Return all of the user-supplied symbols for the restraints\nin this forcefield" );
-
+        
         }
         { //::SireMM::RestraintFF::userValues
-
+        
             typedef ::SireCAS::Values ( ::SireMM::RestraintFF::*userValues_function_type)(  ) const;
             userValues_function_type userValues_function_value( &::SireMM::RestraintFF::userValues );
-
-            RestraintFF_exposer.def(
+            
+            RestraintFF_exposer.def( 
                 "userValues"
                 , userValues_function_value
                 , bp::release_gil_policy()
                 , "Return all of the values for the user-supplied values in the\nrestraints in this forcefield" );
-
+        
         }
         RestraintFF_exposer.staticmethod( "typeName" );
         RestraintFF_exposer.def( "__copy__", &__copy__);

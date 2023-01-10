@@ -33,78 +33,78 @@ void register_BendBendComponent_class(){
         BendBendComponent_exposer.def( bp::init< SireCAS::Symbol const & >(( bp::arg("symbol") ), "Construct from a symbol\nThrow: SireError::incompatible_error\n") );
         BendBendComponent_exposer.def( bp::init< SireMM::BendBendComponent const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::BendBendComponent::changeEnergy
-
+        
             typedef void ( ::SireMM::BendBendComponent::*changeEnergy_function_type)( ::SireFF::FF &,::SireMM::BendBendEnergy const & ) const;
             changeEnergy_function_type changeEnergy_function_value( &::SireMM::BendBendComponent::changeEnergy );
-
-            BendBendComponent_exposer.def(
+            
+            BendBendComponent_exposer.def( 
                 "changeEnergy"
                 , changeEnergy_function_value
                 , ( bp::arg("ff"), bp::arg("bbnrg") )
                 , bp::release_gil_policy()
                 , "Change the component of the energy in the forcefield ff\nby delta" );
-
+        
         }
         { //::SireMM::BendBendComponent::setEnergy
-
+        
             typedef void ( ::SireMM::BendBendComponent::*setEnergy_function_type)( ::SireFF::FF &,::SireMM::BendBendEnergy const & ) const;
             setEnergy_function_type setEnergy_function_value( &::SireMM::BendBendComponent::setEnergy );
-
-            BendBendComponent_exposer.def(
+            
+            BendBendComponent_exposer.def( 
                 "setEnergy"
                 , setEnergy_function_value
                 , ( bp::arg("ff"), bp::arg("bbnrg") )
                 , bp::release_gil_policy()
                 , "Set the component of the energy in the forcefield ff\nto be equal to the passed energy" );
-
+        
         }
         { //::SireMM::BendBendComponent::symbols
-
+        
             typedef ::SireCAS::Symbols ( ::SireMM::BendBendComponent::*symbols_function_type)(  ) const;
             symbols_function_type symbols_function_value( &::SireMM::BendBendComponent::symbols );
-
-            BendBendComponent_exposer.def(
+            
+            BendBendComponent_exposer.def( 
                 "symbols"
                 , symbols_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::BendBendComponent::total
-
+        
             typedef ::SireMM::BendBendComponent const & ( ::SireMM::BendBendComponent::*total_function_type)(  ) const;
             total_function_type total_function_value( &::SireMM::BendBendComponent::total );
-
-            BendBendComponent_exposer.def(
+            
+            BendBendComponent_exposer.def( 
                 "total"
                 , total_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireMM::BendBendComponent::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMM::BendBendComponent::typeName );
-
-            BendBendComponent_exposer.def(
+            
+            BendBendComponent_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMM::BendBendComponent::what
-
+        
             typedef char const * ( ::SireMM::BendBendComponent::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMM::BendBendComponent::what );
-
-            BendBendComponent_exposer.def(
+            
+            BendBendComponent_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         BendBendComponent_exposer.staticmethod( "typeName" );
         BendBendComponent_exposer.def( "__copy__", &__copy__);

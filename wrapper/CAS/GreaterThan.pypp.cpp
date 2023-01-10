@@ -50,67 +50,67 @@ void register_GreaterThan_class(){
         GreaterThan_exposer.def( bp::init< SireCAS::Expression const &, SireCAS::Expression const & >(( bp::arg("left_hand_side"), bp::arg("right_hand_side") ), "Construct to compare left_hand_side with right_hand_side") );
         GreaterThan_exposer.def( bp::init< SireCAS::GreaterThan const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::GreaterThan::alwaysFalse
-
+        
             typedef bool ( ::SireCAS::GreaterThan::*alwaysFalse_function_type)(  ) const;
             alwaysFalse_function_type alwaysFalse_function_value( &::SireCAS::GreaterThan::alwaysFalse );
-
-            GreaterThan_exposer.def(
+            
+            GreaterThan_exposer.def( 
                 "alwaysFalse"
                 , alwaysFalse_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not we can be absolutely sure that this\ncondition will always be false. Note that this doesnt try\ntoo hard, so some things that are always false may not\nbe reported here as being always false, e.g. x > x + 1" );
-
+        
         }
         { //::SireCAS::GreaterThan::alwaysTrue
-
+        
             typedef bool ( ::SireCAS::GreaterThan::*alwaysTrue_function_type)(  ) const;
             alwaysTrue_function_type alwaysTrue_function_value( &::SireCAS::GreaterThan::alwaysTrue );
-
-            GreaterThan_exposer.def(
+            
+            GreaterThan_exposer.def( 
                 "alwaysTrue"
                 , alwaysTrue_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not we can be absolutely sure that this\ncondition will always be true. Note that this doesnt try\ntoo hard, so some things that are always true may not\nbe reported here as being always true, e.g. x + 1 > x" );
-
+        
         }
         { //::SireCAS::GreaterThan::operator=
-
+        
             typedef ::SireCAS::GreaterThan & ( ::SireCAS::GreaterThan::*assign_function_type)( ::SireCAS::GreaterThan const & ) ;
             assign_function_type assign_function_value( &::SireCAS::GreaterThan::operator= );
-
-            GreaterThan_exposer.def(
+            
+            GreaterThan_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         GreaterThan_exposer.def( bp::self == bp::self );
         GreaterThan_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::GreaterThan::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::GreaterThan::typeName );
-
-            GreaterThan_exposer.def(
+            
+            GreaterThan_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::GreaterThan::what
-
+        
             typedef char const * ( ::SireCAS::GreaterThan::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::GreaterThan::what );
-
-            GreaterThan_exposer.def(
+            
+            GreaterThan_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         GreaterThan_exposer.staticmethod( "typeName" );
         GreaterThan_exposer.def( "__copy__", &__copy__);

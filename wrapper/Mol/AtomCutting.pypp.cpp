@@ -52,42 +52,42 @@ void register_AtomCutting_class(){
         AtomCutting_exposer.def( bp::init< SireMol::AtomCutting const & >(( bp::arg("other") ), "Copy constructor") );
         AtomCutting_exposer.def( bp::self != bp::self );
         { //::SireMol::AtomCutting::operator()
-
+        
             typedef ::SireMol::MolStructureEditor ( ::SireMol::AtomCutting::*__call___function_type)( ::SireMol::MolStructureEditor & ) const;
             __call___function_type __call___function_value( &::SireMol::AtomCutting::operator() );
-
-            AtomCutting_exposer.def(
+            
+            AtomCutting_exposer.def( 
                 "__call__"
                 , __call___function_value
                 , ( bp::arg("moleditor") )
                 , "" );
-
+        
         }
         { //::SireMol::AtomCutting::operator=
-
+        
             typedef ::SireMol::AtomCutting & ( ::SireMol::AtomCutting::*assign_function_type)( ::SireMol::AtomCutting const & ) ;
             assign_function_type assign_function_value( &::SireMol::AtomCutting::operator= );
-
-            AtomCutting_exposer.def(
+            
+            AtomCutting_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         AtomCutting_exposer.def( bp::self == bp::self );
         { //::SireMol::AtomCutting::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::AtomCutting::typeName );
-
-            AtomCutting_exposer.def(
+            
+            AtomCutting_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AtomCutting_exposer.staticmethod( "typeName" );
         AtomCutting_exposer.def( "__copy__", &__copy__);

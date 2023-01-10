@@ -247,6 +247,9 @@ option ( SIRE_DISABLE_AVX "Prevent use of AVX when compiling" OFF )
 # be disabled as it doesn't improve performance and can be buggy
 option ( SIRE_DISABLE_AVX512F "Prevent use of AVX512F when compiling" ON )
 
+# Add option to disable use of NEON
+option ( SIRE_DISABLE_NEON "Prevent use of NEON when compiling" OFF )
+
 # Add an option to say whether or not to use OpenMM - this is installed
 # via conda and should be available and usable
 option( SIRE_USE_OPENMM "Set whether or not to compile in support for OpenMM" ON )
@@ -433,7 +436,7 @@ if ( ${SIRE_CXX_COMPILER_ID} MATCHES "GNU" )
     set ( SIRE_PLATFORM_FLAGS "-pipe -DSIRE_ALWAYS_INLINE=inline" )
     set ( SIRE_STATIC_LINK_FLAGS "-static" )
 
-    GET_SIRE_VECTOR_FLAGS( "-fopenmp-simd" "-msse2" "-mavx" "-mavx512f" )
+    GET_SIRE_VECTOR_FLAGS( "-fopenmp-simd" "-msse2" "-mavx" "-mavx512f" "-march=armv8-a+fp+simd" )
 
     # support for ppc64le architecture
     if ( CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "ppc64le" )
@@ -496,7 +499,7 @@ elseif ( ${SIRE_CXX_COMPILER_ID} MATCHES "CLANG" )
     set ( SIRE_PLATFORM_FLAGS "-pipe -DSIRE_ALWAYS_INLINE=inline" )
     set ( SIRE_STATIC_LINK_FLAGS "-static" )
 
-    GET_SIRE_VECTOR_FLAGS( "-openmp-simd" "-msse2" "-mavx" "-mavx512f" )
+    GET_SIRE_VECTOR_FLAGS( "-openmp-simd" "-msse2" "-mavx" "-mavx512f" "-march=armv8-a+fp+simd" )
 
     set ( SIRE_VISIBILITY_FLAGS "-DSIRE_VISIBILITY_AVAILABLE -fvisibility=hidden -fvisibility-inlines-hidden" )
 
@@ -558,7 +561,7 @@ elseif (MSVC)
     set ( SIRE_RELEASE_FLAGS  "/O2 /GL /Gw" )
     set ( SIRE_DEBUG_FLAGS   "/Zi" )
     set ( SIRE_VISIBILITY_FLAGS "/DSIRE_NO_VISIBILITY_AVAILABLE" )
-    GET_SIRE_VECTOR_FLAGS( "/openmp:experimental" "/arch:SSE2" "/arch:AVX" "/arch:AVX512" )
+    GET_SIRE_VECTOR_FLAGS( "/openmp:experimental" "/arch:SSE2" "/arch:AVX" "/arch:AVX512" "/arch:NEON" )
     set ( SIRE_SHARE_LINK_FLAGS "/LTCG /OPT:REF /OPT:ICF" )
     set ( SIRE_STATIC_LINK_FLAGS "/LTCG /OPT:REF /OPT:ICF" )
     set ( SIRE_EXE_LINK_FLAGS "/LTCG /OPT:REF /OPT:ICF" )

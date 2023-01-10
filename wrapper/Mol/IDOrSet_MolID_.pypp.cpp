@@ -64,158 +64,158 @@ void register_IDOrSet_MolID__class(){
         IDOrSet_MolID__exposer.def( bp::init< QList< SireMol::MolIdentifier > const & >(( bp::arg("ids") ), "") );
         IDOrSet_MolID__exposer.def( bp::init< SireID::IDOrSet< SireMol::MolID > const & >(( bp::arg("other") ), "") );
         { //::SireID::IDOrSet< SireMol::MolID >::IDs
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef ::QSet< SireMol::MolIdentifier > const & ( ::SireID::IDOrSet< SireMol::MolID >::*IDs_function_type)(  ) const;
             IDs_function_type IDs_function_value( &::SireID::IDOrSet< SireMol::MolID >::IDs );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "IDs"
                 , IDs_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::MolID >::hash
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef ::uint ( ::SireID::IDOrSet< SireMol::MolID >::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireID::IDOrSet< SireMol::MolID >::hash );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::MolID >::isNull
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef bool ( ::SireID::IDOrSet< SireMol::MolID >::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireID::IDOrSet< SireMol::MolID >::isNull );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::MolID >::map
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef ::QList< SireMol::MolNum > ( ::SireID::IDOrSet< SireMol::MolID >::*map_function_type)( ::SireMol::Molecules const & ) const;
             map_function_type map_function_value( &::SireID::IDOrSet< SireMol::MolID >::map );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("mols") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::MolID >::map
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef ::QList< SireMol::MolNum > ( ::SireID::IDOrSet< SireMol::MolID >::*map_function_type)( ::SireMol::MoleculeGroup const & ) const;
             map_function_type map_function_value( &::SireID::IDOrSet< SireMol::MolID >::map );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molgroup") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::MolID >::map
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef ::QList< SireMol::MolNum > ( ::SireID::IDOrSet< SireMol::MolID >::*map_function_type)( ::SireMol::MolGroupsBase const & ) const;
             map_function_type map_function_value( &::SireID::IDOrSet< SireMol::MolID >::map );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("molgroups") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         IDOrSet_MolID__exposer.def( bp::self != bp::other< SireID::ID >() );
         IDOrSet_MolID__exposer.def( bp::self != bp::self );
         IDOrSet_MolID__exposer.def( bp::self != bp::other< SireMol::MolID >() );
         { //::SireID::IDOrSet< SireMol::MolID >::operator=
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef ::SireID::IDOrSet< SireMol::MolID > & ( ::SireID::IDOrSet< SireMol::MolID >::*assign_function_type)( ::SireID::IDOrSet< SireMol::MolID > const & ) ;
             assign_function_type assign_function_value( &::SireID::IDOrSet< SireMol::MolID >::operator= );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::MolID >::operator=
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef ::SireID::IDOrSet< SireMol::MolID > & ( ::SireID::IDOrSet< SireMol::MolID >::*assign_function_type)( ::SireMol::MolID const & ) ;
             assign_function_type assign_function_value( &::SireID::IDOrSet< SireMol::MolID >::operator= );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         IDOrSet_MolID__exposer.def( bp::self == bp::other< SireID::ID >() );
         IDOrSet_MolID__exposer.def( bp::self == bp::self );
         IDOrSet_MolID__exposer.def( bp::self == bp::other< SireMol::MolID >() );
         { //::SireID::IDOrSet< SireMol::MolID >::toString
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef ::QString ( ::SireID::IDOrSet< SireMol::MolID >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireID::IDOrSet< SireMol::MolID >::toString );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::MolID >::typeName
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireID::IDOrSet< SireMol::MolID >::typeName );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::MolID >::what
-
+        
             typedef SireID::IDOrSet< SireMol::MolID > exported_class_t;
             typedef char const * ( ::SireID::IDOrSet< SireMol::MolID >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireID::IDOrSet< SireMol::MolID >::what );
-
-            IDOrSet_MolID__exposer.def(
+            
+            IDOrSet_MolID__exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         IDOrSet_MolID__exposer.staticmethod( "typeName" );
         IDOrSet_MolID__exposer.def( "__copy__", &__copy__);

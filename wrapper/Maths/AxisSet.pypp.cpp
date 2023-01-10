@@ -32,167 +32,167 @@ void register_AxisSet_class(){
         AxisSet_exposer.def( bp::init< SireMaths::Matrix const &, bp::optional< SireMaths::Vector > >(( bp::arg("matrx"), bp::arg("orign")=SireMaths::Vector() ), "Construct an AxisSet using matrix matrx, and origin orign") );
         AxisSet_exposer.def( bp::init< SireMaths::AxisSet const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMaths::AxisSet::fromFrame
-
+        
             typedef ::SireMaths::Vector ( ::SireMaths::AxisSet::*fromFrame_function_type)( ::SireMaths::AxisSet const &,::SireMaths::Vector const & ) const;
             fromFrame_function_type fromFrame_function_value( &::SireMaths::AxisSet::fromFrame );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "fromFrame"
                 , fromFrame_function_value
                 , ( bp::arg("frame"), bp::arg("vec") )
                 , bp::release_gil_policy()
                 , "Convert a vector from the frame frame to this coordinate frame" );
-
+        
         }
         { //::SireMaths::AxisSet::fromIdentity
-
+        
             typedef ::SireMaths::Vector ( ::SireMaths::AxisSet::*fromIdentity_function_type)( ::SireMaths::Vector const & ) const;
             fromIdentity_function_type fromIdentity_function_value( &::SireMaths::AxisSet::fromIdentity );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "fromIdentity"
                 , fromIdentity_function_value
                 , ( bp::arg("vec") )
                 , bp::release_gil_policy()
                 , "Convert a vector from the cartesian frame to this coordinate frame" );
-
+        
         }
         { //::SireMaths::AxisSet::fromIdentity
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireMaths::AxisSet::*fromIdentity_function_type)( ::QVector< SireMaths::Vector > const & ) const;
             fromIdentity_function_type fromIdentity_function_value( &::SireMaths::AxisSet::fromIdentity );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "fromIdentity"
                 , fromIdentity_function_value
                 , ( bp::arg("vec") )
                 , bp::release_gil_policy()
                 , "Convert the array of vectors from the cartesian frame to this coordinate frame" );
-
+        
         }
         { //::SireMaths::AxisSet::fromIdentity
-
+        
             typedef ::SireMaths::Vector ( ::SireMaths::AxisSet::*fromIdentity_function_type)( ::SireMaths::Vector const &,::SireMaths::Vector const & ) const;
             fromIdentity_function_type fromIdentity_function_value( &::SireMaths::AxisSet::fromIdentity );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "fromIdentity"
                 , fromIdentity_function_value
                 , ( bp::arg("vec"), bp::arg("delta") )
                 , bp::release_gil_policy()
                 , "Convert a vector from the cartesian frame with origin delta to this coordinate frame" );
-
+        
         }
         { //::SireMaths::AxisSet::fromIdentity
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireMaths::AxisSet::*fromIdentity_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
             fromIdentity_function_type fromIdentity_function_value( &::SireMaths::AxisSet::fromIdentity );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "fromIdentity"
                 , fromIdentity_function_value
                 , ( bp::arg("vecs"), bp::arg("delta") )
                 , bp::release_gil_policy()
                 , "Convert the array of vectors from the cartesian frame offset by delta\nto this coordinate frame" );
-
+        
         }
         { //::SireMaths::AxisSet::invMatrix
-
+        
             typedef ::SireMaths::Matrix const & ( ::SireMaths::AxisSet::*invMatrix_function_type)(  ) const;
             invMatrix_function_type invMatrix_function_value( &::SireMaths::AxisSet::invMatrix );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "invMatrix"
                 , invMatrix_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMaths::AxisSet::matrix
-
+        
             typedef ::SireMaths::Matrix const & ( ::SireMaths::AxisSet::*matrix_function_type)(  ) const;
             matrix_function_type matrix_function_value( &::SireMaths::AxisSet::matrix );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "matrix"
                 , matrix_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMaths::AxisSet::origin
-
+        
             typedef ::SireMaths::Vector const & ( ::SireMaths::AxisSet::*origin_function_type)(  ) const;
             origin_function_type origin_function_value( &::SireMaths::AxisSet::origin );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "origin"
                 , origin_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMaths::AxisSet::toFrame
-
+        
             typedef ::SireMaths::Vector ( ::SireMaths::AxisSet::*toFrame_function_type)( ::SireMaths::AxisSet const &,::SireMaths::Vector const & ) const;
             toFrame_function_type toFrame_function_value( &::SireMaths::AxisSet::toFrame );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "toFrame"
                 , toFrame_function_value
                 , ( bp::arg("frame"), bp::arg("vec") )
                 , bp::release_gil_policy()
                 , "Convert a vector to the frame frame from this coordinate frame" );
-
+        
         }
         { //::SireMaths::AxisSet::toIdentity
-
+        
             typedef ::SireMaths::Vector ( ::SireMaths::AxisSet::*toIdentity_function_type)( ::SireMaths::Vector const & ) const;
             toIdentity_function_type toIdentity_function_value( &::SireMaths::AxisSet::toIdentity );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "toIdentity"
                 , toIdentity_function_value
                 , ( bp::arg("vec") )
                 , bp::release_gil_policy()
                 , "Convert a vector to the cartesian frame from this coordinate frame" );
-
+        
         }
         { //::SireMaths::AxisSet::toString
-
+        
             typedef ::QString ( ::SireMaths::AxisSet::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMaths::AxisSet::toString );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of the AxisSet" );
-
+        
         }
         { //::SireMaths::AxisSet::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMaths::AxisSet::typeName );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMaths::AxisSet::what
-
+        
             typedef char const * ( ::SireMaths::AxisSet::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireMaths::AxisSet::what );
-
-            AxisSet_exposer.def(
+            
+            AxisSet_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         AxisSet_exposer.staticmethod( "typeName" );
         AxisSet_exposer.def( "__copy__", &__copy__);

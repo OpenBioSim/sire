@@ -25,80 +25,80 @@ void register_BeadProp_class(){
         BeadProp_exposer_t BeadProp_exposer = BeadProp_exposer_t( "BeadProp", "Small class used to provide a common base for all BeadProperty types", bp::no_init );
         bp::scope BeadProp_scope( BeadProp_exposer );
         { //::SireMol::BeadProp::assertCanConvert
-
+        
             typedef void ( ::SireMol::BeadProp::*assertCanConvert_function_type)( ::QVariant const & ) const;
             assertCanConvert_function_type assertCanConvert_function_value( &::SireMol::BeadProp::assertCanConvert );
-
-            BeadProp_exposer.def(
+            
+            BeadProp_exposer.def( 
                 "assertCanConvert"
                 , assertCanConvert_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::BeadProp::assignFrom
-
+        
             typedef void ( ::SireMol::BeadProp::*assignFrom_function_type)( ::SireMol::BeadProperty< QVariant > const & ) ;
             assignFrom_function_type assignFrom_function_value( &::SireMol::BeadProp::assignFrom );
-
-            BeadProp_exposer.def(
+            
+            BeadProp_exposer.def( 
                 "assignFrom"
                 , assignFrom_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::BeadProp::beading
-
+        
             typedef ::SireMol::Beading const & ( ::SireMol::BeadProp::*beading_function_type)(  ) const;
             beading_function_type beading_function_value( &::SireMol::BeadProp::beading );
-
-            BeadProp_exposer.def(
+            
+            BeadProp_exposer.def( 
                 "beading"
                 , beading_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the beading property used to define the beads in the molecule" );
-
+        
         }
         { //::SireMol::BeadProp::canConvert
-
+        
             typedef bool ( ::SireMol::BeadProp::*canConvert_function_type)( ::QVariant const & ) const;
             canConvert_function_type canConvert_function_value( &::SireMol::BeadProp::canConvert );
-
-            BeadProp_exposer.def(
+            
+            BeadProp_exposer.def( 
                 "canConvert"
                 , canConvert_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::BeadProp::setBeading
-
+        
             typedef void ( ::SireMol::BeadProp::*setBeading_function_type)( ::SireMol::Beading const & ) ;
             setBeading_function_type setBeading_function_value( &::SireMol::BeadProp::setBeading );
-
-            BeadProp_exposer.def(
+            
+            BeadProp_exposer.def( 
                 "setBeading"
                 , setBeading_function_value
                 , ( bp::arg("beading") )
                 , bp::release_gil_policy()
                 , "Set the beading property used to define the beads in the molecule" );
-
+        
         }
         { //::SireMol::BeadProp::toVariant
-
+        
             typedef ::SireMol::BeadProperty< QVariant > ( ::SireMol::BeadProp::*toVariant_function_type)(  ) const;
             toVariant_function_type toVariant_function_value( &::SireMol::BeadProp::toVariant );
-
-            BeadProp_exposer.def(
+            
+            BeadProp_exposer.def( 
                 "toVariant"
                 , toVariant_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         BeadProp_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::BeadProp >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );

@@ -69,317 +69,317 @@ void register_PrefSampler_class(){
         PrefSampler_exposer.def( bp::init< SireMol::MoleculeView const &, SireMol::MoleculeGroup const &, SireCAS::Expression const &, SireUnits::Dimension::Area >(( bp::arg("molview"), bp::arg("molgroup"), bp::arg("f"), bp::arg("k") ), "Construct a sampler that samples the molecules in molgroup, and\nthat prefers molecules that are closest to the view molview\nusing the supplied preferential sampling biasing\nfunction f and sampling constant k") );
         PrefSampler_exposer.def( bp::init< SireMove::PrefSampler const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMove::PrefSampler::biasingFunction
-
+        
             typedef ::SireCAS::Expression ( ::SireMove::PrefSampler::*biasingFunction_function_type)(  ) const;
             biasingFunction_function_type biasingFunction_function_value( &::SireMove::PrefSampler::biasingFunction );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "biasingFunction"
                 , biasingFunction_function_value
                 , bp::release_gil_policy()
                 , "Return the preferential sampling biasing expression" );
-
+        
         }
         { //::SireMove::PrefSampler::coordinatesProperty
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMove::PrefSampler::*coordinatesProperty_function_type)(  ) const;
             coordinatesProperty_function_type coordinatesProperty_function_value( &::SireMove::PrefSampler::coordinatesProperty );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "coordinatesProperty"
                 , coordinatesProperty_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the name of the property used to find the coordinates\nof the molecules" );
-
+        
         }
         { //::SireMove::PrefSampler::focalMolecule
-
+        
             typedef ::SireMol::PartialMolecule const & ( ::SireMove::PrefSampler::*focalMolecule_function_type)(  ) const;
             focalMolecule_function_type focalMolecule_function_value( &::SireMove::PrefSampler::focalMolecule );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "focalMolecule"
                 , focalMolecule_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the current focal molecule (this will be an empty molecule\nif a focal point is being used)" );
-
+        
         }
         { //::SireMove::PrefSampler::focalPoint
-
+        
             typedef ::SireMaths::Vector const & ( ::SireMove::PrefSampler::*focalPoint_function_type)(  ) const;
             focalPoint_function_type focalPoint_function_value( &::SireMove::PrefSampler::focalPoint );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "focalPoint"
                 , focalPoint_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the current focal point (this will be the current center of the\nmolecule view if a focal molecule is being used)" );
-
+        
         }
         { //::SireMove::PrefSampler::isBiased
-
+        
             typedef bool ( ::SireMove::PrefSampler::*isBiased_function_type)(  ) const;
             isBiased_function_type isBiased_function_value( &::SireMove::PrefSampler::isBiased );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "isBiased"
                 , isBiased_function_value
                 , bp::release_gil_policy()
                 , "The preferential sampler is definitely biased" );
-
+        
         }
         { //::SireMove::PrefSampler::k
-
+        
             typedef ::SireCAS::Symbol ( *k_function_type )(  );
             k_function_type k_function_value( &::SireMove::PrefSampler::k );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "k"
                 , k_function_value
                 , bp::release_gil_policy()
                 , "Return the symbol used to represent the preferential sampling constant (k)" );
-
+        
         }
         PrefSampler_exposer.def( bp::self != bp::self );
         { //::SireMove::PrefSampler::operator=
-
+        
             typedef ::SireMove::PrefSampler & ( ::SireMove::PrefSampler::*assign_function_type)( ::SireMove::PrefSampler const & ) ;
             assign_function_type assign_function_value( &::SireMove::PrefSampler::operator= );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         PrefSampler_exposer.def( bp::self == bp::self );
         { //::SireMove::PrefSampler::probabilityOf
-
+        
             typedef double ( ::SireMove::PrefSampler::*probabilityOf_function_type)( ::SireMol::PartialMolecule const & ) const;
             probabilityOf_function_type probabilityOf_function_value( &::SireMove::PrefSampler::probabilityOf );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "probabilityOf"
                 , probabilityOf_function_value
                 , ( bp::arg("molecule") )
                 , bp::release_gil_policy()
                 , "Return the probability with which the molecule molecule was\nsampled from this sampler\nThrow: SireMol::missing_molecule\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireMove::PrefSampler::probabilityOfMolecule
-
+        
             typedef double ( ::SireMove::PrefSampler::*probabilityOfMolecule_function_type)( ::SireMol::Molecule const & ) const;
             probabilityOfMolecule_function_type probabilityOfMolecule_function_value( &::SireMove::PrefSampler::probabilityOfMolecule );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "probabilityOfMolecule"
                 , probabilityOfMolecule_function_value
                 , ( bp::arg("molecule") )
                 , bp::release_gil_policy()
                 , "Return the probability that the molecule mol would have been picked\nby this sampler" );
-
+        
         }
         { //::SireMove::PrefSampler::r
-
+        
             typedef ::SireCAS::Symbol ( *r_function_type )(  );
             r_function_type r_function_value( &::SireMove::PrefSampler::r );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "r"
                 , r_function_value
                 , bp::release_gil_policy()
                 , "Return the symbol used to represent the distance between molecules (r)" );
-
+        
         }
         { //::SireMove::PrefSampler::sample
-
+        
             typedef ::boost::tuples::tuple< SireMol::PartialMolecule, double, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireMove::PrefSampler::*sample_function_type)(  ) const;
             sample_function_type sample_function_value( &::SireMove::PrefSampler::sample );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "sample"
                 , sample_function_value
                 , bp::release_gil_policy()
                 , "Sample a molecule from the group, and return it, together\nwith the probability with which it was chosen" );
-
+        
         }
         { //::SireMove::PrefSampler::sampleMolecule
-
+        
             typedef ::boost::tuples::tuple< SireMol::Molecule, double, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireMove::PrefSampler::*sampleMolecule_function_type)(  ) const;
             sampleMolecule_function_type sampleMolecule_function_value( &::SireMove::PrefSampler::sampleMolecule );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "sampleMolecule"
                 , sampleMolecule_function_value
                 , bp::release_gil_policy()
                 , "Sample a whole molecule from the group, and return it and the\nprobability with which it was chosen. This returns the whole\nmolecule, even if only part of the molecule was in the group" );
-
+        
         }
         { //::SireMove::PrefSampler::samplingConstant
-
+        
             typedef ::SireUnits::Dimension::Area ( ::SireMove::PrefSampler::*samplingConstant_function_type)(  ) const;
             samplingConstant_function_type samplingConstant_function_value( &::SireMove::PrefSampler::samplingConstant );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "samplingConstant"
                 , samplingConstant_function_value
                 , bp::release_gil_policy()
                 , "Return the preferential sampling constant (k)" );
-
+        
         }
         { //::SireMove::PrefSampler::setBiasingFunction
-
+        
             typedef void ( ::SireMove::PrefSampler::*setBiasingFunction_function_type)( ::SireCAS::Expression const & ) ;
             setBiasingFunction_function_type setBiasingFunction_function_value( &::SireMove::PrefSampler::setBiasingFunction );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "setBiasingFunction"
                 , setBiasingFunction_function_value
                 , ( bp::arg("f") )
                 , bp::release_gil_policy()
                 , "Set the preferential sampling biasing expression - this\nshould use the symbols k and r, which are the biasing\nconstant and distance between molecules respectively.\nThe default biasing expression is  1.0  (r^2 + k)\n" );
-
+        
         }
         { //::SireMove::PrefSampler::setCoordinatesProperty
-
+        
             typedef void ( ::SireMove::PrefSampler::*setCoordinatesProperty_function_type)( ::SireBase::PropertyName const & ) ;
             setCoordinatesProperty_function_type setCoordinatesProperty_function_value( &::SireMove::PrefSampler::setCoordinatesProperty );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "setCoordinatesProperty"
                 , setCoordinatesProperty_function_value
                 , ( bp::arg("coords_property") )
                 , bp::release_gil_policy()
                 , "Set the property name used to find the coordinates property of\nthe molecules" );
-
+        
         }
         { //::SireMove::PrefSampler::setFocalMolecule
-
+        
             typedef void ( ::SireMove::PrefSampler::*setFocalMolecule_function_type)( ::SireMol::MoleculeView const & ) ;
             setFocalMolecule_function_type setFocalMolecule_function_value( &::SireMove::PrefSampler::setFocalMolecule );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "setFocalMolecule"
                 , setFocalMolecule_function_value
                 , ( bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Set the focal molecule of this sampler" );
-
+        
         }
         { //::SireMove::PrefSampler::setFocalPoint
-
+        
             typedef void ( ::SireMove::PrefSampler::*setFocalPoint_function_type)( ::SireMaths::Vector const & ) ;
             setFocalPoint_function_type setFocalPoint_function_value( &::SireMove::PrefSampler::setFocalPoint );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "setFocalPoint"
                 , setFocalPoint_function_value
                 , ( bp::arg("point") )
                 , bp::release_gil_policy()
                 , "Set the focal point of this sampler" );
-
+        
         }
         { //::SireMove::PrefSampler::setGroup
-
+        
             typedef void ( ::SireMove::PrefSampler::*setGroup_function_type)( ::SireMol::MoleculeGroup const & ) ;
             setGroup_function_type setGroup_function_value( &::SireMove::PrefSampler::setGroup );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "setGroup"
                 , setGroup_function_value
                 , ( bp::arg("molgroup") )
                 , bp::release_gil_policy()
                 , "Set the molecule group from which molecule view will be sampled" );
-
+        
         }
         { //::SireMove::PrefSampler::setSamplingConstant
-
+        
             typedef void ( ::SireMove::PrefSampler::*setSamplingConstant_function_type)( ::SireUnits::Dimension::Area ) ;
             setSamplingConstant_function_type setSamplingConstant_function_value( &::SireMove::PrefSampler::setSamplingConstant );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "setSamplingConstant"
                 , setSamplingConstant_function_value
                 , ( bp::arg("k") )
                 , bp::release_gil_policy()
                 , "Set the preferential sampling constant - this is the value\nof k in the biasing algorithm" );
-
+        
         }
         { //::SireMove::PrefSampler::setSpaceProperty
-
+        
             typedef void ( ::SireMove::PrefSampler::*setSpaceProperty_function_type)( ::SireBase::PropertyName const & ) ;
             setSpaceProperty_function_type setSpaceProperty_function_value( &::SireMove::PrefSampler::setSpaceProperty );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "setSpaceProperty"
                 , setSpaceProperty_function_value
                 , ( bp::arg("space_property") )
                 , bp::release_gil_policy()
                 , "Set the property used to find the space property of the system" );
-
+        
         }
         { //::SireMove::PrefSampler::spaceProperty
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMove::PrefSampler::*spaceProperty_function_type)(  ) const;
             spaceProperty_function_type spaceProperty_function_value( &::SireMove::PrefSampler::spaceProperty );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "spaceProperty"
                 , spaceProperty_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the name of the property used to find the system space" );
-
+        
         }
         { //::SireMove::PrefSampler::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::PrefSampler::typeName );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::PrefSampler::updateFrom
-
+        
             typedef void ( ::SireMove::PrefSampler::*updateFrom_function_type)( ::SireSystem::System const & ) ;
             updateFrom_function_type updateFrom_function_value( &::SireMove::PrefSampler::updateFrom );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "updateFrom"
                 , updateFrom_function_value
                 , ( bp::arg("system") )
                 , bp::release_gil_policy()
                 , "Update this sampler so that the molecules match the versions\nin the system system" );
-
+        
         }
         { //::SireMove::PrefSampler::usingFocalMolecule
-
+        
             typedef bool ( ::SireMove::PrefSampler::*usingFocalMolecule_function_type)(  ) const;
             usingFocalMolecule_function_type usingFocalMolecule_function_value( &::SireMove::PrefSampler::usingFocalMolecule );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "usingFocalMolecule"
                 , usingFocalMolecule_function_value
                 , bp::release_gil_policy()
                 , "Return whether we are using a focal molecule (rather\nthan a focal point)" );
-
+        
         }
         { //::SireMove::PrefSampler::usingFocalPoint
-
+        
             typedef bool ( ::SireMove::PrefSampler::*usingFocalPoint_function_type)(  ) const;
             usingFocalPoint_function_type usingFocalPoint_function_value( &::SireMove::PrefSampler::usingFocalPoint );
-
-            PrefSampler_exposer.def(
+            
+            PrefSampler_exposer.def( 
                 "usingFocalPoint"
                 , usingFocalPoint_function_value
                 , bp::release_gil_policy()
                 , "Return whether we are using a focal point (rather\nthan a focal molecule)" );
-
+        
         }
         PrefSampler_exposer.staticmethod( "k" );
         PrefSampler_exposer.staticmethod( "r" );

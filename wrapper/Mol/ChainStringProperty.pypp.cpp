@@ -35,346 +35,346 @@ void register_ChainStringProperty_class(){
         ChainStringProperty_exposer.def( bp::init< QVector< QString > const & >(( bp::arg("values") ), "") );
         ChainStringProperty_exposer.def( bp::init< SireMol::ChainProperty< QString > const & >(( bp::arg("other") ), "") );
         { //::SireMol::ChainProperty< QString >::array
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QVector< QString > const & ( ::SireMol::ChainProperty< QString >::*array_function_type)(  ) const;
             array_function_type array_function_value( &::SireMol::ChainProperty< QString >::array );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "array"
                 , array_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::assertCanConvert
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef void ( ::SireMol::ChainProperty< QString >::*assertCanConvert_function_type)( ::QVariant const & ) const;
             assertCanConvert_function_type assertCanConvert_function_value( &::SireMol::ChainProperty< QString >::assertCanConvert );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "assertCanConvert"
                 , assertCanConvert_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::assignFrom
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef void ( ::SireMol::ChainProperty< QString >::*assignFrom_function_type)( ::SireMol::ChainProperty< QVariant > const & ) ;
             assignFrom_function_type assignFrom_function_value( &::SireMol::ChainProperty< QString >::assignFrom );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "assignFrom"
                 , assignFrom_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::at
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QString const & ( ::SireMol::ChainProperty< QString >::*at_function_type)( ::SireMol::ChainIdx const & ) const;
             at_function_type at_function_value( &::SireMol::ChainProperty< QString >::at );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("chainidx") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::at
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QString const & ( ::SireMol::ChainProperty< QString >::*at_function_type)( int ) const;
             at_function_type at_function_value( &::SireMol::ChainProperty< QString >::at );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "at"
                 , at_function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::canConvert
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef bool ( ::SireMol::ChainProperty< QString >::*canConvert_function_type)( ::QVariant const & ) const;
             canConvert_function_type canConvert_function_value( &::SireMol::ChainProperty< QString >::canConvert );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "canConvert"
                 , canConvert_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::count
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef int ( ::SireMol::ChainProperty< QString >::*count_function_type)(  ) const;
             count_function_type count_function_value( &::SireMol::ChainProperty< QString >::count );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "count"
                 , count_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::fromVariant
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::SireMol::ChainProperty< QString > ( *fromVariant_function_type )( ::SireMol::ChainProperty< QVariant > const & );
             fromVariant_function_type fromVariant_function_value( &::SireMol::ChainProperty< QString >::fromVariant );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "fromVariant"
                 , fromVariant_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::get
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QString const & ( ::SireMol::ChainProperty< QString >::*get_function_type)( ::SireMol::ChainIdx const & ) const;
             get_function_type get_function_value( &::SireMol::ChainProperty< QString >::get );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "get"
                 , get_function_value
                 , ( bp::arg("chainidx") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::get
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QString const & ( ::SireMol::ChainProperty< QString >::*get_function_type)( int ) const;
             get_function_type get_function_value( &::SireMol::ChainProperty< QString >::get );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "get"
                 , get_function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::getAsProperty
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::SireBase::PropertyPtr ( ::SireMol::ChainProperty< QString >::*getAsProperty_function_type)( ::SireMol::ChainIdx const & ) const;
             getAsProperty_function_type getAsProperty_function_value( &::SireMol::ChainProperty< QString >::getAsProperty );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "getAsProperty"
                 , getAsProperty_function_value
                 , ( bp::arg("idx") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::getAsVariant
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QVariant ( ::SireMol::ChainProperty< QString >::*getAsVariant_function_type)( ::SireMol::ChainIdx const & ) const;
             getAsVariant_function_type getAsVariant_function_value( &::SireMol::ChainProperty< QString >::getAsVariant );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "getAsVariant"
                 , getAsVariant_function_value
                 , ( bp::arg("idx") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::isCompatibleWith
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef bool ( ::SireMol::ChainProperty< QString >::*isCompatibleWith_function_type)( ::SireMol::MoleculeInfoData const & ) const;
             isCompatibleWith_function_type isCompatibleWith_function_value( &::SireMol::ChainProperty< QString >::isCompatibleWith );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "isCompatibleWith"
                 , isCompatibleWith_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::isEmpty
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef bool ( ::SireMol::ChainProperty< QString >::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireMol::ChainProperty< QString >::isEmpty );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::nChains
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef int ( ::SireMol::ChainProperty< QString >::*nChains_function_type)(  ) const;
             nChains_function_type nChains_function_value( &::SireMol::ChainProperty< QString >::nChains );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "nChains"
                 , nChains_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ChainStringProperty_exposer.def( bp::self != bp::self );
         { //::SireMol::ChainProperty< QString >::operator=
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::SireMol::ChainProperty< QString > & ( ::SireMol::ChainProperty< QString >::*assign_function_type)( ::SireMol::ChainProperty< QString > const & ) ;
             assign_function_type assign_function_value( &::SireMol::ChainProperty< QString >::operator= );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         ChainStringProperty_exposer.def( bp::self == bp::self );
         { //::SireMol::ChainProperty< QString >::operator[]
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QString const & ( ::SireMol::ChainProperty< QString >::*__getitem___function_type)( ::SireMol::ChainIdx const & ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::ChainProperty< QString >::operator[] );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("chainidx") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::operator[]
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QString const & ( ::SireMol::ChainProperty< QString >::*__getitem___function_type)( int ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::ChainProperty< QString >::operator[] );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("i") )
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::operator[]
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QList< QString > ( ::SireMol::ChainProperty< QString >::*__getitem___function_type)( ::QList< long long > const & ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::ChainProperty< QString >::operator[] );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("idxs") )
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::operator[]
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QList< QString > ( ::SireMol::ChainProperty< QString >::*__getitem___function_type)( ::SireBase::Slice const & ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::ChainProperty< QString >::operator[] );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("slice") )
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::set
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::SireMol::ChainProperty< QString > & ( ::SireMol::ChainProperty< QString >::*set_function_type)( ::SireMol::ChainIdx,::QString const & ) ;
             set_function_type set_function_value( &::SireMol::ChainProperty< QString >::set );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "set"
                 , set_function_value
                 , ( bp::arg("chainidx"), bp::arg("value") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::size
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef int ( ::SireMol::ChainProperty< QString >::*size_function_type)(  ) const;
             size_function_type size_function_value( &::SireMol::ChainProperty< QString >::size );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "size"
                 , size_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::toString
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::QString ( ::SireMol::ChainProperty< QString >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMol::ChainProperty< QString >::toString );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::toVariant
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef ::SireMol::ChainProperty< QVariant > ( ::SireMol::ChainProperty< QString >::*toVariant_function_type)(  ) const;
             toVariant_function_type toVariant_function_value( &::SireMol::ChainProperty< QString >::toVariant );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "toVariant"
                 , toVariant_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::ChainProperty< QString >::typeName
-
+        
             typedef SireMol::ChainProperty< QString > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::ChainProperty< QString >::typeName );
-
-            ChainStringProperty_exposer.def(
+            
+            ChainStringProperty_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         ChainStringProperty_exposer.staticmethod( "fromVariant" );
         ChainStringProperty_exposer.staticmethod( "typeName" );

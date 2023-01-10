@@ -63,780 +63,780 @@ void register_FF_class(){
         FF_exposer_t FF_exposer = FF_exposer_t( "FF", "This class is the base class of all of the forcefield classes.\nA forcefield is a collection of molecule groups (SireMol::MolGroups)\nthat had additional code to allow the energies, forces (and\nfurther derivatives) to be calculated for the molecules in those\ngroups. The forcefield can, optionally, break this energy\ndown into a set of components, and the energy, force (andor\nfurther derivatives) of the components for the group(s) of\nmolecules can be queried individually.\n\nFF derived objects are derived from MolGroupsBase, and hold\nmolecule group objects that are derived from MoleculeGroup, e.g.\n\nFFGroupPvt : public MoleculeGroup  (used internally)\n\nFFGroup : public MoleculeGroup (used externally - needed so can\nhold a copy of the FF) - FFGroupPvt\nauto-converts to FFGroup when copied\n\nThis class is derived into a series of types, e.g.\n\nG1FF - forcefield that only contains a single group of molecules\nG2FF - forcefield that contains two groups of molecules\n\nMultiFF - forcefield that is an amalgamation of other forcefields\n\nThere are also additional pure virtual interfaces, e.g.\n\nFF2D - interface for all 2-dimensional forcefields\n(can be used to calculate forces in 2D space)\n\nFF3D - interface for all 3-dimensional forcefields\n(can be used to calculate forces in 3D space)\n\nInterCLJFF  == Inter2B3DG1FF<InterCLJPotential>\nIntraCLJFF  == Intra2B3DG1FF<IntraCLJPotential>\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope FF_scope( FF_exposer );
         { //::SireFF::FF::UID
-
+        
             typedef ::QUuid const & ( ::SireFF::FF::*UID_function_type)(  ) const;
             UID_function_type UID_function_value( &::SireFF::FF::UID );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "UID"
                 , UID_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the unique ID for this forcefield" );
-
+        
         }
         { //::SireFF::FF::add
-
+        
             typedef void ( ::SireFF::FF::*add_function_type)( ::SireMol::MoleculeView const &,::SireMol::MGID const &,::SireBase::PropertyMap const & ) ;
             add_function_type add_function_value( &::SireFF::FF::add );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molview"), bp::arg("mgid"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Add the molecule viewed in molview to the forcefield groups\nidentified by mgid using the supplied map to find the properties\nof the molecule that contain the forcefield parameters\nNote that if this molecule exists already in this forcefield, then\nthe version of the molecule that is in this forcefield will be used,\nnot the version of molview\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::add
-
+        
             typedef void ( ::SireFF::FF::*add_function_type)( ::SireMol::ViewsOfMol const &,::SireMol::MGID const &,::SireBase::PropertyMap const & ) ;
             add_function_type add_function_value( &::SireFF::FF::add );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molviews"), bp::arg("mgid"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Add the views of the molecule viewed in molviews to the forcefield groups\nidentified by mgid using the supplied map to find the properties\nof the molecule that contain the forcefield parameters\nNote that if this molecule exists already in this forcefield, then\nthe version of the molecule that is in this forcefield will be used,\nnot the version of molview\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::add
-
+        
             typedef void ( ::SireFF::FF::*add_function_type)( ::SireMol::Molecules const &,::SireMol::MGID const &,::SireBase::PropertyMap const & ) ;
             add_function_type add_function_value( &::SireFF::FF::add );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molecules"), bp::arg("mgid"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Add all of the molecules in molecules to the forcefield groups\nidentified by mgid using the supplied map to find the properties\nof the molecule that contain the forcefield parameters\nNote that if a molecule exists already in this forcefield, then\nthe version of the molecule that is in this forcefield will be used,\nnot the version in molecules\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::add
-
+        
             typedef void ( ::SireFF::FF::*add_function_type)( ::SireMol::MoleculeGroup const &,::SireMol::MGID const &,::SireBase::PropertyMap const & ) ;
             add_function_type add_function_value( &::SireFF::FF::add );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molgroup"), bp::arg("mgid"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Add all of the molecules in the group molgroup to the forcefield groups\nidentified by mgid using the supplied map to find the properties\nof the molecule that contain the forcefield parameters\nNote that if a molecule exists already in this forcefield, then\nthe version of the molecule that is in this forcefield will be used,\nnot the version in molecules\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::add
-
+        
             typedef void ( ::SireFF::FF::*add_function_type)( ::SireMol::MoleculeView const &,::SireMol::MGID const & ) ;
             add_function_type add_function_value( &::SireFF::FF::add );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molview"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Add the passed view of the molecule to the molecule groups\nidentified by mgid using the default properties to\nfind the parameters needed by this forcefield\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::add
-
+        
             typedef void ( ::SireFF::FF::*add_function_type)( ::SireMol::ViewsOfMol const &,::SireMol::MGID const & ) ;
             add_function_type add_function_value( &::SireFF::FF::add );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molviews"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Add the passed views of the molecule to the molecule groups\nidentified by mgid using the default properties to\nfind the parameters needed by this forcefield\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::add
-
+        
             typedef void ( ::SireFF::FF::*add_function_type)( ::SireMol::Molecules const &,::SireMol::MGID const & ) ;
             add_function_type add_function_value( &::SireFF::FF::add );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molecules"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Add the passed molecules to the molecule groups\nidentified by mgid using the default properties to\nfind the parameters needed by this forcefield\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::add
-
+        
             typedef void ( ::SireFF::FF::*add_function_type)( ::SireMol::MoleculeGroup const &,::SireMol::MGID const & ) ;
             add_function_type add_function_value( &::SireFF::FF::add );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("molgroup"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Add the molecules in the passed MoleculeGroup to the molecule groups\nidentified by mgid using the default properties to\nfind the parameters needed by this forcefield\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::addIfUnique
-
+        
             typedef void ( ::SireFF::FF::*addIfUnique_function_type)( ::SireMol::MoleculeView const &,::SireMol::MGID const &,::SireBase::PropertyMap const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireFF::FF::addIfUnique );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molview"), bp::arg("mgid"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Add the molecule viewed in molview to the forcefield groups\nidentified by mgid using the supplied map to find the properties\nof the molecule that contain the forcefield parameters\nThis only adds the view to groups that dont already contain it.\nNote that if this molecule exists already in this forcefield, then\nthe version of the molecule that is in this forcefield will be used,\nnot the version of molview\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::addIfUnique
-
+        
             typedef void ( ::SireFF::FF::*addIfUnique_function_type)( ::SireMol::ViewsOfMol const &,::SireMol::MGID const &,::SireBase::PropertyMap const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireFF::FF::addIfUnique );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molviews"), bp::arg("mgid"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Add the views of the molecule viewed in molviews to the forcefield groups\nidentified by mgid using the supplied map to find the properties\nof the molecule that contain the forcefield parameters\nThis only adds views to groups that dont already contain them.\nNote that if this molecule exists already in this forcefield, then\nthe version of the molecule that is in this forcefield will be used,\nnot the version of molview\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::addIfUnique
-
+        
             typedef void ( ::SireFF::FF::*addIfUnique_function_type)( ::SireMol::Molecules const &,::SireMol::MGID const &,::SireBase::PropertyMap const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireFF::FF::addIfUnique );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molecules"), bp::arg("mgid"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Add all of the molecules in molecules to the forcefield groups\nidentified by mgid using the supplied map to find the properties\nof the molecule that contain the forcefield parameters\nThis only adds molecules to groups that dont already contain them.\nNote that if a molecule exists already in this forcefield, then\nthe version of the molecule that is in this forcefield will be used,\nnot the version in molecules\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::addIfUnique
-
+        
             typedef void ( ::SireFF::FF::*addIfUnique_function_type)( ::SireMol::MoleculeGroup const &,::SireMol::MGID const &,::SireBase::PropertyMap const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireFF::FF::addIfUnique );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molgroup"), bp::arg("mgid"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Add all of the molecules in the group molgroup to the forcefield groups\nidentified by mgid using the supplied map to find the properties\nof the molecule that contain the forcefield parameters\nThis only adds molecules to groups that dont already contain them.\nNote that if a molecule exists already in this forcefield, then\nthe version of the molecule that is in this forcefield will be used,\nnot the version in molecules\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::addIfUnique
-
+        
             typedef void ( ::SireFF::FF::*addIfUnique_function_type)( ::SireMol::MoleculeView const &,::SireMol::MGID const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireFF::FF::addIfUnique );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molview"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Add the passed view of the molecule to the molecule groups\nidentified by mgid using the default properties to\nfind the parameters needed by this forcefield\nOnly add this view to groups that dont already contain\nthis view (the whole view, not part of it)\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::addIfUnique
-
+        
             typedef void ( ::SireFF::FF::*addIfUnique_function_type)( ::SireMol::ViewsOfMol const &,::SireMol::MGID const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireFF::FF::addIfUnique );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molviews"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Add the passed views of the molecule to the molecule groups\nidentified by mgid using the default properties to\nfind the parameters needed by this forcefield\nOnly add views to groups that dont already contain\nthem (the whole view, not part of it, and can add some views)\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::addIfUnique
-
+        
             typedef void ( ::SireFF::FF::*addIfUnique_function_type)( ::SireMol::Molecules const &,::SireMol::MGID const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireFF::FF::addIfUnique );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molecules"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Add the passed molecules to the molecule groups\nidentified by mgid using the default properties to\nfind the parameters needed by this forcefield\nOnly add the views of molecules to groups that dont already contain\nthem (the whole view, not part of it)\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::addIfUnique
-
+        
             typedef void ( ::SireFF::FF::*addIfUnique_function_type)( ::SireMol::MoleculeGroup const &,::SireMol::MGID const & ) ;
             addIfUnique_function_type addIfUnique_function_value( &::SireFF::FF::addIfUnique );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "addIfUnique"
                 , addIfUnique_function_value
                 , ( bp::arg("molgroup"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Add the molecules in the passed MoleculeGroup to the molecule groups\nidentified by mgid using the default properties to\nfind the parameters needed by this forcefield\nOnly add the views of molecules to groups that dont already contain\nthem (the whole view, not part of it)\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::components
-
+        
             typedef ::SireFF::FFComponent const & ( ::SireFF::FF::*components_function_type)(  ) const;
             components_function_type components_function_value( &::SireFF::FF::components );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "components"
                 , components_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return an object that describes all of the components\nof this forcefield (complete with SireCAS::Symbols to\nuniquely ID each component)" );
-
+        
         }
         { //::SireFF::FF::containsProperty
-
+        
             typedef bool ( ::SireFF::FF::*containsProperty_function_type)( ::QString const & ) const;
             containsProperty_function_type containsProperty_function_value( &::SireFF::FF::containsProperty );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "containsProperty"
                 , containsProperty_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Return whether or not this forcefield contains a property\ncalled name" );
-
+        
         }
         { //::SireFF::FF::energies
-
+        
             typedef ::SireCAS::Values ( ::SireFF::FF::*energies_function_type)( ::QSet< SireCAS::Symbol > const & ) ;
             energies_function_type energies_function_value( &::SireFF::FF::energies );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "energies"
                 , energies_function_value
                 , ( bp::arg("components") )
                 , bp::release_gil_policy()
                 , "Return the values of the specified energy components" );
-
+        
         }
         { //::SireFF::FF::energies
-
+        
             typedef ::SireCAS::Values ( ::SireFF::FF::*energies_function_type)(  ) ;
             energies_function_type energies_function_value( &::SireFF::FF::energies );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "energies"
                 , energies_function_value
                 , bp::release_gil_policy()
                 , "Return the values of all of the energy components of this forcefield" );
-
+        
         }
         { //::SireFF::FF::energy
-
+        
             typedef ::SireUnits::Dimension::MolarEnergy ( ::SireFF::FF::*energy_function_type)(  ) ;
             energy_function_type energy_function_value( &::SireFF::FF::energy );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "energy"
                 , energy_function_value
                 , bp::release_gil_policy()
                 , "Return the energy of this forcefield in its current state" );
-
+        
         }
         { //::SireFF::FF::energy
-
+        
             typedef ::SireUnits::Dimension::MolarEnergy ( ::SireFF::FF::*energy_function_type)( ::SireCAS::Symbol const & ) ;
             energy_function_type energy_function_value( &::SireFF::FF::energy );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "energy"
                 , energy_function_value
                 , ( bp::arg("component") )
                 , bp::release_gil_policy()
                 , "Return the energy of the forcefield component represented\nby the passed symbol\nThrow: SireFF::missing_component\n" );
-
+        
         }
         { //::SireFF::FF::isClean
-
+        
             typedef bool ( ::SireFF::FF::*isClean_function_type)(  ) const;
             isClean_function_type isClean_function_value( &::SireFF::FF::isClean );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "isClean"
                 , isClean_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FF::isDirty
-
+        
             typedef bool ( ::SireFF::FF::*isDirty_function_type)(  ) const;
             isDirty_function_type isDirty_function_value( &::SireFF::FF::isDirty );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "isDirty"
                 , isDirty_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FF::mustNowRecalculateFromScratch
-
+        
             typedef void ( ::SireFF::FF::*mustNowRecalculateFromScratch_function_type)(  ) ;
             mustNowRecalculateFromScratch_function_type mustNowRecalculateFromScratch_function_value( &::SireFF::FF::mustNowRecalculateFromScratch );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "mustNowRecalculateFromScratch"
                 , mustNowRecalculateFromScratch_function_value
                 , bp::release_gil_policy()
                 , "Tell the forcefield that it has to recalculate everything from\nscratch" );
-
+        
         }
         { //::SireFF::FF::name
-
+        
             typedef ::SireFF::FFName const & ( ::SireFF::FF::*name_function_type)(  ) const;
             name_function_type name_function_value( &::SireFF::FF::name );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "name"
                 , name_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the name of this forcefield" );
-
+        
         }
         { //::SireFF::FF::null
-
+        
             typedef ::SireFF::NullFF const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireFF::FF::null );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         FF_exposer.def( bp::self != bp::self );
         FF_exposer.def( bp::self == bp::self );
         { //::SireFF::FF::properties
-
+        
             typedef ::SireBase::Properties const & ( ::SireFF::FF::*properties_function_type)(  ) const;
             properties_function_type properties_function_value( &::SireFF::FF::properties );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "properties"
                 , properties_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the values of all of the properties of this forcefield" );
-
+        
         }
         { //::SireFF::FF::property
-
+        
             typedef ::SireBase::Property const & ( ::SireFF::FF::*property_function_type)( ::QString const & ) const;
             property_function_type property_function_value( &::SireFF::FF::property );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "property"
                 , property_function_value
                 , ( bp::arg("name") )
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the property that has the name name\n\nThrow: SireBase::missing_property\n" );
-
+        
         }
         { //::SireFF::FF::propertyKeys
-
+        
             typedef ::QStringList ( ::SireFF::FF::*propertyKeys_function_type)(  ) const;
             propertyKeys_function_type propertyKeys_function_value( &::SireFF::FF::propertyKeys );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "propertyKeys"
                 , propertyKeys_function_value
                 , bp::release_gil_policy()
                 , "Return the names of all of the properties available to this forcefield" );
-
+        
         }
         { //::SireFF::FF::remove
-
+        
             typedef bool ( ::SireFF::FF::*remove_function_type)( ::SireMol::MoleculeView const &,::SireMol::MGID const & ) ;
             remove_function_type remove_function_value( &::SireFF::FF::remove );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molview"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Remove the view molview from the specified groups in this\nforcefield. Note that this only removes the specific view\n(and indeed only the first copy of this view if there\nare duplicates) - it does not remove the atoms in this\nview from all of the other views\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::remove
-
+        
             typedef bool ( ::SireFF::FF::*remove_function_type)( ::SireMol::ViewsOfMol const &,::SireMol::MGID const & ) ;
             remove_function_type remove_function_value( &::SireFF::FF::remove );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molviews"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Remove the views of the molecule in molviews from the specified\ngroups in this forcefield. Note that this only removes the specific view\n(and indeed only the first copy of this view if there\nare duplicates) - it does not remove the atoms in these\nviews from all of the other views\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::remove
-
+        
             typedef bool ( ::SireFF::FF::*remove_function_type)( ::SireMol::Molecules const &,::SireMol::MGID const & ) ;
             remove_function_type remove_function_value( &::SireFF::FF::remove );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molecules"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Remove the views of the molecules in molecules from the specified\ngroups in this forcefield. Note that this only removes the specific view\n(and indeed only the first copy of this view if there\nare duplicates) - it does not remove the atoms in these\nviews from all of the other views\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::remove
-
+        
             typedef bool ( ::SireFF::FF::*remove_function_type)( ::SireMol::MoleculeGroup const &,::SireMol::MGID const & ) ;
             remove_function_type remove_function_value( &::SireFF::FF::remove );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molgroup"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Remove the views of the molecules in the molecule group molgroup f\nfrom the specified groups in this forcefield. Note that this only\nremoves the specific view (and indeed only the first copy of this view\nif there are duplicates) - it does not remove the atoms in these\nviews from all of the other views\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::remove
-
+        
             typedef bool ( ::SireFF::FF::*remove_function_type)( ::SireMol::MolNum,::SireMol::MGID const & ) ;
             remove_function_type remove_function_value( &::SireFF::FF::remove );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molnum"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Completely remove the molecule with number molnum from the\nforcefield groups identified by mgid\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::remove
-
+        
             typedef bool ( ::SireFF::FF::*remove_function_type)( ::QSet< SireMol::MolNum > const &,::SireMol::MGID const & ) ;
             remove_function_type remove_function_value( &::SireFF::FF::remove );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "remove"
                 , remove_function_value
                 , ( bp::arg("molnums"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Remove all of the molecules whose numbers are in molnums\nfrom all of the forcefield groups identified by mgid\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::removeAll
-
+        
             typedef bool ( ::SireFF::FF::*removeAll_function_type)( ::SireMol::MGID const & ) ;
             removeAll_function_type removeAll_function_value( &::SireFF::FF::removeAll );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Completely remove all of the molecules from the groups identified\nby mgid\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::removeAll
-
+        
             typedef bool ( ::SireFF::FF::*removeAll_function_type)( ::SireMol::MoleculeView const &,::SireMol::MGID const & ) ;
             removeAll_function_type removeAll_function_value( &::SireFF::FF::removeAll );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("molview"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Remove the view molview from the specified groups in this\nforcefield. Note that this only removes the specific view\n(and indeed all copies of this view if there\nare duplicates) - it does not remove the atoms in this\nview from all of the other views\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::removeAll
-
+        
             typedef bool ( ::SireFF::FF::*removeAll_function_type)( ::SireMol::ViewsOfMol const &,::SireMol::MGID const & ) ;
             removeAll_function_type removeAll_function_value( &::SireFF::FF::removeAll );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("molviews"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Remove the views of the molecule in molviews from the specified\ngroups in this forcefield. Note that this only removes the specific view\n(and indeed all copies of this view if there\nare duplicates) - it does not remove the atoms in these\nviews from all of the other views\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::removeAll
-
+        
             typedef bool ( ::SireFF::FF::*removeAll_function_type)( ::SireMol::Molecules const &,::SireMol::MGID const & ) ;
             removeAll_function_type removeAll_function_value( &::SireFF::FF::removeAll );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("molecules"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Remove the views of the molecules in molecules from the specified\ngroups in this forcefield. Note that this only removes the specific view\n(and indeed all copies of this view if there\nare duplicates) - it does not remove the atoms in these\nviews from all of the other views\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::removeAll
-
+        
             typedef bool ( ::SireFF::FF::*removeAll_function_type)( ::SireMol::MoleculeGroup const &,::SireMol::MGID const & ) ;
             removeAll_function_type removeAll_function_value( &::SireFF::FF::removeAll );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "removeAll"
                 , removeAll_function_value
                 , ( bp::arg("molgroup"), bp::arg("mgid") )
                 , bp::release_gil_policy()
                 , "Remove the views of the molecules in the molecule group molgroup f\nfrom the specified groups in this forcefield. Note that this only\nremoves the specific view (and indeed all copies of this view\nif there are duplicates) - it does not remove the atoms in these\nviews from all of the other views\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::setContents
-
+        
             typedef void ( ::SireFF::FF::*setContents_function_type)( ::SireMol::MGID const &,::SireMol::MoleculeView const & ) ;
             setContents_function_type setContents_function_value( &::SireFF::FF::setContents );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("mgid"), bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Set the contents of this forcefield to just contain molview,\nusing the default locations to find the properties that contain\nthe forcefield parameters for this molecule\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::setContents
-
+        
             typedef void ( ::SireFF::FF::*setContents_function_type)( ::SireMol::MGID const &,::SireMol::ViewsOfMol const & ) ;
             setContents_function_type setContents_function_value( &::SireFF::FF::setContents );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("mgid"), bp::arg("molview") )
                 , bp::release_gil_policy()
                 , "Set the contents of this forcefield to the molecule views in molviews,\nusing the default locations to find the properties that contain\nthe forcefield parameters for this molecule\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::setContents
-
+        
             typedef void ( ::SireFF::FF::*setContents_function_type)( ::SireMol::MGID const &,::SireMol::Molecules const & ) ;
             setContents_function_type setContents_function_value( &::SireFF::FF::setContents );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("mgid"), bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "Set the contents of this forcefield to the molecules molecules,\nusing the default locations to find the properties that contain\nthe forcefield parameters for this molecule\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::setContents
-
+        
             typedef void ( ::SireFF::FF::*setContents_function_type)( ::SireMol::MGID const &,::SireMol::MoleculeGroup const & ) ;
             setContents_function_type setContents_function_value( &::SireFF::FF::setContents );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("mgid"), bp::arg("molgroup") )
                 , bp::release_gil_policy()
                 , "Set the contents of this forcefield to contains the molecules in molgroup,\nusing the default locations to find the properties that contain\nthe forcefield parameters for this molecule\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::setContents
-
+        
             typedef void ( ::SireFF::FF::*setContents_function_type)( ::SireMol::MGID const &,::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) ;
             setContents_function_type setContents_function_value( &::SireFF::FF::setContents );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("mgid"), bp::arg("molview"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Set the contents of the forcefield groups identified by mgid\nso that they only contain the molecule viewed in molview.\nThis will use the version of the molecule that exists already\nin this forcefield, not the version in molview\nThis will use the supplied map to find the property names\nof the parameters required by this forcefield\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::setContents
-
+        
             typedef void ( ::SireFF::FF::*setContents_function_type)( ::SireMol::MGID const &,::SireMol::ViewsOfMol const &,::SireBase::PropertyMap const & ) ;
             setContents_function_type setContents_function_value( &::SireFF::FF::setContents );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("mgid"), bp::arg("molviews"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Set the contents of the forcefield groups identified by mgid\nso that they only contain the molecule views in molviews.\nThis will use the version of the molecule that exists already\nin this forcefield, not the version in molview\nThis will use the supplied map to find the property names\nof the parameters required by this forcefield\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::setContents
-
+        
             typedef void ( ::SireFF::FF::*setContents_function_type)( ::SireMol::MGID const &,::SireMol::Molecules const &,::SireBase::PropertyMap const & ) ;
             setContents_function_type setContents_function_value( &::SireFF::FF::setContents );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("mgid"), bp::arg("molecules"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Set the contents of the forcefield groups identified by mgid\nso that they only contain the molecules in molecules.\nThis will use the version of the molecule that exists already\nin this forcefield, not the version in molview\nThis will use the supplied map to find the property names\nof the parameters required by this forcefield\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::setContents
-
+        
             typedef void ( ::SireFF::FF::*setContents_function_type)( ::SireMol::MGID const &,::SireMol::MoleculeGroup const &,::SireBase::PropertyMap const & ) ;
             setContents_function_type setContents_function_value( &::SireFF::FF::setContents );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setContents"
                 , setContents_function_value
                 , ( bp::arg("mgid"), bp::arg("molgroup"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Set the contents of the forcefield groups identified by mgid\nso that they only contain the molecules contained in molgroup.\nThis will use the version of the molecule that exists already\nin this forcefield, not the version in molview\nThis will use the supplied map to find the property names\nof the parameters required by this forcefield\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::setName
-
+        
             typedef void ( ::SireFF::FF::*setName_function_type)( ::QString const & ) ;
             setName_function_type setName_function_value( &::SireFF::FF::setName );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setName"
                 , setName_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Set the name of this forcefield" );
-
+        
         }
         { //::SireFF::FF::setName
-
+        
             typedef void ( ::SireFF::FF::*setName_function_type)( ::SireMol::MGID const &,::QString const & ) ;
             setName_function_type setName_function_value( &::SireFF::FF::setName );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setName"
                 , setName_function_value
                 , ( bp::arg("mgid"), bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Set the name of the forcefield groups identified by mgid\nThrow: SireMol::missing_group\n" );
-
+        
         }
         { //::SireFF::FF::setProperty
-
+        
             typedef bool ( ::SireFF::FF::*setProperty_function_type)( ::QString const &,::SireBase::Property const & ) ;
             setProperty_function_type setProperty_function_value( &::SireFF::FF::setProperty );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "setProperty"
                 , setProperty_function_value
                 , ( bp::arg("name"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Set the property with name name to have the value value\n\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::toString
-
+        
             typedef ::QString ( ::SireFF::FF::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireFF::FF::toString );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this forcefield" );
-
+        
         }
         { //::SireFF::FF::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireFF::FF::typeName );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::FF::update
-
+        
             typedef void ( ::SireFF::FF::*update_function_type)( ::SireMol::MoleculeData const &,bool ) ;
             update_function_type update_function_value( &::SireFF::FF::update );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("moldata"), bp::arg("auto_commit")=(bool)(true) )
                 , "Update this forcefield so that it uses the version of the molecule\nthat is present in moldata - this does nothing if this molecule\nis not in this forcefield. This uses the existing property names\nto find the updated properties that contain the forcefield parameters\nfor this molecule. If you want to change the property names, then you\nmust remove the molecule, then re-add it with the new names.\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::update
-
+        
             typedef void ( ::SireFF::FF::*update_function_type)( ::SireMol::MoleculeView const &,bool ) ;
             update_function_type update_function_value( &::SireFF::FF::update );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("molview"), bp::arg("auto_commit")=(bool)(true) )
                 , "Update the data of the molecule that is view in molview. This\nupdates all atoms, even those that are not part of the view" );
-
+        
         }
         { //::SireFF::FF::update
-
+        
             typedef void ( ::SireFF::FF::*update_function_type)( ::SireMol::Molecules const &,bool ) ;
             update_function_type update_function_value( &::SireFF::FF::update );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("molecules"), bp::arg("auto_commit")=(bool)(true) )
                 , "Update the molecules in this forcefield so that they have the\nsame version as in molecules. The molecules will use the existing\nproperty names to find the properties that contain the forcefield\nparameters. If you want to change the property names, then you\nmust remove the molecule, then re-add it with the new names\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::update
-
+        
             typedef void ( ::SireFF::FF::*update_function_type)( ::SireMol::MoleculeGroup const &,bool ) ;
             update_function_type update_function_value( &::SireFF::FF::update );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "update"
                 , update_function_value
                 , ( bp::arg("molgroup"), bp::arg("auto_commit")=(bool)(true) )
                 , "Update this forcefield so that it has the same version molecules\nas those contained in molgroup.\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::FF::version
-
+        
             typedef ::quint64 ( ::SireFF::FF::*version_function_type)(  ) const;
             version_function_type version_function_value( &::SireFF::FF::version );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "version"
                 , version_function_value
                 , bp::release_gil_policy()
                 , "Return the version number of this copy of the forcefield" );
-
+        
         }
         { //::SireFF::FF::what
-
+        
             typedef char const * ( ::SireFF::FF::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireFF::FF::what );
-
-            FF_exposer.def(
+            
+            FF_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "Return the class name of the forcefield" );
-
+        
         }
         FF_exposer.staticmethod( "null" );
         FF_exposer.staticmethod( "typeName" );

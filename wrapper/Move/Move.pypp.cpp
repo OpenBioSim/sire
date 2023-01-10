@@ -45,426 +45,426 @@ void register_Move_class(){
         Move_exposer_t Move_exposer = Move_exposer_t( "Move", "This is the base class of all of the move classes\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope Move_scope( Move_exposer );
         { //::SireMove::Move::chemicalPotential
-
+        
             typedef ::SireUnits::Dimension::MolarEnergy ( ::SireMove::Move::*chemicalPotential_function_type)(  ) const;
             chemicalPotential_function_type chemicalPotential_function_value( &::SireMove::Move::chemicalPotential );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "chemicalPotential"
                 , chemicalPotential_function_value
                 , bp::release_gil_policy()
                 , "Return the constant chemical potential that this move samples\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireMove::Move::clearStatistics
-
+        
             typedef void ( ::SireMove::Move::*clearStatistics_function_type)(  ) ;
             clearStatistics_function_type clearStatistics_function_value( &::SireMove::Move::clearStatistics );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "clearStatistics"
                 , clearStatistics_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::Move::coordinatesProperty
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMove::Move::*coordinatesProperty_function_type)(  ) const;
             coordinatesProperty_function_type coordinatesProperty_function_value( &::SireMove::Move::coordinatesProperty );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "coordinatesProperty"
                 , coordinatesProperty_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the property used to find the molecule coordinates to be moves" );
-
+        
         }
         { //::SireMove::Move::energy
-
+        
             typedef ::SireUnits::Dimension::MolarEnergy ( ::SireMove::Move::*energy_function_type)( ::SireSystem::System & ) const;
             energy_function_type energy_function_value( &::SireMove::Move::energy );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "energy"
                 , energy_function_value
                 , ( bp::arg("system") )
                 , bp::release_gil_policy()
                 , "Return the energy of the system system - this is the energy\nof this configuration that will be seen by this move" );
-
+        
         }
         { //::SireMove::Move::energyComponent
-
+        
             typedef ::SireCAS::Symbol const & ( ::SireMove::Move::*energyComponent_function_type)(  ) const;
             energyComponent_function_type energyComponent_function_value( &::SireMove::Move::energyComponent );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "energyComponent"
                 , energyComponent_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "Return the symbol that describes the Hamiltonian that this move\nwill sample" );
-
+        
         }
         { //::SireMove::Move::ensemble
-
+        
             typedef ::SireMove::Ensemble ( ::SireMove::Move::*ensemble_function_type)(  ) const;
             ensemble_function_type ensemble_function_value( &::SireMove::Move::ensemble );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "ensemble"
                 , ensemble_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::Move::fugacity
-
+        
             typedef ::SireUnits::Dimension::Pressure ( ::SireMove::Move::*fugacity_function_type)(  ) const;
             fugacity_function_type fugacity_function_value( &::SireMove::Move::fugacity );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "fugacity"
                 , fugacity_function_value
                 , bp::release_gil_policy()
                 , "Return the constant fugacity that this move samples\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireMove::Move::isConstantChemicalPotential
-
+        
             typedef bool ( ::SireMove::Move::*isConstantChemicalPotential_function_type)(  ) const;
             isConstantChemicalPotential_function_type isConstantChemicalPotential_function_value( &::SireMove::Move::isConstantChemicalPotential );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "isConstantChemicalPotential"
                 , isConstantChemicalPotential_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this move keeps the chemical potential constant" );
-
+        
         }
         { //::SireMove::Move::isConstantEnergy
-
+        
             typedef bool ( ::SireMove::Move::*isConstantEnergy_function_type)(  ) const;
             isConstantEnergy_function_type isConstantEnergy_function_value( &::SireMove::Move::isConstantEnergy );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "isConstantEnergy"
                 , isConstantEnergy_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this move keeps the total energy constant" );
-
+        
         }
         { //::SireMove::Move::isConstantFugacity
-
+        
             typedef bool ( ::SireMove::Move::*isConstantFugacity_function_type)(  ) const;
             isConstantFugacity_function_type isConstantFugacity_function_value( &::SireMove::Move::isConstantFugacity );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "isConstantFugacity"
                 , isConstantFugacity_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this move keeps the fugacity (related to the chemical\npotential) constant" );
-
+        
         }
         { //::SireMove::Move::isConstantLambda
-
+        
             typedef bool ( ::SireMove::Move::*isConstantLambda_function_type)( ::SireCAS::Symbol const & ) const;
             isConstantLambda_function_type isConstantLambda_function_value( &::SireMove::Move::isConstantLambda );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "isConstantLambda"
                 , isConstantLambda_function_value
                 , ( bp::arg("lam") )
                 , bp::release_gil_policy()
                 , "Return whether or not this move keeps the symbol lam constant" );
-
+        
         }
         { //::SireMove::Move::isConstantPressure
-
+        
             typedef bool ( ::SireMove::Move::*isConstantPressure_function_type)(  ) const;
             isConstantPressure_function_type isConstantPressure_function_value( &::SireMove::Move::isConstantPressure );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "isConstantPressure"
                 , isConstantPressure_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this move keeps the pressure constant" );
-
+        
         }
         { //::SireMove::Move::isConstantTemperature
-
+        
             typedef bool ( ::SireMove::Move::*isConstantTemperature_function_type)(  ) const;
             isConstantTemperature_function_type isConstantTemperature_function_value( &::SireMove::Move::isConstantTemperature );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "isConstantTemperature"
                 , isConstantTemperature_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this move keeps the temperature constant" );
-
+        
         }
         { //::SireMove::Move::isConstantVolume
-
+        
             typedef bool ( ::SireMove::Move::*isConstantVolume_function_type)(  ) const;
             isConstantVolume_function_type isConstantVolume_function_value( &::SireMove::Move::isConstantVolume );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "isConstantVolume"
                 , isConstantVolume_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this move keeps the volume constant" );
-
+        
         }
         { //::SireMove::Move::move
-
+        
             typedef void ( ::SireMove::Move::*move_function_type)( ::SireSystem::System &,int,bool ) ;
             move_function_type move_function_value( &::SireMove::Move::move );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "move"
                 , move_function_value
                 , ( bp::arg("system"), bp::arg("nmoves"), bp::arg("record_stats") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::Move::move
-
+        
             typedef void ( ::SireMove::Move::*move_function_type)( ::SireSystem::System & ) ;
             move_function_type move_function_value( &::SireMove::Move::move );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "move"
                 , move_function_value
                 , ( bp::arg("system") )
                 , bp::release_gil_policy()
                 , "Perform a single move on the system system without\nrecording any statistics" );
-
+        
         }
         { //::SireMove::Move::move
-
+        
             typedef void ( ::SireMove::Move::*move_function_type)( ::SireSystem::System &,int ) ;
             move_function_type move_function_value( &::SireMove::Move::move );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "move"
                 , move_function_value
                 , ( bp::arg("system"), bp::arg("nmoves") )
                 , bp::release_gil_policy()
                 , "Perform n moves on the system without recording any\nstatistics" );
-
+        
         }
         { //::SireMove::Move::nMoves
-
+        
             typedef int ( ::SireMove::Move::*nMoves_function_type)(  ) const;
             nMoves_function_type nMoves_function_value( &::SireMove::Move::nMoves );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "nMoves"
                 , nMoves_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::Move::null
-
+        
             typedef ::SireMove::NullMove const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMove::Move::null );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
                 , "" );
-
+        
         }
         { //::SireMove::Move::pressure
-
+        
             typedef ::SireUnits::Dimension::Pressure ( ::SireMove::Move::*pressure_function_type)(  ) const;
             pressure_function_type pressure_function_value( &::SireMove::Move::pressure );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "pressure"
                 , pressure_function_value
                 , bp::release_gil_policy()
                 , "Return the constant pressure that this move samples\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireMove::Move::propertyMap
-
+        
             typedef ::SireBase::PropertyMap const & ( ::SireMove::Move::*propertyMap_function_type)(  ) const;
             propertyMap_function_type propertyMap_function_value( &::SireMove::Move::propertyMap );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "propertyMap"
                 , propertyMap_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the property map used to perform this move" );
-
+        
         }
         { //::SireMove::Move::setChemicalPotential
-
+        
             typedef void ( ::SireMove::Move::*setChemicalPotential_function_type)( ::SireUnits::Dimension::MolarEnergy const & ) ;
             setChemicalPotential_function_type setChemicalPotential_function_value( &::SireMove::Move::setChemicalPotential );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "setChemicalPotential"
                 , setChemicalPotential_function_value
                 , ( bp::arg("chemical_potential") )
                 , bp::release_gil_policy()
                 , "Set the chemical potential that this constant chemical potential move samples\nto chemical_potential\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireMove::Move::setCoordinatesProperty
-
+        
             typedef void ( ::SireMove::Move::*setCoordinatesProperty_function_type)( ::SireBase::PropertyName const & ) ;
             setCoordinatesProperty_function_type setCoordinatesProperty_function_value( &::SireMove::Move::setCoordinatesProperty );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "setCoordinatesProperty"
                 , setCoordinatesProperty_function_value
                 , ( bp::arg("coords_property") )
                 , bp::release_gil_policy()
                 , "Set the property used to locate the molecule coordinates to be moved" );
-
+        
         }
         { //::SireMove::Move::setEnergyComponent
-
+        
             typedef void ( ::SireMove::Move::*setEnergyComponent_function_type)( ::SireCAS::Symbol const & ) ;
             setEnergyComponent_function_type setEnergyComponent_function_value( &::SireMove::Move::setEnergyComponent );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "setEnergyComponent"
                 , setEnergyComponent_function_value
                 , ( bp::arg("component") )
                 , bp::release_gil_policy()
                 , "Set the energy component that describes the Hamiltonian that this move\nwill sample" );
-
+        
         }
         { //::SireMove::Move::setFugacity
-
+        
             typedef void ( ::SireMove::Move::*setFugacity_function_type)( ::SireUnits::Dimension::Pressure const & ) ;
             setFugacity_function_type setFugacity_function_value( &::SireMove::Move::setFugacity );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "setFugacity"
                 , setFugacity_function_value
                 , ( bp::arg("fugacity") )
                 , bp::release_gil_policy()
                 , "Set the fugacity that this constant fugacity move samples\nto fugacity\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireMove::Move::setGenerator
-
+        
             typedef void ( ::SireMove::Move::*setGenerator_function_type)( ::SireMaths::RanGenerator const & ) ;
             setGenerator_function_type setGenerator_function_value( &::SireMove::Move::setGenerator );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "setGenerator"
                 , setGenerator_function_value
                 , ( bp::arg("rangenerator") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::Move::setPressure
-
+        
             typedef void ( ::SireMove::Move::*setPressure_function_type)( ::SireUnits::Dimension::Pressure const & ) ;
             setPressure_function_type setPressure_function_value( &::SireMove::Move::setPressure );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "setPressure"
                 , setPressure_function_value
                 , ( bp::arg("pressure") )
                 , bp::release_gil_policy()
                 , "Set the pressure that this constant pressure move samples\nto pressure\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireMove::Move::setSpaceProperty
-
+        
             typedef void ( ::SireMove::Move::*setSpaceProperty_function_type)( ::SireBase::PropertyName const & ) ;
             setSpaceProperty_function_type setSpaceProperty_function_value( &::SireMove::Move::setSpaceProperty );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "setSpaceProperty"
                 , setSpaceProperty_function_value
                 , ( bp::arg("space_property") )
                 , bp::release_gil_policy()
                 , "Set the property used to find the simulation box for this move. This\nproperty is only used when the move involves changing the\nsimulation box, or when trying to find the volume using\nthe volume function" );
-
+        
         }
         { //::SireMove::Move::setTemperature
-
+        
             typedef void ( ::SireMove::Move::*setTemperature_function_type)( ::SireUnits::Dimension::Temperature const & ) ;
             setTemperature_function_type setTemperature_function_value( &::SireMove::Move::setTemperature );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "setTemperature"
                 , setTemperature_function_value
                 , ( bp::arg("temperature") )
                 , bp::release_gil_policy()
                 , "Set the temperature that this constant temperature move samples\nto temperature\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireMove::Move::spaceProperty
-
+        
             typedef ::SireBase::PropertyName const & ( ::SireMove::Move::*spaceProperty_function_type)(  ) const;
             spaceProperty_function_type spaceProperty_function_value( &::SireMove::Move::spaceProperty );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "spaceProperty"
                 , spaceProperty_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the property used to find the simulation space (box)\nfor this move. This property is only used when the move\ninvolves changing the simulation box." );
-
+        
         }
         { //::SireMove::Move::temperature
-
+        
             typedef ::SireUnits::Dimension::Temperature ( ::SireMove::Move::*temperature_function_type)(  ) const;
             temperature_function_type temperature_function_value( &::SireMove::Move::temperature );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "temperature"
                 , temperature_function_value
                 , bp::release_gil_policy()
                 , "Return the constant temperature that this move samples\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireMove::Move::toString
-
+        
             typedef ::QString ( ::SireMove::Move::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireMove::Move::toString );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::Move::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::Move::typeName );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMove::Move::volume
-
+        
             typedef ::SireUnits::Dimension::Volume ( ::SireMove::Move::*volume_function_type)( ::SireSystem::System const & ) const;
             volume_function_type volume_function_value( &::SireMove::Move::volume );
-
-            Move_exposer.def(
+            
+            Move_exposer.def( 
                 "volume"
                 , volume_function_value
                 , ( bp::arg("system") )
                 , bp::release_gil_policy()
                 , "Return the volume of the system system - this is the volume\nof this configuration that will be seen by this move" );
-
+        
         }
         Move_exposer.staticmethod( "null" );
         Move_exposer.staticmethod( "typeName" );

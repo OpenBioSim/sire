@@ -32,16 +32,16 @@ void register_MoleculeProperty_class(){
         MoleculeProperty_exposer_t MoleculeProperty_exposer = MoleculeProperty_exposer_t( "MoleculeProperty", "This specifically is a property that pertains to an entire\nmolecule (e.g. a selection of atoms from that molecule)\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope MoleculeProperty_scope( MoleculeProperty_exposer );
         { //::SireMol::MoleculeProperty::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMol::MoleculeProperty::typeName );
-
-            MoleculeProperty_exposer.def(
+            
+            MoleculeProperty_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MoleculeProperty_exposer.staticmethod( "typeName" );
         MoleculeProperty_exposer.def( "__str__", &__str__< ::SireMol::MoleculeProperty > );

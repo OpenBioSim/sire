@@ -46,155 +46,155 @@ void register_MolForceTable_class(){
         MolForceTable_exposer.def( bp::init< SireMol::MoleculeView const & >(( bp::arg("molview") ), "Construct a table to hold the forces on all of the CutGroups that\nare selected in molview. The forces are initialised to zero") );
         MolForceTable_exposer.def( bp::init< SireFF::MolForceTable const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireFF::MolForceTable::add
-
+        
             typedef bool ( ::SireFF::MolForceTable::*add_function_type)( ::SireMol::CGAtomIdx const &,::SireMaths::Vector const & ) ;
             add_function_type add_function_value( &::SireFF::MolForceTable::add );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("cgatomidx"), bp::arg("force") )
                 , bp::release_gil_policy()
                 , "Add the force force onto this table. This ignores\nforces calculated for atoms that are in CutGroups that are\nnot in this table - this returns whether or not the\natom is in this table\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireFF::MolForceTable::add
-
+        
             typedef bool ( ::SireFF::MolForceTable::*add_function_type)( ::SireMol::AtomSelection const &,::SireMaths::Vector const & ) ;
             add_function_type add_function_value( &::SireFF::MolForceTable::add );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("selected_atoms"), bp::arg("force") )
                 , bp::release_gil_policy()
                 , "Add the force force onto this table for all of the atoms\nin selected_atoms. This ignores forces calculated for atoms\nthat are in CutGroups that are not in this table - this returns whether\nor not any selected atoms are in this table\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::MolForceTable::add
-
+        
             typedef void ( ::SireFF::MolForceTable::*add_function_type)( ::SireFF::MolForceTable const & ) ;
             add_function_type add_function_value( &::SireFF::MolForceTable::add );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "Add the forces contained in other onto this force table. This will only\nadd the forces for CutGroups that are in both tables" );
-
+        
         }
         { //::SireFF::MolForceTable::add
-
+        
             typedef void ( ::SireFF::MolForceTable::*add_function_type)( ::SireMaths::Vector const & ) ;
             add_function_type add_function_value( &::SireFF::MolForceTable::add );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "add"
                 , add_function_value
                 , ( bp::arg("force") )
                 , bp::release_gil_policy()
                 , "Add the force force onto all of the atom points in this table" );
-
+        
         }
         { //::SireFF::MolForceTable::divide
-
+        
             typedef void ( ::SireFF::MolForceTable::*divide_function_type)( double ) ;
             divide_function_type divide_function_value( &::SireFF::MolForceTable::divide );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "divide"
                 , divide_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Divide the force at all atom points by value" );
-
+        
         }
         { //::SireFF::MolForceTable::initialise
-
+        
             typedef void ( ::SireFF::MolForceTable::*initialise_function_type)(  ) ;
             initialise_function_type initialise_function_value( &::SireFF::MolForceTable::initialise );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "initialise"
                 , initialise_function_value
                 , bp::release_gil_policy()
                 , "Initialise this table - this resets all of the forces back to zero" );
-
+        
         }
         { //::SireFF::MolForceTable::map
-
+        
             typedef int ( ::SireFF::MolForceTable::*map_function_type)( ::SireMol::CGIdx ) const;
             map_function_type map_function_value( &::SireFF::MolForceTable::map );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("cgidx") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::MolForceTable::molNum
-
+        
             typedef ::SireMol::MolNum ( ::SireFF::MolForceTable::*molNum_function_type)(  ) const;
             molNum_function_type molNum_function_value( &::SireFF::MolForceTable::molNum );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "molNum"
                 , molNum_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::MolForceTable::molUID
-
+        
             typedef ::QUuid const & ( ::SireFF::MolForceTable::*molUID_function_type)(  ) const;
             molUID_function_type molUID_function_value( &::SireFF::MolForceTable::molUID );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "molUID"
                 , molUID_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireFF::MolForceTable::multiply
-
+        
             typedef void ( ::SireFF::MolForceTable::*multiply_function_type)( double ) ;
             multiply_function_type multiply_function_value( &::SireFF::MolForceTable::multiply );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "multiply"
                 , multiply_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Multiply the force at all atom points by value" );
-
+        
         }
         { //::SireFF::MolForceTable::nCutGroups
-
+        
             typedef int ( ::SireFF::MolForceTable::*nCutGroups_function_type)(  ) const;
             nCutGroups_function_type nCutGroups_function_value( &::SireFF::MolForceTable::nCutGroups );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "nCutGroups"
                 , nCutGroups_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::MolForceTable::nSelectedCutGroups
-
+        
             typedef int ( ::SireFF::MolForceTable::*nSelectedCutGroups_function_type)(  ) const;
             nSelectedCutGroups_function_type nSelectedCutGroups_function_value( &::SireFF::MolForceTable::nSelectedCutGroups );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "nSelectedCutGroups"
                 , nSelectedCutGroups_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MolForceTable_exposer.def( bp::self != bp::self );
         MolForceTable_exposer.def( bp::self * bp::other< double >() );
@@ -205,170 +205,170 @@ void register_MolForceTable_class(){
         MolForceTable_exposer.def( -bp::self );
         MolForceTable_exposer.def( bp::self / bp::other< double >() );
         { //::SireFF::MolForceTable::operator=
-
+        
             typedef ::SireFF::MolForceTable & ( ::SireFF::MolForceTable::*assign_function_type)( ::SireFF::MolForceTable const & ) ;
             assign_function_type assign_function_value( &::SireFF::MolForceTable::operator= );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireFF::MolForceTable::operator=
-
+        
             typedef ::SireFF::MolForceTable & ( ::SireFF::MolForceTable::*assign_function_type)( ::SireMaths::Vector const & ) ;
             assign_function_type assign_function_value( &::SireFF::MolForceTable::operator= );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("force") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         MolForceTable_exposer.def( bp::self == bp::self );
         { //::SireFF::MolForceTable::selected
-
+        
             typedef bool ( ::SireFF::MolForceTable::*selected_function_type)( ::SireMol::CGIdx ) const;
             selected_function_type selected_function_value( &::SireFF::MolForceTable::selected );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "selected"
                 , selected_function_value
                 , ( bp::arg("cgidx") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::MolForceTable::selectedAll
-
+        
             typedef bool ( ::SireFF::MolForceTable::*selectedAll_function_type)(  ) const;
             selectedAll_function_type selectedAll_function_value( &::SireFF::MolForceTable::selectedAll );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "selectedAll"
                 , selectedAll_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::MolForceTable::setAll
-
+        
             typedef void ( ::SireFF::MolForceTable::*setAll_function_type)( ::SireMaths::Vector const & ) ;
             setAll_function_type setAll_function_value( &::SireFF::MolForceTable::setAll );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "setAll"
                 , setAll_function_value
                 , ( bp::arg("force") )
                 , bp::release_gil_policy()
                 , "Set all of the forces at the atom points equal to force" );
-
+        
         }
         { //::SireFF::MolForceTable::subtract
-
+        
             typedef bool ( ::SireFF::MolForceTable::*subtract_function_type)( ::SireMol::CGAtomIdx const &,::SireMaths::Vector const & ) ;
             subtract_function_type subtract_function_value( &::SireFF::MolForceTable::subtract );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "subtract"
                 , subtract_function_value
                 , ( bp::arg("cgatomidx"), bp::arg("force") )
                 , bp::release_gil_policy()
                 , "Subtract the force force from this table. This ignores\nforces calculated for atoms that are in CutGroups that are\nnot in this table - this returns whether or not the\natom is in this table\nThrow: SireError::invalid_index\n" );
-
+        
         }
         { //::SireFF::MolForceTable::subtract
-
+        
             typedef bool ( ::SireFF::MolForceTable::*subtract_function_type)( ::SireMol::AtomSelection const &,::SireMaths::Vector const & ) ;
             subtract_function_type subtract_function_value( &::SireFF::MolForceTable::subtract );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "subtract"
                 , subtract_function_value
                 , ( bp::arg("selected_atoms"), bp::arg("force") )
                 , bp::release_gil_policy()
                 , "Subtract the force force from this table for all of the atoms\nin selected_atoms. This ignores forces calculated for atoms\nthat are in CutGroups that are not in this table - this returns whether\nor not any selected atoms are in this table\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::MolForceTable::subtract
-
+        
             typedef void ( ::SireFF::MolForceTable::*subtract_function_type)( ::SireFF::MolForceTable const & ) ;
             subtract_function_type subtract_function_value( &::SireFF::MolForceTable::subtract );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "subtract"
                 , subtract_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "Subtract the forces contained in other from this force table. This will only\nsubtract the forces for CutGroups that are in both tables" );
-
+        
         }
         { //::SireFF::MolForceTable::subtract
-
+        
             typedef void ( ::SireFF::MolForceTable::*subtract_function_type)( ::SireMaths::Vector const & ) ;
             subtract_function_type subtract_function_value( &::SireFF::MolForceTable::subtract );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "subtract"
                 , subtract_function_value
                 , ( bp::arg("force") )
                 , bp::release_gil_policy()
                 , "Subtract the force force from all of the atom points in this table" );
-
+        
         }
         { //::SireFF::MolForceTable::toVector
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireFF::MolForceTable::*toVector_function_type)(  ) const;
             toVector_function_type toVector_function_value( &::SireFF::MolForceTable::toVector );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "toVector"
                 , toVector_function_value
                 , bp::release_gil_policy()
                 , "Return an array of all of the forces on the atoms, in CGAtomIdx order" );
-
+        
         }
         { //::SireFF::MolForceTable::toVector
-
+        
             typedef ::QVector< SireMaths::Vector > ( ::SireFF::MolForceTable::*toVector_function_type)( ::SireMol::AtomSelection const & ) const;
             toVector_function_type toVector_function_value( &::SireFF::MolForceTable::toVector );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "toVector"
                 , toVector_function_value
                 , ( bp::arg("selection") )
                 , bp::release_gil_policy()
                 , "Return an array of all of the forces on the atoms selected in selection\nThrow: SireError::incompatible_error\n" );
-
+        
         }
         { //::SireFF::MolForceTable::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireFF::MolForceTable::typeName );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireFF::MolForceTable::what
-
+        
             typedef char const * ( ::SireFF::MolForceTable::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireFF::MolForceTable::what );
-
-            MolForceTable_exposer.def(
+            
+            MolForceTable_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MolForceTable_exposer.staticmethod( "typeName" );
         MolForceTable_exposer.def( "__copy__", &__copy__);

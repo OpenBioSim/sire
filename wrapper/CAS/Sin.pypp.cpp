@@ -38,55 +38,55 @@ void register_Sin_class(){
         Sin_exposer.def( bp::init< SireCAS::Expression const & >(( bp::arg("ex") ), "Construct cos(expression)") );
         Sin_exposer.def( bp::init< SireCAS::Sin const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireCAS::Sin::evaluate
-
+        
             typedef double ( ::SireCAS::Sin::*evaluate_function_type)( ::SireCAS::Values const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Sin::evaluate );
-
-            Sin_exposer.def(
+            
+            Sin_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Evaluate this function" );
-
+        
         }
         { //::SireCAS::Sin::evaluate
-
+        
             typedef ::SireMaths::Complex ( ::SireCAS::Sin::*evaluate_function_type)( ::SireCAS::ComplexValues const & ) const;
             evaluate_function_type evaluate_function_value( &::SireCAS::Sin::evaluate );
-
-            Sin_exposer.def(
+            
+            Sin_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "Complex evaluation" );
-
+        
         }
         Sin_exposer.def( bp::self == bp::other< SireCAS::ExBase >() );
         { //::SireCAS::Sin::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireCAS::Sin::typeName );
-
-            Sin_exposer.def(
+            
+            Sin_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireCAS::Sin::what
-
+        
             typedef char const * ( ::SireCAS::Sin::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireCAS::Sin::what );
-
-            Sin_exposer.def(
+            
+            Sin_exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         Sin_exposer.staticmethod( "typeName" );
         Sin_exposer.def( "__copy__", &__copy__);

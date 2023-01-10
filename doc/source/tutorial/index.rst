@@ -13,9 +13,9 @@ installed. You can test this by starting python and typing
 
 >>> import sire as sr
 
-If ``sire`` imports without error, then everything is working.
+If :mod:`sire` imports without error, then everything is working.
 
-If you can't import ``sire``, or have any other problems, then
+If you can't import :mod:`sire`, or have any other problems, then
 please :doc:`ask for support. <../support>`
 
 .. toctree::

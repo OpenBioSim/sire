@@ -24,81 +24,81 @@ void register_SegProp_class(){
         SegProp_exposer_t SegProp_exposer = SegProp_exposer_t( "SegProp", "Small class used to provide a common base for all SegProperty types", bp::no_init );
         bp::scope SegProp_scope( SegProp_exposer );
         { //::SireMol::SegProp::assertCanConvert
-
+        
             typedef void ( ::SireMol::SegProp::*assertCanConvert_function_type)( ::QVariant const & ) const;
             assertCanConvert_function_type assertCanConvert_function_value( &::SireMol::SegProp::assertCanConvert );
-
-            SegProp_exposer.def(
+            
+            SegProp_exposer.def( 
                 "assertCanConvert"
                 , assertCanConvert_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::SegProp::assignFrom
-
+        
             typedef void ( ::SireMol::SegProp::*assignFrom_function_type)( ::SireMol::SegProperty< QVariant > const & ) ;
             assignFrom_function_type assignFrom_function_value( &::SireMol::SegProp::assignFrom );
-
-            SegProp_exposer.def(
+            
+            SegProp_exposer.def( 
                 "assignFrom"
                 , assignFrom_function_value
                 , ( bp::arg("values") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::SegProp::canConvert
-
+        
             typedef bool ( ::SireMol::SegProp::*canConvert_function_type)( ::QVariant const & ) const;
             canConvert_function_type canConvert_function_value( &::SireMol::SegProp::canConvert );
-
-            SegProp_exposer.def(
+            
+            SegProp_exposer.def( 
                 "canConvert"
                 , canConvert_function_value
                 , ( bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::SegProp::getAsProperty
-
+        
             typedef ::SireBase::PropertyPtr ( ::SireMol::SegProp::*getAsProperty_function_type)( ::SireMol::SegIdx const & ) const;
             getAsProperty_function_type getAsProperty_function_value( &::SireMol::SegProp::getAsProperty );
-
-            SegProp_exposer.def(
+            
+            SegProp_exposer.def( 
                 "getAsProperty"
                 , getAsProperty_function_value
                 , ( bp::arg("segidx") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::SegProp::getAsVariant
-
+        
             typedef ::QVariant ( ::SireMol::SegProp::*getAsVariant_function_type)( ::SireMol::SegIdx const & ) const;
             getAsVariant_function_type getAsVariant_function_value( &::SireMol::SegProp::getAsVariant );
-
-            SegProp_exposer.def(
+            
+            SegProp_exposer.def( 
                 "getAsVariant"
                 , getAsVariant_function_value
                 , ( bp::arg("segidx") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireMol::SegProp::toVariant
-
+        
             typedef ::SireMol::SegProperty< QVariant > ( ::SireMol::SegProp::*toVariant_function_type)(  ) const;
             toVariant_function_type toVariant_function_value( &::SireMol::SegProp::toVariant );
-
-            SegProp_exposer.def(
+            
+            SegProp_exposer.def( 
                 "toVariant"
                 , toVariant_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         SegProp_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::SegProp >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );

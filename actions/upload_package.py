@@ -1,4 +1,3 @@
-
 import os
 import sys
 import glob
@@ -27,16 +26,12 @@ print(f"conda_bld = {conda_bld}")
 
 # Find the packages to upload
 sire_pkg = glob.glob(os.path.join(conda_bld, "*-*", "sire-*.tar.bz2"))
-kcombu_pkg = glob.glob(os.path.join(conda_bld, "*-*", "kcombu-*.tar.bz2"))
 
 if len(sire_pkg) == 0:
     print("No sire packages to upload?")
     sys.exit(-1)
 
 packages = sire_pkg
-
-if len(kcombu_pkg) == 0:
-    packages = packages + kcombu_pkg
 
 print(f"Uploading packages:")
 print(" * ", "\n *  ".join(packages))
@@ -46,8 +41,10 @@ packages = " ".join(packages)
 
 def run_cmd(cmd):
     import subprocess
+
     p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
     return str(p.stdout.read().decode("utf-8")).lstrip().rstrip()
+
 
 gitdir = os.path.join(srcdir, ".git")
 
@@ -68,8 +65,7 @@ cmd = f"anaconda --token {conda_token} upload --user openbiosim {label} --force 
 print(f"\nUpload command:\n\n{cmd}\n")
 
 # Label release packages with main and dev so that dev is at least as new as
-# main. Only need to uncomment the libcpuid and kcombu package uploads when
-# there new versions are released.
+# main.
 if conda_token == "TEST":
     print("Not uploading as the ANACONDA_TOKEN is not set!")
     sys.exit(-1)

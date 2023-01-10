@@ -73,130 +73,130 @@ void register_IDOrSet_ResID__class(){
         IDOrSet_ResID__exposer.def( bp::init< SireID::IDOrSet< SireMol::ResID > const & >(( bp::arg("ids") ), "") );
         IDOrSet_ResID__exposer.def( bp::init< SireID::IDOrSet< SireMol::ResID > const & >(( bp::arg("other") ), "") );
         { //::SireID::IDOrSet< SireMol::ResID >::IDs
-
+        
             typedef SireID::IDOrSet< SireMol::ResID > exported_class_t;
             typedef ::QSet< SireMol::ResIdentifier > const & ( ::SireID::IDOrSet< SireMol::ResID >::*IDs_function_type)(  ) const;
             IDs_function_type IDs_function_value( &::SireID::IDOrSet< SireMol::ResID >::IDs );
-
-            IDOrSet_ResID__exposer.def(
+            
+            IDOrSet_ResID__exposer.def( 
                 "IDs"
                 , IDs_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::ResID >::hash
-
+        
             typedef SireID::IDOrSet< SireMol::ResID > exported_class_t;
             typedef ::uint ( ::SireID::IDOrSet< SireMol::ResID >::*hash_function_type)(  ) const;
             hash_function_type hash_function_value( &::SireID::IDOrSet< SireMol::ResID >::hash );
-
-            IDOrSet_ResID__exposer.def(
+            
+            IDOrSet_ResID__exposer.def( 
                 "hash"
                 , hash_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::ResID >::isNull
-
+        
             typedef SireID::IDOrSet< SireMol::ResID > exported_class_t;
             typedef bool ( ::SireID::IDOrSet< SireMol::ResID >::*isNull_function_type)(  ) const;
             isNull_function_type isNull_function_value( &::SireID::IDOrSet< SireMol::ResID >::isNull );
-
-            IDOrSet_ResID__exposer.def(
+            
+            IDOrSet_ResID__exposer.def( 
                 "isNull"
                 , isNull_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::ResID >::map
-
+        
             typedef SireID::IDOrSet< SireMol::ResID > exported_class_t;
             typedef ::QList< SireMol::ResIdx > ( ::SireID::IDOrSet< SireMol::ResID >::*map_function_type)( ::SireID::IDOrSet< SireMol::ResID >::SearchObject const & ) const;
             map_function_type map_function_value( &::SireID::IDOrSet< SireMol::ResID >::map );
-
-            IDOrSet_ResID__exposer.def(
+            
+            IDOrSet_ResID__exposer.def( 
                 "map"
                 , map_function_value
                 , ( bp::arg("obj") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         IDOrSet_ResID__exposer.def( bp::self != bp::other< SireID::ID >() );
         IDOrSet_ResID__exposer.def( bp::self != bp::self );
         IDOrSet_ResID__exposer.def( bp::self != bp::other< SireMol::ResID >() );
         { //::SireID::IDOrSet< SireMol::ResID >::operator=
-
+        
             typedef SireID::IDOrSet< SireMol::ResID > exported_class_t;
             typedef ::SireID::IDOrSet< SireMol::ResID > & ( ::SireID::IDOrSet< SireMol::ResID >::*assign_function_type)( ::SireID::IDOrSet< SireMol::ResID > const & ) ;
             assign_function_type assign_function_value( &::SireID::IDOrSet< SireMol::ResID >::operator= );
-
-            IDOrSet_ResID__exposer.def(
+            
+            IDOrSet_ResID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::ResID >::operator=
-
+        
             typedef SireID::IDOrSet< SireMol::ResID > exported_class_t;
             typedef ::SireID::IDOrSet< SireMol::ResID > & ( ::SireID::IDOrSet< SireMol::ResID >::*assign_function_type)( ::SireMol::ResID const & ) ;
             assign_function_type assign_function_value( &::SireID::IDOrSet< SireMol::ResID >::operator= );
-
-            IDOrSet_ResID__exposer.def(
+            
+            IDOrSet_ResID__exposer.def( 
                 "assign"
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
-
+        
         }
         IDOrSet_ResID__exposer.def( bp::self == bp::other< SireID::ID >() );
         IDOrSet_ResID__exposer.def( bp::self == bp::self );
         IDOrSet_ResID__exposer.def( bp::self == bp::other< SireMol::ResID >() );
         { //::SireID::IDOrSet< SireMol::ResID >::toString
-
+        
             typedef SireID::IDOrSet< SireMol::ResID > exported_class_t;
             typedef ::QString ( ::SireID::IDOrSet< SireMol::ResID >::*toString_function_type)(  ) const;
             toString_function_type toString_function_value( &::SireID::IDOrSet< SireMol::ResID >::toString );
-
-            IDOrSet_ResID__exposer.def(
+            
+            IDOrSet_ResID__exposer.def( 
                 "toString"
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::ResID >::typeName
-
+        
             typedef SireID::IDOrSet< SireMol::ResID > exported_class_t;
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireID::IDOrSet< SireMol::ResID >::typeName );
-
-            IDOrSet_ResID__exposer.def(
+            
+            IDOrSet_ResID__exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireID::IDOrSet< SireMol::ResID >::what
-
+        
             typedef SireID::IDOrSet< SireMol::ResID > exported_class_t;
             typedef char const * ( ::SireID::IDOrSet< SireMol::ResID >::*what_function_type)(  ) const;
             what_function_type what_function_value( &::SireID::IDOrSet< SireMol::ResID >::what );
-
-            IDOrSet_ResID__exposer.def(
+            
+            IDOrSet_ResID__exposer.def( 
                 "what"
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         IDOrSet_ResID__exposer.staticmethod( "typeName" );
         IDOrSet_ResID__exposer.def( "__copy__", &__copy__);

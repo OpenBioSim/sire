@@ -44,104 +44,104 @@ void register_MolInserter_class(){
         MolInserter_exposer_t MolInserter_exposer = MolInserter_exposer_t( "MolInserter", "This is the base class of all molecule inserters. These are\nmanipulator classes that are used to insert (add) molecules\nto a system or molecule group(s) during a running simulation.\ne.g. This is useful for Grand Canonial or Gibbs Ensemble simulations.\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope MolInserter_scope( MolInserter_exposer );
         { //::SireMove::MolInserter::generator
-
+        
             typedef ::SireMaths::RanGenerator const & ( ::SireMove::MolInserter::*generator_function_type)(  ) const;
             generator_function_type generator_function_value( &::SireMove::MolInserter::generator );
-
-            MolInserter_exposer.def(
+            
+            MolInserter_exposer.def( 
                 "generator"
                 , generator_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the random number generator used to generate the random\nnumbers used when inserting the molecule" );
-
+        
         }
         { //::SireMove::MolInserter::groups
-
+        
             typedef ::SireMol::MGIDsAndMaps const & ( ::SireMove::MolInserter::*groups_function_type)(  ) const;
             groups_function_type groups_function_value( &::SireMove::MolInserter::groups );
-
-            MolInserter_exposer.def(
+            
+            MolInserter_exposer.def( 
                 "groups"
                 , groups_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the group IDs (and associated) properties to which\nthe molecule will be inserted" );
-
+        
         }
         { //::SireMove::MolInserter::insert
-
+        
             typedef double ( ::SireMove::MolInserter::*insert_function_type)( ::SireMol::Molecule const &,::SireSystem::System &,::SireVol::Space const & ) ;
             insert_function_type insert_function_value( &::SireMove::MolInserter::insert );
-
-            MolInserter_exposer.def(
+            
+            MolInserter_exposer.def( 
                 "insert"
                 , insert_function_value
                 , ( bp::arg("molecule"), bp::arg("system"), bp::arg("space") )
                 , bp::release_gil_policy()
                 , "Insert the entire molecule molecule into the system system\nusing the space space, using the information about which\ngroups to add the molecule to (and which properties to use)\nwhich are contained in this inserter). This returns the\nprobability of where the molecule was inserted (normalised\nso that a probability of 1 is returned if the molecule\nwas added at a uniformly random orientation and position)" );
-
+        
         }
         { //::SireMove::MolInserter::insert
-
+        
             typedef double ( ::SireMove::MolInserter::*insert_function_type)( ::SireMol::PartialMolecule const &,::SireSystem::System &,::SireVol::Space const & ) ;
             insert_function_type insert_function_value( &::SireMove::MolInserter::insert );
-
-            MolInserter_exposer.def(
+            
+            MolInserter_exposer.def( 
                 "insert"
                 , insert_function_value
                 , ( bp::arg("molecule"), bp::arg("system"), bp::arg("space") )
                 , bp::release_gil_policy()
                 , "Insert the partial molecule molecule into the system system\nusing the space space, using the information about which\ngroups to add the molecule to (and which properties to use)\nwhich are contained in this inserter). This returns the\nprobability of where the molecule was inserted (normalised\nso that a probability of 1 is returned if the molecule\nwas added at a uniformly random orientation and position)" );
-
+        
         }
         { //::SireMove::MolInserter::null
-
+        
             typedef ::SireMove::NullInserter const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireMove::MolInserter::null );
-
-            MolInserter_exposer.def(
+            
+            MolInserter_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "Return the global null MolInserter" );
-
+        
         }
         { //::SireMove::MolInserter::setGenerator
-
+        
             typedef void ( ::SireMove::MolInserter::*setGenerator_function_type)( ::SireMaths::RanGenerator const & ) ;
             setGenerator_function_type setGenerator_function_value( &::SireMove::MolInserter::setGenerator );
-
-            MolInserter_exposer.def(
+            
+            MolInserter_exposer.def( 
                 "setGenerator"
                 , setGenerator_function_value
                 , ( bp::arg("generator") )
                 , bp::release_gil_policy()
                 , "Set the random number generator used to generate the random\nnumbers used to insert the molecule" );
-
+        
         }
         { //::SireMove::MolInserter::setGroups
-
+        
             typedef void ( ::SireMove::MolInserter::*setGroups_function_type)( ::SireMol::MGIDsAndMaps const & ) ;
             setGroups_function_type setGroups_function_value( &::SireMove::MolInserter::setGroups );
-
-            MolInserter_exposer.def(
+            
+            MolInserter_exposer.def( 
                 "setGroups"
                 , setGroups_function_value
                 , ( bp::arg("mgids") )
                 , bp::release_gil_policy()
                 , "Set the groups (and associated properties) used when adding\nthe molecule to the system" );
-
+        
         }
         { //::SireMove::MolInserter::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireMove::MolInserter::typeName );
-
-            MolInserter_exposer.def(
+            
+            MolInserter_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         MolInserter_exposer.staticmethod( "null" );
         MolInserter_exposer.staticmethod( "typeName" );

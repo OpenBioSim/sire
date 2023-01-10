@@ -68,824 +68,824 @@ void register_MoleculeParser_class(){
         MoleculeParser_exposer_t MoleculeParser_exposer = MoleculeParser_exposer_t( "MoleculeParser", "The base class of all molecule parsers", bp::no_init );
         bp::scope MoleculeParser_scope( MoleculeParser_exposer );
         { //::SireIO::MoleculeParser::construct
-
+        
             typedef ::SireIO::MoleculeParserPtr ( ::SireIO::MoleculeParser::*construct_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
             construct_function_type construct_function_value( &::SireIO::MoleculeParser::construct );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "construct"
                 , construct_function_value
                 , ( bp::arg("filename"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::construct
-
+        
             typedef ::SireIO::MoleculeParserPtr ( ::SireIO::MoleculeParser::*construct_function_type)( ::QStringList const &,::SireBase::PropertyMap const & ) const;
             construct_function_type construct_function_value( &::SireIO::MoleculeParser::construct );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "construct"
                 , construct_function_value
                 , ( bp::arg("lines"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::construct
-
+        
             typedef ::SireIO::MoleculeParserPtr ( ::SireIO::MoleculeParser::*construct_function_type)( ::SireSystem::System const &,::SireBase::PropertyMap const & ) const;
             construct_function_type construct_function_value( &::SireIO::MoleculeParser::construct );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "construct"
                 , construct_function_value
                 , ( bp::arg("system"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::disableParallel
-
+        
             typedef void ( ::SireIO::MoleculeParser::*disableParallel_function_type)(  ) ;
             disableParallel_function_type disableParallel_function_value( &::SireIO::MoleculeParser::disableParallel );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "disableParallel"
                 , disableParallel_function_value
                 , bp::release_gil_policy()
                 , "Disable code to parse files in parallel - parsing will happen in serial" );
-
+        
         }
         { //::SireIO::MoleculeParser::enableParallel
-
+        
             typedef void ( ::SireIO::MoleculeParser::*enableParallel_function_type)(  ) ;
             enableParallel_function_type enableParallel_function_value( &::SireIO::MoleculeParser::enableParallel );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "enableParallel"
                 , enableParallel_function_value
                 , bp::release_gil_policy()
                 , "Enable code to parse files in parallel" );
-
+        
         }
         { //::SireIO::MoleculeParser::errorReport
-
+        
             typedef ::QString ( ::SireIO::MoleculeParser::*errorReport_function_type)(  ) const;
             errorReport_function_type errorReport_function_value( &::SireIO::MoleculeParser::errorReport );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "errorReport"
                 , errorReport_function_value
                 , bp::release_gil_policy()
                 , "Return the error report, if this parser is broken. If it isnt,\n  then an empty string is returned." );
-
+        
         }
         { //::SireIO::MoleculeParser::filename
-
+        
             typedef ::QString ( ::SireIO::MoleculeParser::*filename_function_type)(  ) const;
             filename_function_type filename_function_value( &::SireIO::MoleculeParser::filename );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "filename"
                 , filename_function_value
                 , bp::release_gil_policy()
                 , "Return the name of the file that was parsed" );
-
+        
         }
         { //::SireIO::MoleculeParser::formatDescription
-
+        
             typedef ::QString ( ::SireIO::MoleculeParser::*formatDescription_function_type)(  ) const;
             formatDescription_function_type formatDescription_function_value( &::SireIO::MoleculeParser::formatDescription );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "formatDescription"
                 , formatDescription_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::formatName
-
+        
             typedef ::QString ( ::SireIO::MoleculeParser::*formatName_function_type)(  ) const;
             formatName_function_type formatName_function_value( &::SireIO::MoleculeParser::formatName );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "formatName"
                 , formatName_function_value
                 , bp::release_gil_policy()
                 , "Return the unique name of this format. This should be a short\nstring in capital letters that will identify the format within\nthe program, e.g. PRM7, RST7, PDB3 etc." );
-
+        
         }
         { //::SireIO::MoleculeParser::formatSuffix
-
+        
             typedef ::QStringList ( ::SireIO::MoleculeParser::*formatSuffix_function_type)(  ) const;
             formatSuffix_function_type formatSuffix_function_value( &::SireIO::MoleculeParser::formatSuffix );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "formatSuffix"
                 , formatSuffix_function_value
                 , bp::release_gil_policy()
                 , "Return the suffix (or suffixes) given to files that support this format.\nThe first suffix is the preferred on to use" );
-
+        
         }
         { //::SireIO::MoleculeParser::getFrame
-
+        
             typedef ::SireMol::Frame ( ::SireIO::MoleculeParser::*getFrame_function_type)( int ) const;
             getFrame_function_type getFrame_function_value( &::SireIO::MoleculeParser::getFrame );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "getFrame"
                 , getFrame_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "Return the ith trajectory frame from this parser. Note that\n  some parsers may have to re-read the file, so this may fail\n  if the filename changes since the last time this parser\n  was used\n" );
-
+        
         }
         { //::SireIO::MoleculeParser::hasWarnings
-
+        
             typedef bool ( ::SireIO::MoleculeParser::*hasWarnings_function_type)(  ) const;
             hasWarnings_function_type hasWarnings_function_value( &::SireIO::MoleculeParser::hasWarnings );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "hasWarnings"
                 , hasWarnings_function_value
                 , bp::release_gil_policy()
                 , "Return whether there were any warnings when loading the file\n  using this parser" );
-
+        
         }
         { //::SireIO::MoleculeParser::isBinaryFile
-
+        
             typedef bool ( ::SireIO::MoleculeParser::*isBinaryFile_function_type)(  ) const;
             isBinaryFile_function_type isBinaryFile_function_value( &::SireIO::MoleculeParser::isBinaryFile );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "isBinaryFile"
                 , isBinaryFile_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::isBroken
-
+        
             typedef bool ( ::SireIO::MoleculeParser::*isBroken_function_type)(  ) const;
             isBroken_function_type isBroken_function_value( &::SireIO::MoleculeParser::isBroken );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "isBroken"
                 , isBroken_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this parser is broken" );
-
+        
         }
         { //::SireIO::MoleculeParser::isEmpty
-
+        
             typedef bool ( ::SireIO::MoleculeParser::*isEmpty_function_type)(  ) const;
             isEmpty_function_type isEmpty_function_value( &::SireIO::MoleculeParser::isEmpty );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::isFrame
-
+        
             typedef bool ( ::SireIO::MoleculeParser::*isFrame_function_type)(  ) const;
             isFrame_function_type isFrame_function_value( &::SireIO::MoleculeParser::isFrame );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "isFrame"
                 , isFrame_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this parser is a frame parser" );
-
+        
         }
         { //::SireIO::MoleculeParser::isSupplementary
-
+        
             typedef bool ( ::SireIO::MoleculeParser::*isSupplementary_function_type)(  ) const;
             isSupplementary_function_type isSupplementary_function_value( &::SireIO::MoleculeParser::isSupplementary );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "isSupplementary"
                 , isSupplementary_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this parser is a supplementary parser" );
-
+        
         }
         { //::SireIO::MoleculeParser::isTextFile
-
+        
             typedef bool ( ::SireIO::MoleculeParser::*isTextFile_function_type)(  ) const;
             isTextFile_function_type isTextFile_function_value( &::SireIO::MoleculeParser::isTextFile );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "isTextFile"
                 , isTextFile_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::isTopology
-
+        
             typedef bool ( ::SireIO::MoleculeParser::*isTopology_function_type)(  ) const;
             isTopology_function_type isTopology_function_value( &::SireIO::MoleculeParser::isTopology );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "isTopology"
                 , isTopology_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this parser is a topology parser" );
-
+        
         }
         { //::SireIO::MoleculeParser::lines
-
+        
             typedef ::QVector< QString > const & ( ::SireIO::MoleculeParser::*lines_function_type)(  ) const;
             lines_function_type lines_function_value( &::SireIO::MoleculeParser::lines );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "lines"
                 , lines_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::load
-
+        
             typedef ::SireSystem::System ( *load_function_type )( ::QString const &,::SireBase::PropertyMap const & );
             load_function_type load_function_value( &::SireIO::MoleculeParser::load );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "load"
                 , load_function_value
                 , ( bp::arg("filename"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeParser::read" );
-
+        
         }
         { //::SireIO::MoleculeParser::load
-
+        
             typedef ::SireSystem::System ( *load_function_type )( ::QString const &,::QString const &,::SireBase::PropertyMap const & );
             load_function_type load_function_value( &::SireIO::MoleculeParser::load );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "load"
                 , load_function_value
                 , ( bp::arg("file1"), bp::arg("file2"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeParser::read" );
-
+        
         }
         { //::SireIO::MoleculeParser::load
-
+        
             typedef ::SireSystem::System ( *load_function_type )( ::QStringList const &,::SireBase::PropertyMap const & );
             load_function_type load_function_value( &::SireIO::MoleculeParser::load );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "load"
                 , load_function_value
                 , ( bp::arg("filenames"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeParser::read" );
-
+        
         }
         { //::SireIO::MoleculeParser::load
-
+        
             typedef ::SireSystem::System ( *load_function_type )( ::QString const & );
             load_function_type load_function_value( &::SireIO::MoleculeParser::load );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "load"
                 , load_function_value
                 , ( bp::arg("filename") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeParser::read" );
-
+        
         }
         { //::SireIO::MoleculeParser::load
-
+        
             typedef ::SireSystem::System ( *load_function_type )( ::QString const &,::QString const & );
             load_function_type load_function_value( &::SireIO::MoleculeParser::load );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "load"
                 , load_function_value
                 , ( bp::arg("file1"), bp::arg("file2") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeParser::read" );
-
+        
         }
         { //::SireIO::MoleculeParser::load
-
+        
             typedef ::SireSystem::System ( *load_function_type )( ::QStringList const & );
             load_function_type load_function_value( &::SireIO::MoleculeParser::load );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "load"
                 , load_function_value
                 , ( bp::arg("filenames") )
                 , bp::release_gil_policy()
                 , "Synonym for MoleculeParser::read" );
-
+        
         }
         { //::SireIO::MoleculeParser::nAtoms
-
+        
             typedef int ( ::SireIO::MoleculeParser::*nAtoms_function_type)(  ) const;
             nAtoms_function_type nAtoms_function_value( &::SireIO::MoleculeParser::nAtoms );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "nAtoms"
                 , nAtoms_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::nFrames
-
+        
             typedef int ( ::SireIO::MoleculeParser::*nFrames_function_type)(  ) const;
             nFrames_function_type nFrames_function_value( &::SireIO::MoleculeParser::nFrames );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "nFrames"
                 , nFrames_function_value
                 , bp::release_gil_policy()
                 , "Return the number of trajectory frames contained in this parser.\n  Trajectory frames contain coordinates andor velocities andor\n  forces data. It is possible for a parser to have zero frames,\n  e.g. if it only contains topology information.\n" );
-
+        
         }
         { //::SireIO::MoleculeParser::null
-
+        
             typedef ::SireIO::NullParser const & ( *null_function_type )(  );
             null_function_type null_function_value( &::SireIO::MoleculeParser::null );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "null"
                 , null_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::parse
-
+        
             typedef ::SireIO::MoleculeParserPtr ( *parse_function_type )( ::QString const &,::SireBase::PropertyMap const & );
             parse_function_type parse_function_value( &::SireIO::MoleculeParser::parse );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "parse"
                 , parse_function_value
                 , ( bp::arg("filename"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Parse the passed set of files, returning the resulting Parsers" );
-
+        
         }
         { //::SireIO::MoleculeParser::parse
-
+        
             typedef ::QList< SireBase::PropPtr< SireIO::MoleculeParser > > ( *parse_function_type )( ::QStringList const &,::SireBase::PropertyMap const & );
             parse_function_type parse_function_value( &::SireIO::MoleculeParser::parse );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "parse"
                 , parse_function_value
                 , ( bp::arg("filenames"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Parse the passed set of files, returning the resulting Parsers" );
-
+        
         }
         { //::SireIO::MoleculeParser::parse
-
+        
             typedef ::SireIO::MoleculeParserPtr ( *parse_function_type )( ::QString const & );
             parse_function_type parse_function_value( &::SireIO::MoleculeParser::parse );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "parse"
                 , parse_function_value
                 , ( bp::arg("filename") )
                 , bp::release_gil_policy()
                 , "Parse the passed set of files, returning the resulting Parsers" );
-
+        
         }
         { //::SireIO::MoleculeParser::parse
-
+        
             typedef ::SireIO::MoleculeParserPtr ( *parse_function_type )( ::SireSystem::System const &,::QString const &,::SireBase::PropertyMap const & );
             parse_function_type parse_function_value( &::SireIO::MoleculeParser::parse );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "parse"
                 , parse_function_value
                 , ( bp::arg("system"), bp::arg("format"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Parse the passed system, returning the resulting Parser. You must\n  specify the parser that you want to use\n" );
-
+        
         }
         { //::SireIO::MoleculeParser::parse
-
+        
             typedef ::QList< SireBase::PropPtr< SireIO::MoleculeParser > > ( *parse_function_type )( ::QStringList const & );
             parse_function_type parse_function_value( &::SireIO::MoleculeParser::parse );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "parse"
                 , parse_function_value
                 , ( bp::arg("filenames") )
                 , bp::release_gil_policy()
                 , "Parse the passed set of files, returning the resulting Parsers" );
-
+        
         }
         { //::SireIO::MoleculeParser::read
-
+        
             typedef ::SireSystem::System ( *read_function_type )( ::QString const &,::SireBase::PropertyMap const & );
             read_function_type read_function_value( &::SireIO::MoleculeParser::read );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "read"
                 , read_function_value
                 , ( bp::arg("filename"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Read the files with passed filenames, returning the System contained therein.\nNote that all of the files must be connected to the same system\n(i.e. it could be the Amber Parm and Rst file)" );
-
+        
         }
         { //::SireIO::MoleculeParser::read
-
+        
             typedef ::SireSystem::System ( *read_function_type )( ::QString const &,::QString const &,::SireBase::PropertyMap const & );
             read_function_type read_function_value( &::SireIO::MoleculeParser::read );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "read"
                 , read_function_value
                 , ( bp::arg("file1"), bp::arg("file2"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Read the two passed files, returning the System contained therein. The two\nfiles must refer to the same System, i.e. they could be a parameter + coordinate file" );
-
+        
         }
         { //::SireIO::MoleculeParser::read
-
+        
             typedef ::SireSystem::System ( *read_function_type )( ::QStringList const &,::SireBase::PropertyMap const & );
             read_function_type read_function_value( &::SireIO::MoleculeParser::read );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "read"
                 , read_function_value
                 , ( bp::arg("filenames"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Read the files with passed filenames, returning the System contained therein.\nNote that all of the files must be connected to the same system\n(i.e. it could be the Amber Parm and Rst file)" );
-
+        
         }
         { //::SireIO::MoleculeParser::read
-
+        
             typedef ::SireSystem::System ( *read_function_type )( ::QString const & );
             read_function_type read_function_value( &::SireIO::MoleculeParser::read );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "read"
                 , read_function_value
                 , ( bp::arg("filename") )
                 , bp::release_gil_policy()
                 , "Read the files with passed filenames, returning the System contained therein.\nNote that all of the files must be connected to the same system\n(i.e. it could be the Amber Parm and Rst file)" );
-
+        
         }
         { //::SireIO::MoleculeParser::read
-
+        
             typedef ::SireSystem::System ( *read_function_type )( ::QString const &,::QString const & );
             read_function_type read_function_value( &::SireIO::MoleculeParser::read );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "read"
                 , read_function_value
                 , ( bp::arg("file1"), bp::arg("file2") )
                 , bp::release_gil_policy()
                 , "Read the two passed files, returning the System contained therein. The two\nfiles must refer to the same System, i.e. they could be a parameter + coordinate file" );
-
+        
         }
         { //::SireIO::MoleculeParser::read
-
+        
             typedef ::SireSystem::System ( *read_function_type )( ::QStringList const & );
             read_function_type read_function_value( &::SireIO::MoleculeParser::read );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "read"
                 , read_function_value
                 , ( bp::arg("filenames") )
                 , bp::release_gil_policy()
                 , "Read the files with passed filenames, returning the System contained therein.\nNote that all of the files must be connected to the same system\n(i.e. it could be the Amber Parm and Rst file)" );
-
+        
         }
         { //::SireIO::MoleculeParser::save
-
+        
             typedef ::QStringList ( *save_function_type )( ::SireSystem::System const &,::QString const &,::SireBase::PropertyMap const & );
             save_function_type save_function_value( &::SireIO::MoleculeParser::save );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "save"
                 , save_function_value
                 , ( bp::arg("system"), bp::arg("filename"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Synonym of MoleculeParser::write" );
-
+        
         }
         { //::SireIO::MoleculeParser::save
-
+        
             typedef ::QStringList ( *save_function_type )( ::SireSystem::System const &,::QString const &,::QString const &,::SireBase::PropertyMap const & );
             save_function_type save_function_value( &::SireIO::MoleculeParser::save );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "save"
                 , save_function_value
                 , ( bp::arg("system"), bp::arg("file1"), bp::arg("file2"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Synonym of MoleculeParser::write" );
-
+        
         }
         { //::SireIO::MoleculeParser::save
-
+        
             typedef ::QStringList ( *save_function_type )( ::SireSystem::System const &,::QStringList const &,::SireBase::PropertyMap const & );
             save_function_type save_function_value( &::SireIO::MoleculeParser::save );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "save"
                 , save_function_value
                 , ( bp::arg("system"), bp::arg("filenames"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Synonym of MoleculeParser::write" );
-
+        
         }
         { //::SireIO::MoleculeParser::save
-
+        
             typedef ::QStringList ( *save_function_type )( ::SireSystem::System const &,::QString const & );
             save_function_type save_function_value( &::SireIO::MoleculeParser::save );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "save"
                 , save_function_value
                 , ( bp::arg("system"), bp::arg("filename") )
                 , bp::release_gil_policy()
                 , "Synonym of MoleculeParser::write" );
-
+        
         }
         { //::SireIO::MoleculeParser::save
-
+        
             typedef ::QStringList ( *save_function_type )( ::SireSystem::System const &,::QString const &,::QString const & );
             save_function_type save_function_value( &::SireIO::MoleculeParser::save );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "save"
                 , save_function_value
                 , ( bp::arg("system"), bp::arg("file1"), bp::arg("file2") )
                 , bp::release_gil_policy()
                 , "Synonym of MoleculeParser::write" );
-
+        
         }
         { //::SireIO::MoleculeParser::save
-
+        
             typedef ::QStringList ( *save_function_type )( ::SireSystem::System const &,::QStringList const & );
             save_function_type save_function_value( &::SireIO::MoleculeParser::save );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "save"
                 , save_function_value
                 , ( bp::arg("system"), bp::arg("filenames") )
                 , bp::release_gil_policy()
                 , "Synonym of MoleculeParser::write" );
-
+        
         }
         { //::SireIO::MoleculeParser::score
-
+        
             typedef double ( ::SireIO::MoleculeParser::*score_function_type)(  ) const;
             score_function_type score_function_value( &::SireIO::MoleculeParser::score );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "score"
                 , score_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::setUseParallel
-
+        
             typedef void ( ::SireIO::MoleculeParser::*setUseParallel_function_type)( bool ) ;
             setUseParallel_function_type setUseParallel_function_value( &::SireIO::MoleculeParser::setUseParallel );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "setUseParallel"
                 , setUseParallel_function_value
                 , ( bp::arg("on") )
                 , bp::release_gil_policy()
                 , "Set whether or not to parse files in parallel or serial" );
-
+        
         }
         { //::SireIO::MoleculeParser::supportedFormats
-
+        
             typedef ::QString ( *supportedFormats_function_type )(  );
             supportedFormats_function_type supportedFormats_function_value( &::SireIO::MoleculeParser::supportedFormats );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "supportedFormats"
                 , supportedFormats_function_value
                 , bp::release_gil_policy()
                 , "This returns a human readable set of lines describing the formats supported\nby MoleculeParser. Each line is formatted as extension : description where\nextension is the unique extension of the file used by MoleculeParser, and\ndescription is a description of the file format" );
-
+        
         }
         { //::SireIO::MoleculeParser::toSystem
-
+        
             typedef ::SireSystem::System ( ::SireIO::MoleculeParser::*toSystem_function_type)( ::SireBase::PropertyMap const & ) const;
             toSystem_function_type toSystem_function_value( &::SireIO::MoleculeParser::toSystem );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "toSystem"
                 , toSystem_function_value
                 , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Return the System that is constructed from the data in this parser" );
-
+        
         }
         { //::SireIO::MoleculeParser::toSystem
-
+        
             typedef ::SireSystem::System ( ::SireIO::MoleculeParser::*toSystem_function_type)( ::SireIO::MoleculeParser const &,::SireBase::PropertyMap const & ) const;
             toSystem_function_type toSystem_function_value( &::SireIO::MoleculeParser::toSystem );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "toSystem"
                 , toSystem_function_value
                 , ( bp::arg("other"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Return the System that is constructed from the data in the two\npassed parsers (i.e. representing a topology and a coordinate file)" );
-
+        
         }
         { //::SireIO::MoleculeParser::toSystem
-
+        
             typedef ::SireSystem::System ( ::SireIO::MoleculeParser::*toSystem_function_type)( ::QList< SireBase::PropPtr< SireIO::MoleculeParser > > const &,::SireBase::PropertyMap const & ) const;
             toSystem_function_type toSystem_function_value( &::SireIO::MoleculeParser::toSystem );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "toSystem"
                 , toSystem_function_value
                 , ( bp::arg("others"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Return the System that is constructed from the information in the passed\nparsers. This will parse the information in order, meaning that data contained\nin earlier parsers may be overwritten by data from later parsers" );
-
+        
         }
         { //::SireIO::MoleculeParser::toSystem
-
+        
             typedef ::SireSystem::System ( ::SireIO::MoleculeParser::*toSystem_function_type)(  ) const;
             toSystem_function_type toSystem_function_value( &::SireIO::MoleculeParser::toSystem );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "toSystem"
                 , toSystem_function_value
                 , bp::release_gil_policy()
                 , "Return the System that is constructed from the data in this parser" );
-
+        
         }
         { //::SireIO::MoleculeParser::toSystem
-
+        
             typedef ::SireSystem::System ( ::SireIO::MoleculeParser::*toSystem_function_type)( ::SireIO::MoleculeParser const & ) const;
             toSystem_function_type toSystem_function_value( &::SireIO::MoleculeParser::toSystem );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "toSystem"
                 , toSystem_function_value
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "Return the System that is constructed from the data in the two\npassed parsers (i.e. representing a topology and a coordinate file)" );
-
+        
         }
         { //::SireIO::MoleculeParser::toSystem
-
+        
             typedef ::SireSystem::System ( ::SireIO::MoleculeParser::*toSystem_function_type)( ::QList< SireBase::PropPtr< SireIO::MoleculeParser > > const & ) const;
             toSystem_function_type toSystem_function_value( &::SireIO::MoleculeParser::toSystem );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "toSystem"
                 , toSystem_function_value
                 , ( bp::arg("others") )
                 , bp::release_gil_policy()
                 , "Return the System that is constructed from the information in the passed\nparsers. This will parse the information in order, meaning that data contained\nin earlier parsers may be overwritten by data from later parsers" );
-
+        
         }
         { //::SireIO::MoleculeParser::typeName
-
+        
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireIO::MoleculeParser::typeName );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::usesParallel
-
+        
             typedef bool ( ::SireIO::MoleculeParser::*usesParallel_function_type)(  ) const;
             usesParallel_function_type usesParallel_function_value( &::SireIO::MoleculeParser::usesParallel );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "usesParallel"
                 , usesParallel_function_value
                 , bp::release_gil_policy()
                 , "" );
-
+        
         }
         { //::SireIO::MoleculeParser::warnings
-
+        
             typedef ::QStringList ( ::SireIO::MoleculeParser::*warnings_function_type)(  ) const;
             warnings_function_type warnings_function_value( &::SireIO::MoleculeParser::warnings );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "warnings"
                 , warnings_function_value
                 , bp::release_gil_policy()
                 , "Return any warnings that were generated when loading data\n  using this parser\n" );
-
+        
         }
         { //::SireIO::MoleculeParser::write
-
+        
             typedef ::QStringList ( *write_function_type )( ::SireSystem::System const &,::QString const &,::SireBase::PropertyMap const & );
             write_function_type write_function_value( &::SireIO::MoleculeParser::write );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "write"
                 , write_function_value
                 , ( bp::arg("system"), bp::arg("filename"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Save the passed System to the file called filename. First, the fileformat\nproperty is looked at in map. This is used to set the format(s) of\nthe files that are written (comma-separated list).\nIf this does not exist, then the extension of the\nfile is used to work out which format to use. If no extension is given,\nthen the System will be queried to find out its preferred format (normally\nthe format it was loaded with), via its fileformat property\n(again, comma separated list).\nIf their preferred format results in multiple files, then\nmultiple files will be written. This returns the full pathnames to\nall of the files that are written\n" );
-
+        
         }
         { //::SireIO::MoleculeParser::write
-
+        
             typedef ::QStringList ( *write_function_type )( ::SireSystem::System const &,::QString const &,::QString const &,::SireBase::PropertyMap const & );
             write_function_type write_function_value( &::SireIO::MoleculeParser::write );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "write"
                 , write_function_value
                 , ( bp::arg("system"), bp::arg("file1"), bp::arg("file2"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Extension of MoleculeParser::write which allows you to specify two filenames.\nThe same rules to locate the fileformats are now used, except now only two\nfiles are permitted to be written" );
-
+        
         }
         { //::SireIO::MoleculeParser::write
-
+        
             typedef ::QStringList ( *write_function_type )( ::SireSystem::System const &,::QStringList const &,::SireBase::PropertyMap const & );
             write_function_type write_function_value( &::SireIO::MoleculeParser::write );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "write"
                 , write_function_value
                 , ( bp::arg("system"), bp::arg("filenames"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Extension of MoleculeParser::write which allows many filenames.\nThe same rules to locate the fileformats are now used, except that now only\nthe number of files written must match the number of filenames" );
-
+        
         }
         { //::SireIO::MoleculeParser::write
-
+        
             typedef ::QStringList ( *write_function_type )( ::SireSystem::System const &,::QString const & );
             write_function_type write_function_value( &::SireIO::MoleculeParser::write );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "write"
                 , write_function_value
                 , ( bp::arg("system"), bp::arg("filename") )
                 , bp::release_gil_policy()
                 , "Save the passed System to the file called filename. First, the fileformat\nproperty is looked at in map. This is used to set the format(s) of\nthe files that are written (comma-separated list).\nIf this does not exist, then the extension of the\nfile is used to work out which format to use. If no extension is given,\nthen the System will be queried to find out its preferred format (normally\nthe format it was loaded with), via its fileformat property\n(again, comma separated list).\nIf their preferred format results in multiple files, then\nmultiple files will be written. This returns the full pathnames to\nall of the files that are written\n" );
-
+        
         }
         { //::SireIO::MoleculeParser::write
-
+        
             typedef ::QStringList ( *write_function_type )( ::SireSystem::System const &,::QString const &,::QString const & );
             write_function_type write_function_value( &::SireIO::MoleculeParser::write );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "write"
                 , write_function_value
                 , ( bp::arg("system"), bp::arg("file1"), bp::arg("file2") )
                 , bp::release_gil_policy()
                 , "Extension of MoleculeParser::write which allows you to specify two filenames.\nThe same rules to locate the fileformats are now used, except now only two\nfiles are permitted to be written" );
-
+        
         }
         { //::SireIO::MoleculeParser::write
-
+        
             typedef ::QStringList ( *write_function_type )( ::SireSystem::System const &,::QStringList const & );
             write_function_type write_function_value( &::SireIO::MoleculeParser::write );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "write"
                 , write_function_value
                 , ( bp::arg("system"), bp::arg("filenames") )
                 , bp::release_gil_policy()
                 , "Extension of MoleculeParser::write which allows many filenames.\nThe same rules to locate the fileformats are now used, except that now only\nthe number of files written must match the number of filenames" );
-
+        
         }
         { //::SireIO::MoleculeParser::writeToFile
-
+        
             typedef void ( ::SireIO::MoleculeParser::*writeToFile_function_type)( ::QString const & ) const;
             writeToFile_function_type writeToFile_function_value( &::SireIO::MoleculeParser::writeToFile );
-
-            MoleculeParser_exposer.def(
+            
+            MoleculeParser_exposer.def( 
                 "writeToFile"
                 , writeToFile_function_value
                 , ( bp::arg("filename") )
                 , bp::release_gil_policy()
                 , "Write the parsed data back to the file called filename. This will\noverwrite the file if it exists already, so be careful" );
-
+        
         }
         MoleculeParser_exposer.staticmethod( "load" );
         MoleculeParser_exposer.staticmethod( "null" );
