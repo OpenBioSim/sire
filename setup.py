@@ -27,6 +27,15 @@ import subprocess
 import shutil
 import glob
 
+try:
+    # Find out how much memory we have in total.
+    # The wrappers need 4 GB per core to compile
+    import psutil
+
+    total_memory_gb = psutil.virtual_memory()[0] / (1024 * 1024 * 1024)
+except Exception:
+    total_memory_gb = None
+
 # Debug - we need to print out all of the environment variables
 # for key, value in os.environ.items():
 #     print(f"{key}\n{value}\n")
@@ -43,7 +52,7 @@ if os.path.abspath(os.path.dirname(sys.argv[0])) != curdir:
 sys.path.insert(0, os.path.join(curdir, "actions"))
 
 # We need to verify that this is a Python that is part of a
-# conda installation
+# conda installation
 
 # Find the path to the conda or mamba executable
 conda_base = os.path.abspath(os.path.dirname(sys.executable))
@@ -79,9 +88,11 @@ elif os.path.exists(os.path.join(conda_base, "bin", "python")):
     if conda is None:
         conda = os.path.join(conda_bin, "conda")
 else:
-    print("Cannot find a 'python' binary in directory '%s'. "
-          "Are you running this script using the python executable "
-          "from a valid miniconda or anaconda installation?" % conda_base)
+    print(
+        "Cannot find a 'python' binary in directory '%s'. "
+        "Are you running this script using the python executable "
+        "from a valid miniconda or anaconda installation?" % conda_base
+    )
     sys.exit(-1)
 
 
@@ -136,52 +147,108 @@ platform_string = f"{platform_name}_{machine}"
 def parse_args():
     import argparse
     import multiprocessing
-    parser=argparse.ArgumentParser()
+
+    parser = argparse.ArgumentParser()
 
     ncores = multiprocessing.cpu_count()
 
-    if ncores % 2 == 0:
-        npycores = int(ncores / 2)
+    if total_memory_gb is None:
+        # it is safest to half the number of python build cores
+        if ncores % 2 == 0:
+            npycores = int(ncores / 2)
+        else:
+            npycores = int((ncores + 1) / 2)
     else:
-        npycores = int((ncores + 1) / 2)
+        # we need at least 4 GB RAM per core
+        npycores = min(ncores, int(total_memory_gb / 4))
 
-    parser.add_argument("-C", "--corelib", action="append", nargs=1,
-        metavar=("PARAMETER=VALUE",), default=[],
-        help="pass CMake definitions for corelib")
-    parser.add_argument("-W", "--wrapper", action="append", nargs=1,
-        metavar=("PARAMETER=VALUE",), default=[],
-        help="pass CMake definitions for wrapper")
-    parser.add_argument("-G", "--generator", action="append", nargs=1,
-        metavar=("GENERATOR",), default=[],
-        help="pass CMake generator")
-    parser.add_argument("-n", "--ncores", action="store", type=int, nargs=1,
-        metavar=("N_CORES",), default=[ncores],
+        if npycores < 1:
+            npycores = 1
+
+    parser.add_argument(
+        "-C",
+        "--corelib",
+        action="append",
+        nargs=1,
+        metavar=("PARAMETER=VALUE",),
+        default=[],
+        help="pass CMake definitions for corelib",
+    )
+    parser.add_argument(
+        "-W",
+        "--wrapper",
+        action="append",
+        nargs=1,
+        metavar=("PARAMETER=VALUE",),
+        default=[],
+        help="pass CMake definitions for wrapper",
+    )
+    parser.add_argument(
+        "-G",
+        "--generator",
+        action="append",
+        nargs=1,
+        metavar=("GENERATOR",),
+        default=[],
+        help="pass CMake generator",
+    )
+    parser.add_argument(
+        "-n",
+        "--ncores",
+        action="store",
+        type=int,
+        nargs=1,
+        metavar=("N_CORES",),
+        default=[ncores],
         help="Number of CPU cores used for compiling corelib "
-        "(defaults to all available on the current system)")
-    parser.add_argument("-N", "--npycores", action="store", type=int, nargs=1,
-        metavar=("N_PYTHON_CORES",), default=[npycores],
+        "(defaults to all available on the current system)",
+    )
+    parser.add_argument(
+        "-N",
+        "--npycores",
+        action="store",
+        type=int,
+        nargs=1,
+        metavar=("N_PYTHON_CORES",),
+        default=[npycores],
         help="Number of CPU cores used for compiling Python wrappers "
-        "(defaults to the number of CPU cores used for compiling corelib)")
-    parser.add_argument("--install-bss-deps", action="store_true", default=False,
+        "(defaults to the number of CPU cores used for compiling corelib)",
+    )
+    parser.add_argument(
+        "--install-bss-deps",
+        action="store_true",
+        default=False,
         help="Install BioSimSpace's dependencies too. This helps ensure "
-             "compatibility between Sire's and BioSimSpace's dependencies.")
-    parser.add_argument("--skip-deps", action="store_true", default=False,
+        "compatibility between Sire's and BioSimSpace's dependencies.",
+    )
+    parser.add_argument(
+        "--skip-deps",
+        action="store_true",
+        default=False,
         help="Skip the installation of the dependencies (only use if you know "
-             "that they are already installed)")
-    parser.add_argument("--skip-build", action="store_true", default=False,
+        "that they are already installed)",
+    )
+    parser.add_argument(
+        "--skip-build",
+        action="store_true",
+        default=False,
         help="Skip the build of the C++ code (only use if you know that "
-             "the C++ code is already built)")
-    parser.add_argument("action", nargs="*",
+        "the C++ code is already built)",
+    )
+    parser.add_argument(
+        "action",
+        nargs="*",
         help="Should be one of 'install_requires', 'build', 'install' or 'install_module'.\n"
-             "\n [install_requires] : Just install the conda dependencies.\n"
-             " [build] : 'install_requires' plus compile and install corelib, and just compile the wrappers.\n"
-             " [install] : 'build' plus install the wrappers and install the module.\n"
-             " [install_module] : Just install the module (no compilation or conda dependencies)."
-             )
+        "\n [install_requires] : Just install the conda dependencies.\n"
+        " [build] : 'install_requires' plus compile and install corelib, and just compile the wrappers.\n"
+        " [install] : 'build' plus install the wrappers and install the module.\n"
+        " [install_module] : Just install the module (no compilation or conda dependencies).",
+    )
     return parser.parse_args()
 
 
 _installed_deps = None
+
 
 def _get_installed(conda: str):
     """Return the list of installed conda dependencies"""
@@ -215,6 +282,7 @@ def _add_to_dependencies(dependencies, lines):
 
 _is_conda_prepped = False
 
+
 def conda_install(dependencies, install_bss_reqs=False):
     """Install the passed list of dependencies using conda"""
 
@@ -224,7 +292,9 @@ def conda_install(dependencies, install_bss_reqs=False):
 
     if not _is_conda_prepped:
         if install_bss_reqs:
-            cmd = "%s config --prepend channels openbiosim/label/dev" % conda_exe
+            cmd = (
+                "%s config --prepend channels openbiosim/label/dev" % conda_exe
+            )
             print("Activating openbiosim channel channel using: '%s'" % cmd)
             status = subprocess.run(cmd.split())
             if status.returncode != 0:
@@ -253,7 +323,7 @@ def conda_install(dependencies, install_bss_reqs=False):
     else:
         conda_install = [mamba, "install", "--yes"]
 
-    dependencies = [f"\"{dep}\"" for dep in dependencies]
+    dependencies = [f'"{dep}"' for dep in dependencies]
 
     cmd = [*conda_install, *dependencies]
     print("\nInstalling packages using: '%s'" % " ".join(cmd))
@@ -277,16 +347,20 @@ def conda_install(dependencies, install_bss_reqs=False):
 
 def install_requires(install_bss_reqs=False):
     """Installs all of the dependencies. This can safely be called
-       multiple times, as it will cache the result to prevent future
-       installs taking too long
+    multiple times, as it will cache the result to prevent future
+    installs taking too long
     """
     print(f"Installing requirements for {platform_string}")
 
     if not os.path.exists(conda):
-        print("\nSire can only be installed into a conda or miniconda environment.")
-        print("Please install conda, miniconda, miniforge or similar, then "
-              "activate the conda environment, then rerun this installation "
-              "script.")
+        print(
+            "\nSire can only be installed into a conda or miniconda environment."
+        )
+        print(
+            "Please install conda, miniconda, miniforge or similar, then "
+            "activate the conda environment, then rerun this installation "
+            "script."
+        )
         sys.exit(-1)
 
     # install mamba if it doesn't exist already
@@ -308,7 +382,9 @@ def install_requires(install_bss_reqs=False):
             from parse_requirements import parse_requirements
         except ImportError as e:
             print("\n\n[ERROR] ** You need to install pip-requirements-parser")
-            print("Run `conda install -c conda-forge pip-requirements-parser\n\n")
+            print(
+                "Run `conda install -c conda-forge pip-requirements-parser\n\n"
+            )
             raise e
 
     reqs = parse_requirements("requirements.txt")
@@ -323,27 +399,32 @@ def install_requires(install_bss_reqs=False):
 
 
 def add_default_cmake_defs(cmake_defs, ncores):
-    for a in ("ANACONDA_BASE=%s" % conda_base.replace("\\", "/"),
-              "BUILD_NCORES=%s" % ncores):
+    for a in (
+        "ANACONDA_BASE=%s" % conda_base.replace("\\", "/"),
+        "BUILD_NCORES=%s" % ncores,
+    ):
         found = False
         for d in cmake_defs:
-            if (a in d[0]):
+            if a in d[0]:
                 found = True
                 break
-        if (not found):
+        if not found:
             cmake_defs.append([a])
 
     if is_macos:
-        # don't compile with AVX as the resulting binaries won't
+        # don't compile with AVX as the resulting binaries won't
         # work on M1 macs
         cmake_defs.append(["SIRE_DISABLE_AVX=ON"])
         cmake_defs.append(["SIRE_DISABLE_AVX512F=ON"])
 
 
-def make_cmd(ncores, install = False):
+def make_cmd(ncores, install=False):
     if is_windows:
         action = "INSTALL" if install else "ALL_BUILD"
-        make_args = "%s -- /m:%s /p:Configuration=Release /p:Platform=x64" % (action, ncores)
+        make_args = "%s -- /m:%s /p:Configuration=Release /p:Platform=x64" % (
+            action,
+            ncores,
+        )
     else:
         action = "install" if install else "all"
         make_args = "%s -- VERBOSE=1 -j %s" % (action, ncores)
@@ -360,7 +441,10 @@ def _get_build_ext():
         else:
             ext = ""
 
-        return os.path.basename(conda_base.replace(" ", "_").replace(".", "_")) + ext
+        return (
+            os.path.basename(conda_base.replace(" ", "_").replace(".", "_"))
+            + ext
+        )
 
 
 def _get_bin_dir():
@@ -375,12 +459,11 @@ def _get_bin_dir():
         return conda_bin
 
 
-def build(ncores: int = 1, npycores: int = 1,
-          coredefs=[], pydefs=[]):
+def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     print("\nCompiling the C++ code")
 
-    CC=None
-    CXX=None
+    CC = None
+    CXX = None
 
     cmake = "cmake"
 
@@ -410,8 +493,12 @@ def build(ncores: int = 1, npycores: int = 1,
         print(f"{CC} => {CC_bin}")
 
         if CXX_bin is None or CC_bin is None:
-            print("Cannot find the compilers requested by conda-build in the PATH")
-            print("Please check that the compilers are installed and available.")
+            print(
+                "Cannot find the compilers requested by conda-build in the PATH"
+            )
+            print(
+                "Please check that the compilers are installed and available."
+            )
             sys.exit(-1)
 
         # use the full paths, in case CMake struggles
@@ -481,29 +568,36 @@ def build(ncores: int = 1, npycores: int = 1,
         status = subprocess.run([cmake, "."])
     else:
         # this is the first time we are running cmake
-        sourcedir = os.path.join(os.path.dirname(os.path.dirname(
-            os.getcwd())), "corelib")
+        sourcedir = os.path.join(
+            os.path.dirname(os.path.dirname(os.getcwd())), "corelib"
+        )
 
         if not os.path.exists(os.path.join(sourcedir, "CMakeLists.txt")):
-            print("SOMETHING IS WRONG. There is no file %s" % os.path.join(sourcedir, "CMakeLists.txt"))
+            print(
+                "SOMETHING IS WRONG. There is no file %s"
+                % os.path.join(sourcedir, "CMakeLists.txt")
+            )
             sys.exit(-1)
 
         for a in ("NetCDF_ROOT_DIR", "OPENMM_ROOT_DIR"):
             for i, d in enumerate(args.corelib):
-                if (a in d[0]):
+                if a in d[0]:
                     v = args.corelib.pop(i)[0]
-                    if (not a in os.environ):
+                    if not a in os.environ:
                         os.environ[a] = v.split("=")[-1]
 
         add_default_cmake_defs(args.corelib, ncores)
 
-        cmake_cmd = [cmake, *sum([["-D", d[0]] for d in args.corelib], []),
-                     *sum([["-G", g[0]] for g in args.generator], []),
-                     sourcedir]
+        cmake_cmd = [
+            cmake,
+            *sum([["-D", d[0]] for d in args.corelib], []),
+            *sum([["-G", g[0]] for g in args.generator], []),
+            sourcedir,
+        ]
 
-        if (CC):
+        if CC:
             os.environ["CC"] = CC
-        if (CXX):
+        if CXX:
             os.environ["CXX"] = CXX
 
         print(" ".join(cmake_cmd))
@@ -535,7 +629,9 @@ def build(ncores: int = 1, npycores: int = 1,
     # Compile and install, as need to install to compile the wrappers
     make_args = make_cmd(ncores, True)
 
-    print("NOW RUNNING \"%s\" --build . --target %s" % (cmake, " ".join(make_args)))
+    print(
+        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
+    )
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -568,18 +664,25 @@ def build(ncores: int = 1, npycores: int = 1,
         status = subprocess.run([cmake, "."])
     else:
         # this is the first time we are running cmake
-        sourcedir = os.path.join(os.path.dirname(os.path.dirname(
-                                                 os.getcwd())), "wrapper")
+        sourcedir = os.path.join(
+            os.path.dirname(os.path.dirname(os.getcwd())), "wrapper"
+        )
 
         if not os.path.exists(os.path.join(sourcedir, "CMakeLists.txt")):
-            print("SOMETHING IS WRONG. There is no file %s" % os.path.join(sourcedir, "CMakeLists.txt"))
+            print(
+                "SOMETHING IS WRONG. There is no file %s"
+                % os.path.join(sourcedir, "CMakeLists.txt")
+            )
             sys.exit(-1)
 
         add_default_cmake_defs(args.wrapper, npycores)
 
-        cmake_cmd = [cmake, *sum([["-D", d[0]] for d in args.wrapper], []),
-                     *sum([["-G", g[0]] for g in args.generator], []),
-                     sourcedir]
+        cmake_cmd = [
+            cmake,
+            *sum([["-D", d[0]] for d in args.wrapper], []),
+            *sum([["-G", g[0]] for g in args.generator], []),
+            sourcedir,
+        ]
 
         print(" ".join(cmake_cmd))
         sys.stdout.flush()
@@ -592,7 +695,9 @@ def build(ncores: int = 1, npycores: int = 1,
     # Just compile the wrappers
     make_args = make_cmd(npycores, False)
 
-    print("NOW RUNNING \"%s\" --build . --target %s" % (cmake, " ".join(make_args)))
+    print(
+        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
+    )
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -636,17 +741,24 @@ def install_module(ncores: int = 1):
         status = subprocess.run([cmake, "."])
     else:
         # this is the first time we are running cmake
-        sourcedir = os.path.join(os.path.dirname(os.path.dirname(
-            os.getcwd())), "src", "sire")
+        sourcedir = os.path.join(
+            os.path.dirname(os.path.dirname(os.getcwd())), "src", "sire"
+        )
 
         if not os.path.exists(os.path.join(sourcedir, "CMakeLists.txt")):
-            print("SOMETHING IS WRONG. There is no file %s" % os.path.join(sourcedir, "CMakeLists.txt"))
+            print(
+                "SOMETHING IS WRONG. There is no file %s"
+                % os.path.join(sourcedir, "CMakeLists.txt")
+            )
             sys.exit(-1)
 
         add_default_cmake_defs(args.wrapper, ncores)
-        cmake_cmd = [cmake, *sum([["-D", d[0]] for d in args.wrapper], []),
-                     *sum([["-G", g[0]] for g in args.generator], []),
-                     sourcedir]
+        cmake_cmd = [
+            cmake,
+            *sum([["-D", d[0]] for d in args.wrapper], []),
+            *sum([["-G", g[0]] for g in args.generator], []),
+            sourcedir,
+        ]
         print(" ".join(cmake_cmd))
         sys.stdout.flush()
         status = subprocess.run(cmake_cmd)
@@ -658,7 +770,9 @@ def install_module(ncores: int = 1):
     make_args = make_cmd(ncores, True)
 
     # Now that cmake has run, we can compile and install wrapper
-    print("NOW RUNNING \"%s\" --build . --target %s" % (cmake, " ".join(make_args)))
+    print(
+        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
+    )
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -698,7 +812,9 @@ def install(ncores: int = 1, npycores: int = 1):
     # Now install the wrappers
     make_args = make_cmd(npycores, True)
 
-    print("NOW RUNNING \"%s\" --build . --target %s" % (cmake, " ".join(make_args)))
+    print(
+        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
+    )
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -723,16 +839,22 @@ if __name__ == "__main__":
     action = args.action[0]
 
     if is_windows and (args.generator is None or len(args.generator) == 0):
-        #args.generator = [["Visual Studio 17 2022"]]
-        args.generator = [["Visual Studio 15 2017 Win64"]]  # preferred VC version for conda
+        # args.generator = [["Visual Studio 17 2022"]]
+        args.generator = [
+            ["Visual Studio 15 2017 Win64"]
+        ]  # preferred VC version for conda
 
     if action == "install":
         if not (args.skip_deps or args.skip_build):
             install_requires(install_bss_reqs=install_bss)
 
         if not args.skip_build:
-            build(ncores=args.ncores[0], npycores=args.npycores[0],
-                  coredefs=args.corelib, pydefs=args.wrapper)
+            build(
+                ncores=args.ncores[0],
+                npycores=args.npycores[0],
+                coredefs=args.corelib,
+                pydefs=args.wrapper,
+            )
 
         install(ncores=args.ncores[0], npycores=args.npycores[0])
 
@@ -740,8 +862,12 @@ if __name__ == "__main__":
         if not args.skip_deps:
             install_requires(install_bss_reqs=install_bss)
 
-        build(ncores=args.ncores[0], npycores=args.npycores[0],
-              coredefs=args.corelib, pydefs=args.wrapper)
+        build(
+            ncores=args.ncores[0],
+            npycores=args.npycores[0],
+            coredefs=args.corelib,
+            pydefs=args.wrapper,
+        )
 
     elif action == "install_requires":
         install_requires(install_bss_reqs=install_bss)
@@ -750,5 +876,7 @@ if __name__ == "__main__":
         install_module(ncores=args.ncores[0])
 
     else:
-        print(f"Unrecognised action '{action}'. Please use 'install_requires', "
-              "'build', 'install' or 'install_module'")
+        print(
+            f"Unrecognised action '{action}'. Please use 'install_requires', "
+            "'build', 'install' or 'install_module'"
+        )
