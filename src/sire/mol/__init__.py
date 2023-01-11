@@ -1355,7 +1355,9 @@ def _total_energy(obj, other=None, map=None):
     elif other is None:
         return calculate_energy(mols.molecules(), map=map)
     else:
-        return calculate_energy(mols.molecules(), _to_molecules(other), map=map)
+        return calculate_energy(
+            mols.molecules(), _to_molecules(other), map=map
+        )
 
 
 Atom.energy = _atom_energy
@@ -1403,6 +1405,61 @@ SelectorM_Residue_.view = _viewfunc
 SelectorM_Chain_.view = _viewfunc
 SelectorM_Segment_.view = _viewfunc
 SelectorM_CutGroup_.view = _viewfunc
+
+if not hasattr(SelectorMol, "__orig__find__"):
+
+    def __find__(obj, views):
+        """
+        Find the index(es) of the passed view(s) in this container.
+        This returns a single index if a single view is passed,
+        or a list of indexes if multiple views are passed
+        (in the same order as the passed views).
+
+        This raises an IndexError if any of the views are
+        not in this container.
+        """
+        matches = obj.__orig__find__(views)
+
+        if matches is None:
+            raise IndexError("Cannot find the passed view in the container.")
+
+        if views.is_selector():
+            if len(matches) != len(views):
+                raise IndexError(
+                    "Could not find all of the passed views "
+                    "in the container. We only found "
+                    f"{len(matches)} of the required "
+                    f"{len(views)}."
+                )
+
+            return matches
+        else:
+            if len(matches) != 1:
+                raise IndexError(
+                    "We matched too many indexes? "
+                    f"{matches}. Only expected to match one?"
+                )
+
+            return matches[0]
+
+    def __fix__find(CLASS):
+        CLASS.__orig__find__ = CLASS.find
+        CLASS.find = __find__
+
+    for C in [
+        Selector_Atom_,
+        Selector_Residue_,
+        Selector_Chain_,
+        Selector_CutGroup_,
+        Selector_Segment_,
+        SelectorMol,
+        SelectorM_Atom_,
+        SelectorM_Residue_,
+        SelectorM_Chain_,
+        SelectorM_CutGroup_,
+        SelectorM_Segment_,
+    ]:
+        __fix__find(C)
 
 # Remove some temporary variables
 del C

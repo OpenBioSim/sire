@@ -36,172 +36,171 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class SelectorBond;
+    class SelectorBond;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::SelectorBond&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::SelectorBond&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::SelectorBond &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::SelectorBond &);
 
 namespace SireMM
 {
 
-/** This provides a Selector<T>-style interface for multiple bonds */
-class SIREMM_EXPORT SelectorBond :
-    public SireBase::ConcreteProperty<SelectorBond, SireMol::MoleculeView>
-{
-
-friend QDataStream& ::operator<<(QDataStream&, const SelectorBond&);
-friend QDataStream& ::operator>>(QDataStream&, SelectorBond&);
-
-public:
-    SelectorBond();
-
-    SelectorBond(const Bond &bond);
-
-    SelectorBond(const SireMol::MoleculeData &molecule,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorBond(const MoleculeView &molecule,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorBond(const SireMol::MoleculeData &molecule,
-                 const SireMol::AtomID &atom,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorBond(const SireMol::MoleculeData &molecule,
-                 const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorBond(const SireMol::MoleculeView &molecule,
-                 const SireMol::AtomID &atom,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorBond(const SireMol::MoleculeView &molecule,
-                 const SireMol::BondID &bond,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorBond(const SireMol::MoleculeView &molecule,
-                 const QList<SireMol::BondID> &bonds,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorBond(const SireMol::MoleculeView &molecule,
-                 const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorBond(const SireMol::Selector<SireMol::Atom> &atoms,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-    SelectorBond(const SireMol::Selector<SireMol::Atom> &atoms0,
-                 const SireMol::Selector<SireMol::Atom> &atoms1,
-                 const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorBond(const SelectorBond &other);
-
-    virtual ~SelectorBond();
-
-    static const char* typeName();
-
-    virtual const char* what() const
+    /** This provides a Selector<T>-style interface for multiple bonds */
+    class SIREMM_EXPORT SelectorBond : public SireBase::ConcreteProperty<SelectorBond, SireMol::MoleculeView>
     {
-        return SelectorBond::typeName();
-    }
 
-    virtual SelectorBond* clone() const
-    {
-        return new SelectorBond(*this);
-    }
+        friend QDataStream & ::operator<<(QDataStream &, const SelectorBond &);
+        friend QDataStream & ::operator>>(QDataStream &, SelectorBond &);
 
-    SelectorBond& operator=(const SelectorBond &bond);
+    public:
+        SelectorBond();
 
-    bool operator==(const SelectorBond &other) const;
-    bool operator!=(const SelectorBond &other) const;
+        SelectorBond(const Bond &bond);
 
-    QString toString() const;
+        SelectorBond(const SireMol::MoleculeData &molecule,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SireMol::MolViewPtr operator[](int i) const;
-    SireMol::MolViewPtr operator[](const SireBase::Slice &slice) const;
-    SireMol::MolViewPtr operator[](const QList<qint64> &idxs) const;
-    SireMol::MolViewPtr operator[](const SireMol::BondID &bond) const;
+        SelectorBond(const MoleculeView &molecule,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    Bond operator()(int i) const;
-    SelectorBond operator()(int i, int j) const;
-    SelectorBond operator()(const SireBase::Slice &slice) const;
-    SelectorBond operator()(const QList<qint64> &idxs) const;
-    SelectorBond operator()(const SireMol::BondID &bond) const;
+        SelectorBond(const SireMol::MoleculeData &molecule,
+                     const SireMol::AtomID &atom,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    QList<SireMol::MolViewPtr> toList() const;
+        SelectorBond(const SireMol::MoleculeData &molecule,
+                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    bool isSelector() const;
+        SelectorBond(const SireMol::MoleculeView &molecule,
+                     const SireMol::AtomID &atom,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    QList<SireMol::BondID> IDs() const;
+        SelectorBond(const SireMol::MoleculeView &molecule,
+                     const SireMol::BondID &bond,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SelectorBond add(const Bond &bond) const;
+        SelectorBond(const SireMol::MoleculeView &molecule,
+                     const QList<SireMol::BondID> &bonds,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    int count() const;
-    int size() const;
-    int nViews() const;
+        SelectorBond(const SireMol::MoleculeView &molecule,
+                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    bool isEmpty() const;
-    bool selectedAll() const;
+        SelectorBond(const SireMol::Selector<SireMol::Atom> &atoms,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        SelectorBond(const SireMol::Selector<SireMol::Atom> &atoms0,
+                     const SireMol::Selector<SireMol::Atom> &atoms1,
+                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SireMol::MolViewPtr toSelector() const;
+        SelectorBond(const SelectorBond &other);
 
-    SireMol::AtomSelection selection() const;
+        virtual ~SelectorBond();
 
-    SelectorBond add(const SelectorBond &other) const;
+        static const char *typeName();
 
-    SelectorBond intersection(const SelectorBond &other) const;
+        virtual const char *what() const
+        {
+            return SelectorBond::typeName();
+        }
 
-    SelectorBond invert(const SireBase::PropertyMap &map) const;
-    SelectorBond invert() const;
+        virtual SelectorBond *clone() const
+        {
+            return new SelectorBond(*this);
+        }
 
-    bool hasProperty(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key,
-                     const SireBase::PropertyName &metakey) const;
+        SelectorBond &operator=(const SelectorBond &bond);
 
-    QStringList propertyKeys() const;
-    QStringList metadataKeys() const;
-    QStringList metadataKeys(const SireBase::PropertyName &key) const;
+        bool operator==(const SelectorBond &other) const;
+        bool operator!=(const SelectorBond &other) const;
 
-    QList<SireBase::Properties> properties() const;
+        QString toString() const;
 
-    SireMol::Mover<SelectorBond> move() const;
-    SireMol::Evaluator evaluate() const;
+        SireMol::MolViewPtr operator[](int i) const;
+        SireMol::MolViewPtr operator[](const SireBase::Slice &slice) const;
+        SireMol::MolViewPtr operator[](const QList<qint64> &idxs) const;
+        SireMol::MolViewPtr operator[](const SireMol::BondID &bond) const;
 
-    QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key) const;
-    QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key,
-                                          const Property &default_value) const;
+        Bond operator()(int i) const;
+        SelectorBond operator()(int i, int j) const;
+        SelectorBond operator()(const SireBase::Slice &slice) const;
+        SelectorBond operator()(const QList<qint64> &idxs) const;
+        SelectorBond operator()(const SireMol::BondID &bond) const;
 
-    QList<SireUnits::Dimension::Length> lengths() const;
-    QList<SireUnits::Dimension::Length> lengths(const SireBase::PropertyMap &map) const;
+        QList<SireMol::MolViewPtr> toList() const;
 
-    QList<SireUnits::Dimension::Length> measures() const;
-    QList<SireUnits::Dimension::Length> measures(const SireBase::PropertyMap &map) const;
+        bool isSelector() const;
 
-    QList<SireCAS::Expression> potentials() const;
-    QList<SireCAS::Expression> potentials(const SireBase::PropertyMap &map) const;
+        QList<SireMol::BondID> IDs() const;
 
-    QList<SireUnits::Dimension::GeneralUnit> energies() const;
-    QList<SireUnits::Dimension::GeneralUnit> energies(
-                            const SireBase::PropertyMap &map) const;
+        SelectorBond add(const Bond &bond) const;
 
-    SireUnits::Dimension::GeneralUnit energy() const;
-    SireUnits::Dimension::GeneralUnit energy(
-                            const SireBase::PropertyMap &map) const;
+        int count() const;
+        int size() const;
+        int nViews() const;
 
-protected:
-    /** The IDs of the bond (holding AtomIdx IDs) */
-    QList<SireMol::BondID> bnds;
-};
+        bool isEmpty() const;
+        bool selectedAll() const;
+
+        SireMol::MolViewPtr toSelector() const;
+
+        SireMol::AtomSelection selection() const;
+
+        SelectorBond add(const SelectorBond &other) const;
+
+        SelectorBond intersection(const SelectorBond &other) const;
+
+        SelectorBond invert(const SireBase::PropertyMap &map) const;
+        SelectorBond invert() const;
+
+        bool hasProperty(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key,
+                         const SireBase::PropertyName &metakey) const;
+
+        QStringList propertyKeys() const;
+        QStringList metadataKeys() const;
+        QStringList metadataKeys(const SireBase::PropertyName &key) const;
+
+        QList<SireBase::Properties> properties() const;
+
+        SireMol::Mover<SelectorBond> move() const;
+        SireMol::Evaluator evaluate() const;
+
+        QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key) const;
+        QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key,
+                                              const Property &default_value) const;
+
+        QList<SireUnits::Dimension::Length> lengths() const;
+        QList<SireUnits::Dimension::Length> lengths(const SireBase::PropertyMap &map) const;
+
+        QList<SireUnits::Dimension::Length> measures() const;
+        QList<SireUnits::Dimension::Length> measures(const SireBase::PropertyMap &map) const;
+
+        QList<SireCAS::Expression> potentials() const;
+        QList<SireCAS::Expression> potentials(const SireBase::PropertyMap &map) const;
+
+        QList<SireUnits::Dimension::GeneralUnit> energies() const;
+        QList<SireUnits::Dimension::GeneralUnit> energies(
+            const SireBase::PropertyMap &map) const;
+
+        SireUnits::Dimension::GeneralUnit energy() const;
+        SireUnits::Dimension::GeneralUnit energy(
+            const SireBase::PropertyMap &map) const;
+
+    protected:
+        /** The IDs of the bond (holding AtomIdx IDs) */
+        QList<SireMol::BondID> bnds;
+    };
 
 } // end of namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::SelectorBond )
-Q_DECLARE_METATYPE( SireMol::Mover<SireMM::SelectorBond> )
+Q_DECLARE_METATYPE(SireMM::SelectorBond)
+Q_DECLARE_METATYPE(SireMol::Mover<SireMM::SelectorBond>)
 
-SIRE_EXPOSE_CLASS( SireMM::SelectorBond )
+SIRE_EXPOSE_CLASS(SireMM::SelectorBond)
 
-SIRE_EXPOSE_ALIAS( SireMol::Mover<SireMM::SelectorBond>, SireMol::Mover_SelectorBond_ )
+SIRE_EXPOSE_ALIAS(SireMol::Mover<SireMM::SelectorBond>, SireMol::Mover_SelectorBond_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 

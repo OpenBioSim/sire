@@ -39,6 +39,8 @@ namespace bp = boost::python;
 
 #include "chainproperty.hpp"
 
+#include "SireMol/core.h"
+
 const QString& get_Metadata_SireMol_ChainStringProperty_function1(const SireMol::Chain &atom,
                                    const QString &metakey){ return atom.metadata< QString >(metakey); }
 

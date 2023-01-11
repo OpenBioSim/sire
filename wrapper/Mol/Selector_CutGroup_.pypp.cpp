@@ -37,6 +37,8 @@ namespace bp = boost::python;
 
 #include "cutgroup.h"
 
+#include "SireMol/core.h"
+
 SireMol::Selector<SireMol::CutGroup> __copy__(const SireMol::Selector<SireMol::CutGroup> &other){ return SireMol::Selector<SireMol::CutGroup>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -193,6 +195,48 @@ void register_Selector_CutGroup__class(){
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("i"), bp::arg("j") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::CutGroup >::find
+        
+            typedef SireMol::Selector< SireMol::CutGroup > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::CutGroup >::*find_function_type)( ::SireMol::CutGroup const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::CutGroup >::find );
+            
+            Selector_CutGroup__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::CutGroup >::find
+        
+            typedef SireMol::Selector< SireMol::CutGroup > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::CutGroup >::*find_function_type)( ::SireMol::Selector< SireMol::CutGroup > const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::CutGroup >::find );
+            
+            Selector_CutGroup__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::CutGroup >::find
+        
+            typedef SireMol::Selector< SireMol::CutGroup > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::CutGroup >::*find_function_type)( ::SireMol::SelectorM< SireMol::CutGroup > const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::CutGroup >::find );
+            
+            Selector_CutGroup__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
                 , bp::release_gil_policy()
                 , "" );
         

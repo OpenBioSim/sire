@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 #include "atom.h"
 
+#include "SireMol/core.h"
+
 SireMol::Selector<SireMol::Atom> __copy__(const SireMol::Selector<SireMol::Atom> &other){ return SireMol::Selector<SireMol::Atom>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -201,6 +203,48 @@ void register_Selector_Atom__class(){
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("i"), bp::arg("j") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::Atom >::find
+        
+            typedef SireMol::Selector< SireMol::Atom > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::Atom >::*find_function_type)( ::SireMol::Atom const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::Atom >::find );
+            
+            Selector_Atom__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::Atom >::find
+        
+            typedef SireMol::Selector< SireMol::Atom > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::Atom >::*find_function_type)( ::SireMol::Selector< SireMol::Atom > const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::Atom >::find );
+            
+            Selector_Atom__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::Atom >::find
+        
+            typedef SireMol::Selector< SireMol::Atom > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::Atom >::*find_function_type)( ::SireMol::SelectorM< SireMol::Atom > const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::Atom >::find );
+            
+            Selector_Atom__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
                 , bp::release_gil_policy()
                 , "" );
         

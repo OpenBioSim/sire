@@ -41,6 +41,8 @@ namespace bp = boost::python;
 
 #include "resproperty.hpp"
 
+#include "SireMol/core.h"
+
 const QString& get_Metadata_SireMol_ResStringProperty_function1(const SireMol::Residue &atom,
                                    const QString &metakey){ return atom.metadata< QString >(metakey); }
 

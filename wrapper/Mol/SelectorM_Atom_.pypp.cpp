@@ -580,6 +580,48 @@ void register_SelectorM_Atom__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Atom >::find
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::SelectorM< SireMol::Atom >::*find_function_type)( ::SireMol::Atom const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorM< SireMol::Atom >::find );
+            
+            SelectorM_Atom__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::find
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::SelectorM< SireMol::Atom >::*find_function_type)( ::SireMol::Selector< SireMol::Atom > const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorM< SireMol::Atom >::find );
+            
+            SelectorM_Atom__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::find
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::SelectorM< SireMol::Atom >::*find_function_type)( ::SireMol::SelectorM< SireMol::Atom > const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorM< SireMol::Atom >::find );
+            
+            SelectorM_Atom__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Atom >::indexes
         
             typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;

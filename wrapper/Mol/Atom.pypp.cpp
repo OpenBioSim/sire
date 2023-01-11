@@ -94,6 +94,8 @@ namespace bp = boost::python;
 
 #include "atomproperty.hpp"
 
+#include "SireMol/core.h"
+
 const SireMM::LJParameter& get_Metadata_SireMM_AtomLJs_function1(const SireMol::Atom &atom,
                                    const QString &metakey){ return atom.metadata< SireMM::LJParameter >(metakey); }
 
