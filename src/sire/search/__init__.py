@@ -24,6 +24,11 @@ from .. import use_new_api as _use_new_api
 
 from ..legacy.Search import (
     approx_equal,
+    approx_greater,
+    approx_greater_equal,
+    approx_less,
+    approx_less_equal,
+    approx_not_equal,
     set_approx_epsilon,
     get_approx_epsilon,
     get_min_protein_residues,
