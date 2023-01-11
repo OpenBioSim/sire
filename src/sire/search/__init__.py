@@ -1,5 +1,10 @@
 __all__ = [
     "approx_equal",
+    "approx_greater",
+    "approx_greater_equal",
+    "approx_less",
+    "approx_less_equal",
+    "approx_not_equal",
     "delete_all_tokens",
     "delete_token",
     "get_approx_epsilon",

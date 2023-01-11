@@ -213,7 +213,7 @@ as the result. This can be summarised as a table.
 +----------+---------------------+---------------------+------------------------+----------------------+------------------------+----------------------+
 | Chain    | chains with atom    | chains with bond    | chains with residue    | N/A                  | chains in segment      | chains in molecule   |
 +----------+---------------------+---------------------+------------------------+----------------------+------------------------+----------------------+
-| Segment  | segments with atomv | segments with bond  | segments with residue  | segments with chain  | N/A                    | segments in molecule |
+| Segment  | segments with atoms | segments with bond  | segments with residue  | segments with chain  | N/A                    | segments in molecule |
 +----------+---------------------+---------------------+------------------------+----------------------+------------------------+----------------------+
 | Molecule | molecules with atom | molecules with bond | molecules with residue | molecules with chain | molecules with segment | N/A                  |
 +----------+---------------------+---------------------+------------------------+----------------------+------------------------+----------------------+
@@ -402,7 +402,7 @@ For example;
 * ``atoms in residues with count(atomname CA) == 1`` - match all atoms
   in residues that contain a single atom called ``CA``
 * ``(molecules with count(element O) == 1) and (molecules with count(element H) == 2) and (molecules with count(atoms) == 3)`` -
-  match all molecules that contain there atoms, and that have one oxygen atom
+  match all molecules that contain three atoms, and that have one oxygen atom
   and have two hydrogen atoms (i.e. are water molecules).
 
 Searching by Charge or Mass
@@ -453,7 +453,7 @@ imprecision issues experienced when searching for views by charge.
 The approximate comparison operators are;
 
 * ``=~`` - approximate equal to. :func:`sire.search.approx_equal`
-* ``!~`` - not approximates equal to. :func:`sire.search_approx_not_equal`
+* ``!~`` - not approximates equal to. :func:`sire.search.approx_not_equal`
 * ``>~`` - greater than (but not approximately equal to). :func:`sire.search.approx_greater`
 * ``<~`` - less than (but not approximately equal to). :func:`sire.search.approx_less`
 * ``>=~`` - greater than or approximately equal to. :func:`sire.search.approx_greater_equal`
