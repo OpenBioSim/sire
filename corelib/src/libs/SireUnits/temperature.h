@@ -298,10 +298,10 @@ namespace SireUnits
             return Celsius(value / convertFromInternal());
         }
 
-        Dimension::GeneralUnit operator+(const Dimension::GeneralUnit &other) const;
-        Dimension::GeneralUnit operator-(const Dimension::GeneralUnit &other) const;
-        Dimension::GeneralUnit operator*(const Dimension::GeneralUnit &other) const;
-        Dimension::GeneralUnit operator/(const Dimension::GeneralUnit &other) const;
+        SIREUNITS_EXPORT Dimension::GeneralUnit operator+(const Dimension::GeneralUnit &other) const;
+        SIREUNITS_EXPORT Dimension::GeneralUnit operator-(const Dimension::GeneralUnit &other) const;
+        SIREUNITS_EXPORT Dimension::GeneralUnit operator*(const Dimension::GeneralUnit &other) const;
+        SIREUNITS_EXPORT Dimension::GeneralUnit operator/(const Dimension::GeneralUnit &other) const;
 
     protected:
         QString unitString() const
@@ -456,10 +456,10 @@ namespace SireUnits
             return Fahrenheit(value / convertFromInternal());
         }
 
-        Dimension::GeneralUnit operator+(const Dimension::GeneralUnit &other) const;
-        Dimension::GeneralUnit operator-(const Dimension::GeneralUnit &other) const;
-        Dimension::GeneralUnit operator*(const Dimension::GeneralUnit &other) const;
-        Dimension::GeneralUnit operator/(const Dimension::GeneralUnit &other) const;
+        SIREUNITS_EXPORT Dimension::GeneralUnit operator+(const Dimension::GeneralUnit &other) const;
+        SIREUNITS_EXPORT Dimension::GeneralUnit operator-(const Dimension::GeneralUnit &other) const;
+        SIREUNITS_EXPORT Dimension::GeneralUnit operator*(const Dimension::GeneralUnit &other) const;
+        SIREUNITS_EXPORT Dimension::GeneralUnit operator/(const Dimension::GeneralUnit &other) const;
 
     protected:
         QString unitString() const
