@@ -3,15 +3,15 @@ Installation
 ============
 
 Binary packages for :mod:`sire` are available on MacOS, Linux and Windows
-running on Intel (X86-64) or ARM64 processors.
+running on Intel/AMD (X86-64) or ARM64 processors.
 
 :mod:`sire` can be compiled on any UNIX or Windows-compatible operating system
 running on X86-64, ARM64 or PowerPC processors.
 
 You have a range of options for installing the software.
 
-No-installation - Run in a Web Browser
-======================================
+1. No-installation - Run in a Web Browser
+=========================================
 
 We run a completely free `JupyterHub <https://try.openbiosim.org>`__ on
 which we have sire installed.
@@ -45,8 +45,8 @@ to learn how to use :mod:`sire` or the
    use this service to explore and learn :mod:`sire`.
    Do not use it for production work.
 
-Easy installation - Run in a conda environment
-==============================================
+2. Easy installation - Run in a conda environment
+=================================================
 
 The easiest way to install :mod:`sire` is in a new
 `conda environment <https://anaconda.org>`__.
@@ -57,8 +57,9 @@ as this is pre-configured to use `conda-forge <https://conda-forge.org>`__,
 and bundles `mamba <https://mamba.readthedocs.io/en/latest/>`__, which
 is a fast drop-in replacement for `conda <https://conda.io>`__.
 
-Option 1. Installing a new copy of ``mambaforge``
--------------------------------------------------
+.. _Install_Mambaforge:
+Either... Install a new copy of ``mambaforge``
+----------------------------------------------
 
 To install a new copy of
 `mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`__,
@@ -73,8 +74,8 @@ Once installed, you should be able to run the ``mamba`` command to
 install other packages (e.g. ``mamba -h`` will print out help on
 how to use the ``mamba`` command).
 
-Option 2. Using an existing anaconda/miniconda install
-------------------------------------------------------
+Or... Use an existing anaconda/miniconda install
+------------------------------------------------
 
 If you want to use an existing anaconda or miniconda installation,
 then first open a terminal with that distribution activated.
@@ -94,14 +95,15 @@ drop-in replacement for ``conda``, so first install ``mamba``.
 
 This should install mamba. If this fails, then your anaconda or miniconda
 environment is likely quite full, or else it is outdated. We recommend
-going back to Option 1 and installing a new copy of ``mambaforge``.
+going back and following `the instructions <_Install_Mambaforge>`
+to install a new copy of ``mambaforge``.
 
 If this works, then you should now be able to run the ``mamba`` command
 to install other packages (e.g. ``mamba -h`` will print out help
 on how to use the ``mamba`` command).
 
-Installing sire into a new environment
---------------------------------------
+And then... Install sire into a new environment
+-----------------------------------------------
 
 We recommend that :mod:`sire` is installed into a new (clean) environment.
 This minimises the risk of failures caused by incompatible dependencies.
@@ -162,8 +164,8 @@ We encourage you to take a look at :doc:`the tutorial <tutorial/index>`
 to learn how to use :mod:`sire` or the
 :doc:`quickstart guide <quickstart/index>` if you want an overview.
 
-Also easy installation - Run in a container
-===========================================
+3. Also easy installation - Run in a container
+==============================================
 
 Another route to install :mod:`sire` is to download and run our
 pre-built containers. These can be run via
@@ -219,8 +221,8 @@ We encourage you to take a look at :doc:`the tutorial <tutorial/index>`
 to learn how to use :mod:`sire` or the
 :doc:`quickstart guide <quickstart/index>` if you want an overview.
 
-Harder installation - Compile from source
-=========================================
+4. Harder installation - Compile from source
+============================================
 
 Sometimes you will want to compile and run :mod:`sire` from source.
 This could be because we don't distribute a binary package for your
@@ -230,7 +232,7 @@ branch if you are a developer).
 
 You compile :mod:`sire` into an existing anaconda / miniconda environment.
 Please create and activate an environment, e.g. by following
-the "Option 1" instructions to install a fresh ``mambaforge`` and
+`the instructions <_Install_Mambaforge>` to install a fresh ``mambaforge`` and
 then creating and activating Python 3.9 environment called
 ``openbiosim``.
 
