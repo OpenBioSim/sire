@@ -40,6 +40,8 @@ namespace bp = boost::python;
 
 #include "cgproperty.hpp"
 
+#include "SireMol/core.h"
+
 const QString& get_Metadata_SireMol_CGStringProperty_function1(const SireMol::CutGroup &atom,
                                    const QString &metakey){ return atom.metadata< QString >(metakey); }
 

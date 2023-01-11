@@ -1,9 +1,9 @@
 # Generating the Python wrappers
 
 This is a container that is used to consistently generate
-the Python wrappers for Sire. The container has a working
+the Python wrappers for sire. The container has a working
 version of Py++ in a miniconda that also has all of the header
-files that are needed for Sire.
+files that are needed for sire.
 
 ## Running the container
 
@@ -11,8 +11,16 @@ The simplest way to start is to run the container that we've
 made already. Do this by typing;
 
 ```
-docker run -it siremol/sire-generate-wrappers
+$ docker run -it openbiosim/sire-generate-wrappers:x86
 ```
+
+on Intel/AMD (X86-64) systems, and
+
+```
+$ docker run -it openbiosim/sire-generate-wrappers:arm64
+```
+
+on Apple / ARM64 systems.
 
 Assuming you have docker installed and working, this should
 pull the container from docker hub, and then start a bash
@@ -20,7 +28,7 @@ prompt in that container. You should see something like
 this;
 
 ```
-Unable to find image 'siremol/sire-generate-wrappers:latest' locally
+Unable to find image 'openbiosim/sire-generate-wrappers:arm64' locally
 Trying to pull repository docker.io/siremol/sire-generate-wrappers ...
 latest: Pulling from docker.io/siremol/sire-generate-wrappers
 a2abf6c4d29d: Pull complete
@@ -41,7 +49,7 @@ Status: Downloaded newer image for siremol/sire-generate-wrappers:latest
 
 ## Generating the wrappers
 
-You generate the wrappers for your chosen branch of Sire by typing;
+You generate the wrappers for your chosen branch of sire by typing;
 
 ```
 (base) root:~# generate_wrappers --branch {BRANCH_NAME}
@@ -61,7 +69,7 @@ a long time!
 ## Checking the wrappers
 
 The `generate_wrappers` command will check out your branch
-to the folder `$HOME/Sire`. Feel free to explore this
+to the folder `$HOME/sire`. Feel free to explore this
 folder and run commands manually if there are any problems.
 
 You can check which wrappers were changed by running
@@ -81,7 +89,7 @@ where `${YOUR NAME}` is your real name, as on GitHub, and
 these in double quotes.
 
 This will use `git config` to set those values, before
-running `git add` in `$HOME/Sire`, and then running
+running `git add` in `$HOME/sire`, and then running
 `git commit` and `git push`.
 
 The `git push` command will ask you for your GitHub
@@ -90,21 +98,27 @@ be pushed if these are entered and are correct.
 
 Assuming everything has worked, then congratulations!
 You have successfully generated and pushed your new
-Sire Python wrappers.
+sire Python wrappers.
 
-## Using the container against an external Sire directory
+## Using the container against an external sire directory
 
 You may wish to use this container to create wrappers for
-a Sire directory on your computer. To do this, you can mount
-the Sire directory into the container via
+a sire directory on your computer. To do this, you can mount
+the sire directory into the container via
 
 ```
-docker run -it -v /path/to/Sire:/root/Sire siremol/sire-generate-wrappers
+docker run -it -v /path/to/sire:/root/sire openbiosim/sire-generate-wrappers:x86
 ```
 
-This will make your Sire directory (in `/path/to/Sire`) available in the
-container as `/root/Sire`. You can now generate wrappers in the
-container that will write directly to your real local Sire directory
+or
+
+```
+docker run -it -v /path/to/sire:/root/sire openbiosim/sire-generate-wrappers:arm64
+```
+
+This will make your sire directory (in `/path/to/sire`) available in the
+container as `/root/sire`. You can now generate wrappers in the
+container that will write directly to your real local sire directory
 (and so can be compiled, tested and pushed to GitHub from there).
 
 Once in the container, you need to run `unpack_headers` to unpack the
@@ -114,14 +128,14 @@ headers.
 (base) root:~# unpack_headers
 ```
 
-You can now change into the Sire directory and generate wrappers as you
+You can now change into the sire directory and generate wrappers as you
 need, e.g.
 
 ```
-(base) root:~# cd Sire/wrapper
-(base) root:~/Sire/wrapper# python AutoGenerate/scanheaders.py ~/Sire/corelib/src/libs/ .
-(base) root:~/Sire/wrapper# cd Search
-(base) root:~/Sire/wrapper/Search# python ../AutoGenerate/create_wrappers.py
+(base) root:~# cd sire/wrapper
+(base) root:~/sire/wrapper# python AutoGenerate/scanheaders.py ~/sire/corelib/src/libs/ .
+(base) root:~/sire/wrapper# cd Search
+(base) root:~/sire/wrapper/Search# python ../AutoGenerate/create_wrappers.py
 ```
 
 would regenerate the wrappers for the `Search` module. Note that this
@@ -132,26 +146,26 @@ you needing to push and pull changes via git.
 
 Be very careful doing this, as the git version in the container is not
 going to be the same as on your local computer. Also be careful not
-to run `generate_wrappers` as this will delete your local Sire container.
+to run `generate_wrappers` as this will delete your local sire container.
 
 ## Creating the sire-generate-wrappers container
 
 You only need to read here if you want to create the
 sire-generate-wrappers container yourself.
 
-First, you must have a working installation on Sire
+First, you must have a working installation on sire
 on your computer. This is needed so that we can
 copy the header files from this installation into
-the container. We will assume that Sire is installed
+the container. We will assume that sire is installed
 in `$HOME/sire.app`.
 
 Next, you must navigate to this directory, e.g.
 
 ```
-cd $HOME/Sire/docker/sire-generate-wrappers
+cd $HOME/sire/docker/sire-generate-wrappers
 ```
 
-(assuming Sire was cloned to `$HOME/Sire`)
+(assuming sire was cloned to `$HOME/sire`)
 
 Create the `includes.tar.bz2` file by running the
 `create_includes_tarball` script via;

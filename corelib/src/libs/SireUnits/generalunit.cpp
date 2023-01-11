@@ -22,7 +22,7 @@ using namespace SireStream;
 
 static const RegisterMetaType<GeneralUnit> r_genunit(NO_ROOT);
 
-QDataStream& operator<<(QDataStream &ds, const SireUnits::Dimension::GeneralUnit &u)
+QDataStream &operator<<(QDataStream &ds, const SireUnits::Dimension::GeneralUnit &u)
 {
     writeHeader(ds, r_genunit, 1);
 
@@ -38,12 +38,12 @@ QDataStream& operator<<(QDataStream &ds, const SireUnits::Dimension::GeneralUnit
 
     sds << u.comps
         << a << c << l << m << t1 << t2 << q
-        << static_cast<const Unit&>(u);
+        << static_cast<const Unit &>(u);
 
     return ds;
 }
 
-QDataStream& operator>>(QDataStream &ds, SireUnits::Dimension::GeneralUnit &u)
+QDataStream &operator>>(QDataStream &ds, SireUnits::Dimension::GeneralUnit &u)
 {
     VersionID v = readHeader(ds, r_genunit);
 
@@ -53,9 +53,7 @@ QDataStream& operator>>(QDataStream &ds, SireUnits::Dimension::GeneralUnit &u)
 
         SharedDataStream sds(ds);
 
-        sds >> u.comps
-            >> a >> c >> l >> m >> t1 >> t2 >> q
-            >> static_cast<Unit&>(u);
+        sds >> u.comps >> a >> c >> l >> m >> t1 >> t2 >> q >> static_cast<Unit &>(u);
 
         u.Angle = a;
         u.Charge = c;
@@ -73,50 +71,60 @@ QDataStream& operator>>(QDataStream &ds, SireUnits::Dimension::GeneralUnit &u)
 
 namespace SireUnits
 {
-namespace Dimension
-{
-namespace detail
-{
-
-static QHash<QString,QString> typename_registry;
-static QMutex registry_mutex;
-
-static QString getKey(const GeneralUnit &unit)
-{
-    return QString("%1-%2-%3-%4-%5-%6-%7")
-              .arg(unit.MASS()).arg(unit.LENGTH()).arg(unit.TIME())
-              .arg(unit.CHARGE()).arg(unit.TEMPERATURE())
-              .arg(unit.QUANTITY()).arg(unit.ANGLE());
-}
-
-void SIREUNITS_EXPORT registerTypeName(const GeneralUnit &unit, const char *typnam)
-{
-    QString key = getKey(unit);
-
-    QMutexLocker lkr(&registry_mutex);
-    if (not typename_registry.contains(key))
+    namespace Dimension
     {
-        typename_registry.insert( key, QString(typnam) );
-    }
-}
+        namespace detail
+        {
 
-static QString getTypeName(const GeneralUnit &unit)
-{
-    QString key = getKey(unit);
+            typedef QHash<QString, QString> TypenameRegistry;
 
-    QMutexLocker lkr(&registry_mutex);
+            Q_GLOBAL_STATIC(TypenameRegistry, typename_registry);
+            Q_GLOBAL_STATIC(QMutex, registry_mutex);
 
-    if (typename_registry.contains(key))
-        return typename_registry.value(key);
-    else
-        return QString("SireUnits::Dimension::PhysUnit<%1,%2,%3,%4,%5,%6,%7>")
-                 .arg(unit.MASS()).arg(unit.LENGTH()).arg(unit.TIME())
-                 .arg(unit.CHARGE()).arg(unit.TEMPERATURE())
-                 .arg(unit.QUANTITY()).arg(unit.ANGLE());
-}
+            static QString getKey(const GeneralUnit &unit)
+            {
+                return QString("%1-%2-%3-%4-%5-%6-%7")
+                    .arg(unit.MASS())
+                    .arg(unit.LENGTH())
+                    .arg(unit.TIME())
+                    .arg(unit.CHARGE())
+                    .arg(unit.TEMPERATURE())
+                    .arg(unit.QUANTITY())
+                    .arg(unit.ANGLE());
+            }
 
-} // end of namespace detail
-} // end of namespace Dimension
+            void SIREUNITS_EXPORT registerTypeName(const GeneralUnit &unit, const char *typnam)
+            {
+                QString key = getKey(unit);
+
+                QMutexLocker lkr(registry_mutex());
+                if (not typename_registry()->contains(key))
+                {
+                    typename_registry()->insert(key, QString(typnam));
+                }
+            }
+
+            static QString getTypeName(const GeneralUnit &unit)
+            {
+                QString key = getKey(unit);
+
+                QMutexLocker lkr(registry_mutex());
+
+                if (typename_registry()->contains(key))
+                    return typename_registry()->value(key);
+                else
+                    return QString("SireUnits::Dimension::PhysUnit<%1,%2,%3,%4,%5,%6,%7>")
+                        .arg(unit.MASS())
+                        .arg(unit.LENGTH())
+                        .arg(unit.TIME())
+                        .arg(unit.CHARGE())
+                        .arg(unit.TEMPERATURE())
+                        .arg(unit.QUANTITY())
+                        .arg(unit.ANGLE());
+            }
+
+        } // end of namespace detail
+    }     // end of namespace Dimension
 } // end of namespace SireUnits
 
 GeneralUnit::GeneralUnit() : Unit(0)
@@ -153,7 +161,7 @@ GeneralUnit::GeneralUnit(const TempBase &t) : Unit(t)
 }
 
 GeneralUnit::GeneralUnit(const GeneralUnit &other)
-            : Unit(other), comps(other.comps)
+    : Unit(other), comps(other.comps)
 {
     Mass = other.Mass;
     Length = other.Length;
@@ -165,14 +173,15 @@ GeneralUnit::GeneralUnit(const GeneralUnit &other)
 }
 
 GeneralUnit::~GeneralUnit()
-{}
-
-const char* GeneralUnit::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<GeneralUnit>() );
 }
 
-const char* GeneralUnit::what() const
+const char *GeneralUnit::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<GeneralUnit>());
+}
+
+const char *GeneralUnit::what() const
 {
     return GeneralUnit::typeName();
 }
@@ -196,9 +205,10 @@ void GeneralUnit::assertCompatible(const GeneralUnit &other) const
         Quantity != other.Quantity or
         Angle != other.Angle)
     {
-        throw SireError::incompatible_error( QObject::tr(
-            "Units for values %1 and %2 are incompatible.")
-                .arg(this->toString()).arg(other.toString()));
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Units for values %1 and %2 are incompatible.")
+                                                .arg(this->toString())
+                                                .arg(other.toString()));
     }
 }
 
@@ -207,7 +217,8 @@ QString GeneralUnit::unitString() const
     return SireUnits::Dimension::getUnitString(Mass, Length,
                                                Time, Charge,
                                                temperature, Quantity,
-                                               Angle).second;
+                                               Angle)
+        .second;
 }
 
 QString GeneralUnit::toString() const
@@ -236,7 +247,7 @@ double GeneralUnit::to(const GeneralUnit &units) const
 
 double GeneralUnit::to(const TempBase &other) const
 {
-    //this must be a temperature!
+    // this must be a temperature!
     GeneralUnit general_temp;
     general_temp.temperature = 1;
     general_temp.setScale(other);
@@ -321,7 +332,7 @@ bool GeneralUnit::hasSameUnits(const GeneralUnit &other) const
            Angle == other.Angle;
 }
 
-GeneralUnit& GeneralUnit::operator=(const GeneralUnit &other)
+GeneralUnit &GeneralUnit::operator=(const GeneralUnit &other)
 {
     setScale(other.value());
 
@@ -380,7 +391,7 @@ bool GeneralUnit::operator<=(const GeneralUnit &other) const
 GeneralUnit GeneralUnit::operator-() const
 {
     GeneralUnit ret = *this;
-    ret.setScale( -value() );
+    ret.setScale(-value());
 
     for (const auto &key : this->comps.keys())
     {
@@ -390,7 +401,47 @@ GeneralUnit GeneralUnit::operator-() const
     return ret;
 }
 
-GeneralUnit& GeneralUnit::operator+=(const GeneralUnit &other)
+GeneralUnit &GeneralUnit::operator+=(const TempBase &other)
+{
+    return this->operator+=(GeneralUnit(other));
+}
+
+GeneralUnit &GeneralUnit::operator-=(const TempBase &other)
+{
+    return this->operator-=(GeneralUnit(other));
+}
+
+GeneralUnit &GeneralUnit::operator*=(const TempBase &other)
+{
+    return this->operator*=(GeneralUnit(other));
+}
+
+GeneralUnit &GeneralUnit::operator/=(const TempBase &other)
+{
+    return this->operator/=(GeneralUnit(other));
+}
+
+GeneralUnit GeneralUnit::operator+(const TempBase &other) const
+{
+    return this->operator+(GeneralUnit(other));
+}
+
+GeneralUnit GeneralUnit::operator-(const TempBase &other) const
+{
+    return this->operator-(GeneralUnit(other));
+}
+
+GeneralUnit GeneralUnit::operator*(const TempBase &other) const
+{
+    return this->operator*(GeneralUnit(other));
+}
+
+GeneralUnit GeneralUnit::operator/(const TempBase &other) const
+{
+    return this->operator/(GeneralUnit(other));
+}
+
+GeneralUnit &GeneralUnit::operator+=(const GeneralUnit &other)
 {
     if (this->isZero())
     {
@@ -417,7 +468,7 @@ GeneralUnit& GeneralUnit::operator+=(const GeneralUnit &other)
     return *this;
 }
 
-GeneralUnit& GeneralUnit::operator-=(const GeneralUnit &other)
+GeneralUnit &GeneralUnit::operator-=(const GeneralUnit &other)
 {
     if (this->isZero())
     {
@@ -458,7 +509,7 @@ GeneralUnit GeneralUnit::operator-(const GeneralUnit &other) const
     return ret;
 }
 
-GeneralUnit& GeneralUnit::operator+=(double val)
+GeneralUnit &GeneralUnit::operator+=(double val)
 {
     assertCompatible(GeneralUnit(val));
     setScale(value() + val);
@@ -469,7 +520,7 @@ GeneralUnit& GeneralUnit::operator+=(double val)
     return *this;
 }
 
-GeneralUnit& GeneralUnit::operator-=(double val)
+GeneralUnit &GeneralUnit::operator-=(double val)
 {
     assertCompatible(GeneralUnit(val));
     setScale(value() - val);
@@ -494,7 +545,7 @@ GeneralUnit GeneralUnit::operator-(double val) const
     return ret;
 }
 
-GeneralUnit GeneralUnit::operator*=(const GeneralUnit &other)
+GeneralUnit &GeneralUnit::operator*=(const GeneralUnit &other)
 {
     setScale(value() * other.value());
     Mass += other.Mass;
@@ -543,7 +594,7 @@ GeneralUnit GeneralUnit::operator*=(const GeneralUnit &other)
     return *this;
 }
 
-GeneralUnit GeneralUnit::operator/=(const GeneralUnit &other)
+GeneralUnit &GeneralUnit::operator/=(const GeneralUnit &other)
 {
     setScale(value() / other.value());
     Mass -= other.Mass;
@@ -592,6 +643,46 @@ GeneralUnit GeneralUnit::operator/=(const GeneralUnit &other)
     return *this;
 }
 
+SIREUNITS_EXPORT GeneralUnit Celsius::operator+(const GeneralUnit &other) const
+{
+    return other.operator+(*this);
+}
+
+SIREUNITS_EXPORT GeneralUnit Celsius::operator-(const GeneralUnit &other) const
+{
+    return GeneralUnit(*this) - other;
+}
+
+SIREUNITS_EXPORT GeneralUnit Celsius::operator*(const GeneralUnit &other) const
+{
+    return other.operator*(*this);
+}
+
+SIREUNITS_EXPORT GeneralUnit Celsius::operator/(const GeneralUnit &other) const
+{
+    return GeneralUnit(*this) / other;
+}
+
+SIREUNITS_EXPORT GeneralUnit Fahrenheit::operator+(const GeneralUnit &other) const
+{
+    return other.operator+(*this);
+}
+
+SIREUNITS_EXPORT GeneralUnit Fahrenheit::operator-(const GeneralUnit &other) const
+{
+    return GeneralUnit(*this) - other;
+}
+
+SIREUNITS_EXPORT GeneralUnit Fahrenheit::operator*(const GeneralUnit &other) const
+{
+    return other.operator*(*this);
+}
+
+SIREUNITS_EXPORT GeneralUnit Fahrenheit::operator/(const GeneralUnit &other) const
+{
+    return GeneralUnit(*this) / other;
+}
+
 GeneralUnit GeneralUnit::operator*(const GeneralUnit &other) const
 {
     GeneralUnit ret = *this;
@@ -607,7 +698,7 @@ GeneralUnit GeneralUnit::operator/(const GeneralUnit &other) const
     return ret;
 }
 
-GeneralUnit& GeneralUnit::operator*=(double val)
+GeneralUnit &GeneralUnit::operator*=(double val)
 {
     setScale(value() * val);
 
@@ -625,7 +716,7 @@ GeneralUnit& GeneralUnit::operator*=(double val)
     return *this;
 }
 
-GeneralUnit& GeneralUnit::operator/=(double val)
+GeneralUnit &GeneralUnit::operator/=(double val)
 {
     setScale(value() / val);
 
@@ -643,12 +734,12 @@ GeneralUnit& GeneralUnit::operator/=(double val)
     return *this;
 }
 
-GeneralUnit& GeneralUnit::operator*=(int val)
+GeneralUnit &GeneralUnit::operator*=(int val)
 {
     return this->operator*=(double(val));
 }
 
-GeneralUnit& GeneralUnit::operator/=(int val)
+GeneralUnit &GeneralUnit::operator/=(int val)
 {
     return this->operator/=(double(val));
 }
@@ -685,7 +776,7 @@ GeneralUnit GeneralUnit::invert() const
 {
     GeneralUnit ret;
 
-    ret.setScale( 1.0 / value() );
+    ret.setScale(1.0 / value());
 
     ret.Mass = -Mass;
     ret.Length = -Length;
@@ -701,15 +792,15 @@ GeneralUnit GeneralUnit::invert() const
     return ret;
 }
 
-QHash<QString,GeneralUnit> GeneralUnit::components() const
+QHash<QString, GeneralUnit> GeneralUnit::components() const
 {
-    QHash<QString,GeneralUnit> c;
+    QHash<QString, GeneralUnit> c;
     c.reserve(this->comps.count());
 
     for (const auto &key : this->comps.keys())
     {
         GeneralUnit v(*this);
-        v.comps = QHash<QString,double>();
+        v.comps = QHash<QString, double>();
         v.setScale(this->comps[key]);
         c.insert(key, v);
     }
@@ -720,7 +811,7 @@ QHash<QString,GeneralUnit> GeneralUnit::components() const
 GeneralUnit GeneralUnit::getComponent(const QString &component) const
 {
     GeneralUnit v(*this);
-    v.comps = QHash<QString,double>();
+    v.comps = QHash<QString, double>();
     v.setScale(this->comps.value(component));
     return v;
 }

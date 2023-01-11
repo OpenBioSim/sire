@@ -25,10 +25,17 @@ active_headers = pickle.load( open("active_headers.data", "rb") )
 return_const = "bp::return_value_policy<bp::copy_const_reference>()"
 return_self = "bp::return_self< >()"
 
+def fix_Selector(c):
+   #add in the core header files
+   c.add_declaration_code( "#include \"SireMol/core.h\"" )
+
 def fix_MolView(c, molview, props):
    #now add in all of the header files
    for header in props.dependencies():
        c.add_declaration_code( "#include %s" % header )
+
+   #add in the core header files
+   c.add_declaration_code( "#include \"SireMol/core.h\"" )
 
    #add accessor functions for all of the view properties
    for property in props.properties():
@@ -447,6 +454,12 @@ special_code = { "SireMol::Atom" : fix_Atom,
                  "SireMol::MoleculeInfo" : fix_MolInfo,
 
                  "SireMol::PerturbationSymbols" : fix_PerturbationSymbols,
+
+                 "SireMol::Selector<SireMol::Atom>" : fix_Selector,
+                 "SireMol::Selector<SireMol::Residue>" : fix_Selector,
+                 "SireMol::Selector<SireMol::CutGroup>" : fix_Selector,
+                 "SireMol::Selector<SireMol::Chain>" : fix_Selector,
+                 "SireMol::Selector<SireMol::Segment>" : fix_Selector,
 
                  "SireMol::CGIdx" : fix_CGIdx,
                  "SireMol::CGAtomIdx" : fix_CGAtomIdx }

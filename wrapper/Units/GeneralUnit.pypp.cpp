@@ -29,6 +29,8 @@ namespace bp = boost::python;
 
 #include "generalunit.h"
 
+#include "generalunit.h"
+
 SireUnits::Dimension::GeneralUnit __copy__(const SireUnits::Dimension::GeneralUnit &other){ return SireUnits::Dimension::GeneralUnit(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -45,6 +47,11 @@ void register_GeneralUnit_class(){
         bp::scope GeneralUnit_scope( GeneralUnit_exposer );
         GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::TempBase const & >(( bp::arg("temperature") ), "") );
         GeneralUnit_exposer.def( bp::init< double >(( bp::arg("value") ), "") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< -1, -3, 2, 2, 0, 0, 0 > const & >(( bp::arg("unit") ), "") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, -1, -1, 0 > const & >(( bp::arg("unit") ), "") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< 1, 1, 0, -2, 0, 0, 0 > const & >(( bp::arg("unit") ), "") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< -1, 3, -2, 0, 0, 0, 0 > const & >(( bp::arg("unit") ), "") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< 1, 2, -1, 0, 0, 0, 0 > const & >(( bp::arg("unit") ), "") );
         GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::GeneralUnit const & >(( bp::arg("other") ), "") );
         { //::SireUnits::Dimension::GeneralUnit::ANGLE
         
@@ -243,18 +250,20 @@ void register_GeneralUnit_class(){
         }
         GeneralUnit_exposer.def( bp::self != bp::self );
         GeneralUnit_exposer.def( bp::self * bp::self );
+        GeneralUnit_exposer.def( bp::self * bp::other< SireUnits::Dimension::TempBase >() );
         GeneralUnit_exposer.def( bp::self * bp::other< double >() );
         GeneralUnit_exposer.def( bp::self * bp::other< int >() );
-        GeneralUnit_exposer.def( bp::self *= bp::self );
         GeneralUnit_exposer.def( bp::self + bp::self );
+        GeneralUnit_exposer.def( bp::self + bp::other< SireUnits::Dimension::TempBase >() );
         GeneralUnit_exposer.def( bp::self + bp::other< double >() );
         GeneralUnit_exposer.def( -bp::self );
         GeneralUnit_exposer.def( bp::self - bp::self );
+        GeneralUnit_exposer.def( bp::self - bp::other< SireUnits::Dimension::TempBase >() );
         GeneralUnit_exposer.def( bp::self - bp::other< double >() );
         GeneralUnit_exposer.def( bp::self / bp::self );
+        GeneralUnit_exposer.def( bp::self / bp::other< SireUnits::Dimension::TempBase >() );
         GeneralUnit_exposer.def( bp::self / bp::other< double >() );
         GeneralUnit_exposer.def( bp::self / bp::other< int >() );
-        GeneralUnit_exposer.def( bp::self /= bp::self );
         GeneralUnit_exposer.def( bp::self < bp::self );
         GeneralUnit_exposer.def( bp::self <= bp::self );
         { //::SireUnits::Dimension::GeneralUnit::operator=

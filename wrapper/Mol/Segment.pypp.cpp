@@ -36,6 +36,8 @@ namespace bp = boost::python;
 
 #include "segproperty.hpp"
 
+#include "SireMol/core.h"
+
 const QString& get_Metadata_SireMol_SegStringProperty_function1(const SireMol::Segment &atom,
                                    const QString &metakey){ return atom.metadata< QString >(metakey); }
 

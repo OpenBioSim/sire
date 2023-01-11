@@ -39,6 +39,8 @@ namespace bp = boost::python;
 
 #include "residue.h"
 
+#include "SireMol/core.h"
+
 SireMol::Selector<SireMol::Residue> __copy__(const SireMol::Selector<SireMol::Residue> &other){ return SireMol::Selector<SireMol::Residue>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -195,6 +197,48 @@ void register_Selector_Residue__class(){
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("i"), bp::arg("j") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::Residue >::find
+        
+            typedef SireMol::Selector< SireMol::Residue > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::Residue >::*find_function_type)( ::SireMol::Residue const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::Residue >::find );
+            
+            Selector_Residue__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::Residue >::find
+        
+            typedef SireMol::Selector< SireMol::Residue > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::Residue >::*find_function_type)( ::SireMol::Selector< SireMol::Residue > const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::Residue >::find );
+            
+            Selector_Residue__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::Residue >::find
+        
+            typedef SireMol::Selector< SireMol::Residue > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::Residue >::*find_function_type)( ::SireMol::SelectorM< SireMol::Residue > const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::Residue >::find );
+            
+            Selector_Residue__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
                 , bp::release_gil_policy()
                 , "" );
         

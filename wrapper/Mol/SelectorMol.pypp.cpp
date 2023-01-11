@@ -475,6 +475,32 @@ void register_SelectorMol_class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorMol::find
+        
+            typedef ::QList< long long > ( ::SireMol::SelectorMol::*find_function_type)( ::SireMol::Molecule const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorMol::find );
+            
+            SelectorMol_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::find
+        
+            typedef ::QList< long long > ( ::SireMol::SelectorMol::*find_function_type)( ::SireMol::SelectorMol const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorMol::find );
+            
+            SelectorMol_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorMol::indexes
         
             typedef ::QList< SireMol::MolIdx > ( ::SireMol::SelectorMol::*indexes_function_type)(  ) const;

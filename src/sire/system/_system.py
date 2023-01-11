@@ -85,6 +85,10 @@ class System:
         """Return the number of molecules in this System"""
         return self._system.num_molecules()
 
+    def find(self, views):
+        """Return the index(es) of the molecule(s) that are in `views`"""
+        return self.molecules().find(views)
+
     def names(self):
         """Return the names of all of the molecules in this System"""
         return self.molecules().names()

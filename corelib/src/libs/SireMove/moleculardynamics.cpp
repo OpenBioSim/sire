@@ -53,7 +53,7 @@ static const RegisterMetaType<MolecularDynamics> r_moldyn;
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds,
-                                        const MolecularDynamics &moldyn)
+                        const MolecularDynamics &moldyn)
 {
     writeHeader(ds, r_moldyn, 1);
 
@@ -61,14 +61,14 @@ QDataStream &operator<<(QDataStream &ds,
 
     sds << moldyn.intgrator << moldyn.wspace << moldyn.timestep << moldyn.num_moves
         << moldyn.total_time
-        << static_cast<const Dynamics&>(moldyn);
+        << static_cast<const Dynamics &>(moldyn);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
 QDataStream &operator>>(QDataStream &ds,
-                                        MolecularDynamics &moldyn)
+                        MolecularDynamics &moldyn)
 {
     VersionID v = readHeader(ds, r_moldyn);
 
@@ -76,10 +76,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> moldyn.intgrator >> moldyn.wspace >> moldyn.timestep
-            >> moldyn.num_moves >> moldyn.total_time
-            >> static_cast<Dynamics&>(moldyn);
-
+        sds >> moldyn.intgrator >> moldyn.wspace >> moldyn.timestep >> moldyn.num_moves >> moldyn.total_time >> static_cast<Dynamics &>(moldyn);
     }
     else
         throw version_error(v, "1", r_moldyn, CODELOC);
@@ -89,25 +86,25 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 MolecularDynamics::MolecularDynamics(const PropertyMap &map)
-                  : ConcreteProperty<MolecularDynamics,Dynamics>(map),
-                    intgrator( Integrator::null() ),
-                    wspace( IntegratorWorkspace::null() ),
-                    timestep(1*femtosecond),
-                    num_moves(0), total_time(0)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
+      intgrator(Integrator::null()),
+      wspace(IntegratorWorkspace::null()),
+      timestep(1 * femtosecond),
+      num_moves(0), total_time(0)
 {
-    Dynamics::setEnsemble( Ensemble::NVE() );
+    Dynamics::setEnsemble(Ensemble::NVE());
 }
 
 /** Construct to perform moves on the molecules in the group 'molgroup'. This
     defaults to an all-atom velocity-verlet integrator */
 MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
                                      const PropertyMap &map)
-                  : ConcreteProperty<MolecularDynamics,Dynamics>(map),
-                    intgrator( VelocityVerlet() ), timestep(1*femtosecond),
-                    num_moves(0), total_time(0)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
+      intgrator(VelocityVerlet()), timestep(1 * femtosecond),
+      num_moves(0), total_time(0)
 {
     wspace = intgrator.read().createWorkspace(moleculegroup, map);
-    Dynamics::setEnsemble( intgrator.read().ensemble() );
+    Dynamics::setEnsemble(intgrator.read().ensemble());
 }
 
 /** Construct a move for the passed molecule group, integrated
@@ -115,24 +112,24 @@ MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
 MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
                                      const Integrator &integrator,
                                      const PropertyMap &map)
-                  : ConcreteProperty<MolecularDynamics,Dynamics>(map),
-                    intgrator(integrator), timestep(1*femtosecond), num_moves(0),
-                    total_time(0)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
+      intgrator(integrator), timestep(1 * femtosecond), num_moves(0),
+      total_time(0)
 {
     wspace = intgrator.read().createWorkspace(moleculegroup, map);
-    Dynamics::setEnsemble( intgrator.read().ensemble() );
+    Dynamics::setEnsemble(intgrator.read().ensemble());
 }
 
 /** Construct a move for the passed molecule group, integrated with
     the passed timestep */
 MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup,
                                      Time t, const PropertyMap &map)
-                  : ConcreteProperty<MolecularDynamics,Dynamics>(map),
-                    intgrator( VelocityVerlet() ), timestep(t), num_moves(0),
-                    total_time(0)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
+      intgrator(VelocityVerlet()), timestep(t), num_moves(0),
+      total_time(0)
 {
     wspace = intgrator.read().createWorkspace(molgroup, map);
-    Dynamics::setEnsemble( intgrator.read().ensemble() );
+    Dynamics::setEnsemble(intgrator.read().ensemble());
 }
 
 /** Construct a move for the passed molecule group, integrated
@@ -140,28 +137,30 @@ MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup,
 MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup,
                                      const Integrator &integrator,
                                      Time t, const PropertyMap &map)
-                  : ConcreteProperty<MolecularDynamics,Dynamics>(map),
-                    intgrator(integrator), timestep(t), num_moves(0),
-                    total_time(0)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
+      intgrator(integrator), timestep(t), num_moves(0),
+      total_time(0)
 {
     wspace = intgrator.read().createWorkspace(molgroup, map);
-    Dynamics::setEnsemble( intgrator.read().ensemble() );
+    Dynamics::setEnsemble(intgrator.read().ensemble());
 }
 
 /** Copy constructor */
 MolecularDynamics::MolecularDynamics(const MolecularDynamics &other)
-                  : ConcreteProperty<MolecularDynamics,Dynamics>(other),
-                    intgrator(other.intgrator), wspace(other.wspace),
-                    timestep(other.timestep), num_moves(other.num_moves),
-                    total_time(other.total_time)
-{}
+    : ConcreteProperty<MolecularDynamics, Dynamics>(other),
+      intgrator(other.intgrator), wspace(other.wspace),
+      timestep(other.timestep), num_moves(other.num_moves),
+      total_time(other.total_time)
+{
+}
 
 /** Destructor */
 MolecularDynamics::~MolecularDynamics()
-{}
+{
+}
 
 /** Copy assignment operator */
-MolecularDynamics& MolecularDynamics::operator=(const MolecularDynamics &other)
+MolecularDynamics &MolecularDynamics::operator=(const MolecularDynamics &other)
 {
     if (this != &other)
     {
@@ -198,9 +197,9 @@ bool MolecularDynamics::operator!=(const MolecularDynamics &other) const
 QString MolecularDynamics::toString() const
 {
     return QObject::tr("MolecularDynamics( %1, timeStep() == %2 fs, nMoves() == %3 )")
-                .arg(intgrator->toString())
-                .arg(timestep.to(femtosecond))
-                .arg(num_moves);
+        .arg(intgrator->toString())
+        .arg(timestep.to(femtosecond))
+        .arg(num_moves);
 }
 
 /** Return the number of moves completed using this object */
@@ -216,14 +215,14 @@ SireUnits::Dimension::Time MolecularDynamics::totalTime() const
 }
 
 /** Return the molecule group on which this move operates */
-const MoleculeGroup& MolecularDynamics::moleculeGroup() const
+const MoleculeGroup &MolecularDynamics::moleculeGroup() const
 {
     return wspace.read().moleculeGroup();
 }
 
 /** Return the integrator used to advance the coordinates
     from one timestep to the next */
-const Integrator& MolecularDynamics::integrator() const
+const Integrator &MolecularDynamics::integrator() const
 {
     return intgrator.read();
 }
@@ -258,8 +257,8 @@ void MolecularDynamics::setIntegrator(const Integrator &integrator)
     if (intgrator != integrator)
     {
         intgrator = integrator;
-        wspace = intgrator.read().createWorkspace( moleculeGroup(), propertyMap() );
-        Dynamics::setEnsemble( intgrator.read().ensemble() );
+        wspace = intgrator.read().createWorkspace(moleculeGroup(), propertyMap());
+        Dynamics::setEnsemble(intgrator.read().ensemble());
     }
 }
 
@@ -364,24 +363,23 @@ MolarEnergy MolecularDynamics::kineticEnergy() const
 /** Return the temperature of the system at the last move */
 Temperature MolecularDynamics::temperature() const
 {
-  SireUnits::Dimension::MolarEnergy ekin = MolecularDynamics::kineticEnergy();
+    SireUnits::Dimension::MolarEnergy ekin = MolecularDynamics::kineticEnergy();
 
-  // NOTE THAT THIS ONLY WORKS FOR 3D SPACE WHEN THERE IS ONE ATOM PER MOLECULE
-  // AND NO CONSTRAINTS...IN OTHER WORDS..NEED TO FIX THIS
-  //int ndofs = 3 * wspace.read().nMolecules();
-  int ndofs = 3 * 256;
+    // NOTE THAT THIS ONLY WORKS FOR 3D SPACE WHEN THERE IS ONE ATOM PER MOLECULE
+    // AND NO CONSTRAINTS...IN OTHER WORDS..NEED TO FIX THIS
+    // int ndofs = 3 * wspace.read().nMolecules();
+    int ndofs = 3 * 256;
 
-  SireUnits::Dimension::Temperature temp = ( ( 2 * ekin.value() ) / ( ndofs * k_boltz ) ) * kelvin ;
+    SireUnits::Dimension::Temperature temp = ((2 * ekin.value()) / (ndofs * k_boltz.value())) * kelvin;
 
-  return temp;
-
+    return temp;
 }
 
 /** Completely clear any move statistics - this clears all existing
     velocities */
 void MolecularDynamics::clearStatistics()
 {
-    wspace = intgrator.read().createWorkspace( moleculeGroup(), propertyMap() );
+    wspace = intgrator.read().createWorkspace(moleculeGroup(), propertyMap());
     num_moves = 0;
     total_time = Time(0);
 }
@@ -410,9 +408,9 @@ void MolecularDynamics::move(System &system, int nmoves, bool record_stats)
     if (nmoves <= 0)
         return;
 
-    //first, calculate the energy of the system - this is to prevent a
-    //weird bug that causes systems to blow up if the energy has not been
-    //calculated - THIS NEEDS FIXING!
+    // first, calculate the energy of the system - this is to prevent a
+    // weird bug that causes systems to blow up if the energy has not been
+    // calculated - THIS NEEDS FIXING!
     system.energy();
 
     MolecularDynamics old_state(*this);
@@ -429,9 +427,9 @@ void MolecularDynamics::move(System &system, int nmoves, bool record_stats)
         system = wspace.read().system();
 
         num_moves += nmoves;
-        total_time += nmoves*timestep;
+        total_time += nmoves * timestep;
     }
-    catch(...)
+    catch (...)
     {
         system = old_system_state;
         this->operator=(old_state);
@@ -440,12 +438,12 @@ void MolecularDynamics::move(System &system, int nmoves, bool record_stats)
     }
 }
 
-const char* MolecularDynamics::typeName()
+const char *MolecularDynamics::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MolecularDynamics>() );
+    return QMetaType::typeName(qMetaTypeId<MolecularDynamics>());
 }
 
-MolecularDynamics* MolecularDynamics::clone() const
+MolecularDynamics *MolecularDynamics::clone() const
 {
     return new MolecularDynamics(*this);
 }

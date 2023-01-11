@@ -580,6 +580,48 @@ void register_SelectorM_Chain__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Chain >::find
+        
+            typedef SireMol::SelectorM< SireMol::Chain > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::SelectorM< SireMol::Chain >::*find_function_type)( ::SireMol::Chain const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorM< SireMol::Chain >::find );
+            
+            SelectorM_Chain__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Chain >::find
+        
+            typedef SireMol::SelectorM< SireMol::Chain > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::SelectorM< SireMol::Chain >::*find_function_type)( ::SireMol::Selector< SireMol::Chain > const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorM< SireMol::Chain >::find );
+            
+            SelectorM_Chain__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Chain >::find
+        
+            typedef SireMol::SelectorM< SireMol::Chain > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::SelectorM< SireMol::Chain >::*find_function_type)( ::SireMol::SelectorM< SireMol::Chain > const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorM< SireMol::Chain >::find );
+            
+            SelectorM_Chain__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Chain >::indexes
         
             typedef SireMol::SelectorM< SireMol::Chain > exported_class_t;

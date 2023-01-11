@@ -42,7 +42,7 @@
 #include "SireError/errors.h"
 
 // tbb::task has been deprecated!
-//#include "tbb/task.h"
+// #include "tbb/task.h"
 
 #include <QVector>
 #include <QDebug>
@@ -73,7 +73,7 @@ QDataStream &operator<<(QDataStream &ds, const RepExMove2 &repexmove2)
         << repexmove2.nreject
         << repexmove2.swap_monitors
         << repexmove2.disable_swaps
-        << static_cast<const SupraMove&>(repexmove2);
+        << static_cast<const SupraMove &>(repexmove2);
 
     return ds;
 }
@@ -87,12 +87,7 @@ QDataStream &operator>>(QDataStream &ds, RepExMove2 &repexmove2)
     {
         SharedDataStream sds(ds);
 
-        sds >> repexmove2.rangenerator
-            >> repexmove2.naccept
-            >> repexmove2.nreject
-            >> repexmove2.swap_monitors
-            >> repexmove2.disable_swaps
-            >> static_cast<SupraMove&>(repexmove2);
+        sds >> repexmove2.rangenerator >> repexmove2.naccept >> repexmove2.nreject >> repexmove2.swap_monitors >> repexmove2.disable_swaps >> static_cast<SupraMove &>(repexmove2);
     }
     else
         throw version_error(v, "1", r_repexmove2, CODELOC);
@@ -102,24 +97,27 @@ QDataStream &operator>>(QDataStream &ds, RepExMove2 &repexmove2)
 
 /** Constructor */
 RepExMove2::RepExMove2()
-           : ConcreteProperty<RepExMove2,SupraMove>(),
-             naccept(0), nreject(0), swap_monitors(false), disable_swaps(false)
-{}
+    : ConcreteProperty<RepExMove2, SupraMove>(),
+      naccept(0), nreject(0), swap_monitors(false), disable_swaps(false)
+{
+}
 
 /** Copy constructor */
 RepExMove2::RepExMove2(const RepExMove2 &other)
-           : ConcreteProperty<RepExMove2,SupraMove>(other),
-             naccept(other.naccept), nreject(other.nreject),
-             swap_monitors(other.swap_monitors),
-             disable_swaps(other.disable_swaps)
-{}
+    : ConcreteProperty<RepExMove2, SupraMove>(other),
+      naccept(other.naccept), nreject(other.nreject),
+      swap_monitors(other.swap_monitors),
+      disable_swaps(other.disable_swaps)
+{
+}
 
 /** Destructor */
 RepExMove2::~RepExMove2()
-{}
+{
+}
 
 /** Copy assignment operator */
-RepExMove2& RepExMove2::operator=(const RepExMove2 &other)
+RepExMove2 &RepExMove2::operator=(const RepExMove2 &other)
 {
     if (this != &other)
     {
@@ -195,9 +193,9 @@ double RepExMove2::acceptanceRatio() const
 QString RepExMove2::toString() const
 {
     return QObject::tr("RepExMove2( %1 accepted, %2 rejected : %3 %% )")
-                .arg(this->nAccepted())
-                .arg(this->nRejected())
-                .arg(100 * this->acceptanceRatio());
+        .arg(this->nAccepted())
+        .arg(this->nRejected())
+        .arg(100 * this->acceptanceRatio());
 }
 
 /** Clear the move statistics */
@@ -215,7 +213,7 @@ void RepExMove2::setGenerator(const RanGenerator &generator)
 }
 
 /** Return the random number generator used for the replica exchange tests */
-const RanGenerator& RepExMove2::generator() const
+const RanGenerator &RepExMove2::generator() const
 {
     return rangenerator;
 }
@@ -298,18 +296,18 @@ public:
 bool replicaTest(Replica &replica_a, Replica &replica_b,
                  const RanGenerator &rangenerator)
 {
-    //get the ensembles of the two replicas
+    // get the ensembles of the two replicas
     const Ensemble &ensemble_a = replica_a.ensemble();
     const Ensemble &ensemble_b = replica_b.ensemble();
 
-    if ( (ensemble_a.isNVT() and ensemble_a.isNVT()) or
-         (ensemble_b.isNPT() and ensemble_b.isNPT()) )
+    if ((ensemble_a.isNVT() and ensemble_a.isNVT()) or
+        (ensemble_b.isNPT() and ensemble_b.isNPT()))
     {
         bool need_pv = (ensemble_a.isNPT() and ensemble_b.isNPT());
 
-        //get the values of the thermodynamic parameters
-        double beta_a = 1.0 / (k_boltz * ensemble_a.temperature()).value();
-        double beta_b = 1.0 / (k_boltz * ensemble_b.temperature()).value();
+        // get the values of the thermodynamic parameters
+        double beta_a = 1.0 / (k_boltz.value() * ensemble_a.temperature()).value();
+        double beta_b = 1.0 / (k_boltz.value() * ensemble_b.temperature()).value();
 
         Pressure p_a(0);
         Pressure p_b(0);
@@ -320,8 +318,8 @@ bool replicaTest(Replica &replica_a, Replica &replica_b,
             p_b = ensemble_b.pressure();
         }
 
-        //now get the values of the system properties at their current state,
-        //and at their swapped states
+        // now get the values of the system properties at their current state,
+        // and at their swapped states
         double H_a_i = replica_a.energy().value();
         double H_b_i = replica_b.energy().value();
 
@@ -331,17 +329,17 @@ bool replicaTest(Replica &replica_a, Replica &replica_b,
         if (replica_a.lambdaValue() != replica_b.lambdaValue() or
             replica_a.energyComponent() != replica_b.energyComponent())
         {
-            //there will be a change in energy associated with the swap
+            // there will be a change in energy associated with the swap
             System swapped = replica_a.subSystem();
 
-            //evaluate the energy of replica A swapped into the B state
+            // evaluate the energy of replica A swapped into the B state
             swapped.setComponent(replica_a.lambdaComponent(), replica_b.lambdaValue());
-            H_a_j = swapped.energy( replica_b.energyComponent() ).value();
+            H_a_j = swapped.energy(replica_b.energyComponent()).value();
 
-            //evaluate the energy of replica B swapped into the A state
+            // evaluate the energy of replica B swapped into the A state
             swapped = replica_b.subSystem();
             swapped.setComponent(replica_b.lambdaComponent(), replica_a.lambdaValue());
-            H_b_j = swapped.energy( replica_a.energyComponent() ).value();
+            H_b_j = swapped.energy(replica_a.energyComponent()).value();
         }
 
         double V_a_i(0);
@@ -360,37 +358,35 @@ bool replicaTest(Replica &replica_a, Replica &replica_b,
 
             if (replica_a.spaceProperty() != replica_b.spaceProperty())
             {
-                //the space property changes, so volume could change
-                V_a_j = replica_a.subSystem().property(replica_b.spaceProperty())
-                                 .asA<Space>().volume().value();
+                // the space property changes, so volume could change
+                V_a_j = replica_a.subSystem().property(replica_b.spaceProperty()).asA<Space>().volume().value();
 
-                V_b_j = replica_b.subSystem().property(replica_a.spaceProperty())
-                                 .asA<Space>().volume().value();
+                V_b_j = replica_b.subSystem().property(replica_a.spaceProperty()).asA<Space>().volume().value();
             }
         }
 
-        //now calculate delta needed for the Monte Carlo test
+        // now calculate delta needed for the Monte Carlo test
         //
-        //  For derivation see Appendix C of Christopher Woods' thesis
-        //   (or original replica exchange literature of course!)
+        //   For derivation see Appendix C of Christopher Woods' thesis
+        //    (or original replica exchange literature of course!)
         //
-        //  delta = beta_b * [ H_b_i - H_b_j + P_b (V_b_i - V_b_j) ] +
-        //          beta_a * [ H_a_i - H_a_j + P_a (V_a_i - V_a_j) ]
+        //   delta = beta_b * [ H_b_i - H_b_j + P_b (V_b_i - V_b_j) ] +
+        //           beta_a * [ H_a_i - H_a_j + P_a (V_a_i - V_a_j) ]
 
-        double delta = beta_b * ( H_b_i - H_b_j + p_b*(V_b_i - V_b_j) ) +
-                       beta_a * ( H_a_i - H_a_j + p_a*(V_a_i - V_a_j) );
+        double delta = beta_b * (H_b_i - H_b_j + p_b * (V_b_i - V_b_j)) +
+                       beta_a * (H_a_i - H_a_j + p_a * (V_a_i - V_a_j));
 
-        bool move_passed = ( delta > 0 or (std::exp(delta) >= rangenerator.rand()) );
+        bool move_passed = (delta > 0 or (std::exp(delta) >= rangenerator.rand()));
 
         return move_passed;
     }
     else
     {
-        throw SireError::incompatible_error( QObject::tr(
-            "There is no available replica exchange test that allows tests between "
-            "replicas with ensembles %1 and %2.")
-                .arg(ensemble_a.toString(), ensemble_b.toString()), CODELOC );
-
+        throw SireError::incompatible_error(QObject::tr(
+                                                "There is no available replica exchange test that allows tests between "
+                                                "replicas with ensembles %1 and %2.")
+                                                .arg(ensemble_a.toString(), ensemble_b.toString()),
+                                            CODELOC);
     }
 
     return false;
@@ -559,11 +555,11 @@ public:
 void RepExMove2::performMove(Replicas &replicas, bool record_stats)
 {
     throw SireError::incomplete_code(
-            QObject::tr("tbb has removed tbb::task, so we now need to "
-                        "rewrite RepExMove2. If this affects you, "
-                        "please switch to RepExMove, and then raise "
-                        "a GitHub issue asking us to conduct a rewrite."),
-                        CODELOC);
+        QObject::tr("tbb has removed tbb::task, so we now need to "
+                    "rewrite RepExMove2. If this affects you, "
+                    "please switch to RepExMove, and then raise "
+                    "a GitHub issue asking us to conduct a rewrite."),
+        CODELOC);
     /*
     if (replicas.nReplicas() == 0)
         return;
@@ -658,14 +654,14 @@ void RepExMove2::move(SupraSystem &system, int nmoves, bool record_stats)
 
     try
     {
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
             this->performMove(replicas, record_stats);
         }
 
         SupraMove::incrementNMoves(nmoves);
     }
-    catch(...)
+    catch (...)
     {
         replicas.copy(*old_replicas);
         this->copy(*old_state);
@@ -673,9 +669,7 @@ void RepExMove2::move(SupraSystem &system, int nmoves, bool record_stats)
     }
 }
 
-const char* RepExMove2::typeName()
+const char *RepExMove2::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<RepExMove2>() );
+    return QMetaType::typeName(qMetaTypeId<RepExMove2>());
 }
-
-

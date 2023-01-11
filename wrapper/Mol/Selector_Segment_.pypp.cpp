@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 #include "segment.h"
 
+#include "SireMol/core.h"
+
 SireMol::Selector<SireMol::Segment> __copy__(const SireMol::Selector<SireMol::Segment> &other){ return SireMol::Selector<SireMol::Segment>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -189,6 +191,48 @@ void register_Selector_Segment__class(){
                 "evaluate"
                 , evaluate_function_value
                 , ( bp::arg("i"), bp::arg("j") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::Segment >::find
+        
+            typedef SireMol::Selector< SireMol::Segment > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::Segment >::*find_function_type)( ::SireMol::Segment const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::Segment >::find );
+            
+            Selector_Segment__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::Segment >::find
+        
+            typedef SireMol::Selector< SireMol::Segment > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::Segment >::*find_function_type)( ::SireMol::Selector< SireMol::Segment > const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::Segment >::find );
+            
+            Selector_Segment__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Selector< SireMol::Segment >::find
+        
+            typedef SireMol::Selector< SireMol::Segment > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::Selector< SireMol::Segment >::*find_function_type)( ::SireMol::SelectorM< SireMol::Segment > const & ) const;
+            find_function_type find_function_value( &::SireMol::Selector< SireMol::Segment >::find );
+            
+            Selector_Segment__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
                 , bp::release_gil_policy()
                 , "" );
         

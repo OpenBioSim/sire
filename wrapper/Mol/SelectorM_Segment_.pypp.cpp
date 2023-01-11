@@ -580,6 +580,48 @@ void register_SelectorM_Segment__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Segment >::find
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::SelectorM< SireMol::Segment >::*find_function_type)( ::SireMol::Segment const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorM< SireMol::Segment >::find );
+            
+            SelectorM_Segment__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::find
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::SelectorM< SireMol::Segment >::*find_function_type)( ::SireMol::Selector< SireMol::Segment > const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorM< SireMol::Segment >::find );
+            
+            SelectorM_Segment__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::find
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::QList< long long > ( ::SireMol::SelectorM< SireMol::Segment >::*find_function_type)( ::SireMol::SelectorM< SireMol::Segment > const & ) const;
+            find_function_type find_function_value( &::SireMol::SelectorM< SireMol::Segment >::find );
+            
+            SelectorM_Segment__exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Segment >::indexes
         
             typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
