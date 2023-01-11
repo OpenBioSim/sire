@@ -11,6 +11,8 @@ namespace bp = boost::python;
 
 #include "temperature.h"
 
+#include "generalunit.h"
+
 SireUnits::Fahrenheit __copy__(const SireUnits::Fahrenheit &other){ return SireUnits::Fahrenheit(other); }
 
 #include "Helpers/str.hpp"
@@ -67,13 +69,17 @@ void register_Fahrenheit_class(){
         }
         Fahrenheit_exposer.def( bp::self * bp::other< double >() );
         Fahrenheit_exposer.def( bp::self * bp::other< int >() );
+        Fahrenheit_exposer.def( bp::self * bp::other< SireUnits::Dimension::GeneralUnit >() );
         Fahrenheit_exposer.def( bp::self + bp::self );
         Fahrenheit_exposer.def( bp::self + bp::other< SireUnits::Dimension::PhysUnit< 0, 0, 0, 0, 1, 0, 0 > >() );
+        Fahrenheit_exposer.def( bp::self + bp::other< SireUnits::Dimension::GeneralUnit >() );
         Fahrenheit_exposer.def( -bp::self );
         Fahrenheit_exposer.def( bp::self - bp::self );
         Fahrenheit_exposer.def( bp::self - bp::other< SireUnits::Dimension::PhysUnit< 0, 0, 0, 0, 1, 0, 0 > >() );
+        Fahrenheit_exposer.def( bp::self - bp::other< SireUnits::Dimension::GeneralUnit >() );
         Fahrenheit_exposer.def( bp::self / bp::other< double >() );
         Fahrenheit_exposer.def( bp::self / bp::other< int >() );
+        Fahrenheit_exposer.def( bp::self / bp::other< SireUnits::Dimension::GeneralUnit >() );
         { //::SireUnits::Fahrenheit::operator=
         
             typedef ::SireUnits::Fahrenheit & ( ::SireUnits::Fahrenheit::*assign_function_type)( ::SireUnits::Fahrenheit const & ) ;
@@ -104,6 +110,10 @@ void register_Fahrenheit_class(){
         Fahrenheit_exposer.def( bp::other<double>() - bp::self );
         Fahrenheit_exposer.def( bp::other<double>() * bp::self );
         Fahrenheit_exposer.def( bp::other<double>() / bp::self );
+        Fahrenheit_exposer.def( bp::self + bp::other<SireUnits::Dimension::GeneralUnit>() );
+        Fahrenheit_exposer.def( bp::self - bp::other<SireUnits::Dimension::GeneralUnit>() );
+        Fahrenheit_exposer.def( bp::self * bp::other<SireUnits::Dimension::GeneralUnit>() );
+        Fahrenheit_exposer.def( bp::self / bp::other<SireUnits::Dimension::GeneralUnit>() );
         Fahrenheit_exposer.def( "__copy__", &__copy__);
         Fahrenheit_exposer.def( "__deepcopy__", &__copy__);
         Fahrenheit_exposer.def( "clone", &__copy__);

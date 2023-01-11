@@ -11,6 +11,8 @@ namespace bp = boost::python;
 
 #include "temperature.h"
 
+#include "generalunit.h"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"

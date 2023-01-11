@@ -11,6 +11,8 @@ namespace bp = boost::python;
 
 #include "temperature.h"
 
+#include "generalunit.h"
+
 SireUnits::Celsius __copy__(const SireUnits::Celsius &other){ return SireUnits::Celsius(other); }
 
 #include "Helpers/str.hpp"
@@ -67,13 +69,17 @@ void register_Celsius_class(){
         }
         Celsius_exposer.def( bp::self * bp::other< double >() );
         Celsius_exposer.def( bp::self * bp::other< int >() );
+        Celsius_exposer.def( bp::self * bp::other< SireUnits::Dimension::GeneralUnit >() );
         Celsius_exposer.def( bp::self + bp::self );
         Celsius_exposer.def( bp::self + bp::other< SireUnits::Dimension::PhysUnit< 0, 0, 0, 0, 1, 0, 0 > >() );
+        Celsius_exposer.def( bp::self + bp::other< SireUnits::Dimension::GeneralUnit >() );
         Celsius_exposer.def( -bp::self );
         Celsius_exposer.def( bp::self - bp::self );
         Celsius_exposer.def( bp::self - bp::other< SireUnits::Dimension::PhysUnit< 0, 0, 0, 0, 1, 0, 0 > >() );
+        Celsius_exposer.def( bp::self - bp::other< SireUnits::Dimension::GeneralUnit >() );
         Celsius_exposer.def( bp::self / bp::other< double >() );
         Celsius_exposer.def( bp::self / bp::other< int >() );
+        Celsius_exposer.def( bp::self / bp::other< SireUnits::Dimension::GeneralUnit >() );
         { //::SireUnits::Celsius::operator=
         
             typedef ::SireUnits::Celsius & ( ::SireUnits::Celsius::*assign_function_type)( ::SireUnits::Celsius const & ) ;
@@ -108,6 +114,10 @@ void register_Celsius_class(){
         Celsius_exposer.def( bp::other<double>() - bp::self );
         Celsius_exposer.def( bp::other<double>() * bp::self );
         Celsius_exposer.def( bp::other<double>() / bp::self );
+        Celsius_exposer.def( bp::self + bp::other<SireUnits::Dimension::GeneralUnit>() );
+        Celsius_exposer.def( bp::self - bp::other<SireUnits::Dimension::GeneralUnit>() );
+        Celsius_exposer.def( bp::self * bp::other<SireUnits::Dimension::GeneralUnit>() );
+        Celsius_exposer.def( bp::self / bp::other<SireUnits::Dimension::GeneralUnit>() );
         Celsius_exposer.def( "__copy__", &__copy__);
         Celsius_exposer.def( "__deepcopy__", &__copy__);
         Celsius_exposer.def( "clone", &__copy__);

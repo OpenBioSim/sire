@@ -49,10 +49,10 @@ using namespace SireMove::detail;
 
 static const RegisterMetaType<Ensemble> r_ensemble;
 
-template<class T>
-static QDataStream& operator<<(QDataStream &ds, const CharArray<T> &array)
+template <class T>
+static QDataStream &operator<<(QDataStream &ds, const CharArray<T> &array)
 {
-    for (int i=0; i<CharArray<T>::count(); ++i)
+    for (int i = 0; i < CharArray<T>::count(); ++i)
     {
         ds << array[i];
     }
@@ -60,10 +60,10 @@ static QDataStream& operator<<(QDataStream &ds, const CharArray<T> &array)
     return ds;
 }
 
-template<class T>
-static QDataStream& operator>>(QDataStream &ds, CharArray<T> &array)
+template <class T>
+static QDataStream &operator>>(QDataStream &ds, CharArray<T> &array)
 {
-    for (int i=0; i<CharArray<T>::count(); ++i)
+    for (int i = 0; i < CharArray<T>::count(); ++i)
     {
         ds >> array[i];
     }
@@ -80,7 +80,7 @@ QDataStream &operator<<(QDataStream &ds, const Ensemble &ensemble)
        << double(ensemble.ensemble_pressure)
        << double(ensemble.ensemble_fugacity)
        << ensemble.ensemble_state
-       << static_cast<const Property&>(ensemble);
+       << static_cast<const Property &>(ensemble);
 
     return ds;
 }
@@ -94,30 +94,28 @@ QDataStream &operator>>(QDataStream &ds, Ensemble &ensemble)
     {
         double temp, press, fug;
 
-        ds >> temp >> press >> fug
-           >> ensemble.ensemble_state
-           >> static_cast<Property&>(ensemble);
+        ds >> temp >> press >> fug >> ensemble.ensemble_state >> static_cast<Property &>(ensemble);
 
         ensemble.ensemble_temperature = Temperature(temp);
         ensemble.ensemble_pressure = Pressure(press);
         ensemble.ensemble_fugacity = Pressure(fug);
     }
     else
-        throw version_error( v, "1", r_ensemble, CODELOC );
+        throw version_error(v, "1", r_ensemble, CODELOC);
 
     return ds;
 }
 
 static const quint8 UNKNOWN = 0; // unknown state
 
-static const quint8 N = 4;       // constant number of particles
-static const quint8 Mu = 16;     // constant chemical potential
+static const quint8 N = 4;   // constant number of particles
+static const quint8 Mu = 16; // constant chemical potential
 
-static const quint8 V = 4;       // constant volume
-static const quint8 P = 16;      // constant pressure
+static const quint8 V = 4;  // constant volume
+static const quint8 P = 16; // constant pressure
 
-static const quint8 E = 4;       // constant total energy
-static const quint8 T = 16;      // constant temperature
+static const quint8 E = 4;  // constant total energy
+static const quint8 T = 16; // constant temperature
 
 /** Return the description for the passed state parameters */
 static CharArray<quint32> getDescription(quint8 n, quint8 v, quint8 t)
@@ -132,15 +130,15 @@ static CharArray<quint32> getDescription(quint8 n, quint8 v, quint8 t)
 }
 
 /** Return the merged version of the passed two states */
-template<class T>
+template <class T>
 static CharArray<T> merge(const CharArray<T> &des0,
                           const CharArray<T> &des1)
 {
     CharArray<T> merged;
 
-    for (int i=0; i<CharArray<T>::count(); ++i)
+    for (int i = 0; i < CharArray<T>::count(); ++i)
     {
-        merged[i] = qMax( des0[i], des1[i] );
+        merged[i] = qMax(des0[i], des1[i]);
     }
 
     return merged;
@@ -148,26 +146,28 @@ static CharArray<T> merge(const CharArray<T> &des0,
 
 /** Construct an NVE ensemble */
 Ensemble::Ensemble()
-         : ensemble_temperature(0), ensemble_pressure(0),
-           ensemble_fugacity(0)
+    : ensemble_temperature(0), ensemble_pressure(0),
+      ensemble_fugacity(0)
 {
-    ensemble_state = getDescription( N, V, E );
+    ensemble_state = getDescription(N, V, E);
 }
 
 /** Copy constructor */
 Ensemble::Ensemble(const Ensemble &other)
-         : ensemble_temperature(other.ensemble_temperature),
-           ensemble_pressure(other.ensemble_pressure),
-           ensemble_fugacity(other.ensemble_fugacity),
-           ensemble_state(other.ensemble_state)
-{}
+    : ensemble_temperature(other.ensemble_temperature),
+      ensemble_pressure(other.ensemble_pressure),
+      ensemble_fugacity(other.ensemble_fugacity),
+      ensemble_state(other.ensemble_state)
+{
+}
 
 /** Destructor */
 Ensemble::~Ensemble()
-{}
+{
+}
 
 /** Copy assignment operator */
-Ensemble& Ensemble::operator=(const Ensemble &other)
+Ensemble &Ensemble::operator=(const Ensemble &other)
 {
     if (this != &other)
     {
@@ -240,25 +240,25 @@ bool Ensemble::isConstantChemicalPotential() const
 /** Return whether or not this is the NVE ensemble */
 bool Ensemble::isNVE() const
 {
-    return ensemble_state == getDescription( N, V, E );
+    return ensemble_state == getDescription(N, V, E);
 }
 
 /** Return whether or not this is the NVT ensemble */
 bool Ensemble::isNVT() const
 {
-    return ensemble_state == getDescription( N, V, T );
+    return ensemble_state == getDescription(N, V, T);
 }
 
 /** Return whether or not this is the NPT ensemble */
 bool Ensemble::isNPT() const
 {
-    return ensemble_state == getDescription( N, P, T );
+    return ensemble_state == getDescription(N, P, T);
 }
 
 /** Return whether or not this is the MuVT ensemble */
 bool Ensemble::isMuVT() const
 {
-    return ensemble_state == getDescription( Mu, V, T );
+    return ensemble_state == getDescription(Mu, V, T);
 }
 
 /** Return whether or not this is the microcanonical (NVE) ensemble */
@@ -292,41 +292,41 @@ QString Ensemble::shortHand() const
 
     switch (ensemble_state[0])
     {
-        case N:
-            shorthand[0] = 'N';
-            break;
-        case Mu:
-            shorthand[0] = 'M';   // #warning Need greek Mu character
-            break;
-        default:
-            shorthand[0] = '?';
-            break;
+    case N:
+        shorthand[0] = 'N';
+        break;
+    case Mu:
+        shorthand[0] = 'M'; // #warning Need greek Mu character
+        break;
+    default:
+        shorthand[0] = '?';
+        break;
     }
 
     switch (ensemble_state[1])
     {
-        case V:
-            shorthand[1] = 'V';
-            break;
-        case P:
-            shorthand[1] = 'P';
-            break;
-        default:
-            shorthand[1] = '?';
-            break;
+    case V:
+        shorthand[1] = 'V';
+        break;
+    case P:
+        shorthand[1] = 'P';
+        break;
+    default:
+        shorthand[1] = '?';
+        break;
     }
 
     switch (ensemble_state[2])
     {
-        case E:
-            shorthand[2] = 'E';
-            break;
-        case T:
-            shorthand[2] = 'T';
-            break;
-        default:
-            shorthand[2] = '?';
-            break;
+    case E:
+        shorthand[2] = 'E';
+        break;
+    case T:
+        shorthand[2] = 'T';
+        break;
+    default:
+        shorthand[2] = '?';
+        break;
     }
 
     return shorthand;
@@ -358,20 +358,20 @@ QString Ensemble::toString() const
 
     if (this->isConstantChemicalPotential())
     {
-        parts.append( QObject::tr("chemical potential = %1 kcal mol-1")
-                            .arg( this->chemicalPotential().to(kcal_per_mol) ) );
+        parts.append(QObject::tr("chemical potential = %1 kcal mol-1")
+                         .arg(this->chemicalPotential().to(kcal_per_mol)));
     }
 
     if (this->isConstantPressure())
     {
-        parts.append( QObject::tr("pressure = %1 atm")
-                            .arg( this->pressure().to(atm) ) );
+        parts.append(QObject::tr("pressure = %1 atm")
+                         .arg(this->pressure().to(atm)));
     }
 
     if (this->isConstantTemperature())
     {
-        parts.append( QObject::tr("temperature = %1 C")
-                            .arg( this->temperature().to(Celsius()) ) );
+        parts.append(QObject::tr("temperature = %1 C")
+                         .arg(this->temperature().to(Celsius())));
     }
 
     if (parts.isEmpty())
@@ -379,7 +379,7 @@ QString Ensemble::toString() const
 
     else
         return QString("%1 { %2 }")
-                    .arg(this->name(), Sire::toString(parts));
+            .arg(this->name(), Sire::toString(parts));
 }
 
 /** Return the temperature of this ensemble
@@ -389,9 +389,10 @@ QString Ensemble::toString() const
 Temperature Ensemble::temperature() const
 {
     if (not this->isConstantTemperature())
-        throw SireError::incompatible_error( QObject::tr(
-            "The %1 ensemble does not have a constant temperature.")
-                .arg(this->shortHand()), CODELOC );
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The %1 ensemble does not have a constant temperature.")
+                                                .arg(this->shortHand()),
+                                            CODELOC);
 
     return ensemble_temperature;
 }
@@ -403,9 +404,10 @@ Temperature Ensemble::temperature() const
 Pressure Ensemble::pressure() const
 {
     if (not this->isConstantPressure())
-        throw SireError::incompatible_error( QObject::tr(
-            "The %1 ensemble does not have a constant pressure.")
-                .arg(this->shortHand()), CODELOC );
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The %1 ensemble does not have a constant pressure.")
+                                                .arg(this->shortHand()),
+                                            CODELOC);
 
     return ensemble_pressure;
 }
@@ -417,9 +419,10 @@ Pressure Ensemble::pressure() const
 Pressure Ensemble::fugacity() const
 {
     if (not this->isConstantFugacity())
-        throw SireError::incompatible_error( QObject::tr(
-            "The %1 ensemble does not have a constant fugacity.")
-                .arg(this->shortHand()), CODELOC );
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The %1 ensemble does not have a constant fugacity.")
+                                                .arg(this->shortHand()),
+                                            CODELOC);
 
     return ensemble_fugacity;
 }
@@ -431,9 +434,10 @@ Pressure Ensemble::fugacity() const
 MolarEnergy Ensemble::chemicalPotential() const
 {
     if (not this->isConstantChemicalPotential())
-        throw SireError::incompatible_error( QObject::tr(
-            "The %1 ensemble does not have a constant chemical potential.")
-                .arg(this->shortHand()), CODELOC );
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The %1 ensemble does not have a constant chemical potential.")
+                                                .arg(this->shortHand()),
+                                            CODELOC);
 
     // mu = mu_0 + RT ln ( f / P_0 )
     //
@@ -443,8 +447,7 @@ MolarEnergy Ensemble::chemicalPotential() const
     //  where P_0 is 1 bar (standard state)
 
     // we will actually return mu - mu_0  == RT ln (f / P_0 )
-    return MolarEnergy( gasr * ensemble_temperature.value()
-                             * std::log( ensemble_fugacity / 1.0*bar ) );
+    return MolarEnergy(gasr * ensemble_temperature.value() * std::log(ensemble_fugacity / 1.0 * bar));
 }
 
 /** Merge the two ensembles 'e0' and 'e1' together. This tries to find an ensemble
@@ -570,8 +573,8 @@ Ensemble Ensemble::MuVT(const Temperature &temperature,
 
     // we will actually use mu - mu_0  == RT ln (f / P_0 )
     // so chemical potential = mu - mu_0
-    return Ensemble::MuVT( temperature,
-                           std::exp( chemical_potential / (gasr*temperature) ) * bar );
+    return Ensemble::MuVT(temperature,
+                          std::exp(chemical_potential / (gasr.value() * temperature)) * bar);
 }
 
 /** Syntactic sugar to return the NVE ensemble */
@@ -607,12 +610,12 @@ Ensemble Ensemble::grandCanonical(const Temperature &temperature,
     return Ensemble::MuVT(temperature, chemical_potential);
 }
 
-const char* Ensemble::typeName()
+const char *Ensemble::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Ensemble>() );
+    return QMetaType::typeName(qMetaTypeId<Ensemble>());
 }
 
-Ensemble* Ensemble::clone() const
+Ensemble *Ensemble::clone() const
 {
     return new Ensemble(*this);
 }
