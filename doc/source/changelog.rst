@@ -20,6 +20,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   public API. This is now :mod:`sire`, rather than ``Sire``. The new
   API is activated when you import from this module. You can still use the
   old API by calling :func:`sire.use_old_api` or :func:`sire.use_mixed_api`.
+  The new API is pythonic in style, with our aim to be fully PEP8 compliant.
+  Functions are named in snake_case, with classes in CapitalCase. Modules
+  are all in lowercase. Only a portion of the legacy Sire API has been
+  exposed publicly. You can access unexposed classes / functions via
+  ``sire.legacy.Module``, e.g. ``sire.legacy.Mol.Connectivity`` will
+  get access to the ``Sire.Mol.Connectivity`` class.
 
 * We have
   a `new website <https://sire.openbiosim.org>`__ with easy
