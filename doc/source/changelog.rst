@@ -16,7 +16,157 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 --------------------------------------------------------------------------------------
 
 * Initial release of the OpenBioSim version of sire. The code has been completely
-  refurbished using a tutorial-driven development process.
+  refurbished using a tutorial-driven development process and has a new
+  public API. This is now :mod:`sire`, rather than ``Sire``. The new
+  API is activated when you import from this module. You can still use the
+  old API by calling :func:`sire.use_old_api` or :func:`sire.use_mixed_api`.
+
+* We have
+  a `new website <https://sire.openbiosim.org>`__ with easy
+  `install instructions <https://sire.openbiosim.org/install>`__, a
+  `quickstart guide <https://sire.openbiosim.org/quickstart>`__ and
+  a `comprehensive tutorial <https://sire.openbiosim.org/tutorial>`__.
+  This is built using sphinx from the files in the ``doc`` directory.
+
+* Migrated from `michellab/sire <https://github.com/michelllab/sire>`__
+  to `openbiosim/sire <https://github.com/openbiosim/sire>`__. The new
+  repo has had old large files removed, and so is much smaller,
+  and so quicker and easier to clone.
+
+* Added a :func:`~sire.mol.SelectorMol.find` function to all of the
+  molecule view containers. This returns the index of the view(s)
+  within the container. This can be used to quickly get the index
+  of, e.g. atoms in a system via ``mols.atoms().find(atom)``.
+
+* Made sure that all units and constants were exposed to the
+  new public API, and that the constants were exposed with units, e.g.
+  now ``sire.units.k_boltz * (25 * sire.units.celsius)`` gives
+  ``0.592486 kcal mol-1`` (be careful to put brackets around the
+  temperature, or it will be ``25*k_boltz`` multiplied by ``1 celsius``).
+
+* Made sure that the Rich console is initialised at module import
+  time if the new API is used.
+
+* Moved ``show_warnings`` to default ``True`` when loading files. This
+  now prints out the method to silence warnings. This is better for, e.g.
+  loading gromacs topologies, which were too noisy when ``show_warning``
+  was ``False`` and a message told you how to turn them on...
+
+* Added `sse2neon <https://github.com/DLTcollab/sse2neon>`__ so
+  that we can use the manually vectorised code
+  on ARM64 systems. This fixed issues with Linux/ARM64. This is as fast,
+  if not faster, than relying on openmp::simd as we did before.
+
+* Cleaned up the new sire API
+  via use of `__all__` in all of the new modules. The public API is
+  very limited at the moment, but will grow as we port in more classes.
+  However, the aim is that users will mostly not create classes directly,
+  but will instead implicitly create them as they load molecular systems
+  and call functions on those systems.
+
+* Fully updated the search functionality, making it more robust, more consistent
+  and more powerful. Added a
+  `detailed guide <https://sire.openbiosim.org/cheatsheet/search.html>`__
+  on the search grammar to the new website.
+
+* Added a set of :class:`~sire.mol.Cursor` classes for editing, and made these
+  work consistently with most of the property types. Getting and
+  setting properties should now be easier, with auto-wrapping and
+  expanding of properties.
+
+* Made the AtomProperty classes behave more like standard python containers.
+  This makes them easier to work with, and is the first step to hiding
+  them completely (they will eventually be auto-converted to/from standard
+  Python containers or NumPy arrays).
+
+* Added :func:`~sire.mol.SelectorMol.apply` and
+  :func:`~sire.mol.SelectorMol.apply_reduce` functions that let you map
+  functions across all objects in a molecular container.
+
+* Cleaned up the handling of units - now everything maps into
+  :class:`~sire.units.GeneralUnit` and
+  :class:`~sire.units.GeneralUnitProperty`, which are auto-converted when
+  exposed to Python.
+  Added Python wrapping and monkey-patching to
+  :class:`~sire.maths.Vector` so that it
+  has length units. Improved the printing of units to the screen (using
+  the correct unicode). Added functions that empower the user to choose
+  their own default units, e.g. changing angstroms to picometers, or
+  switching to full SI units. This only impacts the Python layer when
+  rendering the unit, or auto-converting numbers to units, so does
+  not break or change the C++ layer. Any view can now be assigned a
+  :class:`~sire.units.GeneralUnit` property.
+
+* Added :class:`~sire.mm.Bond`, :class:`~sire.mm.Angle`,
+  :class:`~sire.mm.Dihedral`, :class:`~sire.mm.Improper` and their related
+  molecule view container
+  classes (e.g. :class:`~sire.mm.SelectorBond`,
+  :class:`~sire.mm.SelectorMBond` etc). This allows you to have
+  molecule views that represent bonds, angles and dihedrals (or collections
+  of these). Added measurement functions so that you can easily get their
+  lengths or sizes.
+
+* Added :func:`~sire.mol.SelectorMol.energy` to let you calculate
+  energies of views (or views with views).
+  This uses the parameters / forcefield loaded with the molecule(s). You can
+  get energies of any views of sub-views. Also created an proper return type
+  for energies that embeds the energy components. Now
+  ``view.energy().components()``
+  works as you would expect.
+
+* Added :func:`~sire.mol.SelectorMol.energies` to molecule containers so that
+  you can get the energies
+  of each view in the container. Added support for progress bars using Rich so
+  that the user has an indication of progress.
+
+* Added initial support for trajectories. Reworked the molecular parser so that
+  multiple "frame" types files will load multiple frames of a trajectory
+  (e.g. so that a trajectory can be loaded from multiple PDB files, or
+  from multiple DCD or traj files). Added a
+  :class:`~sire.mol.TrajectoryIterator` class that
+  lets you easily iterate over and query trajectories. Fully documented this
+  in the tutorial. You can now do cool things like measure bonds over
+  trajectories, or evaluate energies.
+
+* Added a :func:`~sire.mol.SelectorMol.view` function based on
+  NGLView that lets you easily see any
+  molecule view (or collection of molecule views). Added a
+  :func:`~sire.save_to_string` function
+  that writes a text-based molecule file to an in-memory string rather than
+  a file (so that you don't have to use temporary files with NGLView). Added
+  support for viewing trajectories, so that trajectories that are loaded in
+  sire are also playable in NGLView.
+
+* Added movement functions to the Cursor classes so that you can more easily
+  move molecules (or molecule views). Documented this in
+  :doc:`the tutorial <doc/tutorial/part04/05_movement`. Re-worked
+  the way PropertyMap is passed via Python. Now have a
+  :func:`~sire.base.create_map` function
+  that can create a PropertyMap from anything that is passed. This has some
+  examples in its documentation that show how is can be used. Made sure that
+  all of the new functionality can use PropertyMap and uses
+  :func:`~sire.base.create_map`
+  to support function calls like
+  ``cursor.translate( (1,2,3), map={"coordinates":"coords2"} )``.
+
+* Speaking of which, also updated :class:`~sire.maths.Vector`
+  adding in functions that
+  allow auto-conversion of list-like python objects to
+  :class:`~sire.maths.Vector`.
+  It should almost be the case that a user will not have to use this class
+  directly themselves, as things should just auto-convert. Added support for
+  creating Vectors from plain numbers or length units, using the default length
+  unit if plain numbers are used.
+
+* Removed lots of unnecessary files. Moved some files into the website docs
+  so that there is a single source of truth. Updated paths
+  and links to point to the new locations in OpenBioSim. Fixed CI build issues
+  on Windows by building in the right directory. Updated the pythonizing framework
+  so that we only pythonize the C++ layer, and avoid the circular dependencies
+  that were causing random import errors (particularly on Windows).
+
+* Fixed lots of bugs and expanded the unit test suite to test the above
+  functionality.
 
 GitHub (michellab): June 22nd 2015 - January 2023
 -------------------------------------------------
