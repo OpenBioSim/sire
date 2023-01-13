@@ -145,7 +145,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added movement functions to the Cursor classes so that you can more easily
   move molecules (or molecule views). Documented this in
-  :doc:`the tutorial <doc/tutorial/part04/05_movement`. Re-worked
+  :doc:`the tutorial <tutorial/part04/05_movement>`. Re-worked
   the way PropertyMap is passed via Python. Now have a
   :func:`~sire.base.create_map` function
   that can create a PropertyMap from anything that is passed. This has some
