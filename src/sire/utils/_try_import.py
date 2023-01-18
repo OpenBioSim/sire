@@ -3,20 +3,67 @@ __all__ = ["try_import", "try_import_from"]
 _module_to_package = {}
 
 
+def _find_conda():
+    import os
+    import sys
+
+    conda_base = os.path.abspath(os.path.dirname(sys.executable))
+
+    if os.path.basename(conda_base) == "bin":
+        conda_base = os.path.dirname(conda_base)
+
+    conda = None
+
+    if "CONDA_EXE" in os.environ:
+        conda = os.environ["CONDA_EXE"]
+    else:
+        conda = None
+
+    if "CONDA_DEFAULT_ENV" in os.environ:
+        conda_env = os.environ["CONDA_DEFAULT_ENV"]
+    else:
+        conda_env = None
+
+    if os.path.exists(os.path.join(conda_base, "python.exe")):
+        # Windows
+        conda_bin = os.path.join(conda_base, "Library", "bin")
+
+        if conda is None:
+            conda = os.path.join(conda_base, "Scripts", "conda.exe")
+    elif os.path.exists(os.path.join(conda_base, "bin", "python")):
+        # MacOS and Linux
+        conda_bin = os.path.join(conda_base, "bin")
+
+        if conda is None:
+            conda = os.path.join(conda_bin, "conda")
+    else:
+        print(
+            "Cannot find a 'python' binary in directory '%s'. "
+            "Are you running this script using the python executable "
+            "from a valid miniconda or anaconda installation?" % conda_base
+        )
+        return None
+
+    if conda.endswith(".exe"):
+        m = os.path.join(os.path.dirname(conda), "mamba.exe")
+    else:
+        m = os.path.join(os.path.dirname(conda), "mamba")
+
+    if os.path.exists(m):
+        return m
+    else:
+        return conda
+
+
 def _install_package(name, package_registry):
-    """Internal function used to install the module
+    """
+    Internal function used to install the module
     called 'name', using the passed 'package_registry'
     to find the package that contains the package
-    that contains this module"""
+    that contains this module
+    """
 
-    # get the directory containing the python executable,
-    # we will assume this will also contain 'conda', 'pip'
-    # or 'easy_install'
-    from os.path import realpath, dirname
-    from os import system
-    from sys import executable
-
-    binpath = dirname(realpath(executable))
+    conda = _find_conda()
 
     # ensure that we have the root package name
     try:
@@ -27,38 +74,14 @@ def _install_package(name, package_registry):
     if package in package_registry:
         package = package_registry[name]
 
-    try:
-        print(
-            "\nTrying to install %s from package %s using %s/conda...\n"
-            % (name, package, binpath)
-        )
-        ok = system("%s/conda install %s -y" % (binpath, package))
-
-        if ok == 0:
-            # installed ok
-            return
-    except Exception:
-        pass
+    import os
 
     try:
         print(
-            "\nTrying to install %s from package %s using %s/pip...\n"
-            % (name, package, binpath)
+            "\nTrying to install %s from package %s using %s...\n"
+            % (name, package, conda)
         )
-        ok = system("%s/pip install %s" % (binpath, package))
-
-        if ok == 0:
-            # installed ok
-            return
-    except Exception:
-        pass
-
-    try:
-        print(
-            "\nTrying to install %s from package %s using %s/easy_install...\n"
-            % (name, package, binpath)
-        )
-        ok = system("%s/easy_install %s" % (binpath, package))
+        ok = os.system("%s install %s -y" % (conda, package))
 
         if ok == 0:
             # installed ok
@@ -70,8 +93,6 @@ def _install_package(name, package_registry):
         "\nWARNING: Unable to install '%s' from package '%s'\n"
         % (name, package)
     )
-
-    return
 
 
 def try_import(name, package_registry=_module_to_package):
