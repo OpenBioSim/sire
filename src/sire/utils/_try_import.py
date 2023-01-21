@@ -146,9 +146,8 @@ def try_import_from(name, fromlist, package_registry=_module_to_package):
 
     Example usage:
 
-    Mol = try_import_from("Sire", "Mol")
+    mol = try_import_from("sire", "mol")
     (argv,stdout = try_import_from("sys", ["argv", "stdout"])
-    mapReduce = try_import_from("scoop.Futures", "mapReduce")
     ut = try_import_from("mdtraj", "utils")
     """
 
