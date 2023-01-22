@@ -2296,10 +2296,16 @@ void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs,
     amber_bonds.clear();
     amber_bonds.reserve(bonds.count());
 
-    const auto include_null_bonds_prop = map["include_null_bonds"];
+    // default to keeping null bonds as this retains
+    // existing behaviour
+    bool keep_null_bonds = true;
 
-    const bool include_null_bonds = include_null_bonds_prop.hasValue() and
-                                    include_null_bonds_prop.value().asABoolean();
+    const auto keep_null_bonds_prop = map["keep_null_bonds"];
+
+    if (keep_null_bonds_prop.hasValue())
+    {
+        keep_null_bonds = keep_null_bonds_prop.value().asABoolean();
+    }
 
     for (int i = 0; i < bonds.count(); ++i)
     {
@@ -2308,10 +2314,10 @@ void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs,
         if (amberbond.k() != 0)
         {
             amber_bonds.insert(std::get<0>(bonds_data[i]),
-                               qMakePair(std::get<1>(bonds_data[i]),
+                               qMakePair(amberbond,
                                          std::get<2>(bonds_data[i])));
         }
-        else if (include_null_bonds)
+        else if (keep_null_bonds)
         {
             // include null bonds - create an AmberBond with r0 equal
             // to the current bond length
@@ -2369,11 +2375,37 @@ void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs,
     amber_angles.clear();
     amber_angles.reserve(angles.count());
 
+    // default to keeping null angles as this retains
+    // existing behaviour
+    bool keep_null_angles = true;
+
+    const auto keep_null_angles_prop = map["keep_null_angles"];
+
+    if (keep_null_angles_prop.hasValue())
+    {
+        keep_null_angles = keep_null_angles_prop.value().asABoolean();
+    }
+
     for (int i = 0; i < angles.count(); ++i)
     {
-        amber_angles.insert(std::get<0>(angles_data[i]),
-                            qMakePair(std::get<1>(angles_data[i]),
-                                      std::get<2>(angles_data[i])));
+        const auto &amberangle = std::get<1>(angles_data[i]);
+
+        if (amberangle.k() != 0)
+        {
+            amber_angles.insert(std::get<0>(angles_data[i]),
+                                qMakePair(amberangle,
+                                          std::get<2>(angles_data[i])));
+        }
+        else if (keep_null_angles)
+        {
+            // include null angles - create an AmberAngle with theta0 equal
+            // to the current angle size
+            const auto &angid = std::get<0>(angles_data[i]);
+            double theta0 = Angle(moldata, angid).size(map).to(radians);
+            amber_angles.insert(angid,
+                                qMakePair(AmberAngle(0, theta0),
+                                          std::get<2>(angles_data[i])));
+        }
     }
 }
 
