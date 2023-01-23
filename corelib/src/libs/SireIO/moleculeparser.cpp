@@ -52,6 +52,7 @@
 #include "SireStream/shareddatastream.h"
 
 #include <QFile>
+#include <QDir>
 #include <QTextStream>
 #include <QElapsedTimer>
 #include <QFileInfo>
@@ -1481,7 +1482,8 @@ QStringList MoleculeParser::write(const System &system, const QString &filename,
             fileformats.append(format_property.value().asA<MoleculeParser>().formatName());
         }
 
-        QString basename = QFileInfo(filename).completeBaseName();
+        const auto fileinfo = QFileInfo(filename);
+        QString basename = fileinfo.absoluteDir().absoluteFilePath(fileinfo.completeBaseName());
 
         for (const auto &format : fileformats)
         {
@@ -1578,7 +1580,9 @@ QStringList MoleculeParser::write(const System &system,
         {
             const QString filename = files[i];
 
-            if (filename.isEmpty() or QFileInfo(filename).baseName().isEmpty())
+            const auto fileinfo = QFileInfo(filename);
+
+            if (filename.isEmpty() or fileinfo.completeBaseName().isEmpty())
             {
                 throw SireError::io_error(QObject::tr(
                                               "You must supply a valid filename. This '%1' is not sufficient.")
@@ -1586,7 +1590,8 @@ QStringList MoleculeParser::write(const System &system,
                                           CODELOC);
             }
 
-            QString basename = QFileInfo(filename).completeBaseName();
+            QString basename = fileinfo.absoluteDir().absoluteFilePath(fileinfo.completeBaseName());
+
             filenames.append(QString("%1.%2").arg(basename, fileformats[i].toLower()));
         }
     }

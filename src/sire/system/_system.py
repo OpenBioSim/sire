@@ -29,15 +29,14 @@ class System:
 
         self._molecules = None
 
-    def __copy__(self, other):
-        if type(other) is not System:
-            raise TypeError(f"Cannot copy a {type(other)} to a System")
+    def __copy__(self):
+        other = System()
+        other._system = self._system.clone()
+        other._molecules = None
+        return other
 
-        self._system = other._system.clone()
-        self._molecules = None
-
-    def __deepcopy__(self, other):
-        self.__copy__(other)
+    def __deepcopy__(self, memo):
+        return self.__copy__()
 
     def __str__(self):
         return str(self._system)

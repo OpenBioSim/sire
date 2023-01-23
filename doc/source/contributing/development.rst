@@ -223,6 +223,96 @@ should test a single part of the code, and should complete in seconds
 downloaded and parsed as much as possible. These are all defined
 in the file `tests/conftests.py <https://github.com/OpenBioSim/sire/blob/devel/tests/conftest.py>`__.
 
+Reading files
+-------------
+
+Please place all file reads (and any associated common setup) behind
+a `pytest.fixture <https://docs.pytest.org/en/6.2.x/fixture.html>`__.
+For example, you could add your file read to
+`conftest.py <https://github.com/OpenBioSim/sire/blob/fix_null_amberparams/tests/conftest.py>`__
+which is where we define all of the test systems that are loaded and used
+for the tests.
+
+You can then use the fixture in your test by passing in the name as
+an argument, e.g.
+
+.. code-block:: python
+
+   def test_myfunc(ala_mols):
+      # ala_mols is the ala_mols() pytest.fixture() - assign this to `mols`
+      mols = ala_mols
+
+      # if you need to edit it, then please make a copy!
+      import sire as sr
+      mols = sr.system.System(ala_mols)
+
+      # or use copy.deepcopy
+      import copy
+      mols = copy.deepcopy(ala_mols)
+
+      # or copy.copy (it is already a deepcopy)
+      mols = copy.copy(ala_mols)
+
+
+Writing temporary files
+-----------------------
+
+Please use the `tmpdir fixture <https://docs.pytest.org/en/4.6.x/tmpdir.html#the-tmpdir-fixture>`__
+to write any temporary files into a temporary directory for the test.
+This ensures that you are not accidentally creating temporary files that
+make their way into the repo, or that clash with those created by other tests.
+
+You should create a temporary directory in the ``tmpdir`` for your test,
+and then create the files as needed. For example;
+
+.. code-block:: python
+
+   def test_myfunc(tmpdir, ala_mols):
+      mols = ala_mols
+
+      # create my temporary directory
+      d = tmpdir.mkdir("test_myfunc")
+
+      # write a file into this directory
+      import sire as sr
+      f = sr.save(mols, d.join("output"), format="PRM7")
+
+      # read back in again...
+      mols2 = sr.load(f[0])
+
+Custom attributes
+-----------------
+
+It's possible to mark test functions with any attribute you like. For example:
+
+.. code-block:: python
+
+   @pytest.mark.slow
+   def test_slow_function():
+       """ A unit test that takes a really long time. """
+       ...
+
+Here we have marked the test function with the attribute ``slow`` in order to
+indicate that it takes a while to run. From the command line it is possible
+to run or skip tests with a particular mark.
+
+.. code-block:: bash
+
+   pytest mypkg -m "slow"        # only run the slow tests
+   pytest mypkg -m "not slow"    # skip the slow tests
+
+The custom attribute can just be a label, as in this case, or could be your
+own function decorator.
+
+Please do use ``slow`` to mark tests that take more than 3 seconds
+to run, and use ``veryslow`` for tests that take more than 10 seconds
+to run.
+
+To keep tests running quickly, please do not do any setup or initialisation
+outside the test function. Import modules within the test functions, and
+make use of fixtures (as described above) to ensure any file loads are
+shared across all tests.
+
 Floating point comparisons
 --------------------------
 
@@ -321,34 +411,6 @@ We could then write a test to validate that the error is thrown as expected:
    def test_indexError():
        with pytest.raises(IndexError):
            indexError()
-
-Custom attributes
------------------
-
-It's possible to mark test functions with any attribute you like. For example:
-
-.. code-block:: python
-
-   @pytest.mark.slow
-   def test_slow_function():
-       """ A unit test that takes a really long time. """
-       ...
-
-Here we have marked the test function with the attribute ``slow`` in order to
-indicate that it takes a while to run. From the command line it is possible
-to run or skip tests with a particular mark.
-
-.. code-block:: bash
-
-   pytest mypkg -m "slow"        # only run the slow tests
-   pytest mypkg -m "not slow"    # skip the slow tests
-
-The custom attribute can just be a label, as in this case, or could be your
-own function decorator.
-
-Please do use ``slow`` to mark tests that take more than 3 seconds
-to run, and use ``veryslow`` for tests that take more than 10 seconds
-to run.
 
 Continuous integration and delivery
 -----------------------------------

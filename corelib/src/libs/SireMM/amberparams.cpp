@@ -36,11 +36,15 @@
 #include "SireMol/atomidx.h"
 #include "SireMol/connectivity.h"
 
+#include "SireMol/core.h"
+
 #include "SireMM/gromacsparams.h"
 #include "SireMM/twoatomfunctions.h"
 #include "SireMM/threeatomfunctions.h"
 #include "SireMM/fouratomfunctions.h"
 #include "SireMM/cljnbpairs.h"
+#include "SireMM/bond.h"
+#include "SireMM/angle.h"
 
 #include "SireCAS/expression.h"
 #include "SireCAS/symbol.h"
@@ -2252,7 +2256,9 @@ AtomElements guessElements(const MoleculeInfoData &molinfo, bool *has_elements)
 }
 
 /** Construct the hash of bonds */
-void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs)
+void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs,
+                                    const MoleculeData &moldata,
+                                    const PropertyMap &map)
 {
     // get the set of all bond functions
     const auto potentials = funcs.potentials();
@@ -2290,16 +2296,44 @@ void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs)
     amber_bonds.clear();
     amber_bonds.reserve(bonds.count());
 
+    // default to keeping null bonds as this retains
+    // existing behaviour
+    bool keep_null_bonds = true;
+
+    const auto keep_null_bonds_prop = map["keep_null_bonds"];
+
+    if (keep_null_bonds_prop.hasValue())
+    {
+        keep_null_bonds = keep_null_bonds_prop.value().asABoolean();
+    }
+
     for (int i = 0; i < bonds.count(); ++i)
     {
-        amber_bonds.insert(std::get<0>(bonds_data[i]),
-                           qMakePair(std::get<1>(bonds_data[i]),
-                                     std::get<2>(bonds_data[i])));
+        const auto &amberbond = std::get<1>(bonds_data[i]);
+
+        if (amberbond.k() != 0)
+        {
+            amber_bonds.insert(std::get<0>(bonds_data[i]),
+                               qMakePair(amberbond,
+                                         std::get<2>(bonds_data[i])));
+        }
+        else if (keep_null_bonds)
+        {
+            // include null bonds - create an AmberBond with r0 equal
+            // to the current bond length
+            const auto &bondid = std::get<0>(bonds_data[i]);
+            double r0 = Bond(moldata, bondid).length(map).to(angstrom);
+            amber_bonds.insert(bondid,
+                               qMakePair(AmberBond(0, r0),
+                                         std::get<2>(bonds_data[i])));
+        }
     }
 }
 
 /** Construct the hash of angles */
-void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs)
+void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs,
+                                     const MoleculeData &moldata,
+                                     const PropertyMap &map)
 {
     // get the set of all angle functions
     const auto potentials = funcs.potentials();
@@ -2341,16 +2375,44 @@ void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs)
     amber_angles.clear();
     amber_angles.reserve(angles.count());
 
+    // default to keeping null angles as this retains
+    // existing behaviour
+    bool keep_null_angles = true;
+
+    const auto keep_null_angles_prop = map["keep_null_angles"];
+
+    if (keep_null_angles_prop.hasValue())
+    {
+        keep_null_angles = keep_null_angles_prop.value().asABoolean();
+    }
+
     for (int i = 0; i < angles.count(); ++i)
     {
-        amber_angles.insert(std::get<0>(angles_data[i]),
-                            qMakePair(std::get<1>(angles_data[i]),
-                                      std::get<2>(angles_data[i])));
+        const auto &amberangle = std::get<1>(angles_data[i]);
+
+        if (amberangle.k() != 0)
+        {
+            amber_angles.insert(std::get<0>(angles_data[i]),
+                                qMakePair(amberangle,
+                                          std::get<2>(angles_data[i])));
+        }
+        else if (keep_null_angles)
+        {
+            // include null angles - create an AmberAngle with theta0 equal
+            // to the current angle size
+            const auto &angid = std::get<0>(angles_data[i]);
+            double theta0 = Angle(moldata, angid).size(map).to(radians);
+            amber_angles.insert(angid,
+                                qMakePair(AmberAngle(0, theta0),
+                                          std::get<2>(angles_data[i])));
+        }
     }
 }
 
 /** Construct the hash of dihedrals */
-void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs)
+void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs,
+                                        const MoleculeData &moldata,
+                                        const PropertyMap &map)
 {
     // get the set of all dihedral functions
     const auto potentials = funcs.potentials();
@@ -2403,7 +2465,9 @@ void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs)
 }
 
 /** Construct the hash of impropers */
-void AmberParams::getAmberImpropersFrom(const FourAtomFunctions &funcs)
+void AmberParams::getAmberImpropersFrom(const FourAtomFunctions &funcs,
+                                        const MoleculeData &moldata,
+                                        const PropertyMap &map)
 {
     // get the set of all improper functions
     const auto potentials = funcs.potentials();
@@ -2616,31 +2680,31 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
     if (has_bonds)
     {
         nb_functions.append([&]()
-                            { getAmberBondsFrom(bonds); });
+                            { getAmberBondsFrom(bonds, moldata, map); });
     }
 
     if (has_ubs)
     {
         nb_functions.append([&]()
-                            { getAmberBondsFrom(ub_bonds); });
+                            { getAmberBondsFrom(ub_bonds, moldata, map); });
     }
 
     if (has_angles)
     {
         nb_functions.append([&]()
-                            { getAmberAnglesFrom(angles); });
+                            { getAmberAnglesFrom(angles, moldata, map); });
     }
 
     if (has_dihedrals)
     {
         nb_functions.append([&]()
-                            { getAmberDihedralsFrom(dihedrals); });
+                            { getAmberDihedralsFrom(dihedrals, moldata, map); });
     }
 
     if (has_impropers)
     {
         nb_functions.append([&]()
-                            { getAmberImpropersFrom(impropers); });
+                            { getAmberImpropersFrom(impropers, moldata, map); });
     }
 
     if (has_nbpairs)

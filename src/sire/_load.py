@@ -105,6 +105,12 @@ def _get_gromacs_dir():
 def _resolve_path(path, directory, silent=False):
     import os
 
+    if hasattr(path, "strpath"):
+        path = path.strpath
+
+    if hasattr(directory, "strpath"):
+        directory = directory.strpath
+
     if os.path.exists(path) and os.path.isfile(path):
         if path.endswith(".gz"):
             # unzip the file first
@@ -510,6 +516,9 @@ def save(
     from .base import create_map
 
     map = create_map(map)
+
+    if hasattr(filename, "strpath"):
+        filename = filename.strpath
 
     if format is not None:
         if type(format) is str:
