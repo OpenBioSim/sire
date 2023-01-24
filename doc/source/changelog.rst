@@ -12,6 +12,36 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.1.1 <https://github.com/openbiosim/sire/compare/2023.1.0...2023.1.1>`__ - January 2023
+--------------------------------------------------------------------------------------
+
+* Fix incompatibility between the updated code and the Boresch restraint code.
+* Fixes try_import so that it works within a conda environment, and so that
+  it only uses ``conda`` or ``mamba`` to install dependencies.
+* Fixed ``NaN`` values of ``r0`` for null amber bonds and angles. Now the
+  value of ``r0`` is taken from the current bond length, or else the
+  options ``keep_null_bonds=False`` or ``keep_null_angles=False`` can be
+  passed via a ``map`` to prevent the writing of null bonds and angles
+  to amber parameter files.
+* Fixed a bug in :func:`sire.save` that meant that the save directory was
+  ignored when the format was specified. Files will now save into the correct
+  directory.
+* Updated the instructions for :doc:`writing unit tests <contributing/development>`
+  to say how to use fixtures to load files, and how to use ``tmpdir`` to write
+  files to a temporary directory during a test.
+* Addition of lots of files, e.g. issue templates, pull request templates,
+  security file etc to improve community engagement via GitHub.
+* Created `sire_bigtests <https://github.com/openbiosim/sire_bigtests>`__ from
+  `SireUnitTests <https://github.com/michellab/SireUnitTests>`__ and created
+  an integration testing pipeline based on these tests. Now the latest ``devel``
+  release can be tested via `sire_bigtests <https://github.com/openbiosim/sire_bigtests>`__
+  as an extra validation check before creating a release. This release has
+  been checked this way :-)
+* Lots of minor bugfixes related to those checks, e.g. mostly relating
+  to fixing paths on Windows. Now all the integration tests pass on Windows
+  (something not before attained, as running the tests on Windows was
+  not easy).
+
 `2023.1.0 <https://github.com/openbiosim/sire/releases/tag/2023.1.0>`__ - January 2023
 --------------------------------------------------------------------------------------
 
