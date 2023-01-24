@@ -5,7 +5,6 @@
 
 #include <QDir>
 
-
 #ifdef emit
 #undef emit
 #endif
@@ -37,19 +36,19 @@ using namespace SireCluster;
 
 #include <signal.h>
 
-//handle CTRL-C signal - this should kill the calculation
-// - with thanks to
-//  <http://www.gnu.org/software/libtool/manual/libc/Termination-in-Handler.html#Termination-in-Handler>
+// handle CTRL-C signal - this should kill the calculation
+//  - with thanks to
+//   <http://www.gnu.org/software/libtool/manual/libc/Termination-in-Handler.html#Termination-in-Handler>
 
 volatile sig_atomic_t fatal_error_in_progress = 0;
 
-void fatal_error_signal (int sig)
+void fatal_error_signal(int sig)
 {
     // Since this handler is established for more than one kind of signal,
     // it might still get invoked recursively by delivery of some other kind
     // of signal.  Use a static variable to keep track of that.
     if (fatal_error_in_progress)
-        raise (sig);
+        raise(sig);
 
     fatal_error_in_progress = 1;
 
@@ -65,8 +64,8 @@ void fatal_error_signal (int sig)
     // We could just call exit or abort,
     // but reraising the signal sets the return status
     // from the process correctly.
-    signal (sig, SIG_DFL);
-    raise (sig);
+    signal(sig, SIG_DFL);
+    raise(sig);
 }
 
 #endif // Q_OS_UNIX
@@ -77,9 +76,9 @@ int main(int argc, char **argv)
 
     try
     {
-        //run through the command line arguments and filter out the ones we want
+        // run through the command line arguments and filter out the ones we want
         //(we add 5 to the length as we may add arguments to the list)
-        boost::scoped_array<wchar_t*> python_argv( new wchar_t*[argc+5] );
+        boost::scoped_array<wchar_t *> python_argv(new wchar_t *[argc + 5]);
         int python_argc = 0;
 
         bool ignore_pythonpath = true;
@@ -106,17 +105,17 @@ int main(int argc, char **argv)
 
         if (ppn <= 0)
         {
-            throw SireError::invalid_arg( QObject::tr(
+            throw SireError::invalid_arg(QObject::tr(
                 "Invalid OMP_NUM_THREADS or SIRE_NUM_THREADS environment "
                 "variable! Must be a positive integer."));
         }
 
-        QList< std::wstring > warg_strings;
+        QList<std::wstring> warg_strings;
 
-        for (int i=0; i<argc; ++i)
+        for (int i = 0; i < argc; ++i)
         {
             QString arg = argv[i];
-            //qDebug() << "ARG" << i << arg;
+            // qDebug() << "ARG" << i << arg;
 
             // Command-line arg takes precedence over all environment variables.
             if (arg.startsWith("--ppn"))
@@ -142,17 +141,17 @@ int main(int argc, char **argv)
             else
             {
                 warg_strings.append(arg.toStdWString());
-                python_argv[python_argc] = const_cast<wchar_t*>(warg_strings.last().data());
+                python_argv[python_argc] = const_cast<wchar_t *>(warg_strings.last().data());
                 python_argc += 1;
             }
         }
 
-        #ifdef Q_OS_UNIX
-            signal(SIGINT, fatal_error_signal);
-            signal(SIGTERM, fatal_error_signal);
-        #endif // Q_OS_UNIX
+#ifdef Q_OS_UNIX
+        signal(SIGINT, fatal_error_signal);
+        signal(SIGTERM, fatal_error_signal);
+#endif // Q_OS_UNIX
 
-        QDir site_packages( QString("%1/%2").arg( getInstallDir(), SIRE_PYTHON2_DIR ) );
+        QDir site_packages(QString("%1/%2").arg(getInstallDir(), SIRE_PYTHON2_DIR));
 
         /*
         //if (not site_packages.exists())
@@ -172,7 +171,7 @@ int main(int argc, char **argv)
         else
             pythonpath = QString("%1:%2").arg(site_packages.canonicalPath()).arg(pythonpath);
 
-        QDir python_home( QString("%1/%2/..").arg( getInstallDir(), SIRE_BUNDLED_LIBS_DIR ) );
+        QDir python_home(QString("%1/%2/..").arg(getInstallDir(), SIRE_BUNDLED_LIBS_DIR));
 
         /**
         if (not python_home.exists())
@@ -185,31 +184,27 @@ int main(int argc, char **argv)
         qputenv("PYTHONHOME", python_home.canonicalPath().toUtf8());
         */
 
-#ifdef _WIN32
-        qputenv("PYTHONHOME", QDir(getInstallDir()).canonicalPath().toUtf8() );
-#endif
-
-        //now look at the name of the executable. If there is a script with this
-        //name in share/scripts then run that script
-        QDir scripts_dir( QString("%1/scripts").arg(getShareDir()) );
+        // now look at the name of the executable. If there is a script with this
+        // name in share/scripts then run that script
+        QDir scripts_dir(QString("%1/scripts").arg(getShareDir()));
 
         if (scripts_dir.exists())
         {
-            QFileInfo my_script( scripts_dir, QString("%1.py").arg( QString(argv[0]).split("/").last() ) );
+            QFileInfo my_script(scripts_dir, QString("%1.py").arg(QString(argv[0]).split("/").last()));
 
             if (my_script.exists())
             {
-                //there is a matching script, so automatically run this script
-                for (int i=python_argc; i>1; --i)
+                // there is a matching script, so automatically run this script
+                for (int i = python_argc; i > 1; --i)
                 {
-                    python_argv[i] = python_argv[i-1];
+                    python_argv[i] = python_argv[i - 1];
                 }
 
                 warg_strings.append(my_script.absoluteFilePath().toStdWString());
-                python_argv[1] = const_cast<wchar_t*>(warg_strings.last().data());
+                python_argv[1] = const_cast<wchar_t *>(warg_strings.last().data());
                 python_argc += 1;
 
-                //we must not now run ipython
+                // we must not now run ipython
                 ignore_ipython = true;
             }
         }
@@ -218,49 +213,49 @@ int main(int argc, char **argv)
         printf("Starting %ls: number of threads equals %d\n", python_argv[0], ppn);
 
         // parallel implementation
-        //tbb::task_scheduler_init init(ppn);
+        // tbb::task_scheduler_init init(ppn);
 
         if (not ignore_ipython)
         {
-            //if ipython is installed in sire.app/bundled/bin/ipython3 then automatically
-            //run that as the first script. This will provide a nice environment for running
-            //sire scripts
-            QFileInfo ipython_file( python_home, "bin/ipython3" );
+            // if ipython is installed in sire.app/bundled/bin/ipython3 then automatically
+            // run that as the first script. This will provide a nice environment for running
+            // sire scripts
+            QFileInfo ipython_file(python_home, "bin/ipython3");
 
             if (ipython_file.exists())
             {
-                for (int i=python_argc; i>1; --i)
+                for (int i = python_argc; i > 1; --i)
                 {
-                    python_argv[i] = python_argv[i-1];
+                    python_argv[i] = python_argv[i - 1];
                 }
 
                 warg_strings.append(ipython_file.absoluteFilePath().toStdWString());
-                python_argv[1] = const_cast<wchar_t*>(warg_strings.last().data());
+                python_argv[1] = const_cast<wchar_t *>(warg_strings.last().data());
                 python_argc += 1;
             }
         }
 
-        //name this process and thread
+        // name this process and thread
         SireError::setProcessString("master");
         SireError::setThreadString("main");
 
         // run the standard python interpreter
         status = Py_Main(python_argc, python_argv.get());
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         SireError::printError(e);
         status = -1;
     }
-    catch(const std::exception &e)
+    catch (const std::exception &e)
     {
-        SireError::printError( SireError::std_exception(e) );
+        SireError::printError(SireError::std_exception(e));
         status = -1;
     }
-    catch(...)
+    catch (...)
     {
         SireError::printError(SireError::unknown_exception(
-                                 QObject::tr("An unknown error occurred!"), CODELOC ) );
+            QObject::tr("An unknown error occurred!"), CODELOC));
 
         status = -1;
     }

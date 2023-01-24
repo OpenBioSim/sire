@@ -35,11 +35,14 @@
 #include <QDebug>
 
 #ifdef Q_OS_WIN
-  #include <Windows.h>  // CONDITIONAL_INCLUDE
+#include <Windows.h> // CONDITIONAL_INCLUDE
 #endif
 
 #ifdef Q_OS_MAC
-    extern "C" { int _NSGetExecutablePath(char* buf, uint32_t* bufsize); }
+extern "C"
+{
+    int _NSGetExecutablePath(char *buf, uint32_t *bufsize);
+}
 #endif
 
 #include "SireError/errors.h"
@@ -63,7 +66,7 @@ namespace SireBase
         else
         {
             qDebug() << "CANNOT REMOVE" << last_part << "FROM" << path
-                 << "AS IT IS NOT IN THE PATH?";
+                     << "AS IT IS NOT IN THE PATH?";
 
             return path;
         }
@@ -106,10 +109,11 @@ namespace SireBase
 
         if (not d.exists())
         {
-            throw SireError::file_error( QObject::tr(
-                "You cannot set the installation directory of Sire to a value "
-                "that doesn't exist (%1).")
-                    .arg(dir), CODELOC );
+            throw SireError::file_error(QObject::tr(
+                                            "You cannot set the installation directory of Sire to a value "
+                                            "that doesn't exist (%1).")
+                                            .arg(dir),
+                                        CODELOC);
         }
 
         install_dir = d.absolutePath();
@@ -121,89 +125,95 @@ namespace SireBase
     QString getInstallDir()
     {
         if (not install_dir.isEmpty())
-            return  QDir::toNativeSeparators(install_dir);
+            return QDir::toNativeSeparators(install_dir);
 
         QString sire_root_env = qgetenv("SIRE_ROOT");
         if (!sire_root_env.isEmpty())
             return QDir::toNativeSeparators(sire_root_env);
 
-        //first, find the full path to the running executable. We assume that
-        //we are using a Sire executable or a Python executable
+            // first, find the full path to the running executable. We assume that
+            // we are using a Sire executable or a Python executable
 
-        //we follow the instructions from a stackoverflow answer by mark40
-        //<http://stackoverflow.com/questions/1023306/finding-current-executables-path-without-proc-self-exe/1024937#1024937>
-        //Mac OS X: _NSGetExecutablePath() (man 3 dyld)
-        //Linux: readlink /proc/self/exe
-        //Solaris: getexecname()
-        //FreeBSD: sysctl CTL_KERN KERN_PROC KERN_PROC_PATHNAME -1
-        //BSD with procfs: readlink /proc/curproc/file
-        //Windows: GetModuleFileName() with hModule = NULL
+            // we follow the instructions from a stackoverflow answer by mark40
+            //<http://stackoverflow.com/questions/1023306/finding-current-executables-path-without-proc-self-exe/1024937#1024937>
+            // Mac OS X: _NSGetExecutablePath() (man 3 dyld)
+            // Linux: readlink /proc/self/exe
+            // Solaris: getexecname()
+            // FreeBSD: sysctl CTL_KERN KERN_PROC KERN_PROC_PATHNAME -1
+            // BSD with procfs: readlink /proc/curproc/file
+            // Windows: GetModuleFileName() with hModule = NULL
 
-        #ifdef Q_OS_MAC
-            char pathbuf[PATH_MAX + 1];
-            uint32_t bufsize = PATH_MAX+1;
-            int ok = _NSGetExecutablePath((char*)pathbuf, &bufsize);
+#ifdef Q_OS_MAC
+        char pathbuf[PATH_MAX + 1];
+        uint32_t bufsize = PATH_MAX + 1;
+        int ok = _NSGetExecutablePath((char *)pathbuf, &bufsize);
 
-            if (ok != 0)
-                throw SireError::program_bug( QObject::tr(
-                        "For some reason, _NSGetExecutablePath has not worked! (%1)")
-                            .arg(ok), CODELOC );
+        if (ok != 0)
+            throw SireError::program_bug(QObject::tr(
+                                             "For some reason, _NSGetExecutablePath has not worked! (%1)")
+                                             .arg(ok),
+                                         CODELOC);
 
-            QFileInfo f(pathbuf);
+        QFileInfo f(pathbuf);
 
-            //sometimes we may use a python executable in python.app/Contents/MacOS.
-            //we will use a special case to remove this from the path
-            QString path = f.canonicalPath();
-            if (path.endsWith("python.app/Contents/MacOS"))
-            {
-                path.chop(25);
-                setInstallDir(path);
-            }
-            else
-            {
-                setInstallDir( stripDir(SIRE_BIN_DIR,path) );
-            }
+        // sometimes we may use a python executable in python.app/Contents/MacOS.
+        // we will use a special case to remove this from the path
+        QString path = f.canonicalPath();
+        if (path.endsWith("python.app/Contents/MacOS"))
+        {
+            path.chop(25);
+            setInstallDir(path);
+        }
+        else
+        {
+            setInstallDir(stripDir(SIRE_BIN_DIR, path));
+        }
 
-            return install_dir;
-        #else
-        #ifdef Q_OS_LINUX
-            QFileInfo f( "/proc/self/exe" );
+        return install_dir;
+#else
+#ifdef Q_OS_LINUX
+        QFileInfo f("/proc/self/exe");
 
-            if (not f.exists())
-                throw SireError::program_bug( QObject::tr(
-                        "For some reason /proc/self/exe does not exist for your "
-                        "version of Linux. Let the developers know and we will get it "
-                        "working for you."), CODELOC );
+        if (not f.exists())
+            throw SireError::program_bug(QObject::tr(
+                                             "For some reason /proc/self/exe does not exist for your "
+                                             "version of Linux. Let the developers know and we will get it "
+                                             "working for you."),
+                                         CODELOC);
 
-            setInstallDir( stripDir(SIRE_BIN_DIR,f.canonicalPath()) );
-            return install_dir;
-        #else
-        #ifdef Q_OS_WIN
-            char buf[1024] = {0};
-            DWORD ret = GetModuleFileNameA(NULL, buf, sizeof(buf));
-            if (ret == 0 or ret == sizeof(buf))
-            {
-                throw SireError::program_bug( QObject::tr(
-                    "Problem getting the executable path on Windows... %1").arg(ret), CODELOC );
-            }
+        setInstallDir(stripDir(SIRE_BIN_DIR, f.canonicalPath()));
+        return install_dir;
+#else
+#ifdef Q_OS_WIN
+        char buf[1024] = {0};
+        DWORD ret = GetModuleFileNameA(NULL, buf, sizeof(buf));
+        if (ret == 0 or ret == sizeof(buf))
+        {
+            throw SireError::program_bug(QObject::tr(
+                                             "Problem getting the executable path on Windows... %1")
+                                             .arg(ret),
+                                         CODELOC);
+        }
 
-            QFileInfo f(buf);
+        QFileInfo f(buf);
 
-            if (not f.exists())
-                throw SireError::program_bug( QObject::tr(
-                    "For some reason we cannot find the executable file? %1")
-                        .arg(buf), CODELOC );
+        if (not f.exists())
+            throw SireError::program_bug(QObject::tr(
+                                             "For some reason we cannot find the executable file? %1")
+                                             .arg(buf),
+                                         CODELOC);
 
-            setInstallDir( QDir::toNativeSeparators(f.canonicalPath()) );
-            return install_dir;
-        #else
-            throw SireError::incomplete_code( QObject::tr(
-                    "Ask the Sire developers to write the \"getInstallDir\" function "
-                    "for your platform. Sorry that it has yet to be written."), CODELOC );
-            return QString();
-        #endif
-        #endif
-        #endif
+        setInstallDir(QDir::toNativeSeparators(f.canonicalPath()));
+        return install_dir;
+#else
+        throw SireError::incomplete_code(QObject::tr(
+                                             "Ask the Sire developers to write the \"getInstallDir\" function "
+                                             "for your platform. Sorry that it has yet to be written."),
+                                         CODELOC);
+        return QString();
+#endif
+#endif
+#endif
     }
 
     /** This function is used to get the full path to the file or directory 'path'
@@ -215,14 +225,27 @@ namespace SireBase
     {
         QDir dir(getInstallDir());
 
+        if (not dir.exists(path))
+        {
+            // this is an environment - try two directories up
+            QDir dir2(dir.absoluteFilePath(".."));
+            dir2 = QDir(dir2.absoluteFilePath(".."));
+
+            if (dir2.exists(path))
+            {
+                dir = dir2;
+            }
+        }
+
         if (assert_exists)
         {
             if (not dir.exists(path))
-                throw SireError::file_error( QObject::tr(
-                        "Cannot find the file or directory \"%2\" in the Sire install "
-                        "directory \"%1\" (%3).")
-                            .arg(dir.absolutePath(), path)
-                            .arg(dir.absoluteFilePath(path)), CODELOC );
+                throw SireError::file_error(QObject::tr(
+                                                "Cannot find the file or directory \"%2\" in the Sire install "
+                                                "directory \"%1\" (%3).")
+                                                .arg(dir.absolutePath(), path)
+                                                .arg(dir.absoluteFilePath(path)),
+                                            CODELOC);
         }
 
         return QDir::toNativeSeparators(dir.absoluteFilePath(path));
@@ -231,11 +254,23 @@ namespace SireBase
     /** This returns the directory containing the Sire executables */
     QString getBinDir()
     {
-        #ifdef Q_OS_WIN
-            return getInstallDir();
-        #else
-            return getSireDir(SIRE_BIN_DIR);
-        #endif
+#ifdef Q_OS_WIN
+        QDir dir(getInstallDir());
+        if (not dir.exists("sire_python.exe"))
+        {
+            dir = QDir(QDir::toNativeSeparators(
+                dir.absoluteFilePath("Library/bin")));
+
+            if (not dir.exists("sire_python.exe"))
+            {
+                qDebug() << "Cannot find sire_python.exe in" << dir.absolutePath();
+            }
+        }
+
+        return QDir::toNativeSeparators(dir.absolutePath());
+#else
+        return getSireDir(SIRE_BIN_DIR);
+#endif
     }
 
     /** This returns the directory containing the Sire libraries */
@@ -259,8 +294,6 @@ namespace SireBase
     /** This returns the release version of Sire */
     QString getReleaseVersion()
     {
-        return QString("%1.%2.%3").arg(SIRE_VERSION_MAJOR)
-                                  .arg(SIRE_VERSION_MINOR)
-                                  .arg(SIRE_VERSION_PATCH);
+        return QString("%1.%2.%3").arg(SIRE_VERSION_MAJOR).arg(SIRE_VERSION_MINOR).arg(SIRE_VERSION_PATCH);
     }
 }

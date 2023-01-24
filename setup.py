@@ -843,6 +843,10 @@ if __name__ == "__main__":
         args.generator = [
             ["Visual Studio 15 2017 Win64"]
         ]  # preferred VC version for conda
+    elif is_macos:
+        # fix compile bug when INSTALL_NAME_TOOL is not set
+        if "INSTALL_NAME_TOOL" not in os.environ:
+            os.environ["INSTALL_NAME_TOOL"] = "install_name_tool"
 
     if action == "install":
         if not (args.skip_deps or args.skip_build):

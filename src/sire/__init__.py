@@ -1,6 +1,7 @@
 from . import config
 
 import os as _os
+import warnings as _warnings
 
 from ._pythonize import use_mixed_api, use_new_api, use_old_api
 from ._load import (
@@ -39,6 +40,10 @@ __all__ = [
     "use_new_api",
     "use_old_api",
 ]
+
+
+# filter out annoying double-wrapped warnings
+_warnings.filterwarnings('ignore', "to-Python converter for")
 
 
 def _fix_openmm_path():
