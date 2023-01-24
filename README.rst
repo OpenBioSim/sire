@@ -39,7 +39,7 @@ To create a new environment:
 
 .. code-block:: bash
 
-    mamba create -n openbiosim python==3.9
+    mamba create -n openbiosim "python<3.10"
     mamba activate openbiosim
     mamba install -c openbiosim sire
 
@@ -47,7 +47,7 @@ To install the latest development version you can use:
 
 .. code-block:: bash
 
-    mamba create -n openbiosim-dev python==3.9
+    mamba create -n openbiosim-dev "python<3.10"
     mamba activate openbiosim-dev
     mamba install -c openbiosim/label/dev sire
 
@@ -61,7 +61,7 @@ First, you need to create and activate a conda environment, e.g.
 
 .. code-block:: bash
 
-    mamba create -n openbiosim-dev python==3.9
+    mamba create -n openbiosim-dev "python<3.10"
     mamba activate openbiosim-dev
 
 Next, you need to install the Sire build dependencies.
@@ -88,7 +88,7 @@ and on Windows use
 
     mamba install conda-build
 
-Next, you can clone the Sire source code and compile and install Sire::
+Next, you can clone the sire source code and compile and install sire::
 
     git clone https://github.com/OpenBioSim/sire
     cd sire
