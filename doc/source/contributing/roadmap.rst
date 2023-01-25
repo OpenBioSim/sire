@@ -2,26 +2,25 @@
 Roadmap
 =======
 
-Sire is a well established foundational package for other software,
+:mod:`sire` is a well established foundational package for other software,
 such as `BioSimSpace <https://biosimspace.org>`__.
 
-It hasn't had many major changes since active development switched over
-to BioSimSpace. We plan now to make Sire easier to use. We will do this
+Our plan is to make :mod:`sire` easier to use. We will do this
 by adding lots of tutorials, and simplifying the API so that it is
 easier to do what you want, without having to learn a lot of classes.
 
-Sire does have a few rough edges. These reflect its history as a
+:mod:`sire` does have a few rough edges. These reflect its history as a
 prototyping code, in which many new molecular simulation ideas were
 developed and deployed over 10-15 years. Our plan now is to smooth
 those rough edges, and work to clean away dead code or little-used
 functionality.
 
-This should leave Sire as an excellent tool for loading, editing,
+This should leave :mod:`sire` as an excellent tool for loading, editing,
 manipulating and performing calculations on molecules. We will retain
 the molecular simulation parts, as these may be useful for someone
-in the future. But, predominantly, we will focus Sire as a flexible
+in the future. But, predominantly, we will focus :mod:`sire` as a flexible
 and powerful tool for loading and manipulating molecules, and as a
-useful companion tool to BioSimSpace.
+useful companion tool to `BioSimSpace <https://biosimspace.org>`__.
 
 If you would like to suggest features that should be
 added to the roadmap then please
