@@ -27,6 +27,8 @@ namespace bp = boost::python;
 
 #include "exbase.h"
 
+#include "SireCAS/expressions.h"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
