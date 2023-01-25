@@ -30,15 +30,15 @@
 
 #include "sireglobal.h"
 
-#include "SireBase/propertymap.h"
 #include "SireBase/booleanproperty.h"
+#include "SireBase/propertymap.h"
 
 SIRE_BEGIN_HEADER
 
 #ifndef GCCXML_PARSE
 
-#include <QVector>
 #include <QMutex>
+#include <QVector>
 
 // We have to undef the 'emit' from Qt as this is a function
 // name used in TBB! This should be safe for Qt as that
@@ -49,14 +49,14 @@ SIRE_BEGIN_HEADER
 
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
-#include <tbb/parallel_reduce.h>
 #include <tbb/parallel_invoke.h>
+#include <tbb/parallel_reduce.h>
 
 #include <memory>
 
 namespace SireBase
 {
-    inline bool should_run_in_parallel(int count, const PropertyMap &map=PropertyMap())
+    inline bool should_run_in_parallel(int count, const PropertyMap &map = PropertyMap())
     {
         if (count < 8)
             return false;
@@ -66,27 +66,24 @@ namespace SireBase
             return true;
     }
 
-
     /** This function runs the passed array T of functions in parallel, if
         the optional 'run_parallel' is true. Otherwise, it runs the functions
         serially, one after another */
-    template<class T>
-    void parallel_invoke( const T &functions, bool run_parallel=true )
+    template <class T>
+    void parallel_invoke(const T &functions, bool run_parallel = true)
     {
         if (run_parallel)
         {
-            tbb::parallel_for( tbb::blocked_range<int>(0, functions.count()),
-                               [&](const tbb::blocked_range<int> &r)
+            tbb::parallel_for(tbb::blocked_range<int>(0, functions.count()), [&](const tbb::blocked_range<int> &r)
+                              {
+            for (int i = r.begin(); i < r.end(); ++i)
             {
-                for (int i=r.begin(); i<r.end(); ++i)
-                {
-                    functions[i]();
-                }
-            });
+                functions[i]();
+            } });
         }
         else
         {
-            for (int i=0; i<functions.count(); ++i)
+            for (int i = 0; i < functions.count(); ++i)
             {
                 functions[i]();
             }
@@ -100,4 +97,3 @@ namespace SireBase
 SIRE_END_HEADER
 
 #endif
-

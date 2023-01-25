@@ -30,120 +30,113 @@
 
 #include "systemmonitor.h"
 
-#include "SireUnits/dimensions.h"
 #include "SireBase/propertymap.h"
 #include "SireMol/volumemap.h"
+#include "SireUnits/dimensions.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class VolMapMonitor;
+    class VolMapMonitor;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::VolMapMonitor&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::VolMapMonitor&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::VolMapMonitor &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::VolMapMonitor &);
 
 namespace SireSystem
 {
 
-using SireMol::MoleculeGroup;
-using SireMol::VolumeMap;
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
+    using SireMol::MoleculeGroup;
+    using SireMol::VolumeMap;
 
-/** This class create an occupation volume map showing the
-    regions of space that are occupied by the monitored atoms
-    on average during the simulation
+    /** This class create an occupation volume map showing the
+        regions of space that are occupied by the monitored atoms
+        on average during the simulation
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT VolMapMonitor
-        : public SireBase::ConcreteProperty<VolMapMonitor,SystemMonitor>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT VolMapMonitor : public SireBase::ConcreteProperty<VolMapMonitor, SystemMonitor>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const VolMapMonitor&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, VolMapMonitor&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const VolMapMonitor &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, VolMapMonitor &);
 
-public:
-    VolMapMonitor();
+    public:
+        VolMapMonitor();
 
-    VolMapMonitor(const SireUnits::Dimension::Length &grid_spacing);
+        VolMapMonitor(const SireUnits::Dimension::Length &grid_spacing);
 
-    VolMapMonitor(const MoleculeGroup &group,
-                  const PropertyMap &map = PropertyMap());
+        VolMapMonitor(const MoleculeGroup &group, const PropertyMap &map = PropertyMap());
 
-    VolMapMonitor(const MoleculeGroup &group,
-                  const SireUnits::Dimension::Length &grid_spacing,
-                  const PropertyMap &map = PropertyMap());
+        VolMapMonitor(const MoleculeGroup &group, const SireUnits::Dimension::Length &grid_spacing,
+                      const PropertyMap &map = PropertyMap());
 
-    VolMapMonitor(const MoleculeGroup &group,
-                  bool skip_light_atoms,
-                  const PropertyMap &map = PropertyMap());
+        VolMapMonitor(const MoleculeGroup &group, bool skip_light_atoms, const PropertyMap &map = PropertyMap());
 
-    VolMapMonitor(const MoleculeGroup &group,
-                  const SireUnits::Dimension::Length &grid_spacing,
-                  bool skip_light_atoms,
-                  const PropertyMap &map = PropertyMap());
+        VolMapMonitor(const MoleculeGroup &group, const SireUnits::Dimension::Length &grid_spacing, bool skip_light_atoms,
+                      const PropertyMap &map = PropertyMap());
 
-    VolMapMonitor(const VolMapMonitor &other);
+        VolMapMonitor(const VolMapMonitor &other);
 
-    ~VolMapMonitor();
+        ~VolMapMonitor();
 
-    VolMapMonitor& operator=(const VolMapMonitor &other);
+        VolMapMonitor &operator=(const VolMapMonitor &other);
 
-    bool operator==(const VolMapMonitor &other) const;
-    bool operator!=(const VolMapMonitor &other) const;
+        bool operator==(const VolMapMonitor &other) const;
+        bool operator!=(const VolMapMonitor &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    const MoleculeGroup &group() const;
+        const MoleculeGroup &group() const;
 
-    bool skippingLightAtoms() const;
+        bool skippingLightAtoms() const;
 
-    void setSkipLightAtoms(bool on);
+        void setSkipLightAtoms(bool on);
 
-    void setGridSpacing(const SireUnits::Dimension::Length &grid_spacing);
+        void setGridSpacing(const SireUnits::Dimension::Length &grid_spacing);
 
-    void setGroup(const MoleculeGroup &group, const PropertyMap &map=PropertyMap());
+        void setGroup(const MoleculeGroup &group, const PropertyMap &map = PropertyMap());
 
-    SireVol::GridInfo gridInfo() const;
+        SireVol::GridInfo gridInfo() const;
 
-    SireUnits::Dimension::Length gridSpacing() const;
+        SireUnits::Dimension::Length gridSpacing() const;
 
-    PropertyMap map() const;
+        PropertyMap map() const;
 
-    void setPropertyMap(const PropertyMap &map);
+        void setPropertyMap(const PropertyMap &map);
 
-    QVector<float> averageOccupancy() const;
+        QVector<float> averageOccupancy() const;
 
-    qint64 nSamples() const;
+        qint64 nSamples() const;
 
-    void clearStatistics();
+        void clearStatistics();
 
-    VolumeMap volumeMap() const;
+        VolumeMap volumeMap() const;
 
-    void monitor(System &system);
+        void monitor(System &system);
 
-private:
-    /** The molecule group being monitored */
-    SireMol::MolGroupPtr molgroup;
+    private:
+        /** The molecule group being monitored */
+        SireMol::MolGroupPtr molgroup;
 
-    /** The PropertyMap used to find the right properties of the atoms */
-    SireBase::PropertyMap propmap;
+        /** The PropertyMap used to find the right properties of the atoms */
+        SireBase::PropertyMap propmap;
 
-    /** The volume map under construction */
-    VolumeMap volmap;
-};
+        /** The volume map under construction */
+        VolumeMap volmap;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::VolMapMonitor )
+Q_DECLARE_METATYPE(SireSystem::VolMapMonitor)
 
-SIRE_EXPOSE_CLASS( SireSystem::VolMapMonitor )
+SIRE_EXPOSE_CLASS(SireSystem::VolMapMonitor)
 
 SIRE_END_HEADER
 

@@ -25,10 +25,10 @@
   *
 \*********************************************/
 
-#include "SireBase/propertylist.h"
-#include "SireBase/numberproperty.h"
-#include "SireBase/stringproperty.h"
 #include "SireBase/booleanproperty.h"
+#include "SireBase/numberproperty.h"
+#include "SireBase/propertylist.h"
+#include "SireBase/stringproperty.h"
 
 #include "SireError/errors.h"
 
@@ -71,20 +71,22 @@ QDataStream &operator>>(QDataStream &ds, DoubleArrayProperty &array)
     return ds;
 }
 
-DoubleArrayProperty::DoubleArrayProperty()
-                    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double> >()
-{}
+DoubleArrayProperty::DoubleArrayProperty() : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double>>()
+{
+}
 
 DoubleArrayProperty::DoubleArrayProperty(const QList<double> &array)
-                    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double> >(array)
-{}
+    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double>>(array)
+{
+}
 
 DoubleArrayProperty::DoubleArrayProperty(const QVector<double> &array)
-                    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double> >(array)
-{}
+    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double>>(array)
+{
+}
 
 DoubleArrayProperty::DoubleArrayProperty(const StringArrayProperty &array)
-                    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double> >()
+    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double>>()
 {
     for (const auto &value : array.toVector())
     {
@@ -93,15 +95,14 @@ DoubleArrayProperty::DoubleArrayProperty(const StringArrayProperty &array)
 
         if (!ok)
         {
-            throw SireError::invalid_arg(QObject::tr(
-                "Cannot convert the string '%1' to a double!").arg(value),
-                    CODELOC);
+            throw SireError::invalid_arg(QObject::tr("Cannot convert the string '%1' to a double!").arg(value),
+                                         CODELOC);
         }
     }
 }
 
 DoubleArrayProperty::DoubleArrayProperty(const IntegerArrayProperty &array)
-                    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double> >()
+    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double>>()
 {
     for (const auto &value : array.toVector())
     {
@@ -110,7 +111,7 @@ DoubleArrayProperty::DoubleArrayProperty(const IntegerArrayProperty &array)
 }
 
 DoubleArrayProperty::DoubleArrayProperty(const PropertyList &array)
-                    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double> >()
+    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double>>()
 {
     for (const auto &value : array.toVector())
     {
@@ -119,18 +120,20 @@ DoubleArrayProperty::DoubleArrayProperty(const PropertyList &array)
 }
 
 DoubleArrayProperty::DoubleArrayProperty(const DoubleArrayProperty &other)
-                    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double> >(other)
-{}
+    : ConcreteProperty<DoubleArrayProperty, ArrayProperty<double>>(other)
+{
+}
 
 DoubleArrayProperty::~DoubleArrayProperty()
-{}
+{
+}
 
-const char* DoubleArrayProperty::typeName()
+const char *DoubleArrayProperty::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<DoubleArrayProperty>());
 }
 
-DoubleArrayProperty& DoubleArrayProperty::operator=(const DoubleArrayProperty &other)
+DoubleArrayProperty &DoubleArrayProperty::operator=(const DoubleArrayProperty &other)
 {
     ArrayProperty<double>::operator=(other);
     return *this;
@@ -148,10 +151,10 @@ bool DoubleArrayProperty::operator!=(const DoubleArrayProperty &other) const
 
 DoubleArrayProperty DoubleArrayProperty::operator+(const DoubleArrayProperty &other) const
 {
-    return DoubleArrayProperty( ArrayProperty<double>::operator+(other) );
+    return DoubleArrayProperty(ArrayProperty<double>::operator+(other));
 }
 
-DoubleArrayProperty& DoubleArrayProperty::operator+=(const DoubleArrayProperty &other)
+DoubleArrayProperty &DoubleArrayProperty::operator+=(const DoubleArrayProperty &other)
 {
     ArrayProperty<double>::operator+=(other);
     return *this;
@@ -185,8 +188,7 @@ bool DoubleArrayProperty::isABoolean() const
 QString DoubleArrayProperty::asAString() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to a string").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to a string").arg(this->toString()), CODELOC);
 
     return StringProperty(a.at(0)).asAString();
 }
@@ -194,8 +196,7 @@ QString DoubleArrayProperty::asAString() const
 double DoubleArrayProperty::asADouble() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to a double").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to a double").arg(this->toString()), CODELOC);
 
     return NumberProperty(a.at(0)).asADouble();
 }
@@ -203,8 +204,7 @@ double DoubleArrayProperty::asADouble() const
 int DoubleArrayProperty::asAnInteger() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to an integer").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to an integer").arg(this->toString()), CODELOC);
 
     return NumberProperty(a.at(0)).asAnInteger();
 }
@@ -212,8 +212,7 @@ int DoubleArrayProperty::asAnInteger() const
 bool DoubleArrayProperty::asABoolean() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to a boolean").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to a boolean").arg(this->toString()), CODELOC);
 
     return BooleanProperty(a.at(0)).asABoolean();
 }
@@ -256,21 +255,22 @@ QDataStream &operator>>(QDataStream &ds, IntegerArrayProperty &array)
     return ds;
 }
 
-IntegerArrayProperty::IntegerArrayProperty()
-                     : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64> >()
-{}
+IntegerArrayProperty::IntegerArrayProperty() : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64>>()
+{
+}
 
 IntegerArrayProperty::IntegerArrayProperty(const QList<qint64> &array)
-                    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64> >(array)
-{}
+    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64>>(array)
+{
+}
 
 IntegerArrayProperty::IntegerArrayProperty(const QVector<qint64> &array)
-                    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64> >(array)
-{}
-
+    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64>>(array)
+{
+}
 
 IntegerArrayProperty::IntegerArrayProperty(const StringArrayProperty &array)
-                    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64> >()
+    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64>>()
 {
     for (const auto &value : array.toVector())
     {
@@ -279,15 +279,14 @@ IntegerArrayProperty::IntegerArrayProperty(const StringArrayProperty &array)
 
         if (!ok)
         {
-            throw SireError::invalid_arg(QObject::tr(
-                "Cannot convert the string '%1' to an integer!").arg(value),
-                    CODELOC);
+            throw SireError::invalid_arg(QObject::tr("Cannot convert the string '%1' to an integer!").arg(value),
+                                         CODELOC);
         }
     }
 }
 
 IntegerArrayProperty::IntegerArrayProperty(const DoubleArrayProperty &array)
-                    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64> >()
+    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64>>()
 {
     for (const auto &value : array.toVector())
     {
@@ -296,7 +295,7 @@ IntegerArrayProperty::IntegerArrayProperty(const DoubleArrayProperty &array)
 }
 
 IntegerArrayProperty::IntegerArrayProperty(const PropertyList &array)
-                    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64> >()
+    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64>>()
 {
     for (const auto &value : array.toVector())
     {
@@ -305,18 +304,20 @@ IntegerArrayProperty::IntegerArrayProperty(const PropertyList &array)
 }
 
 IntegerArrayProperty::IntegerArrayProperty(const IntegerArrayProperty &other)
-                    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64> >(other)
-{}
+    : ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64>>(other)
+{
+}
 
 IntegerArrayProperty::~IntegerArrayProperty()
-{}
+{
+}
 
-const char* IntegerArrayProperty::typeName()
+const char *IntegerArrayProperty::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<IntegerArrayProperty>());
 }
 
-IntegerArrayProperty& IntegerArrayProperty::operator=(const IntegerArrayProperty &other)
+IntegerArrayProperty &IntegerArrayProperty::operator=(const IntegerArrayProperty &other)
 {
     ArrayProperty<qint64>::operator=(other);
     return *this;
@@ -334,10 +335,10 @@ bool IntegerArrayProperty::operator!=(const IntegerArrayProperty &other) const
 
 IntegerArrayProperty IntegerArrayProperty::operator+(const IntegerArrayProperty &other) const
 {
-    return IntegerArrayProperty( ArrayProperty<qint64>::operator+(other) );
+    return IntegerArrayProperty(ArrayProperty<qint64>::operator+(other));
 }
 
-IntegerArrayProperty& IntegerArrayProperty::operator+=(const IntegerArrayProperty &other)
+IntegerArrayProperty &IntegerArrayProperty::operator+=(const IntegerArrayProperty &other)
 {
     ArrayProperty<qint64>::operator+=(other);
     return *this;
@@ -366,8 +367,7 @@ bool IntegerArrayProperty::isABoolean() const
 QString IntegerArrayProperty::asAString() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to a string").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to a string").arg(this->toString()), CODELOC);
 
     return StringProperty(a.at(0)).asAString();
 }
@@ -375,8 +375,7 @@ QString IntegerArrayProperty::asAString() const
 double IntegerArrayProperty::asADouble() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to a double").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to a double").arg(this->toString()), CODELOC);
 
     return NumberProperty(a.at(0)).asADouble();
 }
@@ -384,8 +383,7 @@ double IntegerArrayProperty::asADouble() const
 int IntegerArrayProperty::asAnInteger() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to an integer").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to an integer").arg(this->toString()), CODELOC);
 
     return NumberProperty(a.at(0)).asAnInteger();
 }
@@ -393,8 +391,7 @@ int IntegerArrayProperty::asAnInteger() const
 bool IntegerArrayProperty::asABoolean() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to a boolean").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to a boolean").arg(this->toString()), CODELOC);
 
     return BooleanProperty(a.at(0)).asABoolean();
 }
@@ -437,20 +434,22 @@ QDataStream &operator>>(QDataStream &ds, StringArrayProperty &array)
     return ds;
 }
 
-StringArrayProperty::StringArrayProperty()
-                    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString> >()
-{}
+StringArrayProperty::StringArrayProperty() : ConcreteProperty<StringArrayProperty, ArrayProperty<QString>>()
+{
+}
 
 StringArrayProperty::StringArrayProperty(const QList<QString> &array)
-                    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString> >(array)
-{}
+    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString>>(array)
+{
+}
 
 StringArrayProperty::StringArrayProperty(const QVector<QString> &array)
-                    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString> >(array)
-{}
+    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString>>(array)
+{
+}
 
 StringArrayProperty::StringArrayProperty(const DoubleArrayProperty &array)
-                    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString> >()
+    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString>>()
 {
     for (const auto &value : array.toVector())
     {
@@ -459,7 +458,7 @@ StringArrayProperty::StringArrayProperty(const DoubleArrayProperty &array)
 }
 
 StringArrayProperty::StringArrayProperty(const IntegerArrayProperty &array)
-                    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString> >()
+    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString>>()
 {
     for (const auto &value : array.toVector())
     {
@@ -468,7 +467,7 @@ StringArrayProperty::StringArrayProperty(const IntegerArrayProperty &array)
 }
 
 StringArrayProperty::StringArrayProperty(const PropertyList &array)
-                    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString> >()
+    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString>>()
 {
     for (const auto &value : array.toVector())
     {
@@ -477,18 +476,20 @@ StringArrayProperty::StringArrayProperty(const PropertyList &array)
 }
 
 StringArrayProperty::StringArrayProperty(const StringArrayProperty &other)
-                    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString> >(other)
-{}
+    : ConcreteProperty<StringArrayProperty, ArrayProperty<QString>>(other)
+{
+}
 
 StringArrayProperty::~StringArrayProperty()
-{}
+{
+}
 
-const char* StringArrayProperty::typeName()
+const char *StringArrayProperty::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<StringArrayProperty>());
 }
 
-StringArrayProperty& StringArrayProperty::operator=(const StringArrayProperty &other)
+StringArrayProperty &StringArrayProperty::operator=(const StringArrayProperty &other)
 {
     ArrayProperty<QString>::operator=(other);
     return *this;
@@ -506,10 +507,10 @@ bool StringArrayProperty::operator!=(const StringArrayProperty &other) const
 
 StringArrayProperty StringArrayProperty::operator+(const StringArrayProperty &other) const
 {
-    return StringArrayProperty( ArrayProperty<QString>::operator+(other) );
+    return StringArrayProperty(ArrayProperty<QString>::operator+(other));
 }
 
-StringArrayProperty& StringArrayProperty::operator+=(const StringArrayProperty &other)
+StringArrayProperty &StringArrayProperty::operator+=(const StringArrayProperty &other)
 {
     ArrayProperty<QString>::operator+=(other);
     return *this;
@@ -528,8 +529,9 @@ bool StringArrayProperty::isADouble() const
         {
             return NumberProperty(a.at(0)).isADouble();
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     return false;
@@ -543,8 +545,9 @@ bool StringArrayProperty::isAnInteger() const
         {
             return NumberProperty(a.at(0)).isAnInteger();
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     return false;
@@ -558,8 +561,9 @@ bool StringArrayProperty::isABoolean() const
         {
             return BooleanProperty(a.at(0)).isABoolean();
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     return false;
@@ -568,8 +572,7 @@ bool StringArrayProperty::isABoolean() const
 QString StringArrayProperty::asAString() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to a string").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to a string").arg(this->toString()), CODELOC);
 
     return StringProperty(a.at(0)).asAString();
 }
@@ -577,8 +580,7 @@ QString StringArrayProperty::asAString() const
 double StringArrayProperty::asADouble() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to a double").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to a double").arg(this->toString()), CODELOC);
 
     return NumberProperty(a.at(0)).asADouble();
 }
@@ -586,8 +588,7 @@ double StringArrayProperty::asADouble() const
 int StringArrayProperty::asAnInteger() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to an integer").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to an integer").arg(this->toString()), CODELOC);
 
     return NumberProperty(a.at(0)).asAnInteger();
 }
@@ -595,8 +596,7 @@ int StringArrayProperty::asAnInteger() const
 bool StringArrayProperty::asABoolean() const
 {
     if (a.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast %1 to a boolean").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast %1 to a boolean").arg(this->toString()), CODELOC);
 
     return BooleanProperty(a.at(0)).asABoolean();
 }
@@ -605,4 +605,3 @@ PropertyList StringArrayProperty::asAnArray() const
 {
     return PropertyList(*this);
 }
-

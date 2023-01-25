@@ -26,26 +26,26 @@
 \*********************************************/
 
 #include "selectormol.h"
-#include "selectorm.hpp"
-#include "molecules.h"
+#include "evaluatorm.h"
 #include "moleculegroup.h"
 #include "moleculegroups.h"
-#include "evaluatorm.h"
+#include "molecules.h"
+#include "selectorm.hpp"
 
 #include "atomid.h"
-#include "resid.h"
-#include "chainid.h"
-#include "segid.h"
 #include "cgid.h"
+#include "chainid.h"
 #include "molid.h"
 #include "molidx.h"
-#include "molnum.h"
 #include "molname.h"
+#include "molnum.h"
+#include "resid.h"
+#include "segid.h"
 
 #include "SireID/index.h"
 
-#include "SireMol/errors.h"
 #include "SireError/errors.h"
+#include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -240,21 +240,17 @@ SelectorMol::SelectorMol() : ConcreteProperty<SelectorMol, Property>()
 {
 }
 
-SelectorMol::SelectorMol(const MoleculeView &mol)
-    : ConcreteProperty<SelectorMol, Property>()
+SelectorMol::SelectorMol(const MoleculeView &mol) : ConcreteProperty<SelectorMol, Property>()
 {
     this->mols.append(mol.molecule());
 }
 
-SelectorMol::SelectorMol(const Molecules &molecules)
-    : ConcreteProperty<SelectorMol, Property>()
+SelectorMol::SelectorMol(const Molecules &molecules) : ConcreteProperty<SelectorMol, Property>()
 {
     if (not molecules.isEmpty())
     {
         auto toList = [](const QSet<MolNum> &molnums)
-        {
-            return molnums.values();
-        };
+        { return molnums.values(); };
 
         auto molnums = toList(molecules.molNums());
 
@@ -272,8 +268,7 @@ SelectorMol::SelectorMol(const Molecules &molecules)
     }
 }
 
-SelectorMol::SelectorMol(const MoleculeGroup &molecules)
-    : ConcreteProperty<SelectorMol, Property>()
+SelectorMol::SelectorMol(const MoleculeGroup &molecules) : ConcreteProperty<SelectorMol, Property>()
 {
     if (not molecules.isEmpty())
     {
@@ -287,8 +282,7 @@ SelectorMol::SelectorMol(const MoleculeGroup &molecules)
     }
 }
 
-SelectorMol::SelectorMol(const MolGroupsBase &molecules)
-    : ConcreteProperty<SelectorMol, Property>()
+SelectorMol::SelectorMol(const MolGroupsBase &molecules) : ConcreteProperty<SelectorMol, Property>()
 {
     if (not molecules.isEmpty())
     {
@@ -302,8 +296,7 @@ SelectorMol::SelectorMol(const MolGroupsBase &molecules)
     }
 }
 
-SelectorMol::SelectorMol(const SelectResult &molecules)
-    : ConcreteProperty<SelectorMol, Property>()
+SelectorMol::SelectorMol(const SelectResult &molecules) : ConcreteProperty<SelectorMol, Property>()
 {
     if (not molecules.isEmpty())
     {
@@ -316,9 +309,7 @@ SelectorMol::SelectorMol(const SelectResult &molecules)
     }
 }
 
-SelectorMol::SelectorMol(const SelectorMol &other)
-    : ConcreteProperty<SelectorMol, Property>(),
-      mols(other.mols)
+SelectorMol::SelectorMol(const SelectorMol &other) : ConcreteProperty<SelectorMol, Property>(), mols(other.mols)
 {
 }
 
@@ -501,8 +492,7 @@ SelectResult SelectorMol::search(const QString &search_string) const
     return search(this->toSelectResult());
 }
 
-SelectResult SelectorMol::search(const QString &search_string,
-                                 const PropertyMap &map) const
+SelectResult SelectorMol::search(const QString &search_string, const PropertyMap &map) const
 {
     Select search(search_string);
     return search(this->toSelectResult(), map);
@@ -539,11 +529,9 @@ Molecule SelectorMol::molecule(const QString &name, const PropertyMap &map) cons
     auto m = this->molecules(name, map);
 
     if (m.count() > 1)
-        throw SireMol::duplicate_molecule(QObject::tr(
-                                              "More than one molecule matches %1. Number of matches is %2.")
-                                              .arg(name)
-                                              .arg(m.count()),
-                                          CODELOC);
+        throw SireMol::duplicate_molecule(
+            QObject::tr("More than one molecule matches %1. Number of matches is %2.").arg(name).arg(m.count()),
+            CODELOC);
 
     BOOST_ASSERT(m.count() != 0);
 
@@ -555,8 +543,7 @@ Molecule SelectorMol::molecule(const MolIdx &molid, const PropertyMap &map) cons
     auto m = this->molecules(molid, map);
 
     if (m.count() > 1)
-        throw SireMol::duplicate_molecule(QObject::tr(
-                                              "More than one molecule matches %1. Number of matches is %2.")
+        throw SireMol::duplicate_molecule(QObject::tr("More than one molecule matches %1. Number of matches is %2.")
                                               .arg(molid.toString())
                                               .arg(m.count()),
                                           CODELOC);
@@ -571,8 +558,7 @@ Molecule SelectorMol::molecule(const MolName &molid, const PropertyMap &map) con
     auto m = this->molecules(molid, map);
 
     if (m.count() > 1)
-        throw SireMol::duplicate_molecule(QObject::tr(
-                                              "More than one molecule matches %1. Number of matches is %2.")
+        throw SireMol::duplicate_molecule(QObject::tr("More than one molecule matches %1. Number of matches is %2.")
                                               .arg(molid.toString())
                                               .arg(m.count()),
                                           CODELOC);
@@ -587,8 +573,7 @@ Molecule SelectorMol::molecule(const MolNum &molid, const PropertyMap &map) cons
     auto m = this->molecules(molid, map);
 
     if (m.count() > 1)
-        throw SireMol::duplicate_molecule(QObject::tr(
-                                              "More than one molecule matches %1. Number of matches is %2.")
+        throw SireMol::duplicate_molecule(QObject::tr("More than one molecule matches %1. Number of matches is %2.")
                                               .arg(molid.toString())
                                               .arg(m.count()),
                                           CODELOC);
@@ -603,8 +588,7 @@ Molecule SelectorMol::molecule(const MolID &molid, const PropertyMap &map) const
     auto m = this->molecules(molid, map);
 
     if (m.count() > 1)
-        throw SireMol::duplicate_molecule(QObject::tr(
-                                              "More than one molecule matches %1. Number of matches is %2.")
+        throw SireMol::duplicate_molecule(QObject::tr("More than one molecule matches %1. Number of matches is %2.")
                                               .arg(molid.toString())
                                               .arg(m.count()),
                                           CODELOC);
@@ -624,8 +608,7 @@ SelectorMol SelectorMol::molecules(int i, const PropertyMap &map) const
     return SelectorMol(this->molecule(i, map));
 }
 
-SelectorMol SelectorMol::molecules(const SireBase::Slice &slice,
-                                   const PropertyMap &) const
+SelectorMol SelectorMol::molecules(const SireBase::Slice &slice, const PropertyMap &) const
 {
     SelectorMol m;
 
@@ -637,8 +620,7 @@ SelectorMol SelectorMol::molecules(const SireBase::Slice &slice,
     return m;
 }
 
-SelectorMol SelectorMol::molecules(const QList<qint64> &idxs,
-                                   const PropertyMap &) const
+SelectorMol SelectorMol::molecules(const QList<qint64> &idxs, const PropertyMap &) const
 {
     SelectorMol m;
 
@@ -650,8 +632,7 @@ SelectorMol SelectorMol::molecules(const QList<qint64> &idxs,
     return m;
 }
 
-SelectorMol SelectorMol::molecules(const QString &name,
-                                   const PropertyMap &map) const
+SelectorMol SelectorMol::molecules(const QString &name, const PropertyMap &map) const
 {
     try
     {
@@ -664,10 +645,7 @@ SelectorMol SelectorMol::molecules(const QString &name,
             SelectorMol ret(this->search(name, map));
 
             if (ret.count() == 0)
-                throw SireMol::missing_molecule(QObject::tr(
-                                                    "No molecule matches '%1'")
-                                                    .arg(name),
-                                                CODELOC);
+                throw SireMol::missing_molecule(QObject::tr("No molecule matches '%1'").arg(name), CODELOC);
 
             return ret;
         }
@@ -685,14 +663,12 @@ SelectorMol SelectorMol::molecules(const QString &name,
     return SelectorMol();
 }
 
-SelectorMol SelectorMol::molecules(const MolIdx &molid,
-                                   const PropertyMap &map) const
+SelectorMol SelectorMol::molecules(const MolIdx &molid, const PropertyMap &map) const
 {
     return this->molecules(molid.value(), map);
 }
 
-SelectorMol SelectorMol::molecules(const MolName &molname,
-                                   const PropertyMap &) const
+SelectorMol SelectorMol::molecules(const MolName &molname, const PropertyMap &) const
 {
     SelectorMol m;
 
@@ -705,16 +681,13 @@ SelectorMol SelectorMol::molecules(const MolName &molname,
     }
 
     if (m.isEmpty())
-        throw SireMol::missing_molecule(QObject::tr(
-                                            "There is no molecule called %1 in this container.")
-                                            .arg(molname),
+        throw SireMol::missing_molecule(QObject::tr("There is no molecule called %1 in this container.").arg(molname),
                                         CODELOC);
 
     return m;
 }
 
-SelectorMol SelectorMol::molecules(const MolNum &molnum,
-                                   const PropertyMap &) const
+SelectorMol SelectorMol::molecules(const MolNum &molnum, const PropertyMap &) const
 {
     SelectorMol m;
 
@@ -729,10 +702,8 @@ SelectorMol SelectorMol::molecules(const MolNum &molnum,
     }
 
     if (m.isEmpty())
-        throw SireMol::missing_molecule(QObject::tr(
-                                            "There is no molecule with number %1 in this container.")
-                                            .arg(molnum),
-                                        CODELOC);
+        throw SireMol::missing_molecule(
+            QObject::tr("There is no molecule with number %1 in this container.").arg(molnum), CODELOC);
 
     return m;
 }
@@ -749,8 +720,7 @@ MoleculeGroup SelectorMol::toMoleculeGroup() const
     return grp;
 }
 
-SelectorMol SelectorMol::molecules(const MolID &molid,
-                                   const PropertyMap &) const
+SelectorMol SelectorMol::molecules(const MolID &molid, const PropertyMap &) const
 {
     auto molnums = molid.map(this->toMoleculeGroup());
 
@@ -800,14 +770,12 @@ Atom SelectorMol::atom(int i, const PropertyMap &) const
     return Atom();
 }
 
-Atom SelectorMol::atom(const QString &name,
-                       const PropertyMap &map) const
+Atom SelectorMol::atom(const QString &name, const PropertyMap &map) const
 {
     auto atms = this->atoms(name, map);
 
     if (atms.count() > 1)
-        throw SireMol::duplicate_atom(QObject::tr(
-                                          "More than one atom matches the name '%1'. Number of matches is %2.")
+        throw SireMol::duplicate_atom(QObject::tr("More than one atom matches the name '%1'. Number of matches is %2.")
                                           .arg(name)
                                           .arg(atms.count()),
                                       CODELOC);
@@ -822,8 +790,7 @@ Atom SelectorMol::atom(const AtomID &atomid, const PropertyMap &map) const
     auto atms = this->atoms(atomid, map);
 
     if (atms.count() > 1)
-        throw SireMol::duplicate_atom(QObject::tr(
-                                          "More than one atom matches '%1'. Number of matches is %2.")
+        throw SireMol::duplicate_atom(QObject::tr("More than one atom matches '%1'. Number of matches is %2.")
                                           .arg(atomid.toString())
                                           .arg(atms.count()),
                                       CODELOC);
@@ -850,31 +817,28 @@ Residue SelectorMol::residue(int i, const PropertyMap &) const
     return Residue();
 }
 
-Residue SelectorMol::residue(const QString &name,
-                             const PropertyMap &map) const
+Residue SelectorMol::residue(const QString &name, const PropertyMap &map) const
 {
     auto res = this->residues(name, map);
 
     if (res.count() > 1)
-        throw SireMol::duplicate_residue(QObject::tr(
-                                             "More than one residue matches the name '%1'. Number of matches is %2.")
-                                             .arg(name)
-                                             .arg(res.count()),
-                                         CODELOC);
+        throw SireMol::duplicate_residue(
+            QObject::tr("More than one residue matches the name '%1'. Number of matches is %2.")
+                .arg(name)
+                .arg(res.count()),
+            CODELOC);
 
     BOOST_ASSERT(not res.isEmpty());
 
     return res[0];
 }
 
-Residue SelectorMol::residue(const ResID &resid,
-                             const PropertyMap &map) const
+Residue SelectorMol::residue(const ResID &resid, const PropertyMap &map) const
 {
     auto res = this->residues(resid, map);
 
     if (res.count() > 1)
-        throw SireMol::duplicate_residue(QObject::tr(
-                                             "More than one residue matches '%1'. Number of matches is %2.")
+        throw SireMol::duplicate_residue(QObject::tr("More than one residue matches '%1'. Number of matches is %2.")
                                              .arg(resid.toString())
                                              .arg(res.count()),
                                          CODELOC);
@@ -901,31 +865,28 @@ Chain SelectorMol::chain(int i, const PropertyMap &) const
     return Chain();
 }
 
-Chain SelectorMol::chain(const QString &name,
-                         const PropertyMap &map) const
+Chain SelectorMol::chain(const QString &name, const PropertyMap &map) const
 {
     auto cs = this->chains(name, map);
 
     if (cs.count() > 1)
-        throw SireMol::duplicate_chain(QObject::tr(
-                                           "More than one chain matches the name '%1'. Number of matches is %2.")
-                                           .arg(name)
-                                           .arg(cs.count()),
-                                       CODELOC);
+        throw SireMol::duplicate_chain(
+            QObject::tr("More than one chain matches the name '%1'. Number of matches is %2.")
+                .arg(name)
+                .arg(cs.count()),
+            CODELOC);
 
     BOOST_ASSERT(not cs.isEmpty());
 
     return cs[0];
 }
 
-Chain SelectorMol::chain(const ChainID &chainid,
-                         const PropertyMap &map) const
+Chain SelectorMol::chain(const ChainID &chainid, const PropertyMap &map) const
 {
     auto cs = this->chains(chainid, map);
 
     if (cs.count() > 1)
-        throw SireMol::duplicate_chain(QObject::tr(
-                                           "More than one chain matches '%1'. Number of matches is %2.")
+        throw SireMol::duplicate_chain(QObject::tr("More than one chain matches '%1'. Number of matches is %2.")
                                            .arg(chainid.toString())
                                            .arg(cs.count()),
                                        CODELOC);
@@ -952,31 +913,28 @@ Segment SelectorMol::segment(int i, const PropertyMap &) const
     return Segment();
 }
 
-Segment SelectorMol::segment(const QString &name,
-                             const PropertyMap &map) const
+Segment SelectorMol::segment(const QString &name, const PropertyMap &map) const
 {
     auto segs = this->segments(name, map);
 
     if (segs.count() > 1)
-        throw SireMol::duplicate_segment(QObject::tr(
-                                             "More than one segment matches the name '%1'. Number of matches is %2.")
-                                             .arg(name)
-                                             .arg(segs.count()),
-                                         CODELOC);
+        throw SireMol::duplicate_segment(
+            QObject::tr("More than one segment matches the name '%1'. Number of matches is %2.")
+                .arg(name)
+                .arg(segs.count()),
+            CODELOC);
 
     BOOST_ASSERT(not segs.isEmpty());
 
     return segs[0];
 }
 
-Segment SelectorMol::segment(const SegID &segid,
-                             const PropertyMap &map) const
+Segment SelectorMol::segment(const SegID &segid, const PropertyMap &map) const
 {
     auto segs = this->segments(segid, map);
 
     if (segs.count() > 1)
-        throw SireMol::duplicate_segment(QObject::tr(
-                                             "More than one segment matches '%1'. Number of matches is %2.")
+        throw SireMol::duplicate_segment(QObject::tr("More than one segment matches '%1'. Number of matches is %2.")
                                              .arg(segid.toString())
                                              .arg(segs.count()),
                                          CODELOC);
@@ -1003,31 +961,28 @@ CutGroup SelectorMol::cutGroup(int i, const PropertyMap &) const
     return CutGroup();
 }
 
-CutGroup SelectorMol::cutGroup(const QString &name,
-                               const PropertyMap &map) const
+CutGroup SelectorMol::cutGroup(const QString &name, const PropertyMap &map) const
 {
     auto cgs = this->cutGroups(name, map);
 
     if (cgs.count() > 1)
-        throw SireMol::duplicate_cutgroup(QObject::tr(
-                                              "More than one CutGroup matches the name '%1'. Number of matches is %2.")
-                                              .arg(name)
-                                              .arg(cgs.count()),
-                                          CODELOC);
+        throw SireMol::duplicate_cutgroup(
+            QObject::tr("More than one CutGroup matches the name '%1'. Number of matches is %2.")
+                .arg(name)
+                .arg(cgs.count()),
+            CODELOC);
 
     BOOST_ASSERT(not cgs.isEmpty());
 
     return cgs[0];
 }
 
-CutGroup SelectorMol::cutGroup(const CGID &cgid,
-                               const PropertyMap &map) const
+CutGroup SelectorMol::cutGroup(const CGID &cgid, const PropertyMap &map) const
 {
     auto cgs = this->cutGroups(cgid, map);
 
     if (cgs.count() > 1)
-        throw SireMol::duplicate_cutgroup(QObject::tr(
-                                              "More than one CutGroup matches '%1'. Number of matches is %2.")
+        throw SireMol::duplicate_cutgroup(QObject::tr("More than one CutGroup matches '%1'. Number of matches is %2.")
                                               .arg(cgid.toString())
                                               .arg(cgs.count()),
                                           CODELOC);
@@ -1047,26 +1002,22 @@ SelectorM<Atom> SelectorMol::atoms(int i, const PropertyMap &map) const
     return SelectorM<Atom>(this->atom(i, map));
 }
 
-SelectorM<Atom> SelectorMol::atoms(const SireBase::Slice &slice,
-                                   const PropertyMap &) const
+SelectorM<Atom> SelectorMol::atoms(const SireBase::Slice &slice, const PropertyMap &) const
 {
     return SelectorM<Atom>(*this, slice);
 }
 
-SelectorM<Atom> SelectorMol::atoms(const QList<qint64> &idxs,
-                                   const PropertyMap &) const
+SelectorM<Atom> SelectorMol::atoms(const QList<qint64> &idxs, const PropertyMap &) const
 {
     return SelectorM<Atom>(*this, idxs);
 }
 
-SelectorM<Atom> SelectorMol::atoms(const QString &name,
-                                   const PropertyMap &map) const
+SelectorM<Atom> SelectorMol::atoms(const QString &name, const PropertyMap &map) const
 {
     return SelectorM<Atom>(*this, name, map);
 }
 
-SelectorM<Atom> SelectorMol::atoms(const AtomID &atomid,
-                                   const PropertyMap &) const
+SelectorM<Atom> SelectorMol::atoms(const AtomID &atomid, const PropertyMap &) const
 {
     return SelectorM<Atom>(*this, atomid);
 }
@@ -1081,26 +1032,22 @@ SelectorM<Residue> SelectorMol::residues(int i, const PropertyMap &map) const
     return SelectorM<Residue>(this->residue(i, map));
 }
 
-SelectorM<Residue> SelectorMol::residues(const SireBase::Slice &slice,
-                                         const PropertyMap &) const
+SelectorM<Residue> SelectorMol::residues(const SireBase::Slice &slice, const PropertyMap &) const
 {
     return SelectorM<Residue>(*this, slice);
 }
 
-SelectorM<Residue> SelectorMol::residues(const QList<qint64> &idxs,
-                                         const PropertyMap &) const
+SelectorM<Residue> SelectorMol::residues(const QList<qint64> &idxs, const PropertyMap &) const
 {
     return SelectorM<Residue>(*this, idxs);
 }
 
-SelectorM<Residue> SelectorMol::residues(const QString &name,
-                                         const PropertyMap &map) const
+SelectorM<Residue> SelectorMol::residues(const QString &name, const PropertyMap &map) const
 {
     return SelectorM<Residue>(*this, name, map);
 }
 
-SelectorM<Residue> SelectorMol::residues(const ResID &resid,
-                                         const PropertyMap &) const
+SelectorM<Residue> SelectorMol::residues(const ResID &resid, const PropertyMap &) const
 {
     return SelectorM<Residue>(*this, resid);
 }
@@ -1110,32 +1057,27 @@ SelectorM<Chain> SelectorMol::chains() const
     return SelectorM<Chain>(*this);
 }
 
-SelectorM<Chain> SelectorMol::chains(int i,
-                                     const PropertyMap &map) const
+SelectorM<Chain> SelectorMol::chains(int i, const PropertyMap &map) const
 {
     return SelectorM<Chain>(this->chain(i, map));
 }
 
-SelectorM<Chain> SelectorMol::chains(const SireBase::Slice &slice,
-                                     const PropertyMap &) const
+SelectorM<Chain> SelectorMol::chains(const SireBase::Slice &slice, const PropertyMap &) const
 {
     return SelectorM<Chain>(*this, slice);
 }
 
-SelectorM<Chain> SelectorMol::chains(const QList<qint64> &idxs,
-                                     const PropertyMap &) const
+SelectorM<Chain> SelectorMol::chains(const QList<qint64> &idxs, const PropertyMap &) const
 {
     return SelectorM<Chain>(*this, idxs);
 }
 
-SelectorM<Chain> SelectorMol::chains(const QString &name,
-                                     const PropertyMap &map) const
+SelectorM<Chain> SelectorMol::chains(const QString &name, const PropertyMap &map) const
 {
     return SelectorM<Chain>(*this, name, map);
 }
 
-SelectorM<Chain> SelectorMol::chains(const ChainID &chainid,
-                                     const PropertyMap &) const
+SelectorM<Chain> SelectorMol::chains(const ChainID &chainid, const PropertyMap &) const
 {
     return SelectorM<Chain>(*this, chainid);
 }
@@ -1145,32 +1087,27 @@ SelectorM<Segment> SelectorMol::segments() const
     return SelectorM<Segment>(*this);
 }
 
-SelectorM<Segment> SelectorMol::segments(int i,
-                                         const PropertyMap &map) const
+SelectorM<Segment> SelectorMol::segments(int i, const PropertyMap &map) const
 {
     return SelectorM<Segment>(this->segment(i, map));
 }
 
-SelectorM<Segment> SelectorMol::segments(const SireBase::Slice &slice,
-                                         const PropertyMap &) const
+SelectorM<Segment> SelectorMol::segments(const SireBase::Slice &slice, const PropertyMap &) const
 {
     return SelectorM<Segment>(*this, slice);
 }
 
-SelectorM<Segment> SelectorMol::segments(const QList<qint64> &idxs,
-                                         const PropertyMap &) const
+SelectorM<Segment> SelectorMol::segments(const QList<qint64> &idxs, const PropertyMap &) const
 {
     return SelectorM<Segment>(*this, idxs);
 }
 
-SelectorM<Segment> SelectorMol::segments(const QString &name,
-                                         const PropertyMap &map) const
+SelectorM<Segment> SelectorMol::segments(const QString &name, const PropertyMap &map) const
 {
     return SelectorM<Segment>(*this, name, map);
 }
 
-SelectorM<Segment> SelectorMol::segments(const SegID &segid,
-                                         const PropertyMap &) const
+SelectorM<Segment> SelectorMol::segments(const SegID &segid, const PropertyMap &) const
 {
     return SelectorM<Segment>(*this, segid);
 }
@@ -1180,32 +1117,27 @@ SelectorM<CutGroup> SelectorMol::cutGroups() const
     return SelectorM<CutGroup>(*this);
 }
 
-SelectorM<CutGroup> SelectorMol::cutGroups(int i,
-                                           const PropertyMap &map) const
+SelectorM<CutGroup> SelectorMol::cutGroups(int i, const PropertyMap &map) const
 {
     return SelectorM<CutGroup>(this->cutGroup(i, map));
 }
 
-SelectorM<CutGroup> SelectorMol::cutGroups(const SireBase::Slice &slice,
-                                           const PropertyMap &) const
+SelectorM<CutGroup> SelectorMol::cutGroups(const SireBase::Slice &slice, const PropertyMap &) const
 {
     return SelectorM<CutGroup>(*this, slice);
 }
 
-SelectorM<CutGroup> SelectorMol::cutGroups(const QList<qint64> &idxs,
-                                           const PropertyMap &) const
+SelectorM<CutGroup> SelectorMol::cutGroups(const QList<qint64> &idxs, const PropertyMap &) const
 {
     return SelectorM<CutGroup>(*this, idxs);
 }
 
-SelectorM<CutGroup> SelectorMol::cutGroups(const QString &name,
-                                           const PropertyMap &map) const
+SelectorM<CutGroup> SelectorMol::cutGroups(const QString &name, const PropertyMap &map) const
 {
     return SelectorM<CutGroup>(*this, name, map);
 }
 
-SelectorM<CutGroup> SelectorMol::cutGroups(const CGID &cgid,
-                                           const PropertyMap &) const
+SelectorM<CutGroup> SelectorMol::cutGroups(const CGID &cgid, const PropertyMap &) const
 {
     return SelectorM<CutGroup>(*this, cgid);
 }
@@ -1453,9 +1385,7 @@ QString SelectorMol::toString() const
             }
         }
 
-        return QObject::tr("SelectorMol( size=%1\n%2\n)")
-            .arg(n)
-            .arg(parts.join("\n"));
+        return QObject::tr("SelectorMol( size=%1\n%2\n)").arg(n).arg(parts.join("\n"));
     }
 }
 
@@ -1466,4 +1396,4 @@ namespace SireMol
     template class SelectorM<Chain>;
     template class SelectorM<Segment>;
     template class SelectorM<CutGroup>;
-}
+} // namespace SireMol

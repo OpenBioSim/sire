@@ -48,8 +48,7 @@ using namespace SireStream;
 static const RegisterMetaType<BondID> r_bondid;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const BondID &bondid)
+QDataStream &operator<<(QDataStream &ds, const BondID &bondid)
 {
     writeHeader(ds, r_bondid, 1);
 
@@ -61,8 +60,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       BondID &bondid)
+QDataStream &operator>>(QDataStream &ds, BondID &bondid)
 {
     VersionID v = readHeader(ds, r_bondid);
 
@@ -80,26 +78,28 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 BondID::BondID() : ID()
-{}
+{
+}
 
 /** Construct a bond between the two specified atoms. The order
     is important, as this bond may be between two different
     molecules */
-BondID::BondID(const AtomID &atom0, const AtomID &atom1)
-       : ID(), atm0(atom0), atm1(atom1)
-{}
+BondID::BondID(const AtomID &atom0, const AtomID &atom1) : ID(), atm0(atom0), atm1(atom1)
+{
+}
 
 /** Copy constructor */
-BondID::BondID(const BondID &other)
-       : ID(other), atm0(other.atm0), atm1(other.atm1)
-{}
+BondID::BondID(const BondID &other) : ID(other), atm0(other.atm0), atm1(other.atm1)
+{
+}
 
 /** Destructor */
 BondID::~BondID()
-{}
+{
+}
 
 /** Copy assignment operator */
-BondID& BondID::operator=(const BondID &other)
+BondID &BondID::operator=(const BondID &other)
 {
     atm0 = other.atm0;
     atm1 = other.atm1;
@@ -119,11 +119,11 @@ bool BondID::operator!=(const BondID &other) const
     return atm0 != other.atm0 or atm1 != other.atm1;
 }
 
-const AtomID& BondID::operator[](int i) const
+const AtomID &BondID::operator[](int i) const
 {
     i = Index(i).map(2);
 
-    switch(i)
+    switch (i)
     {
     case 0:
         return atm0.base();
@@ -176,7 +176,7 @@ bool BondID::isNull() const
 /** Comparison operator with another ID */
 bool BondID::operator==(const SireID::ID &other) const
 {
-    const BondID *other_bond = dynamic_cast<const BondID*>(&other);
+    const BondID *other_bond = dynamic_cast<const BondID *>(&other);
 
     return other_bond and this->operator==(*other_bond);
 }
@@ -188,10 +188,9 @@ bool BondID::operator==(const SireID::ID &other) const
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-tuple<AtomIdx,AtomIdx> BondID::map(const MoleculeInfoData &molinfo) const
+tuple<AtomIdx, AtomIdx> BondID::map(const MoleculeInfoData &molinfo) const
 {
-    return tuple<AtomIdx,AtomIdx>( molinfo.atomIdx(atm0),
-                                   molinfo.atomIdx(atm1) );
+    return tuple<AtomIdx, AtomIdx>(molinfo.atomIdx(atm0), molinfo.atomIdx(atm1));
 }
 
 /** Return the indicies of the two atoms of this bond, between the
@@ -202,11 +201,9 @@ tuple<AtomIdx,AtomIdx> BondID::map(const MoleculeInfoData &molinfo) const
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-tuple<AtomIdx,AtomIdx> BondID::map(const MoleculeInfoData &mol0info,
-                                   const MoleculeInfoData &mol1info) const
+tuple<AtomIdx, AtomIdx> BondID::map(const MoleculeInfoData &mol0info, const MoleculeInfoData &mol1info) const
 {
-    return tuple<AtomIdx,AtomIdx>( mol0info.atomIdx(atm0),
-                                   mol1info.atomIdx(atm1) );
+    return tuple<AtomIdx, AtomIdx>(mol0info.atomIdx(atm0), mol1info.atomIdx(atm1));
 }
 
 /** Return the vector that goes from atom0() to atom1() in the
@@ -220,14 +217,11 @@ tuple<AtomIdx,AtomIdx> BondID::map(const MoleculeInfoData &mol0info,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Vector BondID::vector(const MoleculeData &moldata,
-                      const PropertyMap &map) const
+Vector BondID::vector(const MoleculeData &moldata, const PropertyMap &map) const
 {
-    const AtomCoords &coords = moldata.property(map["coordinates"])
-                                             .asA<AtomCoords>();
+    const AtomCoords &coords = moldata.property(map["coordinates"]).asA<AtomCoords>();
 
-    return coords.at( moldata.info().cgAtomIdx(atm1) ) -
-           coords.at( moldata.info().cgAtomIdx(atm0) );
+    return coords.at(moldata.info().cgAtomIdx(atm1)) - coords.at(moldata.info().cgAtomIdx(atm0));
 }
 
 /** Return the vector that goes from atom0() in the molecule
@@ -242,19 +236,14 @@ Vector BondID::vector(const MoleculeData &moldata,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Vector BondID::vector(const MoleculeData &mol0data,
-                      const PropertyMap &map0,
-                      const MoleculeData &mol1data,
+Vector BondID::vector(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
                       const PropertyMap &map1) const
 {
-    const AtomCoords &coords0 = mol0data.property(map0["coordinates"])
-                                      .asA<AtomCoords>();
+    const AtomCoords &coords0 = mol0data.property(map0["coordinates"]).asA<AtomCoords>();
 
-    const AtomCoords &coords1 = mol1data.property(map1["coordinates"])
-                                      .asA<AtomCoords>();
+    const AtomCoords &coords1 = mol1data.property(map1["coordinates"]).asA<AtomCoords>();
 
-    return coords1.at( mol1data.info().cgAtomIdx(atm1) ) -
-           coords0.at( mol0data.info().cgAtomIdx(atm0) );
+    return coords1.at(mol1data.info().cgAtomIdx(atm1)) - coords0.at(mol0data.info().cgAtomIdx(atm0));
 }
 
 /** Return the vector that goes from atom0() in the molecule
@@ -268,9 +257,7 @@ Vector BondID::vector(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Vector BondID::vector(const MoleculeData &mol0data,
-                      const MoleculeData &mol1data,
-                      const PropertyMap &map) const
+Vector BondID::vector(const MoleculeData &mol0data, const MoleculeData &mol1data, const PropertyMap &map) const
 {
     return this->vector(mol0data, map, mol1data, map);
 }
@@ -284,10 +271,9 @@ Vector BondID::vector(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-double BondID::length(const MoleculeData &moldata,
-                      const PropertyMap &map) const
+double BondID::length(const MoleculeData &moldata, const PropertyMap &map) const
 {
-    return this->vector(moldata,map).length();
+    return this->vector(moldata, map).length();
 }
 
 /** Return the length of the bond from atom0() in the
@@ -302,9 +288,7 @@ double BondID::length(const MoleculeData &moldata,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-double BondID::length(const MoleculeData &mol0data,
-                      const PropertyMap &map0,
-                      const MoleculeData &mol1data,
+double BondID::length(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
                       const PropertyMap &map1) const
 {
     return this->vector(mol0data, map0, mol1data, map1).length();
@@ -321,9 +305,7 @@ double BondID::length(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-double BondID::length(const MoleculeData &mol0data,
-                      const MoleculeData &mol1data,
-                      const PropertyMap &map) const
+double BondID::length(const MoleculeData &mol0data, const MoleculeData &mol1data, const PropertyMap &map) const
 {
     return this->vector(mol0data, mol1data, map).length();
 }
@@ -336,8 +318,7 @@ double BondID::length(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-double BondID::size(const MoleculeData &moldata,
-                    const PropertyMap &map) const
+double BondID::size(const MoleculeData &moldata, const PropertyMap &map) const
 {
     return this->length(moldata, map);
 }
@@ -351,9 +332,7 @@ double BondID::size(const MoleculeData &moldata,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-double BondID::size(const MoleculeData &mol0data,
-                    const MoleculeData &mol1data,
-                    const PropertyMap &map) const
+double BondID::size(const MoleculeData &mol0data, const MoleculeData &mol1data, const PropertyMap &map) const
 {
     return this->length(mol0data, mol1data, map);
 }
@@ -367,33 +346,30 @@ double BondID::size(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-double BondID::size(const MoleculeData &mol0data,
-                    const PropertyMap &map0,
-                    const MoleculeData &mol1data,
+double BondID::size(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
                     const PropertyMap &map1) const
 {
     return this->length(mol0data, map0, mol1data, map1);
 }
 
 /** Return the ID of the first atom of the bond */
-const AtomID& BondID::atom0() const
+const AtomID &BondID::atom0() const
 {
     return atm0.base();
 }
 
 /** Return the ID of the second atom of the bond */
-const AtomID& BondID::atom1() const
+const AtomID &BondID::atom1() const
 {
     return atm1.base();
 }
 
-const char* BondID::typeName()
+const char *BondID::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<BondID>() );
+    return QMetaType::typeName(qMetaTypeId<BondID>());
 }
 
-BondID* BondID::clone() const
+BondID *BondID::clone() const
 {
     return new BondID(*this);
 }
-

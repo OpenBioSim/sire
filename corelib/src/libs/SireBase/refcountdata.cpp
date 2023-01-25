@@ -33,7 +33,7 @@
 
 using namespace SireBase;
 
-Q_GLOBAL_STATIC( tbb::spin_mutex, get_spin_mutex );
+Q_GLOBAL_STATIC(tbb::spin_mutex, get_spin_mutex);
 
 namespace SireBase
 {
@@ -43,23 +43,26 @@ namespace SireBase
         {
             return get_spin_mutex();
         }
-    }
-}
+    } // namespace detail
+} // namespace SireBase
 
 /** Constructor */
 RefCountData::RefCountData()
-{}
+{
+}
 
 /** Copying is forbidden */
-RefCountData::RefCountData(const RefCountData&o)
-{}
+RefCountData::RefCountData(const RefCountData &o)
+{
+}
 
 /** Destructor */
 RefCountData::~RefCountData()
-{}
+{
+}
 
 /** Copy assignment is forbidden */
-RefCountData& RefCountData::operator=(RefCountData&)
+RefCountData &RefCountData::operator=(RefCountData &)
 {
     return *this;
 }
@@ -80,11 +83,11 @@ bool RefCountData::operator!=(const RefCountData &other) const
 RefCountData::Counter::Counter()
 {
     refcount = 0;
-    //qDebug() << "NEW REFCOUNTDATA" << qintptr(this);
+    // qDebug() << "NEW REFCOUNTDATA" << qintptr(this);
 }
 
 /** Destructor */
 RefCountData::Counter::~Counter()
 {
-    //qDebug() << "DELETING REFCOUNTDATA" << qintptr(this);
+    // qDebug() << "DELETING REFCOUNTDATA" << qintptr(this);
 }

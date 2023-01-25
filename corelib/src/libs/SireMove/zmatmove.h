@@ -35,119 +35,116 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class ZMatMove;
+    class ZMatMove;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::ZMatMove&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::ZMatMove&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::ZMatMove &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::ZMatMove &);
 
 namespace SireMol
 {
-class MoleculeGroup;
-class PartialMolecule;
-class AtomIdx;
-}
+    class MoleculeGroup;
+    class PartialMolecule;
+    class AtomIdx;
+} // namespace SireMol
 
 namespace SireMove
 {
 
-class Sampler;
-class ZMatrixCoords;
+    class Sampler;
+    class ZMatrixCoords;
 
-using SireMol::MoleculeGroup;
-using SireMol::PartialMolecule;
+    using SireMol::MoleculeGroup;
+    using SireMol::PartialMolecule;
 
-/** This class implements a z-matrix based intramolecular Monte Carlo
-    move that may be applied to a random molecule (or part of a molecule)
-    within a MoleculeGroup
+    /** This class implements a z-matrix based intramolecular Monte Carlo
+        move that may be applied to a random molecule (or part of a molecule)
+        within a MoleculeGroup
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT ZMatMove
-            : public SireBase::ConcreteProperty<ZMatMove,MonteCarlo>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT ZMatMove : public SireBase::ConcreteProperty<ZMatMove, MonteCarlo>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const ZMatMove&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, ZMatMove&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const ZMatMove &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, ZMatMove &);
 
-public:
-    ZMatMove(const PropertyMap &map = PropertyMap());
+    public:
+        ZMatMove(const PropertyMap &map = PropertyMap());
 
-    ZMatMove(const MoleculeGroup &molgroup,
-             const PropertyMap &map = PropertyMap());
-    ZMatMove(const Sampler &sampler,
-             const PropertyMap &map = PropertyMap());
+        ZMatMove(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
+        ZMatMove(const Sampler &sampler, const PropertyMap &map = PropertyMap());
 
-    ZMatMove(const ZMatMove &other);
+        ZMatMove(const ZMatMove &other);
 
-    ~ZMatMove();
+        ~ZMatMove();
 
-    ZMatMove& operator=(const ZMatMove &other);
+        ZMatMove &operator=(const ZMatMove &other);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    bool operator==(const ZMatMove &other) const;
-    bool operator!=(const ZMatMove &other) const;
+        bool operator==(const ZMatMove &other) const;
+        bool operator!=(const ZMatMove &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    void setSampler(const Sampler &sampler);
-    void setSampler(const MoleculeGroup &molgroup);
+        void setSampler(const Sampler &sampler);
+        void setSampler(const MoleculeGroup &molgroup);
 
-    const Sampler& sampler() const;
-    const MoleculeGroup& moleculeGroup() const;
+        const Sampler &sampler() const;
+        const MoleculeGroup &moleculeGroup() const;
 
-    const PropertyName& zmatrixProperty() const;
+        const PropertyName &zmatrixProperty() const;
 
-    void setZMatrixProperty(const PropertyName &property);
+        void setZMatrixProperty(const PropertyName &property);
 
-    void setSynchronisedMotion(bool on);
-    void setSynchronisedBonds(bool on);
-    void setSynchronisedAngles(bool on);
-    void setSynchronisedDihedrals(bool on);
+        void setSynchronisedMotion(bool on);
+        void setSynchronisedBonds(bool on);
+        void setSynchronisedAngles(bool on);
+        void setSynchronisedDihedrals(bool on);
 
-    bool synchronisedMotion() const;
-    bool synchronisedBonds() const;
-    bool synchronisedAngles() const;
-    bool synchronisedDihedrals() const;
+        bool synchronisedMotion() const;
+        bool synchronisedBonds() const;
+        bool synchronisedAngles() const;
+        bool synchronisedDihedrals() const;
 
-    void setGenerator(const RanGenerator &rangenerator);
+        void setGenerator(const RanGenerator &rangenerator);
 
-    void move(System &system, int nmoves, bool record_stats=true);
+        void move(System &system, int nmoves, bool record_stats = true);
 
-protected:
-    void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
+    protected:
+        void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
 
-private:
-    void move(SireMol::AtomIdx atom, ZMatrixCoords &zmatrix,
-              QHash< SireMol::AtomIdx, boost::tuple<SireUnits::Dimension::Length,
-                     SireUnits::Dimension::Angle,SireUnits::Dimension::Angle> > &deltas);
+    private:
+        void move(SireMol::AtomIdx atom, ZMatrixCoords &zmatrix,
+                  QHash<SireMol::AtomIdx, boost::tuple<SireUnits::Dimension::Length, SireUnits::Dimension::Angle,
+                                                       SireUnits::Dimension::Angle>> &deltas);
 
-    /** The sampler used to select random molecules for the move */
-    SamplerPtr smplr;
+        /** The sampler used to select random molecules for the move */
+        SamplerPtr smplr;
 
-    /** The name of the property that contains the z-matrix */
-    PropertyName zmatrix_property;
+        /** The name of the property that contains the z-matrix */
+        PropertyName zmatrix_property;
 
-    /** Whether or not to move equivalent bonds in different
-        molecules by the same amount (equivalent is judged by
-        AtomIdx) */
-    bool sync_bonds;
+        /** Whether or not to move equivalent bonds in different
+            molecules by the same amount (equivalent is judged by
+            AtomIdx) */
+        bool sync_bonds;
 
-    /** Whether or not to move equivalent angles in different
-        molecules by the same amount */
-    bool sync_angles;
+        /** Whether or not to move equivalent angles in different
+            molecules by the same amount */
+        bool sync_angles;
 
-    /** Whether or not to move equivalent dihedrals in different
-        molecules by the same amount */
-    bool sync_dihedrals;
-};
+        /** Whether or not to move equivalent dihedrals in different
+            molecules by the same amount */
+        bool sync_dihedrals;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::ZMatMove )
+Q_DECLARE_METATYPE(SireMove::ZMatMove)
 
-SIRE_EXPOSE_CLASS( SireMove::ZMatMove )
+SIRE_EXPOSE_CLASS(SireMove::ZMatMove)
 
 SIRE_END_HEADER
 

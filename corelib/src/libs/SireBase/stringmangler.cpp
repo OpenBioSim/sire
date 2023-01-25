@@ -39,15 +39,13 @@ using namespace SireStream;
 //////// Implementation of StringMangler
 ////////
 
-static const RegisterMetaType<StringMangler> r_stringmangler( MAGIC_ONLY,
-                                                  "SireBase::StringMangler" );
+static const RegisterMetaType<StringMangler> r_stringmangler(MAGIC_ONLY, "SireBase::StringMangler");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const StringMangler &stringmangler)
+QDataStream &operator<<(QDataStream &ds, const StringMangler &stringmangler)
 {
     writeHeader(ds, r_stringmangler, 1);
-    ds << static_cast<const Property&>(stringmangler);
+    ds << static_cast<const Property &>(stringmangler);
 
     return ds;
 }
@@ -59,26 +57,28 @@ QDataStream &operator>>(QDataStream &ds, StringMangler &stringmangler)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(stringmangler);
+        ds >> static_cast<Property &>(stringmangler);
     }
     else
-        throw version_error( v, "1", r_stringmangler, CODELOC );
+        throw version_error(v, "1", r_stringmangler, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 StringMangler::StringMangler() : Property()
-{}
+{
+}
 
 /** Copy constructor */
-StringMangler::StringMangler(const StringMangler &other)
-              : Property(other)
-{}
+StringMangler::StringMangler(const StringMangler &other) : Property(other)
+{
+}
 
 /** Destructor */
 StringMangler::~StringMangler()
-{}
+{
+}
 
 /** Mangle the input string */
 QString StringMangler::operator()(const QString &input) const
@@ -93,12 +93,11 @@ QString StringMangler::operator()(const QString &input) const
 static const RegisterMetaType<NoMangling> r_nomangle;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const NoMangling &nomangle)
+QDataStream &operator<<(QDataStream &ds, const NoMangling &nomangle)
 {
     writeHeader(ds, r_nomangle, 1);
 
-    ds << static_cast<const StringMangler&>(nomangle);
+    ds << static_cast<const StringMangler &>(nomangle);
 
     return ds;
 }
@@ -110,7 +109,7 @@ QDataStream &operator>>(QDataStream &ds, NoMangling &nomangle)
 
     if (v == 1)
     {
-        ds >> static_cast<StringMangler&>(nomangle);
+        ds >> static_cast<StringMangler &>(nomangle);
     }
     else
         throw version_error(v, "1", r_nomangle, CODELOC);
@@ -119,39 +118,41 @@ QDataStream &operator>>(QDataStream &ds, NoMangling &nomangle)
 }
 
 /** Constructor */
-NoMangling::NoMangling() : ConcreteProperty<NoMangling,StringMangler>()
-{}
+NoMangling::NoMangling() : ConcreteProperty<NoMangling, StringMangler>()
+{
+}
 
 /** Copy constructor */
-NoMangling::NoMangling(const NoMangling &other)
-           : ConcreteProperty<NoMangling,StringMangler>(other)
-{}
+NoMangling::NoMangling(const NoMangling &other) : ConcreteProperty<NoMangling, StringMangler>(other)
+{
+}
 
 /** Destructor */
 NoMangling::~NoMangling()
-{}
+{
+}
 
 /** Copy assignment operator */
-NoMangling& NoMangling::operator=(const NoMangling&)
+NoMangling &NoMangling::operator=(const NoMangling &)
 {
     return *this;
 }
 
 /** Comparison operator */
-bool NoMangling::operator==(const NoMangling&) const
+bool NoMangling::operator==(const NoMangling &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool NoMangling::operator!=(const NoMangling&) const
+bool NoMangling::operator!=(const NoMangling &) const
 {
     return false;
 }
 
-const char* NoMangling::typeName()
+const char *NoMangling::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NoMangling>() );
+    return QMetaType::typeName(qMetaTypeId<NoMangling>());
 }
 
 /** Mangle the string - remove all initial and trailing spaces */
@@ -160,7 +161,7 @@ QString NoMangling::mangle(const QString &input) const
     return input;
 }
 
-const NoMangling& StringMangler::null()
+const NoMangling &StringMangler::null()
 {
     return *(create_shared_null<NoMangling>());
 }
@@ -172,12 +173,11 @@ const NoMangling& StringMangler::null()
 static const RegisterMetaType<TrimString> r_trimstring;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const TrimString &trimstring)
+QDataStream &operator<<(QDataStream &ds, const TrimString &trimstring)
 {
     writeHeader(ds, r_trimstring, 1);
 
-    ds << static_cast<const StringMangler&>(trimstring);
+    ds << static_cast<const StringMangler &>(trimstring);
 
     return ds;
 }
@@ -189,7 +189,7 @@ QDataStream &operator>>(QDataStream &ds, TrimString &trimstring)
 
     if (v == 1)
     {
-        ds >> static_cast<StringMangler&>(trimstring);
+        ds >> static_cast<StringMangler &>(trimstring);
     }
     else
         throw version_error(v, "1", r_trimstring, CODELOC);
@@ -198,39 +198,41 @@ QDataStream &operator>>(QDataStream &ds, TrimString &trimstring)
 }
 
 /** Constructor */
-TrimString::TrimString() : ConcreteProperty<TrimString,StringMangler>()
-{}
+TrimString::TrimString() : ConcreteProperty<TrimString, StringMangler>()
+{
+}
 
 /** Copy constructor */
-TrimString::TrimString(const TrimString &other)
-           : ConcreteProperty<TrimString,StringMangler>(other)
-{}
+TrimString::TrimString(const TrimString &other) : ConcreteProperty<TrimString, StringMangler>(other)
+{
+}
 
 /** Destructor */
 TrimString::~TrimString()
-{}
+{
+}
 
 /** Copy assignment operator */
-TrimString& TrimString::operator=(const TrimString&)
+TrimString &TrimString::operator=(const TrimString &)
 {
     return *this;
 }
 
 /** Comparison operator */
-bool TrimString::operator==(const TrimString&) const
+bool TrimString::operator==(const TrimString &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool TrimString::operator!=(const TrimString&) const
+bool TrimString::operator!=(const TrimString &) const
 {
     return false;
 }
 
-const char* TrimString::typeName()
+const char *TrimString::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<TrimString>() );
+    return QMetaType::typeName(qMetaTypeId<TrimString>());
 }
 
 /** Mangle the string - remove all initial and trailing spaces */
@@ -246,12 +248,11 @@ QString TrimString::mangle(const QString &input) const
 static const RegisterMetaType<UpperCaseString> r_upperstring;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const UpperCaseString &upperstring)
+QDataStream &operator<<(QDataStream &ds, const UpperCaseString &upperstring)
 {
     writeHeader(ds, r_upperstring, 1);
 
-    ds << static_cast<const StringMangler&>(upperstring);
+    ds << static_cast<const StringMangler &>(upperstring);
 
     return ds;
 }
@@ -263,7 +264,7 @@ QDataStream &operator>>(QDataStream &ds, UpperCaseString &upperstring)
 
     if (v == 1)
     {
-        ds >> static_cast<StringMangler&>(upperstring);
+        ds >> static_cast<StringMangler &>(upperstring);
     }
     else
         throw version_error(v, "1", r_upperstring, CODELOC);
@@ -272,39 +273,41 @@ QDataStream &operator>>(QDataStream &ds, UpperCaseString &upperstring)
 }
 
 /** Constructor */
-UpperCaseString::UpperCaseString() : ConcreteProperty<UpperCaseString,StringMangler>()
-{}
+UpperCaseString::UpperCaseString() : ConcreteProperty<UpperCaseString, StringMangler>()
+{
+}
 
 /** Copy constructor */
-UpperCaseString::UpperCaseString(const UpperCaseString &other)
-           : ConcreteProperty<UpperCaseString,StringMangler>(other)
-{}
+UpperCaseString::UpperCaseString(const UpperCaseString &other) : ConcreteProperty<UpperCaseString, StringMangler>(other)
+{
+}
 
 /** Destructor */
 UpperCaseString::~UpperCaseString()
-{}
+{
+}
 
 /** Copy assignment operator */
-UpperCaseString& UpperCaseString::operator=(const UpperCaseString&)
+UpperCaseString &UpperCaseString::operator=(const UpperCaseString &)
 {
     return *this;
 }
 
 /** Comparison operator */
-bool UpperCaseString::operator==(const UpperCaseString&) const
+bool UpperCaseString::operator==(const UpperCaseString &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool UpperCaseString::operator!=(const UpperCaseString&) const
+bool UpperCaseString::operator!=(const UpperCaseString &) const
 {
     return false;
 }
 
-const char* UpperCaseString::typeName()
+const char *UpperCaseString::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<UpperCaseString>() );
+    return QMetaType::typeName(qMetaTypeId<UpperCaseString>());
 }
 
 /** Mangle the string - remove all initial and trailing spaces */
@@ -320,12 +323,11 @@ QString UpperCaseString::mangle(const QString &input) const
 static const RegisterMetaType<LowerCaseString> r_lowerstring;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const LowerCaseString &lowerstring)
+QDataStream &operator<<(QDataStream &ds, const LowerCaseString &lowerstring)
 {
     writeHeader(ds, r_lowerstring, 1);
 
-    ds << static_cast<const StringMangler&>(lowerstring);
+    ds << static_cast<const StringMangler &>(lowerstring);
 
     return ds;
 }
@@ -337,7 +339,7 @@ QDataStream &operator>>(QDataStream &ds, LowerCaseString &lowerstring)
 
     if (v == 1)
     {
-        ds >> static_cast<StringMangler&>(lowerstring);
+        ds >> static_cast<StringMangler &>(lowerstring);
     }
     else
         throw version_error(v, "1", r_lowerstring, CODELOC);
@@ -346,39 +348,41 @@ QDataStream &operator>>(QDataStream &ds, LowerCaseString &lowerstring)
 }
 
 /** Constructor */
-LowerCaseString::LowerCaseString() : ConcreteProperty<LowerCaseString,StringMangler>()
-{}
+LowerCaseString::LowerCaseString() : ConcreteProperty<LowerCaseString, StringMangler>()
+{
+}
 
 /** Copy constructor */
-LowerCaseString::LowerCaseString(const LowerCaseString &other)
-           : ConcreteProperty<LowerCaseString,StringMangler>(other)
-{}
+LowerCaseString::LowerCaseString(const LowerCaseString &other) : ConcreteProperty<LowerCaseString, StringMangler>(other)
+{
+}
 
 /** Destructor */
 LowerCaseString::~LowerCaseString()
-{}
+{
+}
 
 /** Copy assignment operator */
-LowerCaseString& LowerCaseString::operator=(const LowerCaseString&)
+LowerCaseString &LowerCaseString::operator=(const LowerCaseString &)
 {
     return *this;
 }
 
 /** Comparison operator */
-bool LowerCaseString::operator==(const LowerCaseString&) const
+bool LowerCaseString::operator==(const LowerCaseString &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool LowerCaseString::operator!=(const LowerCaseString&) const
+bool LowerCaseString::operator!=(const LowerCaseString &) const
 {
     return false;
 }
 
-const char* LowerCaseString::typeName()
+const char *LowerCaseString::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<LowerCaseString>() );
+    return QMetaType::typeName(qMetaTypeId<LowerCaseString>());
 }
 
 /** Mangle the string - remove all initial and trailing spaces */

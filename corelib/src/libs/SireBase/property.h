@@ -28,1221 +28,1161 @@
 #ifndef SIREBASE_PROPERTY_H
 #define SIREBASE_PROPERTY_H
 
-#include "sharedpolypointer.hpp"
 #include "globalsharedpointer.hpp"
+#include "sharedpolypointer.hpp"
 
 #include "refcountdata.h"
 
-#include <QVariant>
 #include <QDebug>
+#include <QVariant>
 
 #include <boost/throw_exception.hpp>
 
 SIRE_BEGIN_HEADER
 
-namespace SireUnits{ namespace Dimension{ class GeneralUnit; }}
+namespace SireUnits
+{
+    namespace Dimension
+    {
+        class GeneralUnit;
+    }
+} // namespace SireUnits
 
 namespace SireBase
 {
-class Property;
-class PropertyList;
-class VariantProperty;
-class NullProperty;
+    class Property;
+    class PropertyList;
+    class VariantProperty;
+    class NullProperty;
 
-class PropPtrBase;
-class GlobalPropPtrBase;
+    class PropPtrBase;
+    class GlobalPropPtrBase;
 
-template<class T>
-class PropPtr;
+    template <class T>
+    class PropPtr;
 
-template<class T>
-class GlobalPropPtr;
+    template <class T>
+    class GlobalPropPtr;
 
-}
+} // namespace SireBase
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::Property&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::Property&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::Property &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::Property &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::NullProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::NullProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::NullProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::NullProperty &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::PropPtrBase&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::PropPtrBase&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::PropPtrBase &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::PropPtrBase &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::GlobalPropPtrBase&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::GlobalPropPtrBase&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::GlobalPropPtrBase &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::GlobalPropPtrBase &);
 
-template<class T>
-QDataStream& operator<<(QDataStream&, const SireBase::PropPtr<T>&);
-template<class T>
-QDataStream& operator>>(QDataStream&, SireBase::PropPtr<T>&);
+template <class T>
+QDataStream &operator<<(QDataStream &, const SireBase::PropPtr<T> &);
+template <class T>
+QDataStream &operator>>(QDataStream &, SireBase::PropPtr<T> &);
 
-template<class T>
-QDataStream& operator<<(QDataStream&, const SireBase::GlobalPropPtr<T>&);
-template<class T>
-QDataStream& operator>>(QDataStream&, SireBase::GlobalPropPtr<T>&);
+template <class T>
+QDataStream &operator<<(QDataStream &, const SireBase::GlobalPropPtr<T> &);
+template <class T>
+QDataStream &operator>>(QDataStream &, SireBase::GlobalPropPtr<T> &);
 
 class QMutex;
 
 namespace SireBase
 {
 
-SIREBASE_EXPORT QMutex* globalLock();
+    SIREBASE_EXPORT QMutex *globalLock();
 
-/** This is the base class of all properties that may be attached to a
-    molecule. Properties are used to assign extra information to a molecule,
-    which may then be carried by the molecule throughout its passage
-    through the simulation. Examples of properties may include the file
-    from which the molecule was read, the charge parameters on the atoms,
-    the PDB code etc.
+    /** This is the base class of all properties that may be attached to a
+        molecule. Properties are used to assign extra information to a molecule,
+        which may then be carried by the molecule throughout its passage
+        through the simulation. Examples of properties may include the file
+        from which the molecule was read, the charge parameters on the atoms,
+        the PDB code etc.
 
-    Properties form a polymorphic hierarchy which are implicitly shared
-    via SireBase::SharedPolyPointer smart pointers.
+        Properties form a polymorphic hierarchy which are implicitly shared
+        via SireBase::SharedPolyPointer smart pointers.
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT Property : public RefCountData
-{
-
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const Property&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, Property&);
-
-public:
-    typedef Property ROOT;
-
-    Property();
-
-    Property(const Property &other);
-
-    virtual ~Property();
-
-    virtual Property* clone() const=0;
-    virtual Property* create() const=0;
-
-    virtual QString toString() const;
-
-    virtual void copy(const Property &other)=0;
-    virtual bool equals(const Property &other) const=0;
-
-    virtual void save(QDataStream &ds) const=0;
-    virtual void load(QDataStream &ds)=0;
-
-    virtual const char* what() const=0;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT Property : public RefCountData
     {
-        return "SireBase::Property";
-    }
 
-    template<class T>
-    bool isA() const;
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const Property &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, Property &);
 
-    template<class T>
-    const T& asA() const;
+    public:
+        typedef Property ROOT;
 
-    template<class T>
-    T& asA();
+        Property();
 
-    virtual bool isAString() const;
-    virtual bool isADouble() const;
-    virtual bool isAnInteger() const;
-    virtual bool isABoolean() const;
-    virtual bool isAnArray() const;
-    virtual bool isAUnit() const;
+        Property(const Property &other);
 
-    virtual QString asAString() const;
-    virtual double asADouble() const;
-    virtual int asAnInteger() const;
-    virtual bool asABoolean() const;
-    virtual PropertyList asAnArray() const;
-    virtual SireUnits::Dimension::GeneralUnit asAUnit() const;
+        virtual ~Property();
 
-    static const NullProperty& null();
+        virtual Property *clone() const = 0;
+        virtual Property *create() const = 0;
 
-protected:
-    Property& operator=(const Property &other);
+        virtual QString toString() const;
 
-    bool operator==(const Property &other) const;
-    bool operator!=(const Property &other) const;
+        virtual void copy(const Property &other) = 0;
+        virtual bool equals(const Property &other) const = 0;
 
-    void throwInvalidCast(const Property &other) const;
-    void throwInvalidCast(const char *typenam) const;
-};
+        virtual void save(QDataStream &ds) const = 0;
+        virtual void load(QDataStream &ds) = 0;
 
-/** This is the second-to-top class of all Properties. Any instantiatable
-    properties must inherit from this template class so that all of the
-    virtual functions are supplied correctly, e.g. if you have a
-    class called Derived, that inherits from Base, and Base derives
-    from Property, then you need to inherit Derived from
-    ConcreteProperty<Derived,Base>
+        virtual const char *what() const = 0;
 
-    @author Christopher Woods
-*/
-template<class Derived, class Base>
-class ConcreteProperty : public Base
-{
-public:
-    ConcreteProperty();
+        static const char *typeName()
+        {
+            return "SireBase::Property";
+        }
 
-    template<class T0>
-    ConcreteProperty(const T0 &t0);
+        template <class T>
+        bool isA() const;
 
-    template<class T0, class T1>
-    ConcreteProperty(const T0 &t0, const T1 &t1);
+        template <class T>
+        const T &asA() const;
 
-    template<class T0, class T1, class T2>
-    ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2);
+        template <class T>
+        T &asA();
 
-    template<class T0, class T1, class T2, class T3>
-    ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3);
+        virtual bool isAString() const;
+        virtual bool isADouble() const;
+        virtual bool isAnInteger() const;
+        virtual bool isABoolean() const;
+        virtual bool isAnArray() const;
+        virtual bool isAUnit() const;
 
-    template<class T0, class T1, class T2, class T3, class T4>
-    ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4);
+        virtual QString asAString() const;
+        virtual double asADouble() const;
+        virtual int asAnInteger() const;
+        virtual bool asABoolean() const;
+        virtual PropertyList asAnArray() const;
+        virtual SireUnits::Dimension::GeneralUnit asAUnit() const;
 
-    template<class T0, class T1, class T2, class T3, class T4, class T5>
-    ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4, const T5 &t5);
+        static const NullProperty &null();
 
-    template<class T0, class T1, class T2, class T3, class T4,
-             class T5, class T6>
-    ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4, const T5 &t5, const T6 &t6);
+    protected:
+        Property &operator=(const Property &other);
 
-    template<class T0, class T1, class T2, class T3, class T4,
-             class T5, class T6, class T7>
-    ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4, const T5 &t5, const T6 &t6, const T7 &t7);
+        bool operator==(const Property &other) const;
+        bool operator!=(const Property &other) const;
 
-    virtual ~ConcreteProperty();
+        void throwInvalidCast(const Property &other) const;
+        void throwInvalidCast(const char *typenam) const;
+    };
 
-    ConcreteProperty<Derived,Base>& operator=(const Property &other);
+    /** This is the second-to-top class of all Properties. Any instantiatable
+        properties must inherit from this template class so that all of the
+        virtual functions are supplied correctly, e.g. if you have a
+        class called Derived, that inherits from Base, and Base derives
+        from Property, then you need to inherit Derived from
+        ConcreteProperty<Derived,Base>
 
-    bool operator==(const Property &other) const;
+        @author Christopher Woods
+    */
+    template <class Derived, class Base>
+    class ConcreteProperty : public Base
+    {
+    public:
+        ConcreteProperty();
 
-    bool operator!=(const Property &other) const;
+        template <class T0>
+        ConcreteProperty(const T0 &t0);
 
-    const char* what() const;
+        template <class T0, class T1>
+        ConcreteProperty(const T0 &t0, const T1 &t1);
 
-    ConcreteProperty<Derived,Base>* clone() const;
+        template <class T0, class T1, class T2>
+        ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2);
 
-    ConcreteProperty<Derived,Base>* create() const;
+        template <class T0, class T1, class T2, class T3>
+        ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3);
 
-    void copy(const Property &other);
+        template <class T0, class T1, class T2, class T3, class T4>
+        ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4);
 
-    bool equals(const Property &other) const;
+        template <class T0, class T1, class T2, class T3, class T4, class T5>
+        ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5);
 
-    void save(QDataStream &ds) const;
-    void load(QDataStream &ds);
+        template <class T0, class T1, class T2, class T3, class T4, class T5, class T6>
+        ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5, const T6 &t6);
 
-protected:
-    ConcreteProperty<Derived,Base>&
-    operator=(const ConcreteProperty<Derived,Base> &other);
+        template <class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
+        ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5, const T6 &t6,
+                         const T7 &t7);
 
-    bool operator==(const ConcreteProperty<Derived,Base> &other) const;
-    bool operator!=(const ConcreteProperty<Derived,Base> &other) const;
-};
+        virtual ~ConcreteProperty();
 
-/** This is a null property */
-class SIREBASE_EXPORT NullProperty
-              : public ConcreteProperty<NullProperty,Property>
-{
-public:
-    NullProperty();
+        ConcreteProperty<Derived, Base> &operator=(const Property &other);
 
-    NullProperty(const NullProperty &other);
+        bool operator==(const Property &other) const;
 
-    ~NullProperty();
+        bool operator!=(const Property &other) const;
 
-    static const char* typeName();
+        const char *what() const;
 
-    QString toString() const;
-};
+        ConcreteProperty<Derived, Base> *clone() const;
 
-/** This is base class of the polymorphic pointer holder for the entire
-    Property class hierarchy. This can hold implicitly
-    shared pointers to any property class.
+        ConcreteProperty<Derived, Base> *create() const;
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT PropPtrBase
-{
+        void copy(const Property &other);
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const PropPtrBase&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, PropPtrBase&);
+        bool equals(const Property &other) const;
 
-public:
-    ~PropPtrBase();
+        void save(QDataStream &ds) const;
+        void load(QDataStream &ds);
 
-    bool operator==(const Property &property) const;
-    bool operator!=(const Property &property) const;
+    protected:
+        ConcreteProperty<Derived, Base> &operator=(const ConcreteProperty<Derived, Base> &other);
 
-    bool operator==(const PropPtrBase &other) const;
-    bool operator!=(const PropPtrBase &other) const;
+        bool operator==(const ConcreteProperty<Derived, Base> &other) const;
+        bool operator!=(const ConcreteProperty<Derived, Base> &other) const;
+    };
 
-    void detach();
+    /** This is a null property */
+    class SIREBASE_EXPORT NullProperty : public ConcreteProperty<NullProperty, Property>
+    {
+    public:
+        NullProperty();
 
-    bool unique() const;
+        NullProperty(const NullProperty &other);
 
-    operator const Property&() const;
+        ~NullProperty();
 
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
-    bool isAnArray() const;
-    bool isAUnit() const;
+        static const char *typeName();
 
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
-    SireUnits::Dimension::GeneralUnit asAUnit() const;
-    PropertyList asAnArray() const;
+        QString toString() const;
+    };
 
-protected:
-    PropPtrBase(const Property &property);
-    PropPtrBase(Property *property);
+    /** This is base class of the polymorphic pointer holder for the entire
+        Property class hierarchy. This can hold implicitly
+        shared pointers to any property class.
 
-    PropPtrBase(const PropPtrBase &other);
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT PropPtrBase
+    {
 
-    PropPtrBase& operator=(const PropPtrBase &other);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const PropPtrBase &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, PropPtrBase &);
 
-    const Property& read() const;
+    public:
+        ~PropPtrBase();
 
-    Property& write();
-    Property& edit();
+        bool operator==(const Property &property) const;
+        bool operator!=(const Property &property) const;
 
-    static void throwCastingError(const char *got_type, const char *want_type);
+        bool operator==(const PropPtrBase &other) const;
+        bool operator!=(const PropPtrBase &other) const;
 
-private:
-    /** Shared pointer to the actual property */
-    SharedPolyPointer<Property> ptr;
-};
+        void detach();
 
-/** This is base class of the global polymorphic pointer holder for the entire
-    Property class hierarchy. This can hold implicitly
-    shared pointers to any property class.
+        bool unique() const;
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT GlobalPropPtrBase
-{
+        operator const Property &() const;
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const GlobalPropPtrBase&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, GlobalPropPtrBase&);
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
+        bool isAnArray() const;
+        bool isAUnit() const;
 
-public:
-    ~GlobalPropPtrBase();
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
+        SireUnits::Dimension::GeneralUnit asAUnit() const;
+        PropertyList asAnArray() const;
 
-    bool operator==(const Property &property) const;
-    bool operator!=(const Property &property) const;
+    protected:
+        PropPtrBase(const Property &property);
+        PropPtrBase(Property *property);
 
-    bool operator==(const GlobalPropPtrBase &other) const;
-    bool operator!=(const GlobalPropPtrBase &other) const;
+        PropPtrBase(const PropPtrBase &other);
 
-    bool unique() const;
+        PropPtrBase &operator=(const PropPtrBase &other);
 
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
-    bool isAnArray() const;
-    bool isAUnit() const;
+        const Property &read() const;
 
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
-    SireUnits::Dimension::GeneralUnit asAUnit() const;
-    PropertyList asAnArray() const;
+        Property &write();
+        Property &edit();
 
-    operator const Property&() const;
+        static void throwCastingError(const char *got_type, const char *want_type);
 
-protected:
-    GlobalPropPtrBase(const Property &property);
-    GlobalPropPtrBase(Property *property);
+    private:
+        /** Shared pointer to the actual property */
+        SharedPolyPointer<Property> ptr;
+    };
 
-    GlobalPropPtrBase(const GlobalPropPtrBase &other);
+    /** This is base class of the global polymorphic pointer holder for the entire
+        Property class hierarchy. This can hold implicitly
+        shared pointers to any property class.
 
-    GlobalPropPtrBase& operator=(const GlobalPropPtrBase &other);
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT GlobalPropPtrBase
+    {
 
-    const Property& read() const;
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const GlobalPropPtrBase &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, GlobalPropPtrBase &);
 
-    static void throwCastingError(const char *got_type, const char *want_type);
+    public:
+        ~GlobalPropPtrBase();
 
-private:
-    /** Global shared pointer to the actual property */
-    GlobalSharedPointer<Property> ptr;
-};
+        bool operator==(const Property &property) const;
+        bool operator!=(const Property &property) const;
 
-/** This is the specialised pointer that is used to hold a hierarchy
-    of properties that are derived from type 'T'
+        bool operator==(const GlobalPropPtrBase &other) const;
+        bool operator!=(const GlobalPropPtrBase &other) const;
 
-    @author Christopher Woods
-*/
-template<class T>
-class PropPtr : public PropPtrBase
-{
+        bool unique() const;
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<<>(QDataStream&, const PropPtr<T>&);
-friend SIREBASE_EXPORT QDataStream& ::operator>><>(QDataStream&, PropPtr<T>&);
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
+        bool isAnArray() const;
+        bool isAUnit() const;
 
-public:
-    typedef T element_type;
-    typedef T value_type;
-    typedef T* pointer;
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
+        SireUnits::Dimension::GeneralUnit asAUnit() const;
+        PropertyList asAnArray() const;
 
-    PropPtr();
+        operator const Property &() const;
 
-    PropPtr(const T &obj);
-    PropPtr(T *obj);
+    protected:
+        GlobalPropPtrBase(const Property &property);
+        GlobalPropPtrBase(Property *property);
 
-    PropPtr(const Property &property);
+        GlobalPropPtrBase(const GlobalPropPtrBase &other);
 
-    PropPtr(const PropPtrBase &other);
+        GlobalPropPtrBase &operator=(const GlobalPropPtrBase &other);
 
-    PropPtr(const PropPtr<T> &other);
+        const Property &read() const;
 
-    ~PropPtr();
+        static void throwCastingError(const char *got_type, const char *want_type);
 
-    PropPtr<T>& operator=(const T &obj);
-    PropPtr<T>& operator=(T *obj);
+    private:
+        /** Global shared pointer to the actual property */
+        GlobalSharedPointer<Property> ptr;
+    };
 
-    PropPtr<T>& operator=(const Property &property);
+    /** This is the specialised pointer that is used to hold a hierarchy
+        of properties that are derived from type 'T'
 
-    PropPtr<T>& operator=(const PropPtr<T> &other);
-    PropPtr<T>& operator=(const PropPtrBase &property);
+        @author Christopher Woods
+    */
+    template <class T>
+    class PropPtr : public PropPtrBase
+    {
 
-    const T* operator->() const;
-    const T& operator*() const;
+        friend SIREBASE_EXPORT QDataStream & ::operator<< <>(QDataStream &, const PropPtr<T> &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>><>(QDataStream &, PropPtr<T> &);
 
-    const T& read() const;
-    T& edit();
+    public:
+        typedef T element_type;
+        typedef T value_type;
+        typedef T *pointer;
 
-    const T* data() const;
-    const T* constData() const;
+        PropPtr();
 
-    T* data();
+        PropPtr(const T &obj);
+        PropPtr(T *obj);
 
-    operator const T&() const;
+        PropPtr(const Property &property);
 
-    bool isNull() const;
+        PropPtr(const PropPtrBase &other);
 
-    static PropPtr<T> null();
+        PropPtr(const PropPtr<T> &other);
 
-protected:
-    void assertSane() const;
-};
+        ~PropPtr();
 
-/** This is the specialised global pointer that is used to hold a hierarchy
-    of properties that are derived from type 'T'
+        PropPtr<T> &operator=(const T &obj);
+        PropPtr<T> &operator=(T *obj);
 
-    @author Christopher Woods
-*/
-template<class T>
-class GlobalPropPtr : public GlobalPropPtrBase
-{
+        PropPtr<T> &operator=(const Property &property);
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<<>(QDataStream&, const GlobalPropPtr<T>&);
-friend SIREBASE_EXPORT QDataStream& ::operator>><>(QDataStream&, GlobalPropPtr<T>&);
+        PropPtr<T> &operator=(const PropPtr<T> &other);
+        PropPtr<T> &operator=(const PropPtrBase &property);
 
-public:
-    GlobalPropPtr();
+        const T *operator->() const;
+        const T &operator*() const;
 
-    GlobalPropPtr(const T &obj);
-    GlobalPropPtr(T *obj);
+        const T &read() const;
+        T &edit();
 
-    GlobalPropPtr(const Property &property);
+        const T *data() const;
+        const T *constData() const;
 
-    GlobalPropPtr(const GlobalPropPtrBase &other);
+        T *data();
 
-    GlobalPropPtr(const GlobalPropPtr<T> &other);
+        operator const T &() const;
 
-    ~GlobalPropPtr();
+        bool isNull() const;
 
-    GlobalPropPtr<T>& operator=(const T &obj);
-    GlobalPropPtr<T>& operator=(T *obj);
+        static PropPtr<T> null();
 
-    GlobalPropPtr<T>& operator=(const Property &property);
+    protected:
+        void assertSane() const;
+    };
 
-    GlobalPropPtr<T>& operator=(const GlobalPropPtr<T> &other);
-    GlobalPropPtr<T>& operator=(const GlobalPropPtrBase &property);
+    /** This is the specialised global pointer that is used to hold a hierarchy
+        of properties that are derived from type 'T'
 
-    const T* operator->() const;
-    const T& operator*() const;
+        @author Christopher Woods
+    */
+    template <class T>
+    class GlobalPropPtr : public GlobalPropPtrBase
+    {
 
-    const T& read() const;
+        friend SIREBASE_EXPORT QDataStream & ::operator<< <>(QDataStream &, const GlobalPropPtr<T> &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>><>(QDataStream &, GlobalPropPtr<T> &);
 
-    const T* data() const;
-    const T* constData() const;
+    public:
+        GlobalPropPtr();
 
-    operator const T&() const;
+        GlobalPropPtr(const T &obj);
+        GlobalPropPtr(T *obj);
 
-    bool isNull() const;
+        GlobalPropPtr(const Property &property);
 
-    static GlobalPropPtr<T> null();
+        GlobalPropPtr(const GlobalPropPtrBase &other);
 
-protected:
-    void assertSane() const;
-};
+        GlobalPropPtr(const GlobalPropPtr<T> &other);
+
+        ~GlobalPropPtr();
+
+        GlobalPropPtr<T> &operator=(const T &obj);
+        GlobalPropPtr<T> &operator=(T *obj);
+
+        GlobalPropPtr<T> &operator=(const Property &property);
+
+        GlobalPropPtr<T> &operator=(const GlobalPropPtr<T> &other);
+        GlobalPropPtr<T> &operator=(const GlobalPropPtrBase &property);
+
+        const T *operator->() const;
+        const T &operator*() const;
+
+        const T &read() const;
+
+        const T *data() const;
+        const T *constData() const;
+
+        operator const T &() const;
+
+        bool isNull() const;
+
+        static GlobalPropPtr<T> null();
+
+    protected:
+        void assertSane() const;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-///////
-/////// Implementation of Property template functions
-///////
+    ///////
+    /////// Implementation of Property template functions
+    ///////
 
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool Property::isA() const
-{
-    if (dynamic_cast<const T*>(this) != 0)
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool Property::isA() const
     {
-        //this isA<T>() !
-        return true;
-    }
-    else
-    {
-        return QLatin1String(T::typeName()) == QLatin1String(this->what());
-    }
-}
-
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& Property::asA() const
-{
-    const T* as_t = dynamic_cast<const T*>(this);
-
-    if (not as_t)
-    {
-        if (QLatin1String(T::typeName()) == QLatin1String(this->what()))
+        if (dynamic_cast<const T *>(this) != 0)
         {
-            //these are the same object - perhaps the typeinfo objects
-            //are in different shared libraries?
-            as_t = (const T*)(this);
+            // this isA<T>() !
+            return true;
         }
         else
-            throwInvalidCast(T::typeName());
-    }
-
-    return *as_t;
-}
-
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T& Property::asA()
-{
-    T* as_t = dynamic_cast<T*>(this);
-
-    if (not as_t)
-    {
-        if (QLatin1String(T::typeName()) == QLatin1String(this->what()))
         {
-            //these are the same object - perhaps the typeinfo objects
-            //are in different shared libraries?
-            as_t = (T*)(this);
+            return QLatin1String(T::typeName()) == QLatin1String(this->what());
         }
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &Property::asA() const
+    {
+        const T *as_t = dynamic_cast<const T *>(this);
+
+        if (not as_t)
+        {
+            if (QLatin1String(T::typeName()) == QLatin1String(this->what()))
+            {
+                // these are the same object - perhaps the typeinfo objects
+                // are in different shared libraries?
+                as_t = (const T *)(this);
+            }
+            else
+                throwInvalidCast(T::typeName());
+        }
+
+        return *as_t;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T &Property::asA()
+    {
+        T *as_t = dynamic_cast<T *>(this);
+
+        if (not as_t)
+        {
+            if (QLatin1String(T::typeName()) == QLatin1String(this->what()))
+            {
+                // these are the same object - perhaps the typeinfo objects
+                // are in different shared libraries?
+                as_t = (T *)(this);
+            }
+            else
+                throwInvalidCast(T::typeName());
+        }
+
+        return *as_t;
+    }
+
+    ///////
+    /////// Implementation of ConcreteProperty<T>
+    ///////
+
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::ConcreteProperty() : Base()
+    {
+    }
+
+    template <class Derived, class Base>
+    template <class T0>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::ConcreteProperty(const T0 &t0) : Base(t0)
+    {
+    }
+
+    template <class Derived, class Base>
+    template <class T0, class T1>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::ConcreteProperty(const T0 &t0, const T1 &t1) : Base(t0, t1)
+    {
+    }
+
+    template <class Derived, class Base>
+    template <class T0, class T1, class T2>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2)
+        : Base(t0, t1, t2)
+    {
+    }
+
+    template <class Derived, class Base>
+    template <class T0, class T1, class T2, class T3>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2,
+                                                                              const T3 &t3)
+        : Base(t0, t1, t2, t3)
+    {
+    }
+
+    template <class Derived, class Base>
+    template <class T0, class T1, class T2, class T3, class T4>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2,
+                                                                              const T3 &t3, const T4 &t4)
+        : Base(t0, t1, t2, t3, t4)
+    {
+    }
+
+    template <class Derived, class Base>
+    template <class T0, class T1, class T2, class T3, class T4, class T5>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2,
+                                                                              const T3 &t3, const T4 &t4, const T5 &t5)
+        : Base(t0, t1, t2, t3, t4, t5)
+    {
+    }
+
+    template <class Derived, class Base>
+    template <class T0, class T1, class T2, class T3, class T4, class T5, class T6>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2,
+                                                                              const T3 &t3, const T4 &t4, const T5 &t5,
+                                                                              const T6 &t6)
+        : Base(t0, t1, t2, t3, t4, t5, t6)
+    {
+    }
+
+    template <class Derived, class Base>
+    template <class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::ConcreteProperty(const T0 &t0, const T1 &t1, const T2 &t2,
+                                                                              const T3 &t3, const T4 &t4, const T5 &t5,
+                                                                              const T6 &t6, const T7 &t7)
+        : Base(t0, t1, t2, t3, t4, t5, t6, t7)
+    {
+    }
+
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base>::~ConcreteProperty()
+    {
+    }
+
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base> &ConcreteProperty<Derived, Base>::operator=(
+        const Property &other)
+    {
+        const Derived *other_t = dynamic_cast<const Derived *>(&other);
+
+        if (!other_t)
+            Base::throwInvalidCast(other);
+
+        return static_cast<Derived *>(this)->operator=(*other_t);
+    }
+
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE bool ConcreteProperty<Derived, Base>::operator==(const Property &other) const
+    {
+        const Derived *other_t = dynamic_cast<const Derived *>(&other);
+
+        if (other_t)
+            return static_cast<const Derived *>(this)->operator==(*other_t);
         else
-            throwInvalidCast(T::typeName());
+            return false;
     }
 
-    return *as_t;
-}
-
-///////
-/////// Implementation of ConcreteProperty<T>
-///////
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::ConcreteProperty() : Base()
-{}
-
-template<class Derived, class Base>
-template<class T0>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::ConcreteProperty(const T0 &t0) : Base(t0)
-{}
-
-template<class Derived, class Base>
-template<class T0, class T1>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::ConcreteProperty(const T0 &t0, const T1 &t1)
-                               : Base(t0,t1)
-{}
-
-template<class Derived, class Base>
-template<class T0, class T1, class T2>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::ConcreteProperty(const T0 &t0, const T1 &t1,
-                                                 const T2 &t2) : Base(t0,t1,t2)
-{}
-
-template<class Derived, class Base>
-template<class T0, class T1, class T2, class T3>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::ConcreteProperty(const T0 &t0, const T1 &t1,
-                                                 const T2 &t2, const T3 &t3)
-                               : Base(t0,t1,t2,t3)
-{}
-
-template<class Derived, class Base>
-template<class T0, class T1, class T2, class T3,
-         class T4>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::ConcreteProperty(const T0 &t0, const T1 &t1,
-                                                 const T2 &t2, const T3 &t3,
-                                                 const T4 &t4)
-                               : Base(t0,t1,t2,t3,t4)
-{}
-
-template<class Derived, class Base>
-template<class T0, class T1, class T2, class T3,
-         class T4, class T5>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::ConcreteProperty(const T0 &t0, const T1 &t1,
-                                                 const T2 &t2, const T3 &t3,
-                                                 const T4 &t4, const T5 &t5)
-                               : Base(t0,t1,t2,t3,t4,t5)
-{}
-
-template<class Derived, class Base>
-template<class T0, class T1, class T2, class T3,
-         class T4, class T5, class T6>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::ConcreteProperty(const T0 &t0, const T1 &t1,
-                                                 const T2 &t2, const T3 &t3,
-                                                 const T4 &t4, const T5 &t5,
-                                                 const T6 &t6)
-                               : Base(t0,t1,t2,t3,t4,t5,t6)
-{}
-
-template<class Derived, class Base>
-template<class T0, class T1, class T2, class T3,
-         class T4, class T5, class T6, class T7>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::ConcreteProperty(const T0 &t0, const T1 &t1,
-                                                 const T2 &t2, const T3 &t3,
-                                                 const T4 &t4, const T5 &t5,
-                                                 const T6 &t6, const T7 &t7)
-                               : Base(t0,t1,t2,t3,t4,t5,t6,t7)
-{}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>::~ConcreteProperty()
-{}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>&
-ConcreteProperty<Derived,Base>::operator=(const Property &other)
-{
-    const Derived* other_t = dynamic_cast<const Derived*>(&other);
-
-    if (!other_t)
-        Base::throwInvalidCast(other);
-
-    return static_cast<Derived*>(this)->operator=(*other_t);
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-bool ConcreteProperty<Derived,Base>::operator==(const Property &other) const
-{
-    const Derived* other_t = dynamic_cast<const Derived*>(&other);
-
-    if (other_t)
-        return static_cast<const Derived*>(this)->operator==(*other_t);
-    else
-        return false;
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-bool ConcreteProperty<Derived,Base>::operator!=(const Property &other) const
-{
-    const Derived* other_t = dynamic_cast<const Derived*>(&other);
-
-    if (other_t)
-        return static_cast<const Derived*>(this)->operator!=(*other_t);
-    else
-        return true;
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-const char* ConcreteProperty<Derived,Base>::what() const
-{
-    return Derived::typeName();
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>* ConcreteProperty<Derived,Base>::clone() const
-{
-    return new Derived( static_cast<const Derived&>(*this) );
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>* ConcreteProperty<Derived,Base>::create() const
-{
-    return new Derived();
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-void ConcreteProperty<Derived,Base>::copy(const Property &other)
-{
-    ConcreteProperty<Derived,Base>::operator=(other);
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-bool ConcreteProperty<Derived,Base>::equals(const Property &other) const
-{
-    return ConcreteProperty<Derived,Base>::operator==(other);
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-void ConcreteProperty<Derived,Base>::save(QDataStream &ds) const
-{
-    ds << static_cast<const Derived&>(*this);
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-void ConcreteProperty<Derived,Base>::load(QDataStream &ds)
-{
-    ds >> static_cast<Derived&>(*this);
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-ConcreteProperty<Derived,Base>&
-ConcreteProperty<Derived,Base>::operator=(const ConcreteProperty<Derived,Base> &other)
-{
-    Base::operator=(other);
-    return *this;
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-bool ConcreteProperty<Derived,Base>::operator==(
-                                    const ConcreteProperty<Derived,Base> &other) const
-{
-    return Base::operator==(other);
-}
-
-template<class Derived, class Base>
-SIRE_OUTOFLINE_TEMPLATE
-bool ConcreteProperty<Derived,Base>::operator!=(
-                                    const ConcreteProperty<Derived,Base> &other) const
-{
-    return Base::operator!=(other);
-}
-
-///////
-/////// Implementation of PropPtr<T>
-///////
-
-/** Assert that this is sane - this is to make sure that the
-    Property really is derived from 'T' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void PropPtr<T>::assertSane() const
-{
-    const Property &p = PropPtrBase::read();
-
-    if (not p.isA<T>())
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE bool ConcreteProperty<Derived, Base>::operator!=(const Property &other) const
     {
-        PropPtrBase::throwCastingError( p.what(), T::typeName() );
+        const Derived *other_t = dynamic_cast<const Derived *>(&other);
+
+        if (other_t)
+            return static_cast<const Derived *>(this)->operator!=(*other_t);
+        else
+            return true;
     }
-}
 
-/** Return the null object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T> PropPtr<T>::null()
-{
-    return PropPtr<T>( T::null() );
-}
-
-/** Return whether this is the null object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool PropPtr<T>::isNull() const
-{
-    return PropPtrBase::operator==( T::null() );
-}
-
-/** Null constructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>::PropPtr() : PropPtrBase( PropPtr<T>::null() )
-{}
-
-/** Construct from the object 'obj' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>::PropPtr(const T &obj) : PropPtrBase(obj)
-{}
-
-/** Construct from a pointer to the passed object 'obj' - this
-    takes over ownership of the pointer and can delete it at any time */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>::PropPtr(T *obj) : PropPtrBase(obj)
-{}
-
-/** Construct from the passed property
-
-    \throw SireError::invalid_cast
-*/
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>::PropPtr(const Property &property) : PropPtrBase(property)
-{
-    this->assertSane();
-}
-
-/** Construct from a pointer of another type */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>::PropPtr(const PropPtrBase &other) : PropPtrBase(other)
-{
-    this->assertSane();
-}
-
-/** Copy constructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>::PropPtr(const PropPtr<T> &other) : PropPtrBase(other)
-{}
-
-/** Destructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>::~PropPtr()
-{}
-
-/** Copy assignment operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>& PropPtr<T>::operator=(const PropPtr<T> &other)
-{
-    PropPtrBase::operator=(other);
-    return *this;
-}
-
-/** Create a pointer that points to the object 'obj' (or a copy, if this
-    object is on the stack) */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>& PropPtr<T>::operator=(const T &obj)
-{
-    return this->operator=( PropPtr<T>(obj) );
-}
-
-/** Create a pointer that points to the object 'obj' - this takes
-    over ownership of 'obj' and can delete it at any time */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>& PropPtr<T>::operator=(T *obj)
-{
-    return this->operator=( PropPtr<T>(obj) );
-}
-
-/** Construct from the passed property
-
-    \throw SireError::invalid_cast
-*/
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>& PropPtr<T>::operator=(const Property &property)
-{
-    return this->operator=( PropPtr<T>(property) );
-}
-
-/** Construct from the passed pointer to a property */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>& PropPtr<T>::operator=(const PropPtrBase &property)
-{
-    return this->operator=( PropPtr<T>(property) );
-}
-
-/** Return a reference to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& PropPtr<T>::read() const
-{
-    //This is only safe as everything in this class ensures that
-    //the base pointer really is a pointer to the derived type 'T' */
-    return static_cast<const T&>( PropPtrBase::read() );
-}
-
-/** Return an editable reference to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T& PropPtr<T>::edit()
-{
-    //This is only safe as everything in this class ensures that
-    //the base pointer really is a pointer to the derived type 'T' */
-    return static_cast<T&>( PropPtrBase::edit() );
-}
-
-/** Return the raw pointer to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T* PropPtr<T>::operator->() const
-{
-    return &(this->read());
-}
-
-/** Return a reference to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& PropPtr<T>::operator*() const
-{
-    return this->read();
-}
-
-/** Return the raw pointer to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T* PropPtr<T>::data() const
-{
-    return &(this->read());
-}
-
-/** Return the raw pointer to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T* PropPtr<T>::constData() const
-{
-    return &(this->read());
-}
-
-/** Return a modifiable pointer to the data */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T* PropPtr<T>::data()
-{
-    return &(this->edit());
-}
-
-/** Allow automatic casting to a T() */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-PropPtr<T>::operator const T&() const
-{
-    return this->read();
-}
-
-///////
-/////// Implementation of GlobalPropPtr<T>
-///////
-
-/** Assert that this is sane - this is to make sure that the
-    Property really is derived from 'T' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void GlobalPropPtr<T>::assertSane() const
-{
-    const Property &p = GlobalPropPtrBase::read();
-
-    if (not p.isA<T>())
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE const char *ConcreteProperty<Derived, Base>::what() const
     {
-        GlobalPropPtrBase::throwCastingError( p.what(), T::typeName() );
+        return Derived::typeName();
     }
-}
 
-/** Return the null object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T> GlobalPropPtr<T>::null()
-{
-    return GlobalPropPtr<T>( T::null() );
-}
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base> *ConcreteProperty<Derived, Base>::clone() const
+    {
+        return new Derived(static_cast<const Derived &>(*this));
+    }
 
-/** Return whether this is the null object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool GlobalPropPtr<T>::isNull() const
-{
-    return GlobalPropPtrBase::operator==( T::null() );
-}
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base> *ConcreteProperty<Derived, Base>::create() const
+    {
+        return new Derived();
+    }
 
-/** Null constructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>::GlobalPropPtr() : GlobalPropPtrBase( GlobalPropPtr<T>::null() )
-{}
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE void ConcreteProperty<Derived, Base>::copy(const Property &other)
+    {
+        ConcreteProperty<Derived, Base>::operator=(other);
+    }
 
-/** Construct from the object 'obj' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>::GlobalPropPtr(const T &obj) : GlobalPropPtrBase(obj)
-{}
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE bool ConcreteProperty<Derived, Base>::equals(const Property &other) const
+    {
+        return ConcreteProperty<Derived, Base>::operator==(other);
+    }
 
-/** Construct from a pointer to the passed object 'obj' - this
-    takes over ownership of the pointer and can delete it at any time */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>::GlobalPropPtr(T *obj) : GlobalPropPtrBase(obj)
-{}
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE void ConcreteProperty<Derived, Base>::save(QDataStream &ds) const
+    {
+        ds << static_cast<const Derived &>(*this);
+    }
 
-/** Construct from the passed property
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE void ConcreteProperty<Derived, Base>::load(QDataStream &ds)
+    {
+        ds >> static_cast<Derived &>(*this);
+    }
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>::GlobalPropPtr(const Property &property) : GlobalPropPtrBase(property)
-{
-    this->assertSane();
-}
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE ConcreteProperty<Derived, Base> &ConcreteProperty<Derived, Base>::operator=(
+        const ConcreteProperty<Derived, Base> &other)
+    {
+        Base::operator=(other);
+        return *this;
+    }
 
-/** Construct from a pointer of another type */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>::GlobalPropPtr(const GlobalPropPtrBase &other) : GlobalPropPtrBase(other)
-{
-    this->assertSane();
-}
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE bool ConcreteProperty<Derived, Base>::operator==(
+        const ConcreteProperty<Derived, Base> &other) const
+    {
+        return Base::operator==(other);
+    }
 
-/** Copy constructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>::GlobalPropPtr(const GlobalPropPtr<T> &other) : GlobalPropPtrBase(other)
-{}
+    template <class Derived, class Base>
+    SIRE_OUTOFLINE_TEMPLATE bool ConcreteProperty<Derived, Base>::operator!=(
+        const ConcreteProperty<Derived, Base> &other) const
+    {
+        return Base::operator!=(other);
+    }
 
-/** Destructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>::~GlobalPropPtr()
-{}
+    ///////
+    /////// Implementation of PropPtr<T>
+    ///////
 
-/** Copy assignment operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>& GlobalPropPtr<T>::operator=(const GlobalPropPtr<T> &other)
-{
-    GlobalPropPtrBase::operator=(other);
-    return *this;
-}
+    /** Assert that this is sane - this is to make sure that the
+        Property really is derived from 'T' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void PropPtr<T>::assertSane() const
+    {
+        const Property &p = PropPtrBase::read();
 
-/** Create a pointer that points to the object 'obj' (or a copy, if this
-    object is on the stack) */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>& GlobalPropPtr<T>::operator=(const T &obj)
-{
-    return this->operator=( GlobalPropPtr<T>(obj) );
-}
+        if (not p.isA<T>())
+        {
+            PropPtrBase::throwCastingError(p.what(), T::typeName());
+        }
+    }
 
-/** Create a pointer that points to the object 'obj' - this takes
-    over ownership of 'obj' and can delete it at any time */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>& GlobalPropPtr<T>::operator=(T *obj)
-{
-    return this->operator=( GlobalPropPtr<T>(obj) );
-}
+    /** Return the null object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T> PropPtr<T>::null()
+    {
+        return PropPtr<T>(T::null());
+    }
 
-/** Construct from the passed property
+    /** Return whether this is the null object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool PropPtr<T>::isNull() const
+    {
+        return PropPtrBase::operator==(T::null());
+    }
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>& GlobalPropPtr<T>::operator=(const Property &property)
-{
-    return this->operator=( GlobalPropPtr<T>(property) );
-}
+    /** Null constructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T>::PropPtr() : PropPtrBase(PropPtr<T>::null())
+    {
+    }
 
-/** Construct from the passed pointer to a property */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>& GlobalPropPtr<T>::operator=(const GlobalPropPtrBase &property)
-{
-    return this->operator=( GlobalPropPtr<T>(property) );
-}
+    /** Construct from the object 'obj' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T>::PropPtr(const T &obj) : PropPtrBase(obj)
+    {
+    }
 
-/** Return a reference to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& GlobalPropPtr<T>::read() const
-{
-    //This is only safe as everything in this class ensures that
-    //the base pointer really is a pointer to the derived type 'T' */
-    return static_cast<const T&>( GlobalPropPtrBase::read() );
-}
+    /** Construct from a pointer to the passed object 'obj' - this
+        takes over ownership of the pointer and can delete it at any time */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T>::PropPtr(T *obj) : PropPtrBase(obj)
+    {
+    }
 
-/** Return the raw pointer to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T* GlobalPropPtr<T>::operator->() const
-{
-    return &(this->read());
-}
+    /** Construct from the passed property
 
-/** Return a reference to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& GlobalPropPtr<T>::operator*() const
-{
-    return this->read();
-}
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T>::PropPtr(const Property &property) : PropPtrBase(property)
+    {
+        this->assertSane();
+    }
 
-/** Return the raw pointer to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T* GlobalPropPtr<T>::data() const
-{
-    return &(this->read());
-}
+    /** Construct from a pointer of another type */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T>::PropPtr(const PropPtrBase &other) : PropPtrBase(other)
+    {
+        this->assertSane();
+    }
 
-/** Return the raw pointer to the object */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T* GlobalPropPtr<T>::constData() const
-{
-    return &(this->read());
-}
+    /** Copy constructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T>::PropPtr(const PropPtr<T> &other) : PropPtrBase(other)
+    {
+    }
 
-/** Allow automatic casting to a T() */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-GlobalPropPtr<T>::operator const T&() const
-{
-    return this->read();
-}
+    /** Destructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T>::~PropPtr()
+    {
+    }
+
+    /** Copy assignment operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T> &PropPtr<T>::operator=(const PropPtr<T> &other)
+    {
+        PropPtrBase::operator=(other);
+        return *this;
+    }
+
+    /** Create a pointer that points to the object 'obj' (or a copy, if this
+        object is on the stack) */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T> &PropPtr<T>::operator=(const T &obj)
+    {
+        return this->operator=(PropPtr<T>(obj));
+    }
+
+    /** Create a pointer that points to the object 'obj' - this takes
+        over ownership of 'obj' and can delete it at any time */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T> &PropPtr<T>::operator=(T *obj)
+    {
+        return this->operator=(PropPtr<T>(obj));
+    }
+
+    /** Construct from the passed property
+
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T> &PropPtr<T>::operator=(const Property &property)
+    {
+        return this->operator=(PropPtr<T>(property));
+    }
+
+    /** Construct from the passed pointer to a property */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T> &PropPtr<T>::operator=(const PropPtrBase &property)
+    {
+        return this->operator=(PropPtr<T>(property));
+    }
+
+    /** Return a reference to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &PropPtr<T>::read() const
+    {
+        // This is only safe as everything in this class ensures that
+        // the base pointer really is a pointer to the derived type 'T' */
+        return static_cast<const T &>(PropPtrBase::read());
+    }
+
+    /** Return an editable reference to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T &PropPtr<T>::edit()
+    {
+        // This is only safe as everything in this class ensures that
+        // the base pointer really is a pointer to the derived type 'T' */
+        return static_cast<T &>(PropPtrBase::edit());
+    }
+
+    /** Return the raw pointer to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T *PropPtr<T>::operator->() const
+    {
+        return &(this->read());
+    }
+
+    /** Return a reference to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &PropPtr<T>::operator*() const
+    {
+        return this->read();
+    }
+
+    /** Return the raw pointer to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T *PropPtr<T>::data() const
+    {
+        return &(this->read());
+    }
+
+    /** Return the raw pointer to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T *PropPtr<T>::constData() const
+    {
+        return &(this->read());
+    }
+
+    /** Return a modifiable pointer to the data */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T *PropPtr<T>::data()
+    {
+        return &(this->edit());
+    }
+
+    /** Allow automatic casting to a T() */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE PropPtr<T>::operator const T &() const
+    {
+        return this->read();
+    }
+
+    ///////
+    /////// Implementation of GlobalPropPtr<T>
+    ///////
+
+    /** Assert that this is sane - this is to make sure that the
+        Property really is derived from 'T' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void GlobalPropPtr<T>::assertSane() const
+    {
+        const Property &p = GlobalPropPtrBase::read();
+
+        if (not p.isA<T>())
+        {
+            GlobalPropPtrBase::throwCastingError(p.what(), T::typeName());
+        }
+    }
+
+    /** Return the null object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T> GlobalPropPtr<T>::null()
+    {
+        return GlobalPropPtr<T>(T::null());
+    }
+
+    /** Return whether this is the null object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool GlobalPropPtr<T>::isNull() const
+    {
+        return GlobalPropPtrBase::operator==(T::null());
+    }
+
+    /** Null constructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T>::GlobalPropPtr() : GlobalPropPtrBase(GlobalPropPtr<T>::null())
+    {
+    }
+
+    /** Construct from the object 'obj' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T>::GlobalPropPtr(const T &obj) : GlobalPropPtrBase(obj)
+    {
+    }
+
+    /** Construct from a pointer to the passed object 'obj' - this
+        takes over ownership of the pointer and can delete it at any time */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T>::GlobalPropPtr(T *obj) : GlobalPropPtrBase(obj)
+    {
+    }
+
+    /** Construct from the passed property
+
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T>::GlobalPropPtr(const Property &property) : GlobalPropPtrBase(property)
+    {
+        this->assertSane();
+    }
+
+    /** Construct from a pointer of another type */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T>::GlobalPropPtr(const GlobalPropPtrBase &other) : GlobalPropPtrBase(other)
+    {
+        this->assertSane();
+    }
+
+    /** Copy constructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T>::GlobalPropPtr(const GlobalPropPtr<T> &other) : GlobalPropPtrBase(other)
+    {
+    }
+
+    /** Destructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T>::~GlobalPropPtr()
+    {
+    }
+
+    /** Copy assignment operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T> &GlobalPropPtr<T>::operator=(const GlobalPropPtr<T> &other)
+    {
+        GlobalPropPtrBase::operator=(other);
+        return *this;
+    }
+
+    /** Create a pointer that points to the object 'obj' (or a copy, if this
+        object is on the stack) */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T> &GlobalPropPtr<T>::operator=(const T &obj)
+    {
+        return this->operator=(GlobalPropPtr<T>(obj));
+    }
+
+    /** Create a pointer that points to the object 'obj' - this takes
+        over ownership of 'obj' and can delete it at any time */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T> &GlobalPropPtr<T>::operator=(T *obj)
+    {
+        return this->operator=(GlobalPropPtr<T>(obj));
+    }
+
+    /** Construct from the passed property
+
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T> &GlobalPropPtr<T>::operator=(const Property &property)
+    {
+        return this->operator=(GlobalPropPtr<T>(property));
+    }
+
+    /** Construct from the passed pointer to a property */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T> &GlobalPropPtr<T>::operator=(const GlobalPropPtrBase &property)
+    {
+        return this->operator=(GlobalPropPtr<T>(property));
+    }
+
+    /** Return a reference to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &GlobalPropPtr<T>::read() const
+    {
+        // This is only safe as everything in this class ensures that
+        // the base pointer really is a pointer to the derived type 'T' */
+        return static_cast<const T &>(GlobalPropPtrBase::read());
+    }
+
+    /** Return the raw pointer to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T *GlobalPropPtr<T>::operator->() const
+    {
+        return &(this->read());
+    }
+
+    /** Return a reference to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &GlobalPropPtr<T>::operator*() const
+    {
+        return this->read();
+    }
+
+    /** Return the raw pointer to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T *GlobalPropPtr<T>::data() const
+    {
+        return &(this->read());
+    }
+
+    /** Return the raw pointer to the object */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T *GlobalPropPtr<T>::constData() const
+    {
+        return &(this->read());
+    }
+
+    /** Allow automatic casting to a T() */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE GlobalPropPtr<T>::operator const T &() const
+    {
+        return this->read();
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-/** This is the specialised pointer that is used to hold a basic
-    Property object
+    /** This is the specialised pointer that is used to hold a basic
+        Property object
 
-    @author Christopher Woods
-*/
-template<>
-class SIREBASE_EXPORT PropPtr<Property> : public PropPtrBase
-{
-public:
-    PropPtr();
+        @author Christopher Woods
+    */
+    template <>
+    class SIREBASE_EXPORT PropPtr<Property> : public PropPtrBase
+    {
+    public:
+        PropPtr();
 
-    PropPtr(const Property &property);
-    PropPtr(Property *property);
+        PropPtr(const Property &property);
+        PropPtr(Property *property);
 
-    PropPtr(const PropPtrBase &other);
+        PropPtr(const PropPtrBase &other);
 
-    PropPtr(const PropPtr<Property> &other);
+        PropPtr(const PropPtr<Property> &other);
 
-    ~PropPtr();
+        ~PropPtr();
 
-    PropPtr<Property>& operator=(const Property &property);
-    PropPtr<Property>& operator=(Property *property);
+        PropPtr<Property> &operator=(const Property &property);
+        PropPtr<Property> &operator=(Property *property);
 
-    PropPtr<Property>& operator=(const PropPtr<Property> &other);
-    PropPtr<Property>& operator=(const PropPtrBase &property);
+        PropPtr<Property> &operator=(const PropPtr<Property> &other);
+        PropPtr<Property> &operator=(const PropPtrBase &property);
 
-    const Property* operator->() const;
-    const Property& operator*() const;
+        const Property *operator->() const;
+        const Property &operator*() const;
 
-    const Property& read() const;
-    Property& edit();
+        const Property &read() const;
+        Property &edit();
 
-    const Property* data() const;
-    const Property* constData() const;
+        const Property *data() const;
+        const Property *constData() const;
 
-    Property* data();
+        Property *data();
 
-    operator const Property&() const;
+        operator const Property &() const;
 
-    bool isNull() const;
+        bool isNull() const;
 
-    static PropPtr<Property> null();
+        static PropPtr<Property> null();
 
-    void assertSane() const
-    {}
-};
+        void assertSane() const
+        {
+        }
+    };
 
-/** This is the specialised global pointer that is used to hold a basic
-    Property object
+    /** This is the specialised global pointer that is used to hold a basic
+        Property object
 
-    @author Christopher Woods
-*/
-template<>
-class SIREBASE_EXPORT GlobalPropPtr<Property> : public GlobalPropPtrBase
-{
-public:
-    GlobalPropPtr();
+        @author Christopher Woods
+    */
+    template <>
+    class SIREBASE_EXPORT GlobalPropPtr<Property> : public GlobalPropPtrBase
+    {
+    public:
+        GlobalPropPtr();
 
-    GlobalPropPtr(const Property &property);
-    GlobalPropPtr(Property *property);
+        GlobalPropPtr(const Property &property);
+        GlobalPropPtr(Property *property);
 
-    GlobalPropPtr(const GlobalPropPtrBase &other);
+        GlobalPropPtr(const GlobalPropPtrBase &other);
 
-    GlobalPropPtr(const GlobalPropPtr<Property> &other);
+        GlobalPropPtr(const GlobalPropPtr<Property> &other);
 
-    ~GlobalPropPtr();
+        ~GlobalPropPtr();
 
-    GlobalPropPtr<Property>& operator=(const Property &property);
-    GlobalPropPtr<Property>& operator=(Property *property);
+        GlobalPropPtr<Property> &operator=(const Property &property);
+        GlobalPropPtr<Property> &operator=(Property *property);
 
-    GlobalPropPtr<Property>& operator=(const GlobalPropPtr<Property> &other);
-    GlobalPropPtr<Property>& operator=(const GlobalPropPtrBase &property);
+        GlobalPropPtr<Property> &operator=(const GlobalPropPtr<Property> &other);
+        GlobalPropPtr<Property> &operator=(const GlobalPropPtrBase &property);
 
-    const Property* operator->() const;
-    const Property& operator*() const;
+        const Property *operator->() const;
+        const Property &operator*() const;
 
-    const Property& read() const;
+        const Property &read() const;
 
-    const Property* data() const;
-    const Property* constData() const;
+        const Property *data() const;
+        const Property *constData() const;
 
-    operator const Property&() const;
+        operator const Property &() const;
 
-    bool isNull() const;
+        bool isNull() const;
 
-    static GlobalPropPtr<Property> null();
+        static GlobalPropPtr<Property> null();
 
-    void assertSane() const
-    {}
-};
+        void assertSane() const
+        {
+        }
+    };
 
-/** Create the type to hold a pointer to a generic Property */
-typedef PropPtr<Property> PropertyPtr;
+    /** Create the type to hold a pointer to a generic Property */
+    typedef PropPtr<Property> PropertyPtr;
 
-/** Create the type to hold a global pointer to a generic Property */
-typedef GlobalPropPtr<Property> GlobalPropertyPtr;
+    /** Create the type to hold a global pointer to a generic Property */
+    typedef GlobalPropPtr<Property> GlobalPropertyPtr;
 
 } // end of namespace SireBase
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
 /** Serialise a property pointer to a binary datastream */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator<<(QDataStream &ds, const SireBase::PropPtr<T> &prop)
+template <class T>
+SIRE_OUTOFLINE_TEMPLATE QDataStream &operator<<(QDataStream &ds, const SireBase::PropPtr<T> &prop)
 {
-    ds << static_cast<const SireBase::PropPtrBase&>(prop);
+    ds << static_cast<const SireBase::PropPtrBase &>(prop);
     return ds;
 }
 
 /** Read a property pointer from a binary datastream */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator>>(QDataStream &ds, SireBase::PropPtr<T> &prop)
+template <class T>
+SIRE_OUTOFLINE_TEMPLATE QDataStream &operator>>(QDataStream &ds, SireBase::PropPtr<T> &prop)
 {
     SireBase::PropPtr<T> ptr;
 
-    ds >> static_cast<SireBase::PropPtrBase&>(ptr);
+    ds >> static_cast<SireBase::PropPtrBase &>(ptr);
 
     ptr.assertSane();
 
@@ -1252,22 +1192,20 @@ QDataStream& operator>>(QDataStream &ds, SireBase::PropPtr<T> &prop)
 }
 
 /** Serialise a property pointer to a binary datastream */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator<<(QDataStream &ds, const SireBase::GlobalPropPtr<T> &prop)
+template <class T>
+SIRE_OUTOFLINE_TEMPLATE QDataStream &operator<<(QDataStream &ds, const SireBase::GlobalPropPtr<T> &prop)
 {
-    ds << static_cast<const SireBase::GlobalPropPtrBase&>(prop);
+    ds << static_cast<const SireBase::GlobalPropPtrBase &>(prop);
     return ds;
 }
 
 /** Read a property pointer from a binary datastream */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator>>(QDataStream &ds, SireBase::GlobalPropPtr<T> &prop)
+template <class T>
+SIRE_OUTOFLINE_TEMPLATE QDataStream &operator>>(QDataStream &ds, SireBase::GlobalPropPtr<T> &prop)
 {
     SireBase::GlobalPropPtr<T> ptr;
 
-    ds >> static_cast<SireBase::GlobalPropPtrBase&>(ptr);
+    ds >> static_cast<SireBase::GlobalPropPtrBase &>(ptr);
 
     ptr.assertSane();
 
@@ -1281,10 +1219,10 @@ QDataStream& operator>>(QDataStream &ds, SireBase::GlobalPropPtr<T> &prop)
 Q_DECLARE_METATYPE(SireBase::NullProperty);
 Q_DECLARE_METATYPE(SireBase::PropertyPtr);
 
-SIRE_EXPOSE_CLASS( SireBase::Property )
-SIRE_EXPOSE_CLASS( SireBase::NullProperty )
+SIRE_EXPOSE_CLASS(SireBase::Property)
+SIRE_EXPOSE_CLASS(SireBase::NullProperty)
 
-SIRE_EXPOSE_PROPERTY( SireBase::PropertyPtr, SireBase::Property )
+SIRE_EXPOSE_PROPERTY(SireBase::PropertyPtr, SireBase::Property)
 
 SIRE_END_HEADER
 

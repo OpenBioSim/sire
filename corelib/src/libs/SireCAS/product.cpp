@@ -26,17 +26,17 @@
 \*********************************************/
 
 #include "product.h"
-#include "sum.h"
+#include "complexvalues.h"
 #include "expression.h"
 #include "expressions.h"
+#include "functions.h"
+#include "i.h"
+#include "identities.h"
+#include "integrationconstant.h"
+#include "power.h"
+#include "sum.h"
 #include "symbol.h"
 #include "symbols.h"
-#include "functions.h"
-#include "power.h"
-#include "integrationconstant.h"
-#include "complexvalues.h"
-#include "identities.h"
-#include "i.h"
 
 #include "SireCAS/errors.h"
 
@@ -54,15 +54,13 @@ static const RegisterMetaType<Product> r_product;
 /** Return a hash for this product */
 uint Product::hash() const
 {
-    return ( r_product.magicID() << 16) | ( (numparts.count()<<8) & 0x0000FF00 )
-                                        | ( denomparts.count() & 0x000000FF );
+    return (r_product.magicID() << 16) | ((numparts.count() << 8) & 0x0000FF00) | (denomparts.count() & 0x000000FF);
 }
 
 /** Serialise a Product to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Product &product)
 {
-    writeHeader(ds, r_product, 1)
-          << product.powers << product.strtval << static_cast<const ExBase&>(product);
+    writeHeader(ds, r_product, 1) << product.powers << product.strtval << static_cast<const ExBase &>(product);
 
     return ds;
 }
@@ -74,10 +72,9 @@ QDataStream &operator>>(QDataStream &ds, Product &product)
 
     if (v == 1)
     {
-        ds >> product.powers >> product.strtval
-           >> static_cast<ExBase&>(product);
+        ds >> product.powers >> product.strtval >> static_cast<ExBase &>(product);
 
-        //rebuild numparts and denomparts from powers
+        // rebuild numparts and denomparts from powers
         product.rebuild();
     }
     else
@@ -88,45 +85,43 @@ QDataStream &operator>>(QDataStream &ds, Product &product)
 
 /** Construct an empty, zero Product */
 Product::Product() : ExBase(), strtval(0)
-{}
+{
+}
 
 /** Construct the product of two expressions */
-Product::Product(const Expression &ex0, const Expression &ex1)
-        : ExBase(), strtval(1)
+Product::Product(const Expression &ex0, const Expression &ex1) : ExBase(), strtval(1)
 {
     multiply(ex0);
     multiply(ex1);
 }
 
 /** Construct the product of all of the expressions in 'expressions' */
-Product::Product(const Expressions &expressions)
-        : ExBase(), strtval(1)
+Product::Product(const Expressions &expressions) : ExBase(), strtval(1)
 {
     int n = expressions.count();
 
-    for (int i=0; i<n; ++i)
+    for (int i = 0; i < n; ++i)
         multiply(expressions.at(i));
 }
 
 /** Copy constructor */
 Product::Product(const Product &other)
-        : ExBase(), powers(other.powers), numparts(other.numparts),
-          denomparts(other.denomparts), strtval(other.strtval)
-{}
+    : ExBase(), powers(other.powers), numparts(other.numparts), denomparts(other.denomparts), strtval(other.strtval)
+{
+}
 
 /** Destructor */
 Product::~Product()
-{}
+{
+}
 
 /** Comparison operator */
 bool Product::operator==(const ExBase &other) const
 {
-    const Product *otherprod = dynamic_cast<const Product*>(&other);
+    const Product *otherprod = dynamic_cast<const Product *>(&other);
 
-    return otherprod != 0 and typeid(*this).name() == typeid(other).name() and
-               strtval == otherprod->strtval and
-                  powers == otherprod->powers;
-
+    return otherprod != 0 and typeid(*this).name() == typeid(other).name() and strtval == otherprod->strtval and
+           powers == otherprod->powers;
 }
 
 /** Evaluate this product */
@@ -136,12 +131,10 @@ double Product::evaluate(const Values &values) const
         return 0;
     else
     {
-        //evaluate the numerator
+        // evaluate the numerator
         double numerator = strtval;
 
-        for ( QHash<Expression,Expression>::const_iterator it = numparts.begin();
-              it != numparts.end();
-              ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
             numerator *= it->evaluate(values);
         }
@@ -149,16 +142,14 @@ double Product::evaluate(const Values &values) const
         if (denomparts.count() == 0 or SireMaths::isZero(numerator))
             return numerator;
 
-        //evaluate the denominator
+        // evaluate the denominator
         double denominator = 1.0;
-        for ( QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-              it != denomparts.end();
-              ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
             denominator *= it->evaluate(values);
         }
 
-        //return the ratio (eventually we could try and be more clever about this...)
+        // return the ratio (eventually we could try and be more clever about this...)
         return numerator / denominator;
     }
 }
@@ -172,12 +163,10 @@ Complex Product::evaluate(const ComplexValues &values) const
         return Complex(strtval);
     else
     {
-        //evaluate the numerator
+        // evaluate the numerator
         Complex numerator(strtval);
 
-        for ( QHash<Expression,Expression>::const_iterator it = numparts.begin();
-              it != numparts.end();
-              ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
             numerator *= it->evaluate(values);
         }
@@ -185,16 +174,14 @@ Complex Product::evaluate(const ComplexValues &values) const
         if (numerator.isZero() or denomparts.count() == 0)
             return numerator;
 
-        //evaluate the denominator
+        // evaluate the denominator
         Complex denominator(1);
-        for ( QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-              it != denomparts.end();
-              ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
             denominator *= it->evaluate(values);
         }
 
-        //return the ratio (eventually we could try and be more clever about this...)
+        // return the ratio (eventually we could try and be more clever about this...)
         return numerator / denominator;
     }
 }
@@ -203,9 +190,11 @@ Complex Product::evaluate(const ComplexValues &values) const
 Expression Product::integrate(const Symbol &symbol) const
 {
     if (this->isFunction(symbol))
-        throw SireCAS::unavailable_integral(QObject::tr(
-            "Integral of a product has yet to be coded. Cannot integrate \"%1\" with "
-            "respect to %2").arg(toString(),symbol.toString()), CODELOC);
+        throw SireCAS::unavailable_integral(
+            QObject::tr("Integral of a product has yet to be coded. Cannot integrate \"%1\" with "
+                        "respect to %2")
+                .arg(toString(), symbol.toString()),
+            CODELOC);
 
     return *this * symbol;
 }
@@ -220,18 +209,14 @@ Expression Product::substitute(const Identities &identities) const
         Product subproduct;
         subproduct.strtval = strtval;
 
-        for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-             it != numparts.end();
-             ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
-            subproduct.multiply( it->substitute(identities) );
+            subproduct.multiply(it->substitute(identities));
         }
 
-        for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-             it != denomparts.end();
-             ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
-            subproduct.multiply( it->invert().substitute(identities) );
+            subproduct.multiply(it->invert().substitute(identities));
         }
 
         return subproduct.reduce();
@@ -242,21 +227,21 @@ Expression Product::substitute(const Identities &identities) const
     common factors - if you want to do this then call the 'collapse' function. */
 Expression Product::reduce() const
 {
-    //return nothing if this is zero
+    // return nothing if this is zero
     if (isConstant())
         return Expression(evaluate(ComplexValues()));
     else if (numparts.count() == 1 and denomparts.count() == 0)
     {
-        //product only contains a single numerator
+        // product only contains a single numerator
         return numparts.values()[0].multiply(strtval);
     }
     else if (denomparts.count() == 1 and numparts.count() == 0)
     {
-        //product only contains the denominator
+        // product only contains the denominator
         return denomparts.values()[0].invert().multiply(strtval);
     }
 
-    //move the 'strtval' into the expression
+    // move the 'strtval' into the expression
     Product p(*this);
     p.strtval = 1;
 
@@ -268,7 +253,7 @@ void Product::multiply(double val)
 {
     strtval *= val;
 
-    if ( SireMaths::isZero(strtval) )
+    if (SireMaths::isZero(strtval))
     {
         numparts.clear();
         denomparts.clear();
@@ -280,13 +265,13 @@ void Product::multiply(double val)
     '0' if there is no expression of the form core^power in this Product */
 Expression Product::take(const Expression &core)
 {
-    //remove this core from numparts and denomparts (if it exists)
+    // remove this core from numparts and denomparts (if it exists)
     numparts.remove(core);
     denomparts.remove(core);
 
-    //remove and return the current expression from powers - this returns
-    //Expression(0) if an expression of the form 'core^power' is
-    //not in this Product
+    // remove and return the current expression from powers - this returns
+    // Expression(0) if an expression of the form 'core^power' is
+    // not in this Product
     return powers.take(core);
 }
 
@@ -294,7 +279,7 @@ Expression Product::take(const Expression &core)
     is performed by this function */
 void Product::multiplyPvt(const Expression &ex, const Expression &power)
 {
-    //get the old power
+    // get the old power
     Expression oldpower = this->take(ex);
 
     Expression newpower;
@@ -302,72 +287,72 @@ void Product::multiplyPvt(const Expression &ex, const Expression &power)
     if (oldpower.isZero())
         newpower = power;
     else
-        //calculate the new power
+        // calculate the new power
         newpower = oldpower + power;
 
     if (newpower.isConstant())
     {
         if (ex.base().isA<IntegrationConstant>())
         {
-            //we only want C^1
-            powers.insert( ex.base(), Expression(1) );
-            numparts.insert( ex.base(), ex.base() );
+            // we only want C^1
+            powers.insert(ex.base(), Expression(1));
+            numparts.insert(ex.base(), ex.base());
         }
         else
         {
-            //calculate the power
+            // calculate the power
             Complex powerval = newpower.evaluate(ComplexValues());
 
-            //is this zero?
+            // is this zero?
             if (powerval.isZero())
             {
-                //x^0 == 1, so leaves the product
+                // x^0 == 1, so leaves the product
                 return;
             }
-            //is this i?
+            // is this i?
             else if (ex.base().isA<I>())
             {
-                Complex z = SireMaths::pow( Complex(0,1), powerval );
+                Complex z = SireMaths::pow(Complex(0, 1), powerval);
 
                 if (z.isReal())
                     multiply(z.real());
                 else if (SireMaths::isZero(z.real()))
                 {
                     multiply(z.imag());
-                    powers.insert( ex.base(), Expression(1) );
-                    numparts.insert( ex.base(), ex.base() );
+                    powers.insert(ex.base(), Expression(1));
+                    numparts.insert(ex.base(), ex.base());
                 }
                 else
                 {
                     Expression cex = z.real() + z.imag() * I();
-                    powers.insert( cex.base(), Expression(1) );
-                    numparts.insert( cex.base(), Expression(1) );
+                    powers.insert(cex.base(), Expression(1));
+                    numparts.insert(cex.base(), Expression(1));
                 }
             }
             else if (powerval.isReal())
             {
                 double realpower = powerval.real();
 
-                powers.insert( ex, Expression(realpower) );
+                powers.insert(ex, Expression(realpower));
 
                 if (realpower > 0)
-                    numparts.insert( ex, ex.pow(realpower) );
+                    numparts.insert(ex, ex.pow(realpower));
                 else
-                    denomparts.insert( ex, ex.pow(-realpower) );
+                    denomparts.insert(ex, ex.pow(-realpower));
             }
             else
             {
-                powers.insert( ex, Expression(powerval) );
-                numparts.insert( ex, ex.pow(powerval) );
+                powers.insert(ex, Expression(powerval));
+                numparts.insert(ex, ex.pow(powerval));
             }
         }
     }
     else
     {
-        //just put the power on the top
-        numparts.insert( ex, ex.pow(newpower) );
+        // just put the power on the top
+        numparts.insert(ex, ex.pow(newpower));
 
-        //save the expression and its power
+        // save the expression and its power
         powers.insert(ex, newpower);
     }
 }
@@ -377,22 +362,22 @@ void Product::multiply(const Complex &complex)
 {
     if (complex.isReal())
         multiply(complex.real());
-    else if ( SireMaths::isZero(complex.real()) )
-        multiplyPvt( complex.imag() * I(), Expression(1) );
+    else if (SireMaths::isZero(complex.real()))
+        multiplyPvt(complex.imag() * I(), Expression(1));
     else
-        multiplyPvt( complex.real() + complex.imag()*I(), Expression(1) );
+        multiplyPvt(complex.real() + complex.imag() * I(), Expression(1));
 }
 
 /** Internal function: Multiply by a number raised to a power */
 void Product::multiply(double val, const Expression &power)
 {
-    if (SireMaths::areEqual(val,1.0))
-        //nothing needs doing as 1^n == 1, even if n is complex
+    if (SireMaths::areEqual(val, 1.0))
+        // nothing needs doing as 1^n == 1, even if n is complex
         return;
     else if (power.isConstant())
     {
         Complex powerval = power.evaluate(ComplexValues());
-        multiply( SireMaths::pow(val, powerval) );
+        multiply(SireMaths::pow(val, powerval));
     }
     else
         multiplyPvt(Expression(val), power);
@@ -405,34 +390,32 @@ void Product::multiply(const Complex &complex, const Expression &power)
         multiply(complex.real(), power);
     else if (power.isConstant())
     {
-        multiply( SireMaths::pow(complex, power.evaluate(ComplexValues())) );
+        multiply(SireMaths::pow(complex, power.evaluate(ComplexValues())));
     }
     else
-        multiplyPvt( complex.real() + complex.imag()*I(), power );
+        multiplyPvt(complex.real() + complex.imag() * I(), power);
 }
 
 /** Internal function: Multiply this Product by a Product */
 void Product::multiply(const Product &product, const Expression &power)
 {
-    //first, the strtval of the product
-    multiply( product.strtval, power );
+    // first, the strtval of the product
+    multiply(product.strtval, power);
 
-    //now the product's numerator...
-    for (QHash<Expression,Expression>::const_iterator it = product.numparts.begin();
-         it != product.numparts.end();
+    // now the product's numerator...
+    for (QHash<Expression, Expression>::const_iterator it = product.numparts.begin(); it != product.numparts.end();
          ++it)
     {
-        multiply( it->factor(), power );
-        multiply( it->base(), power );
+        multiply(it->factor(), power);
+        multiply(it->base(), power);
     }
 
-    //finally the denominator
-    for (QHash<Expression,Expression>::const_iterator it = product.denomparts.begin();
-         it != product.denomparts.end();
+    // finally the denominator
+    for (QHash<Expression, Expression>::const_iterator it = product.denomparts.begin(); it != product.denomparts.end();
          ++it)
     {
-        multiply( it->factor(), -power );
-        multiply( it->base(), -power );
+        multiply(it->factor(), -power);
+        multiply(it->base(), -power);
     }
 }
 
@@ -451,16 +434,16 @@ void Product::multiply(const ExpressionBase &base, const Expression &power)
         Expression core = powerfunc.core();
         Expression combined_power = power * powerfunc.power();
 
-        multiply( core.factor(), combined_power );
-        multiply( core.base(), combined_power );
+        multiply(core.factor(), combined_power);
+        multiply(core.base(), combined_power);
     }
     else if (base.isA<Product>())
     {
-        multiply( base.asA<Product>(), power );
+        multiply(base.asA<Product>(), power);
     }
     else
     {
-        multiplyPvt( Expression(base), power );
+        multiplyPvt(Expression(base), power);
     }
 }
 
@@ -468,11 +451,11 @@ void Product::multiply(const ExpressionBase &base, const Expression &power)
 void Product::multiply(const Expression &ex)
 {
     if (SireMaths::isZero(strtval))
-        //no change if we are already equal to zero!
+        // no change if we are already equal to zero!
         return;
     else if (ex.base().isA<Product>())
     {
-        //multiply by the factor on the product
+        // multiply by the factor on the product
         multiply(ex.factor());
 
         const Product &product = ex.base().asA<Product>();
@@ -490,12 +473,12 @@ void Product::multiply(const Expression &ex)
     else if (ex.isConstant())
     {
         Complex constval = ex.evaluate(ComplexValues());
-        this->multiply( constval, Expression(1) );
+        this->multiply(constval, Expression(1));
     }
     else
     {
-        this->multiply( ex.factor() );
-        this->multiply( ex.base(), Expression(1) );
+        this->multiply(ex.factor());
+        this->multiply(ex.base(), Expression(1));
     }
 }
 
@@ -510,14 +493,12 @@ void Product::rebuild()
         return;
     }
 
-    //clear numparts and denomparts...
+    // clear numparts and denomparts...
     numparts.clear();
     denomparts.clear();
 
-    //rebuild them from 'powers'
-    for (QHash<Expression,Expression>::const_iterator it = powers.begin();
-         it != powers.end();
-         ++it)
+    // rebuild them from 'powers'
+    for (QHash<Expression, Expression>::const_iterator it = powers.begin(); it != powers.end(); ++it)
     {
         Expression core = it.key();
         Expression power = it.value();
@@ -531,15 +512,15 @@ void Product::rebuild()
             if (powerval.isReal())
             {
                 if (powerval.real() > 0)
-                    numparts.insert( core, core.pow(powerval.real()) );
+                    numparts.insert(core, core.pow(powerval.real()));
                 else
-                    denomparts.insert( core, core.pow(-powerval.real()) );
+                    denomparts.insert(core, core.pow(-powerval.real()));
             }
             else
-                numparts.insert( core, core.pow(powerval) );
+                numparts.insert(core, core.pow(powerval));
         }
         else
-            numparts.insert( core, core.pow(power) );
+            numparts.insert(core, core.pow(power));
     }
 }
 
@@ -551,8 +532,8 @@ QString Product::toString() const
 
     QString top("");
 
-    bool strtval_is_one = SireMaths::areEqual(strtval,1.0);
-    bool strtval_is_minus_one = SireMaths::areEqual(strtval,-1.0);
+    bool strtval_is_one = SireMaths::areEqual(strtval, 1.0);
+    bool strtval_is_minus_one = SireMaths::areEqual(strtval, -1.0);
 
     if (numparts.count() == 0)
     {
@@ -562,28 +543,25 @@ QString Product::toString() const
     {
         Expression toppart = numparts.values()[0];
 
-        if ( not toppart.isCompound() or
-             (denomparts.count() == 0 and (strtval_is_one or strtval_is_minus_one)) )
+        if (not toppart.isCompound() or (denomparts.count() == 0 and (strtval_is_one or strtval_is_minus_one)))
             top = toppart.toString();
         else
             top = QString("[%1]").arg(toppart.toString());
     }
     else
     {
-        for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-            it != numparts.end();
-            ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
             if (it->base().isCompound())
-                top = QString("%1 [%2]").arg(top,it->toString());
+                top = QString("%1 [%2]").arg(top, it->toString());
             else
-                top = QString("%1 %2").arg(top,it->toString());
+                top = QString("%1 %2").arg(top, it->toString());
         }
     }
 
     if (strtval_is_minus_one)
         top = QString("-%1").arg(top);
-    else if ( not (strtval_is_one or numparts.count() == 0) )
+    else if (not(strtval_is_one or numparts.count() == 0))
         top = QString("%1 %2").arg(strtval).arg(top);
 
     if (denomparts.count() == 0)
@@ -592,28 +570,25 @@ QString Product::toString() const
     {
         Expression bottom = denomparts.values()[0];
         if (bottom.base().isCompound())
-            return QString("%1 / [%2]").arg(top.simplified(),bottom.toString());
+            return QString("%1 / [%2]").arg(top.simplified(), bottom.toString());
         else
-            return QString("%1 / %2").arg(top.simplified(),bottom.toString());
+            return QString("%1 / %2").arg(top.simplified(), bottom.toString());
     }
     else
     {
         QString bottom("");
 
-        for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-             it != denomparts.end();
-             ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
             if (it->base().isCompound())
-                bottom = QString("%1 [%2]").arg(bottom,it->toString());
+                bottom = QString("%1 [%2]").arg(bottom, it->toString());
             else
-                bottom = QString("%1 %2").arg(bottom,it->toString());
+                bottom = QString("%1 %2").arg(bottom, it->toString());
         }
 
-        return QString("%1 / [%2]").arg(top.simplified(),bottom.simplified());
+        return QString("%1 / [%2]").arg(top.simplified(), bottom.simplified());
     }
 }
-
 
 /** Return a string representation of this Product in the OpenMM syntax*/
 QString Product::toOpenMMString() const
@@ -623,8 +598,8 @@ QString Product::toOpenMMString() const
 
     QString top("");
 
-    bool strtval_is_one = SireMaths::areEqual(strtval,1.0);
-    bool strtval_is_minus_one = SireMaths::areEqual(strtval,-1.0);
+    bool strtval_is_one = SireMaths::areEqual(strtval, 1.0);
+    bool strtval_is_minus_one = SireMaths::areEqual(strtval, -1.0);
 
     if (numparts.count() == 0)
     {
@@ -634,36 +609,35 @@ QString Product::toOpenMMString() const
     {
         Expression toppart = numparts.values()[0];
 
-        if ( not toppart.isCompound() or
-             (denomparts.count() == 0 and (strtval_is_one or strtval_is_minus_one)) )
+        if (not toppart.isCompound() or (denomparts.count() == 0 and (strtval_is_one or strtval_is_minus_one)))
             top = toppart.toOpenMMString();
         else
             top = QString("(%1)").arg(toppart.toOpenMMString());
     }
     else
     {
-        for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-            it != numparts.end();
-            ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
-            if(top.isEmpty()){
-                 if (it->base().isCompound())
+            if (top.isEmpty())
+            {
+                if (it->base().isCompound())
                     top = QString("(%1)").arg(it->toOpenMMString());
                 else
                     top = it->toOpenMMString();
             }
-            else{
+            else
+            {
                 if (it->base().isCompound())
-                    top = QString("%1 * (%2)").arg(top,it->toOpenMMString());
+                    top = QString("%1 * (%2)").arg(top, it->toOpenMMString());
                 else
-                    top = QString("%1 * %2").arg(top,it->toOpenMMString());
+                    top = QString("%1 * %2").arg(top, it->toOpenMMString());
             }
         }
     }
 
     if (strtval_is_minus_one)
         top = QString("-%1").arg(top);
-    else if ( not (strtval_is_one or numparts.count() == 0) )
+    else if (not(strtval_is_one or numparts.count() == 0))
         top = QString("%1 * %2").arg(strtval).arg(top);
 
     if (denomparts.count() == 0)
@@ -672,43 +646,36 @@ QString Product::toOpenMMString() const
     {
         Expression bottom = denomparts.values()[0];
         if (bottom.base().isCompound())
-            return QString("%1 / (%2)").arg(top.simplified(),bottom.toOpenMMString());
+            return QString("%1 / (%2)").arg(top.simplified(), bottom.toOpenMMString());
         else
-            return QString("%1 / %2").arg(top.simplified(),bottom.toOpenMMString());
+            return QString("%1 / %2").arg(top.simplified(), bottom.toOpenMMString());
     }
     else
     {
         QString bottom("");
 
-        for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-             it != denomparts.end();
-             ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
             if (it->base().isCompound())
-                bottom = QString("%1 * (%2)").arg(bottom,it->toOpenMMString());
+                bottom = QString("%1 * (%2)").arg(bottom, it->toOpenMMString());
             else
-                bottom = QString("%1 * %2").arg(bottom,it->toOpenMMString());
+                bottom = QString("%1 * %2").arg(bottom, it->toOpenMMString());
         }
 
-        return QString("%1 / (%2)").arg(top.simplified(),bottom.simplified());
+        return QString("%1 / (%2)").arg(top.simplified(), bottom.simplified());
     }
 }
-
 
 /** Return whether this is a constant */
 bool Product::isConstant() const
 {
-    for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-         it != numparts.end();
-         ++it)
+    for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
     {
         if (not it->isConstant())
             return false;
     }
 
-    for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-         it != denomparts.end();
-         ++it)
+    for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
     {
         if (not it->isConstant())
             return false;
@@ -727,17 +694,13 @@ bool Product::isComplex() const
     }
     else
     {
-        for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-             it != numparts.end();
-             ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
             if (it->isComplex())
                 return true;
         }
 
-        for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-             it != denomparts.end();
-             ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
             if (it->isComplex())
                 return true;
@@ -754,17 +717,13 @@ bool Product::isFunction(const Symbol &symbol) const
         return false;
     else
     {
-        for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-             it != numparts.end();
-             ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
             if (it->isFunction(symbol))
                 return true;
         }
 
-        for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-             it != denomparts.end();
-             ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
             if (it->isFunction(symbol))
                 return true;
@@ -777,9 +736,8 @@ bool Product::isFunction(const Symbol &symbol) const
 /** Return whether or not this is compound (requires brackets when printing) */
 bool Product::isCompound() const
 {
-    return (not isConstant())
-        and (denomparts.count() > 0 or numparts.count() > 1
-                or not SireMaths::areEqual(strtval,1.0));
+    return (not isConstant()) and
+           (denomparts.count() > 0 or numparts.count() > 1 or not SireMaths::areEqual(strtval, 1.0));
 }
 
 /** Return all of the symbols used in this product */
@@ -791,18 +749,14 @@ Symbols Product::symbols() const
     {
         Symbols syms;
 
-        for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-            it != numparts.end();
-            ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
-            syms.insert( it->symbols() );
+            syms.insert(it->symbols());
         }
 
-        for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-            it != denomparts.end();
-            ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
-            syms.insert( it->symbols() );
+            syms.insert(it->symbols());
         }
 
         return syms;
@@ -818,18 +772,14 @@ Functions Product::functions() const
     {
         Functions funcs;
 
-        for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-            it != numparts.end();
-            ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
-            funcs.insert( it->functions() );
+            funcs.insert(it->functions());
         }
 
-        for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-            it != denomparts.end();
-            ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
-            funcs.insert( it->functions() );
+            funcs.insert(it->functions());
         }
 
         return funcs;
@@ -841,18 +791,14 @@ Expressions Product::children() const
 {
     Expressions exps;
 
-    for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-         it != numparts.end();
-         ++it)
+    for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
     {
-        exps.append( *it );
+        exps.append(*it);
     }
 
-    for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-         it != denomparts.end();
-         ++it)
+    for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
     {
-        exps.append( it->invert() );
+        exps.append(it->invert());
     }
 
     return exps;
@@ -870,13 +816,13 @@ Product Product::numerator() const
     if (isPureProduct())
         return *this;
     else
-        return Product( Expressions(numparts.values()) );
+        return Product(Expressions(numparts.values()));
 }
 
 /** Return the Product of expressions on the denominator of this Product */
 Product Product::denominator() const
 {
-    return Product( Expressions(denomparts.values()) );
+    return Product(Expressions(denomparts.values()));
 }
 
 /** Remove the first expression in the product that depends on 'symbol' and
@@ -885,21 +831,21 @@ Product Product::denominator() const
     in the numerator before it moves to the expressions in the denominator */
 Expression Product::takeFirst(const Symbol &symbol)
 {
-    QHash<Expression,Expression>::iterator it = numparts.begin();
+    QHash<Expression, Expression>::iterator it = numparts.begin();
 
-    while( it != numparts.end() )
+    while (it != numparts.end())
     {
         if (it.value().isFunction(symbol))
         {
             Expression f_symbol = it.value();
 
-            //remove this expression from 'powers'
+            // remove this expression from 'powers'
             powers.remove(it.key());
 
-            //remove this expression from numparts
+            // remove this expression from numparts
             it = numparts.erase(it);
 
-            //return this expression
+            // return this expression
             return f_symbol;
         }
         else
@@ -907,26 +853,26 @@ Expression Product::takeFirst(const Symbol &symbol)
     }
 
     it = denomparts.begin();
-    while( it != denomparts.end() )
+    while (it != denomparts.end())
     {
         if (it.value().isFunction(symbol))
         {
             Expression f_symbol = it.value();
 
-            //remove this expression from 'powers'
+            // remove this expression from 'powers'
             powers.remove(it.key());
 
-            //remove this expression from denomparts
+            // remove this expression from denomparts
             it = denomparts.erase(it);
 
-            //return this expression (inverted, as it is on the denominator)
+            // return this expression (inverted, as it is on the denominator)
             return f_symbol.invert();
         }
         else
             ++it;
     }
 
-    //no expression has been found - return Expression(1)
+    // no expression has been found - return Expression(1)
     return Expression(1);
 }
 
@@ -936,54 +882,53 @@ Expression Product::productRule(Product product, const Symbol &symbol)
 {
     BOOST_ASSERT(product.isPureProduct());
 
-    //is this product a function of 'symbol'? If not then return 0
+    // is this product a function of 'symbol'? If not then return 0
     if (not product.isFunction(symbol))
         return Expression(0);
 
-    //ok - this could be a product of many individual functions...
-    // break this down a function at a time...
+    // ok - this could be a product of many individual functions...
+    //  break this down a function at a time...
 
-    //remove the first function of symbol - f(x)
+    // remove the first function of symbol - f(x)
     Expression f = product.takeFirst(symbol);
 
-    BOOST_ASSERT(f.isFunction(symbol));  //has to be true, as product.isFunction(symbol)
+    BOOST_ASSERT(f.isFunction(symbol)); // has to be true, as product.isFunction(symbol)
 
     if (product.isFunction(symbol))
     {
-        //product = g(x)
+        // product = g(x)
         Expression g = product.reduce();
 
-        //product rule is d f(x)g(x) / dx  = f'(x)g(x) + f(x)g'(x)
+        // product rule is d f(x)g(x) / dx  = f'(x)g(x) + f(x)g'(x)
         Expression df = f.differentiate(symbol);
         Expression dg = g.differentiate(symbol);
 
-        return df*g + f*dg;
+        return df * g + f * dg;
     }
     else
     {
-        //this is differential of constant * f(x) = constant * f'(x)
+        // this is differential of constant * f(x) = constant * f'(x)
         return product * f.differentiate(symbol);
     }
 }
 
 /** Internal function: Return the differential of 'f(x)/g(x)'. Note
     that both of these products must be pure products */
-Expression Product::quotientRule(const Product &f, const Product &g,
-                                 const Symbol &symbol)
+Expression Product::quotientRule(const Product &f, const Product &g, const Symbol &symbol)
 {
     BOOST_ASSERT(f.isPureProduct());
     BOOST_ASSERT(f.isPureProduct());
 
-    //quotient rule for f(x)/g(x),  calculate d/dx
-    //   = [g(x)f'(x) - f(x)g'(x)] / g(x)^2
+    // quotient rule for f(x)/g(x),  calculate d/dx
+    //    = [g(x)f'(x) - f(x)g'(x)] / g(x)^2
 
     Expression g2 = pow(g, 2);
-    BOOST_ASSERT( not g2.isZero() );
+    BOOST_ASSERT(not g2.isZero());
 
     Expression dg = productRule(g, symbol);
     Expression df = productRule(f, symbol);
 
-    return ( (g*df) - (f*dg) ) / g2;
+    return ((g * df) - (f * dg)) / g2;
 }
 
 /** Return the differential of this product... */
@@ -993,13 +938,13 @@ Expression Product::differentiate(const Symbol &symbol) const
         return Expression(0);
     else if (isPureProduct())
     {
-        //pure product, so can use product rule
+        // pure product, so can use product rule
         return productRule(*this, symbol);
     }
     else
     {
-        //this is really a quotient. My need to use the quotient rule.
-        //split into numerator and denominator
+        // this is really a quotient. My need to use the quotient rule.
+        // split into numerator and denominator
         Product num = this->numerator();
         Product denom = this->denominator();
 
@@ -1008,19 +953,19 @@ Expression Product::differentiate(const Symbol &symbol) const
 
         if (numerator_is_variable and denominator_is_variable)
         {
-            //use the quotient rule to get the differentials of these two parts
+            // use the quotient rule to get the differentials of these two parts
             return quotientRule(num, denom, symbol);
         }
         else if (numerator_is_variable)
         {
-            //the result is numerator' / denominator (since denominator is a constant)
+            // the result is numerator' / denominator (since denominator is a constant)
             return num.differentiate(symbol) / denom;
         }
         else
         {
-            //the result is numerator * [ (denominator)^1 ]'
-            //  = -numerator * denominator' * (denominator)^-2
-            return -( num * denom.differentiate(symbol) * pow(denom,-2) );
+            // the result is numerator * [ (denominator)^1 ]'
+            //   = -numerator * denominator' * (denominator)^-2
+            return -(num * denom.differentiate(symbol) * pow(denom, -2));
         }
     }
 }
@@ -1035,18 +980,14 @@ Expression Product::series(const Symbol &symbol, int n) const
         Product ret;
         ret.strtval = strtval;
 
-        for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-            it != numparts.end();
-            ++it)
+        for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
         {
-            ret.multiply( it->series(symbol,n) );
+            ret.multiply(it->series(symbol, n));
         }
 
-        for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-            it != denomparts.end();
-            ++it)
+        for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
         {
-            ret.multiply( pow(it->series(symbol,n),-1) );
+            ret.multiply(pow(it->series(symbol, n), -1));
         }
 
         return ret.reduce();
@@ -1058,37 +999,25 @@ Expression Product::simplify(int options) const
 {
     Expression ret(strtval);
 
-    for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-        it != numparts.end();
-        ++it)
+    for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
     {
         if (it->base().isA<Sum>())
         {
             const Sum &sum = it->base().asA<Sum>();
 
             Expression part = ret;
-            ret = ((it->factor() * sum.strtval)
-                        * part.simplify(options))
-                                .simplify(options);
+            ret = ((it->factor() * sum.strtval) * part.simplify(options)).simplify(options);
 
-            for (QHash<ExpressionBase, Expression>::const_iterator
-                                                        it2 = sum.posparts.constBegin();
-                 it2 != sum.posparts.constEnd();
-                 ++it2)
+            for (QHash<ExpressionBase, Expression>::const_iterator it2 = sum.posparts.constBegin();
+                 it2 != sum.posparts.constEnd(); ++it2)
             {
-                ret += (part.simplify(options) *
-                            ( it->factor() * it2.value().simplify(options) ))
-                                    .simplify(options);
+                ret += (part.simplify(options) * (it->factor() * it2.value().simplify(options))).simplify(options);
             }
 
-            for (QHash<ExpressionBase, Expression>::const_iterator
-                                                        it2 = sum.negparts.constBegin();
-                 it2 != sum.negparts.constEnd();
-                 ++it2)
+            for (QHash<ExpressionBase, Expression>::const_iterator it2 = sum.negparts.constBegin();
+                 it2 != sum.negparts.constEnd(); ++it2)
             {
-                ret -= (part.simplify(options) *
-                            ( it->factor() * it2.value().simplify(options) ))
-                                    .simplify(options);
+                ret -= (part.simplify(options) * (it->factor() * it2.value().simplify(options))).simplify(options);
             }
         }
         else if (ret.base().isA<Sum>())
@@ -1097,28 +1026,18 @@ Expression Product::simplify(int options) const
             const Sum &sum = old_ret.base().asA<Sum>();
 
             Expression part = it.value();
-            ret = ((old_ret.factor() * sum.strtval)
-                        * part.simplify(options))
-                                .simplify(options);
+            ret = ((old_ret.factor() * sum.strtval) * part.simplify(options)).simplify(options);
 
-            for (QHash<ExpressionBase, Expression>::const_iterator
-                                                        it2 = sum.posparts.constBegin();
-                 it2 != sum.posparts.constEnd();
-                 ++it2)
+            for (QHash<ExpressionBase, Expression>::const_iterator it2 = sum.posparts.constBegin();
+                 it2 != sum.posparts.constEnd(); ++it2)
             {
-                ret += (part.simplify(options) *
-                            ( it->factor() * it2.value().simplify(options) ))
-                                    .simplify(options);
+                ret += (part.simplify(options) * (it->factor() * it2.value().simplify(options))).simplify(options);
             }
 
-            for (QHash<ExpressionBase, Expression>::const_iterator
-                                                        it2 = sum.negparts.constBegin();
-                 it2 != sum.negparts.constEnd();
-                 ++it2)
+            for (QHash<ExpressionBase, Expression>::const_iterator it2 = sum.negparts.constBegin();
+                 it2 != sum.negparts.constEnd(); ++it2)
             {
-                ret -= (part.simplify(options) *
-                            ( it->factor() * it2.value().simplify(options) ))
-                                    .simplify(options);
+                ret -= (part.simplify(options) * (it->factor() * it2.value().simplify(options))).simplify(options);
             }
         }
         else
@@ -1127,11 +1046,9 @@ Expression Product::simplify(int options) const
         }
     }
 
-    for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-        it != denomparts.end();
-        ++it)
+    for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
     {
-        ret *= pow(it->simplify(options),-1);
+        ret *= pow(it->simplify(options), -1);
     }
 
     if (ret.base().isA<Product>())
@@ -1146,18 +1063,14 @@ Expression Product::conjugate() const
     Product ret;
     ret.strtval = strtval;
 
-    for (QHash<Expression,Expression>::const_iterator it = numparts.begin();
-        it != numparts.end();
-        ++it)
+    for (QHash<Expression, Expression>::const_iterator it = numparts.begin(); it != numparts.end(); ++it)
     {
-        ret.multiply( it->conjugate() );
+        ret.multiply(it->conjugate());
     }
 
-    for (QHash<Expression,Expression>::const_iterator it = denomparts.begin();
-        it != denomparts.end();
-        ++it)
+    for (QHash<Expression, Expression>::const_iterator it = denomparts.begin(); it != denomparts.end(); ++it)
     {
-        ret.multiply( pow(it->conjugate(), -1) );
+        ret.multiply(pow(it->conjugate(), -1));
     }
 
     return ret.reduce();
@@ -1170,36 +1083,31 @@ static QList<Factor> multiply(const QList<Factor> &f0s, const QList<Factor> &f1s
     else if (f1s.isEmpty())
         return f0s;
 
-    QHash<Expression,Expression> factors;
+    QHash<Expression, Expression> factors;
 
     foreach (const Factor &f0, f0s)
     {
         foreach (const Factor &f1, f1s)
         {
-            factors[ f0.power() + f1.power() ] += (f0.factor() * f1.factor());
+            factors[f0.power() + f1.power()] += (f0.factor() * f1.factor());
         }
     }
 
     QList<Factor> ret;
 
-    for (QHash<Expression,Expression>::const_iterator it = factors.constBegin();
-         it != factors.constEnd();
-         ++it)
+    for (QHash<Expression, Expression>::const_iterator it = factors.constBegin(); it != factors.constEnd(); ++it)
     {
-        ret.append( Factor( f0s.at(0).symbol(), it.value(), it.key() ) );
+        ret.append(Factor(f0s.at(0).symbol(), it.value(), it.key()));
     }
 
     return ret;
 }
 
-static QList<Factor> expand(const QHash<Expression,Expression> &product,
-                            const Symbol &symbol)
+static QList<Factor> expand(const QHash<Expression, Expression> &product, const Symbol &symbol)
 {
     QList<Factor> ret;
 
-    for (QHash<Expression,Expression>::const_iterator it = product.constBegin();
-         it != product.constEnd();
-         ++it)
+    for (QHash<Expression, Expression>::const_iterator it = product.constBegin(); it != product.constEnd(); ++it)
     {
         QList<Factor> factors = it->expand(symbol);
 
@@ -1218,44 +1126,39 @@ QList<Factor> Product::expand(const Symbol &symbol) const
 
     if (denom_factors.count() > 1)
     {
-        //we cannot expand functions like ( mx^i + nx^j )^-1
-        throw SireCAS::rearrangement_error( QObject::tr(
-            "The product %1 cannot be expanded in terms of the symbol %2 "
-            "as the denominator contains more than one power of %2.")
-                .arg(this->toString(), symbol.toString()), CODELOC );
+        // we cannot expand functions like ( mx^i + nx^j )^-1
+        throw SireCAS::rearrangement_error(QObject::tr("The product %1 cannot be expanded in terms of the symbol %2 "
+                                                       "as the denominator contains more than one power of %2.")
+                                               .arg(this->toString(), symbol.toString()),
+                                           CODELOC);
     }
 
     QList<Factor> num_factors = ::expand(numparts, symbol);
 
-    //multiply the numerator by the constant...
+    // multiply the numerator by the constant...
     if (strtval != 1)
     {
-        for (QList<Factor>::iterator it = num_factors.begin();
-             it != num_factors.end();
-             ++it)
+        for (QList<Factor>::iterator it = num_factors.begin(); it != num_factors.end(); ++it)
         {
-            *it = Factor( symbol, strtval * it->factor(), it->power() );
+            *it = Factor(symbol, strtval * it->factor(), it->power());
         }
     }
 
-    //now invert the power of the denominator...
-    for (QList<Factor>::iterator it = denom_factors.begin();
-         it != denom_factors.end();
-         ++it)
+    // now invert the power of the denominator...
+    for (QList<Factor>::iterator it = denom_factors.begin(); it != denom_factors.end(); ++it)
     {
-        *it = Factor( it->symbol(), it->factor(), -(it->power()) );
+        *it = Factor(it->symbol(), it->factor(), -(it->power()));
     }
 
     return ::multiply(num_factors, denom_factors);
 }
 
-const char* Product::typeName()
+const char *Product::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Product>() );
+    return QMetaType::typeName(qMetaTypeId<Product>());
 }
 
-Product* Product::clone() const
+Product *Product::clone() const
 {
     return new Product(*this);
 }
-

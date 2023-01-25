@@ -35,8 +35,8 @@
 
 #include "SireID/index.h"
 
-#include "SireMaths/vector.h"
 #include "SireMaths/triangle.h"
+#include "SireMaths/vector.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -51,8 +51,7 @@ using SireUnits::Dimension::Angle;
 static const RegisterMetaType<AngleID> r_angleid;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AngleID &angleid)
+QDataStream &operator<<(QDataStream &ds, const AngleID &angleid)
 {
     writeHeader(ds, r_angleid, 1);
 
@@ -64,8 +63,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       AngleID &angleid)
+QDataStream &operator>>(QDataStream &ds, AngleID &angleid)
 {
     VersionID v = readHeader(ds, r_angleid);
 
@@ -83,28 +81,29 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 AngleID::AngleID() : ID()
-{}
+{
+}
 
 /** Construct a angle between the two specified atoms. The order
     is important, as this angle may be between two different
     molecules */
-AngleID::AngleID(const AtomID &atom0, const AtomID &atom1,
-                 const AtomID &atom2)
-       : ID(), atm0(atom0), atm1(atom1), atm2(atom2)
-{}
+AngleID::AngleID(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2)
+    : ID(), atm0(atom0), atm1(atom1), atm2(atom2)
+{
+}
 
 /** Copy constructor */
-AngleID::AngleID(const AngleID &other)
-       : ID(other), atm0(other.atm0), atm1(other.atm1),
-                    atm2(other.atm2)
-{}
+AngleID::AngleID(const AngleID &other) : ID(other), atm0(other.atm0), atm1(other.atm1), atm2(other.atm2)
+{
+}
 
 /** Destructor */
 AngleID::~AngleID()
-{}
+{
+}
 
 /** Copy assignment operator */
-AngleID& AngleID::operator=(const AngleID &other)
+AngleID &AngleID::operator=(const AngleID &other)
 {
     atm0 = other.atm0;
     atm1 = other.atm1;
@@ -116,22 +115,20 @@ AngleID& AngleID::operator=(const AngleID &other)
 /** Comparison operator - the order is important */
 bool AngleID::operator==(const AngleID &other) const
 {
-    return atm0 == other.atm0 and atm1 == other.atm1 and
-           atm2 == other.atm2;
+    return atm0 == other.atm0 and atm1 == other.atm1 and atm2 == other.atm2;
 }
 
 /** Comparison operator - the order is important */
 bool AngleID::operator!=(const AngleID &other) const
 {
-    return atm0 != other.atm0 or atm1 != other.atm1 or
-           atm2 != other.atm2;
+    return atm0 != other.atm0 or atm1 != other.atm1 or atm2 != other.atm2;
 }
 
-const AtomID& AngleID::operator[](int i) const
+const AtomID &AngleID::operator[](int i) const
 {
     i = Index(i).map(3);
 
-    switch(i)
+    switch (i)
     {
     case 0:
         return atm0.base();
@@ -169,28 +166,25 @@ AngleID AngleID::mirror() const
 /** Return a hash for this ID */
 uint AngleID::hash() const
 {
-    return (atm0.hash() << 16) | ( (atm1.hash()*atm2.hash()) & 0x0000FFFF);
+    return (atm0.hash() << 16) | ((atm1.hash() * atm2.hash()) & 0x0000FFFF);
 }
 
 /** Return a string representation of this ID */
 QString AngleID::toString() const
 {
-    return QString("Angle( %1, %2, %3 )")
-                .arg(atm0.toString(), atm1.toString(),
-                     atm2.toString());
+    return QString("Angle( %1, %2, %3 )").arg(atm0.toString(), atm1.toString(), atm2.toString());
 }
 
 /** Return whether this is a null ID */
 bool AngleID::isNull() const
 {
-    return atm0.isNull() and atm1.isNull() and
-           atm2.isNull();
+    return atm0.isNull() and atm1.isNull() and atm2.isNull();
 }
 
 /** Comparison operator with another ID */
 bool AngleID::operator==(const SireID::ID &other) const
 {
-    const AngleID *other_angle = dynamic_cast<const AngleID*>(&other);
+    const AngleID *other_angle = dynamic_cast<const AngleID *>(&other);
 
     return other_angle and this->operator==(*other_angle);
 }
@@ -202,12 +196,9 @@ bool AngleID::operator==(const SireID::ID &other) const
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-tuple<AtomIdx,AtomIdx,AtomIdx>
-AngleID::map(const MoleculeInfoData &molinfo) const
+tuple<AtomIdx, AtomIdx, AtomIdx> AngleID::map(const MoleculeInfoData &molinfo) const
 {
-    return tuple<AtomIdx,AtomIdx,AtomIdx>( molinfo.atomIdx(atm0),
-                                           molinfo.atomIdx(atm1),
-                                           molinfo.atomIdx(atm2) );
+    return tuple<AtomIdx, AtomIdx, AtomIdx>(molinfo.atomIdx(atm0), molinfo.atomIdx(atm1), molinfo.atomIdx(atm2));
 }
 
 /** Return the indicies of the three atoms of this angle, between the
@@ -219,14 +210,10 @@ AngleID::map(const MoleculeInfoData &molinfo) const
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-tuple<AtomIdx,AtomIdx,AtomIdx>
-AngleID::map(const MoleculeInfoData &mol0info,
-             const MoleculeInfoData &mol1info,
-             const MoleculeInfoData &mol2info) const
+tuple<AtomIdx, AtomIdx, AtomIdx> AngleID::map(const MoleculeInfoData &mol0info, const MoleculeInfoData &mol1info,
+                                              const MoleculeInfoData &mol2info) const
 {
-    return tuple<AtomIdx,AtomIdx,AtomIdx>( mol0info.atomIdx(atm0),
-                                           mol1info.atomIdx(atm1),
-                                           mol2info.atomIdx(atm2) );
+    return tuple<AtomIdx, AtomIdx, AtomIdx>(mol0info.atomIdx(atm0), mol1info.atomIdx(atm1), mol2info.atomIdx(atm2));
 }
 
 /** Return the geometric triangle formed by the three atoms
@@ -239,15 +226,12 @@ AngleID::map(const MoleculeInfoData &mol0info,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Triangle AngleID::triangle(const MoleculeData &moldata,
-                           const PropertyMap &map) const
+Triangle AngleID::triangle(const MoleculeData &moldata, const PropertyMap &map) const
 {
-    const AtomCoords &coords = moldata.property(map["coordinates"])
-                                    .asA<AtomCoords>();
+    const AtomCoords &coords = moldata.property(map["coordinates"]).asA<AtomCoords>();
 
-    return Triangle( coords.at( moldata.info().cgAtomIdx(atm0) ),
-                     coords.at( moldata.info().cgAtomIdx(atm1) ),
-                     coords.at( moldata.info().cgAtomIdx(atm2) ) );
+    return Triangle(coords.at(moldata.info().cgAtomIdx(atm0)), coords.at(moldata.info().cgAtomIdx(atm1)),
+                    coords.at(moldata.info().cgAtomIdx(atm2)));
 }
 
 /** Return the geometric triangle formed by the three atoms,
@@ -263,23 +247,15 @@ Triangle AngleID::triangle(const MoleculeData &moldata,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Triangle AngleID::triangle(const MoleculeData &mol0data,
-                           const PropertyMap &map0,
-                           const MoleculeData &mol1data,
-                           const PropertyMap &map1,
-                           const MoleculeData &mol2data,
-                           const PropertyMap &map2) const
+Triangle AngleID::triangle(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
+                           const PropertyMap &map1, const MoleculeData &mol2data, const PropertyMap &map2) const
 {
-    const AtomCoords &coords0 = mol0data.property(map0["coordinates"])
-                                    .asA<AtomCoords>();
-    const AtomCoords &coords1 = mol1data.property(map1["coordinates"])
-                                    .asA<AtomCoords>();
-    const AtomCoords &coords2 = mol2data.property(map2["coordinates"])
-                                    .asA<AtomCoords>();
+    const AtomCoords &coords0 = mol0data.property(map0["coordinates"]).asA<AtomCoords>();
+    const AtomCoords &coords1 = mol1data.property(map1["coordinates"]).asA<AtomCoords>();
+    const AtomCoords &coords2 = mol2data.property(map2["coordinates"]).asA<AtomCoords>();
 
-    return Triangle( coords0.at( mol0data.info().cgAtomIdx(atm0) ),
-                     coords1.at( mol1data.info().cgAtomIdx(atm1) ),
-                     coords2.at( mol2data.info().cgAtomIdx(atm2) ) );
+    return Triangle(coords0.at(mol0data.info().cgAtomIdx(atm0)), coords1.at(mol1data.info().cgAtomIdx(atm1)),
+                    coords2.at(mol2data.info().cgAtomIdx(atm2)));
 }
 
 /** Return the geometric triangle formed by the three atoms,
@@ -294,14 +270,10 @@ Triangle AngleID::triangle(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Triangle AngleID::triangle(const MoleculeData &mol0data,
-                           const MoleculeData &mol1data,
-                           const MoleculeData &mol2data,
+Triangle AngleID::triangle(const MoleculeData &mol0data, const MoleculeData &mol1data, const MoleculeData &mol2data,
                            const PropertyMap &map) const
 {
-    return this->triangle(mol0data, map,
-                          mol1data, map,
-                          mol2data, map);
+    return this->triangle(mol0data, map, mol1data, map, mol2data, map);
 }
 
 /** Return the vector that is perpendicular to the plane
@@ -316,8 +288,7 @@ Triangle AngleID::triangle(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Vector AngleID::vector(const MoleculeData &moldata,
-                       const PropertyMap &map) const
+Vector AngleID::vector(const MoleculeData &moldata, const PropertyMap &map) const
 {
     return this->triangle(moldata, map).vector();
 }
@@ -335,15 +306,10 @@ Vector AngleID::vector(const MoleculeData &moldata,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Vector AngleID::vector(const MoleculeData &mol0data,
-                       const PropertyMap &map0,
-                       const MoleculeData &mol1data,
-                       const PropertyMap &map1,
-                       const MoleculeData &mol2data,
-                       const PropertyMap &map2) const
+Vector AngleID::vector(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
+                       const PropertyMap &map1, const MoleculeData &mol2data, const PropertyMap &map2) const
 {
-    return this->triangle(mol0data, map0, mol1data, map1,
-                          mol2data, map2).vector();
+    return this->triangle(mol0data, map0, mol1data, map1, mol2data, map2).vector();
 }
 
 /** Return the vector that is perpendicular to the plane
@@ -357,9 +323,7 @@ Vector AngleID::vector(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Vector AngleID::vector(const MoleculeData &mol0data,
-                       const MoleculeData &mol1data,
-                       const MoleculeData &mol2data,
+Vector AngleID::vector(const MoleculeData &mol0data, const MoleculeData &mol1data, const MoleculeData &mol2data,
                        const PropertyMap &map) const
 {
     return this->triangle(mol0data, mol1data, mol2data, map).vector();
@@ -374,10 +338,9 @@ Vector AngleID::vector(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Angle AngleID::size(const MoleculeData &moldata,
-                    const PropertyMap &map) const
+Angle AngleID::size(const MoleculeData &moldata, const PropertyMap &map) const
 {
-    return this->triangle(moldata,map).angle();
+    return this->triangle(moldata, map).angle();
 }
 
 /** Return the size of the angle between atom0() in the
@@ -394,16 +357,10 @@ Angle AngleID::size(const MoleculeData &moldata,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Angle AngleID::size(const MoleculeData &mol0data,
-                    const PropertyMap &map0,
-                    const MoleculeData &mol1data,
-                    const PropertyMap &map1,
-                    const MoleculeData &mol2data,
-                    const PropertyMap &map2) const
+Angle AngleID::size(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
+                    const PropertyMap &map1, const MoleculeData &mol2data, const PropertyMap &map2) const
 {
-    return this->triangle(mol0data, map0,
-                          mol1data, map1,
-                          mol2data, map2).angle();
+    return this->triangle(mol0data, map0, mol1data, map1, mol2data, map2).angle();
 }
 
 /** Return the size of the angle between atom0() in the
@@ -418,39 +375,36 @@ Angle AngleID::size(const MoleculeData &mol0data,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Angle AngleID::size(const MoleculeData &mol0data,
-                    const MoleculeData &mol1data,
-                    const MoleculeData &mol2data,
+Angle AngleID::size(const MoleculeData &mol0data, const MoleculeData &mol1data, const MoleculeData &mol2data,
                     const PropertyMap &map) const
 {
     return this->triangle(mol0data, mol1data, mol2data, map).angle();
 }
 
 /** Return the ID of the first atom of the angle */
-const AtomID& AngleID::atom0() const
+const AtomID &AngleID::atom0() const
 {
     return atm0.base();
 }
 
 /** Return the ID of the second atom of the angle */
-const AtomID& AngleID::atom1() const
+const AtomID &AngleID::atom1() const
 {
     return atm1.base();
 }
 
 /** Return the ID of the third atom of the angle */
-const AtomID& AngleID::atom2() const
+const AtomID &AngleID::atom2() const
 {
     return atm2.base();
 }
 
-const char* AngleID::typeName()
+const char *AngleID::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AngleID>() );
+    return QMetaType::typeName(qMetaTypeId<AngleID>());
 }
 
-AngleID* AngleID::clone() const
+AngleID *AngleID::clone() const
 {
     return new AngleID(*this);
 }
-

@@ -36,78 +36,76 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ResIdx;
+    class ResIdx;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ResIdx&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ResIdx&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ResIdx &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ResIdx &);
 
 namespace SireMol
 {
 
-/** This is an ID object that is used to index CutGroups
+    /** This is an ID object that is used to index CutGroups
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ResIdx
-       : public SireID::Index_T_<ResIdx>, public ResID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ResIdx&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ResIdx&);
-
-public:
-    ResIdx();
-
-    explicit ResIdx(quint32 idx);
-
-    ResIdx(const ResIdx &other);
-
-    ~ResIdx();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ResIdx : public SireID::Index_T_<ResIdx>, public ResID
     {
-        return ResIdx::typeName();
-    }
 
-    ResIdx* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ResIdx &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ResIdx &);
 
-    static ResIdx null();
+    public:
+        ResIdx();
 
-    bool isNull() const;
+        explicit ResIdx(quint32 idx);
 
-    uint hash() const;
+        ResIdx(const ResIdx &other);
 
-    QString toString() const;
+        ~ResIdx();
 
-    ResIdx& operator=(const ResIdx &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return ResIdx::typeName();
+        }
 
-    using SireID::Index_T_<ResIdx>::operator=;
+        ResIdx *clone() const;
 
-    using SireID::Index_T_<ResIdx>::operator==;
-    using SireID::Index_T_<ResIdx>::operator!=;
+        static ResIdx null();
 
-    using SireID::Index_T_<ResIdx>::operator+=;
-    using SireID::Index_T_<ResIdx>::operator++;
-    using SireID::Index_T_<ResIdx>::operator-=;
-    using SireID::Index_T_<ResIdx>::operator--;
+        bool isNull() const;
 
-    using SireID::Index_T_<ResIdx>::map;
+        uint hash() const;
 
-    QList<ResIdx> map(const MolInfo &molinfo) const;
-};
+        QString toString() const;
 
-}
+        ResIdx &operator=(const ResIdx &other);
+
+        bool operator==(const SireID::ID &other) const;
+
+        using SireID::Index_T_<ResIdx>::operator=;
+
+        using SireID::Index_T_<ResIdx>::operator==;
+        using SireID::Index_T_<ResIdx>::operator!=;
+
+        using SireID::Index_T_<ResIdx>::operator+=;
+        using SireID::Index_T_<ResIdx>::operator++;
+        using SireID::Index_T_<ResIdx>::operator-=;
+        using SireID::Index_T_<ResIdx>::operator--;
+
+        using SireID::Index_T_<ResIdx>::map;
+
+        QList<ResIdx> map(const MolInfo &molinfo) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::ResIdx);
 
-SIRE_EXPOSE_CLASS( SireMol::ResIdx )
+SIRE_EXPOSE_CLASS(SireMol::ResIdx)
 
 SIRE_END_HEADER
 
 #endif
-

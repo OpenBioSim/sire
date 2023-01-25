@@ -41,164 +41,157 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class Integrator;
-class NullIntegrator;
-}
+    class Integrator;
+    class NullIntegrator;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::Integrator&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::Integrator&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::Integrator &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::Integrator &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::NullIntegrator&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::NullIntegrator&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::NullIntegrator &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::NullIntegrator &);
 
 namespace SireFF
 {
-class ForceTable;
+    class ForceTable;
 }
 
 namespace SireMol
 {
-class MoleculeGroup;
-class MoleculeView;
-}
+    class MoleculeGroup;
+    class MoleculeView;
+} // namespace SireMol
 
 namespace SireMaths
 {
-class RanGenerator;
+    class RanGenerator;
 }
 
 namespace SireSystem
 {
-class System;
+    class System;
 }
 
 namespace SireCAS
 {
-class Symbol;
+    class Symbol;
 }
 
 namespace SireMove
 {
 
-class Ensemble;
+    class Ensemble;
 
-using SireMol::MoleculeGroup;
-using SireMol::MoleculeView;
+    using SireMol::MoleculeGroup;
+    using SireMol::MoleculeView;
 
-using SireSystem::System;
+    using SireSystem::System;
 
-using SireFF::ForceTable;
+    using SireFF::ForceTable;
 
-using SireCAS::Symbol;
+    using SireCAS::Symbol;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-/** This is the virtual base class of all dynamics integrators. An integrator
-    is the kernel used to advance the coordinates of the system from one
-    timestep to the next
+    /** This is the virtual base class of all dynamics integrators. An integrator
+        is the kernel used to advance the coordinates of the system from one
+        timestep to the next
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT Integrator : public SireBase::Property
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const Integrator&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Integrator&);
-
-public:
-    Integrator();
-
-    Integrator(const Integrator &other);
-
-    virtual ~Integrator();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT Integrator : public SireBase::Property
     {
-        return "SireMove::Integrator";
-    }
 
-    virtual Integrator* clone() const=0;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const Integrator &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, Integrator &);
 
-    static const NullIntegrator& null();
+    public:
+        Integrator();
 
-    virtual QString toString() const=0;
+        Integrator(const Integrator &other);
 
-    virtual Ensemble ensemble() const=0;
+        virtual ~Integrator();
 
-    virtual bool isTimeReversible() const=0;
+        static const char *typeName()
+        {
+            return "SireMove::Integrator";
+        }
 
-    virtual void integrate(IntegratorWorkspace &workspace,
-                           const Symbol &nrg_component,
-                           SireUnits::Dimension::Time timestep,
-                           int nmoves, bool record_stats)=0;
+        virtual Integrator *clone() const = 0;
 
-    virtual IntegratorWorkspacePtr createWorkspace(
-                                        const PropertyMap &map = PropertyMap()) const=0;
+        static const NullIntegrator &null();
 
-    virtual IntegratorWorkspacePtr
-                        createWorkspace(const MoleculeGroup &molgroup,
-                                        const PropertyMap &map = PropertyMap()) const=0;
+        virtual QString toString() const = 0;
 
-protected:
-    Integrator& operator=(const Integrator &other);
+        virtual Ensemble ensemble() const = 0;
 
-    bool operator==(const Integrator &other) const;
-    bool operator!=(const Integrator &other) const;
-};
+        virtual bool isTimeReversible() const = 0;
 
-/** This class holds a null integrator, which doesn't advance anything anywhere
+        virtual void integrate(IntegratorWorkspace &workspace, const Symbol &nrg_component,
+                               SireUnits::Dimension::Time timestep, int nmoves, bool record_stats) = 0;
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT NullIntegrator
-            : public SireBase::ConcreteProperty<NullIntegrator,Integrator>
-{
+        virtual IntegratorWorkspacePtr createWorkspace(const PropertyMap &map = PropertyMap()) const = 0;
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const NullIntegrator&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullIntegrator&);
+        virtual IntegratorWorkspacePtr createWorkspace(const MoleculeGroup &molgroup,
+                                                       const PropertyMap &map = PropertyMap()) const = 0;
 
-public:
-    NullIntegrator();
+    protected:
+        Integrator &operator=(const Integrator &other);
 
-    NullIntegrator(const NullIntegrator &other);
+        bool operator==(const Integrator &other) const;
+        bool operator!=(const Integrator &other) const;
+    };
 
-    ~NullIntegrator();
+    /** This class holds a null integrator, which doesn't advance anything anywhere
 
-    NullIntegrator& operator=(const NullIntegrator &other);
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT NullIntegrator : public SireBase::ConcreteProperty<NullIntegrator, Integrator>
+    {
 
-    static const char* typeName();
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const NullIntegrator &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, NullIntegrator &);
 
-    bool operator==(const NullIntegrator &other) const;
-    bool operator!=(const NullIntegrator &other) const;
+    public:
+        NullIntegrator();
 
-    Ensemble ensemble() const;
+        NullIntegrator(const NullIntegrator &other);
 
-    bool isTimeReversible() const;
+        ~NullIntegrator();
 
-    QString toString() const;
+        NullIntegrator &operator=(const NullIntegrator &other);
 
-    void integrate(IntegratorWorkspace &workspace, const Symbol &nrg_component,
-                   SireUnits::Dimension::Time timestep,
-                   int nmoves, bool record_stats);
+        static const char *typeName();
 
-    IntegratorWorkspacePtr createWorkspace(const PropertyMap &map = PropertyMap()) const;
+        bool operator==(const NullIntegrator &other) const;
+        bool operator!=(const NullIntegrator &other) const;
 
-    IntegratorWorkspacePtr createWorkspace(const MoleculeGroup &molgroup,
-                                           const PropertyMap &map = PropertyMap()) const;
-};
+        Ensemble ensemble() const;
 
-typedef SireBase::PropPtr<Integrator> IntegratorPtr;
+        bool isTimeReversible() const;
 
-}
+        QString toString() const;
 
-Q_DECLARE_METATYPE( SireMove::NullIntegrator )
+        void integrate(IntegratorWorkspace &workspace, const Symbol &nrg_component, SireUnits::Dimension::Time timestep,
+                       int nmoves, bool record_stats);
 
-SIRE_EXPOSE_CLASS( SireMove::Integrator )
-SIRE_EXPOSE_CLASS( SireMove::NullIntegrator )
+        IntegratorWorkspacePtr createWorkspace(const PropertyMap &map = PropertyMap()) const;
 
-SIRE_EXPOSE_PROPERTY( SireMove::IntegratorPtr, SireMove::Integrator )
+        IntegratorWorkspacePtr createWorkspace(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap()) const;
+    };
+
+    typedef SireBase::PropPtr<Integrator> IntegratorPtr;
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::NullIntegrator)
+
+SIRE_EXPOSE_CLASS(SireMove::Integrator)
+SIRE_EXPOSE_CLASS(SireMove::NullIntegrator)
+
+SIRE_EXPOSE_PROPERTY(SireMove::IntegratorPtr, SireMove::Integrator)
 
 SIRE_END_HEADER
 

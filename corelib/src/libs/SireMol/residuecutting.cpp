@@ -32,10 +32,10 @@
 #include "mover.hpp"
 #include "selector.hpp"
 
+#include "atom.h"
+#include "cutgroup.h"
 #include "molecule.h"
 #include "residue.h"
-#include "cutgroup.h"
-#include "atom.h"
 
 #include "atomeditor.h"
 #include "cgeditor.h"
@@ -51,12 +51,11 @@ using namespace SireStream;
 static const RegisterMetaType<ResidueCutting> r_rescut;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const ResidueCutting &rescut)
+QDataStream &operator<<(QDataStream &ds, const ResidueCutting &rescut)
 {
     writeHeader(ds, r_rescut, 1);
 
-    ds << static_cast<const CuttingFunction&>(rescut);
+    ds << static_cast<const CuttingFunction &>(rescut);
 
     return ds;
 }
@@ -68,7 +67,7 @@ QDataStream &operator>>(QDataStream &ds, ResidueCutting &rescut)
 
     if (v == 1)
     {
-        ds >> static_cast<CuttingFunction&>(rescut);
+        ds >> static_cast<CuttingFunction &>(rescut);
     }
     else
         throw version_error(v, "1", r_rescut, CODELOC);
@@ -77,33 +76,34 @@ QDataStream &operator>>(QDataStream &ds, ResidueCutting &rescut)
 }
 
 /** Constructor */
-ResidueCutting::ResidueCutting()
-               : ConcreteProperty<ResidueCutting,CuttingFunction>()
-{}
+ResidueCutting::ResidueCutting() : ConcreteProperty<ResidueCutting, CuttingFunction>()
+{
+}
 
 /** Copy constructor */
-ResidueCutting::ResidueCutting(const ResidueCutting &other)
-               : ConcreteProperty<ResidueCutting,CuttingFunction>(other)
-{}
+ResidueCutting::ResidueCutting(const ResidueCutting &other) : ConcreteProperty<ResidueCutting, CuttingFunction>(other)
+{
+}
 
 /** Destructor */
 ResidueCutting::~ResidueCutting()
-{}
+{
+}
 
 /** Copy assignment operator */
-ResidueCutting& ResidueCutting::operator=(const ResidueCutting&)
+ResidueCutting &ResidueCutting::operator=(const ResidueCutting &)
 {
     return *this;
 }
 
 /** Comparison operator */
-bool ResidueCutting::operator==(const ResidueCutting&) const
+bool ResidueCutting::operator==(const ResidueCutting &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool ResidueCutting::operator!=(const ResidueCutting&) const
+bool ResidueCutting::operator!=(const ResidueCutting &) const
 {
     return false;
 }
@@ -113,32 +113,32 @@ MolStructureEditor ResidueCutting::operator()(MolStructureEditor &moleditor) con
 {
     if (moleditor.nCutGroups() == 1 and moleditor.nResidues() == 1)
     {
-        //there is nothing to do
+        // there is nothing to do
         return moleditor;
     }
 
-    //remove the existing CutGroups
+    // remove the existing CutGroups
     moleditor.removeAllCutGroups();
 
-    //now create one CutGroup for each residue, giving it the same
-    //number as the residue index
-    for (ResIdx i(0); i<moleditor.nResidues(); ++i)
+    // now create one CutGroup for each residue, giving it the same
+    // number as the residue index
+    for (ResIdx i(0); i < moleditor.nResidues(); ++i)
     {
-        moleditor.add( CGName(QString::number(i)) );
+        moleditor.add(CGName(QString::number(i)));
 
-        //now reparent all of the atoms into this CutGroup
+        // now reparent all of the atoms into this CutGroup
         ResStructureEditor reseditor = moleditor.residue(i);
 
-        for (int j=0; j<reseditor.nAtoms(); ++j)
+        for (int j = 0; j < reseditor.nAtoms(); ++j)
         {
-            reseditor.atom(j).reparent( CGIdx(i) );
+            reseditor.atom(j).reparent(CGIdx(i));
         }
     }
 
     return moleditor;
 }
 
-const char* ResidueCutting::typeName()
+const char *ResidueCutting::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResidueCutting>() );
+    return QMetaType::typeName(qMetaTypeId<ResidueCutting>());
 }

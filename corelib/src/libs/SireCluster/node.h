@@ -41,98 +41,97 @@ class QUuid;
 namespace SireCluster
 {
 
-class Nodes;
-class Frontend;
-class WorkPacket;
-class Promise;
+    class Nodes;
+    class Frontend;
+    class WorkPacket;
+    class Promise;
 
-namespace detail
-{
-class NodePvt;
-class PromisePvt;
-}
+    namespace detail
+    {
+        class NodePvt;
+        class PromisePvt;
+    } // namespace detail
 
-/** This is a Node in a cluster. A Node is a resource that can
-    be used to run WorkPackets. A Node is always part of a
-    'Nodes' scheduler object, that coordinates the WorkPackets
-    that are assigned to the nodes. Alternatively, you can
-    grab a node manually from the Nodes object and you can
-    assign WorkPackets to it yourself
+    /** This is a Node in a cluster. A Node is a resource that can
+        be used to run WorkPackets. A Node is always part of a
+        'Nodes' scheduler object, that coordinates the WorkPackets
+        that are assigned to the nodes. Alternatively, you can
+        grab a node manually from the Nodes object and you can
+        assign WorkPackets to it yourself
 
-    Essentially, a Node is a means of directing WorkPackets
-    to Frontends, so that they can be communicated on to
-    Backends that perform the actual work.
+        Essentially, a Node is a means of directing WorkPackets
+        to Frontends, so that they can be communicated on to
+        Backends that perform the actual work.
 
-    @author Christopher Woods
-*/
-class SIRECLUSTER_EXPORT Node
-{
+        @author Christopher Woods
+    */
+    class SIRECLUSTER_EXPORT Node
+    {
 
-friend class Nodes;
+        friend class Nodes;
 
-friend class Promise;
-friend class detail::PromisePvt;
+        friend class Promise;
+        friend class detail::PromisePvt;
 
-public:
-    Node();
+    public:
+        Node();
 
-    Node(const Node &other);
+        Node(const Node &other);
 
-    ~Node();
+        ~Node();
 
-    Node& operator=(const Node &other);
+        Node &operator=(const Node &other);
 
-    bool operator==(const Node &other) const;
-    bool operator!=(const Node &other) const;
+        bool operator==(const Node &other) const;
+        bool operator!=(const Node &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    Nodes nodes();
+        Nodes nodes();
 
-    bool isHomeless();
+        bool isHomeless();
 
-    bool release();
-    void forceRelease();
+        bool release();
+        void forceRelease();
 
-    bool isLocal();
+        bool isLocal();
 
-    bool isNull() const;
+        bool isNull() const;
 
-    QUuid UID();
+        QUuid UID();
 
-    Promise startJob(const WorkPacket &workpacket);
+        Promise startJob(const WorkPacket &workpacket);
 
-    Promise startJob(const WorkPacket &workpacket,
-                     bool autodelete);
+        Promise startJob(const WorkPacket &workpacket, bool autodelete);
 
-    void stopJob();
-    void abortJob();
+        void stopJob();
+        void abortJob();
 
-    void wait();
-    bool wait(int timeout);
+        void wait();
+        bool wait(int timeout);
 
-    float progress();
+        float progress();
 
-protected:
-    static Node create(const Nodes &nodes,
-                       const Frontend &frontend); // called by Nodes
+    protected:
+        static Node create(const Nodes &nodes,
+                           const Frontend &frontend); // called by Nodes
 
-    void evict(); // called by Nodes
-    void rehome(const Nodes &nodes); // called by Nodes
+        void evict();                    // called by Nodes
+        void rehome(const Nodes &nodes); // called by Nodes
 
-    Frontend frontend(); // called by Nodes
+        Frontend frontend(); // called by Nodes
 
-    WorkPacket interimResult(); // called by Promise
-    WorkPacket result();        // called by PromisePvt
+        WorkPacket interimResult(); // called by Promise
+        WorkPacket result();        // called by PromisePvt
 
-private:
-    /** Private implementation of Node */
-    boost::shared_ptr<detail::NodePvt> d;
-};
+    private:
+        /** Private implementation of Node */
+        boost::shared_ptr<detail::NodePvt> d;
+    };
 
-}
+} // namespace SireCluster
 
-SIRE_EXPOSE_CLASS( SireCluster::Node )
+SIRE_EXPOSE_CLASS(SireCluster::Node)
 
 SIRE_END_HEADER
 

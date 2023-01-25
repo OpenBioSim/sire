@@ -26,23 +26,23 @@
 \*********************************************/
 
 #include "moleculeparser.h"
-#include "supplementary.h"
 #include "filetrajectory.h"
+#include "supplementary.h"
 
 #include "SireError/errors.h"
 #include "SireIO/errors.h"
 
-#include "SireBase/parallel.h"
 #include "SireBase/booleanproperty.h"
+#include "SireBase/parallel.h"
 #include "SireBase/stringproperty.h"
 
 #include "SireFF/ffdetail.h"
 #include "SireMM/mmdetail.h"
 
-#include "SireMol/molecule.h"
-#include "SireMol/trajectory.h"
-#include "SireMol/moleditor.h"
 #include "SireMol/core.h"
+#include "SireMol/molecule.h"
+#include "SireMol/moleditor.h"
+#include "SireMol/trajectory.h"
 
 #include "SireSystem/system.h"
 
@@ -51,13 +51,13 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
-#include <QFile>
+#include <QDebug>
 #include <QDir>
-#include <QTextStream>
 #include <QElapsedTimer>
+#include <QFile>
 #include <QFileInfo>
 #include <QMutex>
-#include <QDebug>
+#include <QTextStream>
 
 using namespace SireIO;
 using namespace SireSystem;
@@ -79,8 +79,7 @@ namespace SireIO
         }
 
         /** Copy constructor */
-        ParserFactoryHelper::ParserFactoryHelper(const ParserFactoryHelper &other)
-            : parser(other.parser)
+        ParserFactoryHelper::ParserFactoryHelper(const ParserFactoryHelper &other) : parser(other.parser)
         {
         }
 
@@ -225,8 +224,7 @@ namespace SireIO
 
         /** Use this factory helper to construct a new parser that parses
             the file called 'filename' */
-        MoleculeParserPtr ParserFactoryHelper::construct(const QString &filename,
-                                                         const PropertyMap &map) const
+        MoleculeParserPtr ParserFactoryHelper::construct(const QString &filename, const PropertyMap &map) const
         {
             if (isValid())
             {
@@ -238,8 +236,7 @@ namespace SireIO
 
         /** Use this factory helper to construct a new parser that parses
             the data in the passed lines of text */
-        MoleculeParserPtr ParserFactoryHelper::construct(const QStringList &lines,
-                                                         const PropertyMap &map) const
+        MoleculeParserPtr ParserFactoryHelper::construct(const QStringList &lines, const PropertyMap &map) const
         {
             if (isValid())
             {
@@ -251,8 +248,7 @@ namespace SireIO
 
         /** Use this factory helper to construct a new parser from the information
             contained in the passed system */
-        MoleculeParserPtr ParserFactoryHelper::construct(const SireSystem::System &system,
-                                                         const PropertyMap &map) const
+        MoleculeParserPtr ParserFactoryHelper::construct(const SireSystem::System &system, const PropertyMap &map) const
         {
             if (isValid())
             {
@@ -331,9 +327,8 @@ namespace SireIO
                 if (not missing.isEmpty())
                 {
                     lkr.unlock();
-                    throw SireError::io_error(QObject::tr(
-                                                  "Cannot find parsers that support the following formats: %1.\n"
-                                                  "Supported parsers are:\n%2")
+                    throw SireError::io_error(QObject::tr("Cannot find parsers that support the following formats: %1.\n"
+                                                          "Supported parsers are:\n%2")
                                                   .arg(missing.join(", "))
                                                   .arg(this->supportedFormats()),
                                               CODELOC);
@@ -342,8 +337,7 @@ namespace SireIO
                 return helpers;
             }
 
-            QList<ParserFactoryHelper> factoriesForSuffix(const QString &suffix,
-                                                          bool disable_supplementary)
+            QList<ParserFactoryHelper> factoriesForSuffix(const QString &suffix, bool disable_supplementary)
             {
                 QMutexLocker lkr(&mutex);
                 auto helpers = helpers_by_suffix.values(suffix);
@@ -367,8 +361,7 @@ namespace SireIO
                 return helpers;
             }
 
-            QList<ParserFactoryHelper> factoriesExcludingSuffix(const QString &suffix,
-                                                                bool disable_supplementary)
+            QList<ParserFactoryHelper> factoriesExcludingSuffix(const QString &suffix, bool disable_supplementary)
             {
                 QMutexLocker lkr(&mutex);
 
@@ -447,8 +440,7 @@ namespace SireIO
                     if (not parser.isSupplementary())
                     {
                         lines.append(QObject::tr("## Parser %1 ##").arg(key));
-                        lines.append(QObject::tr("Supports files: %1")
-                                         .arg(parser.suffixes().join(", ")));
+                        lines.append(QObject::tr("Supports files: %1").arg(parser.suffixes().join(", ")));
                         lines.append(parser.formatDescription());
                         lines += QString("#").repeated(13 + key.length()) + "\n";
                     }
@@ -493,8 +485,7 @@ QDataStream &operator<<(QDataStream &ds, const MoleculeParser &parser)
     writeHeader(ds, r_parser, 2);
 
     SharedDataStream sds(ds);
-    sds << parser.fname << parser.lnes << parser.scr << parser.run_parallel
-        << static_cast<const Property &>(parser);
+    sds << parser.fname << parser.lnes << parser.scr << parser.run_parallel << static_cast<const Property &>(parser);
 
     return ds;
 }
@@ -616,9 +607,7 @@ QVector<QString> MoleculeParser::readTextFile(QString filename)
 
 /** Construct the parser, parsing in all of the lines in the file
     with passed filename */
-MoleculeParser::MoleculeParser(const QString &filename,
-                               const PropertyMap &map)
-    : Property(), scr(0), run_parallel(true)
+MoleculeParser::MoleculeParser(const QString &filename, const PropertyMap &map) : Property(), scr(0), run_parallel(true)
 {
     if (map["parallel"].hasValue())
     {
@@ -630,8 +619,7 @@ MoleculeParser::MoleculeParser(const QString &filename,
 }
 
 /** Construct the parser, parsing in all of the passed text lines */
-MoleculeParser::MoleculeParser(const QStringList &lines,
-                               const PropertyMap &map)
+MoleculeParser::MoleculeParser(const QStringList &lines, const PropertyMap &map)
     : Property(), scr(0), run_parallel(true)
 {
     if (map["parallel"].hasValue())
@@ -647,9 +635,7 @@ MoleculeParser::MoleculeParser(const QStringList &lines,
 
 /** Copy constructor */
 MoleculeParser::MoleculeParser(const MoleculeParser &other)
-    : Property(other), fname(other.fname),
-      lnes(other.lnes), scr(other.scr),
-      run_parallel(other.run_parallel)
+    : Property(other), fname(other.fname), lnes(other.lnes), scr(other.scr), run_parallel(other.run_parallel)
 {
 }
 
@@ -724,8 +710,8 @@ MoleculeParser &MoleculeParser::operator=(const MoleculeParser &other)
 
 bool MoleculeParser::operator==(const MoleculeParser &other) const
 {
-    return fname == other.fname and lnes == other.lnes and scr == other.scr and
-           run_parallel == other.run_parallel and Property::operator==(other);
+    return fname == other.fname and lnes == other.lnes and scr == other.scr and run_parallel == other.run_parallel and
+           Property::operator==(other);
 }
 
 bool MoleculeParser::operator!=(const MoleculeParser &other) const
@@ -839,11 +825,11 @@ PropertyPtr MoleculeParser::getForceField(const System &system, const PropertyMa
     if (ffprop.hasValue())
     {
         if (not ffprop.value().isA<FFDetail>())
-            throw SireError::incompatible_error(QObject::tr(
-                                                    "Cannot convert the passed mapped value '%1' to an object of type FFDetail. "
-                                                    "If you want to specify the focefield it must be an object derived from FFDetail.")
-                                                    .arg(ffprop.value().toString()),
-                                                CODELOC);
+            throw SireError::incompatible_error(
+                QObject::tr("Cannot convert the passed mapped value '%1' to an object of type FFDetail. "
+                            "If you want to specify the focefield it must be an object derived from FFDetail.")
+                    .arg(ffprop.value().toString()),
+                CODELOC);
 
         return ffprop.value();
     }
@@ -894,10 +880,11 @@ PropertyPtr MoleculeParser::getForceField(const System &system, const PropertyMa
     }
 
     if (not errors.isEmpty())
-        throw SireError::incompatible_error(QObject::tr("There were some problems "
-                                                        "extracting a valid forcefield object from all of the molecules.\n\n%1")
-                                                .arg(errors.join("\n")),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("There were some problems "
+                        "extracting a valid forcefield object from all of the molecules.\n\n%1")
+                .arg(errors.join("\n")),
+            CODELOC);
 
     // we should have a valid FFDetail now...
     return ffield.read().asA<FFDetail>();
@@ -911,12 +898,12 @@ void MoleculeParser::writeToFile(const QString &filename) const
         return;
 
     if (not this->isTextFile())
-        throw SireError::program_bug(QObject::tr(
-                                         "Dear programmer - please override the MoleculeParser::writeToFile function "
-                                         "to work with your binary file format. Text writing is not supported "
-                                         "for the parser %1.")
-                                         .arg(this->what()),
-                                     CODELOC);
+        throw SireError::program_bug(
+            QObject::tr("Dear programmer - please override the MoleculeParser::writeToFile function "
+                        "to work with your binary file format. Text writing is not supported "
+                        "for the parser %1.")
+                .arg(this->what()),
+            CODELOC);
 
     QFile f(filename);
 
@@ -939,27 +926,20 @@ void MoleculeParser::writeToFile(const QString &filename) const
     'filename'. This will try to find a parser based on suffix, but if that fails,
     it will try all parsers. It will choose the parser that doesn't raise an error
     that scores highest. */
-MoleculeParserPtr MoleculeParser::_pvt_parse(const QString &filename,
-                                             const PropertyMap &map)
+MoleculeParserPtr MoleculeParser::_pvt_parse(const QString &filename, const PropertyMap &map)
 {
     bool disable_supplementary = false;
 
     if (map.specified("DISABLE_SUPPLEMENTARY"))
     {
-        disable_supplementary = map["DISABLE_SUPPLEMENTARY"]
-                                    .value()
-                                    .asA<BooleanProperty>()
-                                    .value();
+        disable_supplementary = map["DISABLE_SUPPLEMENTARY"].value().asA<BooleanProperty>().value();
     }
 
     QFileInfo info(filename);
 
     if (not(info.isFile() and info.isReadable()))
     {
-        throw SireError::file_error(QObject::tr(
-                                        "There is no file readable called '%1'.")
-                                        .arg(filename),
-                                    CODELOC);
+        throw SireError::file_error(QObject::tr("There is no file readable called '%1'.").arg(filename), CODELOC);
     }
 
     // try to find the right parser based on the suffix
@@ -1044,14 +1024,11 @@ MoleculeParserPtr MoleculeParser::_pvt_parse(const QString &filename,
     {
         if (not recognised_suffixes.isEmpty())
         {
-            return MoleculeParserPtr(BrokenParser(filename,
-                                                  recognised_suffixes.join(","),
-                                                  suffix_errors));
+            return MoleculeParserPtr(BrokenParser(filename, recognised_suffixes.join(","), suffix_errors));
         }
         else
         {
-            return MoleculeParserPtr(BrokenParser(filename,
-                                                  suffix_errors + errors));
+            return MoleculeParserPtr(BrokenParser(filename, suffix_errors + errors));
         }
 
         return MoleculeParserPtr();
@@ -1061,9 +1038,7 @@ MoleculeParserPtr MoleculeParser::_pvt_parse(const QString &filename,
 /** Parse the passed system, returning the resulting Parser. You must
  *  specify the parser that you want to use
  */
-MoleculeParserPtr MoleculeParser::parse(const System &system,
-                                        const QString &format,
-                                        const PropertyMap &map)
+MoleculeParserPtr MoleculeParser::parse(const System &system, const QString &format, const PropertyMap &map)
 {
     const auto factories = getParserFactory()->getFactories({format});
 
@@ -1077,8 +1052,7 @@ MoleculeParserPtr MoleculeParser::parse(const System &system,
     of magic to automatically work out the format of the file and whether or
     not this is parseable by Sire... This raises an exception if the file
     cannot be recognised, or if there is an error in parsing. */
-MoleculeParserPtr MoleculeParser::parse(const QString &filename,
-                                        const PropertyMap &map)
+MoleculeParserPtr MoleculeParser::parse(const QString &filename, const PropertyMap &map)
 {
     MoleculeParserPtr parser = MoleculeParser::_pvt_parse(filename, map);
     getFileCache()->clear();
@@ -1086,8 +1060,7 @@ MoleculeParserPtr MoleculeParser::parse(const QString &filename,
 }
 
 /** Parse the passed set of files, returning the resulting Parsers */
-QList<MoleculeParserPtr> MoleculeParser::parse(const QStringList &filenames,
-                                               const PropertyMap &map)
+QList<MoleculeParserPtr> MoleculeParser::parse(const QStringList &filenames, const PropertyMap &map)
 {
     QList<MoleculeParserPtr> result;
 
@@ -1153,8 +1126,7 @@ System MoleculeParser::read(const QString &filename, const PropertyMap &map)
 
 /** Read the two passed files, returning the System contained therein. The two
     files must refer to the same System, i.e. they could be a parameter + coordinate file */
-System MoleculeParser::read(const QString &file1, const QString &file2,
-                            const PropertyMap &map)
+System MoleculeParser::read(const QString &file1, const QString &file2, const PropertyMap &map)
 {
     MoleculeParserPtr parser1, parser2;
 
@@ -1318,15 +1290,12 @@ QString MoleculeParser::supportedFormats()
     return getParserFactory()->supportedFormats();
 }
 
-QStringList pvt_write(const System &system,
-                      const QStringList &filenames,
-                      const QStringList &fileformats,
+QStringList pvt_write(const System &system, const QStringList &filenames, const QStringList &fileformats,
                       const PropertyMap &map)
 {
     if (filenames.count() != fileformats.count())
     {
-        throw SireError::program_bug(QObject::tr(
-                                         "Disagreement of the number of files... %1 vs %2")
+        throw SireError::program_bug(QObject::tr("Disagreement of the number of files... %1 vs %2")
                                          .arg(filenames.count())
                                          .arg(fileformats.count()),
                                      CODELOC);
@@ -1349,18 +1318,17 @@ QStringList pvt_write(const System &system,
             }
             else if (not fileinfos[i].isWritable())
             {
-                errors.append(QObject::tr("The file %1 exists and is not writable!")
-                                  .arg(fileinfos[i].absoluteFilePath()));
+                errors.append(
+                    QObject::tr("The file %1 exists and is not writable!").arg(fileinfos[i].absoluteFilePath()));
             }
         }
     }
 
     if (not errors.isEmpty())
     {
-        throw SireError::io_error(QObject::tr(
-                                      "Cannot write the files as the following errors occurred:\n%1")
-                                      .arg(errors.join("\n\n")),
-                                  CODELOC);
+        throw SireError::io_error(
+            QObject::tr("Cannot write the files as the following errors occurred:\n%1").arg(errors.join("\n\n")),
+            CODELOC);
     }
 
     // now get all of the parsers
@@ -1430,9 +1398,8 @@ QStringList pvt_write(const System &system,
 
     if (not errors.isEmpty())
     {
-        throw SireError::io_error(QObject::tr(
-                                      "Cannot write the (perhaps some of the ) files "
-                                      "as the following errors occurred:\n%1")
+        throw SireError::io_error(QObject::tr("Cannot write the (perhaps some of the ) files "
+                                              "as the following errors occurred:\n%1")
                                       .arg(errors.join("\n\n")),
                                   CODELOC);
     }
@@ -1454,15 +1421,12 @@ QStringList pvt_write(const System &system,
     multiple files will be written. This returns the full pathnames to
     all of the files that are written
 */
-QStringList MoleculeParser::write(const System &system, const QString &filename,
-                                  const PropertyMap &map)
+QStringList MoleculeParser::write(const System &system, const QString &filename, const PropertyMap &map)
 {
     if (filename.isEmpty() or QFileInfo(filename).baseName().isEmpty())
     {
-        throw SireError::io_error(QObject::tr(
-                                      "You must supply a valid filename. This '%1' is not sufficient.")
-                                      .arg(filename),
-                                  CODELOC);
+        throw SireError::io_error(
+            QObject::tr("You must supply a valid filename. This '%1' is not sufficient.").arg(filename), CODELOC);
     }
 
     // build a list of filenames with their associated fileformats
@@ -1503,15 +1467,15 @@ QStringList MoleculeParser::write(const System &system, const QString &filename,
             }
             catch (...)
             {
-                throw SireError::io_error(QObject::tr(
-                                              "Cannot work out the fileformat to use to write the System to "
-                                              "file '%1'. You need to either supply the format using the "
-                                              "'fileformat' property in the passed map, add this to the System "
-                                              "as its 'fileformat' property, or pass a filename with an extension "
-                                              "whose fileformat can be determined. Supported fileformats are;\n%2")
-                                              .arg(filename)
-                                              .arg(MoleculeParser::supportedFormats()),
-                                          CODELOC);
+                throw SireError::io_error(
+                    QObject::tr("Cannot work out the fileformat to use to write the System to "
+                                "file '%1'. You need to either supply the format using the "
+                                "'fileformat' property in the passed map, add this to the System "
+                                "as its 'fileformat' property, or pass a filename with an extension "
+                                "whose fileformat can be determined. Supported fileformats are;\n%2")
+                        .arg(filename)
+                        .arg(MoleculeParser::supportedFormats()),
+                    CODELOC);
             }
 
             for (const auto &format : fileformats)
@@ -1534,14 +1498,11 @@ QStringList MoleculeParser::write(const System &system, const QString &filename,
 /** Extension of MoleculeParser::write which allows many filenames.
     The same rules to locate the fileformats are now used, except that now only
     the number of files written must match the number of filenames */
-QStringList MoleculeParser::write(const System &system,
-                                  const QStringList &files,
-                                  const PropertyMap &map)
+QStringList MoleculeParser::write(const System &system, const QStringList &files, const PropertyMap &map)
 {
     if (files.isEmpty())
     {
-        throw SireError::io_error(QObject::tr(
-                                      "You must supply a valid filename. An empty list is not sufficient!"),
+        throw SireError::io_error(QObject::tr("You must supply a valid filename. An empty list is not sufficient!"),
                                   CODELOC);
     }
     else if (files.count() == 1)
@@ -1568,9 +1529,8 @@ QStringList MoleculeParser::write(const System &system,
 
         if (files.count() != fileformats.count())
         {
-            throw SireError::io_error(QObject::tr(
-                                          "You must match up the number of filenames to fileformats when "
-                                          "specifying both the filenames [%1] and fileformats [%2].")
+            throw SireError::io_error(QObject::tr("You must match up the number of filenames to fileformats when "
+                                                  "specifying both the filenames [%1] and fileformats [%2].")
                                           .arg(filenames.join(","))
                                           .arg(fileformats.join(",")),
                                       CODELOC);
@@ -1584,10 +1544,9 @@ QStringList MoleculeParser::write(const System &system,
 
             if (filename.isEmpty() or fileinfo.completeBaseName().isEmpty())
             {
-                throw SireError::io_error(QObject::tr(
-                                              "You must supply a valid filename. This '%1' is not sufficient.")
-                                              .arg(filename),
-                                          CODELOC);
+                throw SireError::io_error(
+                    QObject::tr("You must supply a valid filename. This '%1' is not sufficient.").arg(filename),
+                    CODELOC);
             }
 
             QString basename = fileinfo.absoluteDir().absoluteFilePath(fileinfo.completeBaseName());
@@ -1616,15 +1575,15 @@ QStringList MoleculeParser::write(const System &system,
             {
                 if (i >= fileformats.count())
                 {
-                    throw SireError::io_error(QObject::tr(
-                                                  "Cannot work out the fileformat to use to write the System to "
-                                                  "file '%1'. You need to either supply the format using the "
-                                                  "'fileformat' property in the passed map, add this to the System "
-                                                  "as its 'fileformat' property, or pass a filename with an extension "
-                                                  "whose fileformat can be determined. Supported fileformats are;\n%2")
-                                                  .arg(filename)
-                                                  .arg(MoleculeParser::supportedFormats()),
-                                              CODELOC);
+                    throw SireError::io_error(
+                        QObject::tr("Cannot work out the fileformat to use to write the System to "
+                                    "file '%1'. You need to either supply the format using the "
+                                    "'fileformat' property in the passed map, add this to the System "
+                                    "as its 'fileformat' property, or pass a filename with an extension "
+                                    "whose fileformat can be determined. Supported fileformats are;\n%2")
+                            .arg(filename)
+                            .arg(MoleculeParser::supportedFormats()),
+                        CODELOC);
                 }
                 else
                 {
@@ -1652,8 +1611,8 @@ QStringList MoleculeParser::write(const System &system,
 /** Extension of MoleculeParser::write which allows you to specify two filenames.
     The same rules to locate the fileformats are now used, except now only two
     files are permitted to be written */
-QStringList MoleculeParser::write(const System &system, const QString &file1,
-                                  const QString &file2, const PropertyMap &map)
+QStringList MoleculeParser::write(const System &system, const QString &file1, const QString &file2,
+                                  const PropertyMap &map)
 {
     QStringList filenames;
     filenames.append(file1);
@@ -1662,24 +1621,20 @@ QStringList MoleculeParser::write(const System &system, const QString &file1,
 }
 
 /** Synonym of MoleculeParser::write */
-QStringList MoleculeParser::save(const System &system, const QString &filename,
-                                 const PropertyMap &map)
+QStringList MoleculeParser::save(const System &system, const QString &filename, const PropertyMap &map)
 {
     return MoleculeParser::write(system, filename, map);
 }
 
 /** Synonym of MoleculeParser::write */
-QStringList MoleculeParser::save(const System &system,
-                                 const QString &file1, const QString &file2,
+QStringList MoleculeParser::save(const System &system, const QString &file1, const QString &file2,
                                  const PropertyMap &map)
 {
     return MoleculeParser::write(system, file1, file2, map);
 }
 
 /** Synonym of MoleculeParser::write */
-QStringList MoleculeParser::save(const System &system,
-                                 const QStringList &filenames,
-                                 const PropertyMap &map)
+QStringList MoleculeParser::save(const System &system, const QStringList &filenames, const PropertyMap &map)
 {
     return MoleculeParser::write(system, filenames, map);
 }
@@ -1703,8 +1658,7 @@ System MoleculeParser::toSystem(const MoleculeParser &other, const PropertyMap &
 /** Return the System that is constructed from the information in the passed
     parsers. This will parse the information in order, meaning that data contained
     in earlier parsers may be overwritten by data from later parsers */
-System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others,
-                                const PropertyMap &map) const
+System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others, const PropertyMap &map) const
 {
     auto parsers = this->sortParsers(others, map);
 
@@ -1727,17 +1681,12 @@ System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others,
             filenames.append(parser.read().filename());
         }
 
-        throw SireIO::parse_error(QObject::tr(
-                                      "Unable to load the file: %1")
-                                      .arg(filenames.join(", ")),
-                                  CODELOC);
+        throw SireIO::parse_error(QObject::tr("Unable to load the file: %1").arg(filenames.join(", ")), CODELOC);
     }
 
     if (parsers.value("topology").count() == 0)
     {
-        throw SireError::program_bug(QObject::tr(
-                                         "Should only be here if we already have a topology!"),
-                                     CODELOC);
+        throw SireError::program_bug(QObject::tr("Should only be here if we already have a topology!"), CODELOC);
     }
 
     auto topology = parsers["topology"][0];
@@ -1924,8 +1873,7 @@ QStringList MoleculeParser::write(const System &system, const QString &filename)
 /** Extension of MoleculeParser::write which allows many filenames.
     The same rules to locate the fileformats are now used, except that now only
     the number of files written must match the number of filenames */
-QStringList MoleculeParser::write(const System &system,
-                                  const QStringList &files)
+QStringList MoleculeParser::write(const System &system, const QStringList &files)
 {
     return write(system, files, PropertyMap());
 }
@@ -1933,8 +1881,7 @@ QStringList MoleculeParser::write(const System &system,
 /** Extension of MoleculeParser::write which allows you to specify two filenames.
     The same rules to locate the fileformats are now used, except now only two
     files are permitted to be written */
-QStringList MoleculeParser::write(const System &system, const QString &file1,
-                                  const QString &file2)
+QStringList MoleculeParser::write(const System &system, const QString &file1, const QString &file2)
 {
     return write(system, file1, file2, PropertyMap());
 }
@@ -1946,15 +1893,13 @@ QStringList MoleculeParser::save(const System &system, const QString &filename)
 }
 
 /** Synonym of MoleculeParser::write */
-QStringList MoleculeParser::save(const System &system,
-                                 const QString &file1, const QString &file2)
+QStringList MoleculeParser::save(const System &system, const QString &file1, const QString &file2)
 {
     return save(system, file1, file2, PropertyMap());
 }
 
 /** Synonym of MoleculeParser::write */
-QStringList MoleculeParser::save(const System &system,
-                                 const QStringList &filenames)
+QStringList MoleculeParser::save(const System &system, const QStringList &filenames)
 {
     return save(system, filenames, PropertyMap());
 }
@@ -1984,9 +1929,8 @@ System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others) const
     using the (optional) property map to name the properties */
 System MoleculeParser::startSystem(const PropertyMap &map) const
 {
-    throw SireError::io_error(QObject::tr(
-                                  "There is not enough information in this parser (%1) to start "
-                                  "the creation of a new System. You need to use a more detailed input file.")
+    throw SireError::io_error(QObject::tr("There is not enough information in this parser (%1) to start "
+                                          "the creation of a new System. You need to use a more detailed input file.")
                                   .arg(this->toString()),
                               CODELOC);
 }
@@ -1996,9 +1940,8 @@ System MoleculeParser::startSystem(const PropertyMap &map) const
     property map to name the properties */
 System MoleculeParser::startSystem(const QVector<QString> &lines, const PropertyMap &map) const
 {
-    throw SireError::io_error(QObject::tr(
-                                  "There is not enough information in this parser (%1) to start "
-                                  "the creation of a new System. You need to use a more detailed input file.")
+    throw SireError::io_error(QObject::tr("There is not enough information in this parser (%1) to start "
+                                          "the creation of a new System. You need to use a more detailed input file.")
                                   .arg(this->toString()),
                               CODELOC);
 }
@@ -2007,9 +1950,8 @@ System MoleculeParser::startSystem(const QVector<QString> &lines, const Property
     this parser, using the (optional) property map to name the properties */
 void MoleculeParser::addToSystem(System &system, const PropertyMap &map) const
 {
-    throw SireError::io_error(QObject::tr(
-                                  "This parser (%1) cannot be used to add additional information to a "
-                                  "System. It can only be used to create a new System from scratch.")
+    throw SireError::io_error(QObject::tr("This parser (%1) cannot be used to add additional information to a "
+                                          "System. It can only be used to create a new System from scratch.")
                                   .arg(this->toString()),
                               CODELOC);
 }
@@ -2029,9 +1971,8 @@ void MoleculeParser::addToSystem(System &system, const PropertyMap &map) const
  *  broken : contains all of the BrokenParser objects for files that
  *           could not be parsed
  */
-QHash<QString, QList<MoleculeParserPtr>>
-MoleculeParser::sortParsers(const QList<MoleculeParserPtr> &parsers,
-                            const PropertyMap &map) const
+QHash<QString, QList<MoleculeParserPtr>> MoleculeParser::sortParsers(const QList<MoleculeParserPtr> &parsers,
+                                                                     const PropertyMap &map) const
 {
     QHash<QString, QList<MoleculeParserPtr>> ret;
 
@@ -2126,12 +2067,11 @@ MoleculeParser::sortParsers(const QList<MoleculeParserPtr> &parsers,
             }
         }
 
-        throw SireIO::parse_error(QObject::tr(
-                                      "Unable to load any molecules from the files as none "
-                                      "contain the necessary molecular information to create a "
-                                      "system. Only coordinate or trajectory information "
-                                      "has been loaded. Structure or topology information, "
-                                      "e.g. as would be found in a topology file, is missing."),
+        throw SireIO::parse_error(QObject::tr("Unable to load any molecules from the files as none "
+                                              "contain the necessary molecular information to create a "
+                                              "system. Only coordinate or trajectory information "
+                                              "has been loaded. Structure or topology information, "
+                                              "e.g. as would be found in a topology file, is missing."),
                                   CODELOC);
     }
 
@@ -2150,10 +2090,10 @@ MoleculeParser::sortParsers(const QList<MoleculeParserPtr> &parsers,
             {
                 if (topology_only_idx != -1)
                 {
-                    throw SireIO::parse_error(QObject::tr(
-                                                  "Cannot construct a System from multiple topology-only parsers "
-                                                  "if none can follow!"),
-                                              CODELOC);
+                    throw SireIO::parse_error(
+                        QObject::tr("Cannot construct a System from multiple topology-only parsers "
+                                    "if none can follow!"),
+                        CODELOC);
                 }
 
                 topology_only_idx = i;
@@ -2227,8 +2167,7 @@ NullParser::NullParser() : ConcreteProperty<NullParser, MoleculeParser>()
 {
 }
 
-NullParser::NullParser(const NullParser &other)
-    : ConcreteProperty<NullParser, MoleculeParser>(other)
+NullParser::NullParser(const NullParser &other) : ConcreteProperty<NullParser, MoleculeParser>(other)
 {
 }
 
@@ -2278,29 +2217,24 @@ System NullParser::toSystem(const PropertyMap &) const
     return System();
 }
 
-System NullParser::toSystem(const MoleculeParser &other,
-                            const PropertyMap &) const
+System NullParser::toSystem(const MoleculeParser &other, const PropertyMap &) const
 {
     if (not other.isA<NullParser>())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Null parsers cannot be combined with other parsers (%1)")
-                                                .arg(other.toString()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("Null parsers cannot be combined with other parsers (%1)").arg(other.toString()), CODELOC);
 
     return System();
 }
 
-System NullParser::toSystem(const QList<MoleculeParserPtr> &others,
-                            const PropertyMap &) const
+System NullParser::toSystem(const QList<MoleculeParserPtr> &others, const PropertyMap &) const
 {
     for (auto other : others)
     {
         if (not other.isNull())
         {
-            throw SireError::incompatible_error(QObject::tr(
-                                                    "Null parsers cannot be combined with other parsers (%1)")
-                                                    .arg(other.read().toString()),
-                                                CODELOC);
+            throw SireError::incompatible_error(
+                QObject::tr("Null parsers cannot be combined with other parsers (%1)").arg(other.read().toString()),
+                CODELOC);
         }
     }
 
@@ -2308,34 +2242,25 @@ System NullParser::toSystem(const QList<MoleculeParserPtr> &others,
 }
 
 /** Return this parser constructed from the passed filename */
-MoleculeParserPtr NullParser::construct(const QString &filename,
-                                        const PropertyMap &map) const
+MoleculeParserPtr NullParser::construct(const QString &filename, const PropertyMap &map) const
 {
-    throw SireError::program_bug(QObject::tr(
-                                     "The NullParser should not be used for an real file IO!"),
-                                 CODELOC);
+    throw SireError::program_bug(QObject::tr("The NullParser should not be used for an real file IO!"), CODELOC);
 
     return MoleculeParserPtr();
 }
 
 /** Return this parser constructed from the passed set of lines */
-MoleculeParserPtr NullParser::construct(const QStringList &lines,
-                                        const PropertyMap &map) const
+MoleculeParserPtr NullParser::construct(const QStringList &lines, const PropertyMap &map) const
 {
-    throw SireError::program_bug(QObject::tr(
-                                     "The NullParser should not be used for an real file IO!"),
-                                 CODELOC);
+    throw SireError::program_bug(QObject::tr("The NullParser should not be used for an real file IO!"), CODELOC);
 
     return MoleculeParserPtr();
 }
 
 /** Return this parser constructed from the passed SireSystem::System */
-MoleculeParserPtr NullParser::construct(const SireSystem::System &system,
-                                        const PropertyMap &map) const
+MoleculeParserPtr NullParser::construct(const SireSystem::System &system, const PropertyMap &map) const
 {
-    throw SireError::program_bug(QObject::tr(
-                                     "The NullParser should not be used for an real file IO!"),
-                                 CODELOC);
+    throw SireError::program_bug(QObject::tr("The NullParser should not be used for an real file IO!"), CODELOC);
 
     return MoleculeParserPtr();
 }
@@ -2352,8 +2277,7 @@ QDataStream &operator<<(QDataStream &ds, const BrokenParser &parser)
 
     SharedDataStream sds(ds);
 
-    sds << parser.error_report << parser.suffix
-        << static_cast<const MoleculeParser &>(parser);
+    sds << parser.error_report << parser.suffix << static_cast<const MoleculeParser &>(parser);
 
     return ds;
 }
@@ -2382,8 +2306,7 @@ BrokenParser::BrokenParser(const QString &filename, const PropertyMap &map)
 {
 }
 
-BrokenParser::BrokenParser(const QString &filename, const QString &s,
-                           const QStringList &errors)
+BrokenParser::BrokenParser(const QString &filename, const QString &s, const QStringList &errors)
     : ConcreteProperty<BrokenParser, MoleculeParser>(filename, PropertyMap())
 {
     suffix = s;
@@ -2401,14 +2324,12 @@ BrokenParser::BrokenParser(const QStringList &lines, const PropertyMap &map)
 {
 }
 
-BrokenParser::BrokenParser(const System &, const PropertyMap &map)
-    : ConcreteProperty<BrokenParser, MoleculeParser>(map)
+BrokenParser::BrokenParser(const System &, const PropertyMap &map) : ConcreteProperty<BrokenParser, MoleculeParser>(map)
 {
 }
 
 BrokenParser::BrokenParser(const BrokenParser &other)
-    : ConcreteProperty<BrokenParser, MoleculeParser>(other),
-      error_report(other.error_report), suffix(other.suffix)
+    : ConcreteProperty<BrokenParser, MoleculeParser>(other), error_report(other.error_report), suffix(other.suffix)
 {
 }
 
@@ -2491,29 +2412,24 @@ System BrokenParser::toSystem(const PropertyMap &) const
     return System();
 }
 
-System BrokenParser::toSystem(const MoleculeParser &other,
-                              const PropertyMap &) const
+System BrokenParser::toSystem(const MoleculeParser &other, const PropertyMap &) const
 {
     if (not other.isA<BrokenParser>())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Broken parsers cannot be combined with other parsers (%1)")
-                                                .arg(other.toString()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("Broken parsers cannot be combined with other parsers (%1)").arg(other.toString()), CODELOC);
 
     return System();
 }
 
-System BrokenParser::toSystem(const QList<MoleculeParserPtr> &others,
-                              const PropertyMap &) const
+System BrokenParser::toSystem(const QList<MoleculeParserPtr> &others, const PropertyMap &) const
 {
     for (const auto &other : others)
     {
         if (not other->isA<BrokenParser>())
         {
-            throw SireError::incompatible_error(QObject::tr(
-                                                    "Broken parsers cannot be combined with other parsers (%1)")
-                                                    .arg(other.read().toString()),
-                                                CODELOC);
+            throw SireError::incompatible_error(
+                QObject::tr("Broken parsers cannot be combined with other parsers (%1)").arg(other.read().toString()),
+                CODELOC);
         }
     }
 
@@ -2521,22 +2437,19 @@ System BrokenParser::toSystem(const QList<MoleculeParserPtr> &others,
 }
 
 /** Return this parser constructed from the passed filename */
-MoleculeParserPtr BrokenParser::construct(const QString &filename,
-                                          const PropertyMap &map) const
+MoleculeParserPtr BrokenParser::construct(const QString &filename, const PropertyMap &map) const
 {
     return MoleculeParserPtr(BrokenParser(filename, map));
 }
 
 /** Return this parser constructed from the passed set of lines */
-MoleculeParserPtr BrokenParser::construct(const QStringList &lines,
-                                          const PropertyMap &map) const
+MoleculeParserPtr BrokenParser::construct(const QStringList &lines, const PropertyMap &map) const
 {
     return MoleculeParserPtr(BrokenParser(lines, map));
 }
 
 /** Return this parser constructed from the passed SireSystem::System */
-MoleculeParserPtr BrokenParser::construct(const SireSystem::System &system,
-                                          const PropertyMap &map) const
+MoleculeParserPtr BrokenParser::construct(const SireSystem::System &system, const PropertyMap &map) const
 {
     return MoleculeParserPtr(BrokenParser(system, map));
 }

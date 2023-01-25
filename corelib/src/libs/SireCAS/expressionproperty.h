@@ -35,67 +35,66 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class ExpressionProperty;
+    class ExpressionProperty;
 }
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::ExpressionProperty&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::ExpressionProperty&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::ExpressionProperty &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::ExpressionProperty &);
 
 namespace SireCAS
 {
 
-/** This class provides a thin Property wrapper around SireCAS objects
+    /** This class provides a thin Property wrapper around SireCAS objects
 
-    @author Christopher Woods
-*/
-class SIRECAS_EXPORT ExpressionProperty
-    : public SireBase::ConcreteProperty<ExpressionProperty,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIRECAS_EXPORT ExpressionProperty : public SireBase::ConcreteProperty<ExpressionProperty, SireBase::Property>
+    {
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const ExpressionProperty&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, ExpressionProperty&);
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const ExpressionProperty &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, ExpressionProperty &);
 
-public:
-    ExpressionProperty();
-    ExpressionProperty(const ExBase &exbase);
-    ExpressionProperty(const Expression &expression);
-    ExpressionProperty(const ExpressionProperty &other);
+    public:
+        ExpressionProperty();
+        ExpressionProperty(const ExBase &exbase);
+        ExpressionProperty(const Expression &expression);
+        ExpressionProperty(const ExpressionProperty &other);
 
-    ~ExpressionProperty();
+        ~ExpressionProperty();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    ExpressionProperty& operator=(const ExpressionProperty &other);
+        ExpressionProperty &operator=(const ExpressionProperty &other);
 
-    bool operator==(const ExpressionProperty &other) const;
-    bool operator!=(const ExpressionProperty &other) const;
+        bool operator==(const ExpressionProperty &other) const;
+        bool operator!=(const ExpressionProperty &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    Expression value() const;
+        Expression value() const;
 
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
 
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
 
-private:
-    Expression _val;
-};
+    private:
+        Expression _val;
+    };
 
-SIRECAS_EXPORT SireBase::PropertyPtr wrap(const ExBase &expression);
-SIRECAS_EXPORT SireBase::PropertyPtr wrap(const Expression &expression);
+    SIRECAS_EXPORT SireBase::PropertyPtr wrap(const ExBase &expression);
+    SIRECAS_EXPORT SireBase::PropertyPtr wrap(const Expression &expression);
 
-}
+} // namespace SireCAS
 
-Q_DECLARE_METATYPE( SireCAS::ExpressionProperty )
+Q_DECLARE_METATYPE(SireCAS::ExpressionProperty)
 
-SIRE_EXPOSE_CLASS( SireCAS::ExpressionProperty )
+SIRE_EXPOSE_CLASS(SireCAS::ExpressionProperty)
 
-SIRE_EXPOSE_FUNCTION( SireCAS::wrap )
+SIRE_EXPOSE_FUNCTION(SireCAS::wrap)
 
 SIRE_END_HEADER
 

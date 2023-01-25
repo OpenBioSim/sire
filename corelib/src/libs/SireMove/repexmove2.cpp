@@ -44,8 +44,8 @@
 // tbb::task has been deprecated!
 // #include "tbb/task.h"
 
-#include <QVector>
 #include <QDebug>
+#include <QVector>
 
 using namespace SireMove;
 using namespace SireMaths;
@@ -68,12 +68,8 @@ QDataStream &operator<<(QDataStream &ds, const RepExMove2 &repexmove2)
 
     SharedDataStream sds(ds);
 
-    sds << repexmove2.rangenerator
-        << repexmove2.naccept
-        << repexmove2.nreject
-        << repexmove2.swap_monitors
-        << repexmove2.disable_swaps
-        << static_cast<const SupraMove &>(repexmove2);
+    sds << repexmove2.rangenerator << repexmove2.naccept << repexmove2.nreject << repexmove2.swap_monitors
+        << repexmove2.disable_swaps << static_cast<const SupraMove &>(repexmove2);
 
     return ds;
 }
@@ -87,7 +83,8 @@ QDataStream &operator>>(QDataStream &ds, RepExMove2 &repexmove2)
     {
         SharedDataStream sds(ds);
 
-        sds >> repexmove2.rangenerator >> repexmove2.naccept >> repexmove2.nreject >> repexmove2.swap_monitors >> repexmove2.disable_swaps >> static_cast<SupraMove &>(repexmove2);
+        sds >> repexmove2.rangenerator >> repexmove2.naccept >> repexmove2.nreject >> repexmove2.swap_monitors >>
+            repexmove2.disable_swaps >> static_cast<SupraMove &>(repexmove2);
     }
     else
         throw version_error(v, "1", r_repexmove2, CODELOC);
@@ -97,17 +94,14 @@ QDataStream &operator>>(QDataStream &ds, RepExMove2 &repexmove2)
 
 /** Constructor */
 RepExMove2::RepExMove2()
-    : ConcreteProperty<RepExMove2, SupraMove>(),
-      naccept(0), nreject(0), swap_monitors(false), disable_swaps(false)
+    : ConcreteProperty<RepExMove2, SupraMove>(), naccept(0), nreject(0), swap_monitors(false), disable_swaps(false)
 {
 }
 
 /** Copy constructor */
 RepExMove2::RepExMove2(const RepExMove2 &other)
-    : ConcreteProperty<RepExMove2, SupraMove>(other),
-      naccept(other.naccept), nreject(other.nreject),
-      swap_monitors(other.swap_monitors),
-      disable_swaps(other.disable_swaps)
+    : ConcreteProperty<RepExMove2, SupraMove>(other), naccept(other.naccept), nreject(other.nreject),
+      swap_monitors(other.swap_monitors), disable_swaps(other.disable_swaps)
 {
 }
 
@@ -136,8 +130,7 @@ RepExMove2 &RepExMove2::operator=(const RepExMove2 &other)
 bool RepExMove2::operator==(const RepExMove2 &other) const
 {
     return (this == &other) or
-           (naccept == other.naccept and nreject == other.nreject and
-            swap_monitors == other.swap_monitors and
+           (naccept == other.naccept and nreject == other.nreject and swap_monitors == other.swap_monitors and
             disable_swaps == other.disable_swaps and SupraMove::operator==(other));
 }
 
@@ -293,15 +286,13 @@ public:
 
 /** Internal function used to test the passed pair of replicas -
     this returns whether or not the test has passed */
-bool replicaTest(Replica &replica_a, Replica &replica_b,
-                 const RanGenerator &rangenerator)
+bool replicaTest(Replica &replica_a, Replica &replica_b, const RanGenerator &rangenerator)
 {
     // get the ensembles of the two replicas
     const Ensemble &ensemble_a = replica_a.ensemble();
     const Ensemble &ensemble_b = replica_b.ensemble();
 
-    if ((ensemble_a.isNVT() and ensemble_a.isNVT()) or
-        (ensemble_b.isNPT() and ensemble_b.isNPT()))
+    if ((ensemble_a.isNVT() and ensemble_a.isNVT()) or (ensemble_b.isNPT() and ensemble_b.isNPT()))
     {
         bool need_pv = (ensemble_a.isNPT() and ensemble_b.isNPT());
 
@@ -373,8 +364,8 @@ bool replicaTest(Replica &replica_a, Replica &replica_b,
         //   delta = beta_b * [ H_b_i - H_b_j + P_b (V_b_i - V_b_j) ] +
         //           beta_a * [ H_a_i - H_a_j + P_a (V_a_i - V_a_j) ]
 
-        double delta = beta_b * (H_b_i - H_b_j + p_b * (V_b_i - V_b_j)) +
-                       beta_a * (H_a_i - H_a_j + p_a * (V_a_i - V_a_j));
+        double delta =
+            beta_b * (H_b_i - H_b_j + p_b * (V_b_i - V_b_j)) + beta_a * (H_a_i - H_a_j + p_a * (V_a_i - V_a_j));
 
         bool move_passed = (delta > 0 or (std::exp(delta) >= rangenerator.rand()));
 
@@ -382,11 +373,11 @@ bool replicaTest(Replica &replica_a, Replica &replica_b,
     }
     else
     {
-        throw SireError::incompatible_error(QObject::tr(
-                                                "There is no available replica exchange test that allows tests between "
-                                                "replicas with ensembles %1 and %2.")
-                                                .arg(ensemble_a.toString(), ensemble_b.toString()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("There is no available replica exchange test that allows tests between "
+                        "replicas with ensembles %1 and %2.")
+                .arg(ensemble_a.toString(), ensemble_b.toString()),
+            CODELOC);
     }
 
     return false;
@@ -554,12 +545,11 @@ public:
     pairs */
 void RepExMove2::performMove(Replicas &replicas, bool record_stats)
 {
-    throw SireError::incomplete_code(
-        QObject::tr("tbb has removed tbb::task, so we now need to "
-                    "rewrite RepExMove2. If this affects you, "
-                    "please switch to RepExMove, and then raise "
-                    "a GitHub issue asking us to conduct a rewrite."),
-        CODELOC);
+    throw SireError::incomplete_code(QObject::tr("tbb has removed tbb::task, so we now need to "
+                                                 "rewrite RepExMove2. If this affects you, "
+                                                 "please switch to RepExMove, and then raise "
+                                                 "a GitHub issue asking us to conduct a rewrite."),
+                                     CODELOC);
     /*
     if (replicas.nReplicas() == 0)
         return;

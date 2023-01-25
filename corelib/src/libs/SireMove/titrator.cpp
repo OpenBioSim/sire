@@ -27,18 +27,18 @@
 
 #include "titrator.h"
 
-#include "SireError/errors.h"
 #include "SireBase/errors.h"
+#include "SireError/errors.h"
 
 #include "SireID/index.h"
 
+#include "SireMol/atomcharges.h"
+#include "SireMol/core.h"
+#include "SireMol/editor.hpp"
+#include "SireMol/evaluator.h"
 #include "SireMol/moleculegroup.h"
 #include "SireMol/molidx.h"
-#include "SireMol/atomcharges.h"
-#include "SireMol/evaluator.h"
-#include "SireMol/editor.hpp"
 #include "SireMol/mover.hpp"
-#include "SireMol/core.h"
 
 #include "SireMaths/rangenerator.h"
 
@@ -65,15 +65,11 @@ QDataStream &operator<<(QDataStream &ds, const Titrator &titrator)
 
     SharedDataStream sds(ds);
 
-    sds << titrator.mgname << titrator.mgnum << titrator.mgversion
-        << titrator.chgs << titrator.desired_chgs
-        << titrator.neutral_template << titrator.negative_template
-        << titrator.positive_template << titrator.neutral_properties
-        << titrator.negative_properties << titrator.positive_properties
-        << titrator.neutral_map << titrator.negative_map
-        << titrator.positive_map << titrator.propmap
-        << titrator.pos_charge << titrator.neg_charge
-        << static_cast<const Property&>(titrator);
+    sds << titrator.mgname << titrator.mgnum << titrator.mgversion << titrator.chgs << titrator.desired_chgs
+        << titrator.neutral_template << titrator.negative_template << titrator.positive_template
+        << titrator.neutral_properties << titrator.negative_properties << titrator.positive_properties
+        << titrator.neutral_map << titrator.negative_map << titrator.positive_map << titrator.propmap
+        << titrator.pos_charge << titrator.neg_charge << static_cast<const Property &>(titrator);
 
     return ds;
 }
@@ -86,15 +82,11 @@ QDataStream &operator>>(QDataStream &ds, Titrator &titrator)
     {
         SharedDataStream sds(ds);
 
-        sds >> titrator.mgname >> titrator.mgnum >> titrator.mgversion
-            >> titrator.chgs >> titrator.desired_chgs
-            >> titrator.neutral_template >> titrator.negative_template
-            >> titrator.positive_template >> titrator.neutral_properties
-            >> titrator.negative_properties >> titrator.positive_properties
-            >> titrator.neutral_map >> titrator.negative_map
-            >> titrator.positive_map >> titrator.propmap
-            >> titrator.pos_charge >> titrator.neg_charge
-            >> static_cast<Property&>(titrator);
+        sds >> titrator.mgname >> titrator.mgnum >> titrator.mgversion >> titrator.chgs >> titrator.desired_chgs >>
+            titrator.neutral_template >> titrator.negative_template >> titrator.positive_template >>
+            titrator.neutral_properties >> titrator.negative_properties >> titrator.positive_properties >>
+            titrator.neutral_map >> titrator.negative_map >> titrator.positive_map >> titrator.propmap >>
+            titrator.pos_charge >> titrator.neg_charge >> static_cast<Property &>(titrator);
     }
     else
         throw version_error(v, "1", r_titrator, CODELOC);
@@ -103,48 +95,45 @@ QDataStream &operator>>(QDataStream &ds, Titrator &titrator)
 }
 
 /** Constructor */
-Titrator::Titrator()
-         : ConcreteProperty<Titrator,Property>(), pos_charge(0), neg_charge(0)
-{}
+Titrator::Titrator() : ConcreteProperty<Titrator, Property>(), pos_charge(0), neg_charge(0)
+{
+}
 
 /** Construct to titrate the molecules in the passed molecule group */
 Titrator::Titrator(const MoleculeGroup &group)
-         : ConcreteProperty<Titrator,Property>(), mgname(group.name()),
-           pos_charge(0), neg_charge(0)
-{}
+    : ConcreteProperty<Titrator, Property>(), mgname(group.name()), pos_charge(0), neg_charge(0)
+{
+}
 
 /** Copy constructor */
 Titrator::Titrator(const Titrator &other)
-         : ConcreteProperty<Titrator,Property>(other),
-           mgname(other.mgname), mgnum(other.mgnum),
-           mgversion(other.mgversion), chgs(other.chgs),
-           desired_chgs(other.desired_chgs), neutral_template(other.neutral_template),
-           negative_template(other.negative_template),
-           positive_template(other.positive_template),
-           neutral_properties(other.neutral_properties),
-           negative_properties(other.negative_properties),
-           positive_properties(other.positive_properties),
-           neutral_map(other.neutral_map), negative_map(other.negative_map),
-           positive_map(other.positive_map), propmap(other.propmap),
-           pos_charge(other.pos_charge), neg_charge(other.neg_charge)
-{}
+    : ConcreteProperty<Titrator, Property>(other), mgname(other.mgname), mgnum(other.mgnum), mgversion(other.mgversion),
+      chgs(other.chgs), desired_chgs(other.desired_chgs), neutral_template(other.neutral_template),
+      negative_template(other.negative_template), positive_template(other.positive_template),
+      neutral_properties(other.neutral_properties), negative_properties(other.negative_properties),
+      positive_properties(other.positive_properties), neutral_map(other.neutral_map), negative_map(other.negative_map),
+      positive_map(other.positive_map), propmap(other.propmap), pos_charge(other.pos_charge),
+      neg_charge(other.neg_charge)
+{
+}
 
 /** Destructor */
 Titrator::~Titrator()
-{}
-
-const char* Titrator::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Titrator>() );
 }
 
-const char* Titrator::what() const
+const char *Titrator::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<Titrator>());
+}
+
+const char *Titrator::what() const
 {
     return Titrator::typeName();
 }
 
 /** Copy assignment operator */
-Titrator& Titrator::operator=(const Titrator &other)
+Titrator &Titrator::operator=(const Titrator &other)
 {
     if (this != &other)
     {
@@ -177,24 +166,13 @@ bool Titrator::operator==(const Titrator &other) const
     if (this == &other)
         return true;
 
-    return mgname == other.mgname and
-           mgnum == other.mgnum and
-           mgversion == other.mgversion and
-           chgs == other.chgs and
-           desired_chgs == other.desired_chgs and
-           neutral_template.equals(other.neutral_template) and
-           negative_template.equals(other.negative_template) and
-           positive_template.equals(other.positive_template) and
-           neutral_properties == other.neutral_properties and
-           negative_properties == other.negative_properties and
-           positive_properties == other.positive_properties and
-           neutral_map == other.neutral_map and
-           negative_map == other.negative_map and
-           positive_map == other.positive_map and
-           propmap == other.propmap and
-           pos_charge == other.pos_charge and
-           neg_charge == other.neg_charge and
-           Property::operator==(other);
+    return mgname == other.mgname and mgnum == other.mgnum and mgversion == other.mgversion and chgs == other.chgs and
+           desired_chgs == other.desired_chgs and neutral_template.equals(other.neutral_template) and
+           negative_template.equals(other.negative_template) and positive_template.equals(other.positive_template) and
+           neutral_properties == other.neutral_properties and negative_properties == other.negative_properties and
+           positive_properties == other.positive_properties and neutral_map == other.neutral_map and
+           negative_map == other.negative_map and positive_map == other.positive_map and propmap == other.propmap and
+           pos_charge == other.pos_charge and neg_charge == other.neg_charge and Property::operator==(other);
 }
 
 /** Comparison operator */
@@ -227,40 +205,37 @@ void Titrator::setMoleculeGroup(const MoleculeGroup &group)
 /** Set the template for the positive ion state. The collection of properties
     listed in "properties" are copied from "positive_ion" (once mapped by
     "map") to the molecule to put it into the "positive_ion" state */
-void Titrator::setPositiveTemplate(const Molecule &positive_ion,
-                                   const QStringList &properties,
-                                   const PropertyMap &map)
+void Titrator::setPositiveTemplate(const Molecule &positive_ion, const QStringList &properties, const PropertyMap &map)
 {
     foreach (QString property, properties)
     {
         if (not positive_ion.hasProperty(map[property]))
         {
-            throw SireBase::missing_property( QObject::tr(
-                    "You have asked to use the property %1 (mapped from %2) from the "
-                    "passed positive ion template, but the only available properties are %3.")
-                        .arg(map[property].toString(), property)
-                        .arg(Sire::toString(positive_ion.propertyKeys())), CODELOC );
+            throw SireBase::missing_property(
+                QObject::tr("You have asked to use the property %1 (mapped from %2) from the "
+                            "passed positive ion template, but the only available properties are %3.")
+                    .arg(map[property].toString(), property)
+                    .arg(Sire::toString(positive_ion.propertyKeys())),
+                CODELOC);
         }
     }
 
-    //check also that there is a charge property of type "AtomCharges"
-    const Property &p = positive_ion.property( map["charge"] );
+    // check also that there is a charge property of type "AtomCharges"
+    const Property &p = positive_ion.property(map["charge"]);
 
     if (not p.isA<AtomCharges>())
     {
-        throw SireBase::missing_property( QObject::tr(
-                "The positive ion template is missing the AtomCharges charge property..."),
-                    CODELOC );
+        throw SireBase::missing_property(
+            QObject::tr("The positive ion template is missing the AtomCharges charge property..."), CODELOC);
     }
 
     double chg = positive_ion.evaluate().charge(map);
 
     if (chg <= 0)
-        throw SireError::invalid_arg( QObject::tr(
-                "The charge on the positive ion template is not positive! %1")
-                    .arg(chg), CODELOC );
+        throw SireError::invalid_arg(
+            QObject::tr("The charge on the positive ion template is not positive! %1").arg(chg), CODELOC);
 
-    pos_charge = qint32( chg+0.5 );
+    pos_charge = qint32(chg + 0.5);
 
     positive_template = positive_ion;
     positive_properties = properties;
@@ -272,40 +247,37 @@ void Titrator::setPositiveTemplate(const Molecule &positive_ion,
 /** Set the template for the negative ion state. The collection of properties
     listed in "properties" are copied from "negative_ion" (once mapped by
     "map") to the molecule to put it into the "negative_ion" state */
-void Titrator::setNegativeTemplate(const Molecule &negative_ion,
-                                   const QStringList &properties,
-                                   const PropertyMap &map)
+void Titrator::setNegativeTemplate(const Molecule &negative_ion, const QStringList &properties, const PropertyMap &map)
 {
     foreach (QString property, properties)
     {
         if (not negative_ion.hasProperty(map[property]))
         {
-            throw SireBase::missing_property( QObject::tr(
-                    "You have asked to use the property %1 (mapped from %2) from the "
-                    "passed negative ion template, but the only available properties are %3.")
-                        .arg(map[property].toString(), property)
-                        .arg(Sire::toString(negative_ion.propertyKeys())), CODELOC );
+            throw SireBase::missing_property(
+                QObject::tr("You have asked to use the property %1 (mapped from %2) from the "
+                            "passed negative ion template, but the only available properties are %3.")
+                    .arg(map[property].toString(), property)
+                    .arg(Sire::toString(negative_ion.propertyKeys())),
+                CODELOC);
         }
     }
 
-    //check also that there is a charge property of type "AtomCharges"
-    const Property &p = negative_ion.property( map["charge"] );
+    // check also that there is a charge property of type "AtomCharges"
+    const Property &p = negative_ion.property(map["charge"]);
 
     if (not p.isA<AtomCharges>())
     {
-        throw SireBase::missing_property( QObject::tr(
-                "The negative ion template is missing the AtomCharges charge property..."),
-                    CODELOC );
+        throw SireBase::missing_property(
+            QObject::tr("The negative ion template is missing the AtomCharges charge property..."), CODELOC);
     }
 
     double chg = negative_ion.evaluate().charge(map);
 
     if (chg >= 0)
-        throw SireError::invalid_arg( QObject::tr(
-                "The charge on the negative ion template is not negative! %1")
-                    .arg(chg), CODELOC );
+        throw SireError::invalid_arg(
+            QObject::tr("The charge on the negative ion template is not negative! %1").arg(chg), CODELOC);
 
-    neg_charge = qint32( chg-0.5 );
+    neg_charge = qint32(chg - 0.5);
 
     negative_template = negative_ion;
     negative_properties = properties;
@@ -317,38 +289,35 @@ void Titrator::setNegativeTemplate(const Molecule &negative_ion,
 /** Set the template for the neutral state. The collection of properties
     listed in "properties" are copied from "neutral_mol" (once mapped by
     "map") to the molecule to put it into the "neutral" state */
-void Titrator::setNeutralTemplate(const Molecule &neutral_mol,
-                                  const QStringList &properties,
-                                  const PropertyMap &map)
+void Titrator::setNeutralTemplate(const Molecule &neutral_mol, const QStringList &properties, const PropertyMap &map)
 {
     foreach (QString property, properties)
     {
         if (not neutral_mol.hasProperty(map[property]))
         {
-            throw SireBase::missing_property( QObject::tr(
-                    "You have asked to use the property %1 (mapped from %2) from the "
-                    "passed neutral molecule template, but the only available properties are %3.")
-                        .arg(map[property].toString(), property)
-                        .arg(Sire::toString(neutral_mol.propertyKeys())), CODELOC );
+            throw SireBase::missing_property(
+                QObject::tr("You have asked to use the property %1 (mapped from %2) from the "
+                            "passed neutral molecule template, but the only available properties are %3.")
+                    .arg(map[property].toString(), property)
+                    .arg(Sire::toString(neutral_mol.propertyKeys())),
+                CODELOC);
         }
     }
 
-    //check also that there is a charge property of type "AtomCharges"
-    const Property &p = neutral_mol.property( map["charge"] );
+    // check also that there is a charge property of type "AtomCharges"
+    const Property &p = neutral_mol.property(map["charge"]);
 
     if (not p.isA<AtomCharges>())
     {
-        throw SireBase::missing_property( QObject::tr(
-                "The neutral molecule template is missing the AtomCharges charge property..."),
-                    CODELOC );
+        throw SireBase::missing_property(
+            QObject::tr("The neutral molecule template is missing the AtomCharges charge property..."), CODELOC);
     }
 
     double chg = neutral_mol.evaluate().charge(map);
 
     if (not SireMaths::isZero(chg))
-        throw SireError::invalid_arg( QObject::tr(
-                "The charge on the neutral molecule template is not zero! %1")
-                    .arg(chg), CODELOC );
+        throw SireError::invalid_arg(
+            QObject::tr("The charge on the neutral molecule template is not zero! %1").arg(chg), CODELOC);
 
     neutral_template = neutral_mol;
     neutral_properties = properties;
@@ -481,11 +450,11 @@ int Titrator::nNegativeIons() const
 /** Return the index of the molecule at ion_index 'ion_index' */
 int Titrator::getIonIndex(int ion_index) const
 {
-    ion_index = Index(ion_index).map( this->nIons() );
+    ion_index = Index(ion_index).map(this->nIons());
 
     if (desired_chgs.isEmpty())
     {
-        for (int i=0; i<chgs.count(); ++i)
+        for (int i = 0; i < chgs.count(); ++i)
         {
             if (chgs[i] != 0)
             {
@@ -498,7 +467,7 @@ int Titrator::getIonIndex(int ion_index) const
     }
     else
     {
-        for (int i=0; i<desired_chgs.count(); ++i)
+        for (int i = 0; i < desired_chgs.count(); ++i)
         {
             if (desired_chgs[i] != 0)
             {
@@ -510,8 +479,7 @@ int Titrator::getIonIndex(int ion_index) const
         }
     }
 
-    throw SireError::program_bug( QObject::tr(
-                    "It should not be possible to not find an ion!"), CODELOC );
+    throw SireError::program_bug(QObject::tr("It should not be possible to not find an ion!"), CODELOC);
 
     return 0;
 }
@@ -519,11 +487,11 @@ int Titrator::getIonIndex(int ion_index) const
 /** Return the index of the molecule at positive ion_index 'ion_index' */
 int Titrator::getPositiveIonIndex(int ion_index) const
 {
-    ion_index = Index(ion_index).map( this->nPositiveIons() );
+    ion_index = Index(ion_index).map(this->nPositiveIons());
 
     if (desired_chgs.isEmpty())
     {
-        for (int i=0; i<chgs.count(); ++i)
+        for (int i = 0; i < chgs.count(); ++i)
         {
             if (chgs[i] > 0)
             {
@@ -536,7 +504,7 @@ int Titrator::getPositiveIonIndex(int ion_index) const
     }
     else
     {
-        for (int i=0; i<desired_chgs.count(); ++i)
+        for (int i = 0; i < desired_chgs.count(); ++i)
         {
             if (desired_chgs[i] > 0)
             {
@@ -548,8 +516,7 @@ int Titrator::getPositiveIonIndex(int ion_index) const
         }
     }
 
-    throw SireError::program_bug( QObject::tr(
-                    "It should not be possible to not find a positive ion!"), CODELOC );
+    throw SireError::program_bug(QObject::tr("It should not be possible to not find a positive ion!"), CODELOC);
 
     return 0;
 }
@@ -557,11 +524,11 @@ int Titrator::getPositiveIonIndex(int ion_index) const
 /** Return the index of the molecule at negative ion_index 'ion_index' */
 int Titrator::getNegativeIonIndex(int ion_index) const
 {
-    ion_index = Index(ion_index).map( this->nNegativeIons() );
+    ion_index = Index(ion_index).map(this->nNegativeIons());
 
     if (desired_chgs.isEmpty())
     {
-        for (int i=0; i<chgs.count(); ++i)
+        for (int i = 0; i < chgs.count(); ++i)
         {
             if (chgs[i] < 0)
             {
@@ -574,7 +541,7 @@ int Titrator::getNegativeIonIndex(int ion_index) const
     }
     else
     {
-        for (int i=0; i<desired_chgs.count(); ++i)
+        for (int i = 0; i < desired_chgs.count(); ++i)
         {
             if (desired_chgs[i] < 0)
             {
@@ -586,8 +553,7 @@ int Titrator::getNegativeIonIndex(int ion_index) const
         }
     }
 
-    throw SireError::program_bug( QObject::tr(
-                    "It should not be possible to not find a negative ion!"), CODELOC );
+    throw SireError::program_bug(QObject::tr("It should not be possible to not find a negative ion!"), CODELOC);
 
     return 0;
 }
@@ -595,11 +561,11 @@ int Titrator::getNegativeIonIndex(int ion_index) const
 /** Return the index of the molecule at neutral 'ion_index' */
 int Titrator::getNeutralIndex(int neutral_index) const
 {
-    neutral_index = Index(neutral_index).map( this->nNeutrals() );
+    neutral_index = Index(neutral_index).map(this->nNeutrals());
 
     if (desired_chgs.isEmpty())
     {
-        for (int i=0; i<chgs.count(); ++i)
+        for (int i = 0; i < chgs.count(); ++i)
         {
             if (chgs[i] == 0)
             {
@@ -612,7 +578,7 @@ int Titrator::getNeutralIndex(int neutral_index) const
     }
     else
     {
-        for (int i=0; i<desired_chgs.count(); ++i)
+        for (int i = 0; i < desired_chgs.count(); ++i)
         {
             if (desired_chgs[i] == 0)
             {
@@ -624,8 +590,7 @@ int Titrator::getNeutralIndex(int neutral_index) const
         }
     }
 
-    throw SireError::program_bug( QObject::tr(
-                    "It should not be possible to not find a neutral molecule!"), CODELOC );
+    throw SireError::program_bug(QObject::tr("It should not be possible to not find a neutral molecule!"), CODELOC);
 
     return 0;
 }
@@ -660,8 +625,7 @@ void Titrator::swapCharge(int i, int j)
     }
 }
 
-Molecule copyIntoMol(Molecule molecule, const Molecule &templ,
-                     QStringList properties, const PropertyMap &templ_map,
+Molecule copyIntoMol(Molecule molecule, const Molecule &templ, QStringList properties, const PropertyMap &templ_map,
                      const PropertyMap &map)
 {
     if (properties.isEmpty())
@@ -669,7 +633,7 @@ Molecule copyIntoMol(Molecule molecule, const Molecule &templ,
         properties = templ.propertyKeys();
 
         if (properties.contains("coordinates"))
-            properties.removeAt( properties.indexOf("coordinates") );
+            properties.removeAt(properties.indexOf("coordinates"));
     }
 
     if (not properties.contains("charge"))
@@ -740,36 +704,33 @@ double Titrator::applyTo(System &system)
     MoleculeGroup group = system.group(mgname);
 
     if (group.number() != mgnum or group.version().majorVersion() != mgversion.majorVersion())
-        //if there is a change in group, or a change in the molecules in a group,
-        //then we need to reinitialise this object
+        // if there is a change in group, or a change in the molecules in a group,
+        // then we need to reinitialise this object
         clearState();
 
     PropertyName chgkey = propmap["charge"];
 
-    AtomCharges positive_chgs = positive_template.property( positive_map["charge"] )
-                                                 .asA<AtomCharges>();
+    AtomCharges positive_chgs = positive_template.property(positive_map["charge"]).asA<AtomCharges>();
 
-    AtomCharges negative_chgs = negative_template.property( negative_map["charge"] )
-                                                 .asA<AtomCharges>();
+    AtomCharges negative_chgs = negative_template.property(negative_map["charge"]).asA<AtomCharges>();
 
-    AtomCharges neutral_chgs = neutral_template.property( neutral_map["charge"] )
-                                               .asA<AtomCharges>();
+    AtomCharges neutral_chgs = neutral_template.property(neutral_map["charge"]).asA<AtomCharges>();
 
     if (chgs.isEmpty())
     {
         desired_chgs.clear();
 
-        //go through all of the molecules and work out what charge they have. We do this
-        //by checking the "charge" property of the molecule and seeing which of the three
-        //templates it agrees with. If it agrees with none of them, then we will force the
-        //molecule to have a neutral charge and will assign the neutral molecule
+        // go through all of the molecules and work out what charge they have. We do this
+        // by checking the "charge" property of the molecule and seeing which of the three
+        // templates it agrees with. If it agrees with none of them, then we will force the
+        // molecule to have a neutral charge and will assign the neutral molecule
         int nmols = group.nMolecules();
 
         chgs = QVector<qint32>(nmols, 0);
 
         Molecules mols;
 
-        for (int i=0; i<nmols; ++i)
+        for (int i = 0; i < nmols; ++i)
         {
             Molecule molecule = group[MolIdx(i)].molecule();
 
@@ -779,33 +740,31 @@ double Titrator::applyTo(System &system)
             {
                 molchgs = molecule.property(chgkey).asA<AtomCharges>();
             }
-            catch(...)
-            {}
+            catch (...)
+            {
+            }
 
             if (molchgs.array() == positive_chgs.array())
             {
-                //this is a positively charged molecule - copy across all of the
-                //other positive ion properties
-                molecule = copyIntoMol(molecule, positive_template, positive_properties,
-                                       positive_map, propmap);
+                // this is a positively charged molecule - copy across all of the
+                // other positive ion properties
+                molecule = copyIntoMol(molecule, positive_template, positive_properties, positive_map, propmap);
 
                 chgs[i] = pos_charge;
             }
             else if (molchgs.array() == negative_chgs.array())
             {
-                //this is a negatively charged molecule - copy across all of the
-                //other negative ion properties
-                molecule = copyIntoMol(molecule, negative_template, negative_properties,
-                                       negative_map, propmap);
+                // this is a negatively charged molecule - copy across all of the
+                // other negative ion properties
+                molecule = copyIntoMol(molecule, negative_template, negative_properties, negative_map, propmap);
 
                 chgs[i] = neg_charge;
             }
             else
             {
-                //this is a neutral molecule - copy across all of the neutral molecule
-                //properties
-                molecule = copyIntoMol(molecule, neutral_template, neutral_properties,
-                                       neutral_map, propmap);
+                // this is a neutral molecule - copy across all of the neutral molecule
+                // properties
+                molecule = copyIntoMol(molecule, neutral_template, neutral_properties, neutral_map, propmap);
 
                 chgs[i] = 0;
             }
@@ -821,32 +780,29 @@ double Titrator::applyTo(System &system)
         {
             Molecules mols;
 
-            for (int i=0; i<chgs.count(); ++i)
+            for (int i = 0; i < chgs.count(); ++i)
             {
                 if (desired_chgs.at(i) != chgs.at(i))
                 {
-                    //we need to change the charge of the molecule
+                    // we need to change the charge of the molecule
                     qint32 newchg = desired_chgs.at(i);
 
                     Molecule molecule = group[MolIdx(i)].molecule();
 
                     if (newchg > 0)
                     {
-                        //switch the molecule to the positive ion
-                        molecule = copyIntoMol(molecule, positive_template, positive_properties,
-                                               positive_map, propmap);
+                        // switch the molecule to the positive ion
+                        molecule = copyIntoMol(molecule, positive_template, positive_properties, positive_map, propmap);
                     }
                     else if (newchg < 0)
                     {
-                        //switch the molecule to the negative ion
-                        molecule = copyIntoMol(molecule, negative_template, negative_properties,
-                                               negative_map, propmap);
+                        // switch the molecule to the negative ion
+                        molecule = copyIntoMol(molecule, negative_template, negative_properties, negative_map, propmap);
                     }
                     else
                     {
-                        //switch the molecule to the neutral state
-                        molecule = copyIntoMol(molecule, neutral_template, neutral_properties,
-                                               neutral_map, propmap);
+                        // switch the molecule to the neutral state
+                        molecule = copyIntoMol(molecule, neutral_template, neutral_properties, neutral_map, propmap);
                     }
 
                     mols.add(molecule);
@@ -868,7 +824,7 @@ double Titrator::applyTo(System &system)
     PropertyName tiprop = propmap["titrator"];
 
     if (tiprop.hasSource())
-        system.setProperty(tiprop.source(), *this );
+        system.setProperty(tiprop.source(), *this);
 
     return 0;
 }

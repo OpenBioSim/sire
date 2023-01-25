@@ -43,196 +43,188 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class VolumeChanger;
-class NullVolumeChanger;
+    class VolumeChanger;
+    class NullVolumeChanger;
 
-class ScaleVolumeFromCenter;
-}
+    class ScaleVolumeFromCenter;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::VolumeChanger&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::VolumeChanger&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::VolumeChanger &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::VolumeChanger &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::NullVolumeChanger&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::NullVolumeChanger&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::NullVolumeChanger &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::NullVolumeChanger &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::ScaleVolumeFromCenter&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::ScaleVolumeFromCenter&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::ScaleVolumeFromCenter &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::ScaleVolumeFromCenter &);
 
 namespace SireSystem
 {
-class System;
+    class System;
 }
 
 namespace SireMol
 {
-class MoleculeGroup;
+    class MoleculeGroup;
 }
 
 namespace SireMove
 {
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-using SireMol::MoleculeGroup;
-using SireMol::MGID;
+    using SireMol::MGID;
+    using SireMol::MoleculeGroup;
 
-using SireFF::Point;
-using SireFF::PointRef;
+    using SireFF::Point;
+    using SireFF::PointRef;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-using SireSystem::System;
+    using SireSystem::System;
 
-/** This is the base class of all volume changing function classes.
-    These classes are used to change the volume of a system
-    i.e. during a VolumeMove
+    /** This is the base class of all volume changing function classes.
+        These classes are used to change the volume of a system
+        i.e. during a VolumeMove
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT VolumeChanger : public SireBase::Property
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const VolumeChanger&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, VolumeChanger&);
-
-public:
-    VolumeChanger();
-    VolumeChanger(const MGID &mgid);
-    VolumeChanger(const MoleculeGroup &molgroup);
-
-    VolumeChanger(const VolumeChanger &other);
-
-    virtual ~VolumeChanger();
-
-    VolumeChanger* clone() const=0;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT VolumeChanger : public SireBase::Property
     {
-        return "SireMove::VolumeChanger";
-    }
 
-    void setGenerator(const RanGenerator &generator);
-    const RanGenerator& generator() const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const VolumeChanger &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, VolumeChanger &);
 
-    const MGID& groupID() const;
+    public:
+        VolumeChanger();
+        VolumeChanger(const MGID &mgid);
+        VolumeChanger(const MoleculeGroup &molgroup);
 
-    void setGroup(const MGID &mgid);
-    void setGroup(const MoleculeGroup &molgroup);
+        VolumeChanger(const VolumeChanger &other);
 
-    virtual int setVolume(System &system,
-                          const SireUnits::Dimension::Volume &volume,
-                          const PropertyMap &map = PropertyMap()) const=0;
+        virtual ~VolumeChanger();
 
-    virtual int changeVolume(System &system,
-                             const SireUnits::Dimension::Volume &delta,
-                             const PropertyMap &map = PropertyMap()) const;
+        VolumeChanger *clone() const = 0;
 
-    virtual int randomChangeVolume(System &system,
-                                   const SireUnits::Dimension::Volume &maxvolchange,
-                                   double &new_bias, double &old_bias,
-                                   const PropertyMap &map = PropertyMap()) const;
+        static const char *typeName()
+        {
+            return "SireMove::VolumeChanger";
+        }
 
-    static const NullVolumeChanger& null();
+        void setGenerator(const RanGenerator &generator);
+        const RanGenerator &generator() const;
 
-protected:
-    VolumeChanger& operator=(const VolumeChanger &other);
+        const MGID &groupID() const;
 
-    bool operator==(const VolumeChanger &other) const;
-    bool operator!=(const VolumeChanger &other) const;
+        void setGroup(const MGID &mgid);
+        void setGroup(const MoleculeGroup &molgroup);
 
-private:
-    /** The random number generator used by this volume changer */
-    RanGenerator rangen;
+        virtual int setVolume(System &system, const SireUnits::Dimension::Volume &volume,
+                              const PropertyMap &map = PropertyMap()) const = 0;
 
-    /** The ID of the molecule group(s) that will be
-        moved by this volume changer */
-    SireMol::MGIdentifier mgid;
-};
+        virtual int changeVolume(System &system, const SireUnits::Dimension::Volume &delta,
+                                 const PropertyMap &map = PropertyMap()) const;
 
-/** This is a null volume changer that does nothing */
-class SIREMOVE_EXPORT NullVolumeChanger
-          : public SireBase::ConcreteProperty<NullVolumeChanger,VolumeChanger>
-{
+        virtual int randomChangeVolume(System &system, const SireUnits::Dimension::Volume &maxvolchange, double &new_bias,
+                                       double &old_bias, const PropertyMap &map = PropertyMap()) const;
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const NullVolumeChanger&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullVolumeChanger&);
+        static const NullVolumeChanger &null();
 
-public:
-    NullVolumeChanger();
+    protected:
+        VolumeChanger &operator=(const VolumeChanger &other);
 
-    NullVolumeChanger(const NullVolumeChanger &other);
+        bool operator==(const VolumeChanger &other) const;
+        bool operator!=(const VolumeChanger &other) const;
 
-    ~NullVolumeChanger();
+    private:
+        /** The random number generator used by this volume changer */
+        RanGenerator rangen;
 
-    NullVolumeChanger& operator=(const NullVolumeChanger &other);
+        /** The ID of the molecule group(s) that will be
+            moved by this volume changer */
+        SireMol::MGIdentifier mgid;
+    };
 
-    bool operator==(const NullVolumeChanger &other) const;
-    bool operator!=(const NullVolumeChanger &other) const;
+    /** This is a null volume changer that does nothing */
+    class SIREMOVE_EXPORT NullVolumeChanger : public SireBase::ConcreteProperty<NullVolumeChanger, VolumeChanger>
+    {
 
-    static const char* typeName();
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const NullVolumeChanger &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, NullVolumeChanger &);
 
-    int setVolume(System &system,
-                  const SireUnits::Dimension::Volume &volume,
-                  const PropertyMap &map = PropertyMap()) const;
-};
+    public:
+        NullVolumeChanger();
 
-/** This is a volume changer that works by scaling the molecules
-    from a user-supplied center point, scaling those molecules closest
-    to the center point the least, and those furthest from the
-    point the most
+        NullVolumeChanger(const NullVolumeChanger &other);
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT ScaleVolumeFromCenter
-            : public SireBase::ConcreteProperty<ScaleVolumeFromCenter,VolumeChanger>
-{
+        ~NullVolumeChanger();
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const ScaleVolumeFromCenter&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, ScaleVolumeFromCenter&);
+        NullVolumeChanger &operator=(const NullVolumeChanger &other);
 
-public:
-    ScaleVolumeFromCenter();
+        bool operator==(const NullVolumeChanger &other) const;
+        bool operator!=(const NullVolumeChanger &other) const;
 
-    ScaleVolumeFromCenter(const MGID &mgid);
-    ScaleVolumeFromCenter(const MoleculeGroup &molgroup);
+        static const char *typeName();
 
-    ScaleVolumeFromCenter(const MGID &mgid, const PointRef &point);
-    ScaleVolumeFromCenter(const MoleculeGroup &molgroup, const PointRef &point);
+        int setVolume(System &system, const SireUnits::Dimension::Volume &volume,
+                      const PropertyMap &map = PropertyMap()) const;
+    };
 
-    ScaleVolumeFromCenter(const ScaleVolumeFromCenter &other);
+    /** This is a volume changer that works by scaling the molecules
+        from a user-supplied center point, scaling those molecules closest
+        to the center point the least, and those furthest from the
+        point the most
 
-    ~ScaleVolumeFromCenter();
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT ScaleVolumeFromCenter : public SireBase::ConcreteProperty<ScaleVolumeFromCenter, VolumeChanger>
+    {
 
-    ScaleVolumeFromCenter& operator=(const ScaleVolumeFromCenter &other);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const ScaleVolumeFromCenter &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, ScaleVolumeFromCenter &);
 
-    bool operator==(const ScaleVolumeFromCenter &other) const;
-    bool operator!=(const ScaleVolumeFromCenter &other) const;
+    public:
+        ScaleVolumeFromCenter();
 
-    static const char* typeName();
+        ScaleVolumeFromCenter(const MGID &mgid);
+        ScaleVolumeFromCenter(const MoleculeGroup &molgroup);
 
-    const Point& center() const;
+        ScaleVolumeFromCenter(const MGID &mgid, const PointRef &point);
+        ScaleVolumeFromCenter(const MoleculeGroup &molgroup, const PointRef &point);
 
-    void setCenter(const PointRef &center);
+        ScaleVolumeFromCenter(const ScaleVolumeFromCenter &other);
 
-    int setVolume(System &system,
-                  const SireUnits::Dimension::Volume &volume,
-                  const PropertyMap &map = PropertyMap()) const;
+        ~ScaleVolumeFromCenter();
 
-private:
-    /** The point from which the volume will be scaled */
-    SireFF::PointPtr scale_point;
-};
+        ScaleVolumeFromCenter &operator=(const ScaleVolumeFromCenter &other);
 
-typedef SireBase::PropPtr<VolumeChanger> VolumeChangerPtr;
+        bool operator==(const ScaleVolumeFromCenter &other) const;
+        bool operator!=(const ScaleVolumeFromCenter &other) const;
 
-}
+        static const char *typeName();
 
-Q_DECLARE_METATYPE( SireMove::NullVolumeChanger )
-Q_DECLARE_METATYPE( SireMove::ScaleVolumeFromCenter )
+        const Point &center() const;
 
-SIRE_EXPOSE_CLASS( SireMove::VolumeChanger )
-SIRE_EXPOSE_CLASS( SireMove::NullVolumeChanger )
-SIRE_EXPOSE_CLASS( SireMove::ScaleVolumeFromCenter )
+        void setCenter(const PointRef &center);
+
+        int setVolume(System &system, const SireUnits::Dimension::Volume &volume,
+                      const PropertyMap &map = PropertyMap()) const;
+
+    private:
+        /** The point from which the volume will be scaled */
+        SireFF::PointPtr scale_point;
+    };
+
+    typedef SireBase::PropPtr<VolumeChanger> VolumeChangerPtr;
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::NullVolumeChanger)
+Q_DECLARE_METATYPE(SireMove::ScaleVolumeFromCenter)
+
+SIRE_EXPOSE_CLASS(SireMove::VolumeChanger)
+SIRE_EXPOSE_CLASS(SireMove::NullVolumeChanger)
+SIRE_EXPOSE_CLASS(SireMove::ScaleVolumeFromCenter)
 
 SIRE_END_HEADER
 

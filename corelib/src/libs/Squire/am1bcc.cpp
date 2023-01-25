@@ -29,18 +29,18 @@
 
 #include "am1bcc.h"
 
+#include "SireMol/atomcoords.h"
+#include "SireMol/atomname.h"
+#include "SireMol/groupatomids.h"
 #include "SireMol/moleculedata.h"
 #include "SireMol/moleculeinfodata.h"
-#include "SireMol/atomname.h"
 #include "SireMol/resname.h"
-#include "SireMol/groupatomids.h"
-#include "SireMol/atomcoords.h"
 
-#include "SireUnits/units.h"
 #include "SireUnits/dimensions.h"
+#include "SireUnits/units.h"
 
-#include "SireBase/tempdir.h"
 #include "SireBase/sire_process.h"
+#include "SireBase/tempdir.h"
 
 #include "SireIO/pdb.h"
 
@@ -64,8 +64,7 @@ QDataStream &operator<<(QDataStream &ds, const AM1BCC &am1bcc)
 
     SharedDataStream sds(ds);
 
-    sds << am1bcc.mopac
-        << static_cast<const QMChargeCalculator&>(am1bcc);
+    sds << am1bcc.mopac << static_cast<const QMChargeCalculator &>(am1bcc);
 
     return ds;
 }
@@ -79,8 +78,7 @@ QDataStream &operator>>(QDataStream &ds, AM1BCC &am1bcc)
     {
         SharedDataStream sds(ds);
 
-        sds >> am1bcc.mopac
-            >> static_cast<QMChargeCalculator&>(am1bcc);
+        sds >> am1bcc.mopac >> static_cast<QMChargeCalculator &>(am1bcc);
     }
     else
         throw version_error(v, "1", r_am1bcc, CODELOC);
@@ -89,26 +87,27 @@ QDataStream &operator>>(QDataStream &ds, AM1BCC &am1bcc)
 }
 
 /** Constructor */
-AM1BCC::AM1BCC() : ConcreteProperty<AM1BCC,QMChargeCalculator>()
-{}
+AM1BCC::AM1BCC() : ConcreteProperty<AM1BCC, QMChargeCalculator>()
+{
+}
 
 /** Copy constructor */
-AM1BCC::AM1BCC(const AM1BCC &other)
-       : ConcreteProperty<AM1BCC,QMChargeCalculator>(other),
-         mopac(other.mopac)
-{}
+AM1BCC::AM1BCC(const AM1BCC &other) : ConcreteProperty<AM1BCC, QMChargeCalculator>(other), mopac(other.mopac)
+{
+}
 
 /** Destructor */
 AM1BCC::~AM1BCC()
-{}
-
-const char* AM1BCC::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AM1BCC>() );
+}
+
+const char *AM1BCC::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<AM1BCC>());
 }
 
 /** Comparison operator */
-AM1BCC& AM1BCC::operator=(const AM1BCC &other)
+AM1BCC &AM1BCC::operator=(const AM1BCC &other)
 {
     if (this != &other)
     {
@@ -123,8 +122,7 @@ AM1BCC& AM1BCC::operator=(const AM1BCC &other)
 /** Comparison operator */
 bool AM1BCC::operator==(const AM1BCC &other) const
 {
-    return this == &other or
-           (mopac == other.mopac and QMChargeCalculator::operator==(other));
+    return this == &other or (mopac == other.mopac and QMChargeCalculator::operator==(other));
 }
 
 /** Comparison operator */
@@ -143,7 +141,7 @@ void AM1BCC::setEnvironment(const QString &variable, const QString &value)
 
 /** Return the environmental variables that will be overridden when
     the charges are calculated */
-const QHash<QString,QString>& AM1BCC::environment() const
+const QHash<QString, QString> &AM1BCC::environment() const
 {
     return mopac.environment();
 }
@@ -160,7 +158,7 @@ void AM1BCC::setTotalCharge(int charge)
     mopac.setTotalCharge(charge);
 
     if (charge != 0)
-        //we cannot scale non-zero total charge molecules
+        // we cannot scale non-zero total charge molecules
         QMChargeCalculator::setScaleFactor(1.0);
 }
 
@@ -174,10 +172,12 @@ int AM1BCC::totalCharge() const
 void AM1BCC::setScaleFactor(double sclfac)
 {
     if (sclfac != 1 and this->totalCharge() != 0)
-        throw SireError::incompatible_error( QObject::tr(
-            "It is not possible to use a scaling factor (%1) with a molecule "
-            "with a non-zero total charge (charge == %2)")
-                .arg(sclfac).arg(this->totalCharge()), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("It is not possible to use a scaling factor (%1) with a molecule "
+                        "with a non-zero total charge (charge == %2)")
+                .arg(sclfac)
+                .arg(this->totalCharge()),
+            CODELOC);
 
     QMChargeCalculator::setScaleFactor(sclfac);
 }
@@ -199,79 +199,75 @@ static QString getOutput(const QString &filename)
 }
 
 static void runProcess(const QString &cmd, const QString &path,
-               const QHash<QString,QString> &environment = QHash<QString,QString>())
+                       const QHash<QString, QString> &environment = QHash<QString, QString>())
 {
     QString shellfile = QString("%1/shell_cmd_file").arg(path);
 
-    //write the shell file to run the command
+    // write the shell file to run the command
     {
-        QFile f( shellfile );
+        QFile f(shellfile);
 
         if (not f.open(QIODevice::WriteOnly))
             throw SireError::file_error(f, CODELOC);
 
         QTextStream ts(&f);
 
-        //set the environmental variables of the job
-        for (QHash<QString,QString>::const_iterator it = environment.constBegin();
-             it != environment.constEnd();
-             ++it)
+        // set the environmental variables of the job
+        for (QHash<QString, QString>::const_iterator it = environment.constBegin(); it != environment.constEnd(); ++it)
         {
             ts << "export " << it.key() << "=\"" << it.value() << "\"\n";
         }
 
-        //set the script to change into the run directory of the job
+        // set the script to change into the run directory of the job
         ts << QString("\ncd %1").arg(path) << "\n\n";
 
-        //set the command to run
+        // set the command to run
         ts << cmd << " > runcommand.log";
 
         f.close();
     }
 
-    //now run the command
+    // now run the command
     {
         Process p = Process::run("sh", shellfile);
 
-        //wait until the job has finished
+        // wait until the job has finished
         p.wait();
 
         if (p.wasKilled())
         {
-            throw SireError::process_error( QObject::tr(
-                "The command {%1} was killed.").arg(cmd), CODELOC );
+            throw SireError::process_error(QObject::tr("The command {%1} was killed.").arg(cmd), CODELOC);
         }
 
         if (p.isError())
         {
-            throw SireError::process_error( QObject::tr(
-                "There was an error running the command {%1}. Here is the output "
-                "from running the command:\n%2")
+            throw SireError::process_error(
+                QObject::tr("There was an error running the command {%1}. Here is the output "
+                            "from running the command:\n%2")
                     .arg(cmd, getOutput(QString("%1/runcommand.log").arg(path))),
-                        CODELOC );
+                CODELOC);
         }
     }
 }
 
-static void addChargesToAC(const AtomCharges &mulliken_charges,
-                           const QString &infilename, const QString &outfilename,
+static void addChargesToAC(const AtomCharges &mulliken_charges, const QString &infilename, const QString &outfilename,
                            const Molecule &molecule)
 {
-    QFile infile( infilename );
+    QFile infile(infilename);
 
     if (not infile.open(QIODevice::ReadOnly))
         throw SireError::file_error(infile, CODELOC);
 
-    QFile outfile( outfilename );
+    QFile outfile(outfilename);
 
     if (not outfile.open(QIODevice::WriteOnly))
         throw SireError::file_error(outfile, CODELOC);
 
-    QTextStream instream( &infile );
-    QTextStream outstream( &outfile );
+    QTextStream instream(&infile);
+    QTextStream outstream(&outfile);
 
-    outstream.setFieldAlignment( QTextStream::AlignRight );
-    outstream.setRealNumberNotation( QTextStream::FixedNotation );
+    outstream.setFieldAlignment(QTextStream::AlignRight);
+    outstream.setRealNumberNotation(QTextStream::FixedNotation);
     outstream.setRealNumberPrecision(6);
 
     const MoleculeInfoData &molinfo = molecule.data().info();
@@ -283,32 +279,34 @@ static void addChargesToAC(const AtomCharges &mulliken_charges,
         if (line.startsWith("ATOM", Qt::CaseInsensitive))
         {
             // found an antechamber AC ATOM line
-            //ATOM      1  C01 MEO     1       0.000   0.000   0.000  0.000000        c3
+            // ATOM      1  C01 MEO     1       0.000   0.000   0.000  0.000000        c3
 
-            QStringList words = line.split(" ",Qt::SkipEmptyParts);
+            QStringList words = line.split(" ", Qt::SkipEmptyParts);
 
             if (words.count() < 10)
-                throw SireError::file_error( QObject::tr(
-                    "The AC file line \"%1\" does not look like a valid antechamber "
-                    "format ATOM line.").arg(line), CODELOC );
+                throw SireError::file_error(
+                    QObject::tr("The AC file line \"%1\" does not look like a valid antechamber "
+                                "format ATOM line.")
+                        .arg(line),
+                    CODELOC);
 
-            AtomName atmnam( words[2] );
-            ResName resnam( words[3] );
+            AtomName atmnam(words[2]);
+            ResName resnam(words[3]);
 
-            //get the CGAtomIdx of the atom with this atom and residue name
-            CGAtomIdx cgatomidx = molinfo.cgAtomIdx( atmnam + resnam );
+            // get the CGAtomIdx of the atom with this atom and residue name
+            CGAtomIdx cgatomidx = molinfo.cgAtomIdx(atmnam + resnam);
 
-            //get the mulliken charge of this atom
+            // get the mulliken charge of this atom
             Charge atmchg = mulliken_charges[cgatomidx];
 
-            //substitute that into the AC file
+            // substitute that into the AC file
             outstream << line.left(54);
 
             outstream.setFieldWidth(10);
-            outstream << atmchg.to( mod_electron );
+            outstream << atmchg.to(mod_electron);
 
             outstream.setFieldWidth(0);
-            outstream << line.mid(62,-1) << "\n";
+            outstream << line.mid(62, -1) << "\n";
         }
         else
         {
@@ -317,8 +315,7 @@ static void addChargesToAC(const AtomCharges &mulliken_charges,
     }
 }
 
-static AtomCharges extractAM1BCC(const QString &file, const Molecule &molecule,
-                                 const double sclfac)
+static AtomCharges extractAM1BCC(const QString &file, const Molecule &molecule, const double sclfac)
 {
     QFile f(file);
 
@@ -327,9 +324,9 @@ static AtomCharges extractAM1BCC(const QString &file, const Molecule &molecule,
 
     const MoleculeInfoData &molinfo = molecule.data().info();
 
-    AtomCharges am1bcc_chgs( molinfo );
+    AtomCharges am1bcc_chgs(molinfo);
 
-    QTextStream ts( &f );
+    QTextStream ts(&f);
 
     while (not ts.atEnd())
     {
@@ -343,18 +340,19 @@ static AtomCharges extractAM1BCC(const QString &file, const Molecule &molecule,
             {
                 f.close();
 
-                throw SireError::file_error( QObject::tr(
-                        "The AC Atom line \"%1\" does not look like a valid "
-                        "antechamber format ATOM line. Here's the complete "
-                        "file;\n%2")
-                            .arg(line).arg(::getOutput(file)), CODELOC );
+                throw SireError::file_error(QObject::tr("The AC Atom line \"%1\" does not look like a valid "
+                                                        "antechamber format ATOM line. Here's the complete "
+                                                        "file;\n%2")
+                                                .arg(line)
+                                                .arg(::getOutput(file)),
+                                            CODELOC);
             }
 
-            AtomName atmnam( words[2] );
-            ResName resnam( words[3] );
+            AtomName atmnam(words[2]);
+            ResName resnam(words[3]);
 
-            //get the CGAtomIdx of the atom with this atom and residue name
-            CGAtomIdx cgatomidx = molinfo.cgAtomIdx( atmnam + resnam );
+            // get the CGAtomIdx of the atom with this atom and residue name
+            CGAtomIdx cgatomidx = molinfo.cgAtomIdx(atmnam + resnam);
 
             bool ok;
 
@@ -364,14 +362,15 @@ static AtomCharges extractAM1BCC(const QString &file, const Molecule &molecule,
             {
                 f.close();
 
-                throw SireError::file_error( QObject::tr(
-                        "The AC Atom line \"%1\" does not look like a valid "
-                        "antechamber format ATOM line. Here's the complete "
-                        "file;\n%2")
-                            .arg(line).arg(::getOutput(file)), CODELOC );
+                throw SireError::file_error(QObject::tr("The AC Atom line \"%1\" does not look like a valid "
+                                                        "antechamber format ATOM line. Here's the complete "
+                                                        "file;\n%2")
+                                                .arg(line)
+                                                .arg(::getOutput(file)),
+                                            CODELOC);
             }
 
-            am1bcc_chgs.set( cgatomidx, chg );
+            am1bcc_chgs.set(cgatomidx, chg);
         }
     }
 
@@ -379,51 +378,49 @@ static AtomCharges extractAM1BCC(const QString &file, const Molecule &molecule,
 }
 
 /** Internal function used to convert AM1 mulliken charges to AM1-BCC charges */
-AtomCharges AM1BCC::convertAM1MullikenToAM1BCC(const AtomCharges &mulliken_charges,
-                                               const Molecule &molecule,
-                                               const PropertyMap &map,
-                                               const QString &amberhome) const
+AtomCharges AM1BCC::convertAM1MullikenToAM1BCC(const AtomCharges &mulliken_charges, const Molecule &molecule,
+                                               const PropertyMap &map, const QString &amberhome) const
 {
-    //we will use antechamber to create an AC file for this
-    //molecule (with zero charges). We will then copy the
-    //AM1 mulliken charges into this file, run "am1bcc" to
-    //get the AM1-BCC charges, and will then parse the output
-    //file to extract those charges.
+    // we will use antechamber to create an AC file for this
+    // molecule (with zero charges). We will then copy the
+    // AM1 mulliken charges into this file, run "am1bcc" to
+    // get the AM1-BCC charges, and will then parse the output
+    // file to extract those charges.
 
-    //antechamber needs the AMBERHOME environmental variable to be set
-    QHash<QString,QString> env = this->environment();
-    env.insert( "AMBERHOME", amberhome );
+    // antechamber needs the AMBERHOME environmental variable to be set
+    QHash<QString, QString> env = this->environment();
+    env.insert("AMBERHOME", amberhome);
 
-    //all of this will be performed in a temporary directory!
+    // all of this will be performed in a temporary directory!
     TempDir tmpdir;
-    //tmpdir.doNotDelete();
+    // tmpdir.doNotDelete();
 
     const QString pdbfile = QString("%1/molecule.pdb").arg(tmpdir.path());
     const QString acfile = QString("%1/molecule.AC").arg(tmpdir.path());
     const QString am1file = QString("%1/am1mulliken.AC").arg(tmpdir.path());
     const QString am1bccfile = QString("%1/am1bcc.AC").arg(tmpdir.path());
 
-    //first we need a PDB of the molecule to input to antechamber
+    // first we need a PDB of the molecule to input to antechamber
     PDB().write(molecule, pdbfile, map);
 
-    //now we run antechamber on this PDB to create the AC file (needed by am1bcc)
-    ::runProcess( QString("%1/bin/antechamber -i molecule.pdb -fi pdb "
-                          "-o molecule.AC -j 4 -fo ac -nc %2")
-                  .arg(amberhome).arg(mopac.totalCharge()),
-            tmpdir.path(), env );
+    // now we run antechamber on this PDB to create the AC file (needed by am1bcc)
+    ::runProcess(QString("%1/bin/antechamber -i molecule.pdb -fi pdb "
+                         "-o molecule.AC -j 4 -fo ac -nc %2")
+                     .arg(amberhome)
+                     .arg(mopac.totalCharge()),
+                 tmpdir.path(), env);
 
-    //now we edit the resulting AC file to insert the AM1 mulliken charges...
-    ::addChargesToAC( mulliken_charges, acfile, am1file, molecule );
+    // now we edit the resulting AC file to insert the AM1 mulliken charges...
+    ::addChargesToAC(mulliken_charges, acfile, am1file, molecule);
 
-    //use "am1bcc" to convert the charges to AM1-BCC charges
-    ::runProcess(
-            QString("%1/bin/am1bcc -i am1mulliken.AC -o am1bcc.AC -f ac "
-                    "-p %1/dat/antechamber/BCCPARM.DAT -j 4")
-                    .arg(amberhome),
-            tmpdir.path(), env);
+    // use "am1bcc" to convert the charges to AM1-BCC charges
+    ::runProcess(QString("%1/bin/am1bcc -i am1mulliken.AC -o am1bcc.AC -f ac "
+                         "-p %1/dat/antechamber/BCCPARM.DAT -j 4")
+                     .arg(amberhome),
+                 tmpdir.path(), env);
 
-    //finally(!) read the output AC file and extract all of the AM1-BCC charges
-    return ::extractAM1BCC( am1bccfile, molecule, this->scaleFactor() );
+    // finally(!) read the output AC file and extract all of the AM1-BCC charges
+    return ::extractAM1BCC(am1bccfile, molecule, this->scaleFactor());
 }
 
 /** Return the amber directory (AMBERHOME) */
@@ -436,12 +433,12 @@ QString AM1BCC::getAmberHome() const
         const char *amberhome = ::getenv("AMBERHOME");
 
         if (not amberhome)
-            throw SireError::process_error( QObject::tr(
-                    "It is not possible to run the mopac and antechamber "
-                    "programs required to generate charges unless the "
-                    "AMBERHOME environmental variable is set (this must point "
-                    "to the location of the amber directory, e.g. "
-                    "$HOME/ambertools/amber10"), CODELOC );
+            throw SireError::process_error(QObject::tr("It is not possible to run the mopac and antechamber "
+                                                       "programs required to generate charges unless the "
+                                                       "AMBERHOME environmental variable is set (this must point "
+                                                       "to the location of the amber directory, e.g. "
+                                                       "$HOME/ambertools/amber10"),
+                                           CODELOC);
 
         return QString(amberhome);
     }
@@ -451,31 +448,29 @@ QString AM1BCC::getAmberHome() const
     molecule 'molecule'. This only calculates the charges for the selected
     atoms in the molecule. Either default (0) charges, or the original
     charges are use for atoms that are not selected */
-AtomCharges AM1BCC::operator()(const PartialMolecule &molecule,
-                               const PropertyMap &map) const
+AtomCharges AM1BCC::operator()(const PartialMolecule &molecule, const PropertyMap &map) const
 {
-    //we use the tools provided by antechamber - all in AMBERHOME
+    // we use the tools provided by antechamber - all in AMBERHOME
     QString amberhome = this->getAmberHome();
 
-    //we use mopac to calculate all of the AM1 mulliken charges for the entire molecule
-    Molecule whole_mol( molecule );
+    // we use mopac to calculate all of the AM1 mulliken charges for the entire molecule
+    Molecule whole_mol(molecule);
 
-    Mopac my_mopac( mopac );
-    my_mopac.setExecutable( QString("%1/bin/mopac").arg(amberhome) );
+    Mopac my_mopac(mopac);
+    my_mopac.setExecutable(QString("%1/bin/mopac").arg(amberhome));
 
     AtomCharges mopac_chgs = my_mopac.calculateCharges(whole_mol, map);
 
-    //we now need to convert these AM1 charges to AM1-BCC charges
-    //using the am1bcc program from antechamber
-    AtomCharges am1bcc_chgs = convertAM1MullikenToAM1BCC(mopac_chgs, whole_mol, map,
-                                                         amberhome);
+    // we now need to convert these AM1 charges to AM1-BCC charges
+    // using the am1bcc program from antechamber
+    AtomCharges am1bcc_chgs = convertAM1MullikenToAM1BCC(mopac_chgs, whole_mol, map, amberhome);
 
     if (not molecule.selectedAll())
     {
-        //merge any original charges for unselected atoms
-        //with the new charges for selected atoms - note that this may
+        // merge any original charges for unselected atoms
+        // with the new charges for selected atoms - note that this may
         //(probably will!) make the total charge on the molecule
-        //non-integer
+        // non-integer
 
         const PropertyName &charge_property = map["charge"];
 
@@ -500,13 +495,13 @@ AtomCharges AM1BCC::operator()(const PartialMolecule &molecule,
             old_charges = AtomCharges(molinfo);
         }
 
-        if (molecule.selection().nSelected() > molecule.nAtoms()/2)
+        if (molecule.selection().nSelected() > molecule.nAtoms() / 2)
         {
             for (CGIdx i(0); i < molinfo.nCutGroups(); ++i)
             {
                 for (Index j(0); j < molinfo.nAtoms(i); ++j)
                 {
-                    CGAtomIdx cgatomidx(i,j);
+                    CGAtomIdx cgatomidx(i, j);
 
                     if (not molecule.selection().selected(cgatomidx))
                     {
@@ -517,11 +512,11 @@ AtomCharges AM1BCC::operator()(const PartialMolecule &molecule,
         }
         else
         {
-            for (CGIdx i(0); i<molinfo.nCutGroups(); ++i)
+            for (CGIdx i(0); i < molinfo.nCutGroups(); ++i)
             {
-                for (Index j(0); j<molinfo.nAtoms(i); ++j)
+                for (Index j(0); j < molinfo.nAtoms(i); ++j)
                 {
-                    CGAtomIdx cgatomidx(i,j);
+                    CGAtomIdx cgatomidx(i, j);
 
                     if (molecule.selection().selected(cgatomidx))
                     {
@@ -544,34 +539,33 @@ static bool comparable(const double val0, const double val1)
     const double diff = val0 - val1;
     const double tol = 1e-5;
 
-    return ( diff > -tol and diff < tol);
+    return (diff > -tol and diff < tol);
 }
 
 /** This returns whether or not the charges will change when going
     from 'oldmol' to 'newmol' - note that this assumes that the
     charges in 'oldmol' are already AM1BCC charges! If they are
     not, then this will give the wrong answer! */
-bool AM1BCC::mayChangeCharges(const PartialMolecule &oldmol,
-                              const PartialMolecule &newmol,
+bool AM1BCC::mayChangeCharges(const PartialMolecule &oldmol, const PartialMolecule &newmol,
                               const PropertyMap &map) const
 {
     const MoleculeData &olddata = oldmol.data();
     const MoleculeData &newdata = newmol.data();
 
-    //the charges won't change if the molecule hasn't changed!
+    // the charges won't change if the molecule hasn't changed!
     if (olddata.version() == newdata.version())
     {
         return false;
     }
 
-    //if atoms have been added or removed, then the charges will change
+    // if atoms have been added or removed, then the charges will change
     if (olddata.info() != newdata.info())
     {
         return true;
     }
 
-    //the charges won't change if the elements or coordinates
-    //properties haven't changed
+    // the charges won't change if the elements or coordinates
+    // properties haven't changed
     const PropertyName &coords_property = map["coordinates"];
     const PropertyName &element_property = map["element"];
 
@@ -595,18 +589,16 @@ bool AM1BCC::mayChangeCharges(const PartialMolecule &oldmol,
 
         if (olddata.version(coords_property) != newdata.version(coords_property))
         {
-            //the coordinates have changed - this will only affect the charges
-            //if the conformation of the molecule has changed - we can test
-            //this by building rudimentary z-matricies of the two versions
-            //of the molecules and making comparisons that way
-            const QVector<Vector> old_coords = olddata.property(coords_property)
-                                                      .asA<AtomCoords>().toVector();
+            // the coordinates have changed - this will only affect the charges
+            // if the conformation of the molecule has changed - we can test
+            // this by building rudimentary z-matricies of the two versions
+            // of the molecules and making comparisons that way
+            const QVector<Vector> old_coords = olddata.property(coords_property).asA<AtomCoords>().toVector();
 
-            const QVector<Vector> new_coords = newdata.property(coords_property)
-                                                      .asA<AtomCoords>().toVector();
+            const QVector<Vector> new_coords = newdata.property(coords_property).asA<AtomCoords>().toVector();
 
             const int nats = old_coords.count();
-            BOOST_ASSERT( new_coords.count() == nats );
+            BOOST_ASSERT(new_coords.count() == nats);
 
             if (nats <= 1)
                 return false;
@@ -614,10 +606,9 @@ bool AM1BCC::mayChangeCharges(const PartialMolecule &oldmol,
             const Vector *old_coords_array = old_coords.constData();
             const Vector *new_coords_array = new_coords.constData();
 
-            //do atom 2
-            if ( not ::comparable(
-                        Vector::distance2(old_coords_array[1], old_coords_array[0]),
-                        Vector::distance2(new_coords_array[1], new_coords_array[0])) )
+            // do atom 2
+            if (not ::comparable(Vector::distance2(old_coords_array[1], old_coords_array[0]),
+                                 Vector::distance2(new_coords_array[1], new_coords_array[0])))
             {
                 return true;
             }
@@ -626,16 +617,12 @@ bool AM1BCC::mayChangeCharges(const PartialMolecule &oldmol,
                 return false;
             }
 
-            //do atom 3
-            if ( not (::comparable(
-                        Vector::distance2(old_coords_array[2], old_coords_array[1]),
-                        Vector::distance2(new_coords_array[2], new_coords_array[1])) and
+            // do atom 3
+            if (not(::comparable(Vector::distance2(old_coords_array[2], old_coords_array[1]),
+                                 Vector::distance2(new_coords_array[2], new_coords_array[1])) and
 
-                      ::comparable(
-                        Vector::angle(old_coords_array[2], old_coords_array[1],
-                                      old_coords_array[0]),
-                        Vector::angle(new_coords_array[2], new_coords_array[1],
-                                      new_coords_array[0])) ) )
+                    ::comparable(Vector::angle(old_coords_array[2], old_coords_array[1], old_coords_array[0]),
+                                 Vector::angle(new_coords_array[2], new_coords_array[1], new_coords_array[0]))))
             {
                 return true;
             }
@@ -644,18 +631,18 @@ bool AM1BCC::mayChangeCharges(const PartialMolecule &oldmol,
                 return false;
             }
 
-            //now do the remaining atoms
-            for (int i=3; i<nats; ++i)
+            // now do the remaining atoms
+            for (int i = 3; i < nats; ++i)
             {
                 const Vector &old_v0 = old_coords_array[i];
-                const Vector &old_v1 = old_coords_array[i-1];
-                const Vector &old_v2 = old_coords_array[i-2];
-                const Vector &old_v3 = old_coords_array[i-3];
+                const Vector &old_v1 = old_coords_array[i - 1];
+                const Vector &old_v2 = old_coords_array[i - 2];
+                const Vector &old_v3 = old_coords_array[i - 3];
 
                 const Vector &new_v0 = new_coords_array[i];
-                const Vector &new_v1 = new_coords_array[i-1];
-                const Vector &new_v2 = new_coords_array[i-2];
-                const Vector &new_v3 = new_coords_array[i-3];
+                const Vector &new_v1 = new_coords_array[i - 1];
+                const Vector &new_v2 = new_coords_array[i - 2];
+                const Vector &new_v3 = new_coords_array[i - 3];
 
                 const double old_bond = Vector::distance2(old_v0, old_v1);
                 const double new_bond = Vector::distance2(new_v0, new_v1);
@@ -666,9 +653,8 @@ bool AM1BCC::mayChangeCharges(const PartialMolecule &oldmol,
                 const Angle old_dih = Vector::dihedral(old_v0, old_v1, old_v2, old_v3);
                 const Angle new_dih = Vector::dihedral(new_v0, new_v1, new_v2, new_v3);
 
-                if ( not (::comparable(old_bond, new_bond) and
-                          ::comparable(old_ang, new_ang) and
-                          ::comparable(old_dih, new_dih)) )
+                if (not(::comparable(old_bond, new_bond) and ::comparable(old_ang, new_ang) and
+                        ::comparable(old_dih, new_dih)))
                 {
                     return true;
                 }

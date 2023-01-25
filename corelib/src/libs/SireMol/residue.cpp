@@ -27,19 +27,19 @@
 
 #include "residue.h"
 
-#include "mover.hpp"
-#include "selector.hpp"
 #include "evaluator.h"
+#include "mover.hpp"
 #include "reseditor.h"
+#include "selector.hpp"
 
-#include "molecule.h"
-#include "chain.h"
 #include "atom.h"
+#include "chain.h"
+#include "molecule.h"
 
 #include "atomidcombos.h"
 
-#include "SireError/errors.h"
 #include "SireBase/errors.h"
+#include "SireError/errors.h"
 #include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
@@ -55,14 +55,12 @@ using namespace SireStream;
 /////// Implementation of ResProp
 ///////
 
-static const RegisterMetaType<ResProp> r_resprop(MAGIC_ONLY,
-                                                 "SireMol::ResProp");
+static const RegisterMetaType<ResProp> r_resprop(MAGIC_ONLY, "SireMol::ResProp");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const ResProp &resprop)
 {
-    writeHeader(ds, r_resprop, 1)
-         << static_cast<const MolViewProperty&>(resprop);
+    writeHeader(ds, r_resprop, 1) << static_cast<const MolViewProperty &>(resprop);
 
     return ds;
 }
@@ -74,7 +72,7 @@ QDataStream &operator>>(QDataStream &ds, ResProp &resprop)
 
     if (v == 1)
     {
-        ds >> static_cast<MolViewProperty&>(resprop);
+        ds >> static_cast<MolViewProperty &>(resprop);
     }
     else
         throw version_error(v, "1", r_resprop, CODELOC);
@@ -83,13 +81,16 @@ QDataStream &operator>>(QDataStream &ds, ResProp &resprop)
 }
 
 ResProp::ResProp() : MolViewProperty()
-{}
+{
+}
 
 ResProp::ResProp(const ResProp &other) : MolViewProperty(other)
-{}
+{
+}
 
 ResProp::~ResProp()
-{}
+{
+}
 
 ///////
 /////// Implementation of Residue
@@ -104,7 +105,7 @@ QDataStream &operator<<(QDataStream &ds, const Residue &res)
 
     SharedDataStream sds(ds);
 
-    sds << res.residx << static_cast<const MoleculeView&>(res);
+    sds << res.residx << static_cast<const MoleculeView &>(res);
 
     return ds;
 }
@@ -118,7 +119,7 @@ QDataStream &operator>>(QDataStream &ds, Residue &res)
     {
         SharedDataStream sds(ds);
 
-        sds >> res.residx >> static_cast<MoleculeView&>(res);
+        sds >> res.residx >> static_cast<MoleculeView &>(res);
 
         res.selected_atoms = AtomSelection(res.data());
         res.selected_atoms.selectOnly(res.residx);
@@ -129,22 +130,23 @@ QDataStream &operator>>(QDataStream &ds, Residue &res)
     return ds;
 }
 
-void SireMol::detail::assertSameSize(Residue*, int nats, int nprops)
+void SireMol::detail::assertSameSize(Residue *, int nats, int nprops)
 {
     if (nats != nprops)
-        throw SireError::incompatible_error( QObject::tr(
-            "The number of supplied properties (%1) is not the same "
-            "as the number of residues (%2).")
-                .arg(nprops).arg(nats), CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The number of supplied properties (%1) is not the same "
+                                                        "as the number of residues (%2).")
+                                                .arg(nprops)
+                                                .arg(nats),
+                                            CODELOC);
 }
 
 /** Null constructor */
-Residue::Residue() : ConcreteProperty<Residue,MoleculeView>()
-{}
+Residue::Residue() : ConcreteProperty<Residue, MoleculeView>()
+{
+}
 
 /** Construct as a specified residue */
-Residue::Residue(const MoleculeData &moldata, const ResID &resid)
-        : ConcreteProperty<Residue,MoleculeView>(moldata)
+Residue::Residue(const MoleculeData &moldata, const ResID &resid) : ConcreteProperty<Residue, MoleculeView>(moldata)
 {
     residx = moldata.info().resIdx(resid);
     selected_atoms = AtomSelection(moldata);
@@ -153,16 +155,17 @@ Residue::Residue(const MoleculeData &moldata, const ResID &resid)
 
 /** Copy constructor */
 Residue::Residue(const Residue &other)
-        : ConcreteProperty<Residue,MoleculeView>(other), residx(other.residx),
-          selected_atoms(other.selected_atoms)
-{}
+    : ConcreteProperty<Residue, MoleculeView>(other), residx(other.residx), selected_atoms(other.selected_atoms)
+{
+}
 
 /** Destructor */
 Residue::~Residue()
-{}
+{
+}
 
 /** Copy assignment operator */
-Residue& Residue::operator=(const Residue &other)
+Residue &Residue::operator=(const Residue &other)
 {
     if (this != &other)
     {
@@ -177,15 +180,13 @@ Residue& Residue::operator=(const Residue &other)
 /** Comparison operator */
 bool Residue::operator==(const Residue &other) const
 {
-    return residx == other.residx and
-           MoleculeView::operator==(other);
+    return residx == other.residx and MoleculeView::operator==(other);
 }
 
 /** Comparison operator */
 bool Residue::operator!=(const Residue &other) const
 {
-    return residx != other.residx or
-           MoleculeView::operator!=(other);
+    return residx != other.residx or MoleculeView::operator!=(other);
 }
 
 /** Return a string representation of this residue */
@@ -193,14 +194,12 @@ QString Residue::toString() const
 {
     QString n = QString("%1:%2").arg(this->name()).arg(this->number());
 
-    return QObject::tr( "Residue( %1 num_atoms=%2 )" )
-                .arg( n, -7 )
-                .arg( this->nAtoms() );
+    return QObject::tr("Residue( %1 num_atoms=%2 )").arg(n, -7).arg(this->nAtoms());
 }
 
 MolViewPtr Residue::toSelector() const
 {
-    return MolViewPtr( Selector<Residue>(*this) );
+    return MolViewPtr(Selector<Residue>(*this));
 }
 
 /** Is this residue empty? */
@@ -228,20 +227,21 @@ AtomSelection Residue::selection() const
 */
 void Residue::update(const MoleculeData &moldata)
 {
-    //check that the new data is compatible (has same molecule
-    //number and info ID number)
-    if (d->number() != moldata.number() or
-        d->info().UID() != moldata.info().UID())
+    // check that the new data is compatible (has same molecule
+    // number and info ID number)
+    if (d->number() != moldata.number() or d->info().UID() != moldata.info().UID())
     {
-        throw SireError::incompatible_error( QObject::tr(
-            "You can only update a residue with the molecule data "
-            "for the same molecule (same molecule number) and that "
-            "has a .info() object that has the same UID. You are "
-            "trying to update residue %1 in molecule %2 with UID %3 "
-            "with molecule %4 with UID %5.")
-                .arg(residx).arg(d->number()).arg(d->info().UID().toString())
-                .arg(moldata.number()).arg(moldata.info().UID().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("You can only update a residue with the molecule data "
+                                                        "for the same molecule (same molecule number) and that "
+                                                        "has a .info() object that has the same UID. You are "
+                                                        "trying to update residue %1 in molecule %2 with UID %3 "
+                                                        "with molecule %4 with UID %5.")
+                                                .arg(residx)
+                                                .arg(d->number())
+                                                .arg(d->info().UID().toString())
+                                                .arg(moldata.number())
+                                                .arg(moldata.info().UID().toString()),
+                                            CODELOC);
     }
 
     d = moldata;
@@ -305,7 +305,7 @@ int Residue::nAtoms() const
 
 /** Return the indicies of the atoms in this residue, in the
     order that they appear in this residue */
-const QList<AtomIdx>& Residue::atomIdxs() const
+const QList<AtomIdx> &Residue::atomIdxs() const
 {
     return d->info().getAtomsIn(residx);
 }
@@ -368,8 +368,7 @@ bool Residue::hasMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-bool Residue::hasMetadata(const PropertyName &key,
-                       const PropertyName &metakey) const
+bool Residue::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return d->hasMetadataOfType<ResProp>(key, metakey);
 }
@@ -381,11 +380,12 @@ bool Residue::hasMetadata(const PropertyName &key,
 void Residue::assertContainsProperty(const PropertyName &key) const
 {
     if (not this->hasProperty(key))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no residue property at key \"%1\" for the "
-            "residue %2 (%3) in the molecule \"%4\".")
-                .arg(key.toString(), this->name()).arg(this->number())
-                .arg(d->name()), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no residue property at key \"%1\" for the "
+                                                     "residue %2 (%3) in the molecule \"%4\".")
+                                             .arg(key.toString(), this->name())
+                                             .arg(this->number())
+                                             .arg(d->name()),
+                                         CODELOC);
 }
 
 /** Assert that this residue contains some residue metadata at metakey 'metakey'
@@ -395,11 +395,12 @@ void Residue::assertContainsProperty(const PropertyName &key) const
 void Residue::assertContainsMetadata(const PropertyName &metakey) const
 {
     if (not this->hasMetadata(metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no residue metadata at metakey \"%1\" for the "
-            "residue %2 (%3) in the molecule \"%4\".")
-                .arg(metakey.toString(), this->name()).arg(this->number())
-                .arg(d->name()), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no residue metadata at metakey \"%1\" for the "
+                                                     "residue %2 (%3) in the molecule \"%4\".")
+                                             .arg(metakey.toString(), this->name())
+                                             .arg(this->number())
+                                             .arg(d->name()),
+                                         CODELOC);
 }
 
 /** Assert that this residue contains some residue metadata
@@ -407,17 +408,16 @@ void Residue::assertContainsMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-void Residue::assertContainsMetadata(const PropertyName &key,
-                                     const PropertyName &metakey) const
+void Residue::assertContainsMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
-    if (not this->hasMetadata(key,metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no residue metadata at metakey \"%1\" for the "
-            "property at key \"%2\" for the "
-            "residue %2 (%3) in the molecule \"%4\".")
-                .arg(metakey.toString(), key.toString(),
-                     this->name()).arg(this->number())
-                .arg(d->name()), CODELOC );
+    if (not this->hasMetadata(key, metakey))
+        throw SireBase::missing_property(QObject::tr("There is no residue metadata at metakey \"%1\" for the "
+                                                     "property at key \"%2\" for the "
+                                                     "residue %2 (%3) in the molecule \"%4\".")
+                                             .arg(metakey.toString(), key.toString(), this->name())
+                                             .arg(this->number())
+                                             .arg(d->name()),
+                                         CODELOC);
 }
 
 /** Return the keys of all ResProperty properties */
@@ -442,29 +442,23 @@ QStringList Residue::metadataKeys(const PropertyName &key) const
     return d->properties().metadataKeysOfType<ResProp>(key);
 }
 
-const char* Residue::typeName()
+const char *Residue::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Residue>() );
+    return QMetaType::typeName(qMetaTypeId<Residue>());
 }
 
-bool SireMol::detail::has_property(const Residue*,
-                                                  const MoleculeData &moldata,
-                                                  const PropertyName &key)
+bool SireMol::detail::has_property(const Residue *, const MoleculeData &moldata, const PropertyName &key)
 {
     return moldata.hasPropertyOfType<ResProp>(key);
 }
 
-bool SireMol::detail::has_metadata(const Residue*,
-                                                  const MoleculeData &moldata,
-                                                  const PropertyName &metakey)
+bool SireMol::detail::has_metadata(const Residue *, const MoleculeData &moldata, const PropertyName &metakey)
 {
     return moldata.hasMetadataOfType<ResProp>(metakey);
 }
 
-bool SireMol::detail::has_metadata(const Residue*,
-                                                  const MoleculeData &moldata,
-                                                  const PropertyName &key,
-                                                  const PropertyName &metakey)
+bool SireMol::detail::has_metadata(const Residue *, const MoleculeData &moldata, const PropertyName &key,
+                                   const PropertyName &metakey)
 {
     return moldata.hasMetadataOfType<ResProp>(key, metakey);
 }
@@ -478,10 +472,10 @@ namespace SireMol
     template class Mover<Residue>;
     template class Selector<Residue>;
 
-    template class Mover< Selector<Residue> >;
-}
+    template class Mover<Selector<Residue>>;
+} // namespace SireMol
 
-Residue* Residue::clone() const
+Residue *Residue::clone() const
 {
     return new Residue(*this);
 }

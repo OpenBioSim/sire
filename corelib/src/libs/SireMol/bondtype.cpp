@@ -64,12 +64,12 @@ QDataStream &operator>>(QDataStream &ds, BondType &b)
 }
 
 /** Constructor (default is an undefined bond) */
-BondType::BondType() : ConcreteProperty<BondType,Property>(), bond_type(0)
-{}
+BondType::BondType() : ConcreteProperty<BondType, Property>(), bond_type(0)
+{
+}
 
 /** Construct from the passed string */
-BondType::BondType(const QString &str)
-         : ConcreteProperty<BondType,Property>()
+BondType::BondType(const QString &str) : ConcreteProperty<BondType, Property>()
 {
     auto s = str.trimmed().toLower();
 
@@ -84,36 +84,36 @@ BondType::BondType(const QString &str)
     else if (s == "undefined")
         this->bond_type = 0;
     else
-        throw SireError::invalid_arg(QObject::tr(
-            "Cannot interpret bond type '%1'. Should be one of "
-            "'single', 'double', 'triple', 'aromatic' or 'undefined'.")
-              .arg(str), CODELOC);
+        throw SireError::invalid_arg(QObject::tr("Cannot interpret bond type '%1'. Should be one of "
+                                                 "'single', 'double', 'triple', 'aromatic' or 'undefined'.")
+                                         .arg(str),
+                                     CODELOC);
 }
 
 /** Construct from the the passed number */
-BondType::BondType(int value)
-         : ConcreteProperty<BondType,Property>()
+BondType::BondType(int value) : ConcreteProperty<BondType, Property>()
 {
     if (value < 0 or value > 4)
-        throw SireError::invalid_arg(QObject::tr(
-            "Invalid bond type '%1'. Should be an integer between "
-            "0 and 4.").arg(value), CODELOC);
+        throw SireError::invalid_arg(QObject::tr("Invalid bond type '%1'. Should be an integer between "
+                                                 "0 and 4.")
+                                         .arg(value),
+                                     CODELOC);
 
     this->bond_type = value;
 }
 
 /** Copy constructor */
-BondType::BondType(const BondType &other)
-         : ConcreteProperty<BondType,Property>(other),
-           bond_type(other.bond_type)
-{}
+BondType::BondType(const BondType &other) : ConcreteProperty<BondType, Property>(other), bond_type(other.bond_type)
+{
+}
 
 /** Destructor */
 BondType::~BondType()
-{}
+{
+}
 
 /** Copy assignment operator */
-BondType& BondType::operator=(const BondType &other)
+BondType &BondType::operator=(const BondType &other)
 {
     bond_type = other.bond_type;
     return *this;
@@ -131,29 +131,27 @@ bool BondType::operator!=(const BondType &other) const
     return not this->operator==(other);
 }
 
-const char* BondType::typeName()
+const char *BondType::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<BondType>() );
+    return QMetaType::typeName(qMetaTypeId<BondType>());
 }
 
 QString BondType::toString() const
 {
     switch (this->bond_type)
     {
-        case 0:
-            return "undefined";
-        case 1:
-            return "single";
-        case 2:
-            return "double";
-        case 3:
-            return "triple";
-        case 4:
-            return "aromatic";
-        default:
-            throw SireError::program_bug(
-                QObject::tr("Should not get here: %1").arg(this->bond_type),
-                  CODELOC);
+    case 0:
+        return "undefined";
+    case 1:
+        return "single";
+    case 2:
+        return "double";
+    case 3:
+        return "triple";
+    case 4:
+        return "aromatic";
+    default:
+        throw SireError::program_bug(QObject::tr("Should not get here: %1").arg(this->bond_type), CODELOC);
     }
 }
 
@@ -230,4 +228,3 @@ bool BondType::isAromatic() const
 {
     return this->bond_type == 4;
 }
-

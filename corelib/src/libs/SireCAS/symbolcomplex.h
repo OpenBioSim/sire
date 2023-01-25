@@ -37,42 +37,46 @@ SIRE_BEGIN_HEADER
 namespace SireCAS
 {
 
-using SireMaths::Complex;
+    using SireMaths::Complex;
 
-/** Small class that holds a SymbolID number and an associated complex value */
-class SIRECAS_EXPORT SymbolComplex
-{
-public:
-    SymbolComplex(SymbolID id, const Complex &val) : _val(val), _id(id)
-    {}
-
-    SymbolComplex(SymbolID id, double val) : _val(val), _id(id)
-    {}
-
-    SymbolComplex(const SymbolValue &val) : _val(val.value()), _id(val.ID())
-    {}
-
-    ~SymbolComplex()
-    {}
-
-    SymbolID ID() const
+    /** Small class that holds a SymbolID number and an associated complex value */
+    class SIRECAS_EXPORT SymbolComplex
     {
-        return _id;
-    }
+    public:
+        SymbolComplex(SymbolID id, const Complex &val) : _val(val), _id(id)
+        {
+        }
 
-    const Complex& value() const
-    {
-        return _val;
-    }
-private:
+        SymbolComplex(SymbolID id, double val) : _val(val), _id(id)
+        {
+        }
 
-    Complex _val;
-    SymbolID _id;
-};
+        SymbolComplex(const SymbolValue &val) : _val(val.value()), _id(val.ID())
+        {
+        }
 
-}
+        ~SymbolComplex()
+        {
+        }
 
-SIRE_EXPOSE_CLASS( SireCAS::SymbolComplex )
+        SymbolID ID() const
+        {
+            return _id;
+        }
+
+        const Complex &value() const
+        {
+            return _val;
+        }
+
+    private:
+        Complex _val;
+        SymbolID _id;
+    };
+
+} // namespace SireCAS
+
+SIRE_EXPOSE_CLASS(SireCAS::SymbolComplex)
 
 SIRE_END_HEADER
 

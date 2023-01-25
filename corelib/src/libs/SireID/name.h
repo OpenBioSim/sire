@@ -37,79 +37,81 @@ SIRE_BEGIN_HEADER
 
 namespace SireID
 {
-class Name;
+    class Name;
 }
 
-SIREID_EXPORT QDataStream& operator<<(QDataStream&, const SireID::Name&);
-SIREID_EXPORT QDataStream& operator>>(QDataStream&, SireID::Name&);
+SIREID_EXPORT QDataStream &operator<<(QDataStream &, const SireID::Name &);
+SIREID_EXPORT QDataStream &operator>>(QDataStream &, SireID::Name &);
 
 namespace SireID
 {
 
-enum CaseSensitivity{  CaseInsensitive = 0,
-                       CaseSensitive   = 1 };
+    enum CaseSensitivity
+    {
+        CaseInsensitive = 0,
+        CaseSensitive = 1
+    };
 
-/** This is the base class of all Name ID objects. A Name is used
-    to provide an object with a human-readable name that can be
-    used to identify the object, e.g. identifying atoms by their
-    name within a residue, or identifying forcefields by their name.
+    /** This is the base class of all Name ID objects. A Name is used
+        to provide an object with a human-readable name that can be
+        used to identify the object, e.g. identifying atoms by their
+        name within a residue, or identifying forcefields by their name.
 
-    A name does not have to uniquely identify an object, though it
-    helps, as generally only the first object with a specified name
-    is returned if there are in fact multiple objects with the same
-    name.
+        A name does not have to uniquely identify an object, though it
+        helps, as generally only the first object with a specified name
+        is returned if there are in fact multiple objects with the same
+        name.
 
-    @author Christopher Woods
-*/
-class SIREID_EXPORT Name
-{
+        @author Christopher Woods
+    */
+    class SIREID_EXPORT Name
+    {
 
-friend SIREID_EXPORT QDataStream& ::operator<<(QDataStream&, const Name&);
-friend SIREID_EXPORT QDataStream& ::operator>>(QDataStream&, Name&);
+        friend SIREID_EXPORT QDataStream & ::operator<<(QDataStream &, const Name &);
+        friend SIREID_EXPORT QDataStream & ::operator>>(QDataStream &, Name &);
 
-public:
-    ~Name();
+    public:
+        ~Name();
 
-    operator QString() const;
+        operator QString() const;
 
-    bool isNull() const;
+        bool isNull() const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    uint hash() const;
+        uint hash() const;
 
-    const QString& value() const;
+        const QString &value() const;
 
-    bool isCaseSensitive() const;
+        bool isCaseSensitive() const;
 
-protected:
-    explicit Name(const QString &name = QString(),
-                  CaseSensitivity = CaseSensitive);
+    protected:
+        explicit Name(const QString &name = QString(), CaseSensitivity = CaseSensitive);
 
-    Name(const Name &other);
+        Name(const Name &other);
 
-    Name& operator=(const Name &other);
+        Name &operator=(const Name &other);
 
-    bool operator==(const Name &other) const;
-    bool operator!=(const Name &other) const;
+        bool operator==(const Name &other) const;
+        bool operator!=(const Name &other) const;
 
-    /** The actual name */
-    QString _name;
+        /** The actual name */
+        QString _name;
 
-    /** Should this name be case sensitive or not? */
-    bool case_sensitive;
-};
+        /** Should this name be case sensitive or not? */
+        bool case_sensitive;
+    };
 
-/** Return a hash of this Name */
-SIRE_ALWAYS_INLINE uint qHash(const Name &name)
-{
-    return name.hash();
-}
+    /** Return a hash of this Name */
+    SIRE_ALWAYS_INLINE uint qHash(const Name &name)
+    {
+        return name.hash();
+    }
 
-}
+} // namespace SireID
 
 SIRE_END_HEADER
 
-SIRE_EXPOSE_CLASS( SireID::Name )
+SIRE_EXPOSE_CLASS(SireID::Name)
 
 #endif

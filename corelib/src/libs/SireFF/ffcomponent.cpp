@@ -38,14 +38,13 @@ using namespace SireFF;
 using namespace SireCAS;
 using namespace SireStream;
 
-static const RegisterMetaType<FFComponent> r_ffcomp( MAGIC_ONLY,
-                                                     "SireFF::FFComponent" );
+static const RegisterMetaType<FFComponent> r_ffcomp(MAGIC_ONLY, "SireFF::FFComponent");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const FFComponent &ffcomp)
 {
     writeHeader(ds, r_ffcomp, 1);
-    ds << static_cast<const Symbol&>(ffcomp);
+    ds << static_cast<const Symbol &>(ffcomp);
 
     return ds;
 }
@@ -57,7 +56,7 @@ QDataStream &operator>>(QDataStream &ds, FFComponent &ffcomp)
 
     if (v == 1)
     {
-        ds >> static_cast<Symbol&>(ffcomp);
+        ds >> static_cast<Symbol &>(ffcomp);
     }
     else
         throw version_error(v, "1", r_ffcomp, CODELOC);
@@ -65,60 +64,59 @@ QDataStream &operator>>(QDataStream &ds, FFComponent &ffcomp)
     return ds;
 }
 
-static QRegExp name_regexp( "E\\_\\{(.+)\\}\\^\\{(.+)\\}" );
+static QRegExp name_regexp("E\\_\\{(.+)\\}\\^\\{(.+)\\}");
 
 /** Constructor */
-FFComponent::FFComponent(const FFName &ffname, const QString &name)
-            : Symbol( FFComponent::symbolName(ffname, name) )
-{}
+FFComponent::FFComponent(const FFName &ffname, const QString &name) : Symbol(FFComponent::symbolName(ffname, name))
+{
+}
 
 /** Construct from a passed symbol
 
     \throw SireError::incompatible_error
 */
-FFComponent::FFComponent(const Symbol &symbol, const QString &name)
-            : Symbol(symbol)
+FFComponent::FFComponent(const Symbol &symbol, const QString &name) : Symbol(symbol)
 {
     QRegExp local_copy = name_regexp;
 
-    if (local_copy.indexIn( Symbol::toString() ) == -1)
-        //we could not interpret the symbol
-        throw SireError::incompatible_error( QObject::tr(
-            "The symbol \"%1\" is not a valid FFComponent symbol. "
-            "FFComponent symbols have the form E^{<FF_NAME>}^{<COMPONENT_NAME>} "
-            "where <FF_NAME> is the name of the forcefield that contains this "
-            "component and <COMPONENT_NAME> is the name of the component itself.")
-                .arg(symbol.toString()), CODELOC );
+    if (local_copy.indexIn(Symbol::toString()) == -1)
+        // we could not interpret the symbol
+        throw SireError::incompatible_error(
+            QObject::tr("The symbol \"%1\" is not a valid FFComponent symbol. "
+                        "FFComponent symbols have the form E^{<FF_NAME>}^{<COMPONENT_NAME>} "
+                        "where <FF_NAME> is the name of the forcefield that contains this "
+                        "component and <COMPONENT_NAME> is the name of the component itself.")
+                .arg(symbol.toString()),
+            CODELOC);
 
     if (name != local_copy.cap(2))
-        throw SireError::incompatible_error( QObject::tr(
-            "The symbol \"%1\" is for the wrong component! (%2). "
-            "The correct component is called \"%3\".")
-                .arg(symbol.toString(), local_copy.cap(2), name),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The symbol \"%1\" is for the wrong component! (%2). "
+                                                        "The correct component is called \"%3\".")
+                                                .arg(symbol.toString(), local_copy.cap(2), name),
+                                            CODELOC);
 }
 
 /** Copy constructor */
-FFComponent::FFComponent(const FFComponent &other)
-            : Symbol(other)
-{}
+FFComponent::FFComponent(const FFComponent &other) : Symbol(other)
+{
+}
 
 /** Destructor */
 FFComponent::~FFComponent()
-{}
+{
+}
 
 /** Return the name of the forcefield that owns this component */
 FFName FFComponent::forceFieldName() const
 {
     QRegExp local_copy = name_regexp;
 
-    if (local_copy.indexIn( Symbol::toString() ) == -1)
-        //we could not interpret the name!
-        throw SireError::program_bug( QObject::tr(
-            "Could not interpret this symbol (%1) as an FFComponent.")
-                .arg(Symbol::toString()), CODELOC );
+    if (local_copy.indexIn(Symbol::toString()) == -1)
+        // we could not interpret the name!
+        throw SireError::program_bug(
+            QObject::tr("Could not interpret this symbol (%1) as an FFComponent.").arg(Symbol::toString()), CODELOC);
 
-    return FFName( local_copy.cap(1) );
+    return FFName(local_copy.cap(1));
 }
 
 /** Return the name of the component of the potential energy
@@ -127,11 +125,10 @@ QString FFComponent::componentName() const
 {
     QRegExp local_copy = name_regexp;
 
-    if (name_regexp.indexIn( Symbol::toString() ) == -1)
-        //we could not interpret the name!
-        throw SireError::program_bug( QObject::tr(
-            "Could not interpret this symbol (%1) as an FFComponent.")
-                .arg(Symbol::toString()), CODELOC );
+    if (name_regexp.indexIn(Symbol::toString()) == -1)
+        // we could not interpret the name!
+        throw SireError::program_bug(
+            QObject::tr("Could not interpret this symbol (%1) as an FFComponent.").arg(Symbol::toString()), CODELOC);
 
     return local_copy.cap(1);
 }
@@ -160,7 +157,7 @@ static const RegisterMetaType<SingleComponent> r_single;
 QDataStream &operator<<(QDataStream &ds, const SingleComponent &single)
 {
     writeHeader(ds, r_single, 1);
-    ds << static_cast<const FFComponent&>(single);
+    ds << static_cast<const FFComponent &>(single);
     return ds;
 }
 
@@ -171,7 +168,7 @@ QDataStream &operator>>(QDataStream &ds, SingleComponent &single)
 
     if (v == 1)
     {
-        ds >> static_cast<FFComponent&>(single);
+        ds >> static_cast<FFComponent &>(single);
     }
     else
         throw version_error(v, "1", r_single, CODELOC);
@@ -180,31 +177,33 @@ QDataStream &operator>>(QDataStream &ds, SingleComponent &single)
 }
 
 /** Constructor */
-SingleComponent::SingleComponent(const FFName &ffname)
-                : FFComponent(ffname, QLatin1String("total"))
-{}
+SingleComponent::SingleComponent(const FFName &ffname) : FFComponent(ffname, QLatin1String("total"))
+{
+}
 
 /** Construct using the passed forcefield name and suffix */
 SingleComponent::SingleComponent(const FFName &ffname, const QString &suffix)
-                 : FFComponent(ffname, QString("total_{%1}").arg(suffix))
-{}
+    : FFComponent(ffname, QString("total_{%1}").arg(suffix))
+{
+}
 
 /** Construct from a symbol
 
     \throw SireError::incompatible_error
 */
-SingleComponent::SingleComponent(const SireCAS::Symbol &symbol)
-                 : FFComponent(symbol, QLatin1String("total"))
-{}
+SingleComponent::SingleComponent(const SireCAS::Symbol &symbol) : FFComponent(symbol, QLatin1String("total"))
+{
+}
 
 /** Copy constructor */
-SingleComponent::SingleComponent(const SingleComponent &other)
-                 : FFComponent(other)
-{}
+SingleComponent::SingleComponent(const SingleComponent &other) : FFComponent(other)
+{
+}
 
 /** Destructor */
 SingleComponent::~SingleComponent()
-{}
+{
+}
 
 /** Set the energy in the forcefield 'ff' to equal to the passed SingleEnergy */
 void SingleComponent::setEnergy(FF &ff, const SingleEnergy &nrg) const
@@ -218,7 +217,7 @@ void SingleComponent::changeEnergy(FF &ff, const SingleEnergy &delta) const
     FFComponent::changeEnergy(ff, this->total(), delta);
 }
 
-const char* SingleComponent::typeName()
+const char *SingleComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SingleComponent>() );
+    return QMetaType::typeName(qMetaTypeId<SingleComponent>());
 }

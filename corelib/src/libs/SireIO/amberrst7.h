@@ -36,122 +36,116 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class AmberRst7;
+    class AmberRst7;
 }
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::AmberRst7&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::AmberRst7&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::AmberRst7 &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::AmberRst7 &);
 
 namespace SireIO
 {
 
-/** This class represents an Amber-format restart/coordinate file (ascii),
-    currently supporting these files from Amber7 to Amber16.
+    /** This class represents an Amber-format restart/coordinate file (ascii),
+        currently supporting these files from Amber7 to Amber16.
 
-    The format of this file is described here;
+        The format of this file is described here;
 
-    http://ambermd.org/formats.html
+        http://ambermd.org/formats.html
 
-    (specifically the "AMBER coordinate/restart" file specification
+        (specifically the "AMBER coordinate/restart" file specification
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT AmberRst7 : public SireBase::ConcreteProperty<AmberRst7,MoleculeParser>
-{
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT AmberRst7 : public SireBase::ConcreteProperty<AmberRst7, MoleculeParser>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const AmberRst7&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, AmberRst7&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const AmberRst7 &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, AmberRst7 &);
 
-public:
-    AmberRst7();
-    AmberRst7(const QString &filename,
-              const PropertyMap &map = PropertyMap());
-    AmberRst7(const QStringList &lines,
-              const PropertyMap &map = PropertyMap());
-    AmberRst7(const SireSystem::System &system,
-              const PropertyMap &map = PropertyMap());
+    public:
+        AmberRst7();
+        AmberRst7(const QString &filename, const PropertyMap &map = PropertyMap());
+        AmberRst7(const QStringList &lines, const PropertyMap &map = PropertyMap());
+        AmberRst7(const SireSystem::System &system, const PropertyMap &map = PropertyMap());
 
-    AmberRst7(const AmberRst7 &other);
+        AmberRst7(const AmberRst7 &other);
 
-    ~AmberRst7();
+        ~AmberRst7();
 
-    AmberRst7& operator=(const AmberRst7 &other);
+        AmberRst7 &operator=(const AmberRst7 &other);
 
-    bool operator==(const AmberRst7 &other) const;
-    bool operator!=(const AmberRst7 &other) const;
+        bool operator==(const AmberRst7 &other) const;
+        bool operator!=(const AmberRst7 &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    MoleculeParserPtr construct(const QString &filename,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QString &filename, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const QStringList &lines,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const SireSystem::System &system,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const SireSystem::System &system, const PropertyMap &map) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    QString formatName() const;
-    QString formatDescription() const;
-    QStringList formatSuffix() const;
+        QString formatName() const;
+        QString formatDescription() const;
+        QStringList formatSuffix() const;
 
-    static AmberRst7 parse(const QString &filename);
+        static AmberRst7 parse(const QString &filename);
 
-    bool isFrame() const;
+        bool isFrame() const;
 
-    int nFrames() const;
+        int nFrames() const;
 
-    SireMol::Frame getFrame(int i) const;
+        SireMol::Frame getFrame(int i) const;
 
-    QString title() const;
-    double time() const;
+        QString title() const;
+        double time() const;
 
-    int nAtoms() const;
+        int nAtoms() const;
 
-    bool hasVelocities() const;
+        bool hasVelocities() const;
 
-    QVector<SireMaths::Vector> coordinates() const;
-    QVector<SireMaths::Vector> velocities() const;
+        QVector<SireMaths::Vector> coordinates() const;
+        QVector<SireMaths::Vector> velocities() const;
 
-    SireMaths::Vector boxDimensions() const;
-    SireMaths::Vector boxAngles() const;
+        SireMaths::Vector boxDimensions() const;
+        SireMaths::Vector boxAngles() const;
 
-protected:
-    void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
+    protected:
+        void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
 
-private:
-    void parse(const PropertyMap &map);
+    private:
+        void parse(const PropertyMap &map);
 
-    void readBoxInfo(int boxidx);
+        void readBoxInfo(int boxidx);
 
-    /** The title of the file */
-    QString ttle;
+        /** The title of the file */
+        QString ttle;
 
-    /** The current time of the simulation in picoseconds */
-    double current_time;
+        /** The current time of the simulation in picoseconds */
+        double current_time;
 
-    /** The coordinate data */
-    QVector<SireMaths::Vector> coords;
+        /** The coordinate data */
+        QVector<SireMaths::Vector> coords;
 
-    /** The velocity data in amber units (angstroms / 1/20.455 ps) */
-    QVector<SireMaths::Vector> vels;
+        /** The velocity data in amber units (angstroms / 1/20.455 ps) */
+        QVector<SireMaths::Vector> vels;
 
-    /** The box dimensions */
-    SireMaths::Vector box_dims;
+        /** The box dimensions */
+        SireMaths::Vector box_dims;
 
-    /** The box angles */
-    SireMaths::Vector box_angs;
-};
+        /** The box angles */
+        SireMaths::Vector box_angs;
+    };
 
-}
+} // namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::AmberRst7 )
+Q_DECLARE_METATYPE(SireIO::AmberRst7)
 
-SIRE_EXPOSE_CLASS( SireIO::AmberRst7 )
+SIRE_EXPOSE_CLASS(SireIO::AmberRst7)
 
 SIRE_END_HEADER
 

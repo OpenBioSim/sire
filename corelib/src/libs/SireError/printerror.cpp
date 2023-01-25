@@ -27,40 +27,39 @@
 
 #include <QTextStream>
 
-#include "printerror.h"
 #include "SireError/exception.h"
+#include "printerror.h"
 
 namespace SireError
 {
 
-void printAaargh(QTextStream &ts)
-{
-    ts << " ^   ^  \n"
-       << " O   O  \n"
-       << "   \"   \n"
-       << " /\"\"\"\\   AAAAAARRRRGGGHHHH!!!!!!!\n"
-       << " \\___/\n\n";
-}
+    void printAaargh(QTextStream &ts)
+    {
+        ts << " ^   ^  \n"
+           << " O   O  \n"
+           << "   \"   \n"
+           << " /\"\"\"\\   AAAAAARRRRGGGHHHH!!!!!!!\n"
+           << " \\___/\n\n";
+    }
 
-/** Print the error 'text' to standard output */
-void printError(const QString &text)
-{
-    QTextStream ts(stdout);
+    /** Print the error 'text' to standard output */
+    void printError(const QString &text)
+    {
+        QTextStream ts(stdout);
 
-    ts << "\n**********************************************************\n"
-       << "Something went wrong with the simulation. Here's the error\n"
-       << "**********************************************************\n\n"
-       << text
-       << "\n\nSorry - your simulation terminated with an error. Scroll back up\n"
-       << "to the top of the error to work out what has gone wrong.\n\n";
+        ts << "\n**********************************************************\n"
+           << "Something went wrong with the simulation. Here's the error\n"
+           << "**********************************************************\n\n"
+           << text << "\n\nSorry - your simulation terminated with an error. Scroll back up\n"
+           << "to the top of the error to work out what has gone wrong.\n\n";
 
-    printAaargh(ts);
-}
+        printAaargh(ts);
+    }
 
-/** Print the error 'e' to standard output */
-void printError(const SireError::exception &e)
-{
-    SireError::printError( e.toString() );
-}
+    /** Print the error 'e' to standard output */
+    void printError(const SireError::exception &e)
+    {
+        SireError::printError(e.toString());
+    }
 
-}
+} // namespace SireError

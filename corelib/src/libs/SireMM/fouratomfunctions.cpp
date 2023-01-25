@@ -31,9 +31,9 @@
 
 #include "SireCAS/symbols.h"
 
-#include "SireMol/moleculeinfodata.h"
-#include "SireMol/atomselection.h"
 #include "SireMol/atommatcher.h"
+#include "SireMol/atomselection.h"
+#include "SireMol/moleculeinfodata.h"
 
 #include "SireMol/errors.h"
 
@@ -52,51 +52,47 @@ using namespace SireStream;
 ////// Implementation of FourAtomFunction
 //////
 
-QDataStream &operator<<(QDataStream &ds,
-                                      const FourAtomFunction &fouratomfunc)
+QDataStream &operator<<(QDataStream &ds, const FourAtomFunction &fouratomfunc)
 {
-    ds << fouratomfunc.atm0 << fouratomfunc.atm1
-       << fouratomfunc.atm2 << fouratomfunc.atm3
-       << static_cast<const AtomFunction&>(fouratomfunc);
+    ds << fouratomfunc.atm0 << fouratomfunc.atm1 << fouratomfunc.atm2 << fouratomfunc.atm3
+       << static_cast<const AtomFunction &>(fouratomfunc);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                      FourAtomFunction &fouratomfunc)
+QDataStream &operator>>(QDataStream &ds, FourAtomFunction &fouratomfunc)
 {
-    ds >> fouratomfunc.atm0 >> fouratomfunc.atm1
-       >> fouratomfunc.atm2 >> fouratomfunc.atm3
-       >> static_cast<AtomFunction&>(fouratomfunc);
+    ds >> fouratomfunc.atm0 >> fouratomfunc.atm1 >> fouratomfunc.atm2 >> fouratomfunc.atm3 >>
+        static_cast<AtomFunction &>(fouratomfunc);
 
     return ds;
 }
 
 /** Constructor */
 FourAtomFunction::FourAtomFunction() : AtomFunction()
-{}
+{
+}
 
 /** Construct for the specified pair of atoms with the specified function */
-FourAtomFunction::FourAtomFunction(const CGAtomIdx &atom0, const CGAtomIdx &atom1,
-                                   const CGAtomIdx &atom2, const CGAtomIdx &atom3,
-                                   const SireCAS::Expression &function)
-                : AtomFunction(function),
-                  atm0(atom0), atm1(atom1), atm2(atom2), atm3(atom3)
-{}
+FourAtomFunction::FourAtomFunction(const CGAtomIdx &atom0, const CGAtomIdx &atom1, const CGAtomIdx &atom2,
+                                   const CGAtomIdx &atom3, const SireCAS::Expression &function)
+    : AtomFunction(function), atm0(atom0), atm1(atom1), atm2(atom2), atm3(atom3)
+{
+}
 
 /** Copy constructor */
 FourAtomFunction::FourAtomFunction(const FourAtomFunction &other)
-                : AtomFunction(other),
-                  atm0(other.atm0), atm1(other.atm1),
-                  atm2(other.atm2), atm3(other.atm3)
-{}
+    : AtomFunction(other), atm0(other.atm0), atm1(other.atm1), atm2(other.atm2), atm3(other.atm3)
+{
+}
 
 /** Destructor */
 FourAtomFunction::~FourAtomFunction()
-{}
+{
+}
 
 /** Copy assignment operator */
-FourAtomFunction& FourAtomFunction::operator=(const FourAtomFunction &other)
+FourAtomFunction &FourAtomFunction::operator=(const FourAtomFunction &other)
 {
     AtomFunction::operator=(other);
     atm0 = other.atm0;
@@ -110,16 +106,14 @@ FourAtomFunction& FourAtomFunction::operator=(const FourAtomFunction &other)
 /** Comparison operator */
 bool FourAtomFunction::operator==(const FourAtomFunction &other) const
 {
-    return atm0 == other.atm0 and atm1 == other.atm1 and
-           atm2 == other.atm2 and atm3 == other.atm3 and
+    return atm0 == other.atm0 and atm1 == other.atm1 and atm2 == other.atm2 and atm3 == other.atm3 and
            AtomFunction::operator==(other);
 }
 
 /** Comparison operator */
 bool FourAtomFunction::operator!=(const FourAtomFunction &other) const
 {
-    return atm0 != other.atm0 or atm1 != other.atm1 or
-           atm2 != other.atm2 or atm3 != other.atm3 or
+    return atm0 != other.atm0 or atm1 != other.atm1 or atm2 != other.atm2 or atm3 != other.atm3 or
            AtomFunction::operator!=(other);
 }
 
@@ -127,54 +121,51 @@ bool FourAtomFunction::operator!=(const FourAtomFunction &other) const
 QString FourAtomFunction::toString() const
 {
     return QObject::tr("FourAtomFunction( %1 <- %2 - %3 -> %4 : %5 )")
-                .arg(atm0.toString(), atm1.toString(),
-                     atm2.toString(), atm3.toString())
-                .arg(this->function().toString());
+        .arg(atm0.toString(), atm1.toString(), atm2.toString(), atm3.toString())
+        .arg(this->function().toString());
 }
 
 //////
 ////// Implementation of detail::IDQuad
 //////
 
-QDataStream& operator<<(QDataStream &ds, const IDQuad &idquad)
+QDataStream &operator<<(QDataStream &ds, const IDQuad &idquad)
 {
-    ds << idquad.atom0 << idquad.atom1
-       << idquad.atom2 << idquad.atom3;
+    ds << idquad.atom0 << idquad.atom1 << idquad.atom2 << idquad.atom3;
 
     return ds;
 }
 
-QDataStream& operator>>(QDataStream &ds, IDQuad &idquad)
+QDataStream &operator>>(QDataStream &ds, IDQuad &idquad)
 {
-    ds >> idquad.atom0 >> idquad.atom1
-       >> idquad.atom2 >> idquad.atom3;
+    ds >> idquad.atom0 >> idquad.atom1 >> idquad.atom2 >> idquad.atom3;
 
     return ds;
 }
 
 IDQuad::IDQuad(quint32 atm0, quint32 atm1, quint32 atm2, quint32 atm3)
-       : atom0(atm0), atom1(atm1), atom2(atm2), atom3(atm3)
+    : atom0(atm0), atom1(atm1), atom2(atm2), atom3(atm3)
 {
     if (atm0 > atm3)
     {
-        qSwap(atom0,atom3);
-        qSwap(atom1,atom2);
+        qSwap(atom0, atom3);
+        qSwap(atom1, atom2);
     }
     else if (atm0 == atm3 and atm1 > atm2)
     {
-        qSwap(atom1,atom2);
+        qSwap(atom1, atom2);
     }
 }
 
-IDQuad::IDQuad(const IDQuad &other)
-       : atom0(other.atom0), atom1(other.atom1),
-         atom2(other.atom2), atom3(other.atom3)
-{}
+IDQuad::IDQuad(const IDQuad &other) : atom0(other.atom0), atom1(other.atom1), atom2(other.atom2), atom3(other.atom3)
+{
+}
 
 IDQuad::~IDQuad()
-{}
+{
+}
 
-IDQuad& IDQuad::operator=(const IDQuad &other)
+IDQuad &IDQuad::operator=(const IDQuad &other)
 {
     atom0 = other.atom0;
     atom1 = other.atom1;
@@ -186,29 +177,20 @@ IDQuad& IDQuad::operator=(const IDQuad &other)
 
 bool IDQuad::operator==(const IDQuad &other) const
 {
-    return atom0 == other.atom0 and atom1 == other.atom1 and
-           atom2 == other.atom2 and atom3 == other.atom3;
+    return atom0 == other.atom0 and atom1 == other.atom1 and atom2 == other.atom2 and atom3 == other.atom3;
 }
 
 bool IDQuad::operator!=(const IDQuad &other) const
 {
-    return atom0 != other.atom0 or atom1 != other.atom1 or
-           atom2 != other.atom2 or atom3 != other.atom3;
+    return atom0 != other.atom0 or atom1 != other.atom1 or atom2 != other.atom2 or atom3 != other.atom3;
 }
 
 bool IDQuad::operator>(const IDQuad &other) const
 {
     return atom0 > other.atom0 or
-           (atom0 == other.atom0 and (
-                atom1 > other.atom1 or (
-                    atom1 == other.atom1 and (
-                        atom2 > other.atom2 or (
-                            atom2 == other.atom2 and atom3 > other.atom3
-                            )
-                        )
-                    )
-                )
-           );
+           (atom0 == other.atom0 and
+            (atom1 > other.atom1 or
+             (atom1 == other.atom1 and (atom2 > other.atom2 or (atom2 == other.atom2 and atom3 > other.atom3)))));
 }
 
 bool IDQuad::operator>=(const IDQuad &other) const
@@ -233,22 +215,19 @@ bool IDQuad::operator<=(const IDQuad &other) const
 static const RegisterMetaType<FourAtomFunctions> r_fouratomfuncs;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const FourAtomFunctions &fouratomfuncs)
+QDataStream &operator<<(QDataStream &ds, const FourAtomFunctions &fouratomfuncs)
 {
     writeHeader(ds, r_fouratomfuncs, 1);
 
     SharedDataStream sds(ds);
 
-    sds << fouratomfuncs.potentials_by_atoms
-        << static_cast<const AtomFunctions&>(fouratomfuncs);
+    sds << fouratomfuncs.potentials_by_atoms << static_cast<const AtomFunctions &>(fouratomfuncs);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                      FourAtomFunctions &fouratomfuncs)
+QDataStream &operator>>(QDataStream &ds, FourAtomFunctions &fouratomfuncs)
 {
     VersionID v = readHeader(ds, r_fouratomfuncs);
 
@@ -256,8 +235,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> fouratomfuncs.potentials_by_atoms
-            >> static_cast<AtomFunctions&>(fouratomfuncs);
+        sds >> fouratomfuncs.potentials_by_atoms >> static_cast<AtomFunctions &>(fouratomfuncs);
     }
     else
         throw version_error(v, "1", r_fouratomfuncs, CODELOC);
@@ -266,34 +244,37 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Constructor */
-FourAtomFunctions::FourAtomFunctions()
-                 : ConcreteProperty<FourAtomFunctions,AtomFunctions>()
-{}
+FourAtomFunctions::FourAtomFunctions() : ConcreteProperty<FourAtomFunctions, AtomFunctions>()
+{
+}
 
 /** Construct the container to hold the set of four-atom functions
     for the molecule whose data is in 'moldata' */
 FourAtomFunctions::FourAtomFunctions(const MoleculeData &moldata)
-                 : ConcreteProperty<FourAtomFunctions,AtomFunctions>(moldata)
-{}
+    : ConcreteProperty<FourAtomFunctions, AtomFunctions>(moldata)
+{
+}
 
 /** Construct the container to hold the set of four-atom functions
     for the molecule whose layout information is in 'molinfo' */
 FourAtomFunctions::FourAtomFunctions(const MoleculeInfoData &molinfo)
-                 : ConcreteProperty<FourAtomFunctions,AtomFunctions>(molinfo)
-{}
+    : ConcreteProperty<FourAtomFunctions, AtomFunctions>(molinfo)
+{
+}
 
 /** Copy constructor */
 FourAtomFunctions::FourAtomFunctions(const FourAtomFunctions &other)
-                 : ConcreteProperty<FourAtomFunctions,AtomFunctions>(other),
-                   potentials_by_atoms(other.potentials_by_atoms)
-{}
+    : ConcreteProperty<FourAtomFunctions, AtomFunctions>(other), potentials_by_atoms(other.potentials_by_atoms)
+{
+}
 
 /** Destructor */
 FourAtomFunctions::~FourAtomFunctions()
-{}
+{
+}
 
 /** Copy assignment operator */
-FourAtomFunctions& FourAtomFunctions::operator=(const FourAtomFunctions &other)
+FourAtomFunctions &FourAtomFunctions::operator=(const FourAtomFunctions &other)
 {
     AtomFunctions::operator=(other);
     potentials_by_atoms = other.potentials_by_atoms;
@@ -304,36 +285,29 @@ FourAtomFunctions& FourAtomFunctions::operator=(const FourAtomFunctions &other)
 /** Comparison operator */
 bool FourAtomFunctions::operator==(const FourAtomFunctions &other) const
 {
-    return AtomFunctions::operator==(other) and
-           potentials_by_atoms == other.potentials_by_atoms;
+    return AtomFunctions::operator==(other) and potentials_by_atoms == other.potentials_by_atoms;
 }
 
 /** Comparison operator */
 bool FourAtomFunctions::operator!=(const FourAtomFunctions &other) const
 {
-    return AtomFunctions::operator!=(other) or
-           potentials_by_atoms != other.potentials_by_atoms;
+    return AtomFunctions::operator!=(other) or potentials_by_atoms != other.potentials_by_atoms;
 }
 
 inline QString _id_string(const MoleculeInfoData &info, int atom)
 {
-    return QString("%1:%2").arg(info.name(AtomIdx(atom)))
-                           .arg(info.number(AtomIdx(atom)));
+    return QString("%1:%2").arg(info.name(AtomIdx(atom))).arg(info.number(AtomIdx(atom)));
 }
 
-inline QString _pretty_string(const MoleculeInfoData &info,
-                              const IDQuad &quad,
-                              const Expression &func)
+inline QString _pretty_string(const MoleculeInfoData &info, const IDQuad &quad, const Expression &func)
 {
     QString id = QString("%1-%2-%3-%4")
-                    .arg(_id_string(info, quad.atom0), 7)
-                    .arg(_id_string(info, quad.atom1))
-                    .arg(_id_string(info, quad.atom2))
-                    .arg(_id_string(info, quad.atom3), -7);
+                     .arg(_id_string(info, quad.atom0), 7)
+                     .arg(_id_string(info, quad.atom1))
+                     .arg(_id_string(info, quad.atom2))
+                     .arg(_id_string(info, quad.atom3), -7);
 
-    return QString("%1 : %2")
-                .arg(id, -31)
-                .arg(func.toString());
+    return QString("%1 : %2").arg(id, -31).arg(func.toString());
 }
 
 /** Return a string representation */
@@ -354,37 +328,30 @@ QString FourAtomFunctions::toString() const
 
         if (n <= 10)
         {
-            for (int i=0; i<n; ++i)
+            for (int i = 0; i < n; ++i)
             {
-                parts.append(QObject::tr("%1: %2").arg(i)
-                        .arg(_pretty_string(info(),
-                                            keys[i],
-                                            potentials_by_atoms[keys[i]])));
+                parts.append(
+                    QObject::tr("%1: %2").arg(i).arg(_pretty_string(info(), keys[i], potentials_by_atoms[keys[i]])));
             }
         }
         else
         {
-            for (int i=0; i<5; ++i)
+            for (int i = 0; i < 5; ++i)
             {
-                parts.append(QObject::tr("%1: %2").arg(i)
-                        .arg(_pretty_string(info(),
-                                            keys[i],
-                                            potentials_by_atoms[keys[i]])));
+                parts.append(
+                    QObject::tr("%1: %2").arg(i).arg(_pretty_string(info(), keys[i], potentials_by_atoms[keys[i]])));
             }
 
             parts.append("...");
 
-            for (int i=n-5; i<n; ++i)
+            for (int i = n - 5; i < n; ++i)
             {
-                parts.append(QObject::tr("%1: %2").arg(i)
-                        .arg(_pretty_string(info(),
-                                            keys[i],
-                                            potentials_by_atoms[keys[i]])));
+                parts.append(
+                    QObject::tr("%1: %2").arg(i).arg(_pretty_string(info(), keys[i], potentials_by_atoms[keys[i]])));
             }
         }
 
-        return QObject::tr("FourAtomFunctions( size=%1\n%2\n)")
-                        .arg(n).arg(parts.join("\n"));
+        return QObject::tr("FourAtomFunctions( size=%1\n%2\n)").arg(n).arg(parts.join("\n"));
     }
 }
 
@@ -396,23 +363,23 @@ QString FourAtomFunctions::toString() const
     \throw SireError::invalid_index
     \throw SireMol::duplicate_atom
 */
-void FourAtomFunctions::set(AtomIdx atom0, AtomIdx atom1,
-                            AtomIdx atom2, AtomIdx atom3,
-                            const Expression &expression)
+void FourAtomFunctions::set(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3, const Expression &expression)
 {
-    quint32 atm0 = atom0.map( info().nAtoms() );
-    quint32 atm1 = atom1.map( info().nAtoms() );
-    quint32 atm2 = atom2.map( info().nAtoms() );
-    quint32 atm3 = atom3.map( info().nAtoms() );
+    quint32 atm0 = atom0.map(info().nAtoms());
+    quint32 atm1 = atom1.map(info().nAtoms());
+    quint32 atm2 = atom2.map(info().nAtoms());
+    quint32 atm3 = atom3.map(info().nAtoms());
 
-    if (atm0 == atm1 or atm0 == atm2 or atm0 == atm3 or
-        atm1 == atm2 or atm1 == atm3 or atm2 == atm3 )
-        throw SireMol::duplicate_atom( QObject::tr(
-            "You cannot add a function that acts between the same atoms! "
-            "(%1-%2-%3-%4)")
-                .arg(atm0).arg(atm1).arg(atm2).arg(atm3), CODELOC );
+    if (atm0 == atm1 or atm0 == atm2 or atm0 == atm3 or atm1 == atm2 or atm1 == atm3 or atm2 == atm3)
+        throw SireMol::duplicate_atom(QObject::tr("You cannot add a function that acts between the same atoms! "
+                                                  "(%1-%2-%3-%4)")
+                                          .arg(atm0)
+                                          .arg(atm1)
+                                          .arg(atm2)
+                                          .arg(atm3),
+                                      CODELOC);
 
-    potentials_by_atoms.insert( IDQuad(atm0,atm1,atm2,atm3), expression );
+    potentials_by_atoms.insert(IDQuad(atm0, atm1, atm2, atm3), expression);
     AtomFunctions::addSymbols(expression.symbols());
 }
 
@@ -423,12 +390,10 @@ void FourAtomFunctions::set(AtomIdx atom0, AtomIdx atom1,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-void FourAtomFunctions::set(const AtomID &atom0, const AtomID &atom1,
-                            const AtomID &atom2, const AtomID &atom3,
+void FourAtomFunctions::set(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3,
                             const Expression &expression)
 {
-    this->set( info().atomIdx(atom0), info().atomIdx(atom1),
-               info().atomIdx(atom2), info().atomIdx(atom3), expression );
+    this->set(info().atomIdx(atom0), info().atomIdx(atom1), info().atomIdx(atom2), info().atomIdx(atom3), expression);
 }
 
 /** Set the potential energy function used for the dihedral identified by 'dihedralid'
@@ -480,10 +445,8 @@ void FourAtomFunctions::set(const ImproperID &improperid, const Expression &expr
 /** Check if any of the symbols in 'symbols' need to be removed... */
 void FourAtomFunctions::removeSymbols(QSet<Symbol> symbols)
 {
-    for (QHash<IDQuad,Expression>::const_iterator
-                                    it = potentials_by_atoms.constBegin();
-         it != potentials_by_atoms.constEnd();
-         ++it)
+    for (QHash<IDQuad, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
     {
         if (symbols.isEmpty())
             return;
@@ -491,8 +454,8 @@ void FourAtomFunctions::removeSymbols(QSet<Symbol> symbols)
         symbols.subtract(it.value().symbols());
     }
 
-    //the only remaining symbols are ones that no longer exist
-    //in this set
+    // the only remaining symbols are ones that no longer exist
+    // in this set
     AtomFunctions::removeSymbols(symbols);
 }
 
@@ -500,16 +463,14 @@ void FourAtomFunctions::removeSymbols(QSet<Symbol> symbols)
 
     \throw SireError::invalid_index
 */
-void FourAtomFunctions::clear(AtomIdx atom0, AtomIdx atom1,
-                              AtomIdx atom2, AtomIdx atom3)
+void FourAtomFunctions::clear(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3)
 {
-    quint32 atm0 = atom0.map( info().nAtoms() );
-    quint32 atm1 = atom1.map( info().nAtoms() );
-    quint32 atm2 = atom2.map( info().nAtoms() );
-    quint32 atm3 = atom3.map( info().nAtoms() );
+    quint32 atm0 = atom0.map(info().nAtoms());
+    quint32 atm1 = atom1.map(info().nAtoms());
+    quint32 atm2 = atom2.map(info().nAtoms());
+    quint32 atm3 = atom3.map(info().nAtoms());
 
-    FourAtomFunctions::removeSymbols( potentials_by_atoms
-                                       .take( IDQuad(atm0,atm1,atm2,atm3) ).symbols() );
+    FourAtomFunctions::removeSymbols(potentials_by_atoms.take(IDQuad(atm0, atm1, atm2, atm3)).symbols());
 }
 
 /** Clear all functions that involve the atom 'atom'
@@ -524,11 +485,9 @@ void FourAtomFunctions::clear(AtomIdx atom)
 
     foreach (const IDQuad &key, keys)
     {
-        if (key.atom0 == atm or key.atom1 == atm or
-            key.atom2 == atm or key.atom3 == atm)
+        if (key.atom0 == atm or key.atom1 == atm or key.atom2 == atm or key.atom3 == atm)
         {
-            FourAtomFunctions::removeSymbols( potentials_by_atoms
-                                               .take(key).symbols() );
+            FourAtomFunctions::removeSymbols(potentials_by_atoms.take(key).symbols());
         }
     }
 }
@@ -553,8 +512,7 @@ void FourAtomFunctions::clear(const AtomID &atom)
     \throw SireMol::missing_atom
     \throw SireError::invalid_index
 */
-void FourAtomFunctions::clear(const AtomID &atom0, const AtomID &atom1,
-                              const AtomID &atom2, const AtomID &atom3)
+void FourAtomFunctions::clear(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3)
 {
     QList<AtomIdx> atoms0 = atom0.map(info());
     QList<AtomIdx> atoms1 = atom1.map(info());
@@ -585,11 +543,9 @@ void FourAtomFunctions::clear(const AtomID &atom0, const AtomID &atom1,
 */
 void FourAtomFunctions::clear(const DihedralID &dihedralid)
 {
-    this->clear( dihedralid.atom0(), dihedralid.atom1(),
-                 dihedralid.atom2(), dihedralid.atom3() );
+    this->clear(dihedralid.atom0(), dihedralid.atom1(), dihedralid.atom2(), dihedralid.atom3());
 
-    this->clear( dihedralid.atom3(), dihedralid.atom2(),
-                 dihedralid.atom1(), dihedralid.atom0() );
+    this->clear(dihedralid.atom3(), dihedralid.atom2(), dihedralid.atom1(), dihedralid.atom0());
 }
 
 /** Clear the potential that acts over the improper identified by 'improperid'
@@ -601,11 +557,9 @@ void FourAtomFunctions::clear(const DihedralID &dihedralid)
 */
 void FourAtomFunctions::clear(const ImproperID &improperid)
 {
-    this->clear( improperid.atom0(), improperid.atom1(),
-                 improperid.atom2(), improperid.atom3() );
+    this->clear(improperid.atom0(), improperid.atom1(), improperid.atom2(), improperid.atom3());
 
-    this->clear( improperid.atom0(), improperid.atom1(),
-                 improperid.atom3(), improperid.atom2() );
+    this->clear(improperid.atom0(), improperid.atom1(), improperid.atom3(), improperid.atom2());
 }
 
 /** Completely clear all of the functions from this set */
@@ -623,9 +577,7 @@ void FourAtomFunctions::substitute(const Identities &identities)
 {
     AtomFunctions::removeSymbols();
 
-    for (QHash<IDQuad,Expression>::iterator it = potentials_by_atoms.begin();
-         it != potentials_by_atoms.end();
-         ++it)
+    for (QHash<IDQuad, Expression>::iterator it = potentials_by_atoms.begin(); it != potentials_by_atoms.end(); ++it)
     {
         it.value() = it.value().substitute(identities);
         AtomFunctions::addSymbols(it.value().symbols());
@@ -645,22 +597,23 @@ bool FourAtomFunctions::isEmpty() const
     \throw SireError::invalid_index
     \throw SireMol::duplicate_atom
 */
-Expression FourAtomFunctions::potential(AtomIdx atom0, AtomIdx atom1,
-                                        AtomIdx atom2, AtomIdx atom3) const
+Expression FourAtomFunctions::potential(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3) const
 {
-    quint32 atm0 = atom0.map( info().nAtoms() );
-    quint32 atm1 = atom1.map( info().nAtoms() );
-    quint32 atm2 = atom2.map( info().nAtoms() );
-    quint32 atm3 = atom3.map( info().nAtoms() );
+    quint32 atm0 = atom0.map(info().nAtoms());
+    quint32 atm1 = atom1.map(info().nAtoms());
+    quint32 atm2 = atom2.map(info().nAtoms());
+    quint32 atm3 = atom3.map(info().nAtoms());
 
-    if (atm0 == atm1 or atm0 == atm2 or atm0 == atm3 or
-        atm1 == atm2 or atm1 == atm3 or atm2 == atm3)
-        throw SireMol::duplicate_atom( QObject::tr(
-            "There is no potential that acts between the same atoms! "
-            "(%1-%2-%3-%4)")
-                .arg(atm0).arg(atm1).arg(atm2).arg(atm3), CODELOC );
+    if (atm0 == atm1 or atm0 == atm2 or atm0 == atm3 or atm1 == atm2 or atm1 == atm3 or atm2 == atm3)
+        throw SireMol::duplicate_atom(QObject::tr("There is no potential that acts between the same atoms! "
+                                                  "(%1-%2-%3-%4)")
+                                          .arg(atm0)
+                                          .arg(atm1)
+                                          .arg(atm2)
+                                          .arg(atm3),
+                                      CODELOC);
 
-    return potentials_by_atoms.value( IDQuad(atm0,atm1,atm2,atm3) );
+    return potentials_by_atoms.value(IDQuad(atm0, atm1, atm2, atm3));
 }
 
 /** Return the function acting between the atoms 'atom0' to 'atom3'.
@@ -671,13 +624,10 @@ Expression FourAtomFunctions::potential(AtomIdx atom0, AtomIdx atom1,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Expression FourAtomFunctions::potential(const AtomID &atom0,
-                                        const AtomID &atom1,
-                                        const AtomID &atom2,
+Expression FourAtomFunctions::potential(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
                                         const AtomID &atom3) const
 {
-    return this->potential( info().atomIdx(atom0), info().atomIdx(atom1),
-                            info().atomIdx(atom2), info().atomIdx(atom3) );
+    return this->potential(info().atomIdx(atom0), info().atomIdx(atom1), info().atomIdx(atom2), info().atomIdx(atom3));
 }
 
 /** Return the function acting on the dihedral identified by 'dihedralid'.
@@ -693,22 +643,22 @@ Expression FourAtomFunctions::potential(const AtomID &atom0,
 */
 Expression FourAtomFunctions::potential(const DihedralID &dihedralid) const
 {
-    AtomIdx atom0 = info().atomIdx( dihedralid.atom0() );
-    AtomIdx atom1 = info().atomIdx( dihedralid.atom1() );
-    AtomIdx atom2 = info().atomIdx( dihedralid.atom2() );
-    AtomIdx atom3 = info().atomIdx( dihedralid.atom3() );
+    AtomIdx atom0 = info().atomIdx(dihedralid.atom0());
+    AtomIdx atom1 = info().atomIdx(dihedralid.atom1());
+    AtomIdx atom2 = info().atomIdx(dihedralid.atom2());
+    AtomIdx atom3 = info().atomIdx(dihedralid.atom3());
 
-    quint32 atm0 = atom0.map( info().nAtoms() );
-    quint32 atm1 = atom1.map( info().nAtoms() );
-    quint32 atm2 = atom2.map( info().nAtoms() );
-    quint32 atm3 = atom3.map( info().nAtoms() );
+    quint32 atm0 = atom0.map(info().nAtoms());
+    quint32 atm1 = atom1.map(info().nAtoms());
+    quint32 atm2 = atom2.map(info().nAtoms());
+    quint32 atm3 = atom3.map(info().nAtoms());
 
-    if (potentials_by_atoms.contains(IDQuad(atm0,atm1,atm2,atm3)))
+    if (potentials_by_atoms.contains(IDQuad(atm0, atm1, atm2, atm3)))
     {
-        return potentials_by_atoms.value(IDQuad(atm0,atm1,atm2,atm3));
+        return potentials_by_atoms.value(IDQuad(atm0, atm1, atm2, atm3));
     }
     else
-        return potentials_by_atoms.value( IDQuad(atm3,atm2,atm1,atm0) );
+        return potentials_by_atoms.value(IDQuad(atm3, atm2, atm1, atm0));
 }
 
 /** Return the function acting on the improper identified by 'improperid'.
@@ -724,22 +674,22 @@ Expression FourAtomFunctions::potential(const DihedralID &dihedralid) const
 */
 Expression FourAtomFunctions::potential(const ImproperID &improperid) const
 {
-    AtomIdx atom0 = info().atomIdx( improperid.atom0() );
-    AtomIdx atom1 = info().atomIdx( improperid.atom1() );
-    AtomIdx atom2 = info().atomIdx( improperid.atom2() );
-    AtomIdx atom3 = info().atomIdx( improperid.atom3() );
+    AtomIdx atom0 = info().atomIdx(improperid.atom0());
+    AtomIdx atom1 = info().atomIdx(improperid.atom1());
+    AtomIdx atom2 = info().atomIdx(improperid.atom2());
+    AtomIdx atom3 = info().atomIdx(improperid.atom3());
 
-    quint32 atm0 = atom0.map( info().nAtoms() );
-    quint32 atm1 = atom1.map( info().nAtoms() );
-    quint32 atm2 = atom2.map( info().nAtoms() );
-    quint32 atm3 = atom3.map( info().nAtoms() );
+    quint32 atm0 = atom0.map(info().nAtoms());
+    quint32 atm1 = atom1.map(info().nAtoms());
+    quint32 atm2 = atom2.map(info().nAtoms());
+    quint32 atm3 = atom3.map(info().nAtoms());
 
-    if (potentials_by_atoms.contains(IDQuad(atm0,atm1,atm2,atm3)))
+    if (potentials_by_atoms.contains(IDQuad(atm0, atm1, atm2, atm3)))
     {
-        return potentials_by_atoms.value(IDQuad(atm0,atm1,atm2,atm3));
+        return potentials_by_atoms.value(IDQuad(atm0, atm1, atm2, atm3));
     }
     else
-        return potentials_by_atoms.value( IDQuad(atm0,atm1,atm3,atm2) );
+        return potentials_by_atoms.value(IDQuad(atm0, atm1, atm3, atm2));
 }
 
 /** Return the force (derivative of the potential with respect to 'symbol')
@@ -747,11 +697,10 @@ Expression FourAtomFunctions::potential(const ImproperID &improperid) const
 
     \throw SireError::invalid_index
 */
-Expression FourAtomFunctions::force(AtomIdx atom0, AtomIdx atom1,
-                                    AtomIdx atom2, AtomIdx atom3,
+Expression FourAtomFunctions::force(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3,
                                     const Symbol &symbol) const
 {
-    return -(this->potential(atom0,atom1,atom2,atom3).differentiate(symbol));
+    return -(this->potential(atom0, atom1, atom2, atom3).differentiate(symbol));
 }
 
 /** Return the force (derivative of the potential with respect to 'symbol')
@@ -761,11 +710,10 @@ Expression FourAtomFunctions::force(AtomIdx atom0, AtomIdx atom1,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Expression FourAtomFunctions::force(const AtomID &atom0, const AtomID &atom1,
-                                    const AtomID &atom2, const AtomID &atom3,
+Expression FourAtomFunctions::force(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3,
                                     const Symbol &symbol) const
 {
-    return -(this->potential(atom0,atom1,atom2,atom3).differentiate(symbol));
+    return -(this->potential(atom0, atom1, atom2, atom3).differentiate(symbol));
 }
 
 /** Return the force (derivative of the potential with respect to 'symbol')
@@ -778,8 +726,7 @@ Expression FourAtomFunctions::force(const AtomID &atom0, const AtomID &atom1,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Expression FourAtomFunctions::force(const DihedralID &dihedralid,
-                                    const Symbol &symbol) const
+Expression FourAtomFunctions::force(const DihedralID &dihedralid, const Symbol &symbol) const
 {
     return -(this->potential(dihedralid).differentiate(symbol));
 }
@@ -794,8 +741,7 @@ Expression FourAtomFunctions::force(const DihedralID &dihedralid,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Expression FourAtomFunctions::force(const ImproperID &improperid,
-                                    const Symbol &symbol) const
+Expression FourAtomFunctions::force(const ImproperID &improperid, const Symbol &symbol) const
 {
     return -(this->potential(improperid).differentiate(symbol));
 }
@@ -804,22 +750,18 @@ Expression FourAtomFunctions::force(const ImproperID &improperid,
     quads of atoms */
 QVector<FourAtomFunction> FourAtomFunctions::potentials() const
 {
-    QVector<FourAtomFunction> funcs( potentials_by_atoms.count() );
+    QVector<FourAtomFunction> funcs(potentials_by_atoms.count());
 
     FourAtomFunction *funcs_array = funcs.data();
 
     int i = 0;
 
-    for (QHash<IDQuad,Expression>::const_iterator
-                                    it = potentials_by_atoms.constBegin();
-         it != potentials_by_atoms.constEnd();
-         ++it)
+    for (QHash<IDQuad, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
     {
-        funcs_array[i] = FourAtomFunction( info().cgAtomIdx( AtomIdx(it.key().atom0) ),
-                                           info().cgAtomIdx( AtomIdx(it.key().atom1) ),
-                                           info().cgAtomIdx( AtomIdx(it.key().atom2) ),
-                                           info().cgAtomIdx( AtomIdx(it.key().atom3) ),
-                                           it.value() );
+        funcs_array[i] = FourAtomFunction(
+            info().cgAtomIdx(AtomIdx(it.key().atom0)), info().cgAtomIdx(AtomIdx(it.key().atom1)),
+            info().cgAtomIdx(AtomIdx(it.key().atom2)), info().cgAtomIdx(AtomIdx(it.key().atom3)), it.value());
 
         ++i;
     }
@@ -834,21 +776,16 @@ QVector<FourAtomFunction> FourAtomFunctions::forces(const Symbol &symbol) const
     QVector<FourAtomFunction> forces;
     forces.reserve(potentials_by_atoms.count());
 
-    for (QHash<IDQuad,Expression>::const_iterator
-                                    it = potentials_by_atoms.constBegin();
-         it != potentials_by_atoms.constEnd();
-         ++it)
+    for (QHash<IDQuad, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
     {
         Expression force = it.value().differentiate(symbol);
 
         if (not force.isZero())
         {
-            forces.append( FourAtomFunction(
-                              info().cgAtomIdx( AtomIdx(it.key().atom0) ),
-                              info().cgAtomIdx( AtomIdx(it.key().atom1) ),
-                              info().cgAtomIdx( AtomIdx(it.key().atom2) ),
-                              info().cgAtomIdx( AtomIdx(it.key().atom3) ),
-                              -force ) );
+            forces.append(FourAtomFunction(
+                info().cgAtomIdx(AtomIdx(it.key().atom0)), info().cgAtomIdx(AtomIdx(it.key().atom1)),
+                info().cgAtomIdx(AtomIdx(it.key().atom2)), info().cgAtomIdx(AtomIdx(it.key().atom3)), -force));
         }
     }
 
@@ -860,12 +797,11 @@ QVector<FourAtomFunction> FourAtomFunctions::forces(const Symbol &symbol) const
     only include functions where all of the atoms are in 'selected_atoms',
     while if 'isstrict' is false, include functions where at least one
     atom is in 'selected_atoms' */
-FourAtomFunctions FourAtomFunctions::includeOnly(const AtomSelection &selected_atoms,
-                                                 bool isstrict) const
+FourAtomFunctions FourAtomFunctions::includeOnly(const AtomSelection &selected_atoms, bool isstrict) const
 {
     FourAtomFunctions ret(*this);
 
-    QMutableHashIterator<IDQuad,Expression> it(ret.potentials_by_atoms);
+    QMutableHashIterator<IDQuad, Expression> it(ret.potentials_by_atoms);
 
     if (isstrict)
     {
@@ -873,10 +809,10 @@ FourAtomFunctions FourAtomFunctions::includeOnly(const AtomSelection &selected_a
         {
             it.next();
 
-            if (not (selected_atoms.selected(AtomIdx(it.key().atom0)) and
-                     selected_atoms.selected(AtomIdx(it.key().atom1)) and
-                     selected_atoms.selected(AtomIdx(it.key().atom2)) and
-                     selected_atoms.selected(AtomIdx(it.key().atom3)) ) )
+            if (not(selected_atoms.selected(AtomIdx(it.key().atom0)) and
+                    selected_atoms.selected(AtomIdx(it.key().atom1)) and
+                    selected_atoms.selected(AtomIdx(it.key().atom2)) and
+                    selected_atoms.selected(AtomIdx(it.key().atom3))))
             {
                 it.remove();
             }
@@ -888,10 +824,10 @@ FourAtomFunctions FourAtomFunctions::includeOnly(const AtomSelection &selected_a
         {
             it.next();
 
-            if (not (selected_atoms.selected(AtomIdx(it.key().atom0)) or
-                     selected_atoms.selected(AtomIdx(it.key().atom1)) or
-                     selected_atoms.selected(AtomIdx(it.key().atom2)) or
-                     selected_atoms.selected(AtomIdx(it.key().atom3)) ) )
+            if (not(selected_atoms.selected(AtomIdx(it.key().atom0)) or
+                    selected_atoms.selected(AtomIdx(it.key().atom1)) or
+                    selected_atoms.selected(AtomIdx(it.key().atom2)) or
+                    selected_atoms.selected(AtomIdx(it.key().atom3))))
             {
                 it.remove();
             }
@@ -921,20 +857,19 @@ int FourAtomFunctions::nFunctions() const
 
     \throw SireError::incompatible_error
 */
-PropertyPtr
-FourAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                           const AtomMatcher &atommatcher) const
+PropertyPtr FourAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                       const AtomMatcher &atommatcher) const
 {
     if (not atommatcher.changesOrder(this->info(), molinfo))
     {
-        //the order of the atoms remains the same - this means that the
-        //AtomIdx indicies are still valid
+        // the order of the atoms remains the same - this means that the
+        // AtomIdx indicies are still valid
         FourAtomFunctions ret(molinfo);
         ret.potentials_by_atoms = this->potentials_by_atoms;
         return ret;
     }
 
-    QHash<AtomIdx,AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
+    QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
 
     return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
 }
@@ -953,31 +888,29 @@ FourAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
 
     \throw SireError::incompatible_error
 */
-PropertyPtr
-FourAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                           const QHash<AtomIdx,AtomIdx> &map) const
+PropertyPtr FourAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                       const QHash<AtomIdx, AtomIdx> &map) const
 {
     FourAtomFunctions ret(molinfo);
 
-    for (QHash<IDQuad,Expression>::const_iterator it = potentials_by_atoms.constBegin();
-         it != potentials_by_atoms.constEnd();
-         ++it)
+    for (QHash<IDQuad, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
     {
-        AtomIdx new_atom0 = map.value( AtomIdx(it.key().atom0), AtomIdx(-1) );
-        AtomIdx new_atom1 = map.value( AtomIdx(it.key().atom1), AtomIdx(-1) );
-        AtomIdx new_atom2 = map.value( AtomIdx(it.key().atom2), AtomIdx(-1) );
-        AtomIdx new_atom3 = map.value( AtomIdx(it.key().atom3), AtomIdx(-1) );
+        AtomIdx new_atom0 = map.value(AtomIdx(it.key().atom0), AtomIdx(-1));
+        AtomIdx new_atom1 = map.value(AtomIdx(it.key().atom1), AtomIdx(-1));
+        AtomIdx new_atom2 = map.value(AtomIdx(it.key().atom2), AtomIdx(-1));
+        AtomIdx new_atom3 = map.value(AtomIdx(it.key().atom3), AtomIdx(-1));
 
         if (new_atom0 == -1 or new_atom1 == -1 or new_atom2 == -1 or new_atom3 == -1)
             continue;
 
-        ret.set( new_atom0, new_atom1, new_atom2, new_atom3, it.value() );
+        ret.set(new_atom0, new_atom1, new_atom2, new_atom3, it.value());
     }
 
     return ret;
 }
 
-const char* FourAtomFunctions::typeName()
+const char *FourAtomFunctions::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<FourAtomFunctions>() );
+    return QMetaType::typeName(qMetaTypeId<FourAtomFunctions>());
 }

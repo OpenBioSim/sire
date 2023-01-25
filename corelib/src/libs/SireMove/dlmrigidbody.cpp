@@ -52,7 +52,7 @@ QDataStream &operator<<(QDataStream &ds, const DLMRigidBody &dlmrb)
 {
     writeHeader(ds, r_dlmrb, 1);
 
-    ds << dlmrb.frequent_save_velocities << static_cast<const Integrator&>(dlmrb);
+    ds << dlmrb.frequent_save_velocities << static_cast<const Integrator &>(dlmrb);
 
     return ds;
 }
@@ -63,32 +63,33 @@ QDataStream &operator>>(QDataStream &ds, DLMRigidBody &dlmrb)
 
     if (v == 1)
     {
-        ds >> dlmrb.frequent_save_velocities >> static_cast<Integrator&>(dlmrb);
+        ds >> dlmrb.frequent_save_velocities >> static_cast<Integrator &>(dlmrb);
     }
     else
-        throw version_error( v, "1", r_dlmrb, CODELOC );
+        throw version_error(v, "1", r_dlmrb, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 DLMRigidBody::DLMRigidBody(bool frequent_save)
-             : ConcreteProperty<DLMRigidBody,Integrator>(),
-               frequent_save_velocities(frequent_save)
-{}
+    : ConcreteProperty<DLMRigidBody, Integrator>(), frequent_save_velocities(frequent_save)
+{
+}
 
 /** Copy constructor */
 DLMRigidBody::DLMRigidBody(const DLMRigidBody &other)
-             : ConcreteProperty<DLMRigidBody,Integrator>(other),
-               frequent_save_velocities(other.frequent_save_velocities)
-{}
+    : ConcreteProperty<DLMRigidBody, Integrator>(other), frequent_save_velocities(other.frequent_save_velocities)
+{
+}
 
 /** Destructor */
 DLMRigidBody::~DLMRigidBody()
-{}
+{
+}
 
 /** Copy assignment operator */
-DLMRigidBody& DLMRigidBody::operator=(const DLMRigidBody &other)
+DLMRigidBody &DLMRigidBody::operator=(const DLMRigidBody &other)
 {
     if (this != &other)
     {
@@ -102,8 +103,7 @@ DLMRigidBody& DLMRigidBody::operator=(const DLMRigidBody &other)
 /** Comparison operator */
 bool DLMRigidBody::operator==(const DLMRigidBody &other) const
 {
-    return frequent_save_velocities == other.frequent_save_velocities and
-           Integrator::operator==(other);
+    return frequent_save_velocities == other.frequent_save_velocities and Integrator::operator==(other);
 }
 
 /** Comparison operator */
@@ -112,9 +112,9 @@ bool DLMRigidBody::operator!=(const DLMRigidBody &other) const
     return not DLMRigidBody::operator==(other);
 }
 
-const char* DLMRigidBody::typeName()
+const char *DLMRigidBody::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<DLMRigidBody>() );
+    return QMetaType::typeName(qMetaTypeId<DLMRigidBody>());
 }
 
 QString DLMRigidBody::toString() const
@@ -137,9 +137,8 @@ bool DLMRigidBody::isTimeReversible() const
 /** Integrate using the passed workspace, the energy component 'nrg_component',
     performing 'nmoves' moves using the specified timestep, recording
     statistics of every move if 'record_stats' is true */
-void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
-                             const Symbol &nrg_component,
-                             Time timestep, int nmoves, bool record_stats)
+void DLMRigidBody::integrate(IntegratorWorkspace &workspace, const Symbol &nrg_component, Time timestep, int nmoves,
+                             bool record_stats)
 {
     RBWorkspace &ws = workspace.asA<RBWorkspace>();
 
@@ -148,7 +147,7 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
 
     const int nbeads = ws.nBeads();
 
-    for (int imove=0; imove<nmoves; ++imove)
+    for (int imove = 0; imove < nmoves; ++imove)
     {
         ws.calculateForces(nrg_component);
 
@@ -162,8 +161,8 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
         const Vector *bead_forces = ws.beadForcesArray();
         const Vector *bead_torques = ws.beadTorquesArray();
 
-        //first integrate the coordinates - loop over all beads
-        for (int i=0; i<nbeads; ++i)
+        // first integrate the coordinates - loop over all beads
+        for (int i = 0; i < nbeads; ++i)
         {
             Vector &x = bead_coords[i];
             Quaternion &q = bead_orient[i];
@@ -175,7 +174,7 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
             const Vector &torque = bead_torques[i];
 
             if (mass == 0)
-                //this is a dummy atom
+                // this is a dummy atom
                 continue;
 
             // use velocity verlet to integrate the position of the bead
@@ -185,14 +184,14 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
             // r(t + dt) = r(t) + v(t + dt/2) dt
             x += (dt / mass) * p;
 
-            //now update the orientation / angular momenta using the DLM algorithm
+            // now update the orientation / angular momenta using the DLM algorithm
             ap += (half_dt * torque);
 
             if (not ap.isZero())
             {
                 if (ap[0] != 0 and inertia[0] != 0)
                 {
-                    Quaternion R1( (half_dt*ap[0] / inertia[0]) * radian, Vector(1,0,0) );
+                    Quaternion R1((half_dt * ap[0] / inertia[0]) * radian, Vector(1, 0, 0));
 
                     ap = R1.rotate(ap);
                     q = q * R1.conjugate();
@@ -200,7 +199,7 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
 
                 if (ap[1] != 0 and inertia[1] != 0)
                 {
-                    Quaternion R2( (half_dt*ap[1] / inertia[1]) * radian, Vector(0,1,0) );
+                    Quaternion R2((half_dt * ap[1] / inertia[1]) * radian, Vector(0, 1, 0));
 
                     ap = R2.rotate(ap);
                     q = q * R2.conjugate();
@@ -208,7 +207,7 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
 
                 if (ap[2] != 0 and inertia[2] != 0)
                 {
-                    Quaternion R3( (dt*ap[2] / inertia[2]) * radian, Vector(0,0,1) );
+                    Quaternion R3((dt * ap[2] / inertia[2]) * radian, Vector(0, 0, 1));
 
                     ap = R3.rotate(ap);
                     q = q * R3.conjugate();
@@ -216,7 +215,7 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
 
                 if (ap[1] != 0 and inertia[1] != 0)
                 {
-                    Quaternion R4( (half_dt*ap[1] / inertia[1]) * radian, Vector(0,1,0) );
+                    Quaternion R4((half_dt * ap[1] / inertia[1]) * radian, Vector(0, 1, 0));
 
                     ap = R4.rotate(ap);
                     q = q * R4.conjugate();
@@ -224,7 +223,7 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
 
                 if (ap[0] != 0 and inertia[0] != 0)
                 {
-                    Quaternion R5( (half_dt*ap[0] / inertia[0]) * radian, Vector(1,0,0) );
+                    Quaternion R5((half_dt * ap[0] / inertia[0]) * radian, Vector(1, 0, 0));
 
                     ap = R5.rotate(ap);
                     q = q * R5.conjugate();
@@ -243,8 +242,8 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
         bead_forces = ws.beadForcesArray();
         bead_torques = ws.beadTorquesArray();
 
-        //now need to integrate the momenta
-        for (int i=0; i<nbeads; ++i)
+        // now need to integrate the momenta
+        for (int i = 0; i < nbeads; ++i)
         {
             if (bead_masses[i] == 0)
                 continue;
@@ -254,8 +253,8 @@ void DLMRigidBody::integrate(IntegratorWorkspace &workspace,
             const Vector &force = bead_forces[i];
             const Vector &torque = bead_torques[i];
 
-            p += ( half_dt * force );
-            ap += ( half_dt * torque );
+            p += (half_dt * force);
+            ap += (half_dt * torque);
         }
 
         if (frequent_save_velocities)
@@ -276,8 +275,7 @@ IntegratorWorkspacePtr DLMRigidBody::createWorkspace(const PropertyMap &map) con
 }
 
 /** Create a workspace to integrate the molecules in the passed molecule group */
-IntegratorWorkspacePtr DLMRigidBody::createWorkspace(const MoleculeGroup &molgroup,
-                                                     const PropertyMap &map) const
+IntegratorWorkspacePtr DLMRigidBody::createWorkspace(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
-    return IntegratorWorkspacePtr(new RBWorkspace(molgroup,map));
+    return IntegratorWorkspacePtr(new RBWorkspace(molgroup, map));
 }

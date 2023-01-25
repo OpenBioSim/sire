@@ -47,7 +47,7 @@ QDataStream &operator<<(QDataStream &ds, const ExpressionProperty &expprop)
 
     SharedDataStream sds(ds);
 
-    sds << expprop._val << static_cast<const Property&>(expprop);
+    sds << expprop._val << static_cast<const Property &>(expprop);
 
     return ds;
 }
@@ -60,7 +60,7 @@ QDataStream &operator>>(QDataStream &ds, ExpressionProperty &expprop)
     {
         SharedDataStream sds(ds);
 
-        sds >> expprop._val >> static_cast<Property&>(expprop);
+        sds >> expprop._val >> static_cast<Property &>(expprop);
     }
     else
         throw version_error(v, "1", r_expprop, CODELOC);
@@ -79,41 +79,43 @@ namespace SireCAS
     {
         return ExpressionProperty(val);
     }
-}
+} // namespace SireCAS
 
 /** Constructor - this constructs an empty expression */
-ExpressionProperty::ExpressionProperty() : ConcreteProperty<ExpressionProperty,Property>()
-{}
+ExpressionProperty::ExpressionProperty() : ConcreteProperty<ExpressionProperty, Property>()
+{
+}
 
 /** Construct from the passed expression */
 ExpressionProperty::ExpressionProperty(const Expression &value)
-               : ConcreteProperty<ExpressionProperty,Property>(),
-                 _val(value)
-{}
+    : ConcreteProperty<ExpressionProperty, Property>(), _val(value)
+{
+}
 
 /** Construct from the passed expression */
 ExpressionProperty::ExpressionProperty(const ExBase &value)
-               : ConcreteProperty<ExpressionProperty,Property>(),
-                 _val(value)
-{}
+    : ConcreteProperty<ExpressionProperty, Property>(), _val(value)
+{
+}
 
 /** Copy constructor */
 ExpressionProperty::ExpressionProperty(const ExpressionProperty &other)
-                   : ConcreteProperty<ExpressionProperty,Property>(other),
-                     _val(other._val)
-{}
+    : ConcreteProperty<ExpressionProperty, Property>(other), _val(other._val)
+{
+}
 
 /** Destructor */
 ExpressionProperty::~ExpressionProperty()
-{}
-
-const char* ExpressionProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ExpressionProperty>() );
+}
+
+const char *ExpressionProperty::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<ExpressionProperty>());
 }
 
 /** Copy assignment operator */
-ExpressionProperty& ExpressionProperty::operator=(const ExpressionProperty &other)
+ExpressionProperty &ExpressionProperty::operator=(const ExpressionProperty &other)
 {
     if (this != &other)
     {
@@ -139,9 +141,8 @@ bool ExpressionProperty::operator!=(const ExpressionProperty &other) const
 int ExpressionProperty::asAnInteger() const
 {
     if (not _val.isConstant())
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert the expression '%1' to an integer")
-                .arg(_val.toString()), CODELOC );
+        throw SireError::invalid_cast(
+            QObject::tr("Cannot convert the expression '%1' to an integer").arg(_val.toString()), CODELOC);
 
     return NumberProperty(_val.evaluate(Values())).asAnInteger();
 }
@@ -150,9 +151,8 @@ int ExpressionProperty::asAnInteger() const
 double ExpressionProperty::asADouble() const
 {
     if (not _val.isConstant())
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert the expression '%1' to a double")
-                .arg(_val.toString()), CODELOC );
+        throw SireError::invalid_cast(
+            QObject::tr("Cannot convert the expression '%1' to a double").arg(_val.toString()), CODELOC);
 
     return _val.evaluate(Values());
 }
@@ -161,9 +161,8 @@ double ExpressionProperty::asADouble() const
 bool ExpressionProperty::asABoolean() const
 {
     if (not _val.isConstant())
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert the expression '%1' to a bool")
-                .arg(_val.toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot convert the expression '%1' to a bool").arg(_val.toString()),
+                                      CODELOC);
 
     return _val.evaluate(Values());
 }

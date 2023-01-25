@@ -26,8 +26,8 @@
 \*********************************************/
 
 #include "moleculeconstraint.h"
-#include "system.h"
 #include "delta.h"
+#include "system.h"
 
 #include "SireMol/molecules.h"
 
@@ -43,63 +43,61 @@ using namespace SireMol;
 using namespace SireBase;
 using namespace SireStream;
 
-static const RegisterMetaType<MoleculeConstraint> r_molconstraint( MAGIC_ONLY,
-                                                       MoleculeConstraint::typeName() );
+static const RegisterMetaType<MoleculeConstraint> r_molconstraint(MAGIC_ONLY, MoleculeConstraint::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const MoleculeConstraint &molconstraint)
+QDataStream &operator<<(QDataStream &ds, const MoleculeConstraint &molconstraint)
 {
     writeHeader(ds, r_molconstraint, 2);
 
-    ds << static_cast<const Constraint&>(molconstraint);
+    ds << static_cast<const Constraint &>(molconstraint);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          MoleculeConstraint &molconstraint)
+QDataStream &operator>>(QDataStream &ds, MoleculeConstraint &molconstraint)
 {
     VersionID v = readHeader(ds, r_molconstraint);
 
     if (v == 2)
     {
-        ds >> static_cast<Constraint&>(molconstraint);
+        ds >> static_cast<Constraint &>(molconstraint);
     }
     else if (v == 1)
     {
         QUuid sysuid;
 
-        ds >> sysuid
-           >> static_cast<Constraint&>(molconstraint);
+        ds >> sysuid >> static_cast<Constraint &>(molconstraint);
     }
     else
-        throw version_error( v, "1,2", r_molconstraint, CODELOC );
+        throw version_error(v, "1,2", r_molconstraint, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 MoleculeConstraint::MoleculeConstraint() : Constraint()
-{}
+{
+}
 
 /** Copy constructor */
-MoleculeConstraint::MoleculeConstraint(const MoleculeConstraint &other)
-                   : Constraint(other)
-{}
+MoleculeConstraint::MoleculeConstraint(const MoleculeConstraint &other) : Constraint(other)
+{
+}
 
 /** Destructor */
 MoleculeConstraint::~MoleculeConstraint()
-{}
+{
+}
 
-const char* MoleculeConstraint::typeName()
+const char *MoleculeConstraint::typeName()
 {
     return "SireSystem::MoleculeConstraint";
 }
 
 /** Copy assignment operator */
-MoleculeConstraint& MoleculeConstraint::operator=(const MoleculeConstraint &other)
+MoleculeConstraint &MoleculeConstraint::operator=(const MoleculeConstraint &other)
 {
     if (this != &other)
         Constraint::operator=(other);

@@ -45,206 +45,200 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class VelocityGenerator;
-class VelocitiesFromProperty;
-class MaxwellBoltzmann;
+    class VelocityGenerator;
+    class VelocitiesFromProperty;
+    class MaxwellBoltzmann;
 
-class NullVelocityGenerator;
-}
+    class NullVelocityGenerator;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::VelocityGenerator&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::VelocityGenerator&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::VelocityGenerator &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::VelocityGenerator &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::NullVelocityGenerator&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::NullVelocityGenerator&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::NullVelocityGenerator &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::NullVelocityGenerator &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::VelocitiesFromProperty&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::VelocitiesFromProperty&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::VelocitiesFromProperty &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::VelocitiesFromProperty &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::MaxwellBoltzmann&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::MaxwellBoltzmann&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::MaxwellBoltzmann &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::MaxwellBoltzmann &);
 
 namespace SireCAS
 {
-class Symbol;
+    class Symbol;
 }
 
 namespace SireMove
 {
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-using SireCAS::Symbol;
+    using SireCAS::Symbol;
 
-using SireMol::AtomVelocities;
-using SireMol::MoleculeView;
+    using SireMol::AtomVelocities;
+    using SireMol::MoleculeView;
 
-/** This is the base class of generators that are used
-    to get velocities for molecules
+    /** This is the base class of generators that are used
+        to get velocities for molecules
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT VelocityGenerator : public SireBase::Property
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const VelocityGenerator&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, VelocityGenerator&);
-
-public:
-    VelocityGenerator();
-
-    VelocityGenerator(const VelocityGenerator &other);
-
-    virtual ~VelocityGenerator();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT VelocityGenerator : public SireBase::Property
     {
-        return "SireMove::VelocityGenerator";
-    }
 
-    virtual VelocityGenerator* clone() const=0;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const VelocityGenerator &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, VelocityGenerator &);
 
-    virtual void setGenerator(const RanGenerator &generator);
+    public:
+        VelocityGenerator();
 
-    virtual AtomVelocities generate(const MoleculeView &molview,
-                                    const PropertyMap &map = PropertyMap()) const=0;
+        VelocityGenerator(const VelocityGenerator &other);
 
-    static const NullVelocityGenerator& null();
+        virtual ~VelocityGenerator();
 
-protected:
-    VelocityGenerator& operator=(const VelocityGenerator &other);
+        static const char *typeName()
+        {
+            return "SireMove::VelocityGenerator";
+        }
 
-    bool operator==(const VelocityGenerator &other) const;
-    bool operator!=(const VelocityGenerator &other) const;
+        virtual VelocityGenerator *clone() const = 0;
 
-};
+        virtual void setGenerator(const RanGenerator &generator);
 
-/** This is the null velocity generator
+        virtual AtomVelocities generate(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const = 0;
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT NullVelocityGenerator
-           : public SireBase::ConcreteProperty<NullVelocityGenerator,VelocityGenerator>
-{
+        static const NullVelocityGenerator &null();
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const NullVelocityGenerator&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullVelocityGenerator&);
+    protected:
+        VelocityGenerator &operator=(const VelocityGenerator &other);
 
-public:
-    NullVelocityGenerator();
+        bool operator==(const VelocityGenerator &other) const;
+        bool operator!=(const VelocityGenerator &other) const;
+    };
 
-    NullVelocityGenerator(const NullVelocityGenerator &other);
+    /** This is the null velocity generator
 
-    ~NullVelocityGenerator();
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT NullVelocityGenerator
+        : public SireBase::ConcreteProperty<NullVelocityGenerator, VelocityGenerator>
+    {
 
-    NullVelocityGenerator& operator=(const NullVelocityGenerator &other);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const NullVelocityGenerator &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, NullVelocityGenerator &);
 
-    bool operator==(const NullVelocityGenerator &other) const;
-    bool operator!=(const NullVelocityGenerator &other) const;
+    public:
+        NullVelocityGenerator();
 
-    AtomVelocities generate(const MoleculeView &molview,
-                            const PropertyMap &map = PropertyMap()) const;
+        NullVelocityGenerator(const NullVelocityGenerator &other);
 
-    static const char* typeName();
-};
+        ~NullVelocityGenerator();
 
-/** This is a velocity generator that extracts velocities from a
-    specified molecular property
+        NullVelocityGenerator &operator=(const NullVelocityGenerator &other);
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT VelocitiesFromProperty
-        : public SireBase::ConcreteProperty<VelocitiesFromProperty,VelocityGenerator>
-{
+        bool operator==(const NullVelocityGenerator &other) const;
+        bool operator!=(const NullVelocityGenerator &other) const;
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const VelocitiesFromProperty&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, VelocitiesFromProperty&);
+        AtomVelocities generate(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
 
-public:
-    VelocitiesFromProperty();
+        static const char *typeName();
+    };
 
-    VelocitiesFromProperty(const SireBase::PropertyName &property);
+    /** This is a velocity generator that extracts velocities from a
+        specified molecular property
 
-    VelocitiesFromProperty(const VelocitiesFromProperty &other);
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT VelocitiesFromProperty
+        : public SireBase::ConcreteProperty<VelocitiesFromProperty, VelocityGenerator>
+    {
 
-    ~VelocitiesFromProperty();
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const VelocitiesFromProperty &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, VelocitiesFromProperty &);
 
-    VelocitiesFromProperty& operator=(const VelocitiesFromProperty &other);
+    public:
+        VelocitiesFromProperty();
 
-    bool operator==(const VelocitiesFromProperty &other) const;
-    bool operator!=(const VelocitiesFromProperty &other) const;
+        VelocitiesFromProperty(const SireBase::PropertyName &property);
 
-    static const char* typeName();
+        VelocitiesFromProperty(const VelocitiesFromProperty &other);
 
-    AtomVelocities generate(const MoleculeView &molview,
-                            const PropertyMap &map = PropertyMap()) const;
+        ~VelocitiesFromProperty();
 
-private:
-    /** The name of the property from which the velocities will be obtained */
-    SireBase::PropertyName vel_property;
-};
+        VelocitiesFromProperty &operator=(const VelocitiesFromProperty &other);
 
-/** This is a velocity generator that generates random velocities
-    according to the Maxwell-Boltzmann distribution
+        bool operator==(const VelocitiesFromProperty &other) const;
+        bool operator!=(const VelocitiesFromProperty &other) const;
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT MaxwellBoltzmann
-          : public SireBase::ConcreteProperty<MaxwellBoltzmann,VelocityGenerator>
-{
+        static const char *typeName();
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const MaxwellBoltzmann&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, MaxwellBoltzmann&);
+        AtomVelocities generate(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
 
-public:
-    MaxwellBoltzmann();
+    private:
+        /** The name of the property from which the velocities will be obtained */
+        SireBase::PropertyName vel_property;
+    };
 
-    MaxwellBoltzmann(SireUnits::Dimension::Temperature temperature);
+    /** This is a velocity generator that generates random velocities
+        according to the Maxwell-Boltzmann distribution
 
-    MaxwellBoltzmann(const MaxwellBoltzmann &other);
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT MaxwellBoltzmann : public SireBase::ConcreteProperty<MaxwellBoltzmann, VelocityGenerator>
+    {
 
-    ~MaxwellBoltzmann();
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const MaxwellBoltzmann &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, MaxwellBoltzmann &);
 
-    MaxwellBoltzmann& operator=(const MaxwellBoltzmann &other);
+    public:
+        MaxwellBoltzmann();
 
-    bool operator==(const MaxwellBoltzmann &other) const;
-    bool operator!=(const MaxwellBoltzmann &other) const;
+        MaxwellBoltzmann(SireUnits::Dimension::Temperature temperature);
 
-    static const char* typeName();
+        MaxwellBoltzmann(const MaxwellBoltzmann &other);
 
-    SireUnits::Dimension::Temperature temperature() const;
-    void setTemperature(SireUnits::Dimension::Temperature temperature);
+        ~MaxwellBoltzmann();
 
-    void setGenerator(const RanGenerator &rangenerator);
-    const RanGenerator& generator() const;
+        MaxwellBoltzmann &operator=(const MaxwellBoltzmann &other);
 
-    AtomVelocities generate(const MoleculeView &molview,
-                            const PropertyMap &map = PropertyMap()) const;
+        bool operator==(const MaxwellBoltzmann &other) const;
+        bool operator!=(const MaxwellBoltzmann &other) const;
 
-private:
-    /** The random number generator */
-    RanGenerator ran_generator;
+        static const char *typeName();
 
-    /** The temperature for which to generate the velocities */
-    SireUnits::Dimension::Temperature temp;
-};
+        SireUnits::Dimension::Temperature temperature() const;
+        void setTemperature(SireUnits::Dimension::Temperature temperature);
 
-typedef SireBase::PropPtr<VelocityGenerator> VelGenPtr;
+        void setGenerator(const RanGenerator &rangenerator);
+        const RanGenerator &generator() const;
 
-}
+        AtomVelocities generate(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
 
-Q_DECLARE_METATYPE( SireMove::NullVelocityGenerator )
-Q_DECLARE_METATYPE( SireMove::VelocitiesFromProperty )
-Q_DECLARE_METATYPE( SireMove::MaxwellBoltzmann )
+    private:
+        /** The random number generator */
+        RanGenerator ran_generator;
 
-SIRE_EXPOSE_CLASS( SireMove::VelocityGenerator )
-SIRE_EXPOSE_CLASS( SireMove::NullVelocityGenerator )
-SIRE_EXPOSE_CLASS( SireMove::VelocitiesFromProperty )
-SIRE_EXPOSE_CLASS( SireMove::MaxwellBoltzmann )
+        /** The temperature for which to generate the velocities */
+        SireUnits::Dimension::Temperature temp;
+    };
 
-SIRE_EXPOSE_PROPERTY( SireMove::VelGenPtr, SireMove::VelocityGenerator )
+    typedef SireBase::PropPtr<VelocityGenerator> VelGenPtr;
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::NullVelocityGenerator)
+Q_DECLARE_METATYPE(SireMove::VelocitiesFromProperty)
+Q_DECLARE_METATYPE(SireMove::MaxwellBoltzmann)
+
+SIRE_EXPOSE_CLASS(SireMove::VelocityGenerator)
+SIRE_EXPOSE_CLASS(SireMove::NullVelocityGenerator)
+SIRE_EXPOSE_CLASS(SireMove::VelocitiesFromProperty)
+SIRE_EXPOSE_CLASS(SireMove::MaxwellBoltzmann)
+
+SIRE_EXPOSE_PROPERTY(SireMove::VelGenPtr, SireMove::VelocityGenerator)
 
 SIRE_END_HEADER
 

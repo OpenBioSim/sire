@@ -26,18 +26,18 @@
 \*********************************************/
 
 #include "partialmolecule.h"
-#include "molecule.h"
 #include "atom.h"
-#include "cutgroup.h"
-#include "residue.h"
 #include "chain.h"
+#include "cutgroup.h"
+#include "molecule.h"
+#include "residue.h"
 #include "segment.h"
 
 #include "evaluator.h"
 
+#include "editor.hpp"
 #include "mover.hpp"
 #include "selector.hpp"
-#include "editor.hpp"
 
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
@@ -56,22 +56,19 @@ using namespace SireStream;
 RegisterMetaType<PartialMolecule> r_partialmol;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const PartialMolecule &partialmol)
+QDataStream &operator<<(QDataStream &ds, const PartialMolecule &partialmol)
 {
     writeHeader(ds, r_partialmol, 1);
 
     SharedDataStream sds(ds);
 
-    sds << partialmol.selected_atoms
-        << static_cast<const MoleculeView&>(partialmol);
+    sds << partialmol.selected_atoms << static_cast<const MoleculeView &>(partialmol);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       PartialMolecule &partialmol)
+QDataStream &operator>>(QDataStream &ds, PartialMolecule &partialmol)
 {
     VersionID v = readHeader(ds, r_partialmol);
 
@@ -79,8 +76,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> partialmol.selected_atoms
-            >> static_cast<MoleculeView&>(partialmol);
+        sds >> partialmol.selected_atoms >> static_cast<MoleculeView &>(partialmol);
     }
     else
         throw version_error(v, "1", r_partialmol, CODELOC);
@@ -89,37 +85,37 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-PartialMolecule::PartialMolecule() : ConcreteProperty<PartialMolecule,MoleculeView>()
-{}
+PartialMolecule::PartialMolecule() : ConcreteProperty<PartialMolecule, MoleculeView>()
+{
+}
 
 /** Construct from the passed view */
 PartialMolecule::PartialMolecule(const MoleculeView &molview)
-                : ConcreteProperty<PartialMolecule,MoleculeView>(molview),
-                  selected_atoms(molview.selection())
-{}
+    : ConcreteProperty<PartialMolecule, MoleculeView>(molview), selected_atoms(molview.selection())
+{
+}
 
 /** Construct from the selected atoms of the passed molecule whose
     data is in 'moldata' */
-PartialMolecule::PartialMolecule(const MoleculeData &moldata,
-                                 const AtomSelection &atoms)
-                : ConcreteProperty<PartialMolecule,MoleculeView>(moldata),
-                  selected_atoms(atoms)
+PartialMolecule::PartialMolecule(const MoleculeData &moldata, const AtomSelection &atoms)
+    : ConcreteProperty<PartialMolecule, MoleculeView>(moldata), selected_atoms(atoms)
 {
     atoms.assertCompatibleWith(moldata);
 }
 
 /** Copy constructor */
 PartialMolecule::PartialMolecule(const PartialMolecule &other)
-                : ConcreteProperty<PartialMolecule,MoleculeView>(other),
-                  selected_atoms(other.selected_atoms)
-{}
+    : ConcreteProperty<PartialMolecule, MoleculeView>(other), selected_atoms(other.selected_atoms)
+{
+}
 
 /** Destructor */
 PartialMolecule::~PartialMolecule()
-{}
+{
+}
 
 /** Copy assignment operator */
-PartialMolecule& PartialMolecule::operator=(const MoleculeView &other)
+PartialMolecule &PartialMolecule::operator=(const MoleculeView &other)
 {
     MoleculeView::operator=(other);
     selected_atoms = other.selection();
@@ -127,7 +123,7 @@ PartialMolecule& PartialMolecule::operator=(const MoleculeView &other)
 }
 
 /** Copy assignment operator */
-PartialMolecule& PartialMolecule::operator=(const PartialMolecule &other)
+PartialMolecule &PartialMolecule::operator=(const PartialMolecule &other)
 {
     MoleculeView::operator=(other);
     selected_atoms = other.selected_atoms;
@@ -137,24 +133,22 @@ PartialMolecule& PartialMolecule::operator=(const PartialMolecule &other)
 /** Comparison operator */
 bool PartialMolecule::operator==(const PartialMolecule &other) const
 {
-    return MoleculeView::operator==(other) and
-           selected_atoms == other.selected_atoms;
+    return MoleculeView::operator==(other) and selected_atoms == other.selected_atoms;
 }
 
 /** Comparison operator */
 bool PartialMolecule::operator!=(const PartialMolecule &other) const
 {
-    return MoleculeView::operator!=(other) or
-           selected_atoms != other.selected_atoms;
+    return MoleculeView::operator!=(other) or selected_atoms != other.selected_atoms;
 }
 
 /** Return a string representation of this molecule */
 QString PartialMolecule::toString() const
 {
-    return QObject::tr( "PartialMolecule( %1 : %2 : nAtoms() == %3 )" )
-                .arg(this->name())
-                .arg(this->number())
-                .arg(selected_atoms.nSelected());
+    return QObject::tr("PartialMolecule( %1 : %2 : nAtoms() == %3 )")
+        .arg(this->name())
+        .arg(this->number())
+        .arg(selected_atoms.nSelected());
 }
 
 /** Return whether or not this is empty */
@@ -170,7 +164,7 @@ bool PartialMolecule::selectedAll() const
 }
 
 /** Return the name of this molecule */
-const MolName& PartialMolecule::name() const
+const MolName &PartialMolecule::name() const
 {
     return d->name();
 }
@@ -268,8 +262,7 @@ bool PartialMolecule::hasMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-bool PartialMolecule::hasMetadata(const PropertyName &key,
-                                  const PropertyName &metakey) const
+bool PartialMolecule::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return d->hasMetadata(key, metakey);
 }
@@ -297,7 +290,7 @@ PartialMolecule PartialMolecule::extract() const
         PartialMolecule ret;
 
         ret.d = d->extract(selected_atoms);
-        ret.selected_atoms = AtomSelection( *(ret.d) );
+        ret.selected_atoms = AtomSelection(*(ret.d));
 
         return ret;
     }
@@ -325,7 +318,7 @@ QStringList PartialMolecule::metadataKeys(const PropertyName &key) const
 
     \throw SireBase::missing_property
 */
-const Property& PartialMolecule::property(const PropertyName &key) const
+const Property &PartialMolecule::property(const PropertyName &key) const
 {
     return d->property(key);
 }
@@ -336,7 +329,7 @@ const Property& PartialMolecule::property(const PropertyName &key) const
 
     \throw SireBase::missing_property
 */
-const Property& PartialMolecule::metadata(const PropertyName &metakey) const
+const Property &PartialMolecule::metadata(const PropertyName &metakey) const
 {
     return d->metadata(metakey);
 }
@@ -348,15 +341,14 @@ const Property& PartialMolecule::metadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-const Property& PartialMolecule::metadata(const PropertyName &key,
-                                          const PropertyName &metakey) const
+const Property &PartialMolecule::metadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return d->metadata(key, metakey);
 }
 
-const char* PartialMolecule::typeName()
+const char *PartialMolecule::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<PartialMolecule>() );
+    return QMetaType::typeName(qMetaTypeId<PartialMolecule>());
 }
 
 MolViewPtr PartialMolecule::toSelector() const
@@ -417,9 +409,9 @@ namespace SireMol
     /////////
 
     template class Mover<PartialMolecule>;
-}
+} // namespace SireMol
 
-PartialMolecule* PartialMolecule::clone() const
+PartialMolecule *PartialMolecule::clone() const
 {
     return new PartialMolecule(*this);
 }

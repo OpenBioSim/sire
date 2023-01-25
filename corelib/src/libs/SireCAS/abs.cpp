@@ -26,8 +26,8 @@
 \*********************************************/
 
 #include "abs.h"
-#include "values.h"
 #include "complexvalues.h"
+#include "values.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -42,7 +42,7 @@ static const RegisterMetaType<Abs> r_abs;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Abs &abs)
 {
-    writeHeader(ds, r_abs, 1) << static_cast<const SingleFunc&>(abs);
+    writeHeader(ds, r_abs, 1) << static_cast<const SingleFunc &>(abs);
 
     return ds;
 }
@@ -54,7 +54,7 @@ QDataStream &operator>>(QDataStream &ds, Abs &abs)
 
     if (v == 1)
     {
-        ds >> static_cast<SingleFunc&>(abs);
+        ds >> static_cast<SingleFunc &>(abs);
     }
     else
         throw version_error(v, "1", r_abs, CODELOC);
@@ -64,26 +64,30 @@ QDataStream &operator>>(QDataStream &ds, Abs &abs)
 
 /** Construct an empty Abs(0) */
 Abs::Abs() : SingleFunc()
-{}
+{
+}
 
 /** Construct abs(expression) */
 Abs::Abs(const Expression &expression) : SingleFunc(expression)
-{}
+{
+}
 
 /** Copy constructor */
 Abs::Abs(const Abs &other) : SingleFunc(other)
-{}
+{
+}
 
 /** Destructor */
 Abs::~Abs()
-{}
+{
+}
 
 /** Comparison operator */
 bool Abs::operator==(const ExBase &other) const
 {
-    const Abs *other_abs = dynamic_cast<const Abs*>(&other);
-    return other_abs != 0 and typeid(other).name() == typeid(*this).name()
-             and this->argument() == other_abs->argument();
+    const Abs *other_abs = dynamic_cast<const Abs *>(&other);
+    return other_abs != 0 and typeid(other).name() == typeid(*this).name() and
+           this->argument() == other_abs->argument();
 }
 
 /** Return the magic for this function */
@@ -95,7 +99,7 @@ uint Abs::magic() const
 /** Evaluate this function */
 double Abs::evaluate(const Values &values) const
 {
-    return std::abs( x().evaluate(values) );
+    return std::abs(x().evaluate(values));
 }
 
 /** Complex evaluation */
@@ -103,7 +107,7 @@ Complex Abs::evaluate(const ComplexValues &values) const
 {
     Complex arg = x().evaluate(values);
 
-    return Complex( std::abs(arg.real()), std::abs(arg.imag()) );
+    return Complex(std::abs(arg.real()), std::abs(arg.imag()));
 }
 
 /** d |x| / dx = x / |x|  (signum function) */
@@ -118,12 +122,12 @@ Expression Abs::integ() const
     return 0.5 * (x() * *this);
 }
 
-const char* Abs::typeName()
+const char *Abs::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Abs>() );
+    return QMetaType::typeName(qMetaTypeId<Abs>());
 }
 
-Abs* Abs::clone() const
+Abs *Abs::clone() const
 {
     return new Abs(*this);
 }

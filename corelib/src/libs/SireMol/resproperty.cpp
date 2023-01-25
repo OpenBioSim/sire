@@ -36,7 +36,7 @@ namespace SireMol
     template class ResProperty<double>;
     template class ResProperty<QVariant>;
     template class ResProperty<SireBase::PropertyPtr>;
-}
+} // namespace SireMol
 
 static const RegisterMetaType<ResStringProperty> r_resstring;
 static const RegisterMetaType<ResIntProperty> r_resint;

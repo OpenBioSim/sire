@@ -38,14 +38,14 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-/** Return the fileinfo for the executable called 'exe'. This
-    searches the system path until it finds the first occurance
-    of this executable. */
-SIREBASE_EXPORT QFileInfo findExe(const QString &exe);
+    /** Return the fileinfo for the executable called 'exe'. This
+        searches the system path until it finds the first occurance
+        of this executable. */
+    SIREBASE_EXPORT QFileInfo findExe(const QString &exe);
 
-}
+} // namespace SireBase
 
-SIRE_EXPOSE_FUNCTION( SireBase::findExe )
+SIRE_EXPOSE_FUNCTION(SireBase::findExe)
 
 SIRE_END_HEADER
 

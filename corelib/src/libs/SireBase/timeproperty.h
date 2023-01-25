@@ -36,63 +36,63 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class TimeProperty;
+    class TimeProperty;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::TimeProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::TimeProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::TimeProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::TimeProperty &);
 
 namespace SireBase
 {
 
-using SireUnits::Dimension::Time;
+    using SireUnits::Dimension::Time;
 
-/** This class provides a thin Property wrapper around times
+    /** This class provides a thin Property wrapper around times
 
-    This class is deprecated and only kept for compatibility with
-    old S3 files.
+        This class is deprecated and only kept for compatibility with
+        old S3 files.
 
-    Now you should use GeneralUnitProperty for all units
+        Now you should use GeneralUnitProperty for all units
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT TimeProperty : public ConcreteProperty<TimeProperty,Property>
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT TimeProperty : public ConcreteProperty<TimeProperty, Property>
+    {
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const TimeProperty&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, TimeProperty&);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const TimeProperty &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, TimeProperty &);
 
-public:
-    TimeProperty();
-    TimeProperty(Time value);
+    public:
+        TimeProperty();
+        TimeProperty(Time value);
 
-    TimeProperty(const TimeProperty &other);
-    TimeProperty(const Property &other);
+        TimeProperty(const TimeProperty &other);
+        TimeProperty(const Property &other);
 
-    ~TimeProperty();
+        ~TimeProperty();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    TimeProperty& operator=(const TimeProperty &other);
+        TimeProperty &operator=(const TimeProperty &other);
 
-    bool operator==(const TimeProperty &other) const;
-    bool operator!=(const TimeProperty &other) const;
+        bool operator==(const TimeProperty &other) const;
+        bool operator!=(const TimeProperty &other) const;
 
-    Time value() const;
+        Time value() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    operator Time() const;
+        operator Time() const;
 
-private:
-    Time val;
-};
+    private:
+        Time val;
+    };
 
-}
+} // namespace SireBase
 
-Q_DECLARE_METATYPE( SireBase::TimeProperty )
+Q_DECLARE_METATYPE(SireBase::TimeProperty)
 
-SIRE_EXPOSE_CLASS( SireBase::TimeProperty )
+SIRE_EXPOSE_CLASS(SireBase::TimeProperty)
 
 SIRE_END_HEADER
 

@@ -38,103 +38,102 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class WeightedMoves;
+    class WeightedMoves;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::WeightedMoves&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::WeightedMoves&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::WeightedMoves &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::WeightedMoves &);
 
 namespace SireMove
 {
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-/** This is a collection of moves, with each move in the collection
-    chosen at random according to its weight
+    /** This is a collection of moves, with each move in the collection
+        chosen at random according to its weight
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT WeightedMoves
-          : public SireBase::ConcreteProperty<WeightedMoves,Moves>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT WeightedMoves : public SireBase::ConcreteProperty<WeightedMoves, Moves>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const WeightedMoves&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, WeightedMoves&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const WeightedMoves &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, WeightedMoves &);
 
-public:
-    WeightedMoves();
+    public:
+        WeightedMoves();
 
-    WeightedMoves(const WeightedMoves &other);
+        WeightedMoves(const WeightedMoves &other);
 
-    ~WeightedMoves();
+        ~WeightedMoves();
 
-    WeightedMoves& operator=(const WeightedMoves &other);
+        WeightedMoves &operator=(const WeightedMoves &other);
 
-    bool operator==(const WeightedMoves &other) const;
-    bool operator!=(const WeightedMoves &other) const;
+        bool operator==(const WeightedMoves &other) const;
+        bool operator!=(const WeightedMoves &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    void add(const Move &move, double weight=1);
+        void add(const Move &move, double weight = 1);
 
-    using Moves::move;
+        using Moves::move;
 
-    void clearStatistics();
+        void clearStatistics();
 
-    System move(const System &system, int nmoves, bool record_stats);
+        System move(const System &system, int nmoves, bool record_stats);
 
-    QList<MovePtr> moves() const;
+        QList<MovePtr> moves() const;
 
-    void setEnergyComponent(const Symbol &component);
-    void setSpaceProperty(const PropertyName &spaceproperty);
+        void setEnergyComponent(const Symbol &component);
+        void setSpaceProperty(const PropertyName &spaceproperty);
 
-    void setCombinedSpaceProperty(const PropertyName &spaceproperty);
+        void setCombinedSpaceProperty(const PropertyName &spaceproperty);
 
-    bool hasCombinedSpaceProperty() const;
+        bool hasCombinedSpaceProperty() const;
 
-    const Symbol& energyComponent() const;
-    const PropertyName& spaceProperty() const;
+        const Symbol &energyComponent() const;
+        const PropertyName &spaceProperty() const;
 
-    void setGenerator(const RanGenerator &rangenerator);
+        void setGenerator(const RanGenerator &rangenerator);
 
-    const RanGenerator& generator() const;
+        const RanGenerator &generator() const;
 
-    QList<SireUnits::Dimension::Time> timing() const;
+        QList<SireUnits::Dimension::Time> timing() const;
 
-    void clearTiming();
+        void clearTiming();
 
-protected:
-    void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
-    void _pvt_setPressure(const SireUnits::Dimension::Pressure &pressure);
-    void _pvt_setFugacity(const SireUnits::Dimension::Pressure &fugacity);
+    protected:
+        void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
+        void _pvt_setPressure(const SireUnits::Dimension::Pressure &pressure);
+        void _pvt_setFugacity(const SireUnits::Dimension::Pressure &fugacity);
 
-private:
-    void recalculateWeights();
+    private:
+        void recalculateWeights();
 
-    /** The list of moves, together with their associated weights */
-    QVector< boost::tuple<MovePtr,double> > mvs;
+        /** The list of moves, together with their associated weights */
+        QVector<boost::tuple<MovePtr, double>> mvs;
 
-    /** The list of average times for each move */
-    QVector<SireMaths::Average> avgtimes;
+        /** The list of average times for each move */
+        QVector<SireMaths::Average> avgtimes;
 
-    /** The random number generator used to pick moves */
-    RanGenerator rangenerator;
+        /** The random number generator used to pick moves */
+        RanGenerator rangenerator;
 
-    /** If a combined space is used, this is the name of the
-        combined space property */
-    PropertyName combined_space;
+        /** If a combined space is used, this is the name of the
+            combined space property */
+        PropertyName combined_space;
 
-    /** The value of the maximum weight */
-    double maxweight;
-};
+        /** The value of the maximum weight */
+        double maxweight;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::WeightedMoves )
+Q_DECLARE_METATYPE(SireMove::WeightedMoves)
 
-SIRE_EXPOSE_CLASS( SireMove::WeightedMoves )
+SIRE_EXPOSE_CLASS(SireMove::WeightedMoves)
 
 SIRE_END_HEADER
 

@@ -34,65 +34,65 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class BooleanProperty;
+    class BooleanProperty;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::BooleanProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::BooleanProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::BooleanProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::BooleanProperty &);
 
 namespace SireBase
 {
 
-/** This class provides a thin Property wrapper around bools
+    /** This class provides a thin Property wrapper around bools
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT BooleanProperty : public ConcreteProperty<BooleanProperty,Property>
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT BooleanProperty : public ConcreteProperty<BooleanProperty, Property>
+    {
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const BooleanProperty&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, BooleanProperty&);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const BooleanProperty &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, BooleanProperty &);
 
-public:
-    BooleanProperty();
-    BooleanProperty(const QString &value);
-    BooleanProperty(bool value);
+    public:
+        BooleanProperty();
+        BooleanProperty(const QString &value);
+        BooleanProperty(bool value);
 
-    BooleanProperty(const Property &other);
-    BooleanProperty(const BooleanProperty &other);
+        BooleanProperty(const Property &other);
+        BooleanProperty(const BooleanProperty &other);
 
-    ~BooleanProperty();
+        ~BooleanProperty();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    BooleanProperty& operator=(const BooleanProperty &other);
+        BooleanProperty &operator=(const BooleanProperty &other);
 
-    bool operator==(const BooleanProperty &other) const;
-    bool operator!=(const BooleanProperty &other) const;
+        bool operator==(const BooleanProperty &other) const;
+        bool operator!=(const BooleanProperty &other) const;
 
-    bool value() const;
+        bool value() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
 
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
 
-private:
-    bool val;
-};
+    private:
+        bool val;
+    };
 
-}
+} // namespace SireBase
 
-Q_DECLARE_METATYPE( SireBase::BooleanProperty )
+Q_DECLARE_METATYPE(SireBase::BooleanProperty)
 
-SIRE_EXPOSE_CLASS( SireBase::BooleanProperty )
+SIRE_EXPOSE_CLASS(SireBase::BooleanProperty)
 
 SIRE_END_HEADER
 

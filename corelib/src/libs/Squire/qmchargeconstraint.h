@@ -36,94 +36,90 @@ SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class QMChargeConstraint;
+    class QMChargeConstraint;
 }
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::QMChargeConstraint&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::QMChargeConstraint&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::QMChargeConstraint &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::QMChargeConstraint &);
 
 namespace Squire
 {
 
-using SireSystem::ChargeConstraint;
-using SireSystem::System;
-using SireSystem::Delta;
+    using SireSystem::ChargeConstraint;
+    using SireSystem::Delta;
+    using SireSystem::System;
 
-using SireMol::MoleculeGroup;
-using SireMol::Molecules;
-using SireMol::Molecule;
+    using SireMol::Molecule;
+    using SireMol::MoleculeGroup;
+    using SireMol::Molecules;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-/** This is a charge constraint that constrains the charges
-    of molecules to equal those calculated from QM calculations
-    (e.g. the charges can be constrained to equal those
-    from AM1-BCC calculations)
+    /** This is a charge constraint that constrains the charges
+        of molecules to equal those calculated from QM calculations
+        (e.g. the charges can be constrained to equal those
+        from AM1-BCC calculations)
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT QMChargeConstraint
-          : public SireBase::ConcreteProperty<QMChargeConstraint,ChargeConstraint>
-{
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT QMChargeConstraint : public SireBase::ConcreteProperty<QMChargeConstraint, ChargeConstraint>
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const QMChargeConstraint&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, QMChargeConstraint&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const QMChargeConstraint &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, QMChargeConstraint &);
 
-public:
-    QMChargeConstraint();
+    public:
+        QMChargeConstraint();
 
-    QMChargeConstraint(const MoleculeGroup &molgroup,
-                       const PropertyMap &map = PropertyMap());
+        QMChargeConstraint(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    QMChargeConstraint(const MoleculeGroup &molgroup,
-                       const QMChargeCalculator &chargecalculator,
-                       const PropertyMap &map = PropertyMap());
+        QMChargeConstraint(const MoleculeGroup &molgroup, const QMChargeCalculator &chargecalculator,
+                           const PropertyMap &map = PropertyMap());
 
-    QMChargeConstraint(const QMChargeConstraint &other);
+        QMChargeConstraint(const QMChargeConstraint &other);
 
-    ~QMChargeConstraint();
+        ~QMChargeConstraint();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QMChargeConstraint& operator=(const QMChargeConstraint &other);
+        QMChargeConstraint &operator=(const QMChargeConstraint &other);
 
-    bool operator==(const QMChargeConstraint &other) const;
-    bool operator!=(const QMChargeConstraint &other) const;
+        bool operator==(const QMChargeConstraint &other) const;
+        bool operator!=(const QMChargeConstraint &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    const QMChargeCalculator& chargeCalculator() const;
+        const QMChargeCalculator &chargeCalculator() const;
 
-    void setChargeCalculator(const QMChargeCalculator &chargecalculator);
+        void setChargeCalculator(const QMChargeCalculator &chargecalculator);
 
-protected:
-    void setSystem(const System &system);
-    bool mayChange(const Delta &delta, quint32 last_subversion) const;
+    protected:
+        void setSystem(const System &system);
+        bool mayChange(const Delta &delta, quint32 last_subversion) const;
 
-    bool fullApply(Delta &delta);
-    bool deltaApply(Delta &delta, quint32 last_subversion);
+        bool fullApply(Delta &delta);
+        bool deltaApply(Delta &delta, quint32 last_subversion);
 
-private:
-    Molecule _pvt_calculateCharges(const PartialMolecule &molecule) const;
+    private:
+        Molecule _pvt_calculateCharges(const PartialMolecule &molecule) const;
 
-    /** The charge calculator used to calculate the charges */
-    QMChargeCalculatorPtr charge_calculator;
+        /** The charge calculator used to calculate the charges */
+        QMChargeCalculatorPtr charge_calculator;
 
-    /** The set of molecules that need to change to maintain this constraint */
-    Molecules mols_to_change;
+        /** The set of molecules that need to change to maintain this constraint */
+        Molecules mols_to_change;
 
-    /** If this flag is set, then all of the charges need
-        to be recalculated */
-    bool must_recalc_from_scratch;
-};
+        /** If this flag is set, then all of the charges need
+            to be recalculated */
+        bool must_recalc_from_scratch;
+    };
 
-}
+} // namespace Squire
 
-Q_DECLARE_METATYPE( Squire::QMChargeConstraint )
+Q_DECLARE_METATYPE(Squire::QMChargeConstraint)
 
-SIRE_EXPOSE_CLASS( Squire::QMChargeConstraint )
+SIRE_EXPOSE_CLASS(Squire::QMChargeConstraint)
 
 SIRE_END_HEADER
 
 #endif
-

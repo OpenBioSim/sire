@@ -40,114 +40,113 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class Quaternion;
+    class Quaternion;
 }
 
 class QDataStream;
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Quaternion&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Quaternion&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Quaternion &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Quaternion &);
 
 namespace SireMaths
 {
 
-class Vector;
-class Matrix;
+    class Vector;
+    class Matrix;
 
-class MultiQuaternion;
+    class MultiQuaternion;
 
-SIREMATHS_EXPORT const Quaternion operator+(const Quaternion &p1, const Quaternion &p2);
-SIREMATHS_EXPORT const Quaternion operator-(const Quaternion &p1, const Quaternion &p2);
-SIREMATHS_EXPORT const Quaternion operator*(const Quaternion &p1, const Quaternion &p2);
-SIREMATHS_EXPORT const Quaternion operator*(const Quaternion &p1, const Vector &p2);
-SIREMATHS_EXPORT const Quaternion operator*(const Vector &p1, const Quaternion &p2);
+    SIREMATHS_EXPORT const Quaternion operator+(const Quaternion &p1, const Quaternion &p2);
+    SIREMATHS_EXPORT const Quaternion operator-(const Quaternion &p1, const Quaternion &p2);
+    SIREMATHS_EXPORT const Quaternion operator*(const Quaternion &p1, const Quaternion &p2);
+    SIREMATHS_EXPORT const Quaternion operator*(const Quaternion &p1, const Vector &p2);
+    SIREMATHS_EXPORT const Quaternion operator*(const Vector &p1, const Quaternion &p2);
 
-/**
-This is a quaternion class that is used to handle 3D rotations and SLERP.
+    /**
+    This is a quaternion class that is used to handle 3D rotations and SLERP.
 
-@author Christopher Woods
-*/
-class SIREMATHS_EXPORT Quaternion
-{
-
-friend class MultiQuaternion;
-
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Quaternion&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Quaternion&);
-
-public:
-    Quaternion();
-    Quaternion(const Quaternion& p1);
-
-    Quaternion(SireUnits::Dimension::Angle angle, const Vector &axis);
-    Quaternion(const Matrix &m);
-    Quaternion(double x, double y, double z, double w);
-
-    ~Quaternion();
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Quaternion
     {
-        return Quaternion::typeName();
-    }
 
-    double x() const;
-    double y() const;
-    double z() const;
-    double w() const;
+        friend class MultiQuaternion;
 
-    bool isIdentity() const;
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Quaternion &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Quaternion &);
 
-    Quaternion inverse() const;
-    Quaternion conjugate() const;
+    public:
+        Quaternion();
+        Quaternion(const Quaternion &p1);
 
-    double dot(const Quaternion &q) const;
+        Quaternion(SireUnits::Dimension::Angle angle, const Vector &axis);
+        Quaternion(const Matrix &m);
+        Quaternion(double x, double y, double z, double w);
 
-    QString toString() const;
-    static Quaternion fromString(const QString &str);
+        ~Quaternion();
 
-    Matrix toMatrix() const;
-    void fromMatrix(const Matrix &m);
+        static const char *typeName();
 
-    Vector rotate(const Vector &p) const;
-    QVector<Vector> rotate(const QVector<Vector> &points) const;
+        const char *what() const
+        {
+            return Quaternion::typeName();
+        }
 
-    Quaternion slerp(const Quaternion &q, double lambda) const;
+        double x() const;
+        double y() const;
+        double z() const;
+        double w() const;
 
-    Quaternion pow(double n) const;
+        bool isIdentity() const;
 
-    static Quaternion identity();
+        Quaternion inverse() const;
+        Quaternion conjugate() const;
 
-    void renormalise();
+        double dot(const Quaternion &q) const;
 
-    bool operator==(const Quaternion &p1) const;
-    bool operator!=(const Quaternion &p1) const;
+        QString toString() const;
+        static Quaternion fromString(const QString &str);
 
-    Quaternion& operator=(const Quaternion &p);
+        Matrix toMatrix() const;
+        void fromMatrix(const Matrix &m);
 
-    Quaternion& operator+=(const Quaternion &p);
-    Quaternion& operator-=(const Quaternion &p);
-    Quaternion& operator*=(const Quaternion &p);
-    Quaternion& operator*=(const Vector &p);
+        Vector rotate(const Vector &p) const;
+        QVector<Vector> rotate(const QVector<Vector> &points) const;
 
-    friend SIREMATHS_EXPORT const Quaternion operator+(const Quaternion &p1, const Quaternion &p2);
-    friend SIREMATHS_EXPORT const Quaternion operator-(const Quaternion &p1, const Quaternion &p2);
-    friend SIREMATHS_EXPORT const Quaternion operator*(const Quaternion &p1, const Quaternion &p2);
-    friend SIREMATHS_EXPORT const Quaternion operator*(const Quaternion &p1, const Vector &p2);
-    friend SIREMATHS_EXPORT const Quaternion operator*(const Vector &p1, const Quaternion &p2);
+        Quaternion slerp(const Quaternion &q, double lambda) const;
 
-private:
-    /** The x,y,z,w of the quaternion */
-    double sc[4];
+        Quaternion pow(double n) const;
 
-};
+        static Quaternion identity();
 
-}
+        void renormalise();
+
+        bool operator==(const Quaternion &p1) const;
+        bool operator!=(const Quaternion &p1) const;
+
+        Quaternion &operator=(const Quaternion &p);
+
+        Quaternion &operator+=(const Quaternion &p);
+        Quaternion &operator-=(const Quaternion &p);
+        Quaternion &operator*=(const Quaternion &p);
+        Quaternion &operator*=(const Vector &p);
+
+        friend SIREMATHS_EXPORT const Quaternion operator+(const Quaternion &p1, const Quaternion &p2);
+        friend SIREMATHS_EXPORT const Quaternion operator-(const Quaternion &p1, const Quaternion &p2);
+        friend SIREMATHS_EXPORT const Quaternion operator*(const Quaternion &p1, const Quaternion &p2);
+        friend SIREMATHS_EXPORT const Quaternion operator*(const Quaternion &p1, const Vector &p2);
+        friend SIREMATHS_EXPORT const Quaternion operator*(const Vector &p1, const Quaternion &p2);
+
+    private:
+        /** The x,y,z,w of the quaternion */
+        double sc[4];
+    };
+
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::Quaternion)
 Q_DECLARE_TYPEINFO(SireMaths::Quaternion, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMaths::Quaternion )
+SIRE_EXPOSE_CLASS(SireMaths::Quaternion)
 
 SIRE_END_HEADER
 

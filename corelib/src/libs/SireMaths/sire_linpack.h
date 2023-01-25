@@ -39,18 +39,18 @@ SIRE_BEGIN_HEADER
 namespace SireMaths
 {
 
-class NMatrix;
-class NVector;
+    class NMatrix;
+    class NVector;
 
-std::pair< NMatrix,QVector<int> > dgeco(const NMatrix &A);
+    std::pair<NMatrix, QVector<int>> dgeco(const NMatrix &A);
 
-NMatrix dgedi_inverse(const NMatrix &A, const QVector<int> &IPVT);
+    NMatrix dgedi_inverse(const NMatrix &A, const QVector<int> &IPVT);
 
-double dgedi_determinant(const NMatrix &A, const QVector<int> &IPVT);
+    double dgedi_determinant(const NMatrix &A, const QVector<int> &IPVT);
 
-std::pair<double,NMatrix> dgedi(const NMatrix &A, const QVector<int> &IPVT);
+    std::pair<double, NMatrix> dgedi(const NMatrix &A, const QVector<int> &IPVT);
 
-}
+} // namespace SireMaths
 
 SIRE_END_HEADER
 

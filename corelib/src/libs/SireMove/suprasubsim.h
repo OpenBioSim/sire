@@ -38,91 +38,89 @@ SIRE_BEGIN_HEADER
 namespace SireMove
 {
 
-using SireCluster::Node;
+    using SireCluster::Node;
 
-/** This class is used to start and manage an active
-    sub-simulation of a supra-simulation.
+    /** This class is used to start and manage an active
+        sub-simulation of a supra-simulation.
 
-    A supra-simulation consists of a collection of
-    supra-moves that are applied to a supra-system,
-    while a supra-sub-simulation consists of a collection
-    of sub-moves that are applied to a sub-system
+        A supra-simulation consists of a collection of
+        supra-moves that are applied to a supra-system,
+        while a supra-sub-simulation consists of a collection
+        of sub-moves that are applied to a sub-system
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SupraSubSim
-{
-public:
-    SupraSubSim();
-    SupraSubSim(const SupraSubSim &other);
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SupraSubSim
+    {
+    public:
+        SupraSubSim();
+        SupraSubSim(const SupraSubSim &other);
 
-    ~SupraSubSim();
+        ~SupraSubSim();
 
-    SupraSubSim& operator=(const SupraSubSim &other);
+        SupraSubSim &operator=(const SupraSubSim &other);
 
-    bool operator==(const SupraSubSim &other) const;
-    bool operator!=(const SupraSubSim &other) const;
+        bool operator==(const SupraSubSim &other) const;
+        bool operator!=(const SupraSubSim &other) const;
 
-    static SupraSubSim run(const SupraSubSystem &system, const SupraSubMoves &moves,
-                           int nmoves, bool record_stats=true);
+        static SupraSubSim run(const SupraSubSystem &system, const SupraSubMoves &moves, int nmoves,
+                               bool record_stats = true);
 
-    static SupraSubSim run(const SupraSubSystem &system, const SupraSubMove &move,
-                           int nmoves, bool record_stats=true);
+        static SupraSubSim run(const SupraSubSystem &system, const SupraSubMove &move, int nmoves,
+                               bool record_stats = true);
 
-    static SupraSubSim run(const SupraSubSimPacket &simpacket);
+        static SupraSubSim run(const SupraSubSimPacket &simpacket);
 
-    static SupraSubSim run(Node &node,
-                           const SupraSubSystem &system, const SupraSubMoves &moves,
-                           int nmoves, bool record_stats=true);
+        static SupraSubSim run(Node &node, const SupraSubSystem &system, const SupraSubMoves &moves, int nmoves,
+                               bool record_stats = true);
 
-    static SupraSubSim run(Node &node,
-                           const SupraSubSystem &system, const SupraSubMove &move,
-                           int nmoves, bool record_stats=true);
+        static SupraSubSim run(Node &node, const SupraSubSystem &system, const SupraSubMove &move, int nmoves,
+                               bool record_stats = true);
 
-    static SupraSubSim run(Node &node, const SupraSubSimPacket &simpacket);
+        static SupraSubSim run(Node &node, const SupraSubSimPacket &simpacket);
 
-    void abort();
-    void stop();
+        void abort();
+        void stop();
 
-    void wait();
-    bool wait(int timeout);
+        void wait();
+        bool wait(int timeout);
 
-    bool isRunning();
+        bool isRunning();
 
-    bool isError();
-    void throwError();
+        bool isError();
+        void throwError();
 
-    bool wasStopped();
+        bool wasStopped();
 
-    bool wasAborted();
+        bool wasAborted();
 
-    bool hasFinished();
+        bool hasFinished();
 
-    float progress();
+        float progress();
 
-    SupraSubSimPacket input();
-    SupraSubSimPacket interimResult();
-    SupraSubSimPacket result();
+        SupraSubSimPacket input();
+        SupraSubSimPacket interimResult();
+        SupraSubSimPacket result();
 
-    SupraSubSystemPtr initialSystem();
-    SupraSubMovesPtr initialMoves();
+        SupraSubSystemPtr initialSystem();
+        SupraSubMovesPtr initialMoves();
 
-    SupraSubSystemPtr interimSystem();
-    SupraSubMovesPtr interimMoves();
+        SupraSubSystemPtr interimSystem();
+        SupraSubMovesPtr interimMoves();
 
-    SupraSubSystemPtr system();
-    SupraSubMovesPtr moves();
+        SupraSubSystemPtr system();
+        SupraSubMovesPtr moves();
 
-private:
-    SupraSubSim(const SireCluster::Promise &promise);
+    private:
+        SupraSubSim(const SireCluster::Promise &promise);
 
-    /** The promise holding the running sub-simulation */
-    SireCluster::Promise sim_promise;
-};
+        /** The promise holding the running sub-simulation */
+        SireCluster::Promise sim_promise;
+    };
 
-}
+} // namespace SireMove
 
-SIRE_EXPOSE_CLASS( SireMove::SupraSubSim )
+SIRE_EXPOSE_CLASS(SireMove::SupraSubSim)
 
 SIRE_END_HEADER
 

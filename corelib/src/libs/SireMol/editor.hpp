@@ -35,115 +35,92 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-class AtomEditor;
-class CGEditor;
-class ResEditor;
-class ChainEditor;
-class SegEditor;
-class MolEditor;
+    class AtomEditor;
+    class CGEditor;
+    class ResEditor;
+    class ChainEditor;
+    class SegEditor;
+    class MolEditor;
 
-/** This is the class that is used to edit the molecule view
-    of type 'T'
+    /** This is the class that is used to edit the molecule view
+        of type 'T'
 
-    @author Christopher Woods
-*/
-template<class Parent, class T>
-class Editor : public T
-{
-public:
-    ~Editor();
+        @author Christopher Woods
+    */
+    template <class Parent, class T>
+    class Editor : public T
+    {
+    public:
+        ~Editor();
 
-    Editor<Parent,T>& operator=(const Editor<Parent,T> &other);
-    Editor<Parent,T>& operator=(const T &other);
+        Editor<Parent, T> &operator=(const Editor<Parent, T> &other);
+        Editor<Parent, T> &operator=(const T &other);
 
-    MolViewPtr operator[](int i);
-    MolViewPtr operator[](const QString &name);
-    MolViewPtr operator[](const AtomID &atomid);
-    MolViewPtr operator[](const ResID &resid);
-    MolViewPtr operator[](const CGID &cgid);
-    MolViewPtr operator[](const ChainID &chainid);
-    MolViewPtr operator[](const SegID &segid);
-    MolViewPtr operator[](const SireID::Index &idx);
+        MolViewPtr operator[](int i);
+        MolViewPtr operator[](const QString &name);
+        MolViewPtr operator[](const AtomID &atomid);
+        MolViewPtr operator[](const ResID &resid);
+        MolViewPtr operator[](const CGID &cgid);
+        MolViewPtr operator[](const ChainID &chainid);
+        MolViewPtr operator[](const SegID &segid);
+        MolViewPtr operator[](const SireID::Index &idx);
 
-    template<class V>
-    Parent& setProperty(const SireBase::PropertyName &key, const V &value);
+        template <class V>
+        Parent &setProperty(const SireBase::PropertyName &key, const V &value);
 
-    template<class V>
-    Parent& setMetadata(const SireBase::PropertyName &metakey, const V &value);
+        template <class V>
+        Parent &setMetadata(const SireBase::PropertyName &metakey, const V &value);
 
-    template<class V>
-    Parent& setMetadata(const SireBase::PropertyName &key,
-                        const SireBase::PropertyName &metakey,
-                        const V &value);
+        template <class V>
+        Parent &setMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey, const V &value);
 
-    Parent& removeProperty(const SireBase::PropertyName &key);
-    Parent& removeMetadata(const SireBase::PropertyName &metakey);
-    Parent& removeMetadata(const SireBase::PropertyName &key,
-                           const SireBase::PropertyName &metakey);
+        Parent &removeProperty(const SireBase::PropertyName &key);
+        Parent &removeMetadata(const SireBase::PropertyName &metakey);
+        Parent &removeMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey);
 
-    AtomEditor atom();
-    AtomEditor atom(int i,
-                    const PropertyMap &map = PropertyMap());
-    AtomEditor atom(const QString &name,
-                    const PropertyMap &map = PropertyMap());
-    AtomEditor atom(const AtomID &atomid,
-                    const PropertyMap &map = PropertyMap());
+        AtomEditor atom();
+        AtomEditor atom(int i, const PropertyMap &map = PropertyMap());
+        AtomEditor atom(const QString &name, const PropertyMap &map = PropertyMap());
+        AtomEditor atom(const AtomID &atomid, const PropertyMap &map = PropertyMap());
 
-    CGEditor cutGroup();
-    CGEditor cutGroup(int i,
-                      const PropertyMap &map = PropertyMap());
-    CGEditor cutGroup(const QString &name,
-                      const PropertyMap &map = PropertyMap());
-    CGEditor cutGroup(const CGID &cgid,
-                      const PropertyMap &map = PropertyMap());
+        CGEditor cutGroup();
+        CGEditor cutGroup(int i, const PropertyMap &map = PropertyMap());
+        CGEditor cutGroup(const QString &name, const PropertyMap &map = PropertyMap());
+        CGEditor cutGroup(const CGID &cgid, const PropertyMap &map = PropertyMap());
 
-    ResEditor residue();
-    ResEditor residue(int i,
-                      const PropertyMap &map = PropertyMap());
-    ResEditor residue(const QString &name,
-                      const PropertyMap &map = PropertyMap());
-    ResEditor residue(const ResID &resid,
-                      const PropertyMap &map = PropertyMap());
+        ResEditor residue();
+        ResEditor residue(int i, const PropertyMap &map = PropertyMap());
+        ResEditor residue(const QString &name, const PropertyMap &map = PropertyMap());
+        ResEditor residue(const ResID &resid, const PropertyMap &map = PropertyMap());
 
-    ChainEditor chain();
-    ChainEditor chain(int i,
-                      const PropertyMap &map = PropertyMap());
-    ChainEditor chain(const QString &name,
-                      const PropertyMap &map = PropertyMap());
-    ChainEditor chain(const ChainID &chainid,
-                      const PropertyMap &map = PropertyMap());
+        ChainEditor chain();
+        ChainEditor chain(int i, const PropertyMap &map = PropertyMap());
+        ChainEditor chain(const QString &name, const PropertyMap &map = PropertyMap());
+        ChainEditor chain(const ChainID &chainid, const PropertyMap &map = PropertyMap());
 
-    SegEditor segment();
-    SegEditor segment(int i,
-                      const PropertyMap &map = PropertyMap());
-    SegEditor segment(const QString &name,
-                      const PropertyMap &map = PropertyMap());
-    SegEditor segment(const SegID &segid,
-                      const PropertyMap &map = PropertyMap());
+        SegEditor segment();
+        SegEditor segment(int i, const PropertyMap &map = PropertyMap());
+        SegEditor segment(const QString &name, const PropertyMap &map = PropertyMap());
+        SegEditor segment(const SegID &segid, const PropertyMap &map = PropertyMap());
 
-    MolEditor molecule();
+        MolEditor molecule();
 
-    AtomEditor select(const AtomID &atomid,
-                      const PropertyMap &map = PropertyMap());
+        AtomEditor select(const AtomID &atomid, const PropertyMap &map = PropertyMap());
 
-    CGEditor select(const CGID &cgid,
-                    const PropertyMap &map = PropertyMap());
+        CGEditor select(const CGID &cgid, const PropertyMap &map = PropertyMap());
 
-    ResEditor select(const ResID &resid,
-                     const PropertyMap &map = PropertyMap());
+        ResEditor select(const ResID &resid, const PropertyMap &map = PropertyMap());
 
-    ChainEditor select(const ChainID &chainid,
-                       const PropertyMap &map = PropertyMap());
+        ChainEditor select(const ChainID &chainid, const PropertyMap &map = PropertyMap());
 
-    SegEditor select(const SegID &segid,
-                     const PropertyMap &map = PropertyMap());
+        SegEditor select(const SegID &segid, const PropertyMap &map = PropertyMap());
 
-protected:
-    Editor();
-    Editor(const T &view);
+    protected:
+        Editor();
+        Editor(const T &view);
 
-    Editor(const Editor<Parent,T> &other);
-};
+        Editor(const Editor<Parent, T> &other);
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
@@ -151,503 +128,457 @@ protected:
 
 #include "atomeditor.h"
 #include "cgeditor.h"
-#include "reseditor.h"
 #include "chaineditor.h"
-#include "segeditor.h"
 #include "moleditor.h"
+#include "reseditor.h"
+#include "segeditor.h"
 
 namespace SireMol
 {
 
-/** Null constructor */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-Editor<Parent, T>::Editor() : T()
-{}
-
-/** Construct an editor of the passed view */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-Editor<Parent, T>::Editor(const T &view) : T(view)
-{}
-
-/** Copy constructor */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-Editor<Parent, T>::Editor(const Editor<Parent,T> &other) : T(other)
-{}
-
-/** Destructor */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-Editor<Parent, T>::~Editor()
-{}
-
-/** Copy assignment operator */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-Editor<Parent, T>& Editor<Parent, T>::operator=(const Editor<Parent,T> &other)
-{
-    T::operator=(other);
-
-    return *this;
-}
-
-/** Copy assignment from an object of type T */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-Editor<Parent, T>& Editor<Parent, T>::operator=(const T &other)
-{
-    T::operator=(other);
-
-    return *this;
-}
-
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-MolViewPtr Editor<Parent, T>::operator[](int i)
-{
-    return this->atom(i);
-}
-
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-MolViewPtr Editor<Parent, T>::operator[](const QString &key)
-{
-    return this->atom(key);
-}
-
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-MolViewPtr Editor<Parent, T>::operator[](const AtomID &atomid)
-{
-    return this->atom(atomid);
-}
-
-/** Return the residue(s) that match 'resid' in this view of the molecule */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-MolViewPtr Editor<Parent, T>::operator[](const ResID &resid)
-{
-    return this->residue(resid);
-}
-
-/** Return the CutGroups(s) that match 'resid' in this view of the molecule */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-MolViewPtr Editor<Parent, T>::operator[](const CGID &cgid)
-{
-    return this->cutGroup(cgid);
-}
-
-/** Return the residue(s) that match 'resid' in this view of the molecule */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-MolViewPtr Editor<Parent, T>::operator[](const ChainID &chainid)
-{
-    return this->chain(chainid);
-}
-
-/** Return the residue(s) that match 'resid' in this view of the molecule */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-MolViewPtr Editor<Parent, T>::operator[](const SegID &segid)
-{
-    return this->segment(segid);
-}
-
-/** This is an overload of operator[](int), allowing a SireID::Index to be used
-    as the int */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-MolViewPtr Editor<Parent, T>::operator[](const SireID::Index &idx)
-{
-    return this->operator[](idx.value());
-}
-
-/** Expose the protected 'T::setProperty()' function */
-template<class Parent, class T>
-template<class V>
-SIRE_OUTOFLINE_TEMPLATE
-Parent& Editor<Parent, T>::setProperty(const SireBase::PropertyName &key,
-                                       const V &value)
-{
-    if (key.hasSource())
-        T::setProperty(key.source(), value);
-
-    return static_cast<Parent&>(*this);
-}
-
-/** Expose the protected 'T::setMetadata()' function */
-template<class Parent, class T>
-template<class V>
-SIRE_OUTOFLINE_TEMPLATE
-Parent& Editor<Parent, T>::setMetadata(const SireBase::PropertyName &metakey,
-                                       const V &value)
-{
-    if (metakey.hasSource())
-        T::setMetadata(metakey.source(), value);
-
-    return static_cast<Parent&>(*this);
-}
-
-/** Expose the protected 'T::setMetadata()' function
-
-    \throw SireBase::missing_property
-*/
-template<class Parent, class T>
-template<class V>
-SIRE_OUTOFLINE_TEMPLATE
-Parent& Editor<Parent, T>::setMetadata(const SireBase::PropertyName &key,
-                                       const SireBase::PropertyName &metakey,
-                                       const V &value)
-{
-    if (key.hasSource() and metakey.hasSource())
-        T::setMetadata(key.source(), metakey.source(), value);
-
-    return static_cast<Parent&>(*this);
-}
-
-/** Completely remove the property 'key', if this is valid
-    property for this view. Note that this will remove this
-    property for *all* views, e.g. if this is a Mover<Atom>,
-    then this will remove the property if it is an AtomProp,
-    and it will remove the property for *all* atoms.
-
-    \throw SireBase::missing_property
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-Parent& Editor<Parent, T>::removeProperty(const SireBase::PropertyName &key)
-{
-    if (key.hasSource())
+    /** Null constructor */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE Editor<Parent, T>::Editor() : T()
     {
-        T::assertContainsProperty(key.source());
-        this->d->removeProperty(key.source());
     }
 
-    return static_cast<Parent&>(*this);
-}
-
-/** Completely remove the metadata 'metakey', if this is valid
-    property for this view. Note that this will remove this
-    property for *all* views, e.g. if this is a Mover<Atom>,
-    then this will remove the property if it is an AtomProp,
-    and it will remove the property for *all* atoms.
-
-    \throw SireBase::missing_property
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-Parent& Editor<Parent, T>::removeMetadata(const SireBase::PropertyName &metakey)
-{
-    if (metakey.hasSource())
+    /** Construct an editor of the passed view */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE Editor<Parent, T>::Editor(const T &view) : T(view)
     {
-        T::assertContainsMetadata(metakey.source());
-        this->d->removeMetadata(metakey.source());
     }
 
-    return static_cast<Parent&>(*this);
-}
-
-/** Completely remove metadata with metakey 'metakey' from
-    the property with 'key', if this is valid
-    property for this view. Note that this will remove this
-    property for *all* views, e.g. if this is a Mover<Atom>,
-    then this will remove the property if it is an AtomProp,
-    and it will remove the property for *all* atoms.
-
-    \throw SireBase::missing_property
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-Parent& Editor<Parent, T>::removeMetadata(const SireBase::PropertyName &key,
-                                          const SireBase::PropertyName &metakey)
-{
-    if (key.hasSource() and metakey.hasSource())
+    /** Copy constructor */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE Editor<Parent, T>::Editor(const Editor<Parent, T> &other) : T(other)
     {
-        T::assertContainsMetadata(key.source(), metakey.source());
-        this->d->removeMetadata(key.source(), metakey.source());
     }
 
-    return static_cast<Parent&>(*this);
-}
+    /** Destructor */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE Editor<Parent, T>::~Editor()
+    {
+    }
 
-/** Return the atom of this view - for this to work, only a single
-    atom should be contained in this view
+    /** Copy assignment operator */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE Editor<Parent, T> &Editor<Parent, T>::operator=(const Editor<Parent, T> &other)
+    {
+        T::operator=(other);
 
-    \throw SireMol::missing_atom
-    \throw SireMol::duplicate_atom
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-AtomEditor Editor<Parent, T>::atom()
-{
-    return AtomEditor( MoleculeView::atom() );
-}
+        return *this;
+    }
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-AtomEditor Editor<Parent, T>::atom(int i, const PropertyMap &map)
-{
-    return AtomEditor( MoleculeView::atom(i, map) );
-}
+    /** Copy assignment from an object of type T */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE Editor<Parent, T> &Editor<Parent, T>::operator=(const T &other)
+    {
+        T::operator=(other);
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-AtomEditor Editor<Parent, T>::atom(const QString &name, const PropertyMap &map)
-{
-    return AtomEditor( MoleculeView::atom(name, map) );
-}
+        return *this;
+    }
 
-/** Return the atom from this view that matches the ID 'atomid'
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Editor<Parent, T>::operator[](int i)
+    {
+        return this->atom(i);
+    }
 
-    \throw SireMol::missing_atom
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_atom
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-AtomEditor Editor<Parent, T>::atom(const AtomID &atomid, const PropertyMap &map)
-{
-    return AtomEditor( MoleculeView::atom(atomid, map) );
-}
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Editor<Parent, T>::operator[](const QString &key)
+    {
+        return this->atom(key);
+    }
 
-/** Return the CutGroup involved with this view - for this
-    to work, only a single CutGroup should be involved in this view
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Editor<Parent, T>::operator[](const AtomID &atomid)
+    {
+        return this->atom(atomid);
+    }
 
-    \throw SireMol::missing_cutgroup
-    \throw SireMol::duplicate_cutgroup
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-CGEditor Editor<Parent, T>::cutGroup()
-{
-    return CGEditor( MoleculeView::cutGroup() );
-}
+    /** Return the residue(s) that match 'resid' in this view of the molecule */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Editor<Parent, T>::operator[](const ResID &resid)
+    {
+        return this->residue(resid);
+    }
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-CGEditor Editor<Parent, T>::cutGroup(int i, const PropertyMap &map)
-{
-    return CGEditor( MoleculeView::cutGroup(i, map) );
-}
+    /** Return the CutGroups(s) that match 'resid' in this view of the molecule */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Editor<Parent, T>::operator[](const CGID &cgid)
+    {
+        return this->cutGroup(cgid);
+    }
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-CGEditor Editor<Parent, T>::cutGroup(const QString &name, const PropertyMap &map)
-{
-    return CGEditor( MoleculeView::cutGroup(name, map) );
-}
+    /** Return the residue(s) that match 'resid' in this view of the molecule */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Editor<Parent, T>::operator[](const ChainID &chainid)
+    {
+        return this->chain(chainid);
+    }
 
-/** Return the CutGroups from this view that match the ID 'cgid'
+    /** Return the residue(s) that match 'resid' in this view of the molecule */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Editor<Parent, T>::operator[](const SegID &segid)
+    {
+        return this->segment(segid);
+    }
 
-    \throw SireMol::missing_cutgroup
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_cutgroup
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-CGEditor Editor<Parent, T>::cutGroup(const CGID &cgid, const PropertyMap &map)
-{
-    return CGEditor( MoleculeView::cutGroup(cgid, map) );
-}
+    /** This is an overload of operator[](int), allowing a SireID::Index to be used
+        as the int */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Editor<Parent, T>::operator[](const SireID::Index &idx)
+    {
+        return this->operator[](idx.value());
+    }
 
-/** Return the residue involved with this view - for this
-    to work, only a single residue should be involved in this view
+    /** Expose the protected 'T::setProperty()' function */
+    template <class Parent, class T>
+    template <class V>
+    SIRE_OUTOFLINE_TEMPLATE Parent &Editor<Parent, T>::setProperty(const SireBase::PropertyName &key, const V &value)
+    {
+        if (key.hasSource())
+            T::setProperty(key.source(), value);
 
-    \throw SireMol::missing_residue
-    \throw SireMol::duplicate_residue
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ResEditor Editor<Parent, T>::residue()
-{
-    return ResEditor( MoleculeView::residue() );
-}
+        return static_cast<Parent &>(*this);
+    }
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ResEditor Editor<Parent, T>::residue(int i, const PropertyMap &map)
-{
-    return ResEditor( MoleculeView::residue(i, map) );
-}
+    /** Expose the protected 'T::setMetadata()' function */
+    template <class Parent, class T>
+    template <class V>
+    SIRE_OUTOFLINE_TEMPLATE Parent &Editor<Parent, T>::setMetadata(const SireBase::PropertyName &metakey, const V &value)
+    {
+        if (metakey.hasSource())
+            T::setMetadata(metakey.source(), value);
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ResEditor Editor<Parent, T>::residue(const QString &name, const PropertyMap &map)
-{
-    return ResEditor( MoleculeView::residue(name, map) );
-}
+        return static_cast<Parent &>(*this);
+    }
 
-/** Return the residues from this view that match the ID 'resid'
+    /** Expose the protected 'T::setMetadata()' function
 
-    \throw SireMol::missing_residue
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_residue
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ResEditor Editor<Parent, T>::residue(const ResID &resid, const PropertyMap &map)
-{
-    return ResEditor( MoleculeView::residue(resid, map) );
-}
+        \throw SireBase::missing_property
+    */
+    template <class Parent, class T>
+    template <class V>
+    SIRE_OUTOFLINE_TEMPLATE Parent &Editor<Parent, T>::setMetadata(const SireBase::PropertyName &key,
+                                                                   const SireBase::PropertyName &metakey, const V &value)
+    {
+        if (key.hasSource() and metakey.hasSource())
+            T::setMetadata(key.source(), metakey.source(), value);
 
-/** Return the chain involved with this view - for this
-    to work, only a single chain should be involved in this view
+        return static_cast<Parent &>(*this);
+    }
 
-    \throw SireMol::missing_chain
-    \throw SireMol::duplicate_chain
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ChainEditor Editor<Parent, T>::chain()
-{
-    return ChainEditor( MoleculeView::chain() );
-}
+    /** Completely remove the property 'key', if this is valid
+        property for this view. Note that this will remove this
+        property for *all* views, e.g. if this is a Mover<Atom>,
+        then this will remove the property if it is an AtomProp,
+        and it will remove the property for *all* atoms.
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ChainEditor Editor<Parent, T>::chain(int i, const PropertyMap &map)
-{
-    return ChainEditor( MoleculeView::chain(i, map) );
-}
+        \throw SireBase::missing_property
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE Parent &Editor<Parent, T>::removeProperty(const SireBase::PropertyName &key)
+    {
+        if (key.hasSource())
+        {
+            T::assertContainsProperty(key.source());
+            this->d->removeProperty(key.source());
+        }
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ChainEditor Editor<Parent, T>::chain(const QString &name, const PropertyMap &map)
-{
-    return ChainEditor( MoleculeView::chain(name, map) );
-}
+        return static_cast<Parent &>(*this);
+    }
 
-/** Return the chains from this view that match the ID 'chainid'
+    /** Completely remove the metadata 'metakey', if this is valid
+        property for this view. Note that this will remove this
+        property for *all* views, e.g. if this is a Mover<Atom>,
+        then this will remove the property if it is an AtomProp,
+        and it will remove the property for *all* atoms.
 
-    \throw SireMol::missing_chain
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_chain
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ChainEditor Editor<Parent, T>::chain(const ChainID &chainid, const PropertyMap &map)
-{
-    return ChainEditor( MoleculeView::chain(chainid, map) );
-}
+        \throw SireBase::missing_property
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE Parent &Editor<Parent, T>::removeMetadata(const SireBase::PropertyName &metakey)
+    {
+        if (metakey.hasSource())
+        {
+            T::assertContainsMetadata(metakey.source());
+            this->d->removeMetadata(metakey.source());
+        }
 
-/** Return the segment involved with this view - for this
-    to work, only a single segment should be involved in this view
+        return static_cast<Parent &>(*this);
+    }
 
-    \throw SireMol::missing_segment
-    \throw SireMol::duplicate_segment
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-SegEditor Editor<Parent, T>::segment()
-{
-    return SegEditor( MoleculeView::segment() );
-}
+    /** Completely remove metadata with metakey 'metakey' from
+        the property with 'key', if this is valid
+        property for this view. Note that this will remove this
+        property for *all* views, e.g. if this is a Mover<Atom>,
+        then this will remove the property if it is an AtomProp,
+        and it will remove the property for *all* atoms.
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-SegEditor Editor<Parent, T>::segment(int i, const PropertyMap &map)
-{
-    return SegEditor( MoleculeView::segment(i, map) );
-}
+        \throw SireBase::missing_property
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE Parent &Editor<Parent, T>::removeMetadata(const SireBase::PropertyName &key,
+                                                                      const SireBase::PropertyName &metakey)
+    {
+        if (key.hasSource() and metakey.hasSource())
+        {
+            T::assertContainsMetadata(key.source(), metakey.source());
+            this->d->removeMetadata(key.source(), metakey.source());
+        }
 
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-SegEditor Editor<Parent, T>::segment(const QString &name, const PropertyMap &map)
-{
-    return SegEditor( MoleculeView::segment(name, map) );
-}
+        return static_cast<Parent &>(*this);
+    }
 
-/** Return the segments from this view that match the ID 'segid'
+    /** Return the atom of this view - for this to work, only a single
+        atom should be contained in this view
 
-    \throw SireMol::missing_segment
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_segment
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-SegEditor Editor<Parent, T>::segment(const SegID &segid, const PropertyMap &map)
-{
-    return SegEditor( MoleculeView::segment(segid, map) );
-}
+        \throw SireMol::missing_atom
+        \throw SireMol::duplicate_atom
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE AtomEditor Editor<Parent, T>::atom()
+    {
+        return AtomEditor(MoleculeView::atom());
+    }
 
-/** Return the editor for the molecule that is viewed */
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-MolEditor Editor<Parent, T>::molecule()
-{
-    return MolEditor( MoleculeView::molecule() );
-}
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE AtomEditor Editor<Parent, T>::atom(int i, const PropertyMap &map)
+    {
+        return AtomEditor(MoleculeView::atom(i, map));
+    }
 
-/** Return the atom from this view that matches the ID 'atomid'
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE AtomEditor Editor<Parent, T>::atom(const QString &name, const PropertyMap &map)
+    {
+        return AtomEditor(MoleculeView::atom(name, map));
+    }
 
-    \throw SireMol::missing_atom
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_atom
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-AtomEditor Editor<Parent, T>::select(const AtomID &atomid, const PropertyMap &map)
-{
-    return Editor<Parent,T>::atom(atomid, map);
-}
+    /** Return the atom from this view that matches the ID 'atomid'
 
-/** Return the CutGroups from this view that match the ID 'cgid'
+        \throw SireMol::missing_atom
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_atom
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE AtomEditor Editor<Parent, T>::atom(const AtomID &atomid, const PropertyMap &map)
+    {
+        return AtomEditor(MoleculeView::atom(atomid, map));
+    }
 
-    \throw SireMol::missing_cutgroup
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_cutgroup
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-CGEditor Editor<Parent, T>::select(const CGID &cgid, const PropertyMap &map)
-{
-    return Editor<Parent,T>::cutGroup(cgid, map);
-}
+    /** Return the CutGroup involved with this view - for this
+        to work, only a single CutGroup should be involved in this view
 
-/** Return the residues from this view that match the ID 'resid'
+        \throw SireMol::missing_cutgroup
+        \throw SireMol::duplicate_cutgroup
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE CGEditor Editor<Parent, T>::cutGroup()
+    {
+        return CGEditor(MoleculeView::cutGroup());
+    }
 
-    \throw SireMol::missing_residue
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_residue
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ResEditor Editor<Parent, T>::select(const ResID &resid, const PropertyMap &map)
-{
-    return Editor<Parent,T>::residue(resid, map);
-}
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE CGEditor Editor<Parent, T>::cutGroup(int i, const PropertyMap &map)
+    {
+        return CGEditor(MoleculeView::cutGroup(i, map));
+    }
 
-/** Return the chains from this view that match the ID 'chainid'
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE CGEditor Editor<Parent, T>::cutGroup(const QString &name, const PropertyMap &map)
+    {
+        return CGEditor(MoleculeView::cutGroup(name, map));
+    }
 
-    \throw SireMol::missing_chain
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_chain
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-ChainEditor Editor<Parent, T>::select(const ChainID &chainid, const PropertyMap &map)
-{
-    return Editor<Parent,T>::chain(chainid, map);
-}
+    /** Return the CutGroups from this view that match the ID 'cgid'
 
-/** Return the segments from this view that match the ID 'segid'
+        \throw SireMol::missing_cutgroup
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_cutgroup
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE CGEditor Editor<Parent, T>::cutGroup(const CGID &cgid, const PropertyMap &map)
+    {
+        return CGEditor(MoleculeView::cutGroup(cgid, map));
+    }
 
-    \throw SireMol::missing_segment
-    \throw SireError::invalid_index
-    \throw SireMol::duplicate_segment
-*/
-template<class Parent, class T>
-SIRE_OUTOFLINE_TEMPLATE
-SegEditor Editor<Parent, T>::select(const SegID &segid, const PropertyMap &map)
-{
-    return Editor<Parent,T>::segment(segid, map);
-}
+    /** Return the residue involved with this view - for this
+        to work, only a single residue should be involved in this view
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+        \throw SireMol::missing_residue
+        \throw SireMol::duplicate_residue
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ResEditor Editor<Parent, T>::residue()
+    {
+        return ResEditor(MoleculeView::residue());
+    }
 
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ResEditor Editor<Parent, T>::residue(int i, const PropertyMap &map)
+    {
+        return ResEditor(MoleculeView::residue(i, map));
+    }
+
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ResEditor Editor<Parent, T>::residue(const QString &name, const PropertyMap &map)
+    {
+        return ResEditor(MoleculeView::residue(name, map));
+    }
+
+    /** Return the residues from this view that match the ID 'resid'
+
+        \throw SireMol::missing_residue
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_residue
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ResEditor Editor<Parent, T>::residue(const ResID &resid, const PropertyMap &map)
+    {
+        return ResEditor(MoleculeView::residue(resid, map));
+    }
+
+    /** Return the chain involved with this view - for this
+        to work, only a single chain should be involved in this view
+
+        \throw SireMol::missing_chain
+        \throw SireMol::duplicate_chain
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ChainEditor Editor<Parent, T>::chain()
+    {
+        return ChainEditor(MoleculeView::chain());
+    }
+
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ChainEditor Editor<Parent, T>::chain(int i, const PropertyMap &map)
+    {
+        return ChainEditor(MoleculeView::chain(i, map));
+    }
+
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ChainEditor Editor<Parent, T>::chain(const QString &name, const PropertyMap &map)
+    {
+        return ChainEditor(MoleculeView::chain(name, map));
+    }
+
+    /** Return the chains from this view that match the ID 'chainid'
+
+        \throw SireMol::missing_chain
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_chain
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ChainEditor Editor<Parent, T>::chain(const ChainID &chainid, const PropertyMap &map)
+    {
+        return ChainEditor(MoleculeView::chain(chainid, map));
+    }
+
+    /** Return the segment involved with this view - for this
+        to work, only a single segment should be involved in this view
+
+        \throw SireMol::missing_segment
+        \throw SireMol::duplicate_segment
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE SegEditor Editor<Parent, T>::segment()
+    {
+        return SegEditor(MoleculeView::segment());
+    }
+
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE SegEditor Editor<Parent, T>::segment(int i, const PropertyMap &map)
+    {
+        return SegEditor(MoleculeView::segment(i, map));
+    }
+
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE SegEditor Editor<Parent, T>::segment(const QString &name, const PropertyMap &map)
+    {
+        return SegEditor(MoleculeView::segment(name, map));
+    }
+
+    /** Return the segments from this view that match the ID 'segid'
+
+        \throw SireMol::missing_segment
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_segment
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE SegEditor Editor<Parent, T>::segment(const SegID &segid, const PropertyMap &map)
+    {
+        return SegEditor(MoleculeView::segment(segid, map));
+    }
+
+    /** Return the editor for the molecule that is viewed */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE MolEditor Editor<Parent, T>::molecule()
+    {
+        return MolEditor(MoleculeView::molecule());
+    }
+
+    /** Return the atom from this view that matches the ID 'atomid'
+
+        \throw SireMol::missing_atom
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_atom
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE AtomEditor Editor<Parent, T>::select(const AtomID &atomid, const PropertyMap &map)
+    {
+        return Editor<Parent, T>::atom(atomid, map);
+    }
+
+    /** Return the CutGroups from this view that match the ID 'cgid'
+
+        \throw SireMol::missing_cutgroup
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_cutgroup
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE CGEditor Editor<Parent, T>::select(const CGID &cgid, const PropertyMap &map)
+    {
+        return Editor<Parent, T>::cutGroup(cgid, map);
+    }
+
+    /** Return the residues from this view that match the ID 'resid'
+
+        \throw SireMol::missing_residue
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_residue
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ResEditor Editor<Parent, T>::select(const ResID &resid, const PropertyMap &map)
+    {
+        return Editor<Parent, T>::residue(resid, map);
+    }
+
+    /** Return the chains from this view that match the ID 'chainid'
+
+        \throw SireMol::missing_chain
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_chain
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE ChainEditor Editor<Parent, T>::select(const ChainID &chainid, const PropertyMap &map)
+    {
+        return Editor<Parent, T>::chain(chainid, map);
+    }
+
+    /** Return the segments from this view that match the ID 'segid'
+
+        \throw SireMol::missing_segment
+        \throw SireError::invalid_index
+        \throw SireMol::duplicate_segment
+    */
+    template <class Parent, class T>
+    SIRE_OUTOFLINE_TEMPLATE SegEditor Editor<Parent, T>::select(const SegID &segid, const PropertyMap &map)
+    {
+        return Editor<Parent, T>::segment(segid, map);
+    }
+
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 }
 
 SIRE_END_HEADER

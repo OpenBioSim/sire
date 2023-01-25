@@ -34,69 +34,68 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class Radical;
+    class Radical;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::Radical&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::Radical&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Radical &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Radical &);
 
 namespace SireMol
 {
 
-/** This class provides information about the radical type of an
-    atom (e.g. not a radical, singlet, doublet etc)
+    /** This class provides information about the radical type of an
+        atom (e.g. not a radical, singlet, doublet etc)
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT Radical
-    : public SireBase::ConcreteProperty<Radical,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT Radical : public SireBase::ConcreteProperty<Radical, SireBase::Property>
+    {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const Radical&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, Radical&);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Radical &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, Radical &);
 
-public:
-    Radical();
+    public:
+        Radical();
 
-    Radical(const QString &s);
-    Radical(int value);
+        Radical(const QString &s);
+        Radical(int value);
 
-    Radical(const Radical &other);
+        Radical(const Radical &other);
 
-    ~Radical();
+        ~Radical();
 
-    Radical& operator=(const Radical &other);
+        Radical &operator=(const Radical &other);
 
-    bool operator==(const Radical &other) const;
-    bool operator!=(const Radical &other) const;
+        bool operator==(const Radical &other) const;
+        bool operator!=(const Radical &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    static Radical singlet();
-    static Radical doublet();
-    static Radical triplet();
-    static Radical undefined();
+        static Radical singlet();
+        static Radical doublet();
+        static Radical triplet();
+        static Radical undefined();
 
-    QString toString() const;
+        QString toString() const;
 
-    int value() const;
-    int sdfValue() const;
+        int value() const;
+        int sdfValue() const;
 
-    bool isDefined() const;
-    bool isSinglet() const;
-    bool isDoublet() const;
-    bool isTriplet() const;
+        bool isDefined() const;
+        bool isSinglet() const;
+        bool isDoublet() const;
+        bool isTriplet() const;
 
-private:
-    /** The radical type. */
-    qint32 radical_type;
-};
+    private:
+        /** The radical type. */
+        qint32 radical_type;
+    };
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::Radical )
+Q_DECLARE_METATYPE(SireMol::Radical)
 
-SIRE_EXPOSE_CLASS( SireMol::Radical )
+SIRE_EXPOSE_CLASS(SireMol::Radical)
 
 SIRE_END_HEADER
 

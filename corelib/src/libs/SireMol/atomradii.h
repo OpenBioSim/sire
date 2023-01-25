@@ -37,13 +37,13 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-typedef AtomProperty< SireUnits::Dimension::Length > AtomRadii;
+    typedef AtomProperty<SireUnits::Dimension::Length> AtomRadii;
 
 }
 
-Q_DECLARE_METATYPE( SireMol::AtomRadii );
+Q_DECLARE_METATYPE(SireMol::AtomRadii);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireUnits::Dimension::Length, SireMol::AtomRadii )
+SIRE_EXPOSE_ATOM_PROPERTY(SireUnits::Dimension::Length, SireMol::AtomRadii)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireMol::AtomProperty<SireUnits::Dimension::Length>;

@@ -25,36 +25,36 @@
   *
 \*********************************************/
 
-#include <QTextStream>
 #include <QByteArray>
+#include <QMap>
 #include <QString>
 #include <QStringList>
-#include <QMap>
+#include <QTextStream>
 
 #include "pdb.h"
 
 #include "SireMol/element.h"
 
+#include "SireMol/atomcharges.h"
 #include "SireMol/atomcoords.h"
 #include "SireMol/atomelements.h"
-#include "SireMol/atomcharges.h"
 #include "SireMol/connectivity.h"
 
 #include "SireMol/mover.hpp"
 #include "SireMol/selector.hpp"
 
+#include "SireMol/atomeditor.h"
+#include "SireMol/cgeditor.h"
+#include "SireMol/chain.h"
+#include "SireMol/chaineditor.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleculegroup.h"
-#include "SireMol/molidx.h"
-#include "SireMol/molidentifier.h"
 #include "SireMol/moleditor.h"
-#include "SireMol/segeditor.h"
-#include "SireMol/chaineditor.h"
+#include "SireMol/molidentifier.h"
+#include "SireMol/molidx.h"
 #include "SireMol/reseditor.h"
-#include "SireMol/cgeditor.h"
-#include "SireMol/atomeditor.h"
 #include "SireMol/residue.h"
-#include "SireMol/chain.h"
+#include "SireMol/segeditor.h"
 #include "SireMol/segment.h"
 
 #include "SireMol/cuttingfunction.h"
@@ -86,10 +86,12 @@ using namespace SireStream;
 ///////////
 
 PDBParameters::PDBParameters() : IOParametersBase()
-{}
+{
+}
 
 PDBParameters::~PDBParameters()
-{}
+{
+}
 
 PropertyName PDBParameters::animation_property("animation_frames");
 PropertyName PDBParameters::alternatives_property("alternative");
@@ -102,16 +104,11 @@ PropertyName PDBParameters::pdbresnames_property("PDB-residue-name");
 PropertyName PDBParameters::pdbchainnames_property("PDB-chain-name");
 PropertyName PDBParameters::pdbsegnames_property("PDB-segment-name");
 
-PropertyName PDBParameters::frame_selector( "animation-frame-selector",
-                                            Property::null() );
-PropertyName PDBParameters::atomname_mangler( "atom-name-mangler",
-                                              TrimString() );
-PropertyName PDBParameters::resname_mangler( "residue-name-mangler",
-                                             TrimString() );
-PropertyName PDBParameters::chainname_mangler( "chain-name-mangler",
-                                               TrimString() );
-PropertyName PDBParameters::segname_mangler( "segment-name-mangler",
-                                             TrimString() );
+PropertyName PDBParameters::frame_selector("animation-frame-selector", Property::null());
+PropertyName PDBParameters::atomname_mangler("atom-name-mangler", TrimString());
+PropertyName PDBParameters::resname_mangler("residue-name-mangler", TrimString());
+PropertyName PDBParameters::chainname_mangler("chain-name-mangler", TrimString());
+PropertyName PDBParameters::segname_mangler("segment-name-mangler", TrimString());
 
 ///////////
 /////////// Implementation of everything to get the PDB reader/writer working
@@ -203,22 +200,22 @@ public:
     Element guessElement() const;
     Vector coordinates() const;
 
-    QString   record_name;   // ATOM or HETATM      - line[0:5]
-    int       serial;        // ATOM ID number      - line[6:11]
-    QString   name;          // atom name           - line[12:15]
-    QString   altloc;        // atom altloc         - line[16]
-    QString   resname;       // atom residue name   - line[17:19]
-    QString   chainid;       // atom chain name     - line[21]
-    int       resseq;        // atom residue number - line[22:25]
-    QString   icode;         // atom icode          - line[26]
-    double    x;             // atom x coords       - line[30:37]
-    double    y;             // atom y coords       - line[38:45]
-    double    z;             // atom z coords       - line[46:53]
-    double    occupancy;     // atom occupancy      - line[54:59]
-    double    tempfactor;    // bfactor             - line[60:65]
-    QString   segid;         // atom segment name   - line[72:75]
-    QString   element;       // atom element        - line[76:77]
-    int       charge;        // atom formal charge  - line[78:79]
+    QString record_name; // ATOM or HETATM      - line[0:5]
+    int serial;          // ATOM ID number      - line[6:11]
+    QString name;        // atom name           - line[12:15]
+    QString altloc;      // atom altloc         - line[16]
+    QString resname;     // atom residue name   - line[17:19]
+    QString chainid;     // atom chain name     - line[21]
+    int resseq;          // atom residue number - line[22:25]
+    QString icode;       // atom icode          - line[26]
+    double x;            // atom x coords       - line[30:37]
+    double y;            // atom y coords       - line[38:45]
+    double z;            // atom z coords       - line[46:53]
+    double occupancy;    // atom occupancy      - line[54:59]
+    double tempfactor;   // bfactor             - line[60:65]
+    QString segid;       // atom segment name   - line[72:75]
+    QString element;     // atom element        - line[76:77]
+    int charge;          // atom formal charge  - line[78:79]
 
     /** This is an ID string that is used
         to help index an atom */
@@ -237,9 +234,9 @@ public:
 
     QList<int> availableFrames() const;
 
-    const QList<PDBAtom>& atoms(int frame=1) const;
+    const QList<PDBAtom> &atoms(int frame = 1) const;
 
-    bool hasMultipleOccupancy(int frame=1) const;
+    bool hasMultipleOccupancy(int frame = 1) const;
     bool hasMultipleFrames() const;
 
     void openFrame(int framenum);
@@ -250,7 +247,7 @@ public:
 private:
     /** Extra sets of coordinates (in case of multiple models,
         e.g. from NMR or from a trajectory) */
-    QMap< int, QList<PDBAtom> > frames;
+    QMap<int, QList<PDBAtom>> frames;
 
     int current_frame;
 };
@@ -262,7 +259,7 @@ public:
     PDBMolecules();
     ~PDBMolecules();
 
-    PDBMolecule& nextMolecule();
+    PDBMolecule &nextMolecule();
     void closeMolecule();
 
     int openFrame(int frame_number);
@@ -273,7 +270,7 @@ public:
 
     bool isEmpty() const;
 
-    const QList<PDBMolecule>& molecules() const;
+    const QList<PDBMolecule> &molecules() const;
 
 private:
     QList<PDBMolecule> mols;
@@ -289,88 +286,107 @@ private:
 //////// Implementation of PDBAtom
 ////////
 
-PDBAtom::PDBAtom() : record_name("ATOM"), serial(0), name("UNK"),
-                     altloc(" "), resname("UNK"), chainid(" "),
-                     resseq(-1), icode(" "), x(0), y(0), z(0),
-                     occupancy(0), tempfactor(0), segid("  "),
-                     element("  "), charge(0)
-{}
+PDBAtom::PDBAtom()
+    : record_name("ATOM"), serial(0), name("UNK"), altloc(" "), resname("UNK"), chainid(" "), resseq(-1), icode(" "),
+      x(0), y(0), z(0), occupancy(0), tempfactor(0), segid("  "), element("  "), charge(0)
+{
+}
 
 PDBAtom::~PDBAtom()
-{}
+{
+}
 
 QString PDBAtom::toString() const
 {
     return QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 %16")
-                .arg(record_name).arg(serial).arg(name)
-                .arg(altloc).arg(resname).arg(chainid).arg(resseq)
-                .arg(icode).arg(x).arg(y).arg(z).arg(occupancy)
-                .arg(tempfactor).arg(segid).arg(element).arg(charge);
+        .arg(record_name)
+        .arg(serial)
+        .arg(name)
+        .arg(altloc)
+        .arg(resname)
+        .arg(chainid)
+        .arg(resseq)
+        .arg(icode)
+        .arg(x)
+        .arg(y)
+        .arg(z)
+        .arg(occupancy)
+        .arg(tempfactor)
+        .arg(segid)
+        .arg(element)
+        .arg(charge);
 }
 
 PDBAtom PDBAtom::readFromLine(const QString &line, int linenum)
 {
     if (line.length() < 54)
-        //the line is too short to be a PDB atom line!
-        throw SireIO::parse_error( QObject::tr(
-            "Line %1 does not look like a valid PDB line. It only contains "
-            "%2 characters, when it should contain at least 54.\n%3.")
-                .arg(linenum).arg(line.length()).arg(line), CODELOC );
+        // the line is too short to be a PDB atom line!
+        throw SireIO::parse_error(QObject::tr("Line %1 does not look like a valid PDB line. It only contains "
+                                              "%2 characters, when it should contain at least 54.\n%3.")
+                                      .arg(linenum)
+                                      .arg(line.length())
+                                      .arg(line),
+                                  CODELOC);
 
     PDBAtom atom;
 
     bool ok = true;
 
-    atom.record_name = SireStream::shareString( line.mid(0,6).trimmed() );
+    atom.record_name = SireStream::shareString(line.mid(0, 6).trimmed());
 
-    atom.serial = line.mid(6,5).toInt(&ok);
-
-    if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-            "Line %1 does not have a valid PDB atom number (%2).\n%3")
-                .arg(linenum).arg(line.mid(6,5).trimmed(), line), CODELOC );
-
-    atom.name = SireStream::shareString( line.mid(12,4) );
-    atom.altloc = line.mid(16,1).trimmed();
-    atom.resname = SireStream::shareString( line.mid(17,3) );
-    atom.chainid = line.mid(21,1).trimmed();
-    atom.resseq = line.mid(22,4).toInt(&ok);
+    atom.serial = line.mid(6, 5).toInt(&ok);
 
     if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-            "Line %1 does not have a valid PDB residue number (%2).\n%3")
-                .arg(linenum).arg(line.mid(22,4).trimmed(), line), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Line %1 does not have a valid PDB atom number (%2).\n%3")
+                                      .arg(linenum)
+                                      .arg(line.mid(6, 5).trimmed(), line),
+                                  CODELOC);
 
-    atom.icode = line.mid(26,1).trimmed();
-
-    atom.x = line.mid(30,8).toDouble(&ok);
-
-    if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-            "Line %1 does not have a valid PDB x coordinate (%2)\n%3")
-                .arg(linenum).arg(line.mid(30,8).trimmed(), line), CODELOC );
-
-    atom.y = line.mid(38,8).toDouble(&ok);
+    atom.name = SireStream::shareString(line.mid(12, 4));
+    atom.altloc = line.mid(16, 1).trimmed();
+    atom.resname = SireStream::shareString(line.mid(17, 3));
+    atom.chainid = line.mid(21, 1).trimmed();
+    atom.resseq = line.mid(22, 4).toInt(&ok);
 
     if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-            "Line %1 does not have a valid PDB y coordinate (%2)\n%3")
-                .arg(linenum).arg(line.mid(38,8).trimmed(), line), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Line %1 does not have a valid PDB residue number (%2).\n%3")
+                                      .arg(linenum)
+                                      .arg(line.mid(22, 4).trimmed(), line),
+                                  CODELOC);
 
-    atom.z = line.mid(46,8).toDouble(&ok);
+    atom.icode = line.mid(26, 1).trimmed();
+
+    atom.x = line.mid(30, 8).toDouble(&ok);
 
     if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-            "Line %1 does not have a valid PDB z coordinate (%2)\n%3")
-                .arg(linenum).arg(line.mid(46,8).trimmed(), line), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Line %1 does not have a valid PDB x coordinate (%2)\n%3")
+                                      .arg(linenum)
+                                      .arg(line.mid(30, 8).trimmed(), line),
+                                  CODELOC);
+
+    atom.y = line.mid(38, 8).toDouble(&ok);
+
+    if (not ok)
+        throw SireIO::parse_error(QObject::tr("Line %1 does not have a valid PDB y coordinate (%2)\n%3")
+                                      .arg(linenum)
+                                      .arg(line.mid(38, 8).trimmed(), line),
+                                  CODELOC);
+
+    atom.z = line.mid(46, 8).toDouble(&ok);
+
+    if (not ok)
+        throw SireIO::parse_error(QObject::tr("Line %1 does not have a valid PDB z coordinate (%2)\n%3")
+                                      .arg(linenum)
+                                      .arg(line.mid(46, 8).trimmed(), line),
+                                  CODELOC);
 
     if (line.length() >= 55)
     {
-        //we can read the occupancy
-        atom.occupancy = line.mid(54,6).toDouble(&ok);
+        // we can read the occupancy
+        atom.occupancy = line.mid(54, 6).toDouble(&ok);
 
         if (not ok)
-            //something went wrong reading the occupancy - ignore the error
+            // something went wrong reading the occupancy - ignore the error
             atom.occupancy = 1;
     }
     else
@@ -378,11 +394,11 @@ PDBAtom PDBAtom::readFromLine(const QString &line, int linenum)
 
     if (line.length() >= 61)
     {
-        //try to read the temperature factor
-        atom.tempfactor = line.mid(60,6).toDouble(&ok);
+        // try to read the temperature factor
+        atom.tempfactor = line.mid(60, 6).toDouble(&ok);
 
         if (not ok)
-            //something went wrong
+            // something went wrong
             atom.tempfactor = 0;
     }
     else
@@ -390,23 +406,23 @@ PDBAtom PDBAtom::readFromLine(const QString &line, int linenum)
 
     if (line.length() >= 73)
     {
-        atom.segid = SireStream::shareString( line.mid(72,4).trimmed() );
+        atom.segid = SireStream::shareString(line.mid(72, 4).trimmed());
     }
     else
         atom.segid = QString();
 
     if (line.length() >= 77)
     {
-        atom.element = SireStream::shareString( line.mid(76,2).trimmed() );
+        atom.element = SireStream::shareString(line.mid(76, 2).trimmed());
     }
     else
         atom.element = QString();
 
     if (line.length() >= 79)
     {
-        QString chgstring = line.mid(78,2).trimmed();
+        QString chgstring = line.mid(78, 2).trimmed();
 
-        //format should be 2+ or 1- or something like that
+        // format should be 2+ or 1- or something like that
         int factor = 1;
 
         if (chgstring.contains("-"))
@@ -417,7 +433,7 @@ PDBAtom PDBAtom::readFromLine(const QString &line, int linenum)
         atom.charge = factor * chgstring.toInt(&ok);
 
         if (not ok)
-            //something went wrong - ignore the charge
+            // something went wrong - ignore the charge
             atom.charge = 0;
     }
     else
@@ -426,10 +442,8 @@ PDBAtom PDBAtom::readFromLine(const QString &line, int linenum)
     char idline[31];
     idline[30] = '\0';
 
-    qsnprintf(idline, 30, "%4s %3s %1s %4d%1s %4s",
-              qPrintable(atom.name), qPrintable(atom.resname),
-              qPrintable(atom.chainid), atom.resseq,
-              qPrintable(atom.icode), qPrintable(atom.segid));
+    qsnprintf(idline, 30, "%4s %3s %1s %4d%1s %4s", qPrintable(atom.name), qPrintable(atom.resname),
+              qPrintable(atom.chainid), atom.resseq, qPrintable(atom.icode), qPrintable(atom.segid));
 
     atom.idstring = QString::fromLocal8Bit(idline);
 
@@ -468,23 +482,21 @@ QString PDBAtom::writeToLine() const
         resnum -= 10000;
     }
 
-    QString s = QString::asprintf(
-           "%-6s%5d %4s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %4s%2s%2s",
-            qPrintable(record_name), num, qPrintable(name),
-            qPrintable(altloc), qPrintable(resname), qPrintable(chainid),
-            resnum, qPrintable(icode), x, y, z, occupancy, tempfactor,
-            qPrintable(segid), qPrintable(element), qPrintable(chg));
+    QString s = QString::asprintf("%-6s%5d %4s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %4s%2s%2s",
+                                  qPrintable(record_name), num, qPrintable(name), qPrintable(altloc),
+                                  qPrintable(resname), qPrintable(chainid), resnum, qPrintable(icode), x, y, z,
+                                  occupancy, tempfactor, qPrintable(segid), qPrintable(element), qPrintable(chg));
 
     return s.trimmed();
-/*
-    qsnprintf(line, 82,
-     "%-6s%5d %4s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %4s%2s%2s",
-            qPrintable(record_name), num, qPrintable(name),
-            qPrintable(altloc), qPrintable(resname), qPrintable(chainid),
-            resnum, qPrintable(icode), x, y, z, occupancy, tempfactor,
-            qPrintable(segid), qPrintable(element), qPrintable(chg));
+    /*
+        qsnprintf(line, 82,
+         "%-6s%5d %4s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %4s%2s%2s",
+                qPrintable(record_name), num, qPrintable(name),
+                qPrintable(altloc), qPrintable(resname), qPrintable(chainid),
+                resnum, qPrintable(icode), x, y, z, occupancy, tempfactor,
+                qPrintable(segid), qPrintable(element), qPrintable(chg));
 
-    return QString::fromLocal8Bit(line).trimmed();*/
+        return QString::fromLocal8Bit(line).trimmed();*/
 }
 
 bool PDBAtom::isATOM() const
@@ -501,10 +513,10 @@ Element PDBAtom::guessElement() const
 {
     if (element.isEmpty())
     {
-        //we need to guess the element from the atom name - the
-        //element is the first two characters of the name, right
-        //justified
-        return Element( element.mid(0,2).trimmed() );
+        // we need to guess the element from the atom name - the
+        // element is the first two characters of the name, right
+        // justified
+        return Element(element.mid(0, 2).trimmed());
     }
     else
         return Element(element);
@@ -512,7 +524,7 @@ Element PDBAtom::guessElement() const
 
 Vector PDBAtom::coordinates() const
 {
-    return Vector(x,y,z);
+    return Vector(x, y, z);
 }
 
 ////////
@@ -538,15 +550,17 @@ void PDBMolecule::closeFrame()
 }
 
 PDBMolecule::PDBMolecule() : current_frame(-1)
-{}
+{
+}
 
 PDBMolecule::~PDBMolecule()
-{}
+{
+}
 
 void PDBMolecule::addAtom(const PDBAtom &atom)
 {
     if (current_frame == -1)
-        //open the default frame (1)
+        // open the default frame (1)
         this->openFrame(1);
 
     frames[current_frame].append(atom);
@@ -562,14 +576,15 @@ bool PDBMolecule::isEmpty() const
     return frames.isEmpty();
 }
 
-const QList<PDBAtom>& PDBMolecule::atoms(int frame) const
+const QList<PDBAtom> &PDBMolecule::atoms(int frame) const
 {
-    QMap< int,QList<PDBAtom> >::const_iterator it = frames.constFind(frame);
+    QMap<int, QList<PDBAtom>>::const_iterator it = frames.constFind(frame);
 
     if (it == frames.constEnd())
-        throw SireError::invalid_index( QObject::tr(
-            "There is no frame at index %1. Available frames are %2.")
-                .arg(frame).arg( Sire::toString(frames.keys()) ), CODELOC );
+        throw SireError::invalid_index(QObject::tr("There is no frame at index %1. Available frames are %2.")
+                                           .arg(frame)
+                                           .arg(Sire::toString(frames.keys())),
+                                       CODELOC);
 
     return *it;
 }
@@ -579,8 +594,8 @@ bool PDBMolecule::hasMultipleOccupancy(int frame) const
     foreach (const PDBAtom &atom, frames.value(frame))
     {
         if (atom.occupancy < 1)
-            //as the sum of occupancies for a site must equal 1,
-            //this implies that we do have multiple occupancy in this frame
+            // as the sum of occupancies for a site must equal 1,
+            // this implies that we do have multiple occupancy in this frame
             return true;
     }
 
@@ -596,12 +611,13 @@ bool PDBMolecule::hasMultipleFrames() const
 //////// Implementation of PDBMolecules
 ////////
 
-PDBMolecules::PDBMolecules() : last_frame(0), current_molecule(-1),
-                               frame_opened(false), molecule_opened(false)
-{}
+PDBMolecules::PDBMolecules() : last_frame(0), current_molecule(-1), frame_opened(false), molecule_opened(false)
+{
+}
 
 PDBMolecules::~PDBMolecules()
-{}
+{
+}
 
 void PDBMolecules::closeMolecule()
 {
@@ -612,7 +628,7 @@ void PDBMolecules::closeMolecule()
 
         if (mol.isEmpty())
         {
-            //remove the empty molecule
+            // remove the empty molecule
             mols.removeAt(current_molecule);
 
             --current_molecule;
@@ -622,7 +638,7 @@ void PDBMolecules::closeMolecule()
     molecule_opened = false;
 }
 
-PDBMolecule& PDBMolecules::nextMolecule()
+PDBMolecule &PDBMolecules::nextMolecule()
 {
     if (molecule_opened)
         this->closeMolecule();
@@ -649,9 +665,7 @@ int PDBMolecules::openFrame(int frame_number)
 
     current_molecule = -1;
 
-    for (QList<PDBMolecule>::iterator it = mols.begin();
-         it != mols.end();
-         ++it)
+    for (QList<PDBMolecule>::iterator it = mols.begin(); it != mols.end(); ++it)
     {
         it->openFrame(frame_number);
     }
@@ -664,9 +678,7 @@ int PDBMolecules::openFrame(int frame_number)
 
 void PDBMolecules::closeFrame()
 {
-    for (QList<PDBMolecule>::iterator it = mols.begin();
-         it != mols.end();
-         ++it)
+    for (QList<PDBMolecule>::iterator it = mols.begin(); it != mols.end(); ++it)
     {
         it->closeFrame();
     }
@@ -684,7 +696,7 @@ bool PDBMolecules::moleculeOpened() const
     return molecule_opened;
 }
 
-const QList<PDBMolecule>& PDBMolecules::molecules() const
+const QList<PDBMolecule> &PDBMolecules::molecules() const
 {
     return mols;
 }
@@ -705,7 +717,7 @@ QDataStream &operator<<(QDataStream &ds, const PDB &pdb)
 {
     writeHeader(ds, r_pdb, 1);
 
-    ds << static_cast<const IOBase&>(pdb);
+    ds << static_cast<const IOBase &>(pdb);
 
     return ds;
 }
@@ -717,7 +729,7 @@ QDataStream &operator>>(QDataStream &ds, PDB &pdb)
 
     if (v == 1)
     {
-        ds >> static_cast<IOBase&>(pdb);
+        ds >> static_cast<IOBase &>(pdb);
     }
     else
         throw version_error(v, "1", r_pdb, CODELOC);
@@ -728,32 +740,35 @@ QDataStream &operator>>(QDataStream &ds, PDB &pdb)
 PDBParameters PDB::pdbparams;
 
 /** Constructor */
-PDB::PDB() : ConcreteProperty<PDB,IOBase>()
-{}
+PDB::PDB() : ConcreteProperty<PDB, IOBase>()
+{
+}
 
 /** Copy constructor */
-PDB::PDB(const PDB &other) : ConcreteProperty<PDB,IOBase>(other)
-{}
+PDB::PDB(const PDB &other) : ConcreteProperty<PDB, IOBase>(other)
+{
+}
 
 /** Destructor */
 PDB::~PDB()
-{}
+{
+}
 
 /** Copy assignment operator */
-PDB& PDB::operator=(const PDB &other)
+PDB &PDB::operator=(const PDB &other)
 {
     IOBase::operator=(other);
     return *this;
 }
 
 /** Comparison operator */
-bool PDB::operator==(const PDB&) const
+bool PDB::operator==(const PDB &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool PDB::operator!=(const PDB&) const
+bool PDB::operator!=(const PDB &) const
 {
     return false;
 }
@@ -762,32 +777,33 @@ class PDBResidue
 {
 public:
     PDBResidue()
-    {}
+    {
+    }
 
     PDBResidue(const PDBAtom &atom)
-         : resname(atom.resname), resnum(atom.resseq),
-           icode(atom.icode), chainname(atom.chainid)
-    {}
+        : resname(atom.resname), resnum(atom.resseq), icode(atom.icode), chainname(atom.chainid)
+    {
+    }
 
     ~PDBResidue()
-    {}
+    {
+    }
 
     bool operator==(const PDBResidue &other) const
     {
-        return resname == other.resname and resnum == other.resnum and
-               icode == other.icode and chainname == other.chainname;
+        return resname == other.resname and resnum == other.resnum and icode == other.icode and
+               chainname == other.chainname;
     }
 
     bool operator!=(const PDBResidue &other) const
     {
-        return resname != other.resname or resnum != other.resnum or
-               icode != other.icode or chainname != other.chainname;
+        return resname != other.resname or resnum != other.resnum or icode != other.icode or
+               chainname != other.chainname;
     }
 
     bool isEmpty() const
     {
-        return resname.isEmpty() and resnum.isNull() and icode.isEmpty()
-                  and chainname.isEmpty();
+        return resname.isEmpty() and resnum.isNull() and icode.isEmpty() and chainname.isEmpty();
     }
 
     ResName resname;
@@ -797,13 +813,12 @@ public:
 };
 
 /** Convert a list of PDBAtoms into a molecule */
-static Molecule convert(const QList<PDBAtom> &pdbatoms,
-                        const PropertyMap &map)
+static Molecule convert(const QList<PDBAtom> &pdbatoms, const PropertyMap &map)
 {
     if (pdbatoms.isEmpty())
         return Molecule();
 
-    //get the manglers for the atom, residue, chain and segment names
+    // get the manglers for the atom, residue, chain and segment names
     StringManglerPtr atommangler, resmangler, chainmangler, segmangler;
 
     PropertyName atommangler_property = map[PDB::parameters().atomNameMangler()];
@@ -823,41 +838,41 @@ static Molecule convert(const QList<PDBAtom> &pdbatoms,
     if (segmangler_property.hasValue())
         segmangler = segmangler_property.value().asA<StringMangler>();
 
-    //editor for the molecule
+    // editor for the molecule
     MolStructureEditor moleditor;
 
-    //create the array that holds the location of each atom in the
-    //molecule. This is because some of these atoms may be alternates,
-    //so are not included directly in the molecule. This means that
-    //the ith atom in pdbatoms may not be the ith atom in the molecule.
-    //The 'atomlocations' array maps the ith atom in pdbatoms to
-    //the jth atom in the molecule (or -1 if this is an alternate)
+    // create the array that holds the location of each atom in the
+    // molecule. This is because some of these atoms may be alternates,
+    // so are not included directly in the molecule. This means that
+    // the ith atom in pdbatoms may not be the ith atom in the molecule.
+    // The 'atomlocations' array maps the ith atom in pdbatoms to
+    // the jth atom in the molecule (or -1 if this is an alternate)
     int natoms = pdbatoms.count();
 
     QVector<int> atomlocations(natoms);
     int *atomlocations_array = atomlocations.data();
 
-    //create an array that holds the index of the residue to which
-    //the ith atom in pdbatoms belongs (or -1 if this atom is an
-    //alternate or does not belong in any residue)
+    // create an array that holds the index of the residue to which
+    // the ith atom in pdbatoms belongs (or -1 if this atom is an
+    // alternate or does not belong in any residue)
     QVector<int> resparent(natoms);
     int *resparent_array = resparent.data();
 
-    //this is a list of all of the residues in the order they
-    //appear in pdbatoms
+    // this is a list of all of the residues in the order they
+    // appear in pdbatoms
     QList<PDBResidue> pdbresidues;
 
-    //this contains the index of the primary atom of a set
-    //of alternates (each alternate must have an identical idstring)
-    QHash<QString,int> atom_idstrings;
+    // this contains the index of the primary atom of a set
+    // of alternates (each alternate must have an identical idstring)
+    QHash<QString, int> atom_idstrings;
 
     int atomidx = 0;
     int residx = 0;
     int current_res = -1;
 
-    //create the 'old_res' residue - a new residue is created
-    //whenever the residue information for the current atom is
-    //different to that of the previous atom
+    // create the 'old_res' residue - a new residue is created
+    // whenever the residue information for the current atom is
+    // different to that of the previous atom
     PDBResidue old_res(pdbatoms.at(0));
 
     if (not old_res.isEmpty())
@@ -868,30 +883,30 @@ static Molecule convert(const QList<PDBAtom> &pdbatoms,
         ++residx;
     }
 
-    //read through all of the atoms, and as a first step,
-    //just assign each one to a place in the molecule and to a residue
-    for (int i=0; i<natoms; ++i)
+    // read through all of the atoms, and as a first step,
+    // just assign each one to a place in the molecule and to a residue
+    for (int i = 0; i < natoms; ++i)
     {
         const PDBAtom &pdbatom = pdbatoms.at(i);
 
         if (not pdbatom.altloc.isEmpty())
         {
-            //this atom has an alternate location ID
+            // this atom has an alternate location ID
             if (atom_idstrings.contains(pdbatom.idstring))
             {
-                //one of the other alternates of this atom has
-                //already been read, so we don't need to include
-                //this atom in the molecule directly
+                // one of the other alternates of this atom has
+                // already been read, so we don't need to include
+                // this atom in the molecule directly
 
-                //though we do want to find the atom with the largest
-                //occupancy...
+                // though we do want to find the atom with the largest
+                // occupancy...
                 int alt_idx = atom_idstrings.value(pdbatom.idstring);
                 const PDBAtom &alt_atom = pdbatoms.at(alt_idx);
 
                 if (alt_atom.occupancy < pdbatom.occupancy)
                 {
-                    //this atom has a higher occupancy - make it the
-                    //dominant alternative atom
+                    // this atom has a higher occupancy - make it the
+                    // dominant alternative atom
                     atomlocations_array[i] = atomlocations_array[alt_idx];
                     atomlocations_array[alt_idx] = -1;
 
@@ -906,18 +921,18 @@ static Molecule convert(const QList<PDBAtom> &pdbatoms,
                     resparent_array[i] = -1;
                 }
 
-                //we've now finished with this atom
+                // we've now finished with this atom
                 continue;
             }
             else
             {
-                //this is the first of a (possible) set of alternate
-                //atoms. Record its location
+                // this is the first of a (possible) set of alternate
+                // atoms. Record its location
                 atom_idstrings.insert(pdbatom.idstring, i);
             }
         }
 
-        //add this new atom to the molecule
+        // add this new atom to the molecule
         atomlocations_array[i] = atomidx;
         ++atomidx;
 
@@ -925,7 +940,7 @@ static Molecule convert(const QList<PDBAtom> &pdbatoms,
 
         if (pdbres != old_res)
         {
-            //this is a new residue as well
+            // this is a new residue as well
             if (not pdbres.isEmpty())
             {
                 pdbresidues.append(pdbres);
@@ -941,8 +956,8 @@ static Molecule convert(const QList<PDBAtom> &pdbatoms,
         resparent_array[i] = current_res;
     }
 
-    //we now know the location of every residue in the molecule,
-    //so lets create them all!
+    // we now know the location of every residue in the molecule,
+    // so lets create them all!
     QSet<ChainName> created_chains;
     QList<QString> pdbchains;
 
@@ -951,68 +966,68 @@ static Molecule convert(const QList<PDBAtom> &pdbatoms,
         ResStructureEditor reseditor = moleditor.add(pdbresidue.resnum);
 
         if (not pdbresidue.resname.isEmpty())
-            reseditor.rename( ResName(resmangler->mangle(pdbresidue.resname)) );
+            reseditor.rename(ResName(resmangler->mangle(pdbresidue.resname)));
 
         if (not pdbresidue.chainname.isEmpty())
         {
-            //this residue is part of a chain - add the residue to the chain
+            // this residue is part of a chain - add the residue to the chain
             if (not created_chains.contains(pdbresidue.chainname))
             {
-                moleditor.add( ChainName(chainmangler->mangle(pdbresidue.chainname)) );
+                moleditor.add(ChainName(chainmangler->mangle(pdbresidue.chainname)));
                 created_chains.insert(pdbresidue.chainname);
                 pdbchains.append(pdbresidue.chainname);
             }
 
-            reseditor.reparent( ChainName(chainmangler->mangle(pdbresidue.chainname)) );
-       }
+            reseditor.reparent(ChainName(chainmangler->mangle(pdbresidue.chainname)));
+        }
     }
 
-    //now we have created all of the residues, we can now create
-    //all of the atoms
+    // now we have created all of the residues, we can now create
+    // all of the atoms
     atomidx = 0;
     QSet<QString> created_segments;
     QList<QString> pdbsegs;
 
-    for (int i=0; i<natoms; ++i)
+    for (int i = 0; i < natoms; ++i)
     {
-        //is this an alternative atom?
+        // is this an alternative atom?
         if (atomlocations_array[i] == -1)
         {
-            //yes it is - we don't add these directly to the molecule
+            // yes it is - we don't add these directly to the molecule
             continue;
         }
 
         const PDBAtom &pdbatom = pdbatoms.at(i);
 
-        //add the atom to the molecule
+        // add the atom to the molecule
         BOOST_ASSERT(atomlocations_array[i] == atomidx);
         ++atomidx;
 
-        AtomStructureEditor atomeditor = moleditor.add( AtomNum(pdbatom.serial) );
+        AtomStructureEditor atomeditor = moleditor.add(AtomNum(pdbatom.serial));
 
         if (not pdbatom.name.isEmpty())
-            atomeditor.rename( AtomName(atommangler->mangle(pdbatom.name)) );
+            atomeditor.rename(AtomName(atommangler->mangle(pdbatom.name)));
 
-        //place this atom into a residue (if it belongs in one)
+        // place this atom into a residue (if it belongs in one)
         if (resparent_array[i] != -1)
-            atomeditor.reparent( ResIdx(resparent_array[i]) );
+            atomeditor.reparent(ResIdx(resparent_array[i]));
 
-        //place this atom into a segment (if it belongs in one)
+        // place this atom into a segment (if it belongs in one)
         if (not pdbatom.segid.isEmpty())
         {
             if (not created_segments.contains(pdbatom.segid))
             {
-                moleditor.add( SegName(segmangler->mangle(pdbatom.segid)) );
+                moleditor.add(SegName(segmangler->mangle(pdbatom.segid)));
                 created_segments.insert(pdbatom.segid);
                 pdbsegs.append(pdbatom.segid);
             }
 
-            atomeditor.reparent( SegName(segmangler->mangle(pdbatom.segid)) );
+            atomeditor.reparent(SegName(segmangler->mangle(pdbatom.segid)));
         }
     }
 
-    //now we have the layout, use the supplied function to
-    //break this molecule down into CutGroups...
+    // now we have the layout, use the supplied function to
+    // break this molecule down into CutGroups...
     CutFuncPtr cutfunc;
 
     PropertyName cutfunc_property = map[PDB::parameters().cuttingFunction()];
@@ -1022,279 +1037,250 @@ static Molecule convert(const QList<PDBAtom> &pdbatoms,
 
     moleditor = (*cutfunc)(moleditor);
 
-    //ok, we've now built the structure of the molecule, so commit it!
+    // ok, we've now built the structure of the molecule, so commit it!
     Molecule molecule = moleditor.commit();
 
-    //shall we save the coordinates?
+    // shall we save the coordinates?
     PropertyName coords_property = map[PDB::parameters().coordinates()];
 
     if (coords_property.hasSource())
     {
-        //now build the coordinates - it is inefficient to do this
-        //atom by atom, as the bounding sphere for each CutGroup would
-        //be calculated after setting the coordinates of each atom. We
-        //therefore have to place the coordinates all into a large
-        //array, and then convert them into CoordGroups in one go
-        QVector< QVector<Vector> > atomcoords( molecule.nCutGroups() );
+        // now build the coordinates - it is inefficient to do this
+        // atom by atom, as the bounding sphere for each CutGroup would
+        // be calculated after setting the coordinates of each atom. We
+        // therefore have to place the coordinates all into a large
+        // array, and then convert them into CoordGroups in one go
+        QVector<QVector<Vector>> atomcoords(molecule.nCutGroups());
         QVector<Vector> *atomcoords_array = atomcoords.data();
 
-        for (CGIdx i(0); i<molecule.nCutGroups(); ++i)
+        for (CGIdx i(0); i < molecule.nCutGroups(); ++i)
         {
-            atomcoords_array[i] = QVector<Vector>( molecule.data().info().nAtoms(i) );
+            atomcoords_array[i] = QVector<Vector>(molecule.data().info().nAtoms(i));
         }
 
-        for (int i=0; i<natoms; ++i)
+        for (int i = 0; i < natoms; ++i)
         {
-            //is this an alternative atom?
+            // is this an alternative atom?
             if (atomlocations_array[i] == -1)
             {
-                //yes it is - we need to add this to the alternative
-                //atoms property...
+                // yes it is - we need to add this to the alternative
+                // atoms property...
                 continue;
             }
 
             const PDBAtom &pdbatom = pdbatoms.at(i);
 
-            const CGAtomIdx &cgatomidx = molecule.data().info()
-                                           .cgAtomIdx(AtomIdx(atomlocations_array[i]));
+            const CGAtomIdx &cgatomidx = molecule.data().info().cgAtomIdx(AtomIdx(atomlocations_array[i]));
 
-            //set the coordinates
-            atomcoords_array[cgatomidx.cutGroup()][cgatomidx.atom()]
-                                = Vector(pdbatom.x, pdbatom.y, pdbatom.z);
+            // set the coordinates
+            atomcoords_array[cgatomidx.cutGroup()][cgatomidx.atom()] = Vector(pdbatom.x, pdbatom.y, pdbatom.z);
         }
 
-        molecule = molecule.edit()
-                       .setProperty(coords_property.source(), AtomCoords(atomcoords))
-                       .commit();
+        molecule = molecule.edit().setProperty(coords_property.source(), AtomCoords(atomcoords)).commit();
     }
 
-    //shall we save the element types of the atom?
+    // shall we save the element types of the atom?
     PropertyName elements_property = map[PDB::parameters().element()];
 
     if (elements_property.hasSource())
     {
         AtomElements elements(molecule.data().info());
 
-        for (int i=0; i<natoms; ++i)
+        for (int i = 0; i < natoms; ++i)
         {
             if (atomlocations_array[i] == -1)
                 continue;
 
             const PDBAtom &pdbatom = pdbatoms.at(i);
 
-            const CGAtomIdx &cgatomidx = molecule.data().info()
-                                           .cgAtomIdx(AtomIdx(atomlocations_array[i]));
+            const CGAtomIdx &cgatomidx = molecule.data().info().cgAtomIdx(AtomIdx(atomlocations_array[i]));
 
-            //save the element
+            // save the element
             if (not pdbatom.element.isEmpty())
                 elements.set(cgatomidx, Element(pdbatom.element));
             else
-                //get the element from the first two characters of the
-                //atom name
-                elements.set(cgatomidx, Element(pdbatom.name.mid(0,2).trimmed()));
+                // get the element from the first two characters of the
+                // atom name
+                elements.set(cgatomidx, Element(pdbatom.name.mid(0, 2).trimmed()));
         }
 
-        molecule = molecule.edit()
-                           .setProperty(elements_property.source(), elements)
-                           .commit();
+        molecule = molecule.edit().setProperty(elements_property.source(), elements).commit();
     }
 
-    //shall we save the temperature (b) factors?
+    // shall we save the temperature (b) factors?
     PropertyName bfactor_property = map[PDB::parameters().bFactor()];
 
     if (bfactor_property.hasSource())
     {
-        AtomFloatProperty bfactors( molecule.data().info() );
+        AtomFloatProperty bfactors(molecule.data().info());
 
-        for (int i=0; i<natoms; ++i)
+        for (int i = 0; i < natoms; ++i)
         {
             if (atomlocations_array[i] == -1)
                 continue;
 
             const PDBAtom &pdbatom = pdbatoms.at(i);
 
-            const CGAtomIdx &cgatomidx = molecule.data().info()
-                                           .cgAtomIdx(AtomIdx(atomlocations_array[i]));
+            const CGAtomIdx &cgatomidx = molecule.data().info().cgAtomIdx(AtomIdx(atomlocations_array[i]));
 
-            //save the b-factor
+            // save the b-factor
             bfactors.set(cgatomidx, pdbatom.tempfactor);
         }
 
-        molecule = molecule.edit()
-                           .setProperty(bfactor_property.source(), bfactors)
-                           .commit();
+        molecule = molecule.edit().setProperty(bfactor_property.source(), bfactors).commit();
     }
 
-    //shall we save the atom's formal charge?
+    // shall we save the atom's formal charge?
     PropertyName formalcharge_property = map[PDB::parameters().formalCharge()];
 
     if (formalcharge_property.hasSource())
     {
-        AtomCharges charges( molecule.data().info() );
+        AtomCharges charges(molecule.data().info());
 
-        for (int i=0; i<natoms; ++i)
+        for (int i = 0; i < natoms; ++i)
         {
             if (atomlocations_array[i] == -1)
                 continue;
 
             const PDBAtom &pdbatom = pdbatoms.at(i);
 
-            const CGAtomIdx &cgatomidx = molecule.data().info()
-                                           .cgAtomIdx(AtomIdx(atomlocations_array[i]));
+            const CGAtomIdx &cgatomidx = molecule.data().info().cgAtomIdx(AtomIdx(atomlocations_array[i]));
 
-            //save the charge
+            // save the charge
             charges.set(cgatomidx, pdbatom.charge * SireUnits::mod_electron);
         }
 
-        molecule = molecule.edit()
-                           .setProperty(formalcharge_property.source(), charges)
-                           .commit();
+        molecule = molecule.edit().setProperty(formalcharge_property.source(), charges).commit();
     }
 
-    //shall we save the original PDB atom name?
+    // shall we save the original PDB atom name?
     PropertyName pdbatomname_property = map[PDB::parameters().pdbAtomName()];
 
     if (pdbatomname_property.hasSource())
     {
-        AtomStringProperty atomnames( molecule.data().info() );
+        AtomStringProperty atomnames(molecule.data().info());
 
-        for (int i=0; i<natoms; ++i)
+        for (int i = 0; i < natoms; ++i)
         {
             if (atomlocations_array[i] == -1)
                 continue;
 
             const PDBAtom &pdbatom = pdbatoms.at(i);
 
-            const CGAtomIdx &cgatomidx = molecule.data().info()
-                                           .cgAtomIdx(AtomIdx(atomlocations_array[i]));
+            const CGAtomIdx &cgatomidx = molecule.data().info().cgAtomIdx(AtomIdx(atomlocations_array[i]));
 
-            //save the original atom name
+            // save the original atom name
             atomnames.set(cgatomidx, SireMol::cacheName(pdbatom.name));
         }
 
-        molecule = molecule.edit()
-                           .setProperty(pdbatomname_property.source(), atomnames)
-                           .commit();
+        molecule = molecule.edit().setProperty(pdbatomname_property.source(), atomnames).commit();
     }
 
-    //shall we save the residue insertion code?
+    // shall we save the residue insertion code?
     PropertyName icode_property = map[PDB::parameters().iCode()];
 
     if (icode_property.hasSource())
     {
-        ResStringProperty icodes( molecule.data().info() );
+        ResStringProperty icodes(molecule.data().info());
 
-        for (int i=0; i<pdbresidues.count(); ++i)
+        for (int i = 0; i < pdbresidues.count(); ++i)
         {
             const PDBResidue &pdbres = pdbresidues.at(i);
 
-            icodes.set( ResIdx(i), SireMol::cacheName(pdbres.icode) );
+            icodes.set(ResIdx(i), SireMol::cacheName(pdbres.icode));
         }
 
-        molecule = molecule.edit()
-                           .setProperty(icode_property.source(), icodes)
-                           .commit();
+        molecule = molecule.edit().setProperty(icode_property.source(), icodes).commit();
     }
 
-    //shall we save the original PDB residue names?
+    // shall we save the original PDB residue names?
     PropertyName pdbresnames_property = map[PDB::parameters().pdbResidueName()];
 
     if (pdbresnames_property.hasSource())
     {
-        ResStringProperty resnames( molecule.data().info() );
+        ResStringProperty resnames(molecule.data().info());
 
-        for (int i=0; i<pdbresidues.count(); ++i)
+        for (int i = 0; i < pdbresidues.count(); ++i)
         {
             const PDBResidue &pdbres = pdbresidues.at(i);
 
-            resnames.set( ResIdx(i), SireMol::cacheName(pdbres.resname) );
+            resnames.set(ResIdx(i), SireMol::cacheName(pdbres.resname));
         }
 
-        molecule = molecule.edit()
-                           .setProperty(pdbresnames_property.source(), resnames)
-                           .commit();
+        molecule = molecule.edit().setProperty(pdbresnames_property.source(), resnames).commit();
     }
 
-    //shall we save the original PDB chain names?
+    // shall we save the original PDB chain names?
     PropertyName pdbchainnames_property = map[PDB::parameters().pdbChainName()];
 
     if (pdbchainnames_property.hasSource())
     {
-        ChainStringProperty chainnames( molecule.data().info() );
+        ChainStringProperty chainnames(molecule.data().info());
 
-        for (int i=0; i<pdbchains.count(); ++i)
+        for (int i = 0; i < pdbchains.count(); ++i)
         {
-            chainnames.set( ChainIdx(i), SireMol::cacheName(pdbchains.at(i)) );
+            chainnames.set(ChainIdx(i), SireMol::cacheName(pdbchains.at(i)));
         }
 
-        molecule = molecule.edit()
-                           .setProperty(pdbchainnames_property.source(), chainnames)
-                           .commit();
+        molecule = molecule.edit().setProperty(pdbchainnames_property.source(), chainnames).commit();
     }
 
-    //shall we save the original PDB segment names?
+    // shall we save the original PDB segment names?
     PropertyName pdbsegnames_property = map[PDB::parameters().pdbSegmentName()];
 
     if (pdbsegnames_property.hasSource())
     {
-        SegStringProperty segnames( molecule.data().info() );
+        SegStringProperty segnames(molecule.data().info());
 
-        for (int i=0; i<pdbsegs.count(); ++i)
+        for (int i = 0; i < pdbsegs.count(); ++i)
         {
-            segnames.set( SegIdx(i), SireMol::cacheName(pdbsegs.at(i)) );
+            segnames.set(SegIdx(i), SireMol::cacheName(pdbsegs.at(i)));
         }
 
-        molecule = molecule.edit()
-                           .setProperty(pdbsegnames_property.source(), segnames)
-                           .commit();
+        molecule = molecule.edit().setProperty(pdbsegnames_property.source(), segnames).commit();
     }
 
     return molecule;
 }
 
 /** Convert a PDBMolecule to a Molecule */
-static Molecule convert(const PDBMolecule &pdbmol, int first_frame,
-                        int last_frame,
-                        const PropertyMap &map)
+static Molecule convert(const PDBMolecule &pdbmol, int first_frame, int last_frame, const PropertyMap &map)
 {
-    BOOST_ASSERT( first_frame <= last_frame );
+    BOOST_ASSERT(first_frame <= last_frame);
 
     QList<int> available_frames = pdbmol.availableFrames();
 
     if (available_frames.isEmpty())
         return Molecule();
 
-    //create a molecule from the first frame
+    // create a molecule from the first frame
     int first_available_frame = available_frames.takeFirst();
 
-    BOOST_ASSERT( first_available_frame >= first_frame and
-                  first_available_frame <= last_frame );
+    BOOST_ASSERT(first_available_frame >= first_frame and first_available_frame <= last_frame);
 
     Molecule molecule = convert(pdbmol.atoms(first_available_frame), map);
 
     if (not available_frames.isEmpty())
     {
-        ///there are more frames to read...
+        /// there are more frames to read...
         foreach (int framenum, available_frames)
         {
             Molecule next_frame = convert(pdbmol.atoms(framenum), map);
 
-            //add this frame onto the molecule
+            // add this frame onto the molecule
         }
     }
-    else if (first_available_frame != first_frame or
-             first_frame != last_frame)
+    else if (first_available_frame != first_frame or first_frame != last_frame)
     {
-        //tell the molecule that it exists only at a single
-        //frame within an animation
+        // tell the molecule that it exists only at a single
+        // frame within an animation
     }
 
     return molecule;
 }
 
 /** Read a group of molecules from the data */
-MoleculeGroup PDB::readMols(const QByteArray &data,
-                            const PropertyMap &map) const
+MoleculeGroup PDB::readMols(const QByteArray &data, const PropertyMap &map) const
 {
     // See the PDB format description for details on the format
     //
@@ -1302,7 +1288,7 @@ MoleculeGroup PDB::readMols(const QByteArray &data,
     // Version 2.3 <http://www.wwpdb.org/documentation/format2.3-0108-a4.pdf>
     //
 
-    //connect a text stream to this bytearray so that we can read it as text
+    // connect a text stream to this bytearray so that we can read it as text
     QTextStream ts(data, QIODevice::ReadOnly | QIODevice::Text);
 
     PDBMolecules pdbmols;
@@ -1316,7 +1302,7 @@ MoleculeGroup PDB::readMols(const QByteArray &data,
     {
         ++linenum;
 
-        //read a line from the file
+        // read a line from the file
         QString line = ts.readLine();
 
         if (line.startsWith("END"))
@@ -1324,17 +1310,16 @@ MoleculeGroup PDB::readMols(const QByteArray &data,
             QStringList words = line.split(" ", Qt::SkipEmptyParts);
 
             if (words[0].length() == 3)
-                //this is the end of the PDB file
+                // this is the end of the PDB file
                 break;
         }
 
-        if (line.startsWith("ATOM", Qt::CaseInsensitive) or
-            line.startsWith("HETATM", Qt::CaseInsensitive))
+        if (line.startsWith("ATOM", Qt::CaseInsensitive) or line.startsWith("HETATM", Qt::CaseInsensitive))
         {
             if (not pdbmols.moleculeOpened())
                 current_molecule = &(pdbmols.nextMolecule());
 
-            current_molecule->addAtom( PDBAtom::readFromLine(line, linenum) );
+            current_molecule->addAtom(PDBAtom::readFromLine(line, linenum));
         }
         else if (line.startsWith("TER", Qt::CaseInsensitive))
         {
@@ -1342,23 +1327,23 @@ MoleculeGroup PDB::readMols(const QByteArray &data,
         }
         else if (line.startsWith("MODEL", Qt::CaseInsensitive))
         {
-            //we've started a new model
+            // we've started a new model
             if (pdbmols.frameOpened())
             {
-                throw SireIO::parse_error( QObject::tr(
-                    "Encountered a 'MODEL' entry at line %1 "
-                    "before the previous model has been terminated "
-                    "(via a valid ENDMDL line).")
-                        .arg(linenum), CODELOC );
+                throw SireIO::parse_error(QObject::tr("Encountered a 'MODEL' entry at line %1 "
+                                                      "before the previous model has been terminated "
+                                                      "(via a valid ENDMDL line).")
+                                              .arg(linenum),
+                                          CODELOC);
             }
 
             bool ok;
-            int frame_number = line.mid(10,4).toInt(&ok);
+            int frame_number = line.mid(10, 4).toInt(&ok);
 
             if (not ok)
                 frame_number = -1;
 
-            opened_frames.append( pdbmols.openFrame(frame_number) );
+            opened_frames.append(pdbmols.openFrame(frame_number));
         }
         else if (line.startsWith("ENDMDL", Qt::CaseInsensitive))
         {
@@ -1377,12 +1362,12 @@ MoleculeGroup PDB::readMols(const QByteArray &data,
     }
 
     if (pdbmols.isEmpty())
-        //no molecules have been loaded!
+        // no molecules have been loaded!
         return MoleculeGroup();
 
     int first_frame, last_frame;
 
-    //get the range of frames loaded
+    // get the range of frames loaded
     if (not opened_frames.isEmpty())
     {
         std::sort(opened_frames.begin(), opened_frames.end());
@@ -1392,12 +1377,12 @@ MoleculeGroup PDB::readMols(const QByteArray &data,
     }
     else
     {
-        //this wasn't an animation
+        // this wasn't an animation
         first_frame = 1;
         last_frame = 1;
     }
 
-    //we now need to convert each PDBMolecule into a real molecule
+    // we now need to convert each PDBMolecule into a real molecule
     MoleculeGroup molgroup;
 
     foreach (const PDBMolecule &pdbmol, pdbmols.molecules())
@@ -1418,52 +1403,52 @@ int getValence(const Element &element)
 {
     switch (element.nProtons())
     {
-        case 1:
-            return 1;
-        case 2:
-            return 0;
-        case 3:
-            return 1;
-        case 4:
-            return 2;
-        case 5:
-            return 3;
-        case 6:
-            return 4;
-        case 7:
-            return 3;
-        case 8:
-            return 2;
-        case 9:
-            return 1;
-        case 10:
-            return 0;
-        case 11:
-            return 1;
-        case 12:
-            return 2;
-        case 13:
-            return 3;
-        case 14:
-            return 4;
-        case 15:
-            return 3;
-        case 16:
-            return 2;
-        case 17:
-            return 1;
-        case 18:
-            return 0;
-        case 19:
-            return 1;
-        case 20:
-            return 20;
-        case 35:
-            return 1;
-        case 53:
-            return 1;
-        default:
-            return -1;
+    case 1:
+        return 1;
+    case 2:
+        return 0;
+    case 3:
+        return 1;
+    case 4:
+        return 2;
+    case 5:
+        return 3;
+    case 6:
+        return 4;
+    case 7:
+        return 3;
+    case 8:
+        return 2;
+    case 9:
+        return 1;
+    case 10:
+        return 0;
+    case 11:
+        return 1;
+    case 12:
+        return 2;
+    case 13:
+        return 3;
+    case 14:
+        return 4;
+    case 15:
+        return 3;
+    case 16:
+        return 2;
+    case 17:
+        return 1;
+    case 18:
+        return 0;
+    case 19:
+        return 1;
+    case 20:
+        return 20;
+    case 35:
+        return 1;
+    case 53:
+        return 1;
+    default:
+        return -1;
     }
 }
 
@@ -1483,36 +1468,34 @@ AtomCharges guessFormalCharges(const MoleculeView &molview, const PropertyMap &m
     const PropertyName element_property = map["element"];
     const PropertyName chg_property = map["charge"];
 
-    if (not (molecule.hasProperty(chg_property) and
-             molecule.hasProperty(connectivity_property) and
-             molecule.hasProperty(element_property)))
+    if (not(molecule.hasProperty(chg_property) and molecule.hasProperty(connectivity_property) and
+            molecule.hasProperty(element_property)))
     {
-        //we cannot work this out
+        // we cannot work this out
         return AtomCharges();
     }
 
-    const Connectivity &connectivity = molecule.property(connectivity_property)
-                                               .asA<Connectivity>();
+    const Connectivity &connectivity = molecule.property(connectivity_property).asA<Connectivity>();
 
-    //create space to hold the formal charges - these default to 0
-    AtomCharges formal_charges( molecule.data().info() );
+    // create space to hold the formal charges - these default to 0
+    AtomCharges formal_charges(molecule.data().info());
 
-    for (int i=0; i<molecule.nResidues(); ++i)
+    for (int i = 0; i < molecule.nResidues(); ++i)
     {
-        Residue res = molecule.residue( ResIdx(i) );
+        Residue res = molecule.residue(ResIdx(i));
 
-        //get the formal charge on the residue as a whole
-        const int res_chg = float( 0.5 + res.evaluate().charge(map) );
+        // get the formal charge on the residue as a whole
+        const int res_chg = float(0.5 + res.evaluate().charge(map));
 
-        //total valency charge for the residue
+        // total valency charge for the residue
         int valence_chg = 0;
 
-        //now go through each atom and work out its formal charge
+        // now go through each atom and work out its formal charge
         auto atoms = res.atoms();
 
         QVector<int> atom_chgs(atoms.count(), 0);
 
-        for (int j=0; j<atoms.count(); ++j)
+        for (int j = 0; j < atoms.count(); ++j)
         {
             Atom atom = atoms(j);
 
@@ -1523,14 +1506,13 @@ AtomCharges guessFormalCharges(const MoleculeView &molview, const PropertyMap &m
 
             if (nbonds == 0)
             {
-                //there are no bonds to this atom - it must have the charge
-                //it has from atomic partial charges
-                atom_chg = int(atom.property<SireUnits::Dimension::Charge>(chg_property).value()
-                                            + 0.5);
+                // there are no bonds to this atom - it must have the charge
+                // it has from atomic partial charges
+                atom_chg = int(atom.property<SireUnits::Dimension::Charge>(chg_property).value() + 0.5);
             }
             else
             {
-                if (e.nProtons() == 7  /*nitrogen*/)
+                if (e.nProtons() == 7 /*nitrogen*/)
                 {
                     int nvalence = getValence(e);
                     atom_chg = nbonds - nvalence;
@@ -1542,24 +1524,21 @@ AtomCharges guessFormalCharges(const MoleculeView &molview, const PropertyMap &m
 
                     if (atom_chg < 0)
                     {
-                        //we need to check for CO2-, and decide which O should have the charge
+                        // we need to check for CO2-, and decide which O should have the charge
                         if (nbonds == 1)
                         {
-                            Atom bonded_atom = molecule.atom(
-                                        *(connectivity.connectionsTo(atom.index()).begin()));
+                            Atom bonded_atom = molecule.atom(*(connectivity.connectionsTo(atom.index()).begin()));
 
-                            Element bonded_element = bonded_atom
-                                                        .property<Element>(element_property);
+                            Element bonded_element = bonded_atom.property<Element>(element_property);
 
                             if (bonded_element.nProtons() == 6 /*carbon*/)
                             {
-                                //is this bonded to another oxygen with one bond?
-                                QSet<AtomIdx> bonded = connectivity
-                                                            .connectionsTo(bonded_atom.index());
+                                // is this bonded to another oxygen with one bond?
+                                QSet<AtomIdx> bonded = connectivity.connectionsTo(bonded_atom.index());
 
                                 if (bonded.count() == 3)
                                 {
-                                    //this is a C=O double bond
+                                    // this is a C=O double bond
                                     atom_chg = 0;
 
                                     for (AtomIdx c_idx : bonded)
@@ -1569,13 +1548,12 @@ AtomCharges guessFormalCharges(const MoleculeView &molview, const PropertyMap &m
                                             if (connectivity.nConnections(c_idx) == 1)
                                             {
                                                 Atom c = molecule.atom(c_idx);
-                                                if (c.property<Element>(element_property)
-                                                     .nProtons() == 8)
+                                                if (c.property<Element>(element_property).nProtons() == 8)
                                                 {
-                                                    //this is another single-bonded oxygen
+                                                    // this is another single-bonded oxygen
                                                     if (c.index() < atom.index())
                                                     {
-                                                        //this highest index oxygen gets the charge
+                                                        // this highest index oxygen gets the charge
                                                         atom_chg = -1;
                                                     }
                                                 }
@@ -1596,14 +1574,13 @@ AtomCharges guessFormalCharges(const MoleculeView &molview, const PropertyMap &m
 
         if (valence_chg == res_chg)
         {
-            //we have got the formal charge on the residue to match the
-            //atomic partial charges, so it should be safe to use these values
-            for (int j=0; j<atom_chgs.count(); ++j)
+            // we have got the formal charge on the residue to match the
+            // atomic partial charges, so it should be safe to use these values
+            for (int j = 0; j < atom_chgs.count(); ++j)
             {
                 if (atom_chgs[j] != 0)
                 {
-                    formal_charges.set( atoms(j).cgAtomIdx(),
-                                        SireUnits::Dimension::Charge(atom_chgs[j]) );
+                    formal_charges.set(atoms(j).cgAtomIdx(), SireUnits::Dimension::Charge(atom_chgs[j]));
                 }
             }
         }
@@ -1612,10 +1589,9 @@ AtomCharges guessFormalCharges(const MoleculeView &molview, const PropertyMap &m
     return formal_charges;
 }
 
-int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
-                       int atomnum, const PropertyMap &map) const
+int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview, int atomnum, const PropertyMap &map) const
 {
-    //get the manglers for the atom, residue, chain and segment names
+    // get the manglers for the atom, residue, chain and segment names
     StringManglerPtr atommangler, resmangler, chainmangler, segmangler;
 
     PropertyName atommangler_property = map[PDB::parameters().atomNameMangler()];
@@ -1641,34 +1617,30 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
 
     Molecule mol(molview);
 
-    //map of AtomIdx to PDB atomnum
-    QHash<AtomIdx,int> atomidx_to_pdbnum;
+    // map of AtomIdx to PDB atomnum
+    QHash<AtomIdx, int> atomidx_to_pdbnum;
 
-    const AtomCoords &coords = mol.property(map[PDB::parameters().coordinates()])
-                                  .asA<AtomCoords>();
+    const AtomCoords &coords = mol.property(map[PDB::parameters().coordinates()]).asA<AtomCoords>();
 
     AtomElements elements;
 
     if (mol.hasProperty(map[PDB::parameters().element()]))
     {
-        elements = mol.property(map[PDB::parameters().element()])
-                      .asA<AtomElements>();
+        elements = mol.property(map[PDB::parameters().element()]).asA<AtomElements>();
     }
 
     AtomFloatProperty bfactor;
 
     if (mol.hasProperty(map[PDB::parameters().bFactor()]))
     {
-        bfactor = mol.property(map[PDB::parameters().bFactor()])
-                     .asA<AtomFloatProperty>();
+        bfactor = mol.property(map[PDB::parameters().bFactor()]).asA<AtomFloatProperty>();
     }
 
     AtomCharges charges;
 
     if (mol.hasProperty(map[PDB::parameters().formalCharge()]))
     {
-        charges = mol.property(map[PDB::parameters().formalCharge()])
-                     .asA<AtomCharges>();
+        charges = mol.property(map[PDB::parameters().formalCharge()]).asA<AtomCharges>();
     }
     else
     {
@@ -1679,45 +1651,40 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
 
     if (mol.hasProperty(map[PDB::parameters().pdbAtomName()]))
     {
-        pdbatomname = mol.property(map[PDB::parameters().pdbAtomName()])
-                         .asA<AtomStringProperty>();
+        pdbatomname = mol.property(map[PDB::parameters().pdbAtomName()]).asA<AtomStringProperty>();
     }
 
     ResStringProperty icode;
 
     if (mol.hasProperty(map[PDB::parameters().iCode()]))
     {
-        icode = mol.property(map[PDB::parameters().iCode()])
-                   .asA<ResStringProperty>();
+        icode = mol.property(map[PDB::parameters().iCode()]).asA<ResStringProperty>();
     }
 
     ResStringProperty pdbresname;
 
     if (mol.hasProperty(map[PDB::parameters().pdbResidueName()]))
     {
-        pdbresname = mol.property(PDB::parameters().pdbResidueName())
-                        .asA<ResStringProperty>();
+        pdbresname = mol.property(PDB::parameters().pdbResidueName()).asA<ResStringProperty>();
     }
 
     ChainStringProperty pdbchainname;
 
     if (mol.hasProperty(map[PDB::parameters().pdbChainName()]))
     {
-        pdbchainname = mol.property(map[PDB::parameters().pdbChainName()])
-                          .asA<ChainStringProperty>();
+        pdbchainname = mol.property(map[PDB::parameters().pdbChainName()]).asA<ChainStringProperty>();
     }
 
     SegStringProperty pdbsegname;
 
     if (mol.hasProperty(map[PDB::parameters().pdbSegmentName()]))
     {
-        pdbsegname = mol.property(map[PDB::parameters().pdbSegmentName()])
-                        .asA<SegStringProperty>();
+        pdbsegname = mol.property(map[PDB::parameters().pdbSegmentName()]).asA<SegStringProperty>();
     }
 
     int natoms = mol.nAtoms();
 
-    for (AtomIdx i(0); i<natoms; ++i)
+    for (AtomIdx i(0); i < natoms; ++i)
     {
         if (not selected_atoms.selected(i))
             continue;
@@ -1732,27 +1699,27 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
 
         atomidx_to_pdbnum.insert(atom.index(), atomnum);
 
-        if (pdbatomname.isEmpty() or pdbatomname[ atom.cgAtomIdx() ].isEmpty())
+        if (pdbatomname.isEmpty() or pdbatomname[atom.cgAtomIdx()].isEmpty())
         {
-            pdbatom.name = atommangler->mangle( atom.name() );
+            pdbatom.name = atommangler->mangle(atom.name());
         }
         else
-            pdbatom.name = pdbatomname[ atom.cgAtomIdx() ];
+            pdbatom.name = pdbatomname[atom.cgAtomIdx()];
 
         if (not elements.isEmpty())
-            pdbatom.element = elements[ atom.cgAtomIdx() ].symbol();
+            pdbatom.element = elements[atom.cgAtomIdx()].symbol();
 
-        const Vector &c = coords[ atom.cgAtomIdx() ];
+        const Vector &c = coords[atom.cgAtomIdx()];
 
         pdbatom.x = c.x();
         pdbatom.y = c.y();
         pdbatom.z = c.z();
 
         if (not charges.isEmpty())
-            pdbatom.charge = charges[ atom.cgAtomIdx() ];
+            pdbatom.charge = charges[atom.cgAtomIdx()];
 
         if (not bfactor.isEmpty())
-            pdbatom.tempfactor = bfactor[ atom.cgAtomIdx() ];
+            pdbatom.tempfactor = bfactor[atom.cgAtomIdx()];
         else
             pdbatom.tempfactor = 1;
 
@@ -1760,30 +1727,30 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
         {
             Residue residue = atom.residue();
 
-            if (pdbresname.isEmpty() or pdbresname[ residue.index() ].isEmpty())
+            if (pdbresname.isEmpty() or pdbresname[residue.index()].isEmpty())
                 pdbatom.resname = resmangler->mangle(residue.name());
 
             else
-                pdbatom.resname = pdbresname[ residue.index() ];
+                pdbatom.resname = pdbresname[residue.index()];
 
-	    // JM May 11. PDB file format does not support more than 4 chars
-	    if ( residue.number() > 9999 )
-	      pdbatom.resseq = 9999;
-	    else
-	      pdbatom.resseq = residue.number();
+            // JM May 11. PDB file format does not support more than 4 chars
+            if (residue.number() > 9999)
+                pdbatom.resseq = 9999;
+            else
+                pdbatom.resseq = residue.number();
 
             if (not icode.isEmpty())
-                pdbatom.icode = icode[ residue.index() ];
+                pdbatom.icode = icode[residue.index()];
 
             if (residue.isWithinChain())
             {
                 Chain chain = residue.chain();
 
-                if (pdbchainname.isEmpty() or pdbchainname[ chain.index() ].isEmpty())
+                if (pdbchainname.isEmpty() or pdbchainname[chain.index()].isEmpty())
                     pdbatom.chainid = chainmangler->mangle(chain.name());
 
                 else
-                    pdbatom.chainid = pdbchainname[ chain.index() ];
+                    pdbatom.chainid = pdbchainname[chain.index()];
             }
         }
 
@@ -1791,14 +1758,14 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
         {
             Segment segment = atom.segment();
 
-            if (pdbsegname.isEmpty() or pdbsegname[ segment.index() ].isEmpty())
+            if (pdbsegname.isEmpty() or pdbsegname[segment.index()].isEmpty())
                 pdbatom.segid = segmangler->mangle(segment.name());
 
             else
-                pdbatom.segid = pdbsegname[ segment.index() ];
+                pdbatom.segid = pdbsegname[segment.index()];
         }
 
-        //write the atom to the file
+        // write the atom to the file
         ts << pdbatom.writeToLine() << "\n";
     }
 
@@ -1810,7 +1777,7 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
         {
             AxisSet axes = axes_prop.asA<VariantProperty>().convertTo<AxisSet>();
 
-            Vector v = axes.fromIdentity( Vector(0,0,0) );
+            Vector v = axes.fromIdentity(Vector(0, 0, 0));
 
             ++atomnum;
             PDBAtom pdbatom;
@@ -1823,7 +1790,7 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
 
             ts << pdbatom.writeToLine() << "\n";
 
-            v = axes.fromIdentity( Vector(1,0,0) );
+            v = axes.fromIdentity(Vector(1, 0, 0));
 
             ++atomnum;
             pdbatom.serial = atomnum;
@@ -1834,7 +1801,7 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
 
             ts << pdbatom.writeToLine() << "\n";
 
-            v = axes.fromIdentity( Vector(0,1,0) );
+            v = axes.fromIdentity(Vector(0, 1, 0));
 
             ++atomnum;
             pdbatom.serial = atomnum;
@@ -1845,7 +1812,7 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
 
             ts << pdbatom.writeToLine() << "\n";
 
-            v = axes.fromIdentity( Vector(0,0,1) );
+            v = axes.fromIdentity(Vector(0, 0, 1));
 
             ++atomnum;
             pdbatom.serial = atomnum;
@@ -1887,12 +1854,11 @@ int PDB::writeMolecule(QTextStream &ts, const MoleculeView &molview,
     return atomnum;
 }
 
-//reserve at least 16 MB of space
+// reserve at least 16 MB of space
 static const int RESERVE_SIZE = 16 * 1024 * 1024;
 
 /** Write a group of molecules to a bytearray */
-QByteArray PDB::writeMols(const MoleculeGroup &molgroup,
-                          const PropertyMap &map) const
+QByteArray PDB::writeMols(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     QByteArray data;
     data.reserve(RESERVE_SIZE);
@@ -1909,7 +1875,7 @@ QByteArray PDB::writeMols(const MoleculeGroup &molgroup,
 
     int atomid = 0;
 
-    for (MolIdx i(0); i<nmols; ++i)
+    for (MolIdx i(0); i < nmols; ++i)
     {
         atomid = this->writeMolecule(ts, molgroup[i], atomid, map);
 
@@ -1921,8 +1887,7 @@ QByteArray PDB::writeMols(const MoleculeGroup &molgroup,
 }
 
 /** Write a group of molecules to a bytearray */
-QByteArray PDB::writeMols(const Molecules &molecules,
-                          const PropertyMap &map) const
+QByteArray PDB::writeMols(const Molecules &molecules, const PropertyMap &map) const
 {
     QByteArray data;
     data.reserve(RESERVE_SIZE);
@@ -1937,23 +1902,21 @@ QByteArray PDB::writeMols(const Molecules &molecules,
 
     int atomid = 0;
 
-    for (Molecules::const_iterator it = molecules.constBegin();
-         it != molecules.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
     {
         atomid = this->writeMolecule(ts, *it, atomid, map);
 
         Molecules::const_iterator it2 = it;
         ++it2;
 
-        if ( it2 != molecules.constEnd())
+        if (it2 != molecules.constEnd())
             ts << "TER\n";
     }
 
     return data;
 }
 
-const char* PDB::typeName()
+const char *PDB::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<PDB>() );
+    return QMetaType::typeName(qMetaTypeId<PDB>());
 }

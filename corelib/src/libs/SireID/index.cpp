@@ -55,19 +55,22 @@ QDataStream &operator>>(QDataStream &ds, IndexBase &idx)
 }
 
 IndexBase::IndexBase(qint32 idx) : _idx(idx)
-{}
+{
+}
 
 IndexBase::IndexBase(const IndexBase &other) : _idx(other._idx)
-{}
+{
+}
 
-IndexBase& IndexBase::operator=(const IndexBase &other)
+IndexBase &IndexBase::operator=(const IndexBase &other)
 {
     _idx = other._idx;
     return *this;
 }
 
 IndexBase::~IndexBase()
-{}
+{
+}
 
 /** Return the null index */
 qint32 IndexBase::null()
@@ -104,25 +107,25 @@ IndexBase::operator qint32() const
 void IndexBase::throwInvalidIndex(qint32 n) const
 {
     if (_idx < 0)
-        throw SireError::invalid_index(QObject::tr(
-            "Cannot access item at index %1 as the container has an "
-            "invalid size! (%2)")
-                .arg(n).arg(_idx), CODELOC );
+        throw SireError::invalid_index(QObject::tr("Cannot access item at index %1 as the container has an "
+                                                   "invalid size! (%2)")
+                                           .arg(n)
+                                           .arg(_idx),
+                                       CODELOC);
 
     else if (n == 0)
-        throw SireError::invalid_index(QObject::tr(
-            "Cannot access item at index %1 as the container is empty!")
-                .arg(_idx), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("Cannot access item at index %1 as the container is empty!").arg(_idx), CODELOC);
 
     else if (n == 1)
-        throw SireError::invalid_index(QObject::tr(
-            "Cannot access item at index %1 as there is only one item in the "
-            "container.").arg(_idx), CODELOC );
+        throw SireError::invalid_index(QObject::tr("Cannot access item at index %1 as there is only one item in the "
+                                                   "container.")
+                                           .arg(_idx),
+                                       CODELOC);
 
     else
-        throw SireError::invalid_index( QObject::tr(
-            "No item at index %1. Index range is from %2 to %3.")
-                .arg(_idx).arg(-n).arg(n-1), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("No item at index %1. Index range is from %2 to %3.").arg(_idx).arg(-n).arg(n - 1), CODELOC);
 }
 
 /** Map this index into the container of 'n' elements - this
@@ -156,7 +159,7 @@ QDataStream &operator<<(QDataStream &ds, const Index &index)
 {
     writeHeader(ds, r_index, 1);
 
-    ds << static_cast<const Index_T_<Index>&>(index);
+    ds << static_cast<const Index_T_<Index> &>(index);
 
     return ds;
 }
@@ -168,22 +171,25 @@ QDataStream &operator>>(QDataStream &ds, Index &index)
 
     if (v == 1)
     {
-        ds >> static_cast<Index_T_<Index>&>(index);
+        ds >> static_cast<Index_T_<Index> &>(index);
     }
     else
-        throw version_error( v, "1", r_index, CODELOC );
+        throw version_error(v, "1", r_index, CODELOC);
 
     return ds;
 }
 
 Index::Index(qint32 idx) : Index_T_<Index>(idx)
-{}
+{
+}
 
 Index::Index(const Index &other) : Index_T_<Index>(other)
-{}
+{
+}
 
 Index::~Index()
-{}
+{
+}
 
 Index Index::null()
 {
@@ -195,7 +201,7 @@ QString Index::toString() const
     return QString("Index(%1)").arg(_idx);
 }
 
-const char* Index::typeName()
+const char *Index::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Index>() );
+    return QMetaType::typeName(qMetaTypeId<Index>());
 }

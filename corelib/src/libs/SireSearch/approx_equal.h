@@ -48,16 +48,16 @@ namespace SireSearch
 
     double SIRESEARCH_EXPORT get_approx_epsilon();
     void SIRESEARCH_EXPORT set_approx_epsilon(double eps);
-}
+} // namespace SireSearch
 
-SIRE_EXPOSE_FUNCTION( SireSearch::approx_equal )
-SIRE_EXPOSE_FUNCTION( SireSearch::approx_not_equal )
-SIRE_EXPOSE_FUNCTION( SireSearch::approx_greater )
-SIRE_EXPOSE_FUNCTION( SireSearch::approx_less )
-SIRE_EXPOSE_FUNCTION( SireSearch::approx_greater_equal )
-SIRE_EXPOSE_FUNCTION( SireSearch::approx_less_equal )
-SIRE_EXPOSE_FUNCTION( SireSearch::get_approx_epsilon )
-SIRE_EXPOSE_FUNCTION( SireSearch::set_approx_epsilon )
+SIRE_EXPOSE_FUNCTION(SireSearch::approx_equal)
+SIRE_EXPOSE_FUNCTION(SireSearch::approx_not_equal)
+SIRE_EXPOSE_FUNCTION(SireSearch::approx_greater)
+SIRE_EXPOSE_FUNCTION(SireSearch::approx_less)
+SIRE_EXPOSE_FUNCTION(SireSearch::approx_greater_equal)
+SIRE_EXPOSE_FUNCTION(SireSearch::approx_less_equal)
+SIRE_EXPOSE_FUNCTION(SireSearch::get_approx_epsilon)
+SIRE_EXPOSE_FUNCTION(SireSearch::set_approx_epsilon)
 
 SIRE_END_HEADER
 

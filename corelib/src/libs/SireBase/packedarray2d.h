@@ -35,214 +35,199 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-namespace detail
-{
+    namespace detail
+    {
 
-SIREBASE_EXPORT void throwPackedArray2D_invalidIndex(quint32 i, quint32 nvals);
-SIREBASE_EXPORT void throwPackedArray2D_Array_invalidIndex(quint32 i, quint32 nvals);
-SIREBASE_EXPORT void throwPackedArray2D_Array_incompatibleError(quint32 this_sz, quint32 other_sz);
+        SIREBASE_EXPORT void throwPackedArray2D_invalidIndex(quint32 i, quint32 nvals);
+        SIREBASE_EXPORT void throwPackedArray2D_Array_invalidIndex(quint32 i, quint32 nvals);
+        SIREBASE_EXPORT void throwPackedArray2D_Array_incompatibleError(quint32 this_sz, quint32 other_sz);
 
-SIREBASE_EXPORT void writePackedArray2DHeader(QDataStream &ds);
-SIREBASE_EXPORT quint32 readPackedArray2DHeader(QDataStream &ds);
+        SIREBASE_EXPORT void writePackedArray2DHeader(QDataStream &ds);
+        SIREBASE_EXPORT quint32 readPackedArray2DHeader(QDataStream &ds);
 
-SIREBASE_EXPORT void writePackedArray2DArrayHeader(QDataStream &ds, quint32 version);
-SIREBASE_EXPORT void readPackedArray2DArrayHeader(QDataStream &ds, quint32 version);
+        SIREBASE_EXPORT void writePackedArray2DArrayHeader(QDataStream &ds, quint32 version);
+        SIREBASE_EXPORT void readPackedArray2DArrayHeader(QDataStream &ds, quint32 version);
 
-class PackedArray2DDataBase;
-class PackedArray2D_ArrayDataBase;
+        class PackedArray2DDataBase;
+        class PackedArray2D_ArrayDataBase;
 
-/** Template-independent parts of PackedArray2DMemory */
-class SIREBASE_EXPORT PackedArray2DMemoryBase
-{
-public:
-    static char* getRoot(char *this_ptr, quint32 this_idx);
-    static const char* getRoot(const char *this_ptr, quint32 this_idx);
+        /** Template-independent parts of PackedArray2DMemory */
+        class SIREBASE_EXPORT PackedArray2DMemoryBase
+        {
+        public:
+            static char *getRoot(char *this_ptr, quint32 this_idx);
+            static const char *getRoot(const char *this_ptr, quint32 this_idx);
 
-    static void setArray0(PackedArray2DDataBase *array, quint32 idx);
-    static void setArrayData0(PackedArray2DDataBase *array, quint32 idx);
-    static void setValue0(PackedArray2DDataBase *array, quint32 value0);
+            static void setArray0(PackedArray2DDataBase *array, quint32 idx);
+            static void setArrayData0(PackedArray2DDataBase *array, quint32 idx);
+            static void setValue0(PackedArray2DDataBase *array, quint32 value0);
 
-    static void setNValues(PackedArray2D_ArrayDataBase *array, quint32 nvalues);
-    static void setValue0(PackedArray2D_ArrayDataBase *array, quint32 value0);
+            static void setNValues(PackedArray2D_ArrayDataBase *array, quint32 nvalues);
+            static void setValue0(PackedArray2D_ArrayDataBase *array, quint32 value0);
 
-protected:
-    static quint32 getSize(quint32 narrays, quint32 nvalues,
-                           quint32 sizeof_PackedArray2DData,
-                           quint32 sizeof_PackedArray2D_Array,
-                           quint32 sizeof_PackedArray2D_ArrayData,
-                           quint32 sizeof_T);
+        protected:
+            static quint32 getSize(quint32 narrays, quint32 nvalues, quint32 sizeof_PackedArray2DData,
+                                   quint32 sizeof_PackedArray2D_Array, quint32 sizeof_PackedArray2D_ArrayData,
+                                   quint32 sizeof_T);
 
-    static char* create(quint32 narrays, quint32 nvalues,
-                        quint32 sizeof_PackedArray2DData,
-                        quint32 sizeof_PackedArray2D_Array,
-                        quint32 sizeof_PackedArray2D_ArrayData,
-                        quint32 sizeof_T);
-};
+            static char *create(quint32 narrays, quint32 nvalues, quint32 sizeof_PackedArray2DData,
+                                quint32 sizeof_PackedArray2D_Array, quint32 sizeof_PackedArray2D_ArrayData, quint32 sizeof_T);
+        };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** This converts the pointer to the object
-    that starts at 'this_ptr' to a pointer to the first element
-    of the storage array (given the location of the object at
-    index 'this_idx' in the storage array) */
-SIRE_ALWAYS_INLINE char* PackedArray2DMemoryBase::getRoot(char *this_ptr, quint32 this_idx)
-{
-    return this_ptr - this_idx;
-}
+        /** This converts the pointer to the object
+            that starts at 'this_ptr' to a pointer to the first element
+            of the storage array (given the location of the object at
+            index 'this_idx' in the storage array) */
+        SIRE_ALWAYS_INLINE char *PackedArray2DMemoryBase::getRoot(char *this_ptr, quint32 this_idx)
+        {
+            return this_ptr - this_idx;
+        }
 
-/** This converts the pointer to the object
-    that starts at 'this_ptr' to a pointer to the first element
-    of the storage array (given the location of the object at
-    index 'this_idx' in the storage array) */
-SIRE_ALWAYS_INLINE const char* PackedArray2DMemoryBase::getRoot(const char *this_ptr,
-                                                    quint32 this_idx)
-{
-    return this_ptr - this_idx;
-}
+        /** This converts the pointer to the object
+            that starts at 'this_ptr' to a pointer to the first element
+            of the storage array (given the location of the object at
+            index 'this_idx' in the storage array) */
+        SIRE_ALWAYS_INLINE const char *PackedArray2DMemoryBase::getRoot(const char *this_ptr, quint32 this_idx)
+        {
+            return this_ptr - this_idx;
+        }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-/** The template independent parts of the PackedArray2D metadata */
-class SIREBASE_EXPORT PackedArray2DDataBase : public RefCountData
-{
+        /** The template independent parts of the PackedArray2D metadata */
+        class SIREBASE_EXPORT PackedArray2DDataBase : public RefCountData
+        {
 
-friend class PackedArray2DMemoryBase;
+            friend class PackedArray2DMemoryBase;
 
-public:
-    PackedArray2DDataBase();
-    PackedArray2DDataBase(quint32 narrays, quint32 nvalues);
+        public:
+            PackedArray2DDataBase();
+            PackedArray2DDataBase(quint32 narrays, quint32 nvalues);
 
-    PackedArray2DDataBase(const PackedArray2DDataBase &other);
+            PackedArray2DDataBase(const PackedArray2DDataBase &other);
 
-    ~PackedArray2DDataBase();
+            ~PackedArray2DDataBase();
 
-    void incref();
+            void incref();
 
-    void setNValuesInArray(quint32 i, quint32 nvalues);
+            void setNValuesInArray(quint32 i, quint32 nvalues);
 
-    void close();
+            void close();
 
-    quint32 nArrays() const;
-    quint32 nValues() const;
+            quint32 nArrays() const;
+            quint32 nValues() const;
 
-    char *memory();
-    const char* memory() const;
+            char *memory();
+            const char *memory() const;
 
-    quint32 getValue0() const
-    {
-        return value0;
-    }
+            quint32 getValue0() const
+            {
+                return value0;
+            }
 
-    quint32 getArray0() const
-    {
-        return array0;
-    }
+            quint32 getArray0() const
+            {
+                return array0;
+            }
 
-    quint32 getArrayData0() const
-    {
-        return arraydata0;
-    }
+            quint32 getArrayData0() const
+            {
+                return arraydata0;
+            }
 
-private:
-    /** The index in the storage array of the first PackedArray2D<T>::Array
-        in this array */
-    quint32 array0;
+        private:
+            /** The index in the storage array of the first PackedArray2D<T>::Array
+                in this array */
+            quint32 array0;
 
-    /** The index in the storage array of the first PackedArray2D_ArrayData */
-    quint32 arraydata0;
+            /** The index in the storage array of the first PackedArray2D_ArrayData */
+            quint32 arraydata0;
 
-    /** The number of arrays in this array */
-    quint32 narrays;
+            /** The number of arrays in this array */
+            quint32 narrays;
 
-    /** The index in the storage array of the first object in
-        this array */
-    quint32 value0;
+            /** The index in the storage array of the first object in
+                this array */
+            quint32 value0;
 
-    /** The number of objects in this array */
-    quint32 nvalues;
+            /** The number of objects in this array */
+            quint32 nvalues;
+        };
 
-};
+        /** The template independent parts of the PackedArray2D_ArrayData metadata */
+        class SIREBASE_EXPORT PackedArray2D_ArrayDataBase
+        {
 
-/** The template independent parts of the PackedArray2D_ArrayData metadata */
-class SIREBASE_EXPORT PackedArray2D_ArrayDataBase
-{
+            friend class PackedArray2DMemoryBase;
 
-friend class PackedArray2DMemoryBase;
+        public:
+            PackedArray2D_ArrayDataBase();
+            PackedArray2D_ArrayDataBase(quint32 this_idx);
 
-public:
-    PackedArray2D_ArrayDataBase();
-    PackedArray2D_ArrayDataBase(quint32 this_idx);
+            PackedArray2D_ArrayDataBase(const PackedArray2D_ArrayDataBase &other);
 
-    PackedArray2D_ArrayDataBase(const PackedArray2D_ArrayDataBase &other);
+            ~PackedArray2D_ArrayDataBase();
 
-    ~PackedArray2D_ArrayDataBase();
+            const char *memory() const;
+            char *memory();
 
-    const char* memory() const;
-    char* memory();
+            quint32 nValues() const;
 
-    quint32 nValues() const;
+            quint32 getValue0() const
+            {
+                return value0;
+            }
 
-    quint32 getValue0() const
-    {
-        return value0;
-    }
+            quint32 getThisArray() const
+            {
+                return this_array;
+            }
 
-    quint32 getThisArray() const
-    {
-        return this_array;
-    }
+        private:
+            /** The index in the storage array of this array */
+            quint32 this_array;
 
-private:
-    /** The index in the storage array of this array */
-    quint32 this_array;
+            /** The index in the storage array of the first object in this array */
+            quint32 value0;
 
-    /** The index in the storage array of the first object in this array */
-    quint32 value0;
-
-    /** The number of objects in this array */
-    quint32 nvalues;
-};
+            /** The number of objects in this array */
+            quint32 nvalues;
+        };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-SIRE_ALWAYS_INLINE void PackedArray2DMemoryBase::setArray0(PackedArray2DDataBase *array,
-                                               quint32 idx)
-{
-    array->array0 = idx;
-}
+        SIRE_ALWAYS_INLINE void PackedArray2DMemoryBase::setArray0(PackedArray2DDataBase *array, quint32 idx)
+        {
+            array->array0 = idx;
+        }
 
-SIRE_ALWAYS_INLINE void PackedArray2DMemoryBase::setArrayData0(PackedArray2DDataBase *array,
-                                                   quint32 idx)
-{
-    array->arraydata0 = idx;
-}
+        SIRE_ALWAYS_INLINE void PackedArray2DMemoryBase::setArrayData0(PackedArray2DDataBase *array, quint32 idx)
+        {
+            array->arraydata0 = idx;
+        }
 
-SIRE_ALWAYS_INLINE void
-PackedArray2DMemoryBase::setNValues(PackedArray2D_ArrayDataBase *array,
-                                    quint32 nvalues)
-{
-    array->nvalues = nvalues;
-}
+        SIRE_ALWAYS_INLINE void PackedArray2DMemoryBase::setNValues(PackedArray2D_ArrayDataBase *array, quint32 nvalues)
+        {
+            array->nvalues = nvalues;
+        }
 
-SIRE_ALWAYS_INLINE void
-PackedArray2DMemoryBase::setValue0(PackedArray2D_ArrayDataBase *array,
-                                   quint32 value0)
-{
-    array->value0 = value0;
-}
+        SIRE_ALWAYS_INLINE void PackedArray2DMemoryBase::setValue0(PackedArray2D_ArrayDataBase *array, quint32 value0)
+        {
+            array->value0 = value0;
+        }
 
-SIRE_ALWAYS_INLINE void
-PackedArray2DMemoryBase::setValue0(PackedArray2DDataBase *array,
-                                   quint32 value0)
-{
-    array->value0 = value0;
-}
+        SIRE_ALWAYS_INLINE void PackedArray2DMemoryBase::setValue0(PackedArray2DDataBase *array, quint32 value0)
+        {
+            array->value0 = value0;
+        }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+    } // namespace detail
 
-}
+} // namespace SireBase
 
 SIRE_END_HEADER
 

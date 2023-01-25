@@ -36,232 +36,225 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class DistanceComponent;
-class DoubleDistanceComponent;
-class TripleDistanceComponent;
-}
+    class DistanceComponent;
+    class DoubleDistanceComponent;
+    class TripleDistanceComponent;
+} // namespace SireSystem
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::DistanceComponent&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::DistanceComponent&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::DistanceComponent &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::DistanceComponent &);
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::DoubleDistanceComponent&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::DoubleDistanceComponent&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::DoubleDistanceComponent &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::DoubleDistanceComponent &);
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::TripleDistanceComponent&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::TripleDistanceComponent&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::TripleDistanceComponent &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::TripleDistanceComponent &);
 
 namespace SireSystem
 {
 
-/** This is a constraint that constrains a symbol to equal the
-    value of an expression that involves a distance between atoms
+    /** This is a constraint that constrains a symbol to equal the
+        value of an expression that involves a distance between atoms
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT DistanceComponent
-         : public SireBase::ConcreteProperty<DistanceComponent,GeometryComponent>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT DistanceComponent : public SireBase::ConcreteProperty<DistanceComponent, GeometryComponent>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const DistanceComponent&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, DistanceComponent&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const DistanceComponent &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, DistanceComponent &);
 
-public:
-    DistanceComponent();
-    DistanceComponent(const SireCAS::Symbol &constrained_symbol,
-                      const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                      const PropertyMap &map = PropertyMap());
-    DistanceComponent(const SireCAS::Symbol &constrained_symbol,
-                      const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                      const SireCAS::Expression &geometry_expression,
-                      const PropertyMap &map = PropertyMap());
+    public:
+        DistanceComponent();
+        DistanceComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                          const SireFF::PointRef &point1, const PropertyMap &map = PropertyMap());
+        DistanceComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                          const SireFF::PointRef &point1, const SireCAS::Expression &geometry_expression,
+                          const PropertyMap &map = PropertyMap());
 
-    DistanceComponent(const DistanceComponent &other);
+        DistanceComponent(const DistanceComponent &other);
 
-    ~DistanceComponent();
+        ~DistanceComponent();
 
-    DistanceComponent& operator=(const DistanceComponent &other);
+        DistanceComponent &operator=(const DistanceComponent &other);
 
-    bool operator==(const DistanceComponent &other) const;
-    bool operator!=(const DistanceComponent &other) const;
+        bool operator==(const DistanceComponent &other) const;
+        bool operator!=(const DistanceComponent &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    const SireFF::Point& point(int i) const;
+        const SireFF::Point &point(int i) const;
 
-    const SireFF::Point& point0() const;
-    const SireFF::Point& point1() const;
+        const SireFF::Point &point0() const;
+        const SireFF::Point &point1() const;
 
-    int nPoints() const;
+        int nPoints() const;
 
-    static const SireCAS::Symbol& r();
+        static const SireCAS::Symbol &r();
 
-protected:
-    bool wouldChange(const Delta &delta, quint32 last_subversion) const;
-    SireCAS::Values getValues(const System &system);
+    protected:
+        bool wouldChange(const Delta &delta, quint32 last_subversion) const;
+        SireCAS::Values getValues(const System &system);
 
-    void setSpace(const SireVol::Space &space);
+        void setSpace(const SireVol::Space &space);
 
-private:
-    double getDistance() const;
+    private:
+        double getDistance() const;
 
-    /** The two points between which the distance is calculated */
-    SireFF::PointPtr p0, p1;
+        /** The two points between which the distance is calculated */
+        SireFF::PointPtr p0, p1;
 
-    /** Whether or not the points are within the same molecule */
-    bool intra_molecule_points;
-};
+        /** Whether or not the points are within the same molecule */
+        bool intra_molecule_points;
+    };
 
-/** This is a constraint that constrains a symbol to equal the
-    value of an expression that involves a distance between
-    two pairs of atoms
+    /** This is a constraint that constrains a symbol to equal the
+        value of an expression that involves a distance between
+        two pairs of atoms
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT DoubleDistanceComponent
-         : public SireBase::ConcreteProperty<DoubleDistanceComponent,GeometryComponent>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT DoubleDistanceComponent
+        : public SireBase::ConcreteProperty<DoubleDistanceComponent, GeometryComponent>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const DoubleDistanceComponent&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, DoubleDistanceComponent&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const DoubleDistanceComponent &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, DoubleDistanceComponent &);
 
-public:
-    DoubleDistanceComponent();
-    DoubleDistanceComponent(const SireCAS::Symbol &constrained_symbol,
-                        const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                        const SireFF::PointRef &point2, const SireFF::PointRef &point3,
-                        const PropertyMap &map = PropertyMap());
-    DoubleDistanceComponent(const SireCAS::Symbol &constrained_symbol,
-                        const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                        const SireFF::PointRef &point2, const SireFF::PointRef &point3,
-                        const SireCAS::Expression &geometry_expression,
-                        const PropertyMap &map = PropertyMap());
+    public:
+        DoubleDistanceComponent();
+        DoubleDistanceComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                                const SireFF::PointRef &point1, const SireFF::PointRef &point2,
+                                const SireFF::PointRef &point3, const PropertyMap &map = PropertyMap());
+        DoubleDistanceComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                                const SireFF::PointRef &point1, const SireFF::PointRef &point2,
+                                const SireFF::PointRef &point3, const SireCAS::Expression &geometry_expression,
+                                const PropertyMap &map = PropertyMap());
 
-    DoubleDistanceComponent(const DoubleDistanceComponent &other);
+        DoubleDistanceComponent(const DoubleDistanceComponent &other);
 
-    ~DoubleDistanceComponent();
+        ~DoubleDistanceComponent();
 
-    DoubleDistanceComponent& operator=(const DoubleDistanceComponent &other);
+        DoubleDistanceComponent &operator=(const DoubleDistanceComponent &other);
 
-    bool operator==(const DoubleDistanceComponent &other) const;
-    bool operator!=(const DoubleDistanceComponent &other) const;
+        bool operator==(const DoubleDistanceComponent &other) const;
+        bool operator!=(const DoubleDistanceComponent &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    const SireFF::Point& point(int i) const;
+        const SireFF::Point &point(int i) const;
 
-    const SireFF::Point& point0() const;
-    const SireFF::Point& point1() const;
-    const SireFF::Point& point2() const;
-    const SireFF::Point& point3() const;
+        const SireFF::Point &point0() const;
+        const SireFF::Point &point1() const;
+        const SireFF::Point &point2() const;
+        const SireFF::Point &point3() const;
 
-    int nPoints() const;
+        int nPoints() const;
 
-    static const SireCAS::Symbol& r01();
-    static const SireCAS::Symbol& r23();
+        static const SireCAS::Symbol &r01();
+        static const SireCAS::Symbol &r23();
 
-protected:
-    bool wouldChange(const Delta &delta, quint32 last_subversion) const;
-    SireCAS::Values getValues(const System &system);
+    protected:
+        bool wouldChange(const Delta &delta, quint32 last_subversion) const;
+        SireCAS::Values getValues(const System &system);
 
-    void setSpace(const SireVol::Space &space);
+        void setSpace(const SireVol::Space &space);
 
-private:
-    double getDistance01() const;
-    double getDistance23() const;
+    private:
+        double getDistance01() const;
+        double getDistance23() const;
 
-    /** The four points between which the distance is calculated */
-    SireFF::PointPtr p0, p1, p2, p3;
+        /** The four points between which the distance is calculated */
+        SireFF::PointPtr p0, p1, p2, p3;
 
-    /** Whether or not the points are within the same molecule */
-    bool intra_molecule_points01, intra_molecule_points23;
-};
+        /** Whether or not the points are within the same molecule */
+        bool intra_molecule_points01, intra_molecule_points23;
+    };
 
-/** This is a constraint that constrains a symbol to equal the
-    value of an expression that involves distances between
-    three pairs of atoms
+    /** This is a constraint that constrains a symbol to equal the
+        value of an expression that involves distances between
+        three pairs of atoms
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT TripleDistanceComponent
-         : public SireBase::ConcreteProperty<TripleDistanceComponent,GeometryComponent>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT TripleDistanceComponent
+        : public SireBase::ConcreteProperty<TripleDistanceComponent, GeometryComponent>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const TripleDistanceComponent&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, TripleDistanceComponent&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const TripleDistanceComponent &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, TripleDistanceComponent &);
 
-public:
-    TripleDistanceComponent();
-    TripleDistanceComponent(const SireCAS::Symbol &constrained_symbol,
-                       const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                       const SireFF::PointRef &point2, const SireFF::PointRef &point3,
-                       const SireFF::PointRef &point4, const SireFF::PointRef &point5,
-                       const PropertyMap &map = PropertyMap());
-    TripleDistanceComponent(const SireCAS::Symbol &constrained_symbol,
-                       const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                       const SireFF::PointRef &point2, const SireFF::PointRef &point3,
-                       const SireFF::PointRef &point4, const SireFF::PointRef &point5,
-                       const SireCAS::Expression &geometry_expression,
-                       const PropertyMap &map = PropertyMap());
+    public:
+        TripleDistanceComponent();
+        TripleDistanceComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                                const SireFF::PointRef &point1, const SireFF::PointRef &point2,
+                                const SireFF::PointRef &point3, const SireFF::PointRef &point4,
+                                const SireFF::PointRef &point5, const PropertyMap &map = PropertyMap());
+        TripleDistanceComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                                const SireFF::PointRef &point1, const SireFF::PointRef &point2,
+                                const SireFF::PointRef &point3, const SireFF::PointRef &point4,
+                                const SireFF::PointRef &point5, const SireCAS::Expression &geometry_expression,
+                                const PropertyMap &map = PropertyMap());
 
-    TripleDistanceComponent(const TripleDistanceComponent &other);
+        TripleDistanceComponent(const TripleDistanceComponent &other);
 
-    ~TripleDistanceComponent();
+        ~TripleDistanceComponent();
 
-    TripleDistanceComponent& operator=(const TripleDistanceComponent &other);
+        TripleDistanceComponent &operator=(const TripleDistanceComponent &other);
 
-    bool operator==(const TripleDistanceComponent &other) const;
-    bool operator!=(const TripleDistanceComponent &other) const;
+        bool operator==(const TripleDistanceComponent &other) const;
+        bool operator!=(const TripleDistanceComponent &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    const SireFF::Point& point(int i) const;
+        const SireFF::Point &point(int i) const;
 
-    const SireFF::Point& point0() const;
-    const SireFF::Point& point1() const;
-    const SireFF::Point& point2() const;
-    const SireFF::Point& point3() const;
-    const SireFF::Point& point4() const;
-    const SireFF::Point& point5() const;
+        const SireFF::Point &point0() const;
+        const SireFF::Point &point1() const;
+        const SireFF::Point &point2() const;
+        const SireFF::Point &point3() const;
+        const SireFF::Point &point4() const;
+        const SireFF::Point &point5() const;
 
-    int nPoints() const;
+        int nPoints() const;
 
-    static const SireCAS::Symbol& r01();
-    static const SireCAS::Symbol& r23();
-    static const SireCAS::Symbol& r45();
+        static const SireCAS::Symbol &r01();
+        static const SireCAS::Symbol &r23();
+        static const SireCAS::Symbol &r45();
 
-protected:
-    bool wouldChange(const Delta &delta, quint32 last_subversion) const;
-    SireCAS::Values getValues(const System &system);
+    protected:
+        bool wouldChange(const Delta &delta, quint32 last_subversion) const;
+        SireCAS::Values getValues(const System &system);
 
-    void setSpace(const SireVol::Space &space);
+        void setSpace(const SireVol::Space &space);
 
-private:
-    double getDistance01() const;
-    double getDistance23() const;
-    double getDistance45() const;
+    private:
+        double getDistance01() const;
+        double getDistance23() const;
+        double getDistance45() const;
 
-    /** The points between which the distance is calculated */
-    SireFF::PointPtr p0, p1, p2, p3, p4, p5;
+        /** The points between which the distance is calculated */
+        SireFF::PointPtr p0, p1, p2, p3, p4, p5;
 
-    /** Whether or not the points are within the same molecule */
-    bool intra_molecule_points01, intra_molecule_points23, intra_molecule_points45;
-};
+        /** Whether or not the points are within the same molecule */
+        bool intra_molecule_points01, intra_molecule_points23, intra_molecule_points45;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::DistanceComponent )
-Q_DECLARE_METATYPE( SireSystem::DoubleDistanceComponent )
-Q_DECLARE_METATYPE( SireSystem::TripleDistanceComponent )
+Q_DECLARE_METATYPE(SireSystem::DistanceComponent)
+Q_DECLARE_METATYPE(SireSystem::DoubleDistanceComponent)
+Q_DECLARE_METATYPE(SireSystem::TripleDistanceComponent)
 
-SIRE_EXPOSE_CLASS( SireSystem::DistanceComponent )
-SIRE_EXPOSE_CLASS( SireSystem::DoubleDistanceComponent )
-SIRE_EXPOSE_CLASS( SireSystem::TripleDistanceComponent )
+SIRE_EXPOSE_CLASS(SireSystem::DistanceComponent)
+SIRE_EXPOSE_CLASS(SireSystem::DoubleDistanceComponent)
+SIRE_EXPOSE_CLASS(SireSystem::TripleDistanceComponent)
 
 SIRE_END_HEADER
 

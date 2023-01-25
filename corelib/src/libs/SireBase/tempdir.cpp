@@ -25,8 +25,8 @@
   *
 \*********************************************/
 
-#include <QUuid>
 #include <QMutex>
+#include <QUuid>
 
 #include "tempdir.h"
 
@@ -40,20 +40,18 @@ using namespace SireBase;
 
 static QString getUserName()
 {
-    #ifdef Q_OS_UNIX
-        return std::getenv("USER");
-    #else
-        return "USER";
-    #endif
+#ifdef Q_OS_UNIX
+    return std::getenv("USER");
+#else
+    return "USER";
+#endif
 }
 
 static QMutex tmpdir_mutex;
 
 static QDir createDirectory(const QString &temp_root, int ntries)
 {
-    QString dirname = QString("%1/%2_sire_%3")
-                            .arg(temp_root, getUserName(),
-                                 QUuid::createUuid().toString());
+    QString dirname = QString("%1/%2_sire_%3").arg(temp_root, getUserName(), QUuid::createUuid().toString());
 
     QMutexLocker lkr(&tmpdir_mutex);
 
@@ -61,7 +59,7 @@ static QDir createDirectory(const QString &temp_root, int ntries)
 
     if (tmpdir.exists(dirname))
     {
-        //this directory already exists - try again
+        // this directory already exists - try again
         lkr.unlock();
         return ::createDirectory(temp_root, ntries);
     }
@@ -70,14 +68,14 @@ static QDir createDirectory(const QString &temp_root, int ntries)
     {
         if (ntries > 0)
         {
-            return ::createDirectory(temp_root, ntries-1);
+            return ::createDirectory(temp_root, ntries - 1);
         }
         else
-            throw SireError::file_error( QObject::tr(
-                "Could not create the temporary directory \"%1\". Please "
-                "ensure that there is enough disk space and that you have "
-                "permission to write to the directory \"%2\".")
-                    .arg(dirname, temp_root), CODELOC );
+            throw SireError::file_error(QObject::tr("Could not create the temporary directory \"%1\". Please "
+                                                    "ensure that there is enough disk space and that you have "
+                                                    "permission to write to the directory \"%2\".")
+                                            .arg(dirname, temp_root),
+                                        CODELOC);
     }
 
     return QDir(dirname);
@@ -92,7 +90,7 @@ void TempDir::createDirectory(const QString &temp_root)
 /** This creates a new temporary directory in QDir::tempPath() */
 TempDir::TempDir() : do_not_delete(false)
 {
-    this->createDirectory( QDir::tempPath() );
+    this->createDirectory(QDir::tempPath());
 }
 
 /** This creates a new temporary directory in 'temp_root' */
@@ -103,8 +101,8 @@ TempDir::TempDir(const QString &temp_root) : do_not_delete(false)
 
 static void removeDirectory(QDir &dir)
 {
-    //get the list of all files in this directory
-    // ( cannot use NoDotAndDotDot as this doesn't work on my mac)
+    // get the list of all files in this directory
+    //  ( cannot use NoDotAndDotDot as this doesn't work on my mac)
     QStringList files = dir.entryList();
 
     foreach (const QString &filename, files)
@@ -115,12 +113,12 @@ static void removeDirectory(QDir &dir)
         if (not dir.exists(filename))
             continue;
 
-        QFileInfo fileinfo( dir.absoluteFilePath(filename) );
+        QFileInfo fileinfo(dir.absoluteFilePath(filename));
 
-        if ( fileinfo.isDir() )
+        if (fileinfo.isDir())
         {
-            //remove this directory
-            QDir subdir( fileinfo.absoluteFilePath() );
+            // remove this directory
+            QDir subdir(fileinfo.absoluteFilePath());
             ::removeDirectory(subdir);
         }
         else
@@ -129,7 +127,7 @@ static void removeDirectory(QDir &dir)
         }
     }
 
-    //now remove this directory
+    // now remove this directory
     dir.rmdir(dir.absolutePath());
 }
 

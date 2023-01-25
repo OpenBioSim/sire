@@ -34,69 +34,69 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class Range;
+    class Range;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::Range&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::Range&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::Range &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::Range &);
 
 namespace SireBase
 {
 
-class SimpleRange;
+    class SimpleRange;
 
-typedef PropPtr<Range> RangePtr;
+    typedef PropPtr<Range> RangePtr;
 
-/** This class represents a range of integers.
+    /** This class represents a range of integers.
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT Range : public SireBase::Property
-{
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const SireBase::Range&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, SireBase::Range&);
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT Range : public SireBase::Property
+    {
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const SireBase::Range &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, SireBase::Range &);
 
-public:
-    Range();
-    Range(const Range &other);
+    public:
+        Range();
+        Range(const Range &other);
 
-    virtual ~Range();
+        virtual ~Range();
 
-    static RangePtr create(qint64 i);
-    static RangePtr create(qint64 start, qint64 end);
-    static RangePtr create(qint64 start, qint64 end, qint64 increment);
+        static RangePtr create(qint64 i);
+        static RangePtr create(qint64 start, qint64 end);
+        static RangePtr create(qint64 start, qint64 end, qint64 increment);
 
-    virtual Range* clone() const=0;
+        virtual Range *clone() const = 0;
 
-    virtual qint64 next()=0;
+        virtual qint64 next() = 0;
 
-    virtual bool atEnd() const=0;
+        virtual bool atEnd() const = 0;
 
-    bool hasNext() const;
+        bool hasNext() const;
 
-    virtual RangePtr populate(int nitems) const=0;
+        virtual RangePtr populate(int nitems) const = 0;
 
-    static const Range& null();
+        static const Range &null();
 
-protected:
-    Range& operator=(const Range &other);
-};
+    protected:
+        Range &operator=(const Range &other);
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return whether there is another number available in this range */
-inline bool Range::hasNext() const
-{
-    return not this->atEnd();
-}
+    /** Return whether there is another number available in this range */
+    inline bool Range::hasNext() const
+    {
+        return not this->atEnd();
+    }
 
 #endif
 
-}
+} // namespace SireBase
 
-SIRE_EXPOSE_CLASS( SireBase::Range )
+SIRE_EXPOSE_CLASS(SireBase::Range)
 
-SIRE_EXPOSE_PROPERTY( SireBase::RangePtr, SireBase::Range )
+SIRE_EXPOSE_PROPERTY(SireBase::RangePtr, SireBase::Range)
 
 SIRE_END_HEADER
 

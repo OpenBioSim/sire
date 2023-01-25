@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "segidentifier.h"
+#include "molinfo.h"
 #include "segidx.h"
 #include "segname.h"
-#include "molinfo.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/streampolypointer.hpp"
@@ -63,33 +63,34 @@ QDataStream &operator>>(QDataStream &ds, SegIdentifier &segid)
         SireStream::loadPolyPointer(ds, segid.d);
     }
     else
-        throw version_error( v, "1", r_segid, CODELOC );
+        throw version_error(v, "1", r_segid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 SegIdentifier::SegIdentifier() : SegID()
-{}
+{
+}
 
 /** Construct from the passed SegID */
-SegIdentifier::SegIdentifier(const SegID &segid)
-              : SegID()
+SegIdentifier::SegIdentifier(const SegID &segid) : SegID()
 {
     if (segid.isA<SegIdentifier>())
         d = segid.asA<SegIdentifier>().d;
     else if (not segid.isNull())
-        d.reset( segid.clone() );
+        d.reset(segid.clone());
 }
 
 /** Copy constructor */
-SegIdentifier::SegIdentifier(const SegIdentifier &other)
-              : SegID(other), d(other.d)
-{}
+SegIdentifier::SegIdentifier(const SegIdentifier &other) : SegID(other), d(other.d)
+{
+}
 
 /** Destructor */
 SegIdentifier::~SegIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool SegIdentifier::isNull() const
@@ -116,7 +117,7 @@ QString SegIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const SegID& SegIdentifier::base() const
+const SegID &SegIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -125,14 +126,14 @@ const SegID& SegIdentifier::base() const
 }
 
 /** Copy assignment operator */
-SegIdentifier& SegIdentifier::operator=(const SegIdentifier &other)
+SegIdentifier &SegIdentifier::operator=(const SegIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-SegIdentifier& SegIdentifier::operator=(const SegID &other)
+SegIdentifier &SegIdentifier::operator=(const SegID &other)
 {
     if (other.isA<SegIdentifier>())
         d = other.asA<SegIdentifier>().d;
@@ -203,9 +204,9 @@ QList<SegIdx> SegIdentifier::map(const MolInfo &molinfo) const
         return d->map(molinfo);
 }
 
-const char* SegIdentifier::typeName()
+const char *SegIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SegIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<SegIdentifier>());
 }
 
 ///////
@@ -219,7 +220,7 @@ QDataStream &operator<<(QDataStream &ds, const SegIdx &segidx)
 {
     writeHeader(ds, r_segidx, 1);
 
-    ds << static_cast<const SireID::Index_T_<SegIdx>&>(segidx);
+    ds << static_cast<const SireID::Index_T_<SegIdx> &>(segidx);
 
     return ds;
 }
@@ -231,27 +232,29 @@ QDataStream &operator>>(QDataStream &ds, SegIdx &segidx)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Index_T_<SegIdx>&>(segidx);
+        ds >> static_cast<SireID::Index_T_<SegIdx> &>(segidx);
     }
     else
-        throw version_error( v, "1", r_segidx, CODELOC );
+        throw version_error(v, "1", r_segidx, CODELOC);
 
     return ds;
 }
 
 SegIdx::SegIdx() : SireID::Index_T_<SegIdx>(), SegID()
-{}
+{
+}
 
-SegIdx::SegIdx(quint32 idx)
-          : SireID::Index_T_<SegIdx>(idx), SegID()
-{}
+SegIdx::SegIdx(quint32 idx) : SireID::Index_T_<SegIdx>(idx), SegID()
+{
+}
 
-SegIdx::SegIdx(const SegIdx &other)
-          : SireID::Index_T_<SegIdx>(other), SegID(other)
-{}
+SegIdx::SegIdx(const SegIdx &other) : SireID::Index_T_<SegIdx>(other), SegID(other)
+{
+}
 
 SegIdx::~SegIdx()
-{}
+{
+}
 
 SegIdx SegIdx::null()
 {
@@ -273,7 +276,7 @@ QString SegIdx::toString() const
     return QString("SegIdx(%1)").arg(_idx);
 }
 
-SegIdx& SegIdx::operator=(const SegIdx &other)
+SegIdx &SegIdx::operator=(const SegIdx &other)
 {
     SireID::IndexBase::operator=(other);
     SegID::operator=(other);
@@ -290,9 +293,9 @@ QList<SegIdx> SegIdx::map(const MolInfo &molinfo) const
     return molinfo.map(*this);
 }
 
-const char* SegIdx::typeName()
+const char *SegIdx::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SegIdx>() );
+    return QMetaType::typeName(qMetaTypeId<SegIdx>());
 }
 
 ///////
@@ -306,7 +309,7 @@ QDataStream &operator<<(QDataStream &ds, const SegName &segname)
 {
     writeHeader(ds, r_segname, 1);
 
-    ds << static_cast<const SireID::Name&>(segname);
+    ds << static_cast<const SireID::Name &>(segname);
 
     return ds;
 }
@@ -318,29 +321,34 @@ QDataStream &operator>>(QDataStream &ds, SegName &segname)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Name&>(segname);
+        ds >> static_cast<SireID::Name &>(segname);
     }
     else
-        throw version_error( v, "1", r_segname, CODELOC );
+        throw version_error(v, "1", r_segname, CODELOC);
 
     return ds;
 }
 
 SegName::SegName() : SireID::Name(), SegID()
-{}
+{
+}
 
 SegName::SegName(const QString &name) : SireID::Name(name), SegID()
-{}
+{
+}
 
 SegName::SegName(const QString &name, SireID::CaseSensitivity case_sensitivity)
-        : SireID::Name(name, case_sensitivity), SegID()
-{}
+    : SireID::Name(name, case_sensitivity), SegID()
+{
+}
 
 SegName::SegName(const SegName &other) : SireID::Name(other), SegID(other)
-{}
+{
+}
 
 SegName::~SegName()
-{}
+{
+}
 
 bool SegName::isNull() const
 {
@@ -360,7 +368,7 @@ QString SegName::toString() const
         return QString("SegName('%1', isCaseSensitive=False)").arg(_name);
 }
 
-SegName& SegName::operator=(const SegName &other)
+SegName &SegName::operator=(const SegName &other)
 {
     SireID::Name::operator=(other);
     SegID::operator=(other);
@@ -387,18 +395,17 @@ QList<SegIdx> SegName::map(const MolInfo &molinfo) const
     return molinfo.map(*this);
 }
 
-const char* SegName::typeName()
+const char *SegName::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SegName>() );
+    return QMetaType::typeName(qMetaTypeId<SegName>());
 }
 
-SegIdentifier* SegIdentifier::clone() const
+SegIdentifier *SegIdentifier::clone() const
 {
     return new SegIdentifier(*this);
 }
 
-SegIdx* SegIdx::clone() const
+SegIdx *SegIdx::clone() const
 {
     return new SegIdx(*this);
 }
-

@@ -27,53 +27,51 @@
 
 #include "sharestrings.h"
 
-#include <QSet>
 #include <QMutex>
+#include <QSet>
 
-Q_GLOBAL_STATIC( QMutex, stringRegistryMutex )
+Q_GLOBAL_STATIC(QMutex, stringRegistryMutex)
 
 static QSet<QString> *string_registry(0);
 
 namespace SireStream
 {
 
-/** This function adds the string 'string' to shared storage, and returns
-    a copy of the shared-stored value. Use this function to ensure that
-    there is only one copy of duplicate strings */
-QString shareString(const QString &string)
-{
-    QMutex *mutex = stringRegistryMutex();
-
-    if (not mutex)
-        return string;
-
-    QMutexLocker lkr(mutex);
-
-    if (not string_registry)
+    /** This function adds the string 'string' to shared storage, and returns
+        a copy of the shared-stored value. Use this function to ensure that
+        there is only one copy of duplicate strings */
+    QString shareString(const QString &string)
     {
-        string_registry = new QSet<QString>();
+        QMutex *mutex = stringRegistryMutex();
+
+        if (not mutex)
+            return string;
+
+        QMutexLocker lkr(mutex);
+
+        if (not string_registry)
+        {
+            string_registry = new QSet<QString>();
+        }
+
+        QSet<QString>::const_iterator it = string_registry->constFind(string);
+
+        if (it != string_registry->constEnd())
+            return *it;
+        else
+        {
+            string_registry->insert(string);
+            return string;
+        }
     }
 
-    QSet<QString>::const_iterator it = string_registry->constFind(string);
-
-    if (it != string_registry->constEnd())
-        return *it;
-    else
+    /** This function adds all of the strings in 'strings' to shared storage */
+    void shareStrings(QStringList &strings)
     {
-        string_registry->insert(string);
-        return string;
+        for (QStringList::iterator it = strings.begin(); it != strings.end(); ++it)
+        {
+            *it = shareString(*it);
+        }
     }
-}
 
-/** This function adds all of the strings in 'strings' to shared storage */
-void shareStrings(QStringList &strings)
-{
-    for (QStringList::iterator it = strings.begin();
-         it != strings.end();
-         ++it)
-    {
-        *it = shareString(*it);
-    }
-}
-
-}
+} // namespace SireStream

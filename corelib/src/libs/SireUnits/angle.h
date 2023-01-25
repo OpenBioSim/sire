@@ -35,11 +35,11 @@ SIRE_BEGIN_HEADER
 namespace SireUnits
 {
 
-SIREUNITS_EXPORT Dimension::Angle acute(Dimension::Angle angle);
+    SIREUNITS_EXPORT Dimension::Angle acute(Dimension::Angle angle);
 
 }
 
-SIRE_EXPOSE_FUNCTION( SireUnits::acute )
+SIRE_EXPOSE_FUNCTION(SireUnits::acute)
 
 SIRE_END_HEADER
 

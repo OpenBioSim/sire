@@ -73,8 +73,7 @@ QDataStream &operator>>(QDataStream &ds, NumberProperty &numprop)
 }
 
 /** Constructor - this constructs the integer "0" */
-NumberProperty::NumberProperty() : ConcreteProperty<NumberProperty,Property>(),
-                                   is_int(true)
+NumberProperty::NumberProperty() : ConcreteProperty<NumberProperty, Property>(), is_int(true)
 {
     val.ival = 0;
 }
@@ -85,9 +84,7 @@ static bool is_integer(double value)
 }
 
 /** Construct from the passed double */
-NumberProperty::NumberProperty(double value)
-               : ConcreteProperty<NumberProperty,Property>(),
-                 is_int(false)
+NumberProperty::NumberProperty(double value) : ConcreteProperty<NumberProperty, Property>(), is_int(false)
 {
     if (is_integer(value))
     {
@@ -101,41 +98,33 @@ NumberProperty::NumberProperty(double value)
 }
 
 /** Construct from the passed integer */
-NumberProperty::NumberProperty(qint64 value)
-               : ConcreteProperty<NumberProperty,Property>(),
-                 is_int(true)
+NumberProperty::NumberProperty(qint64 value) : ConcreteProperty<NumberProperty, Property>(), is_int(true)
 {
     val.ival = value;
 }
 
 /** Construct from a passed string */
-NumberProperty::NumberProperty(const QString &value)
-               : ConcreteProperty<NumberProperty,Property>(),
-                 is_int(false)
+NumberProperty::NumberProperty(const QString &value) : ConcreteProperty<NumberProperty, Property>(), is_int(false)
 {
     bool ok;
     double dval = value.toDouble(&ok);
 
     if (not ok)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert the string '%1' to a NumberProperty")
-                .arg(value), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot convert the string '%1' to a NumberProperty").arg(value),
+                                      CODELOC);
 
-    this->operator=( NumberProperty(dval) );
+    this->operator=(NumberProperty(dval));
 }
 
 /** Construct from the passed Property */
-NumberProperty::NumberProperty(const Property &other)
-               : ConcreteProperty<NumberProperty,Property>(),
-                 is_int(false)
+NumberProperty::NumberProperty(const Property &other) : ConcreteProperty<NumberProperty, Property>(), is_int(false)
 {
-    this->operator=( NumberProperty(other.asADouble()) );
+    this->operator=(NumberProperty(other.asADouble()));
 }
 
 /** Copy constructor */
 NumberProperty::NumberProperty(const NumberProperty &other)
-               : ConcreteProperty<NumberProperty,Property>(other),
-                 is_int(other.is_int)
+    : ConcreteProperty<NumberProperty, Property>(other), is_int(other.is_int)
 {
     if (is_int)
         val.ival = other.val.ival;
@@ -145,15 +134,16 @@ NumberProperty::NumberProperty(const NumberProperty &other)
 
 /** Destructor */
 NumberProperty::~NumberProperty()
-{}
-
-const char* NumberProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NumberProperty>() );
+}
+
+const char *NumberProperty::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NumberProperty>());
 }
 
 /** Copy assignment operator */
-NumberProperty& NumberProperty::operator=(const NumberProperty &other)
+NumberProperty &NumberProperty::operator=(const NumberProperty &other)
 {
     if (this != &other)
     {
@@ -186,7 +176,7 @@ qint64 NumberProperty::toInt() const
     if (is_int)
         return val.ival;
     else
-        return qint64( val.dval );
+        return qint64(val.dval);
 }
 
 /** Return this number cast as a double */
@@ -246,9 +236,9 @@ int NumberProperty::asAnInteger() const
 {
     if (not is_int)
     {
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert a non-integer NumberProperty(%1) to an integer.")
-                .arg(this->toDouble()), CODELOC) ;
+        throw SireError::invalid_cast(
+            QObject::tr("Cannot convert a non-integer NumberProperty(%1) to an integer.").arg(this->toDouble()),
+            CODELOC);
     }
     else
         return val.ival;

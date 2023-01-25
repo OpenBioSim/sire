@@ -39,186 +39,183 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class RepExSubMove;
-class RepExMove;
-}
+    class RepExSubMove;
+    class RepExMove;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::RepExMove&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::RepExMove&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::RepExMove &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::RepExMove &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::RepExSubMove&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::RepExSubMove&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::RepExSubMove &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::RepExSubMove &);
 
 namespace SireCluster
 {
-class Nodes;
+    class Nodes;
 }
 
 namespace SireMove
 {
 
-class Replicas;
-class Replica;
+    class Replicas;
+    class Replica;
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-/** This is the sub-move that is applied to each replica in the supra-ensemble
+    /** This is the sub-move that is applied to each replica in the supra-ensemble
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT RepExSubMove
-           : public SireBase::ConcreteProperty<RepExSubMove,SupraSubMove>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT RepExSubMove : public SireBase::ConcreteProperty<RepExSubMove, SupraSubMove>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const RepExSubMove&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, RepExSubMove&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const RepExSubMove &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, RepExSubMove &);
 
-public:
-    RepExSubMove();
-    RepExSubMove(const Replica &replica_a, const Replica &replica_b);
+    public:
+        RepExSubMove();
+        RepExSubMove(const Replica &replica_a, const Replica &replica_b);
 
-    RepExSubMove(const RepExSubMove &other);
+        RepExSubMove(const RepExSubMove &other);
 
-    ~RepExSubMove();
+        ~RepExSubMove();
 
-    RepExSubMove& operator=(const RepExSubMove &other);
+        RepExSubMove &operator=(const RepExSubMove &other);
 
-    bool operator==(const RepExSubMove &other) const;
-    bool operator!=(const RepExSubMove &other) const;
+        bool operator==(const RepExSubMove &other) const;
+        bool operator!=(const RepExSubMove &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    SireUnits::Dimension::MolarEnergy energy_i() const;
-    SireUnits::Dimension::Volume volume_i() const;
+        SireUnits::Dimension::MolarEnergy energy_i() const;
+        SireUnits::Dimension::Volume volume_i() const;
 
-    SireUnits::Dimension::MolarEnergy energy_j() const;
-    SireUnits::Dimension::Volume volume_j() const;
+        SireUnits::Dimension::MolarEnergy energy_j() const;
+        SireUnits::Dimension::Volume volume_j() const;
 
-    void move(SupraSubSystem &system, int n_supra_moves,
-              int n_supra_moves_per_block, bool record_stats);
+        void move(SupraSubSystem &system, int n_supra_moves, int n_supra_moves_per_block, bool record_stats);
 
-private:
-    void evaluateSwappedState(const Replica &replica);
+    private:
+        void evaluateSwappedState(const Replica &replica);
 
-    template<class T>
-    void addPartnerProperty(quint32 property, const T &value);
+        template <class T>
+        void addPartnerProperty(quint32 property, const T &value);
 
-    /** The volume of the system at the end of the move */
-    SireUnits::Dimension::Volume new_volume_i;
+        /** The volume of the system at the end of the move */
+        SireUnits::Dimension::Volume new_volume_i;
 
-    /** The energy of the system at the end of the move */
-    SireUnits::Dimension::MolarEnergy new_energy_i;
+        /** The energy of the system at the end of the move */
+        SireUnits::Dimension::MolarEnergy new_energy_i;
 
-    /** The volume of the system at the end of the move in
-        the partner state */
-    SireUnits::Dimension::Volume new_volume_j;
+        /** The volume of the system at the end of the move in
+            the partner state */
+        SireUnits::Dimension::Volume new_volume_j;
 
-    /** The energy of the system at the end of the move in
-        the new partner state */
-    SireUnits::Dimension::MolarEnergy new_energy_j;
+        /** The energy of the system at the end of the move in
+            the new partner state */
+        SireUnits::Dimension::MolarEnergy new_energy_j;
 
-    enum NewState { LAMBDA_VALUE   = 1,   // the partner has a different lambda value
-                    NRG_COMPONENT  = 2,   // the partner samples a different hamiltonian
-                    SPACE_PROPERTY = 3    // the partner uses a different space property
-                  };
+        enum NewState
+        {
+            LAMBDA_VALUE = 1,  // the partner has a different lambda value
+            NRG_COMPONENT = 2, // the partner samples a different hamiltonian
+            SPACE_PROPERTY = 3 // the partner uses a different space property
+        };
 
-    /** The list of properties of the partner replica that
-        this will be swapped with, together with their values */
-    QList< QPair<quint32,QVariant> > partner_properties;
+        /** The list of properties of the partner replica that
+            this will be swapped with, together with their values */
+        QList<QPair<quint32, QVariant>> partner_properties;
 
-    /** Whether or not volumes and energies for the new state have been
-        calculated */
-    bool have_new_vals;
+        /** Whether or not volumes and energies for the new state have been
+            calculated */
+        bool have_new_vals;
 
-    /** Whether or not the replica move needs the volume of the system */
-    bool need_volume;
-};
+        /** Whether or not the replica move needs the volume of the system */
+        bool need_volume;
+    };
 
-/** This class is used to perform replica exchange moves on a collection
-    of Replicas. Each move involves running a block of sampling
-    on each of the replicas, and then performing replice exchange swaps
-    and tests between pairs.
+    /** This class is used to perform replica exchange moves on a collection
+        of Replicas. Each move involves running a block of sampling
+        on each of the replicas, and then performing replice exchange swaps
+        and tests between pairs.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT RepExMove
-        : public SireBase::ConcreteProperty<RepExMove,SupraMove>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT RepExMove : public SireBase::ConcreteProperty<RepExMove, SupraMove>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const RepExMove&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, RepExMove&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const RepExMove &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, RepExMove &);
 
-public:
-    RepExMove();
+    public:
+        RepExMove();
 
-    RepExMove(const RepExMove &other);
+        RepExMove(const RepExMove &other);
 
-    ~RepExMove();
+        ~RepExMove();
 
-    RepExMove& operator=(const RepExMove &other);
+        RepExMove &operator=(const RepExMove &other);
 
-    bool operator==(const RepExMove &other) const;
-    bool operator!=(const RepExMove &other) const;
+        bool operator==(const RepExMove &other) const;
+        bool operator!=(const RepExMove &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    int nAttempted() const;
-    int nAccepted() const;
-    int nRejected() const;
+        int nAttempted() const;
+        int nAccepted() const;
+        int nRejected() const;
 
-    double acceptanceRatio() const;
+        double acceptanceRatio() const;
 
-    void clearStatistics();
+        void clearStatistics();
 
-    void setSwapMonitors(bool swap_monitors);
+        void setSwapMonitors(bool swap_monitors);
 
-    bool swapMovesDisabled() const;
-    void setDisableSwaps(bool disable);
+        bool swapMovesDisabled() const;
+        void setDisableSwaps(bool disable);
 
-    QString toString() const;
+        QString toString() const;
 
-    void setGenerator(const RanGenerator &generator);
-    const RanGenerator& generator() const;
+        void setGenerator(const RanGenerator &generator);
+        const RanGenerator &generator() const;
 
-    void move(SupraSystem &system, int nmoves, bool record_stats);
+        void move(SupraSystem &system, int nmoves, bool record_stats);
 
-private:
-    void performMove(SireCluster::Nodes &nodes, Replicas &replicas,
-                     bool record_stats);
+    private:
+        void performMove(SireCluster::Nodes &nodes, Replicas &replicas, bool record_stats);
 
-    bool testPair(const Replica &replica_a, const RepExSubMove &move_a,
-                  const Replica &replica_b, const RepExSubMove &move_b) const;
+        bool testPair(const Replica &replica_a, const RepExSubMove &move_a, const Replica &replica_b,
+                      const RepExSubMove &move_b) const;
 
-    void testAndSwap(Replicas &replicas, const QVector<RepExSubMove> &submoves,
-                     bool even_pairs, bool record_stats);
+        void testAndSwap(Replicas &replicas, const QVector<RepExSubMove> &submoves, bool even_pairs, bool record_stats);
 
-    /** The random number generator used to accept or reject the moves */
-    RanGenerator rangenerator;
+        /** The random number generator used to accept or reject the moves */
+        RanGenerator rangenerator;
 
-    /** The number of times a replica exchange move has been accepted */
-    quint32 naccept;
+        /** The number of times a replica exchange move has been accepted */
+        quint32 naccept;
 
-    /** The number of times a replica exchange move has been rejected */
-    quint32 nreject;
+        /** The number of times a replica exchange move has been rejected */
+        quint32 nreject;
 
-    /** Whether or not to swap the system monitors when we swap replicas
-         - by default we leave the monitors with the systems */
-    bool swap_monitors;
+        /** Whether or not to swap the system monitors when we swap replicas
+             - by default we leave the monitors with the systems */
+        bool swap_monitors;
 
-    /** Whether or not to disable RETI tests. This is useful when you want
-        to just use this to RUN TI on a lot of replicas in parallel */
-    bool disable_swaps;
-};
+        /** Whether or not to disable RETI tests. This is useful when you want
+            to just use this to RUN TI on a lot of replicas in parallel */
+        bool disable_swaps;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::RepExMove )
-Q_DECLARE_METATYPE( SireMove::RepExSubMove )
+Q_DECLARE_METATYPE(SireMove::RepExMove)
+Q_DECLARE_METATYPE(SireMove::RepExSubMove)
 
-SIRE_EXPOSE_CLASS( SireMove::RepExMove )
-SIRE_EXPOSE_CLASS( SireMove::RepExSubMove )
+SIRE_EXPOSE_CLASS(SireMove::RepExMove)
+SIRE_EXPOSE_CLASS(SireMove::RepExSubMove)
 
 SIRE_END_HEADER
 

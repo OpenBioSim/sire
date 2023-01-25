@@ -34,106 +34,106 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class Min;
-class Max;
-}
+    class Min;
+    class Max;
+} // namespace SireCAS
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Min&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Min&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Min &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Min &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Max&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Max&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Max &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Max &);
 
 namespace SireCAS
 {
 
-/** Minimum value of two expressions */
-class SIRECAS_EXPORT Min : public DoubleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Min&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Min&);
-
-public:
-    Min();
-    Min(const Expression &x, const Expression &y);
-
-    Min(const Min &other);
-
-    ~Min();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
+    /** Minimum value of two expressions */
+    class SIRECAS_EXPORT Min : public DoubleFunc
     {
-        return Min::typeName();
-    }
 
-    Min* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Min &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Min &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        Min();
+        Min(const Expression &x, const Expression &y);
 
-protected:
-    Expression functionOf(const Expression &x, const Expression &y) const;
+        Min(const Min &other);
 
-    QString stringRep() const
+        ~Min();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Min::typeName();
+        }
+
+        Min *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &x, const Expression &y) const;
+
+        QString stringRep() const
+        {
+            return "min";
+        }
+
+        uint magic() const;
+    };
+
+    /** Maximum value of two expressions */
+    class SIRECAS_EXPORT Max : public DoubleFunc
     {
-        return "min";
-    }
 
-    uint magic() const;
-};
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Max &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Max &);
 
-/** Maximum value of two expressions */
-class SIRECAS_EXPORT Max : public DoubleFunc
-{
+    public:
+        Max();
+        Max(const Expression &x, const Expression &y);
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Max&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Max&);
+        Max(const Max &other);
 
-public:
-    Max();
-    Max(const Expression &x, const Expression &y);
+        ~Max();
 
-    Max(const Max &other);
+        bool operator==(const ExBase &other) const;
 
-    ~Max();
+        static const char *typeName();
 
-    bool operator==(const ExBase &other) const;
+        const char *what() const
+        {
+            return Max::typeName();
+        }
 
-    static const char* typeName();
+        Max *clone() const;
 
-    const char* what() const
-    {
-        return Max::typeName();
-    }
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
 
-    Max* clone() const;
+    protected:
+        Expression functionOf(const Expression &x, const Expression &y) const;
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+        QString stringRep() const
+        {
+            return "max";
+        }
 
-protected:
-    Expression functionOf(const Expression &x, const Expression &y) const;
+        uint magic() const;
+    };
 
-    QString stringRep() const
-    {
-        return "max";
-    }
+} // namespace SireCAS
 
-    uint magic() const;
-};
+Q_DECLARE_METATYPE(SireCAS::Min)
+Q_DECLARE_METATYPE(SireCAS::Max)
 
-}
-
-Q_DECLARE_METATYPE( SireCAS::Min )
-Q_DECLARE_METATYPE( SireCAS::Max )
-
-SIRE_EXPOSE_CLASS( SireCAS::Min )
-SIRE_EXPOSE_CLASS( SireCAS::Max )
+SIRE_EXPOSE_CLASS(SireCAS::Min)
+SIRE_EXPOSE_CLASS(SireCAS::Max)
 
 SIRE_END_HEADER
 

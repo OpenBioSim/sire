@@ -41,12 +41,12 @@ namespace SireMM
 
 namespace SireFF
 {
-    template class Intra2BFF< SoftCLJPotentialInterface<IntraSoftCLJPotential> >;
-    template class Intra2B3DFF< SoftCLJPotentialInterface<IntraSoftCLJPotential> >;
+    template class Intra2BFF<SoftCLJPotentialInterface<IntraSoftCLJPotential>>;
+    template class Intra2B3DFF<SoftCLJPotentialInterface<IntraSoftCLJPotential>>;
 
-    template class Intra2B2GFF< SoftCLJPotentialInterface<IntraSoftCLJPotential> >;
-    template class Intra2B2G3DFF< SoftCLJPotentialInterface<IntraSoftCLJPotential> >;
-}
+    template class Intra2B2GFF<SoftCLJPotentialInterface<IntraSoftCLJPotential>>;
+    template class Intra2B2G3DFF<SoftCLJPotentialInterface<IntraSoftCLJPotential>>;
+} // namespace SireFF
 
 static const RegisterMetaType<IntraSoftCLJFF> r_intrasoftcljff;
 static const RegisterMetaType<IntraGroupSoftCLJFF> r_intragroupsoftcljff;

@@ -28,446 +28,431 @@
 #ifndef SIREMM_GROMACSPARAMS_H
 #define SIREMM_GROMACSPARAMS_H
 
-#include "SireMol/molviewproperty.h"
 #include "SireMol/element.h"
+#include "SireMol/molviewproperty.h"
 
 #include "SireMM/ljparameter.h"
 
 #include "SireUnits/dimensions.h"
 
-#include "SireCAS/symbol.h"
 #include "SireCAS/expression.h"
+#include "SireCAS/symbol.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class GromacsAtomType;
-class GromacsBond;
-class GromacsAngle;
-class GromacsDihedral;
-}
+    class GromacsAtomType;
+    class GromacsBond;
+    class GromacsAngle;
+    class GromacsDihedral;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::GromacsAtomType&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::GromacsAtomType&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::GromacsAtomType &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::GromacsAtomType &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::GromacsBond&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::GromacsBond&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::GromacsBond &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::GromacsBond &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::GromacsAngle&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::GromacsAngle&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::GromacsAngle &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::GromacsAngle &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::GromacsDihedral&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::GromacsDihedral&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::GromacsDihedral &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::GromacsDihedral &);
 
 namespace SireMM
 {
 
-/** This class represents a Gromacs format atom type. This
-    combines particle type information with charge, mass,
-    and LJ parameter info
+    /** This class represents a Gromacs format atom type. This
+        combines particle type information with charge, mass,
+        and LJ parameter info
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT GromacsAtomType
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const GromacsAtomType&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, GromacsAtomType&);
-
-public:
-    enum PARTICLE_TYPE
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT GromacsAtomType
     {
-        UNKNOWN_TYPE = 0,
-        ATOM = 1,
-        SHELL = 2,
-        VIRTUAL = 3
+
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const GromacsAtomType &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, GromacsAtomType &);
+
+    public:
+        enum PARTICLE_TYPE
+        {
+            UNKNOWN_TYPE = 0,
+            ATOM = 1,
+            SHELL = 2,
+            VIRTUAL = 3
+        };
+
+        GromacsAtomType();
+
+        GromacsAtomType(QString atom_type, SireUnits::Dimension::MolarMass mass);
+
+        GromacsAtomType(QString atom_type, SireUnits::Dimension::MolarMass mass, SireUnits::Dimension::Charge charge,
+                        PARTICLE_TYPE particle_type, const LJParameter &ljparam,
+                        const SireMol::Element &element = SireMol::Element(0));
+
+        GromacsAtomType(QString atom_type, QString bond_type, SireUnits::Dimension::MolarMass mass,
+                        SireUnits::Dimension::Charge charge, PARTICLE_TYPE particle_type, const LJParameter &ljparam,
+                        const SireMol::Element &element = SireMol::Element(0));
+
+        GromacsAtomType(const GromacsAtomType &other);
+
+        ~GromacsAtomType();
+
+        GromacsAtomType &operator=(const GromacsAtomType &other);
+
+        bool operator==(const GromacsAtomType &other) const;
+        bool operator!=(const GromacsAtomType &other) const;
+
+        static const char *typeName();
+        const char *what() const;
+
+        bool isNull() const;
+
+        bool hasMassOnly() const;
+
+        QString toString() const;
+
+        QString atomType() const;
+        void setAtomType(const QString &atom_type);
+        QString bondType() const;
+        SireUnits::Dimension::MolarMass mass() const;
+        SireUnits::Dimension::Charge charge() const;
+        SireMM::LJParameter ljParameter() const;
+
+        SireMol::Element element() const;
+        void setElement(SireMol::Element elem);
+
+        PARTICLE_TYPE particleType() const;
+
+        QString particleTypeString() const;
+        QString particleTypeLetter() const;
+
+        static PARTICLE_TYPE toParticleType(const QString &word, bool *ok = 0);
+
+    private:
+        void assertSane() const;
+
+        QString _typ;
+        QString _btyp;
+        SireUnits::Dimension::MolarMass _mass;
+        SireUnits::Dimension::Charge _chg;
+        SireMM::LJParameter _lj;
+        PARTICLE_TYPE _ptyp;
+        SireMol::Element _elem;
     };
 
-    GromacsAtomType();
+    /** This class holds all of the information about a Gromacs Bond
 
-    GromacsAtomType(QString atom_type,
-                    SireUnits::Dimension::MolarMass mass);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT GromacsBond
+    {
 
-    GromacsAtomType(QString atom_type,
-                    SireUnits::Dimension::MolarMass mass,
-                    SireUnits::Dimension::Charge charge,
-                    PARTICLE_TYPE particle_type,
-                    const LJParameter &ljparam,
-                    const SireMol::Element &element = SireMol::Element(0));
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const GromacsBond &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, GromacsBond &);
 
-    GromacsAtomType(QString atom_type, QString bond_type,
-                    SireUnits::Dimension::MolarMass mass,
-                    SireUnits::Dimension::Charge charge,
-                    PARTICLE_TYPE particle_type,
-                    const LJParameter &ljparam,
-                    const SireMol::Element &element = SireMol::Element(0));
+    public:
+        GromacsBond();
+        GromacsBond(int function_type);
+        GromacsBond(int function_type, double k0, double k1 = 0, double k2 = 0, double k3 = 0);
+        GromacsBond(int function_type, const QList<double> &params);
 
-    GromacsAtomType(const GromacsAtomType &other);
+        GromacsBond(const SireCAS::Expression &bond, const SireCAS::Symbol &R);
 
-    ~GromacsAtomType();
+        GromacsBond(const GromacsBond &other);
 
-    GromacsAtomType& operator=(const GromacsAtomType &other);
+        ~GromacsBond();
 
-    bool operator==(const GromacsAtomType &other) const;
-    bool operator!=(const GromacsAtomType &other) const;
+        GromacsBond &operator=(const GromacsBond &other);
 
-    static const char* typeName();
-    const char* what() const;
+        bool operator==(const GromacsBond &other) const;
+        bool operator!=(const GromacsBond &other) const;
 
-    bool isNull() const;
+        bool operator<(const GromacsBond &other) const;
+        bool operator<=(const GromacsBond &other) const;
 
-    bool hasMassOnly() const;
+        bool operator>(const GromacsBond &other) const;
+        bool operator>=(const GromacsBond &other) const;
 
-    QString toString() const;
+        static const char *typeName();
+        const char *what() const;
 
-    QString atomType() const;
-    void setAtomType(const QString& atom_type);
-    QString bondType() const;
-    SireUnits::Dimension::MolarMass mass() const;
-    SireUnits::Dimension::Charge charge() const;
-    SireMM::LJParameter ljParameter() const;
+        double operator[](int i) const;
 
-    SireMol::Element element() const;
-    void setElement(SireMol::Element elem);
+        double at(int i) const;
 
-    PARTICLE_TYPE particleType() const;
+        int count() const;
+        int size() const;
 
-    QString particleTypeString() const;
-    QString particleTypeLetter() const;
+        int functionType() const;
+        QString functionTypeString() const;
 
-    static PARTICLE_TYPE toParticleType(const QString &word, bool *ok=0);
+        bool needsResolving() const;
+        bool isResolved() const;
 
-private:
-    void assertSane() const;
+        bool isSimple() const;
 
-    QString _typ;
-    QString _btyp;
-    SireUnits::Dimension::MolarMass _mass;
-    SireUnits::Dimension::Charge _chg;
-    SireMM::LJParameter _lj;
-    PARTICLE_TYPE _ptyp;
-    SireMol::Element _elem;
-};
+        bool isHarmonic() const;
 
-/** This class holds all of the information about a Gromacs Bond
+        SireUnits::Dimension::Length equilibriumLength() const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT GromacsBond
-{
+        void assertResolved() const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const GromacsBond&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, GromacsBond&);
+        QList<double> parameters() const;
 
-public:
-    GromacsBond();
-    GromacsBond(int function_type);
-    GromacsBond(int function_type,
-                double k0, double k1=0, double k2=0, double k3=0);
-    GromacsBond(int function_type, const QList<double> &params);
+        QString toString() const;
+        SireCAS::Expression toExpression(const SireCAS::Symbol &R) const;
 
-    GromacsBond(const SireCAS::Expression &bond, const SireCAS::Symbol &R);
+        bool atomsAreBonded() const;
 
-    GromacsBond(const GromacsBond &other);
+        uint hash() const;
 
-    ~GromacsBond();
+    private:
+        /** Space to hold up to 4 parameters */
+        double k[4];
 
-    GromacsBond& operator=(const GromacsBond &other);
+        /** The function type */
+        qint32 func_type;
+    };
 
-    bool operator==(const GromacsBond &other) const;
-    bool operator!=(const GromacsBond &other) const;
+    /** This class holds all of the information about a Gromacs Angle
 
-    bool operator<(const GromacsBond &other) const;
-    bool operator<=(const GromacsBond &other) const;
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT GromacsAngle
+    {
 
-    bool operator>(const GromacsBond &other) const;
-    bool operator>=(const GromacsBond &other) const;
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const GromacsAngle &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, GromacsAngle &);
 
-    static const char* typeName();
-    const char* what() const;
+    public:
+        GromacsAngle();
+        GromacsAngle(int function_type);
+        GromacsAngle(int function_type, double k0, double k1 = 0, double k2 = 0, double k3 = 0, double k4 = 0,
+                     double k5 = 0);
+        GromacsAngle(int function_type, const QList<double> &params);
 
-    double operator[](int i) const;
+        GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symbol &theta);
 
-    double at(int i) const;
+        GromacsAngle(const GromacsAngle &other);
 
-    int count() const;
-    int size() const;
+        ~GromacsAngle();
 
-    int functionType() const;
-    QString functionTypeString() const;
+        GromacsAngle &operator=(const GromacsAngle &other);
 
-    bool needsResolving() const;
-    bool isResolved() const;
+        bool operator==(const GromacsAngle &other) const;
+        bool operator!=(const GromacsAngle &other) const;
 
-    bool isSimple() const;
+        bool operator<(const GromacsAngle &other) const;
+        bool operator<=(const GromacsAngle &other) const;
 
-    bool isHarmonic() const;
+        bool operator>(const GromacsAngle &other) const;
+        bool operator>=(const GromacsAngle &other) const;
 
-    SireUnits::Dimension::Length equilibriumLength() const;
+        static const char *typeName();
+        const char *what() const;
 
-    void assertResolved() const;
+        double operator[](int i) const;
 
-    QList<double> parameters() const;
+        double at(int i) const;
 
-    QString toString() const;
-    SireCAS::Expression toExpression(const SireCAS::Symbol &R) const;
+        int count() const;
+        int size() const;
 
-    bool atomsAreBonded() const;
+        int functionType() const;
+        QString functionTypeString() const;
 
-    uint hash() const;
+        QList<double> parameters() const;
 
-private:
-    /** Space to hold up to 4 parameters */
-    double k[4];
+        bool isSimple() const;
 
-    /** The function type */
-    qint32 func_type;
-};
+        bool isBondBondCrossTerm() const;
+        bool isBondAngleCrossTerm() const;
 
-/** This class holds all of the information about a Gromacs Angle
+        GromacsBond toBondTerm() const;
+        GromacsAngle toAngleTerm() const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT GromacsAngle
-{
+        QString toString() const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const GromacsAngle&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, GromacsAngle&);
+        bool isHarmonic() const;
 
-public:
-    GromacsAngle();
-    GromacsAngle(int function_type);
-    GromacsAngle(int function_type,
-                 double k0, double k1=0, double k2=0, double k3=0, double k4=0, double k5=0);
-    GromacsAngle(int function_type, const QList<double> &params);
+        bool isResolved() const;
+        bool needsResolving() const;
 
-    GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symbol &theta);
+        void assertResolved() const;
 
-    GromacsAngle(const GromacsAngle &other);
+        SireCAS::Expression toExpression(const SireCAS::Symbol &theta) const;
 
-    ~GromacsAngle();
+        SireCAS::Expression toBondAngleExpression(const SireCAS::Symbol &r, const SireCAS::Symbol &theta) const;
 
-    GromacsAngle& operator=(const GromacsAngle &other);
+        SireCAS::Expression toBondBondExpression(const SireCAS::Symbol &r01, const SireCAS::Symbol &r12,
+                                                 const SireCAS::Symbol &r02) const;
 
-    bool operator==(const GromacsAngle &other) const;
-    bool operator!=(const GromacsAngle &other) const;
+        uint hash() const;
 
-    bool operator<(const GromacsAngle &other) const;
-    bool operator<=(const GromacsAngle &other) const;
+    private:
+        /** Space to hold up to 6 parameters */
+        double k[6];
 
-    bool operator>(const GromacsAngle &other) const;
-    bool operator>=(const GromacsAngle &other) const;
+        /** The function type */
+        qint32 func_type;
+    };
 
-    static const char* typeName();
-    const char* what() const;
+    /** This class holds all of the information about a Gromacs Dihedral
 
-    double operator[](int i) const;
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT GromacsDihedral
+    {
 
-    double at(int i) const;
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const GromacsDihedral &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, GromacsDihedral &);
 
-    int count() const;
-    int size() const;
+    public:
+        GromacsDihedral();
+        GromacsDihedral(int function_type);
+        GromacsDihedral(int function_type, double k0, double k1 = 0, double k2 = 0, double k3 = 0, double k4 = 0,
+                        double k5 = 0);
+        GromacsDihedral(int function_type, const QList<double> &params);
 
-    int functionType() const;
-    QString functionTypeString() const;
+        GromacsDihedral(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
 
-    QList<double> parameters() const;
+        static QList<GromacsDihedral> construct(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
+        static QList<GromacsDihedral> constructImproper(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
 
-    bool isSimple() const;
+        GromacsDihedral(const GromacsDihedral &other);
 
-    bool isBondBondCrossTerm() const;
-    bool isBondAngleCrossTerm() const;
+        ~GromacsDihedral();
 
-    GromacsBond toBondTerm() const;
-    GromacsAngle toAngleTerm() const;
+        GromacsDihedral &operator=(const GromacsDihedral &other);
 
-    QString toString() const;
+        bool operator==(const GromacsDihedral &other) const;
+        bool operator!=(const GromacsDihedral &other) const;
 
-    bool isHarmonic() const;
+        bool operator<(const GromacsDihedral &other) const;
+        bool operator<=(const GromacsDihedral &other) const;
 
-    bool isResolved() const;
-    bool needsResolving() const;
+        bool operator>(const GromacsDihedral &other) const;
+        bool operator>=(const GromacsDihedral &other) const;
 
-    void assertResolved() const;
+        static const char *typeName();
+        const char *what() const;
 
-    SireCAS::Expression toExpression(const SireCAS::Symbol &theta) const;
+        double operator[](int i) const;
 
-    SireCAS::Expression toBondAngleExpression(const SireCAS::Symbol &r,
-                                              const SireCAS::Symbol &theta) const;
+        double at(int i) const;
 
-    SireCAS::Expression toBondBondExpression(const SireCAS::Symbol &r01,
-                                             const SireCAS::Symbol &r12,
-                                             const SireCAS::Symbol &r02) const;
+        int count() const;
+        int size() const;
 
-    uint hash() const;
+        int functionType() const;
+        QString functionTypeString() const;
 
-private:
-    /** Space to hold up to 6 parameters */
-    double k[6];
+        QList<double> parameters() const;
 
-    /** The function type */
-    qint32 func_type;
-};
+        bool isCosine() const;
 
+        bool isSimple() const;
 
-/** This class holds all of the information about a Gromacs Dihedral
+        bool isImproperAngleTerm() const;
+        bool isAngleTorsionCrossTerm() const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT GromacsDihedral
-{
+        bool isResolved() const;
+        bool needsResolving() const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const GromacsDihedral&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, GromacsDihedral&);
+        void assertResolved() const;
 
-public:
-    GromacsDihedral();
-    GromacsDihedral(int function_type);
-    GromacsDihedral(int function_type,
-                    double k0, double k1=0, double k2=0, double k3=0, double k4=0, double k5=0);
-    GromacsDihedral(int function_type, const QList<double> &params);
+        QString toString() const;
 
-    GromacsDihedral(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
+        SireCAS::Expression toExpression(const SireCAS::Symbol &phi) const;
 
-    static QList<GromacsDihedral> construct(const SireCAS::Expression &dihedral,
-                                            const SireCAS::Symbol &phi);
-    static QList<GromacsDihedral> constructImproper(
-                                            const SireCAS::Expression &dihedral,
-                                            const SireCAS::Symbol &phi);
+        SireCAS::Expression toImproperExpression(const SireCAS::Symbol &eta) const;
 
-    GromacsDihedral(const GromacsDihedral &other);
+        SireCAS::Expression toAngleTorsionExpression(const SireCAS::Symbol &theta0, const SireCAS::Symbol &theta1,
+                                                     const SireCAS::Symbol &phi) const;
 
-    ~GromacsDihedral();
+        uint hash() const;
 
-    GromacsDihedral& operator=(const GromacsDihedral &other);
+    private:
+        /** Space to hold up to 6 parameters */
+        double k[6];
 
-    bool operator==(const GromacsDihedral &other) const;
-    bool operator!=(const GromacsDihedral &other) const;
-
-    bool operator<(const GromacsDihedral &other) const;
-    bool operator<=(const GromacsDihedral &other) const;
-
-    bool operator>(const GromacsDihedral &other) const;
-    bool operator>=(const GromacsDihedral &other) const;
-
-    static const char* typeName();
-    const char* what() const;
-
-    double operator[](int i) const;
-
-    double at(int i) const;
-
-    int count() const;
-    int size() const;
-
-    int functionType() const;
-    QString functionTypeString() const;
-
-    QList<double> parameters() const;
-
-    bool isCosine() const;
-
-    bool isSimple() const;
-
-    bool isImproperAngleTerm() const;
-    bool isAngleTorsionCrossTerm() const;
-
-    bool isResolved() const;
-    bool needsResolving() const;
-
-    void assertResolved() const;
-
-    QString toString() const;
-
-    SireCAS::Expression toExpression(const SireCAS::Symbol &phi) const;
-
-    SireCAS::Expression toImproperExpression(const SireCAS::Symbol &eta) const;
-
-    SireCAS::Expression toAngleTorsionExpression(const SireCAS::Symbol &theta0,
-                                                 const SireCAS::Symbol &theta1,
-                                                 const SireCAS::Symbol &phi) const;
-
-    uint hash() const;
-
-private:
-    /** Space to hold up to 6 parameters */
-    double k[6];
-
-    /** The function type */
-    qint32 func_type;
-};
+        /** The function type */
+        qint32 func_type;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the atom type name */
-SIRE_ALWAYS_INLINE QString GromacsAtomType::atomType() const
-{
-    return _typ;
-}
+    /** Return the atom type name */
+    SIRE_ALWAYS_INLINE QString GromacsAtomType::atomType() const
+    {
+        return _typ;
+    }
 
-/** Return the bond type name - this is normally the same as the atom type,
-    but is different for some forcefields, like OPLS */
-SIRE_ALWAYS_INLINE QString GromacsAtomType::bondType() const
-{
-    return _btyp;
-}
+    /** Return the bond type name - this is normally the same as the atom type,
+        but is different for some forcefields, like OPLS */
+    SIRE_ALWAYS_INLINE QString GromacsAtomType::bondType() const
+    {
+        return _btyp;
+    }
 
-/** Return the atom mass */
-SIRE_ALWAYS_INLINE SireUnits::Dimension::MolarMass GromacsAtomType::mass() const
-{
-    return _mass;
-}
+    /** Return the atom mass */
+    SIRE_ALWAYS_INLINE SireUnits::Dimension::MolarMass GromacsAtomType::mass() const
+    {
+        return _mass;
+    }
 
-/** Return the atomic charge */
-SIRE_ALWAYS_INLINE SireUnits::Dimension::Charge GromacsAtomType::charge() const
-{
-    return _chg;
-}
+    /** Return the atomic charge */
+    SIRE_ALWAYS_INLINE SireUnits::Dimension::Charge GromacsAtomType::charge() const
+    {
+        return _chg;
+    }
 
-/** Return the type of the particle */
-SIRE_ALWAYS_INLINE GromacsAtomType::PARTICLE_TYPE GromacsAtomType::particleType() const
-{
-    return _ptyp;
-}
+    /** Return the type of the particle */
+    SIRE_ALWAYS_INLINE GromacsAtomType::PARTICLE_TYPE GromacsAtomType::particleType() const
+    {
+        return _ptyp;
+    }
 
-/** Return the Lennard Jones parameter */
-SIRE_ALWAYS_INLINE SireMM::LJParameter GromacsAtomType::ljParameter() const
-{
-    return _lj;
-}
+    /** Return the Lennard Jones parameter */
+    SIRE_ALWAYS_INLINE SireMM::LJParameter GromacsAtomType::ljParameter() const
+    {
+        return _lj;
+    }
 
-/** Return whether or not this is a null atom type */
-SIRE_ALWAYS_INLINE bool GromacsAtomType::isNull() const
-{
-    return _typ.isNull();
-}
+    /** Return whether or not this is a null atom type */
+    SIRE_ALWAYS_INLINE bool GromacsAtomType::isNull() const
+    {
+        return _typ.isNull();
+    }
 
-/** Return whether or not this atom type has only the mass specified */
-SIRE_ALWAYS_INLINE bool GromacsAtomType::hasMassOnly() const
-{
-    return _ptyp == UNKNOWN_TYPE and _chg.value() == 0 and _lj.isDummy();
-}
+    /** Return whether or not this atom type has only the mass specified */
+    SIRE_ALWAYS_INLINE bool GromacsAtomType::hasMassOnly() const
+    {
+        return _ptyp == UNKNOWN_TYPE and _chg.value() == 0 and _lj.isDummy();
+    }
 
-/** Return the element type of this type */
-SIRE_ALWAYS_INLINE SireMol::Element GromacsAtomType::element() const
-{
-    return _elem;
-}
+    /** Return the element type of this type */
+    SIRE_ALWAYS_INLINE SireMol::Element GromacsAtomType::element() const
+    {
+        return _elem;
+    }
 
 #endif
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::GromacsAtomType )
-Q_DECLARE_METATYPE( SireMM::GromacsBond )
-Q_DECLARE_METATYPE( SireMM::GromacsAngle )
-Q_DECLARE_METATYPE( SireMM::GromacsDihedral )
+Q_DECLARE_METATYPE(SireMM::GromacsAtomType)
+Q_DECLARE_METATYPE(SireMM::GromacsBond)
+Q_DECLARE_METATYPE(SireMM::GromacsAngle)
+Q_DECLARE_METATYPE(SireMM::GromacsDihedral)
 
-SIRE_EXPOSE_CLASS( SireMM::GromacsAtomType )
-SIRE_EXPOSE_CLASS( SireMM::GromacsBond )
-SIRE_EXPOSE_CLASS( SireMM::GromacsAngle )
-SIRE_EXPOSE_CLASS( SireMM::GromacsDihedral )
+SIRE_EXPOSE_CLASS(SireMM::GromacsAtomType)
+SIRE_EXPOSE_CLASS(SireMM::GromacsBond)
+SIRE_EXPOSE_CLASS(SireMM::GromacsAngle)
+SIRE_EXPOSE_CLASS(SireMM::GromacsDihedral)
 
 SIRE_END_HEADER
 

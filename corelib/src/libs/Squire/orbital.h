@@ -34,137 +34,137 @@ SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class Orbital;
-class OrbitalShell;
-class ShellPair;
-}
+    class Orbital;
+    class OrbitalShell;
+    class ShellPair;
+} // namespace Squire
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::Orbital&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::Orbital&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::Orbital &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::Orbital &);
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::OrbitalShell&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::OrbitalShell&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::OrbitalShell &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::OrbitalShell &);
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::ShellPair&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::ShellPair&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::ShellPair &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::ShellPair &);
 
 namespace Squire
 {
 
-/** This is the base class of all orbitals.
+    /** This is the base class of all orbitals.
 
-    Orbital classes (like OrbitalShell) are designed to hold
-    information about an orbital, and are not meant to be
-    used directly in an integral program (indeed, an orbital
-    normally doesn't even have coordinate information, as
-    this is provided by the molecule that holds the orbital).
+        Orbital classes (like OrbitalShell) are designed to hold
+        information about an orbital, and are not meant to be
+        used directly in an integral program (indeed, an orbital
+        normally doesn't even have coordinate information, as
+        this is provided by the molecule that holds the orbital).
 
-    Orbital classes are thus virtual and not designed for speed.
+        Orbital classes are thus virtual and not designed for speed.
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT Orbital : public SireBase::Property
-{
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT Orbital : public SireBase::Property
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const Orbital&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, Orbital&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const Orbital &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, Orbital &);
 
-public:
-    Orbital();
+    public:
+        Orbital();
 
-    Orbital(const Orbital &other);
+        Orbital(const Orbital &other);
 
-    virtual ~Orbital();
+        virtual ~Orbital();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual Orbital* clone() const=0;
+        virtual Orbital *clone() const = 0;
 
-    virtual QString toString() const=0;
+        virtual QString toString() const = 0;
 
-protected:
-    Orbital& operator=(const Orbital &other);
+    protected:
+        Orbital &operator=(const Orbital &other);
 
-    bool operator==(const Orbital &other) const;
-    bool operator!=(const Orbital &other) const;
-};
+        bool operator==(const Orbital &other) const;
+        bool operator!=(const Orbital &other) const;
+    };
 
-/** This is the base class of a shell of orbitals. An orbital
-    shell contains the typical atomic orbitals (e.g. a p-shell
-    contains 3 orbitals, p_x, p_y and p_z)
+    /** This is the base class of a shell of orbitals. An orbital
+        shell contains the typical atomic orbitals (e.g. a p-shell
+        contains 3 orbitals, p_x, p_y and p_z)
 
-    OrbitalShell classes (like Orbital) are designed to hold
-    information about an orbital, and are not meant to be
-    used directly in an integral program (indeed, an orbital
-    normally doesn't even have coordinate information, as
-    this is provided by the molecule that holds the orbital).
+        OrbitalShell classes (like Orbital) are designed to hold
+        information about an orbital, and are not meant to be
+        used directly in an integral program (indeed, an orbital
+        normally doesn't even have coordinate information, as
+        this is provided by the molecule that holds the orbital).
 
-    Orbital classes are thus virtual and not designed for speed.
+        Orbital classes are thus virtual and not designed for speed.
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT OrbitalShell : public Orbital
-{
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT OrbitalShell : public Orbital
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const OrbitalShell&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, OrbitalShell&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const OrbitalShell &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, OrbitalShell &);
 
-public:
-    OrbitalShell();
-    OrbitalShell(const OrbitalShell &other);
+    public:
+        OrbitalShell();
+        OrbitalShell(const OrbitalShell &other);
 
-    virtual ~OrbitalShell();
+        virtual ~OrbitalShell();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual OrbitalShell* clone() const=0;
+        virtual OrbitalShell *clone() const = 0;
 
-    virtual int angularMomentum() const=0;
-    virtual int nOrbitals() const=0;
+        virtual int angularMomentum() const = 0;
+        virtual int nOrbitals() const = 0;
 
-protected:
-    OrbitalShell& operator=(const OrbitalShell &other);
+    protected:
+        OrbitalShell &operator=(const OrbitalShell &other);
 
-    bool operator==(const OrbitalShell &other) const;
-    bool operator!=(const OrbitalShell &other) const;
-};
+        bool operator==(const OrbitalShell &other) const;
+        bool operator!=(const OrbitalShell &other) const;
+    };
 
-/** The base class of all combined pair orbitals */
-class SQUIRE_EXPORT ShellPair : public SireBase::Property
-{
+    /** The base class of all combined pair orbitals */
+    class SQUIRE_EXPORT ShellPair : public SireBase::Property
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const ShellPair&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, ShellPair&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const ShellPair &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, ShellPair &);
 
-public:
-    ShellPair();
-    ShellPair(const ShellPair &other);
+    public:
+        ShellPair();
+        ShellPair(const ShellPair &other);
 
-    virtual ~ShellPair();
+        virtual ~ShellPair();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual ShellPair* clone() const=0;
+        virtual ShellPair *clone() const = 0;
 
-    virtual int angularMomentum0() const=0;
-    virtual int angularMomentum1() const=0;
+        virtual int angularMomentum0() const = 0;
+        virtual int angularMomentum1() const = 0;
 
-    virtual int nOrbitals0() const=0;
-    virtual int nOrbitals1() const=0;
+        virtual int nOrbitals0() const = 0;
+        virtual int nOrbitals1() const = 0;
 
-protected:
-    ShellPair& operator=(const ShellPair &other);
+    protected:
+        ShellPair &operator=(const ShellPair &other);
 
-    bool operator==(const ShellPair &other) const;
-    bool operator!=(const ShellPair &other) const;
-};
+        bool operator==(const ShellPair &other) const;
+        bool operator!=(const ShellPair &other) const;
+    };
 
-}
+} // namespace Squire
 
-SIRE_EXPOSE_CLASS( Squire::Orbital )
-SIRE_EXPOSE_CLASS( Squire::OrbitalShell )
+SIRE_EXPOSE_CLASS(Squire::Orbital)
+SIRE_EXPOSE_CLASS(Squire::OrbitalShell)
 
-SIRE_EXPOSE_CLASS( Squire::ShellPair )
+SIRE_EXPOSE_CLASS(Squire::ShellPair)
 
 SIRE_END_HEADER
 

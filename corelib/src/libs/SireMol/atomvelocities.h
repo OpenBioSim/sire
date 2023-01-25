@@ -39,23 +39,20 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-using SireUnits::Dimension::Velocity;
+    using SireUnits::Dimension::Velocity;
 
-typedef SireMaths::Vector3D<Velocity> Velocity3D;
+    typedef SireMaths::Vector3D<Velocity> Velocity3D;
 
-typedef AtomProperty<Velocity3D> AtomVelocities;
+    typedef AtomProperty<Velocity3D> AtomVelocities;
 
-}
+} // namespace SireMol
 
-SIRE_EXPOSE_ALIAS(
-        (SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0> >),
-        SireMol::Velocity3D )
+SIRE_EXPOSE_ALIAS((SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0>>), SireMol::Velocity3D)
 
-Q_DECLARE_METATYPE( SireMol::AtomVelocities );
-Q_DECLARE_METATYPE( SireMol::Velocity3D );
+Q_DECLARE_METATYPE(SireMol::AtomVelocities);
+Q_DECLARE_METATYPE(SireMol::Velocity3D);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireMaths::Vector3D<SireUnits::Dimension::Velocity>,
-                           SireMol::AtomVelocities )
+SIRE_EXPOSE_ATOM_PROPERTY(SireMaths::Vector3D<SireUnits::Dimension::Velocity>, SireMol::AtomVelocities)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireMaths::Vector3D<SireUnits::Dimension::Velocity>;

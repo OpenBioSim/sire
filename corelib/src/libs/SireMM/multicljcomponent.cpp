@@ -40,7 +40,7 @@ using namespace SireStream;
 
 namespace SireMM
 {
-    boost::tuple<QString,QString> getSubscriptedProperty(QString name)
+    boost::tuple<QString, QString> getSubscriptedProperty(QString name)
     {
         QRegExp key_regexp("\\[(.*)\\]$");
 
@@ -52,13 +52,13 @@ namespace SireMM
             cljprop.truncate(idx);
             cljprop = cljprop.trimmed();
 
-            return boost::tuple<QString,QString>(cljprop,cljkey);
+            return boost::tuple<QString, QString>(cljprop, cljkey);
         }
         else
-            return boost::tuple<QString,QString>(name, QString());
+            return boost::tuple<QString, QString>(name, QString());
     }
 
-}
+} // namespace SireMM
 
 //////////
 ////////// Implementation of MultiCLJEnergy
@@ -102,9 +102,10 @@ QDataStream &operator>>(QDataStream &ds, MultiCLJEnergy &nrg)
         }
     }
     else
-        throw version_error( QObject::tr(
-                "Unsupported version of MultiCLJEnergy being loaded (%1). "
-                "Only version 1 is supported.").arg(version), CODELOC );
+        throw version_error(QObject::tr("Unsupported version of MultiCLJEnergy being loaded (%1). "
+                                        "Only version 1 is supported.")
+                                .arg(version),
+                            CODELOC);
 
     return ds;
 }
@@ -112,17 +113,19 @@ QDataStream &operator>>(QDataStream &ds, MultiCLJEnergy &nrg)
 void MultiCLJEnergy::assertValidCoulombIndex(quint32 i) const
 {
     if (i >= cnrgs.count())
-        throw SireError::invalid_index( QObject::tr(
-            "There is no CoulombEnergy at index '%1'. Number of energies equals %2.")
-                .arg(i).arg(cnrgs.count()), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("There is no CoulombEnergy at index '%1'. Number of energies equals %2.")
+                .arg(i)
+                .arg(cnrgs.count()),
+            CODELOC);
 }
 
 void MultiCLJEnergy::assertValidLJIndex(quint32 i) const
 {
     if (i >= ljnrgs.count())
-        throw SireError::invalid_index( QObject::tr(
-            "There is no LJEnergy at index '%1'. Number of energies equals %2.")
-                .arg(i).arg(ljnrgs.count()), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("There is no LJEnergy at index '%1'. Number of energies equals %2.").arg(i).arg(ljnrgs.count()),
+            CODELOC);
 }
 
 //////////
@@ -137,8 +140,7 @@ QDataStream &operator<<(QDataStream &ds, const MultiCLJComponent &cljcomp)
 
     SharedDataStream sds(ds);
 
-    sds << cljcomp.comps << cljcomp.key_to_idx
-        << static_cast<const FFComponent&>(cljcomp);
+    sds << cljcomp.comps << cljcomp.key_to_idx << static_cast<const FFComponent &>(cljcomp);
 
     return ds;
 }
@@ -151,8 +153,7 @@ QDataStream &operator>>(QDataStream &ds, MultiCLJComponent &cljcomp)
     {
         SharedDataStream sds(ds);
 
-        sds >> cljcomp.comps >> cljcomp.key_to_idx
-            >> static_cast<FFComponent&>(cljcomp);
+        sds >> cljcomp.comps >> cljcomp.key_to_idx >> static_cast<FFComponent &>(cljcomp);
     }
     else
         throw version_error(v, "1", r_cljcomp, CODELOC);
@@ -162,21 +163,22 @@ QDataStream &operator>>(QDataStream &ds, MultiCLJComponent &cljcomp)
 
 /** Construct with just a single, default, CLJComponent for the
     forcefield with the passed name */
-MultiCLJComponent::MultiCLJComponent(const FFName &name)
-                  : FFComponent(name, QLatin1String("CLJ"))
+MultiCLJComponent::MultiCLJComponent(const FFName &name) : FFComponent(name, QLatin1String("CLJ"))
 {
-    comps.append( CLJComponent(name) );
+    comps.append(CLJComponent(name));
     key_to_idx.insert("default", 0);
 }
 
 /** Copy constructor */
 MultiCLJComponent::MultiCLJComponent(const MultiCLJComponent &other)
-                  : FFComponent(other), comps(other.comps), key_to_idx(other.key_to_idx)
-{}
+    : FFComponent(other), comps(other.comps), key_to_idx(other.key_to_idx)
+{
+}
 
 /** Destructor */
 MultiCLJComponent::~MultiCLJComponent()
-{}
+{
+}
 
 /** Return a copy of this MultiCLJComponent that has been renamed for
     the passed forcefield */
@@ -187,9 +189,7 @@ MultiCLJComponent MultiCLJComponent::rename(const FFName &name) const
     ret.comps = QVector<CLJComponent>(comps.count());
     ret.key_to_idx = key_to_idx;
 
-    for (QHash<QString,quint32>::const_iterator it = key_to_idx.constBegin();
-         it != key_to_idx.constEnd();
-         ++it)
+    for (QHash<QString, quint32>::const_iterator it = key_to_idx.constBegin(); it != key_to_idx.constEnd(); ++it)
     {
         ret.comps[it.value()] = CLJComponent(name, it.key());
     }
@@ -200,11 +200,11 @@ MultiCLJComponent MultiCLJComponent::rename(const FFName &name) const
 /** Return a string representation of these components */
 QString MultiCLJComponent::toString() const
 {
-    return QObject::tr("MultiCLJComponent( %1 )").arg( Sire::toString(symbols()) );
+    return QObject::tr("MultiCLJComponent( %1 )").arg(Sire::toString(symbols()));
 }
 
 /** Copy assignment operator */
-MultiCLJComponent& MultiCLJComponent::operator=(const MultiCLJComponent &other)
+MultiCLJComponent &MultiCLJComponent::operator=(const MultiCLJComponent &other)
 {
     if (this != &other)
     {
@@ -219,8 +219,7 @@ MultiCLJComponent& MultiCLJComponent::operator=(const MultiCLJComponent &other)
 /** Comparison operator */
 bool MultiCLJComponent::operator==(const MultiCLJComponent &other) const
 {
-    return FFComponent::operator==(other) and comps == other.comps
-              and key_to_idx == other.key_to_idx;
+    return FFComponent::operator==(other) and comps == other.comps and key_to_idx == other.key_to_idx;
 }
 
 /** Comparison operator */
@@ -230,55 +229,55 @@ bool MultiCLJComponent::operator!=(const MultiCLJComponent &other) const
 }
 
 /** Return the default coulomb component */
-const CoulombComponent& MultiCLJComponent::coulomb() const
+const CoulombComponent &MultiCLJComponent::coulomb() const
 {
     return comps.at(0).coulomb();
 }
 
 /** Return the coulomb component for the key 'key' */
-const CoulombComponent& MultiCLJComponent::coulomb(QString key) const
+const CoulombComponent &MultiCLJComponent::coulomb(QString key) const
 {
     assertValidKey(key);
-    return comps.at( key_to_idx.value(key) ).coulomb();
+    return comps.at(key_to_idx.value(key)).coulomb();
 }
 
 /** Return the default LJ component */
-const LJComponent& MultiCLJComponent::lj() const
+const LJComponent &MultiCLJComponent::lj() const
 {
     return comps.at(0).lj();
 }
 
 /** Return the LJ component for the key 'key' */
-const LJComponent& MultiCLJComponent::lj(QString key) const
+const LJComponent &MultiCLJComponent::lj(QString key) const
 {
     assertValidKey(key);
-    return comps.at( key_to_idx.value(key) ).lj();
+    return comps.at(key_to_idx.value(key)).lj();
 }
 
 /** Return the default total component */
-const CLJComponent& MultiCLJComponent::total() const
+const CLJComponent &MultiCLJComponent::total() const
 {
     return comps.at(0).total();
 }
 
 /** Return the total component for the key 'key' */
-const CLJComponent& MultiCLJComponent::total(QString key) const
+const CLJComponent &MultiCLJComponent::total(QString key) const
 {
     assertValidKey(key);
-    return comps.at( key_to_idx.value(key) ).total();
+    return comps.at(key_to_idx.value(key)).total();
 }
 
-const char* MultiCLJComponent::typeName()
+const char *MultiCLJComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MultiCLJComponent>() );
+    return QMetaType::typeName(qMetaTypeId<MultiCLJComponent>());
 }
 
-const char* MultiCLJComponent::what() const
+const char *MultiCLJComponent::what() const
 {
     return MultiCLJComponent::typeName();
 }
 
-MultiCLJComponent* MultiCLJComponent::clone() const
+MultiCLJComponent *MultiCLJComponent::clone() const
 {
     return new MultiCLJComponent(*this);
 }
@@ -286,9 +285,10 @@ MultiCLJComponent* MultiCLJComponent::clone() const
 void MultiCLJComponent::assertValidKey(QString key) const
 {
     if (not key_to_idx.contains(key))
-        throw SireError::invalid_key( QObject::tr(
-                "There is no CLJ component with key '%1'. Available keys are %2.")
-                    .arg(key).arg(Sire::toString(keys())), CODELOC );
+        throw SireError::invalid_key(QObject::tr("There is no CLJ component with key '%1'. Available keys are %2.")
+                                         .arg(key)
+                                         .arg(Sire::toString(keys())),
+                                     CODELOC);
 }
 
 /** Set the energy in the forcefield from the passed 'cljnrg' object */
@@ -302,7 +302,7 @@ void MultiCLJComponent::setEnergy(FF &ff, const MultiCLJEnergy &value) const
     }
     else
     {
-        for (int i=0; i<comps.count(); ++i)
+        for (int i = 0; i < comps.count(); ++i)
         {
             const CLJComponent &comp = comps.constData()[i];
 
@@ -324,7 +324,7 @@ void MultiCLJComponent::changeEnergy(FF &ff, const MultiCLJEnergy &delta) const
     }
     else
     {
-        for (int i=0; i<comps.count(); ++i)
+        for (int i = 0; i < comps.count(); ++i)
         {
             const CLJComponent &comp = comps.constData()[i];
 
@@ -340,9 +340,9 @@ SireCAS::Symbols MultiCLJComponent::symbols() const
 {
     Symbols symbs;
 
-    for (int i=0; i<comps.count(); ++i)
+    for (int i = 0; i < comps.count(); ++i)
     {
-        symbs.add( comps.at(i).symbols() );
+        symbs.add(comps.at(i).symbols());
     }
 
     return symbs;
@@ -354,9 +354,9 @@ int MultiCLJComponent::add(QString key)
 {
     if (not key_to_idx.contains(key))
     {
-        comps.append( CLJComponent(this->forceFieldName(),key) );
-        key_to_idx.insert(key, comps.count()-1);
-        return comps.count()-1;
+        comps.append(CLJComponent(this->forceFieldName(), key));
+        key_to_idx.insert(key, comps.count() - 1);
+        return comps.count() - 1;
     }
     else
         return key_to_idx.value(key);
@@ -402,7 +402,7 @@ void MultiCLJComponent::removeAll()
     }
 
     key_to_idx.clear();
-    key_to_idx.insert( "default", 0 );
+    key_to_idx.insert("default", 0);
 }
 
 /** Return the index of the component with key 'key' */
@@ -410,9 +410,10 @@ int MultiCLJComponent::indexOf(QString key) const
 {
     if (not key_to_idx.contains(key))
     {
-        throw SireError::invalid_key( QObject::tr(
-                "There is no CLJComponent with key '%1'. Available keys are %2.")
-                    .arg(key).arg(Sire::toString(key_to_idx.keys())), CODELOC );
+        throw SireError::invalid_key(QObject::tr("There is no CLJComponent with key '%1'. Available keys are %2.")
+                                         .arg(key)
+                                         .arg(Sire::toString(key_to_idx.keys())),
+                                     CODELOC);
     }
 
     return key_to_idx.value(key);

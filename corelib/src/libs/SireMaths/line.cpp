@@ -61,7 +61,8 @@ QDataStream &operator>>(QDataStream &ds, SireMaths::Line &line)
 
 /** Construct a zero line */
 Line::Line()
-{}
+{
+}
 
 /** Construct a line from point0 to point1 */
 Line::Line(const Vector &point0, const Vector &point1)
@@ -72,16 +73,16 @@ Line::Line(const Vector &point0, const Vector &point1)
 
 /** Destructor */
 Line::~Line()
-{}
+{
+}
 
 /** Return a string representation of the line */
 QString Line::toString() const
 {
-    return QObject::tr("Line from %1 to %2, length = %3")
-            .arg(point(0).toString(),point(1).toString()).arg(length());
+    return QObject::tr("Line from %1 to %2, length = %3").arg(point(0).toString(), point(1).toString()).arg(length());
 }
 
-const char* Line::typeName()
+const char *Line::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Line>() );
+    return QMetaType::typeName(qMetaTypeId<Line>());
 }

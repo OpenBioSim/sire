@@ -43,11 +43,9 @@ QDataStream &operator<<(QDataStream &ds, const Values &values)
 
     SharedDataStream sds(ds);
 
-    sds << quint32( values.vals.count() );
+    sds << quint32(values.vals.count());
 
-    for (QHash<SymbolID,double>::const_iterator it = values.vals.constBegin();
-         it != values.vals.constEnd();
-         ++it)
+    for (QHash<SymbolID, double>::const_iterator it = values.vals.constBegin(); it != values.vals.constEnd(); ++it)
     {
         sds << Symbol(it.key()) << it.value();
     }
@@ -67,17 +65,17 @@ QDataStream &operator>>(QDataStream &ds, Values &values)
         quint32 nvals;
         sds >> nvals;
 
-        QHash<SymbolID,double> vals;
+        QHash<SymbolID, double> vals;
         vals.reserve(nvals);
 
-        for (quint32 i=0; i<nvals; ++i)
+        for (quint32 i = 0; i < nvals; ++i)
         {
             Symbol symbol;
             double value;
 
             sds >> symbol >> value;
 
-            vals.insert( symbol.ID(), value );
+            vals.insert(symbol.ID(), value);
         }
 
         values.vals = vals;
@@ -90,33 +88,31 @@ QDataStream &operator>>(QDataStream &ds, Values &values)
 
 /** Construct an empty set of values */
 Values::Values()
-{}
+{
+}
 
 /** Construct from a list of values */
 Values::Values(const QList<SymbolValue> &values)
 {
-    for (QList<SymbolValue>::const_iterator it = values.begin();
-         it != values.end();
-         ++it)
+    for (QList<SymbolValue>::const_iterator it = values.begin(); it != values.end(); ++it)
     {
         add(*it);
     }
 }
 
 /** Construct from a hash of values indexed by symbols */
-Values::Values(const QHash<Symbol,double> &values)
+Values::Values(const QHash<Symbol, double> &values)
 {
-    for (QHash<Symbol,double>::const_iterator it = values.begin();
-         it != values.end();
-         ++it)
+    for (QHash<Symbol, double>::const_iterator it = values.begin(); it != values.end(); ++it)
     {
-        vals.insert( it.key().ID(), it.value() );
+        vals.insert(it.key().ID(), it.value());
     }
 }
 
 /** Copy constructor */
 Values::Values(const Values &other) : vals(other.vals)
-{}
+{
+}
 
 /** Comparison operator */
 bool Values::operator==(const Values &other) const
@@ -142,22 +138,21 @@ QString Values::toString() const
 
     foreach (const Symbol &sym, syms)
     {
-        words.append( QString("%1 == %2").arg(sym.toString())
-                                         .arg(this->value(sym)) );
+        words.append(QString("%1 == %2").arg(sym.toString()).arg(this->value(sym)));
 
         if (words.count() == 4)
         {
-            lines.append( words.join(", ") );
+            lines.append(words.join(", "));
             words.clear();
         }
     }
 
     if (not words.isEmpty())
     {
-        lines.append( words.join(", ") );
+        lines.append(words.join(", "));
     }
 
-    return QString("{ %1 }").arg( lines.join("\n  ") );
+    return QString("{ %1 }").arg(lines.join("\n  "));
 }
 
 /** Return a list of the symbols that are present in this set */
@@ -165,11 +160,9 @@ QList<Symbol> Values::symbols() const
 {
     QList<Symbol> s;
 
-    for (QHash<SymbolID,double>::const_iterator it = vals.constBegin();
-         it != vals.constEnd();
-         ++it)
+    for (QHash<SymbolID, double>::const_iterator it = vals.constBegin(); it != vals.constEnd(); ++it)
     {
-        s.append( Symbol(it.key()) );
+        s.append(Symbol(it.key()));
     }
 
     return s;
@@ -203,8 +196,7 @@ void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolV
 }
 
 /** Add the passed values */
-void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-                 const SymbolValue &val3)
+void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3)
 {
     add(val0);
     add(val1);
@@ -213,8 +205,8 @@ void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolV
 }
 
 /** Add the passed values */
-void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-                 const SymbolValue &val3, const SymbolValue &val4)
+void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+                 const SymbolValue &val4)
 {
     add(val0);
     add(val1);
@@ -224,8 +216,8 @@ void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolV
 }
 
 /** Add the passed values */
-void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-                 const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5)
+void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+                 const SymbolValue &val4, const SymbolValue &val5)
 {
     add(val0);
     add(val1);
@@ -236,9 +228,8 @@ void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolV
 }
 
 /** Add the passed values */
-void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-                 const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5,
-                 const SymbolValue &val6)
+void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+                 const SymbolValue &val4, const SymbolValue &val5, const SymbolValue &val6)
 {
     add(val0);
     add(val1);
@@ -250,9 +241,8 @@ void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolV
 }
 
 /** Add the passed values */
-void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-                 const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5,
-                 const SymbolValue &val6, const SymbolValue &val7)
+void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+                 const SymbolValue &val4, const SymbolValue &val5, const SymbolValue &val6, const SymbolValue &val7)
 {
     add(val0);
     add(val1);
@@ -265,9 +255,9 @@ void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolV
 }
 
 /** Add the passed values */
-void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-                 const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5,
-                 const SymbolValue &val6, const SymbolValue &val7, const SymbolValue &val8)
+void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+                 const SymbolValue &val4, const SymbolValue &val5, const SymbolValue &val6, const SymbolValue &val7,
+                 const SymbolValue &val8)
 {
     add(val0);
     add(val1);
@@ -281,10 +271,9 @@ void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolV
 }
 
 /** Add the passed values */
-void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-                 const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5,
-                 const SymbolValue &val6, const SymbolValue &val7, const SymbolValue &val8,
-                 const SymbolValue &val9)
+void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+                 const SymbolValue &val4, const SymbolValue &val5, const SymbolValue &val6, const SymbolValue &val7,
+                 const SymbolValue &val8, const SymbolValue &val9)
 {
     add(val0);
     add(val1);
@@ -301,77 +290,74 @@ void Values::add(const SymbolValue &val0, const SymbolValue &val1, const SymbolV
 /** Construct from the passed values */
 Values::Values(const SymbolValue &val0, const SymbolValue &val1)
 {
-    add(val0,val1);
+    add(val0, val1);
 }
 
 /** Construct from the passed values */
 Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2)
 {
-    add(val0,val1,val2);
+    add(val0, val1, val2);
 }
 
 /** Construct from the passed values */
-Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-               const SymbolValue &val3)
+Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3)
 {
-    add(val0,val1,val2,val3);
+    add(val0, val1, val2, val3);
 }
 
 /** Construct from the passed values */
-Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-               const SymbolValue &val3, const SymbolValue &val4)
+Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+               const SymbolValue &val4)
 {
-    add(val0,val1,val2,val3,val4);
+    add(val0, val1, val2, val3, val4);
 }
 
 /** Construct from the passed values */
-Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-               const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5)
+Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+               const SymbolValue &val4, const SymbolValue &val5)
 {
-    add(val0,val1,val2,val3,val4,val5);
+    add(val0, val1, val2, val3, val4, val5);
 }
 
 /** Construct from the passed values */
-Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-               const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5,
-               const SymbolValue &val6)
+Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+               const SymbolValue &val4, const SymbolValue &val5, const SymbolValue &val6)
 {
-    add(val0,val1,val2,val3,val4,val5,val6);
+    add(val0, val1, val2, val3, val4, val5, val6);
 }
 
 /** Construct from the passed values */
-Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-               const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5,
-               const SymbolValue &val6, const SymbolValue &val7)
+Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+               const SymbolValue &val4, const SymbolValue &val5, const SymbolValue &val6, const SymbolValue &val7)
 {
-    add(val0,val1,val2,val3,val4,val5,val6,val7);
+    add(val0, val1, val2, val3, val4, val5, val6, val7);
 }
 
 /** Construct from the passed values */
-Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-               const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5,
-               const SymbolValue &val6, const SymbolValue &val7, const SymbolValue &val8)
+Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+               const SymbolValue &val4, const SymbolValue &val5, const SymbolValue &val6, const SymbolValue &val7,
+               const SymbolValue &val8)
 {
-    add(val0,val1,val2,val3,val4,val5,val6,val7,val8);
+    add(val0, val1, val2, val3, val4, val5, val6, val7, val8);
 }
 
 /** Construct from the passed values */
-Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2,
-               const SymbolValue &val3, const SymbolValue &val4, const SymbolValue &val5,
-               const SymbolValue &val6, const SymbolValue &val7, const SymbolValue &val8,
-               const SymbolValue &val9)
+Values::Values(const SymbolValue &val0, const SymbolValue &val1, const SymbolValue &val2, const SymbolValue &val3,
+               const SymbolValue &val4, const SymbolValue &val5, const SymbolValue &val6, const SymbolValue &val7,
+               const SymbolValue &val8, const SymbolValue &val9)
 {
-    add(val0,val1,val2,val3,val4,val5,val6,val7,val8,val9);
+    add(val0, val1, val2, val3, val4, val5, val6, val7, val8, val9);
 }
 
 /** Destructor */
 Values::~Values()
-{}
+{
+}
 
 /** Return the value of the Symbol with ID 'id', or 0.0 if there is no such symbol */
 double Values::value(const Symbol &sym) const
 {
-    return vals.value(sym.ID(),0.0);
+    return vals.value(sym.ID(), 0.0);
 }
 
 /** Return the value of the Symbol with ID 'id', or 0.0 if there is no such symbol */
@@ -387,7 +373,7 @@ double Values::operator()(const Symbol &sym) const
 }
 
 /** Add the value 'val' to this set */
-Values& Values::operator+=(const SymbolValue &val)
+Values &Values::operator+=(const SymbolValue &val)
 {
     this->add(val);
     return *this;
@@ -395,7 +381,7 @@ Values& Values::operator+=(const SymbolValue &val)
 
 /** Add the contents of 'other' to this set - this overwrites any
     existing values that are also in 'other' */
-Values& Values::operator+=(const Values &other)
+Values &Values::operator+=(const Values &other)
 {
     if (other.vals.isEmpty())
         return *this;
@@ -406,13 +392,11 @@ Values& Values::operator+=(const Values &other)
     }
     else
     {
-        vals.reserve( vals.count() + other.vals.count() );
+        vals.reserve(vals.count() + other.vals.count());
 
-        for (QHash<SymbolID,double>::const_iterator it = other.vals.begin();
-             it != other.vals.end();
-             ++it)
+        for (QHash<SymbolID, double>::const_iterator it = other.vals.begin(); it != other.vals.end(); ++it)
         {
-            vals.insert( it.key(), it.value() );
+            vals.insert(it.key(), it.value());
         }
 
         return *this;
@@ -466,7 +450,7 @@ Values::const_iterator Values::constFind(const Symbol &symbol) const
 void Values::set(const Values::const_iterator &it)
 {
     if (it != vals.constEnd())
-        vals.insert( it.key(), it.value() );
+        vals.insert(it.key(), it.value());
 }
 
 /** Remove the value for the symbol 'symbol' */
@@ -481,9 +465,9 @@ void Values::remove(const SymbolID &symbolid)
     vals.remove(symbolid);
 }
 
-const char* Values::typeName()
+const char *Values::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Values>() );
+    return QMetaType::typeName(qMetaTypeId<Values>());
 }
 
 namespace SireCAS
@@ -516,4 +500,4 @@ namespace SireCAS
         new_vals += vals1;
         return new_vals;
     }
-}
+} // namespace SireCAS

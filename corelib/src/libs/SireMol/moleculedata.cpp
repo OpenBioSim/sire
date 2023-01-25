@@ -27,13 +27,13 @@
 
 #include <QDataStream>
 
+#include "atommatchers.h"
+#include "atomselection.h"
 #include "moleculedata.h"
 #include "moleculeinfodata.h"
-#include "structureeditor.h"
 #include "moleculeview.h"
-#include "atomselection.h"
-#include "atommatchers.h"
 #include "moleditor.h"
+#include "structureeditor.h"
 
 #include "core.h"
 
@@ -71,7 +71,7 @@ quint64 MoleculeData::PropVersions::increment()
 /** Increment the version number for the property with key 'key' */
 quint64 MoleculeData::PropVersions::increment(const QString &key)
 {
-    QHash<QString,quint64>::iterator it = property_version.find(key);
+    QHash<QString, quint64>::iterator it = property_version.find(key);
 
     if (it == property_version.end())
     {
@@ -88,15 +88,14 @@ quint64 MoleculeData::PropVersions::increment(const QString &key)
 /** Increment the version number of the property with key 'key',
     also updating and returning the global version number of
     the molecule */
-quint64 MoleculeData::PropVersions::increment(const QString &key,
-                                              quint64 &molversion)
+quint64 MoleculeData::PropVersions::increment(const QString &key, quint64 &molversion)
 {
     QMutexLocker lkr(&mutex);
 
-    //now increment the global version
+    // now increment the global version
     ++version;
 
-    //return the values
+    // return the values
     molversion = version;
 
     return this->increment(key);
@@ -108,7 +107,7 @@ void MoleculeData::PropVersions::incrementAll(MoleculeData &moldata)
 {
     QMutexLocker lkr(&mutex);
 
-    //increment the version for all of the keys in the molecule
+    // increment the version for all of the keys in the molecule
     moldata.prop_vrsns.clear();
 
     foreach (QString key, moldata.props.propertyKeys())
@@ -116,7 +115,7 @@ void MoleculeData::PropVersions::incrementAll(MoleculeData &moldata)
         moldata.prop_vrsns.insert(key, this->increment(key));
     }
 
-    //now increment the global version
+    // now increment the global version
     ++version;
 
     moldata.vrsn = version;
@@ -133,8 +132,7 @@ SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds, const MoleculeData &mold
 
     SharedDataStream sds(ds);
 
-    sds << moldata.molinfo << moldata.props
-        << moldata.molname << moldata.molnum;
+    sds << moldata.molinfo << moldata.props << moldata.molname << moldata.molnum;
 
     return ds;
 }
@@ -156,10 +154,10 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, MoleculeData &moldata)
 
         sds >> moldata.molnum;
 
-        //get a versions object for this molecule
+        // get a versions object for this molecule
         moldata.vrsns = MoleculeData::registerMolecule(moldata.molnum);
 
-        //now get the version numbers for all parts of this molecule
+        // now get the version numbers for all parts of this molecule
         moldata.vrsns->incrementAll(moldata);
     }
     else
@@ -168,37 +166,33 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, MoleculeData &moldata)
     return ds;
 }
 
-QHash< MolNum, boost::weak_ptr<MoleculeData::PropVersions> >
-MoleculeData::version_registry;
+QHash<MolNum, boost::weak_ptr<MoleculeData::PropVersions>> MoleculeData::version_registry;
 
 QMutex MoleculeData::version_registry_mutex;
 
 /** Return the version object that is used to get version numbers
     for the molecule with ID number 'molnum' */
-boost::shared_ptr<MoleculeData::PropVersions>
-MoleculeData::registerMolecule(MolNum molnum)
+boost::shared_ptr<MoleculeData::PropVersions> MoleculeData::registerMolecule(MolNum molnum)
 {
     QMutexLocker lkr(&version_registry_mutex);
 
-    boost::shared_ptr<PropVersions> vrsns
-                    = version_registry[molnum].lock();
+    boost::shared_ptr<PropVersions> vrsns = version_registry[molnum].lock();
 
     if (not vrsns)
     {
-        vrsns.reset( new PropVersions() );
+        vrsns.reset(new PropVersions());
         version_registry[molnum] = vrsns;
 
         if (version_registry.capacity() - version_registry.count() < 10)
         {
-            //ok, its time to try and clean out - remove all expired
-            //molecules from the registry - this prevents us filling
-            //up memory, and also may prevent the next malloc of the
-            //hash (as the test is based on the remaining capacity
-            //of the hash)
-            QMutableHashIterator< MolNum, boost::weak_ptr<PropVersions > >
-                                                it( version_registry );
+            // ok, its time to try and clean out - remove all expired
+            // molecules from the registry - this prevents us filling
+            // up memory, and also may prevent the next malloc of the
+            // hash (as the test is based on the remaining capacity
+            // of the hash)
+            QMutableHashIterator<MolNum, boost::weak_ptr<PropVersions>> it(version_registry);
 
-            while( it.hasNext() )
+            while (it.hasNext())
             {
                 it.next();
 
@@ -217,11 +211,11 @@ MolNum MoleculeData::createUniqueMolNum()
 {
     QMutexLocker lkr(&version_registry_mutex);
 
-    MolNum molnum( last_registered_molnum.increment() );
+    MolNum molnum(last_registered_molnum.increment());
 
     while (version_registry.contains(molnum))
     {
-        molnum = MolNum( last_registered_molnum.increment() );
+        molnum = MolNum(last_registered_molnum.increment());
     }
 
     return molnum;
@@ -234,25 +228,22 @@ MolNum MolNum::getUniqueNumber()
 
 /** Null constructor */
 MoleculeData::MoleculeData()
-             : RefCountData(),
-               molinfo( MoleculeInfoData::null() ),
-               vrsn(0),
-               molnum(0),
-               vrsns( MoleculeData::registerMolecule(molnum) )
-{}
+    : RefCountData(), molinfo(MoleculeInfoData::null()), vrsn(0), molnum(0),
+      vrsns(MoleculeData::registerMolecule(molnum))
+{
+}
 
 /** Get the underlying data viewed by the passed molecule view */
-MoleculeData::MoleculeData(const MoleculeView &molview)
-             : RefCountData()
+MoleculeData::MoleculeData(const MoleculeView &molview) : RefCountData()
 {
-    this->operator=( molview.data() );
+    this->operator=(molview.data());
 
     SireBase::assert_true(vrsns.get() != 0, CODELOC);
 }
 
 SharedDataPointer<MoleculeData> MoleculeData::null()
 {
-    auto n = SharedDataPointer<MoleculeData>( create_shared_null<MoleculeData>() );
+    auto n = SharedDataPointer<MoleculeData>(create_shared_null<MoleculeData>());
 
     SireBase::assert_true(n.read().vrsns.get() != 0, CODELOC);
 
@@ -262,7 +253,7 @@ SharedDataPointer<MoleculeData> MoleculeData::null()
 /** Give this molecule a brand new unique ID number! */
 void MoleculeData::renumber()
 {
-    //get the new ID number...
+    // get the new ID number...
     molnum = MolNum::getUniqueNumber();
 
     vrsns = MoleculeData::registerMolecule(molnum);
@@ -276,7 +267,7 @@ void MoleculeData::renumber()
 void MoleculeData::renumber(MolNum newnum)
 {
     if (newnum == molnum)
-        //nothing to do
+        // nothing to do
         return;
 
     molnum = newnum;
@@ -286,21 +277,20 @@ void MoleculeData::renumber(MolNum newnum)
 }
 
 /** Construct from the passed StructureEditor */
-MoleculeData::MoleculeData(const StructureEditor &editor)
-             : RefCountData(), vrsn(0), molnum(0)
+MoleculeData::MoleculeData(const StructureEditor &editor) : RefCountData(), vrsn(0), molnum(0)
 {
-    //create the info object from this editor
-    molinfo = SharedDataPointer<MoleculeInfoData>( new MoleculeInfoData(editor) );
+    // create the info object from this editor
+    molinfo = SharedDataPointer<MoleculeInfoData>(new MoleculeInfoData(editor));
 
-    //now copy across the properties...
+    // now copy across the properties...
     props = editor.properties();
 
-    //copy across the name
+    // copy across the name
     molname = editor.molName();
 
-    //finally, sort out the molecule number - this also
-    //sets up all of the version numbers and performs
-    //the registration of the molecule
+    // finally, sort out the molecule number - this also
+    // sets up all of the version numbers and performs
+    // the registration of the molecule
     if (editor.molNum().isNull() or editor.molNum().value() == 0)
         this->renumber();
     else
@@ -311,24 +301,19 @@ MoleculeData::MoleculeData(const StructureEditor &editor)
 
 /** Copy constructor */
 MoleculeData::MoleculeData(const MoleculeData &other)
-                : RefCountData(),
-                  molinfo(other.molinfo),
-                  props(other.props),
-                  vrsn(other.vrsn),
-                  molname(other.molname),
-                  molnum(other.molnum),
-                  prop_vrsns(other.prop_vrsns),
-                  vrsns(other.vrsns)
+    : RefCountData(), molinfo(other.molinfo), props(other.props), vrsn(other.vrsn), molname(other.molname),
+      molnum(other.molnum), prop_vrsns(other.prop_vrsns), vrsns(other.vrsns)
 {
     SireBase::assert_true(vrsns.get() != 0, CODELOC);
 }
 
 /** Destructor */
 MoleculeData::~MoleculeData()
-{}
+{
+}
 
 /** Assignment operator */
-MoleculeData& MoleculeData::operator=(const MoleculeData &other)
+MoleculeData &MoleculeData::operator=(const MoleculeData &other)
 {
     if (this != &other)
     {
@@ -346,17 +331,16 @@ MoleculeData& MoleculeData::operator=(const MoleculeData &other)
 }
 
 /** Assign equal to a copy of the molecule being edited in 'editor' */
-MoleculeData& MoleculeData::operator=(const StructureEditor &editor)
+MoleculeData &MoleculeData::operator=(const StructureEditor &editor)
 {
-    return this->operator=( MoleculeData(editor) );
+    return this->operator=(MoleculeData(editor));
 }
 
 /** Comparison operator - two molecules are the same if they have
     the same ID and version numbers. */
 bool MoleculeData::operator==(const MoleculeData &other) const
 {
-    return molnum == other.molnum and
-           vrsn == other.vrsn;
+    return molnum == other.molnum and vrsn == other.vrsn;
 }
 
 /** Comparison operator - two molecules are the same if they have
@@ -379,10 +363,10 @@ MoleculeData MoleculeData::extract(const AtomSelection &selected_atoms) const
         return MoleculeData();
 
     // edit a copy of this molecule
-    MolStructureEditor editor = MolStructureEditor( Molecule(*this) );
+    MolStructureEditor editor = MolStructureEditor(Molecule(*this));
 
     // delete all of the atoms that don't exist
-    for (int i=molinfo->nAtoms()-1; i>=0; --i)
+    for (int i = molinfo->nAtoms() - 1; i >= 0; --i)
     {
         AtomIdx idx(i);
 
@@ -393,7 +377,7 @@ MoleculeData MoleculeData::extract(const AtomSelection &selected_atoms) const
     }
 
     // delete all empty cutgroups
-    for (int i=molinfo->nCutGroups()-1; i>=0; --i)
+    for (int i = molinfo->nCutGroups() - 1; i >= 0; --i)
     {
         CGIdx idx(i);
 
@@ -403,8 +387,8 @@ MoleculeData MoleculeData::extract(const AtomSelection &selected_atoms) const
         }
     }
 
-    //delete all empty segments
-    for (int i=molinfo->nSegments()-1; i>=0; --i)
+    // delete all empty segments
+    for (int i = molinfo->nSegments() - 1; i >= 0; --i)
     {
         SegIdx idx(i);
 
@@ -414,8 +398,8 @@ MoleculeData MoleculeData::extract(const AtomSelection &selected_atoms) const
         }
     }
 
-    //delete all empty chains
-    for (int i=molinfo->nChains()-1; i>=0; --i)
+    // delete all empty chains
+    for (int i = molinfo->nChains() - 1; i >= 0; --i)
     {
         ChainIdx idx(i);
 
@@ -425,8 +409,8 @@ MoleculeData MoleculeData::extract(const AtomSelection &selected_atoms) const
         }
     }
 
-    //delete all empty residues
-    for (int i=molinfo->nResidues()-1; i>=0; --i)
+    // delete all empty residues
+    for (int i = molinfo->nResidues() - 1; i >= 0; --i)
     {
         ResIdx idx(i);
 
@@ -469,8 +453,7 @@ bool MoleculeData::hasMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-bool MoleculeData::hasMetadata(const PropertyName &key,
-                               const PropertyName &metakey) const
+bool MoleculeData::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return props.hasMetadata(key, metakey);
 }
@@ -479,7 +462,7 @@ bool MoleculeData::hasMetadata(const PropertyName &key,
 
     \throw SireBase::missing_property
 */
-const char* MoleculeData::propertyType(const PropertyName &key) const
+const char *MoleculeData::propertyType(const PropertyName &key) const
 {
     return props.propertyType(key);
 }
@@ -509,7 +492,7 @@ QStringList MoleculeData::metadataKeys(const PropertyName &key) const
 
     \throw SireBase::missing_property
 */
-const char* MoleculeData::metadataType(const PropertyName &metakey) const
+const char *MoleculeData::metadataType(const PropertyName &metakey) const
 {
     return props.metadataType(metakey);
 }
@@ -519,8 +502,7 @@ const char* MoleculeData::metadataType(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-const char* MoleculeData::metadataType(const PropertyName &key,
-                                       const PropertyName &metakey) const
+const char *MoleculeData::metadataType(const PropertyName &key, const PropertyName &metakey) const
 {
     return props.metadataType(key, metakey);
 }
@@ -529,15 +511,14 @@ const char* MoleculeData::metadataType(const PropertyName &key,
 
     \throw SireBase::missing_property
 */
-const Property& MoleculeData::property(const PropertyName &key) const
+const Property &MoleculeData::property(const PropertyName &key) const
 {
     return props.property(key);
 }
 
 /** Return the property at key 'key', or 'default_value' if there
     is no such property */
-const Property& MoleculeData::property(const PropertyName &key,
-                                       const Property &default_value) const
+const Property &MoleculeData::property(const PropertyName &key, const Property &default_value) const
 {
     return props.property(key, default_value);
 }
@@ -546,7 +527,7 @@ const Property& MoleculeData::property(const PropertyName &key,
 
     \throw SireBase::missing_property
 */
-const Property& MoleculeData::metadata(const PropertyName &metakey) const
+const Property &MoleculeData::metadata(const PropertyName &metakey) const
 {
     return props.metadata(metakey);
 }
@@ -556,16 +537,14 @@ const Property& MoleculeData::metadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-const Property& MoleculeData::metadata(const PropertyName &key,
-                                       const PropertyName &metakey) const
+const Property &MoleculeData::metadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return props.metadata(key, metakey);
 }
 
 /** Return the metadata at metakey 'metakey', or 'default_value'
     if there is no such value */
-const Property& MoleculeData::metadata(const PropertyName &metakey,
-                                       const Property &default_value) const
+const Property &MoleculeData::metadata(const PropertyName &metakey, const Property &default_value) const
 {
     return props.metadata(metakey, default_value);
 }
@@ -575,8 +554,7 @@ const Property& MoleculeData::metadata(const PropertyName &metakey,
 
     \throw SireBase::missing_property
 */
-const Property& MoleculeData::metadata(const PropertyName &key,
-                                       const PropertyName &metakey,
+const Property &MoleculeData::metadata(const PropertyName &key, const PropertyName &metakey,
                                        const Property &default_value) const
 {
     return props.metadata(key, metakey, default_value);
@@ -592,8 +570,8 @@ void MoleculeData::updatePropertyMolInfo(const AtomMatcher &matcher)
     {
         if (it.value().read().isA<MolViewProperty>())
         {
-            newprops.setProperty(it.key(), it.value().read().asA<MolViewProperty>()
-                                            .makeCompatibleWith(molinfo.read(),matcher));
+            newprops.setProperty(it.key(),
+                                 it.value().read().asA<MolViewProperty>().makeCompatibleWith(molinfo.read(), matcher));
         }
     }
 
@@ -604,7 +582,7 @@ void MoleculeData::updatePropertyMolInfo(const AtomMatcher &matcher)
     This assumes that the update hasn't changed the order of the atoms in the molecule */
 void MoleculeData::updatePropertyMolInfo()
 {
-    this->updatePropertyMolInfo( AtomIdxMatcher() );
+    this->updatePropertyMolInfo(AtomIdxMatcher());
 }
 
 /** Return if this is empty (has now atoms) */
@@ -619,7 +597,7 @@ void MoleculeData::rename(const MolName &newname)
 {
     if (newname != molname)
     {
-        SireBase::assert_true( vrsns.get() != 0, CODELOC );
+        SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
         molname = newname;
         updatePropertyMolInfo();
@@ -637,7 +615,7 @@ void MoleculeData::rename(AtomIdx atomidx, const AtomName &newname)
 
     if (newinfo.UID() != molinfo.constData()->UID())
     {
-        SireBase::assert_true( vrsns.get() != 0, CODELOC );
+        SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
         molinfo = newinfo;
         updatePropertyMolInfo();
@@ -652,9 +630,9 @@ void MoleculeData::rename(AtomIdx atomidx, const AtomName &newname)
 */
 void MoleculeData::rename(const AtomID &atomid, const AtomName &newname)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
-    MoleculeInfoData newinfo( *(molinfo.constData()) );
+    MoleculeInfoData newinfo(*(molinfo.constData()));
 
     foreach (AtomIdx atomidx, atomid.map(info()))
     {
@@ -675,7 +653,7 @@ void MoleculeData::rename(const AtomID &atomid, const AtomName &newname)
 */
 void MoleculeData::rename(CGIdx cgidx, const CGName &newname)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     MoleculeInfoData newinfo = molinfo->rename(cgidx, newname);
 
@@ -694,9 +672,9 @@ void MoleculeData::rename(CGIdx cgidx, const CGName &newname)
 */
 void MoleculeData::rename(const CGID &cgid, const CGName &newname)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
-    MoleculeInfoData newinfo( *(molinfo.constData()) );
+    MoleculeInfoData newinfo(*(molinfo.constData()));
 
     foreach (CGIdx cgidx, cgid.map(info()))
     {
@@ -717,7 +695,7 @@ void MoleculeData::rename(const CGID &cgid, const CGName &newname)
 */
 void MoleculeData::rename(ResIdx residx, const ResName &newname)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     MoleculeInfoData newinfo = molinfo->rename(residx, newname);
 
@@ -736,9 +714,9 @@ void MoleculeData::rename(ResIdx residx, const ResName &newname)
 */
 void MoleculeData::rename(const ResID &resid, const ResName &newname)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
-    MoleculeInfoData newinfo( *(molinfo.constData()) );
+    MoleculeInfoData newinfo(*(molinfo.constData()));
 
     foreach (ResIdx residx, resid.map(info()))
     {
@@ -747,9 +725,9 @@ void MoleculeData::rename(const ResID &resid, const ResName &newname)
 
     if (newinfo.UID() != molinfo.constData()->UID())
     {
-       molinfo = newinfo;
-       updatePropertyMolInfo();
-       vrsn = vrsns->increment();
+        molinfo = newinfo;
+        updatePropertyMolInfo();
+        vrsn = vrsns->increment();
     }
 }
 
@@ -759,7 +737,7 @@ void MoleculeData::rename(const ResID &resid, const ResName &newname)
 */
 void MoleculeData::rename(ChainIdx chainidx, const ChainName &newname)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     MoleculeInfoData newinfo = molinfo->rename(chainidx, newname);
 
@@ -778,9 +756,9 @@ void MoleculeData::rename(ChainIdx chainidx, const ChainName &newname)
 */
 void MoleculeData::rename(const ChainID &chainid, const ChainName &newname)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
-    MoleculeInfoData newinfo( *(molinfo.constData()) );
+    MoleculeInfoData newinfo(*(molinfo.constData()));
 
     foreach (ChainIdx chainidx, chainid.map(info()))
     {
@@ -801,7 +779,7 @@ void MoleculeData::rename(const ChainID &chainid, const ChainName &newname)
 */
 void MoleculeData::rename(SegIdx segidx, const SegName &newname)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     MoleculeInfoData newinfo = molinfo->rename(segidx, newname);
 
@@ -820,9 +798,9 @@ void MoleculeData::rename(SegIdx segidx, const SegName &newname)
 */
 void MoleculeData::rename(const SegID &segid, const SegName &newname)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
-    MoleculeInfoData newinfo( *(molinfo.constData()) );
+    MoleculeInfoData newinfo(*(molinfo.constData()));
 
     foreach (SegIdx segidx, segid.map(info()))
     {
@@ -843,7 +821,7 @@ void MoleculeData::rename(const SegID &segid, const SegName &newname)
 */
 void MoleculeData::renumber(AtomIdx atomidx, AtomNum newnum)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     MoleculeInfoData newinfo = molinfo->renumber(atomidx, newnum);
 
@@ -862,9 +840,9 @@ void MoleculeData::renumber(AtomIdx atomidx, AtomNum newnum)
 */
 void MoleculeData::renumber(const AtomID &atomid, AtomNum newnum)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
-    MoleculeInfoData newinfo( *(molinfo.constData()) );
+    MoleculeInfoData newinfo(*(molinfo.constData()));
 
     foreach (AtomIdx atomidx, atomid.map(info()))
     {
@@ -885,7 +863,7 @@ void MoleculeData::renumber(const AtomID &atomid, AtomNum newnum)
 */
 void MoleculeData::renumber(ResIdx residx, ResNum newnum)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     MoleculeInfoData newinfo = molinfo->renumber(residx, newnum);
 
@@ -904,9 +882,9 @@ void MoleculeData::renumber(ResIdx residx, ResNum newnum)
 */
 void MoleculeData::renumber(const ResID &resid, ResNum newnum)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
-    MoleculeInfoData newinfo( *(molinfo.constData()) );
+    MoleculeInfoData newinfo(*(molinfo.constData()));
 
     foreach (ResIdx residx, resid.map(info()))
     {
@@ -922,9 +900,9 @@ void MoleculeData::renumber(const ResID &resid, ResNum newnum)
 }
 
 /** Renumber all of the atoms in map */
-void MoleculeData::renumber(const QHash<AtomNum,AtomNum> &atomnums)
+void MoleculeData::renumber(const QHash<AtomNum, AtomNum> &atomnums)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     MoleculeInfoData newinfo = molinfo->renumber(atomnums);
 
@@ -937,9 +915,9 @@ void MoleculeData::renumber(const QHash<AtomNum,AtomNum> &atomnums)
 }
 
 /** Renumber all of the residues in map */
-void MoleculeData::renumber(const QHash<ResNum,ResNum> &resnums)
+void MoleculeData::renumber(const QHash<ResNum, ResNum> &resnums)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     MoleculeInfoData newinfo = molinfo->renumber(resnums);
 
@@ -952,12 +930,11 @@ void MoleculeData::renumber(const QHash<ResNum,ResNum> &resnums)
 }
 
 /** Renumber all of the atoms and residues in the passed maps */
-void MoleculeData::renumber(const QHash<AtomNum,AtomNum> &atomnums,
-                            const QHash<ResNum,ResNum> &resnums)
+void MoleculeData::renumber(const QHash<AtomNum, AtomNum> &atomnums, const QHash<ResNum, ResNum> &resnums)
 {
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
-    MoleculeInfoData newinfo = molinfo->renumber(atomnums,resnums);
+    MoleculeInfoData newinfo = molinfo->renumber(atomnums, resnums);
 
     if (newinfo.UID() != molinfo.constData()->UID())
     {
@@ -976,20 +953,17 @@ void MoleculeData::renumber(const QHash<AtomNum,AtomNum> &atomnums,
 
     \throw SireError::incompatible_error
 */
-void MoleculeData::setProperty(const QString &key,
-                               const Property &value,
-                               bool clear_metadata)
+void MoleculeData::setProperty(const QString &key, const Property &value, bool clear_metadata)
 {
     if (key.isEmpty())
-        throw SireError::invalid_arg( QObject::tr(
-            "You cannot set a property with an empty key!"), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("You cannot set a property with an empty key!"), CODELOC);
 
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
-    //now the property version number
-    prop_vrsns.insert( key, vrsns->increment(key, vrsn) );
+    // now the property version number
+    prop_vrsns.insert(key, vrsns->increment(key, vrsn));
 
-    //now save the property itself
+    // now save the property itself
     props.setProperty(key, value, clear_metadata);
 }
 
@@ -1003,12 +977,12 @@ void MoleculeData::removeProperty(const QString &key)
         props.removeProperty(key);
         prop_vrsns.remove(key);
 
-        //do not remove from the shared version numbers, in
-        //case the user re-adds a property with this key -
-        //we have to still ensure that the version number is
-        //unique :-)
+        // do not remove from the shared version numbers, in
+        // case the user re-adds a property with this key -
+        // we have to still ensure that the version number is
+        // unique :-)
 
-        //increment the global version number
+        // increment the global version number
         vrsn = vrsns->increment();
     }
 }
@@ -1047,7 +1021,7 @@ PropertyPtr MoleculeData::takeMetadata(const QString &metakey)
 PropertyPtr MoleculeData::takeMetadata(const QString &key, const QString &metakey)
 {
     PropertyPtr value = this->metadata(key, metakey);
-    this->removeMetadata(key,metakey);
+    this->removeMetadata(key, metakey);
 
     return value;
 }
@@ -1057,14 +1031,13 @@ PropertyPtr MoleculeData::takeMetadata(const QString &key, const QString &metake
 void MoleculeData::setMetadata(const QString &metakey, const Property &value)
 {
     if (metakey.isEmpty())
-        throw SireError::invalid_arg( QObject::tr(
-            "You cannot set some metadata with an empty metakey!"), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("You cannot set some metadata with an empty metakey!"), CODELOC);
 
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     props.setMetadata(metakey, value);
 
-    //increment the global version number
+    // increment the global version number
     vrsn = vrsns->increment();
 }
 
@@ -1073,21 +1046,18 @@ void MoleculeData::setMetadata(const QString &metakey, const Property &value)
 
     \throw SireBase::missing_property
 */
-void MoleculeData::setMetadata(const QString &key, const QString &metakey,
-                               const Property &value)
+void MoleculeData::setMetadata(const QString &key, const QString &metakey, const Property &value)
 {
     if (key.isNull())
-        throw SireError::invalid_arg( QObject::tr(
-            "You cannot set some metadata with an empty key!"), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("You cannot set some metadata with an empty key!"), CODELOC);
     else if (metakey.isEmpty())
-        throw SireError::invalid_arg( QObject::tr(
-            "You cannot set some metadata with an empty metakey!"), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("You cannot set some metadata with an empty metakey!"), CODELOC);
 
-    SireBase::assert_true( vrsns.get() != 0, CODELOC );
+    SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     props.setMetadata(key, metakey, value);
 
-    //increment the global version number
+    // increment the global version number
     vrsn = vrsns->increment();
 }
 
@@ -1115,7 +1085,7 @@ void MoleculeData::removeMetadata(const QString &key, const QString &metakey)
     }
 }
 
-const char* MoleculeData::typeName()
+const char *MoleculeData::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MoleculeData>() );
+    return QMetaType::typeName(qMetaTypeId<MoleculeData>());
 }

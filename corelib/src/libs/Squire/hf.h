@@ -38,52 +38,52 @@ SIRE_BEGIN_HEADER
 namespace Squire
 {
 
-using SireMaths::Vector;
+    using SireMaths::Vector;
 
-class Orbital;
-class S_GTO;
-class P_GTO;
-class PointCharge;
-class PointDipole;
+    class Orbital;
+    class S_GTO;
+    class P_GTO;
+    class PointCharge;
+    class PointDipole;
 
-/** This is my first attempt at a small HF program */
-class SQUIRE_EXPORT HF
-{
-public:
-    HF();
+    /** This is my first attempt at a small HF program */
+    class SQUIRE_EXPORT HF
+    {
+    public:
+        HF();
 
-    ~HF();
+        ~HF();
 
-    void solve();
+        void solve();
 
-    void add(const Orbital &orbital);
-    void add(const Vector &point, const Orbital &orbital);
-    void add(const Vector &point, const SireUnits::Dimension::Charge &charge);
-    void add(const Vector &point, const Vector &dipole);
+        void add(const Orbital &orbital);
+        void add(const Vector &point, const Orbital &orbital);
+        void add(const Vector &point, const SireUnits::Dimension::Charge &charge);
+        void add(const Vector &point, const Vector &dipole);
 
-private:
-    /** All of the coordinates of the s_orbital centers */
-    QVector<Vector> s_centers;
+    private:
+        /** All of the coordinates of the s_orbital centers */
+        QVector<Vector> s_centers;
 
-    /** All of the S-basis functions */
-    QVector<S_GTO> s_orbs;
+        /** All of the S-basis functions */
+        QVector<S_GTO> s_orbs;
 
-    /** All of the coordinates of the p_orbital centers */
-    QVector<Vector> p_centers;
+        /** All of the coordinates of the p_orbital centers */
+        QVector<Vector> p_centers;
 
-    /** All of the P-basis functions */
-    QVector<P_GTO> p_orbs;
+        /** All of the P-basis functions */
+        QVector<P_GTO> p_orbs;
 
-    /** All of the point charges (nuclei) */
-    QVector<PointCharge> chgs;
+        /** All of the point charges (nuclei) */
+        QVector<PointCharge> chgs;
 
-    /** All of the point dipoles */
-    QVector<PointDipole> dipols;
-};
+        /** All of the point dipoles */
+        QVector<PointDipole> dipols;
+    };
 
-}
+} // namespace Squire
 
-SIRE_EXPOSE_CLASS( Squire::HF )
+SIRE_EXPOSE_CLASS(Squire::HF)
 
 SIRE_END_HEADER
 

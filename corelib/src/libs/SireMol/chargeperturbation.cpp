@@ -44,24 +44,22 @@ using namespace SireStream;
 
 static const RegisterMetaType<ChargePerturbation> r_chgpert;
 
-QDataStream &operator<<(QDataStream &ds,
-                                       const ChargePerturbation &chgpert)
+QDataStream &operator<<(QDataStream &ds, const ChargePerturbation &chgpert)
 {
     writeHeader(ds, r_chgpert, 1);
 
-    ds << static_cast<const Perturbation&>(chgpert);
+    ds << static_cast<const Perturbation &>(chgpert);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                       ChargePerturbation &chgpert)
+QDataStream &operator>>(QDataStream &ds, ChargePerturbation &chgpert)
 {
     VersionID v = readHeader(ds, r_chgpert);
 
     if (v == 1)
     {
-        ds >> static_cast<Perturbation&>(chgpert);
+        ds >> static_cast<Perturbation &>(chgpert);
     }
     else
         throw version_error(v, "1", r_chgpert, CODELOC);
@@ -74,48 +72,48 @@ QDataStream &operator>>(QDataStream &ds,
     "final_charge", placing the current charges in "charge",
     and using Perturbation::defaultEquation() to map the
     charges */
-ChargePerturbation::ChargePerturbation()
-                   : ConcreteProperty<ChargePerturbation,Perturbation>()
-{}
+ChargePerturbation::ChargePerturbation() : ConcreteProperty<ChargePerturbation, Perturbation>()
+{
+}
 
 /** Construct, using the passed map to find the properties used
     by this perturbation */
-ChargePerturbation::ChargePerturbation(const PropertyMap &map)
-                   : ConcreteProperty<ChargePerturbation,Perturbation>(map)
-{}
+ChargePerturbation::ChargePerturbation(const PropertyMap &map) : ConcreteProperty<ChargePerturbation, Perturbation>(map)
+{
+}
 
 /** Construct, using the passed map to find the properties used
     by this perturbation and the passed mapping function to map
     the charges between the states */
-ChargePerturbation::ChargePerturbation(const Expression &mapping_function,
-                                       const PropertyMap &map)
-                   : ConcreteProperty<ChargePerturbation,Perturbation>(mapping_function,
-                                                                       map)
-{}
+ChargePerturbation::ChargePerturbation(const Expression &mapping_function, const PropertyMap &map)
+    : ConcreteProperty<ChargePerturbation, Perturbation>(mapping_function, map)
+{
+}
 
 /** Copy constructor */
 ChargePerturbation::ChargePerturbation(const ChargePerturbation &other)
-                   : ConcreteProperty<ChargePerturbation,Perturbation>(other)
-{}
+    : ConcreteProperty<ChargePerturbation, Perturbation>(other)
+{
+}
 
 /** Destructor */
 ChargePerturbation::~ChargePerturbation()
-{}
-
-const char* ChargePerturbation::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ChargePerturbation>() );
+}
+
+const char *ChargePerturbation::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<ChargePerturbation>());
 }
 
 QString ChargePerturbation::toString() const
 {
     return QObject::tr("ChargePerturbation( from %1 to %2 )")
-                .arg(propertyMap()["initial_charge"].source(),
-                     propertyMap()["final_charge"].source());
+        .arg(propertyMap()["initial_charge"].source(), propertyMap()["final_charge"].source());
 }
 
 /** Copy assignment operator */
-ChargePerturbation& ChargePerturbation::operator=(const ChargePerturbation &other)
+ChargePerturbation &ChargePerturbation::operator=(const ChargePerturbation &other)
 {
     Perturbation::operator=(other);
     return *this;
@@ -141,49 +139,42 @@ QSet<QString> ChargePerturbation::requiredProperties() const
     PropertyName prop = propertyMap()["charge"];
 
     if (prop.hasSource())
-        props.insert( prop.source() );
+        props.insert(prop.source());
 
     prop = propertyMap()["initial_charge"];
 
     if (prop.hasSource())
-        props.insert( prop.source() );
+        props.insert(prop.source());
 
     prop = propertyMap()["final_charge"];
 
     if (prop.hasSource())
-        props.insert( prop.source() );
+        props.insert(prop.source());
 
     return props;
 }
 
 /** Return whether or not this perturbation with the passed values would
     change the molecule 'molecule' */
-bool ChargePerturbation::wouldChange(const Molecule &molecule,
-                                     const Values &values) const
+bool ChargePerturbation::wouldChange(const Molecule &molecule, const Values &values) const
 {
     try
     {
-        const AtomCharges &initial_chgs = molecule.property(
-                                            propertyMap()["initial_charge"] )
-                                                .asA<AtomCharges>();
+        const AtomCharges &initial_chgs = molecule.property(propertyMap()["initial_charge"]).asA<AtomCharges>();
 
-        const AtomCharges &final_chgs = molecule.property(
-                                            propertyMap()["final_charge"] )
-                                                .asA<AtomCharges>();
+        const AtomCharges &final_chgs = molecule.property(propertyMap()["final_charge"]).asA<AtomCharges>();
 
-        const AtomCharges &chgs = molecule.property(
-                                            propertyMap()["charge"] )
-                                                .asA<AtomCharges>();
+        const AtomCharges &chgs = molecule.property(propertyMap()["charge"]).asA<AtomCharges>();
 
         const Expression &f = this->mappingFunction();
         const Symbol &initial = this->symbols().initial();
         const Symbol &final = this->symbols().final();
 
-        for (CGIdx i(0); i<initial_chgs.nCutGroups(); ++i)
+        for (CGIdx i(0); i < initial_chgs.nCutGroups(); ++i)
         {
-            for (Index j(0); j<initial_chgs.nAtoms(i); ++j)
+            for (Index j(0); j < initial_chgs.nAtoms(i); ++j)
             {
-                CGAtomIdx atomidx(i,j);
+                CGAtomIdx atomidx(i, j);
 
                 double initial_chg = initial_chgs[atomidx].value();
                 double final_chg = final_chgs[atomidx].value();
@@ -191,8 +182,7 @@ bool ChargePerturbation::wouldChange(const Molecule &molecule,
 
                 if (initial_chg != final_chg)
                 {
-                    Values atom_values = values + (initial == initial_chg) +
-                                                  (final == final_chg);
+                    Values atom_values = values + (initial == initial_chg) + (final == final_chg);
 
                     if (chg != f(atom_values))
                         return true;
@@ -206,7 +196,7 @@ bool ChargePerturbation::wouldChange(const Molecule &molecule,
 
         return false;
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -221,11 +211,9 @@ bool ChargePerturbation::wouldChange(const Molecule &molecule,
 */
 void ChargePerturbation::perturbMolecule(MolEditor &molecule, const Values &values) const
 {
-    const AtomCharges &initial_chgs = molecule.property( propertyMap()["initial_charge"] )
-                                              .asA<AtomCharges>();
+    const AtomCharges &initial_chgs = molecule.property(propertyMap()["initial_charge"]).asA<AtomCharges>();
 
-    const AtomCharges &final_chgs = molecule.property( propertyMap()["final_charge"] )
-                                            .asA<AtomCharges>();
+    const AtomCharges &final_chgs = molecule.property(propertyMap()["final_charge"]).asA<AtomCharges>();
 
     AtomCharges chgs(initial_chgs);
 
@@ -233,24 +221,23 @@ void ChargePerturbation::perturbMolecule(MolEditor &molecule, const Values &valu
     const Symbol &initial = this->symbols().initial();
     const Symbol &final = this->symbols().final();
 
-    for (CGIdx i(0); i<initial_chgs.nCutGroups(); ++i)
+    for (CGIdx i(0); i < initial_chgs.nCutGroups(); ++i)
     {
-        for (Index j(0); j<initial_chgs.nAtoms(i); ++j)
+        for (Index j(0); j < initial_chgs.nAtoms(i); ++j)
         {
-            CGAtomIdx atomidx(i,j);
+            CGAtomIdx atomidx(i, j);
 
             double initial_chg = initial_chgs[atomidx].value();
             double final_chg = final_chgs[atomidx].value();
 
             if (initial_chg != final_chg)
             {
-                Values atom_values = values + (initial == initial_chg) +
-                                              (final == final_chg);
+                Values atom_values = values + (initial == initial_chg) + (final == final_chg);
 
-                chgs.set( atomidx, Charge(f(atom_values)) );
+                chgs.set(atomidx, Charge(f(atom_values)));
             }
         }
     }
 
-    molecule.setProperty( propertyMap()["charge"].source(), chgs );
+    molecule.setProperty(propertyMap()["charge"].source(), chgs);
 }

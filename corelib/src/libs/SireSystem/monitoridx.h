@@ -36,77 +36,76 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class MonitorIdx;
+    class MonitorIdx;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::MonitorIdx&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::MonitorIdx&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::MonitorIdx &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::MonitorIdx &);
 
 namespace SireSystem
 {
 
-/** This is an ID object that is used to index system monitors (e.g. index
-    in a list or array).
+    /** This is an ID object that is used to index system monitors (e.g. index
+        in a list or array).
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT MonitorIdx
-                : public SireID::Index_T_<MonitorIdx>, public MonitorID
-{
-
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const MonitorIdx&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, MonitorIdx&);
-
-public:
-    MonitorIdx();
-    explicit MonitorIdx(qint32 idx);
-
-    MonitorIdx(const MonitorIdx &other);
-
-    ~MonitorIdx();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT MonitorIdx : public SireID::Index_T_<MonitorIdx>, public MonitorID
     {
-        return MonitorIdx::typeName();
-    }
 
-    MonitorIdx* clone() const;
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const MonitorIdx &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, MonitorIdx &);
 
-    static MonitorIdx null();
+    public:
+        MonitorIdx();
+        explicit MonitorIdx(qint32 idx);
 
-    bool isNull() const;
+        MonitorIdx(const MonitorIdx &other);
 
-    uint hash() const;
+        ~MonitorIdx();
 
-    QString toString() const;
+        static const char *typeName();
 
-    MonitorIdx& operator=(const MonitorIdx &other);
+        const char *what() const
+        {
+            return MonitorIdx::typeName();
+        }
 
-    bool operator==(const SireID::ID &other) const;
+        MonitorIdx *clone() const;
 
-    using SireID::Index_T_<MonitorIdx>::operator=;
+        static MonitorIdx null();
 
-    using SireID::Index_T_<MonitorIdx>::operator==;
-    using SireID::Index_T_<MonitorIdx>::operator!=;
+        bool isNull() const;
 
-    using SireID::Index_T_<MonitorIdx>::operator+=;
-    using SireID::Index_T_<MonitorIdx>::operator++;
-    using SireID::Index_T_<MonitorIdx>::operator-=;
-    using SireID::Index_T_<MonitorIdx>::operator--;
+        uint hash() const;
 
-    using SireID::Index_T_<MonitorIdx>::map;
+        QString toString() const;
 
-    QList<MonitorName> map(const SystemMonitors &monitors) const;
-};
+        MonitorIdx &operator=(const MonitorIdx &other);
 
-}
+        bool operator==(const SireID::ID &other) const;
+
+        using SireID::Index_T_<MonitorIdx>::operator=;
+
+        using SireID::Index_T_<MonitorIdx>::operator==;
+        using SireID::Index_T_<MonitorIdx>::operator!=;
+
+        using SireID::Index_T_<MonitorIdx>::operator+=;
+        using SireID::Index_T_<MonitorIdx>::operator++;
+        using SireID::Index_T_<MonitorIdx>::operator-=;
+        using SireID::Index_T_<MonitorIdx>::operator--;
+
+        using SireID::Index_T_<MonitorIdx>::map;
+
+        QList<MonitorName> map(const SystemMonitors &monitors) const;
+    };
+
+} // namespace SireSystem
 
 Q_DECLARE_TYPEINFO(SireSystem::MonitorIdx, Q_MOVABLE_TYPE);
 Q_DECLARE_METATYPE(SireSystem::MonitorIdx);
 
-SIRE_EXPOSE_CLASS( SireSystem::MonitorIdx )
+SIRE_EXPOSE_CLASS(SireSystem::MonitorIdx)
 
 SIRE_END_HEADER
 

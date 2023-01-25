@@ -36,8 +36,8 @@
 
 #include "SireBase/numberproperty.h"
 
-#include "SireFF/errors.h"
 #include "SireBase/errors.h"
+#include "SireFF/errors.h"
 
 #include "SireStream/datastream.h"
 
@@ -57,27 +57,23 @@ using namespace SireStream;
 
 namespace Squire
 {
-    template class QMMMPotential<QMPotential,InterCoulombPotential>;
+    template class QMMMPotential<QMPotential, InterCoulombPotential>;
 }
 
-static const RegisterMetaType<QMMMElecEmbedPotential> r_qmmm( MAGIC_ONLY, NO_ROOT,
-                                                "Squire::QMMMElecEmbedPotential" );
+static const RegisterMetaType<QMMMElecEmbedPotential> r_qmmm(MAGIC_ONLY, NO_ROOT, "Squire::QMMMElecEmbedPotential");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const QMMMElecEmbedPotential &qmmm)
+QDataStream &operator<<(QDataStream &ds, const QMMMElecEmbedPotential &qmmm)
 {
     writeHeader(ds, r_qmmm, 2);
 
-    ds << static_cast<const QMMMPotential<QMPotential,InterCoulombPotential>&>(qmmm)
-       << qmmm.chg_sclfac;
+    ds << static_cast<const QMMMPotential<QMPotential, InterCoulombPotential> &>(qmmm) << qmmm.chg_sclfac;
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                      QMMMElecEmbedPotential &qmmm)
+QDataStream &operator>>(QDataStream &ds, QMMMElecEmbedPotential &qmmm)
 {
     VersionID v = readHeader(ds, r_qmmm);
 
@@ -85,7 +81,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        ds >> static_cast<QMMMPotential<QMPotential,InterCoulombPotential>&>(qmmm);
+        ds >> static_cast<QMMMPotential<QMPotential, InterCoulombPotential> &>(qmmm);
 
         if (v == 2)
             ds >> qmmm.chg_sclfac;
@@ -103,8 +99,8 @@ QDataStream &operator>>(QDataStream &ds,
 /** Merge the properties of the QM and MM forcefields */
 void QMMMElecEmbedPotential::mergeProperties()
 {
-    //we are only interested in the space, qm program and switching function
-    //properties
+    // we are only interested in the space, qm program and switching function
+    // properties
     props = Properties();
 
     props.setProperty("space", this->space());
@@ -115,28 +111,26 @@ void QMMMElecEmbedPotential::mergeProperties()
 }
 
 /** Constructor */
-QMMMElecEmbedPotential::QMMMElecEmbedPotential()
-                       : QMMMPotential<QMPotential,InterCoulombPotential>(),
-                         chg_sclfac(1.0)
+QMMMElecEmbedPotential::QMMMElecEmbedPotential() : QMMMPotential<QMPotential, InterCoulombPotential>(), chg_sclfac(1.0)
 {
     this->mergeProperties();
 }
 
 /** Copy constructor */
 QMMMElecEmbedPotential::QMMMElecEmbedPotential(const QMMMElecEmbedPotential &other)
-                       : QMMMPotential<QMPotential,InterCoulombPotential>(other),
-                         props(other.props), chg_sclfac(other.chg_sclfac)
-{}
+    : QMMMPotential<QMPotential, InterCoulombPotential>(other), props(other.props), chg_sclfac(other.chg_sclfac)
+{
+}
 
 /** Destructor */
 QMMMElecEmbedPotential::~QMMMElecEmbedPotential()
-{}
+{
+}
 
 /** Copy assignment operator */
-QMMMElecEmbedPotential&
-QMMMElecEmbedPotential::operator=(const QMMMElecEmbedPotential &other)
+QMMMElecEmbedPotential &QMMMElecEmbedPotential::operator=(const QMMMElecEmbedPotential &other)
 {
-    QMMMPotential<QMPotential,InterCoulombPotential>::operator=(other);
+    QMMMPotential<QMPotential, InterCoulombPotential>::operator=(other);
     props = other.props;
     chg_sclfac = other.chg_sclfac;
 
@@ -144,21 +138,21 @@ QMMMElecEmbedPotential::operator=(const QMMMElecEmbedPotential &other)
 }
 
 /** Return the space within which the molecules in this potential exist */
-const Space& QMMMElecEmbedPotential::space() const
+const Space &QMMMElecEmbedPotential::space() const
 {
     return QMPotential::space();
 }
 
 /** Return the switching function that is used to implement the non-bonded
     cutoff */
-const SwitchingFunction& QMMMElecEmbedPotential::switchingFunction() const
+const SwitchingFunction &QMMMElecEmbedPotential::switchingFunction() const
 {
     return MMPotential::switchingFunction();
 }
 
 /** Return the handle to the quantum chemical program that is used
     by this potential to calculate the QM energies and forces */
-const QMProgram& QMMMElecEmbedPotential::quantumProgram() const
+const QMProgram &QMMMElecEmbedPotential::quantumProgram() const
 {
     return QMPotential::quantumProgram();
 }
@@ -256,16 +250,16 @@ bool QMMMElecEmbedPotential::setChargeScalingFactor(double scale_factor)
 bool QMMMElecEmbedPotential::setProperty(const QString &name, const Property &value)
 {
     if (not this->containsProperty(name))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no property called \"%1\" in the potential %2. "
-            "Available properties are [ %3 ].")
-                .arg(name).arg(this->what())
-                .arg(Sire::toString(props.propertyKeys())),
-                    CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no property called \"%1\" in the potential %2. "
+                                                     "Available properties are [ %3 ].")
+                                             .arg(name)
+                                             .arg(this->what())
+                                             .arg(Sire::toString(props.propertyKeys())),
+                                         CODELOC);
 
     if (name == "chargeScalingFactor")
     {
-        return this->setChargeScalingFactor( value.asA<NumberProperty>().value() );
+        return this->setChargeScalingFactor(value.asA<NumberProperty>().value());
     }
     else if (QMPotential::containsProperty(name))
     {
@@ -293,7 +287,7 @@ bool QMMMElecEmbedPotential::setProperty(const QString &name, const Property &va
 
     \throw SireBase::missing_property
 */
-const Property& QMMMElecEmbedPotential::property(const QString &name) const
+const Property &QMMMElecEmbedPotential::property(const QString &name) const
 {
     return props.property(name);
 }
@@ -305,25 +299,24 @@ bool QMMMElecEmbedPotential::containsProperty(const QString &name) const
 }
 
 /** Return all of the properties of this potential */
-const Properties& QMMMElecEmbedPotential::properties() const
+const Properties &QMMMElecEmbedPotential::properties() const
 {
     return props;
 }
 
 /** This converts the MM molecules in 'mmmols' into a set of lattice charges
     that surround the QM molecules in 'qmmols' */
-LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmols,
-                                                         const MMMolecules &mmmols,
-                              QHash<MolNum,AtomIntProperty> *lattice_indicies) const
+LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmols, const MMMolecules &mmmols,
+                                                         QHash<MolNum, AtomIntProperty> *lattice_indicies) const
 {
     if (qmmols.isEmpty() or mmmols.isEmpty())
     {
         return LatticeCharges();
     }
 
-    //the QM molecules are already in this space
+    // the QM molecules are already in this space
 
-    //merge all of the atoms from the QM molecules into a single CoordGroup
+    // merge all of the atoms from the QM molecules into a single CoordGroup
     CoordGroup qmgroup;
 
     if (qmmols.count() == 1)
@@ -339,7 +332,7 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
         const ChunkedVector<QMMolecule> &qmmols_array = qmmols.moleculesByIndex();
         CoordGroup *qmgroups_array = qmgroups.data();
 
-        for (int i=0; i<nqmmols; ++i)
+        for (int i = 0; i < nqmmols; ++i)
         {
             qmgroups_array[i] = qmmols_array[i].coordinates().merge();
         }
@@ -347,7 +340,7 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
         qmgroup = CoordGroupArray(qmgroups).merge();
     }
 
-    //now map all of the MM molecules into the same space as the QM molecules
+    // now map all of the MM molecules into the same space as the QM molecules
     const Space &spce = this->space();
     const SwitchingFunction &switchfunc = this->switchingFunction();
 
@@ -356,9 +349,9 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
     int nmols = mmmols.count();
     const ChunkedVector<MMMolecule> &mmmols_array = mmmols.moleculesByIndex();
 
-    //try to reserve enough space
+    // try to reserve enough space
     int nats = 0;
-    for (int i=0; i<nmols; ++i)
+    for (int i = 0; i < nmols; ++i)
     {
         nats += mmmols_array[i].coordinates().nCoords();
     }
@@ -366,43 +359,39 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
     LatticeCharges lattice_charges;
     lattice_charges.reserve(nats);
 
-    //now place the molecules' charges onto the lattice, recording
-    //the lattice index of the atoms of the closest CutGroup copy
+    // now place the molecules' charges onto the lattice, recording
+    // the lattice index of the atoms of the closest CutGroup copy
     if (lattice_indicies != 0)
     {
-        *lattice_indicies = QHash<MolNum,AtomIntProperty>();
+        *lattice_indicies = QHash<MolNum, AtomIntProperty>();
         lattice_indicies->reserve(nmols);
     }
 
-    for (int i=0; i<nmols; ++i)
+    for (int i = 0; i < nmols; ++i)
     {
         const MMMolecule &mmmol = mmmols_array[i];
 
         int ngroups = mmmol.coordinates().nCoordGroups();
         const CoordGroup *cgroup_array = mmmol.coordinates().constData();
-        const MMParameters::Array *charge_array = mmmol.parameters()
-                                                       .atomicParameters().constData();
+        const MMParameters::Array *charge_array = mmmol.parameters().atomicParameters().constData();
 
         // nasty code - I need the atom elements and am going to have to assume they
         // are correct. I need to update the QMMM potential to properly get the
         // charge and element property from each atom so that this nasty hack is not needed.
-        const AtomElements &elems = mmmol.molecule().molecule().property("element")
-                                         .asA<AtomElements>();
+        const AtomElements &elems = mmmol.molecule().molecule().property("element").asA<AtomElements>();
 
-        BOOST_ASSERT( ngroups == mmmol.parameters().atomicParameters().nArrays() );
+        BOOST_ASSERT(ngroups == mmmol.parameters().atomicParameters().nArrays());
 
         AtomIntProperty lattice_idxs;
 
         if (lattice_indicies != 0)
             lattice_idxs = AtomIntProperty(mmmol.molecule().data().info(), -1);
 
-        for (int j=0; j<ngroups; ++j)
+        for (int j = 0; j < ngroups; ++j)
         {
-            //get all copies of this molecule within the cutoff distance
-            //of any QM atom
-            QList< tuple<double,CoordGroup> > mapped_groups =
-                                   spce.getCopiesWithin(cgroup_array[j], qmgroup,
-                                                        cutoff);
+            // get all copies of this molecule within the cutoff distance
+            // of any QM atom
+            QList<tuple<double, CoordGroup>> mapped_groups = spce.getCopiesWithin(cgroup_array[j], qmgroup, cutoff);
 
             const MMParameters::Array &group_charges = charge_array[j];
             const ChargeParameter *group_charges_array = group_charges.constData();
@@ -411,22 +400,19 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
 
             const CGIdx cgidx = mmmol.cgIdx(j);
 
-            for (QList< tuple<double,CoordGroup> >::const_iterator
-                                                        it = mapped_groups.constBegin();
-                 it != mapped_groups.constEnd();
-                 ++it)
+            for (QList<tuple<double, CoordGroup>>::const_iterator it = mapped_groups.constBegin();
+                 it != mapped_groups.constEnd(); ++it)
             {
                 const double sqrt_4pieps0 = std::sqrt(SireUnits::four_pi_eps0);
 
-                //get any scaling feather factor for this group (and to convert
-                //the charge from reduced units to mod_electrons)
-                double scl = switchfunc.electrostaticScaleFactor( Length(it->get<0>()) )
-                                   * sqrt_4pieps0 * chg_sclfac;
+                // get any scaling feather factor for this group (and to convert
+                // the charge from reduced units to mod_electrons)
+                double scl = switchfunc.electrostaticScaleFactor(Length(it->get<0>())) * sqrt_4pieps0 * chg_sclfac;
 
                 if (scl == 0)
                     continue;
 
-                //add the coordinates and charges
+                // add the coordinates and charges
                 const CoordGroup &mapped_group = it->get<1>();
 
                 BOOST_ASSERT(mapped_group.count() == group_charges.count());
@@ -440,7 +426,7 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
                     index_this_group = true;
                 }
 
-                for (int k=0; k<mapped_group.count(); ++k)
+                for (int k = 0; k < mapped_group.count(); ++k)
                 {
                     double chg = scl * group_charges_array[k].reduced_charge;
 
@@ -449,13 +435,11 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
                         const CGAtomIdx cgatomidx(cgidx, Index(k));
 
                         if (index_this_group and (lattice_indicies != 0))
-                            lattice_idxs.set( cgatomidx, lattice_charges.count() );
+                            lattice_idxs.set(cgatomidx, lattice_charges.count());
 
-                        //lattice charges are electron charges, with coordinates
-                        //in angstroms
-                        lattice_charges.add(
-                                LatticeCharge(mapped_group_array[k],
-                                              chg, elems[cgatomidx]) );
+                        // lattice charges are electron charges, with coordinates
+                        // in angstroms
+                        lattice_charges.add(LatticeCharge(mapped_group_array[k], chg, elems[cgatomidx]));
                     }
                 }
             }
@@ -465,45 +449,42 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
             lattice_indicies->insert(mmmol.molecule().number(), lattice_idxs);
     }
 
-    //get the limit of the number of MM atoms for the used number of QM atoms
+    // get the limit of the number of MM atoms for the used number of QM atoms
     const int num_mm_limit = quantumProgram().numberOfMMAtomsLimit(qmgroup.count());
 
     if (num_mm_limit > 0 and num_mm_limit < lattice_charges.count())
     {
-        //create a QMap indexed by distance, as this will sort by distance
-        QMultiMap<float,int> distances;
+        // create a QMap indexed by distance, as this will sort by distance
+        QMultiMap<float, int> distances;
 
         Cartesian space;
 
-        for (int i=0; i<lattice_charges.count(); ++i)
+        for (int i = 0; i < lattice_charges.count(); ++i)
         {
-            const Vector coords( lattice_charges[i].x(), lattice_charges[i].y(),
-                                 lattice_charges[i].z() );
+            const Vector coords(lattice_charges[i].x(), lattice_charges[i].y(), lattice_charges[i].z());
 
-            float dist = space.minimumDistance( qmgroup.aaBox(), coords );
+            float dist = space.minimumDistance(qmgroup.aaBox(), coords);
 
-            distances.insert( dist, i );
+            distances.insert(dist, i);
         }
 
         int n_to_remove = lattice_charges.count() - num_mm_limit;
 
-        QMultiMap<float,int>::const_iterator it = distances.constEnd();
+        QMultiMap<float, int>::const_iterator it = distances.constEnd();
 
         float max_distance = 0;
 
-        for (int i=0; i<n_to_remove; ++i)
+        for (int i = 0; i < n_to_remove; ++i)
         {
             --it;
             lattice_charges.setCharge(it.value(), 0.0);
             max_distance = it.key();
         }
 
-        //there are too many MM atoms. We have to remove MM atoms, starting
-        //from the furthest ones out, until we are under the limit
-        qDebug() << "WARNING: Number of MM atoms is too high." << lattice_charges.count()
-                 << num_mm_limit;
-        qDebug() << "All MM atoms beyond a distance of" << max_distance
-                 << "A have had their charges set to 0.";
+        // there are too many MM atoms. We have to remove MM atoms, starting
+        // from the furthest ones out, until we are under the limit
+        qDebug() << "WARNING: Number of MM atoms is too high." << lattice_charges.count() << num_mm_limit;
+        qDebug() << "All MM atoms beyond a distance of" << max_distance << "A have had their charges set to 0.";
     }
 
     return lattice_charges;
@@ -512,29 +493,24 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
 /** Calculate the QM forces on the molecules in 'molecules' and add them
     onto the forces in the passed force table (scaled by the optional
     scaling constant 'scale_force') */
-void QMMMElecEmbedPotential::calculateForce(const QMMolecules &qmmols,
-                                            const MMMolecules &mmmols,
-                                            ForceTable &forcetable,
-                                            double scale_force) const
+void QMMMElecEmbedPotential::calculateForce(const QMMolecules &qmmols, const MMMolecules &mmmols,
+                                            ForceTable &forcetable, double scale_force) const
 {
     if (scale_force == 0)
         return;
 
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMMolecules mapped_qmmols = QMPotential::mapIntoSpace(qmmols);
 
-    QHash<MolNum,AtomIntProperty> lattice_indicies;
+    QHash<MolNum, AtomIntProperty> lattice_indicies;
 
-    LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols,
-                                                     &lattice_indicies);
+    LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols, &lattice_indicies);
 
-    QVector<Vector> lattice_forces = quantumProgram().calculateForce(
-                                                    mapped_qmmols, charges,
-                                                    forcetable, scale_force);
+    QVector<Vector> lattice_forces = quantumProgram().calculateForce(mapped_qmmols, charges, forcetable, scale_force);
 
-    //loop over all MMMolecules and see if they are in the forcetable
+    // loop over all MMMolecules and see if they are in the forcetable
 
-    //map the lattice forces back to the potentials on the molecules
+    // map the lattice forces back to the potentials on the molecules
     qDebug() << "WARNING - NEED TO MAP LATTICE FORCES BACK TO MM ATOMS";
     qDebug() << "YOUR SIMULATION IS BROKEN!!!";
 }
@@ -542,35 +518,31 @@ void QMMMElecEmbedPotential::calculateForce(const QMMolecules &qmmols,
 /** Calculate the QM forces on the molecules in 'molecules' and add them
     onto the forces in the passed force table (scaled by the optional
     scaling constant 'scale_force') */
-void QMMMElecEmbedPotential::calculateForce(const QMMolecules &qmmols,
-                                            const MMMolecules &mmmols,
-                                            ForceTable &forcetable,
-                                            const Symbol &symbol,
-                                            const Components &components,
+void QMMMElecEmbedPotential::calculateForce(const QMMolecules &qmmols, const MMMolecules &mmmols,
+                                            ForceTable &forcetable, const Symbol &symbol, const Components &components,
                                             double scale_force) const
 {
     if (symbol == components.total())
         this->calculateForce(qmmols, mmmols, forcetable, scale_force);
 
     else
-        throw SireFF::missing_component( QObject::tr(
-            "There is no force component in potential %1 - available "
-            "components are %2.")
-                .arg(this->what())
-                .arg(components.total().toString()), CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no force component in potential %1 - available "
+                                                    "components are %2.")
+                                            .arg(this->what())
+                                            .arg(components.total().toString()),
+                                        CODELOC);
 }
 
 /** Calculate the QM energy of the molecules in 'qmmols' in the electrostatic
     field of the molecules in 'mmmols' and add it on to the energy 'nrg', optionally
     scaled by the scaling constant 'scale_energy' */
-void QMMMElecEmbedPotential::calculateEnergy(const QMMolecules &qmmols,
-                                             const MMMolecules &mmmols,
-                                             Energy &nrg, double scale_energy) const
+void QMMMElecEmbedPotential::calculateEnergy(const QMMolecules &qmmols, const MMMolecules &mmmols, Energy &nrg,
+                                             double scale_energy) const
 {
     if (scale_energy == 0)
         return;
 
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMMolecules mapped_qmmols = QMPotential::mapIntoSpace(qmmols);
 
     LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols);
@@ -583,11 +555,10 @@ void QMMMElecEmbedPotential::calculateEnergy(const QMMolecules &qmmols,
 /** Return the contents of the QM program command file that will be used
     to calculate the QM energy of the molecules in 'qmmols' surrounded
     in the field of the molecules in 'mmols' */
-QString QMMMElecEmbedPotential::energyCommandFile(
-                          const QMMMElecEmbedPotential::QMMolecules &qmmols,
-                          const QMMMElecEmbedPotential::MMMolecules &mmmols) const
+QString QMMMElecEmbedPotential::energyCommandFile(const QMMMElecEmbedPotential::QMMolecules &qmmols,
+                                                  const QMMMElecEmbedPotential::MMMolecules &mmmols) const
 {
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMMolecules mapped_qmmols = QMPotential::mapIntoSpace(qmmols);
 
     LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols);
@@ -599,12 +570,11 @@ QString QMMMElecEmbedPotential::energyCommandFile(
     to calculate the QM forces on the molecules 'qmmols', and on the
     molecules 'mmols', where 'qmmols' are the QM molecules that are
     in the field of the MM molecules 'mmmols' */
-QString QMMMElecEmbedPotential::forceCommandFile(
-                          const QMMMElecEmbedPotential::QMMolecules &qmmols,
-                          const QMMMElecEmbedPotential::MMMolecules &mmmols,
-                          const ForceTable &forcetable) const
+QString QMMMElecEmbedPotential::forceCommandFile(const QMMMElecEmbedPotential::QMMolecules &qmmols,
+                                                 const QMMMElecEmbedPotential::MMMolecules &mmmols,
+                                                 const ForceTable &forcetable) const
 {
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMMolecules mapped_qmmols = QMPotential::mapIntoSpace(qmmols);
 
     LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols);
@@ -616,113 +586,96 @@ QString QMMMElecEmbedPotential::forceCommandFile(
     to calculate the QM fields around the molecules 'qmmols', and on the
     molecules 'mmols', where 'qmmols' are the QM molecules that are
     in the field of the MM molecules 'mmmols' */
-QString QMMMElecEmbedPotential::fieldCommandFile(
-                          const QMMMElecEmbedPotential::QMMolecules &qmmols,
-                          const QMMMElecEmbedPotential::MMMolecules &mmmols,
-                          const FieldTable &fieldtable,
-                          const SireFF::Probe &probe) const
+QString QMMMElecEmbedPotential::fieldCommandFile(const QMMMElecEmbedPotential::QMMolecules &qmmols,
+                                                 const QMMMElecEmbedPotential::MMMolecules &mmmols,
+                                                 const FieldTable &fieldtable, const SireFF::Probe &probe) const
 {
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMMolecules mapped_qmmols = QMPotential::mapIntoSpace(qmmols);
 
     LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols);
 
-    return this->quantumProgram().fieldCommandFile(mapped_qmmols, charges,
-                                                   fieldtable, probe);
+    return this->quantumProgram().fieldCommandFile(mapped_qmmols, charges, fieldtable, probe);
 }
 
 /** Return the contents of the QM program command file that will be used
     to calculate the QM potentials around the molecules 'qmmols', and on the
     molecules 'mmols', where 'qmmols' are the QM molecules that are
     in the field of the MM molecules 'mmmols' */
-QString QMMMElecEmbedPotential::potentialCommandFile(
-                          const QMMMElecEmbedPotential::QMMolecules &qmmols,
-                          const QMMMElecEmbedPotential::MMMolecules &mmmols,
-                          const PotentialTable &pottable,
-                          const SireFF::Probe &probe) const
+QString QMMMElecEmbedPotential::potentialCommandFile(const QMMMElecEmbedPotential::QMMolecules &qmmols,
+                                                     const QMMMElecEmbedPotential::MMMolecules &mmmols,
+                                                     const PotentialTable &pottable, const SireFF::Probe &probe) const
 {
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMMolecules mapped_qmmols = QMPotential::mapIntoSpace(qmmols);
 
     LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols);
 
-    return this->quantumProgram().potentialCommandFile(mapped_qmmols, charges,
-                                                       pottable, probe);
+    return this->quantumProgram().potentialCommandFile(mapped_qmmols, charges, pottable, probe);
 }
 
 /** Calculate the QM field at the points in the passed potential table */
-void QMMMElecEmbedPotential::calculateField(const QMMolecules &qmmols,
-                                            const MMMolecules &mmmols,
-                                            FieldTable &fieldtable,
-                                            const SireFF::Probe &probe,
+void QMMMElecEmbedPotential::calculateField(const QMMolecules &qmmols, const MMMolecules &mmmols,
+                                            FieldTable &fieldtable, const SireFF::Probe &probe,
                                             double scale_field) const
 {
     if (scale_field == 0)
         return;
 
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMMolecules mapped_qmmols = QMPotential::mapIntoSpace(qmmols);
 
     LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols);
 
-    QVector<Vector> lattice_fields = quantumProgram().calculateField(
-                                                    mapped_qmmols, charges, fieldtable,
-                                                    probe, scale_field);
+    QVector<Vector> lattice_fields =
+        quantumProgram().calculateField(mapped_qmmols, charges, fieldtable, probe, scale_field);
 
-    //map the lattice potentials back to the potentials on the molecules
+    // map the lattice potentials back to the potentials on the molecules
     qDebug() << "WARNING - NEED TO MAP LATTICE FIELDS BACK TO MM ATOMS";
     qDebug() << "YOUR SIMULATION IS BROKEN!!!";
 }
 
 /** Calculate the QM field at the points in the passed potential table */
-void QMMMElecEmbedPotential::calculateField(const QMMolecules &qmmols,
-                                            const MMMolecules &mmmols,
-                                            FieldTable &fieldtable,
-                                            const SireFF::Probe &probe,
-                                            const Symbol &symbol,
-                                            const Components &components,
-                                            double scale_field) const
+void QMMMElecEmbedPotential::calculateField(const QMMolecules &qmmols, const MMMolecules &mmmols,
+                                            FieldTable &fieldtable, const SireFF::Probe &probe, const Symbol &symbol,
+                                            const Components &components, double scale_field) const
 {
     if (symbol == components.total())
         this->calculateField(qmmols, mmmols, fieldtable, probe, scale_field);
 
     else
-        throw SireFF::missing_component( QObject::tr(
-            "There is no field component in potential %1 - available "
-            "components are %2.")
-                .arg(this->what())
-                .arg(components.total().toString()), CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no field component in potential %1 - available "
+                                                    "components are %2.")
+                                            .arg(this->what())
+                                            .arg(components.total().toString()),
+                                        CODELOC);
 }
 
 /** Calculate the QM potential at the points in the passed potential table */
-void QMMMElecEmbedPotential::calculatePotential(const QMMolecules &qmmols,
-                                                const MMMolecules &mmmols,
-                                                PotentialTable &pottable,
-                                                const SireFF::Probe &probe,
+void QMMMElecEmbedPotential::calculatePotential(const QMMolecules &qmmols, const MMMolecules &mmmols,
+                                                PotentialTable &pottable, const SireFF::Probe &probe,
                                                 double scale_potential) const
 {
     if (scale_potential == 0)
         return;
 
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMMolecules mapped_qmmols = QMPotential::mapIntoSpace(qmmols);
 
-    QHash<MolNum,AtomIntProperty> lattice_indicies;
+    QHash<MolNum, AtomIntProperty> lattice_indicies;
 
-    LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols,
-                                                     &lattice_indicies);
+    LatticeCharges charges = this->getLatticeCharges(mapped_qmmols, mmmols, &lattice_indicies);
 
-    QVector<MolarEnergy> lattice_potentials = quantumProgram().calculatePotential(
-                                                    mapped_qmmols, charges, pottable,
-                                                    probe, scale_potential);
+    QVector<MolarEnergy> lattice_potentials =
+        quantumProgram().calculatePotential(mapped_qmmols, charges, pottable, probe, scale_potential);
 
-    //loop over the MMMolecules and see if they are in the potential table
+    // loop over the MMMolecules and see if they are in the potential table
     int nmols = mmmols.count();
     const ChunkedVector<MMMolecule> &mmmols_array = mmmols.moleculesByIndex();
 
     const MolarEnergy *potentials_array = lattice_potentials.constData();
 
-    for (int i=0; i<nmols; ++i)
+    for (int i = 0; i < nmols; ++i)
     {
         const MMMolecule &mmmol = mmmols_array[i];
         MolNum molnum = mmmol.number();
@@ -733,9 +686,9 @@ void QMMMElecEmbedPotential::calculatePotential(const QMMolecules &qmmols,
 
             MolPotentialTable &moltable = pottable.getTable(molnum);
 
-            for (CGIdx cgidx(0); cgidx<indicies.nCutGroups(); ++cgidx)
+            for (CGIdx cgidx(0); cgidx < indicies.nCutGroups(); ++cgidx)
             {
-                for (Index atomidx(0); atomidx<indicies.nAtoms(cgidx); ++atomidx)
+                for (Index atomidx(0); atomidx < indicies.nAtoms(cgidx); ++atomidx)
                 {
                     CGAtomIdx cgatomidx(cgidx, atomidx);
 
@@ -750,21 +703,18 @@ void QMMMElecEmbedPotential::calculatePotential(const QMMolecules &qmmols,
 }
 
 /** Calculate the QM potential at the points in the passed potential table */
-void QMMMElecEmbedPotential::calculatePotential(const QMMolecules &qmmols,
-                                                const MMMolecules &mmmols,
-                                                PotentialTable &pottable,
-                                                const SireFF::Probe &probe,
-                                                const Symbol &symbol,
-                                                const Components &components,
+void QMMMElecEmbedPotential::calculatePotential(const QMMolecules &qmmols, const MMMolecules &mmmols,
+                                                PotentialTable &pottable, const SireFF::Probe &probe,
+                                                const Symbol &symbol, const Components &components,
                                                 double scale_potential) const
 {
     if (symbol == components.total())
         this->calculatePotential(qmmols, mmmols, pottable, probe, scale_potential);
 
     else
-        throw SireFF::missing_component( QObject::tr(
-            "There is no potential component in potential %1 - available "
-            "components are %2.")
-                .arg(this->what())
-                .arg(components.total().toString()), CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no potential component in potential %1 - available "
+                                                    "components are %2.")
+                                            .arg(this->what())
+                                            .arg(components.total().toString()),
+                                        CODELOC);
 }

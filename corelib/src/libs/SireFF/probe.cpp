@@ -39,13 +39,13 @@ using namespace SireStream;
 /////////// Implementation of Probe
 ///////////
 
-static const RegisterMetaType<Probe> r_probe( MAGIC_ONLY, Probe::typeName() );
+static const RegisterMetaType<Probe> r_probe(MAGIC_ONLY, Probe::typeName());
 
 QDataStream &operator<<(QDataStream &ds, const Probe &probe)
 {
     writeHeader(ds, r_probe, 1);
 
-    ds << static_cast<const Property&>(probe);
+    ds << static_cast<const Property &>(probe);
 
     return ds;
 }
@@ -56,28 +56,31 @@ QDataStream &operator>>(QDataStream &ds, Probe &probe)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(probe);
+        ds >> static_cast<Property &>(probe);
     }
     else
-        throw version_error( v, "1", r_probe, CODELOC );
+        throw version_error(v, "1", r_probe, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 Probe::Probe() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 Probe::Probe(const Probe &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 Probe::~Probe()
-{}
+{
+}
 
 /** Copy assignment operator */
-Probe& Probe::operator=(const Probe &other)
+Probe &Probe::operator=(const Probe &other)
 {
     Property::operator=(other);
     return *this;
@@ -97,19 +100,19 @@ bool Probe::operator!=(const Probe &other) const
 
 void Probe::throwCastError(const char *desired_name) const
 {
-    throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert a Probe of type %1 to a Probe of type %2.")
-                .arg(this->what()).arg(desired_name), CODELOC );
+    throw SireError::invalid_cast(
+        QObject::tr("Cannot convert a Probe of type %1 to a Probe of type %2.").arg(this->what()).arg(desired_name),
+        CODELOC);
 }
 
-const char* Probe::typeName()
+const char *Probe::typeName()
 {
     return "SireFF::Probe";
 }
 
-Q_GLOBAL_STATIC( NullProbe, nullProbe );
+Q_GLOBAL_STATIC(NullProbe, nullProbe);
 
-const Probe& Probe::null()
+const Probe &Probe::null()
 {
     return *(nullProbe());
 }
@@ -124,7 +127,7 @@ QDataStream &operator<<(QDataStream &ds, const NullProbe &nullprobe)
 {
     writeHeader(ds, r_nullprobe, 1);
 
-    ds << static_cast<const Probe&>(nullprobe);
+    ds << static_cast<const Probe &>(nullprobe);
 
     return ds;
 }
@@ -135,7 +138,7 @@ QDataStream &operator>>(QDataStream &ds, NullProbe &nullprobe)
 
     if (v == 1)
     {
-        ds >> static_cast<Probe&>(nullprobe);
+        ds >> static_cast<Probe &>(nullprobe);
     }
     else
         throw version_error(v, "1", r_nullprobe, CODELOC);
@@ -144,19 +147,22 @@ QDataStream &operator>>(QDataStream &ds, NullProbe &nullprobe)
 }
 
 /** Constructor */
-NullProbe::NullProbe() : ConcreteProperty<NullProbe,Probe>()
-{}
+NullProbe::NullProbe() : ConcreteProperty<NullProbe, Probe>()
+{
+}
 
 /** Copy constructor */
-NullProbe::NullProbe(const NullProbe &other) : ConcreteProperty<NullProbe,Probe>(other)
-{}
+NullProbe::NullProbe(const NullProbe &other) : ConcreteProperty<NullProbe, Probe>(other)
+{
+}
 
 /** Destructor */
 NullProbe::~NullProbe()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullProbe& NullProbe::operator=(const NullProbe &other)
+NullProbe &NullProbe::operator=(const NullProbe &other)
 {
     Probe::operator=(other);
     return *this;
@@ -174,7 +180,7 @@ bool NullProbe::operator!=(const NullProbe &other) const
     return Probe::operator!=(other);
 }
 
-const char* NullProbe::typeName()
+const char *NullProbe::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullProbe>() );
+    return QMetaType::typeName(qMetaTypeId<NullProbe>());
 }

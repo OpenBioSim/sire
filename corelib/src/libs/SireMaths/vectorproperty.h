@@ -28,8 +28,8 @@
 #ifndef SIREMATHS_VECTORPROPERTY_H
 #define SIREMATHS_VECTORPROPERTY_H
 
-#include "SireBase/property.h"
 #include "SireBase/arrayproperty.hpp"
+#include "SireBase/property.h"
 
 #include "SireMaths/vector.h"
 
@@ -37,98 +37,96 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class VectorProperty;
-class VectorArrayProperty;
-}
+    class VectorProperty;
+    class VectorArrayProperty;
+} // namespace SireMaths
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::VectorProperty&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::VectorProperty&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::VectorProperty &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::VectorProperty &);
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::VectorArrayProperty&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::VectorArrayProperty&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::VectorArrayProperty &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::VectorArrayProperty &);
 
 namespace SireMaths
 {
 
-/** This class provides a simple Property wrapper around a Vector, thereby
-    allowing the vector to be stored as a Property, e.g. for the center
-    of a molecule
+    /** This class provides a simple Property wrapper around a Vector, thereby
+        allowing the vector to be stored as a Property, e.g. for the center
+        of a molecule
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT VectorProperty
-            : public SireBase::ConcreteProperty<VectorProperty,SireBase::Property>,
-              public Vector
-{
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT VectorProperty : public SireBase::ConcreteProperty<VectorProperty, SireBase::Property>,
+                                            public Vector
+    {
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const VectorProperty&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, VectorProperty&);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const VectorProperty &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, VectorProperty &);
 
-public:
-    VectorProperty();
-    VectorProperty(const Vector &value);
-    VectorProperty(const VectorProperty &value);
+    public:
+        VectorProperty();
+        VectorProperty(const Vector &value);
+        VectorProperty(const VectorProperty &value);
 
-    ~VectorProperty();
+        ~VectorProperty();
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    VectorProperty& operator=(const VectorProperty &other);
-    VectorProperty& operator=(const Vector &other);
+        VectorProperty &operator=(const VectorProperty &other);
+        VectorProperty &operator=(const Vector &other);
 
-    bool operator==(const VectorProperty &other) const;
-    bool operator!=(const VectorProperty &other) const;
+        bool operator==(const VectorProperty &other) const;
+        bool operator!=(const VectorProperty &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    Vector value() const;
+        Vector value() const;
 
-    VectorProperty* clone() const;
-};
+        VectorProperty *clone() const;
+    };
 
-class SIREMATHS_EXPORT VectorArrayProperty
-        : public SireBase::ConcreteProperty<VectorArrayProperty,SireBase::ArrayProperty<Vector> >
-{
+    class SIREMATHS_EXPORT VectorArrayProperty
+        : public SireBase::ConcreteProperty<VectorArrayProperty, SireBase::ArrayProperty<Vector>>
+    {
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const VectorArrayProperty&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, VectorArrayProperty&);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const VectorArrayProperty &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, VectorArrayProperty &);
 
-public:
-    VectorArrayProperty();
-    VectorArrayProperty(const QList<Vector> &array);
-    VectorArrayProperty(const QVector<Vector> &array);
-    VectorArrayProperty(const VectorArrayProperty &other);
+    public:
+        VectorArrayProperty();
+        VectorArrayProperty(const QList<Vector> &array);
+        VectorArrayProperty(const QVector<Vector> &array);
+        VectorArrayProperty(const VectorArrayProperty &other);
 
-    ~VectorArrayProperty();
+        ~VectorArrayProperty();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    VectorArrayProperty& operator=(const VectorArrayProperty &other);
+        VectorArrayProperty &operator=(const VectorArrayProperty &other);
 
-    bool operator==(const VectorArrayProperty &other) const;
-    bool operator!=(const VectorArrayProperty &other) const;
+        bool operator==(const VectorArrayProperty &other) const;
+        bool operator!=(const VectorArrayProperty &other) const;
 
-    VectorArrayProperty operator+(const VectorArrayProperty &other) const;
-    VectorArrayProperty& operator+=(const VectorArrayProperty &other);
-};
+        VectorArrayProperty operator+(const VectorArrayProperty &other) const;
+        VectorArrayProperty &operator+=(const VectorArrayProperty &other);
+    };
 
-SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const Vector &vector);
-SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const QVector<Vector> &vector);
-SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const QList<Vector> &vector);
+    SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const Vector &vector);
+    SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const QVector<Vector> &vector);
+    SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const QList<Vector> &vector);
 
-}
+} // namespace SireMaths
 
-Q_DECLARE_METATYPE( SireMaths::VectorProperty )
-Q_DECLARE_METATYPE( SireMaths::VectorArrayProperty )
+Q_DECLARE_METATYPE(SireMaths::VectorProperty)
+Q_DECLARE_METATYPE(SireMaths::VectorArrayProperty)
 
-SIRE_EXPOSE_FUNCTION( SireMaths::wrap )
+SIRE_EXPOSE_FUNCTION(SireMaths::wrap)
 
-SIRE_EXPOSE_CLASS( SireMaths::VectorProperty )
-SIRE_EXPOSE_CLASS( SireMaths::VectorArrayProperty )
+SIRE_EXPOSE_CLASS(SireMaths::VectorProperty)
+SIRE_EXPOSE_CLASS(SireMaths::VectorArrayProperty)
 
-SIRE_EXPOSE_ALIAS( (SireBase::ArrayProperty<SireMaths::Vector>),
-                    SireBase::ArrayProperty_Vector_ )
+SIRE_EXPOSE_ALIAS((SireBase::ArrayProperty<SireMaths::Vector>), SireBase::ArrayProperty_Vector_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireBase::ArrayProperty<SireMaths::Vector>;

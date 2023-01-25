@@ -40,8 +40,7 @@ using namespace SireStream;
 static const RegisterMetaType<SupraSubSimPacket> r_suprasubsimpacket;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const SupraSubSimPacket &suprasubsimpacket)
+QDataStream &operator<<(QDataStream &ds, const SupraSubSimPacket &suprasubsimpacket)
 {
     writeHeader(ds, r_suprasubsimpacket, 1);
 
@@ -57,17 +56,14 @@ QDataStream &operator<<(QDataStream &ds,
     else
         sds << suprasubsimpacket.sub_system;
 
-    sds << suprasubsimpacket.sub_moves
-        << suprasubsimpacket.n_sub_moves << suprasubsimpacket.ncompleted
-        << suprasubsimpacket.record_stats
-        << static_cast<const WorkPacketBase&>(suprasubsimpacket);
+    sds << suprasubsimpacket.sub_moves << suprasubsimpacket.n_sub_moves << suprasubsimpacket.ncompleted
+        << suprasubsimpacket.record_stats << static_cast<const WorkPacketBase &>(suprasubsimpacket);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                        SupraSubSimPacket &suprasubsimpacket)
+QDataStream &operator>>(QDataStream &ds, SupraSubSimPacket &suprasubsimpacket)
 {
     VersionID v = readHeader(ds, r_suprasubsimpacket);
 
@@ -75,10 +71,9 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> suprasubsimpacket.sub_system >> suprasubsimpacket.sub_moves
-            >> suprasubsimpacket.n_sub_moves >> suprasubsimpacket.ncompleted
-            >> suprasubsimpacket.record_stats
-            >> static_cast<WorkPacketBase&>(suprasubsimpacket);
+        sds >> suprasubsimpacket.sub_system >> suprasubsimpacket.sub_moves >> suprasubsimpacket.n_sub_moves >>
+            suprasubsimpacket.ncompleted >> suprasubsimpacket.record_stats >>
+            static_cast<WorkPacketBase &>(suprasubsimpacket);
 
         suprasubsimpacket.sub_system_was_packed = false;
     }
@@ -90,36 +85,33 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 SupraSubSimPacket::SupraSubSimPacket()
-                  : WorkPacketBase(), n_sub_moves(0), ncompleted(0),
-                    record_stats(false), sub_system_was_packed(false)
-{}
+    : WorkPacketBase(), n_sub_moves(0), ncompleted(0), record_stats(false), sub_system_was_packed(false)
+{
+}
 
 /** Construct a work packet to perform 'nmoves' sub-moves (in 'moves') on
     the sub-system 'system', recording statistics if 'record_stats' is true */
-SupraSubSimPacket::SupraSubSimPacket(const SupraSubSystem &system,
-                                     const SupraSubMoves &moves,
-                                     int nmoves, bool record_statistics)
-                  : WorkPacketBase(),
-                    sub_system(system), sub_moves(moves),
-                    n_sub_moves(nmoves), ncompleted(0),
-                    record_stats(record_statistics), sub_system_was_packed(false)
-{}
+SupraSubSimPacket::SupraSubSimPacket(const SupraSubSystem &system, const SupraSubMoves &moves, int nmoves,
+                                     bool record_statistics)
+    : WorkPacketBase(), sub_system(system), sub_moves(moves), n_sub_moves(nmoves), ncompleted(0),
+      record_stats(record_statistics), sub_system_was_packed(false)
+{
+}
 
 /** Copy constructor */
 SupraSubSimPacket::SupraSubSimPacket(const SupraSubSimPacket &other)
-                  : WorkPacketBase(other),
-                    sub_system(other.sub_system), sub_moves(other.sub_moves),
-                    n_sub_moves(other.n_sub_moves), ncompleted(other.ncompleted),
-                    record_stats(other.record_stats),
-                    sub_system_was_packed(other.sub_system_was_packed)
-{}
+    : WorkPacketBase(other), sub_system(other.sub_system), sub_moves(other.sub_moves), n_sub_moves(other.n_sub_moves),
+      ncompleted(other.ncompleted), record_stats(other.record_stats), sub_system_was_packed(other.sub_system_was_packed)
+{
+}
 
 /** Destructor */
 SupraSubSimPacket::~SupraSubSimPacket()
-{}
+{
+}
 
 /** Copy assignment operator */
-SupraSubSimPacket& SupraSubSimPacket::operator=(const SupraSubSimPacket &other)
+SupraSubSimPacket &SupraSubSimPacket::operator=(const SupraSubSimPacket &other)
 {
     if (this != &other)
     {
@@ -140,11 +132,8 @@ SupraSubSimPacket& SupraSubSimPacket::operator=(const SupraSubSimPacket &other)
 bool SupraSubSimPacket::operator==(const SupraSubSimPacket &other) const
 {
     return (this == &other) or
-           (sub_system == other.sub_system and
-            sub_moves == other.sub_moves and
-            n_sub_moves == other.n_sub_moves and
-            ncompleted == other.ncompleted and
-            record_stats == other.record_stats);
+           (sub_system == other.sub_system and sub_moves == other.sub_moves and n_sub_moves == other.n_sub_moves and
+            ncompleted == other.ncompleted and record_stats == other.record_stats);
 }
 
 /** Comparison operator */
@@ -164,18 +153,18 @@ bool SupraSubSimPacket::shouldPack() const
 /** This is likely to be large */
 int SupraSubSimPacket::approximatePacketSize() const
 {
-    //16 MB
-    return 16*1024*1024;
+    // 16 MB
+    return 16 * 1024 * 1024;
 }
 
 /** Return the sub-system */
-const SupraSubSystem& SupraSubSimPacket::subSystem() const
+const SupraSubSystem &SupraSubSimPacket::subSystem() const
 {
     return sub_system;
 }
 
 /** Return the moves */
-const SupraSubMoves& SupraSubSimPacket::subMoves() const
+const SupraSubMoves &SupraSubSimPacket::subMoves() const
 {
     return sub_moves;
 }
@@ -212,15 +201,14 @@ float SupraSubSimPacket::chunk()
     if (ncompleted >= n_sub_moves)
         return 100.0;
 
-    //see if we need to unpack the system before running the moves
+    // see if we need to unpack the system before running the moves
     if (sub_system->isPacked())
     {
         sub_system_was_packed = true;
         sub_system.edit().unpack();
     }
 
-    sub_moves.edit().move( sub_system.edit(), 1, n_sub_moves - ncompleted,
-                           record_stats );
+    sub_moves.edit().move(sub_system.edit(), 1, n_sub_moves - ncompleted, record_stats);
 
     ++ncompleted;
 
@@ -233,15 +221,15 @@ float SupraSubSimPacket::chunk()
         }
     }
 
-    return 100.0 * ( float(ncompleted) / float(n_sub_moves) );
+    return 100.0 * (float(ncompleted) / float(n_sub_moves));
 }
 
-const char* SupraSubSimPacket::typeName()
+const char *SupraSubSimPacket::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SupraSubSimPacket>() );
+    return QMetaType::typeName(qMetaTypeId<SupraSubSimPacket>());
 }
 
-SupraSubSimPacket* SupraSubSimPacket::clone() const
+SupraSubSimPacket *SupraSubSimPacket::clone() const
 {
     return new SupraSubSimPacket(*this);
 }

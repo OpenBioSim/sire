@@ -28,8 +28,8 @@
 #ifndef SIREMM_INTRAGROUPFF_H
 #define SIREMM_INTRAGROUPFF_H
 
-#include "cljgroup.h"
 #include "cljfunction.h"
+#include "cljgroup.h"
 #include "multicljcomponent.h"
 
 #include "SireBase/chunkedhash.hpp"
@@ -41,143 +41,137 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class IntraGroupFF;
-namespace detail{ class IntraGroupFFMolData; }
-}
+    class IntraGroupFF;
+    namespace detail
+    {
+        class IntraGroupFFMolData;
+    }
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::IntraGroupFF&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::IntraGroupFF&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::IntraGroupFF &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::IntraGroupFF &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::detail::IntraGroupFFMolData&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::detail::IntraGroupFFMolData&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::detail::IntraGroupFFMolData &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::detail::IntraGroupFFMolData &);
 
 namespace SireMM
 {
 
-namespace detail
-{
-class IntraGroupFFData;
-}
+    namespace detail
+    {
+        class IntraGroupFFData;
+    }
 
-/** This forcefield is used to calculate the intramolecular
-    coulomb and LJ energy of the contained molecules. Note
-    that this is the coulomb and LJ energy of the non-bonded
-    atoms *only*, i.e. it does not contain the scaled
-    1-4 coulomb and LJ energies. These should be calculated
-    separately, e.g. via additional terms added to InternalFF
+    /** This forcefield is used to calculate the intramolecular
+        coulomb and LJ energy of the contained molecules. Note
+        that this is the coulomb and LJ energy of the non-bonded
+        atoms *only*, i.e. it does not contain the scaled
+        1-4 coulomb and LJ energies. These should be calculated
+        separately, e.g. via additional terms added to InternalFF
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT IntraGroupFF : public SireBase::ConcreteProperty<IntraGroupFF,SireFF::G2FF>
-{
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT IntraGroupFF : public SireBase::ConcreteProperty<IntraGroupFF, SireFF::G2FF>
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const IntraGroupFF&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, IntraGroupFF&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const IntraGroupFF &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, IntraGroupFF &);
 
-public:
-    IntraGroupFF();
-    IntraGroupFF(const QString &name);
+    public:
+        IntraGroupFF();
+        IntraGroupFF(const QString &name);
 
-    IntraGroupFF(const IntraGroupFF &other);
+        IntraGroupFF(const IntraGroupFF &other);
 
-    ~IntraGroupFF();
+        ~IntraGroupFF();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    IntraGroupFF& operator=(const IntraGroupFF &other);
+        IntraGroupFF &operator=(const IntraGroupFF &other);
 
-    bool operator==(const IntraGroupFF &other) const;
-    bool operator!=(const IntraGroupFF &other) const;
+        bool operator==(const IntraGroupFF &other) const;
+        bool operator!=(const IntraGroupFF &other) const;
 
-    IntraGroupFF* clone() const;
+        IntraGroupFF *clone() const;
 
-    const MultiCLJComponent& components() const;
+        const MultiCLJComponent &components() const;
 
-    void setCLJFunction(const CLJIntraFunction &cljfunc);
-    const CLJIntraFunction& cljFunction() const;
+        void setCLJFunction(const CLJIntraFunction &cljfunc);
+        const CLJIntraFunction &cljFunction() const;
 
-    void setCLJFunction(QString key, const CLJIntraFunction &cljfunc);
+        void setCLJFunction(QString key, const CLJIntraFunction &cljfunc);
 
-    void removeCLJFunctionAt(QString key);
-    void removeAllCLJFunctions();
+        void removeCLJFunctionAt(QString key);
+        void removeAllCLJFunctions();
 
-    const CLJIntraFunction& cljFunction(QString key) const;
+        const CLJIntraFunction &cljFunction(QString key) const;
 
-    int nCLJFunctions() const;
-    QStringList cljFunctionKeys() const;
+        int nCLJFunctions() const;
+        QStringList cljFunctionKeys() const;
 
-    QHash<QString,CLJFunctionPtr> cljFunctions() const;
+        QHash<QString, CLJFunctionPtr> cljFunctions() const;
 
-    void enableParallelCalculation();
-    void disableParallelCalculation();
-    void setUseParallelCalculation(bool on);
-    bool usesParallelCalculation() const;
+        void enableParallelCalculation();
+        void disableParallelCalculation();
+        void setUseParallelCalculation(bool on);
+        bool usesParallelCalculation() const;
 
-    void enableReproducibleCalculation();
-    void disableReproducibleCalculation();
-    void setUseReproducibleCalculation(bool on);
-    bool usesReproducibleCalculation() const;
+        void enableReproducibleCalculation();
+        void disableReproducibleCalculation();
+        void setUseReproducibleCalculation(bool on);
+        bool usesReproducibleCalculation() const;
 
-    bool setProperty(const QString &name, const Property &property);
-    const Property& property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
-    const Properties& properties() const;
+        bool setProperty(const QString &name, const Property &property);
+        const Property &property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
+        const Properties &properties() const;
 
-    void mustNowRecalculateFromScratch();
+        void mustNowRecalculateFromScratch();
 
-    void accept();
-    bool needsAccepting() const;
+        void accept();
+        bool needsAccepting() const;
 
-private:
-    void mustNowReallyRecalculateFromScratch();
+    private:
+        void mustNowReallyRecalculateFromScratch();
 
-    void recalculateEnergy();
-    void rebuildProps();
+        void recalculateEnergy();
+        void rebuildProps();
 
-    MultiCLJEnergy calcEnergy(detail::IntraGroupFFMolData &moldata) const;
+        MultiCLJEnergy calcEnergy(detail::IntraGroupFFMolData &moldata) const;
 
-    void _pvt_added(quint32 group_idx,
-                    const SireMol::PartialMolecule &mol,
-                    const SireBase::PropertyMap &map);
+        void _pvt_added(quint32 group_idx, const SireMol::PartialMolecule &mol, const SireBase::PropertyMap &map);
 
-    void _pvt_removed(quint32 group_idx,
-                      const SireMol::PartialMolecule &mol);
+        void _pvt_removed(quint32 group_idx, const SireMol::PartialMolecule &mol);
 
-    void _pvt_changed(quint32 group_idx,
-                      const SireMol::Molecule &molecule, bool auto_update);
-    void _pvt_changed(quint32 group_idx,
-                      const QList<SireMol::Molecule> &molecules, bool auto_update);
+        void _pvt_changed(quint32 group_idx, const SireMol::Molecule &molecule, bool auto_update);
+        void _pvt_changed(quint32 group_idx, const QList<SireMol::Molecule> &molecules, bool auto_update);
 
-    void _pvt_removedAll(quint32 group_idx);
+        void _pvt_removedAll(quint32 group_idx);
 
-    bool _pvt_wouldChangeProperties(quint32 group_idx,
-                                    SireMol::MolNum molnum,
-                                    const SireBase::PropertyMap &map) const;
+        bool _pvt_wouldChangeProperties(quint32 group_idx, SireMol::MolNum molnum, const SireBase::PropertyMap &map) const;
 
-    void _pvt_updateName();
+        void _pvt_updateName();
 
-    typedef SireBase::ChunkedHash< MolNum,
-                        SireBase::SharedDataPointer<detail::IntraGroupFFMolData> > MolData;
+        typedef SireBase::ChunkedHash<MolNum, SireBase::SharedDataPointer<detail::IntraGroupFFMolData>> MolData;
 
-    /** The CLJGroups for each of the molecules added to this forcefield */
-    MolData moldata;
+        /** The CLJGroups for each of the molecules added to this forcefield */
+        MolData moldata;
 
-    /** Implicitly shared pointer to the (mostly) const data for this forcefield */
-    SireBase::SharedDataPointer<detail::IntraGroupFFData> d;
+        /** Implicitly shared pointer to the (mostly) const data for this forcefield */
+        SireBase::SharedDataPointer<detail::IntraGroupFFData> d;
 
-    /** Whether or not we need to 'accept' this move */
-    bool needs_accepting;
-};
+        /** Whether or not we need to 'accept' this move */
+        bool needs_accepting;
+    };
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::IntraGroupFF )
+Q_DECLARE_METATYPE(SireMM::IntraGroupFF)
 
-SIRE_EXPOSE_CLASS( SireMM::IntraGroupFF )
+SIRE_EXPOSE_CLASS(SireMM::IntraGroupFF)
 
 SIRE_END_HEADER
 
 #endif
-

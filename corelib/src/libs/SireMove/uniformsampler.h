@@ -34,55 +34,54 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class UniformSampler;
+    class UniformSampler;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::UniformSampler&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::UniformSampler&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::UniformSampler &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::UniformSampler &);
 
 namespace SireMove
 {
 
-/** This class is used to pick a molecule at random
-    from the molecule group. Each view of each molecule
-    has an equal chance of being chosen.
+    /** This class is used to pick a molecule at random
+        from the molecule group. Each view of each molecule
+        has an equal chance of being chosen.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT UniformSampler
-        : public SireBase::ConcreteProperty<UniformSampler,Sampler>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT UniformSampler : public SireBase::ConcreteProperty<UniformSampler, Sampler>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const UniformSampler&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, UniformSampler&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const UniformSampler &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, UniformSampler &);
 
-public:
-    UniformSampler();
+    public:
+        UniformSampler();
 
-    UniformSampler(const MoleculeGroup &molgroup);
+        UniformSampler(const MoleculeGroup &molgroup);
 
-    UniformSampler(const UniformSampler &other);
+        UniformSampler(const UniformSampler &other);
 
-    ~UniformSampler();
+        ~UniformSampler();
 
-    UniformSampler& operator=(const UniformSampler &other);
+        UniformSampler &operator=(const UniformSampler &other);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    UniformSampler* clone() const;
+        UniformSampler *clone() const;
 
-    tuple<PartialMolecule,double> sample() const;
-    tuple<Molecule,double> sampleMolecule() const;
+        tuple<PartialMolecule, double> sample() const;
+        tuple<Molecule, double> sampleMolecule() const;
 
-    double probabilityOf(const PartialMolecule &molecule) const;
-    double probabilityOfMolecule(const Molecule &molecule) const;
-};
+        double probabilityOf(const PartialMolecule &molecule) const;
+        double probabilityOfMolecule(const Molecule &molecule) const;
+    };
 
-}
+} // namespace SireMove
 
 Q_DECLARE_METATYPE(SireMove::UniformSampler)
 
-SIRE_EXPOSE_CLASS( SireMove::UniformSampler )
+SIRE_EXPOSE_CLASS(SireMove::UniformSampler)
 
 SIRE_END_HEADER
 

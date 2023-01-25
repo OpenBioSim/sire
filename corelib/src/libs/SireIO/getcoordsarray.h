@@ -28,10 +28,10 @@
 #ifndef SIREIO_GETCOORDSARRAY_H
 #define SIREIO_GETCOORDSARRAY_H
 
-#include "SireMol/moleculeview.h"
-#include "SireMol/moleculegroup.h"
-#include "SireSystem/system.h"
 #include "SireBase/propertymap.h"
+#include "SireMol/moleculegroup.h"
+#include "SireMol/moleculeview.h"
+#include "SireSystem/system.h"
 #include "SireUnits/dimensions.h"
 
 #include <QVector>
@@ -40,23 +40,20 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-    SIREIO_EXPORT QVector<float>
-    getCoordsArray(const SireMol::MoleculeView &mol,
-                   const SireUnits::Dimension::Length &to_unit,
-                   const SireBase::PropertyMap &map);
+    SIREIO_EXPORT QVector<float> getCoordsArray(const SireMol::MoleculeView &mol,
+                                                const SireUnits::Dimension::Length &to_unit,
+                                                const SireBase::PropertyMap &map);
 
-    SIREIO_EXPORT QVector<float>
-    getCoordsArray(const SireMol::MoleculeGroup &mols,
-                   const SireUnits::Dimension::Length &to_unit,
-                   const SireBase::PropertyMap &map);
+    SIREIO_EXPORT QVector<float> getCoordsArray(const SireMol::MoleculeGroup &mols,
+                                                const SireUnits::Dimension::Length &to_unit,
+                                                const SireBase::PropertyMap &map);
 
-    SIREIO_EXPORT QVector<float>
-    getCoordsArray(const SireSystem::System &system,
-                   const SireUnits::Dimension::Length &to_unit,
-                   const SireBase::PropertyMap &map);
-}
+    SIREIO_EXPORT QVector<float> getCoordsArray(const SireSystem::System &system,
+                                                const SireUnits::Dimension::Length &to_unit,
+                                                const SireBase::PropertyMap &map);
+} // namespace SireIO
 
-SIRE_EXPOSE_FUNCTION( SireIO::getCoordsArray )
+SIRE_EXPOSE_FUNCTION(SireIO::getCoordsArray)
 
 SIRE_END_HEADER
 

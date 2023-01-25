@@ -34,83 +34,82 @@
 
 namespace SireMol
 {
-class ResIdentifier;
+    class ResIdentifier;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ResIdentifier&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ResIdentifier&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ResIdentifier &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ResIdentifier &);
 
 namespace SireMol
 {
 
-/** This is the polymorphic holder of all residue IDs */
-class SIREMOL_EXPORT ResIdentifier : public ResID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ResIdentifier&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ResIdentifier&);
-
-public:
-    ResIdentifier();
-    ResIdentifier(const ResID &resid);
-    ResIdentifier(const ResIdentifier &other);
-
-    ~ResIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+    /** This is the polymorphic holder of all residue IDs */
+    class SIREMOL_EXPORT ResIdentifier : public ResID
     {
-        return ResIdentifier::typeName();
+
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ResIdentifier &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ResIdentifier &);
+
+    public:
+        ResIdentifier();
+        ResIdentifier(const ResID &resid);
+        ResIdentifier(const ResIdentifier &other);
+
+        ~ResIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return ResIdentifier::typeName();
+        }
+
+        ResIdentifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const ResID &base() const;
+
+        ResIdentifier &operator=(const ResIdentifier &other);
+        ResIdentifier &operator=(const ResID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const ResIdentifier &other) const;
+        bool operator!=(const ResIdentifier &other) const;
+
+        bool operator==(const ResID &other) const;
+        bool operator!=(const ResID &other) const;
+
+        QList<ResIdx> map(const MolInfo &molinfo) const;
+
+    private:
+        /** Pointer to the ResID */
+        boost::shared_ptr<ResID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const ResIdentifier &resid)
+    {
+        return resid.hash();
     }
 
-    ResIdentifier* clone() const;
+} // namespace SireMol
 
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const ResID& base() const;
-
-    ResIdentifier& operator=(const ResIdentifier &other);
-    ResIdentifier& operator=(const ResID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const ResIdentifier &other) const;
-    bool operator!=(const ResIdentifier &other) const;
-
-    bool operator==(const ResID &other) const;
-    bool operator!=(const ResID &other) const;
-
-    QList<ResIdx> map(const MolInfo &molinfo) const;
-
-private:
-    /** Pointer to the ResID */
-    boost::shared_ptr<ResID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const ResIdentifier &resid)
-{
-    return resid.hash();
-}
-
-}
-
-#include "residx.h"
 #include "atomidx.h"
+#include "residx.h"
 
-Q_DECLARE_METATYPE( SireID::Specify<SireMol::ResID> );
-Q_DECLARE_METATYPE( SireMol::AtomsIn<SireMol::ResID> );
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireMol::ResID> );
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireMol::ResID> );
-Q_DECLARE_METATYPE( SireID::MatchAll<SireMol::ResID> );
-Q_DECLARE_METATYPE( SireID::InvertMatch<SireMol::ResID> );
+Q_DECLARE_METATYPE(SireID::Specify<SireMol::ResID>);
+Q_DECLARE_METATYPE(SireMol::AtomsIn<SireMol::ResID>);
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireMol::ResID>);
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireMol::ResID>);
+Q_DECLARE_METATYPE(SireID::MatchAll<SireMol::ResID>);
+Q_DECLARE_METATYPE(SireID::InvertMatch<SireMol::ResID>);
 
 Q_DECLARE_METATYPE(SireMol::ResIdentifier);
 
 #endif
-

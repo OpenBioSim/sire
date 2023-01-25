@@ -31,9 +31,9 @@
 
 #include "SireCAS/expression.h"
 
-#include "SireMol/errors.h"
-#include "SireError/errors.h"
 #include "SireBase/errors.h"
+#include "SireError/errors.h"
+#include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -53,7 +53,7 @@ SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const SelectorMImproper &
 
     SharedDataStream sds(ds);
 
-    sds << imps.imps << static_cast<const Property&>(imps);
+    sds << imps.imps << static_cast<const Property &>(imps);
 
     return ds;
 }
@@ -66,7 +66,7 @@ SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, SelectorMImproper &imps)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> imps.imps >> static_cast<Property&>(imps);
+        sds >> imps.imps >> static_cast<Property &>(imps);
     }
     else
         throw version_error(v, "1", r_simp, CODELOC);
@@ -74,33 +74,29 @@ SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, SelectorMImproper &imps)
     return ds;
 }
 
-SelectorMImproper::SelectorMImproper()
-                  : ConcreteProperty<SelectorMImproper, Property>()
-{}
+SelectorMImproper::SelectorMImproper() : ConcreteProperty<SelectorMImproper, Property>()
+{
+}
 
-SelectorMImproper::SelectorMImproper(const Improper &view)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+SelectorMImproper::SelectorMImproper(const Improper &view) : ConcreteProperty<SelectorMImproper, Property>()
 {
     if (not view.isEmpty())
         imps.append(SelectorImproper(view));
 }
 
-SelectorMImproper::SelectorMImproper(const Molecules &mols,
-                                     const PropertyMap &map)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+SelectorMImproper::SelectorMImproper(const Molecules &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     if (not mols.isEmpty())
     {
         auto toList = [](const QSet<MolNum> &molnums)
-        {
-            return molnums.values();
-        };
+        { return molnums.values(); };
 
         auto molnums = toList(mols.molNums());
 
-        //sort them, as this is also likely the order the molecules
-        //were read in from a file, and so more likely to be the
-        //order the user would expect
+        // sort them, as this is also likely the order the molecules
+        // were read in from a file, and so more likely to be the
+        // order the user would expect
         std::sort(molnums.begin(), molnums.end());
 
         this->imps.reserve(molnums.count());
@@ -115,9 +111,8 @@ SelectorMImproper::SelectorMImproper(const Molecules &mols,
     }
 }
 
-SelectorMImproper::SelectorMImproper(const MoleculeGroup &mols,
-                                     const PropertyMap &map)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+SelectorMImproper::SelectorMImproper(const MoleculeGroup &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -134,9 +129,8 @@ SelectorMImproper::SelectorMImproper(const MoleculeGroup &mols,
     }
 }
 
-SelectorMImproper::SelectorMImproper(const MolGroupsBase &mols,
-                                     const PropertyMap &map)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+SelectorMImproper::SelectorMImproper(const MolGroupsBase &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -153,9 +147,8 @@ SelectorMImproper::SelectorMImproper(const MolGroupsBase &mols,
     }
 }
 
-SelectorMImproper::SelectorMImproper(const SelectResult &mols,
-                                     const PropertyMap &map)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+SelectorMImproper::SelectorMImproper(const SelectResult &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -176,10 +169,8 @@ SelectorMImproper::SelectorMImproper(const SelectResult &mols,
     }
 }
 
-SelectorMImproper::SelectorMImproper(const SelectResult &mols,
-                                     const ImproperID &improper,
-                                     const PropertyMap &map)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+SelectorMImproper::SelectorMImproper(const SelectResult &mols, const ImproperID &improper, const PropertyMap &map)
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -194,22 +185,22 @@ SelectorMImproper::SelectorMImproper(const SelectResult &mols,
                 if (not d.isEmpty())
                     this->imps.append(d);
             }
-            catch(...)
-            {}
+            catch (...)
+            {
+            }
         }
     }
 }
 
 SelectorMImproper::SelectorMImproper(const SelectorImproper &impropers)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     if (not impropers.isEmpty())
         imps.append(impropers);
 }
 
-SelectorMImproper::SelectorMImproper(const SelectorMol &mols,
-                                     const PropertyMap &map)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+SelectorMImproper::SelectorMImproper(const SelectorMol &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -234,7 +225,7 @@ void SelectorMImproper::_append(const SelectorImproper &impropers)
         this->imps.append(impropers);
     else
     {
-        for (int i=0; i<impropers.count(); ++i)
+        for (int i = 0; i < impropers.count(); ++i)
         {
             this->_append(impropers(i));
         }
@@ -259,20 +250,17 @@ void SelectorMImproper::_append(const Improper &improper)
     }
 }
 
-SelectorMImproper::SelectorMImproper(const SelectorMImproper &impropers,
-                                     const SireBase::Slice &slice)
-                  : SireBase::ConcreteProperty<SelectorMImproper,Property>()
+SelectorMImproper::SelectorMImproper(const SelectorMImproper &impropers, const SireBase::Slice &slice)
+    : SireBase::ConcreteProperty<SelectorMImproper, Property>()
 {
-    for (auto it = slice.begin(impropers.count());
-         not it.atEnd(); it.next())
+    for (auto it = slice.begin(impropers.count()); not it.atEnd(); it.next())
     {
         this->_append(impropers[it.value()]);
     }
 }
 
-SelectorMImproper::SelectorMImproper(const SelectorMImproper &impropers,
-                                     const QList<qint64> &idxs)
-                  : SireBase::ConcreteProperty<SelectorMImproper,Property>()
+SelectorMImproper::SelectorMImproper(const SelectorMImproper &impropers, const QList<qint64> &idxs)
+    : SireBase::ConcreteProperty<SelectorMImproper, Property>()
 {
     for (const auto &idx : idxs)
     {
@@ -280,9 +268,8 @@ SelectorMImproper::SelectorMImproper(const SelectorMImproper &impropers,
     }
 }
 
-SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms,
-                                     const PropertyMap &map)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms, const PropertyMap &map)
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     for (const auto &mol_atoms : atoms)
     {
@@ -291,10 +278,9 @@ SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms,
     }
 }
 
-SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0,
-                                     const SelectorM<Atom> &atoms1,
+SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0, const SelectorM<Atom> &atoms1,
                                      const PropertyMap &map)
-              : ConcreteProperty<SelectorMImproper, Property>()
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     for (const auto &mol_atoms0 : atoms0)
     {
@@ -302,19 +288,16 @@ SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0,
         {
             if (mol_atoms0.isSameMolecule(mol_atoms1))
             {
-                const auto impropers = SelectorImproper(mol_atoms0,
-                                                        mol_atoms1, map);
+                const auto impropers = SelectorImproper(mol_atoms0, mol_atoms1, map);
                 this->_append(impropers);
             }
         }
     }
 }
 
-SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0,
-                                     const SelectorM<Atom> &atoms1,
-                                     const SelectorM<Atom> &atoms2,
-                                     const PropertyMap &map)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0, const SelectorM<Atom> &atoms1,
+                                     const SelectorM<Atom> &atoms2, const PropertyMap &map)
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     for (const auto &mol_atoms0 : atoms0)
     {
@@ -326,10 +309,7 @@ SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0,
                 {
                     if (mol_atoms0.isSameMolecule(mol_atoms2))
                     {
-                        const auto impropers = SelectorImproper(
-                                                           mol_atoms0,
-                                                           mol_atoms1,
-                                                           mol_atoms2, map);
+                        const auto impropers = SelectorImproper(mol_atoms0, mol_atoms1, mol_atoms2, map);
                         this->_append(impropers);
                     }
                 }
@@ -338,12 +318,10 @@ SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0,
     }
 }
 
-SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0,
-                                     const SelectorM<Atom> &atoms1,
-                                     const SelectorM<Atom> &atoms2,
-                                     const SelectorM<Atom> &atoms3,
+SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0, const SelectorM<Atom> &atoms1,
+                                     const SelectorM<Atom> &atoms2, const SelectorM<Atom> &atoms3,
                                      const PropertyMap &map)
-                  : ConcreteProperty<SelectorMImproper, Property>()
+    : ConcreteProperty<SelectorMImproper, Property>()
 {
     for (const auto &mol_atoms0 : atoms0)
     {
@@ -359,12 +337,8 @@ SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0,
                         {
                             if (mol_atoms0.isSameMolecule(mol_atoms3))
                             {
-                                const auto impropers = SelectorImproper(
-                                                                   mol_atoms0,
-                                                                   mol_atoms1,
-                                                                   mol_atoms2,
-                                                                   mol_atoms3,
-                                                                   map);
+                                const auto impropers =
+                                    SelectorImproper(mol_atoms0, mol_atoms1, mol_atoms2, mol_atoms3, map);
                                 this->_append(impropers);
                             }
                         }
@@ -376,19 +350,20 @@ SelectorMImproper::SelectorMImproper(const SelectorM<Atom> &atoms0,
 }
 
 SelectorMImproper::SelectorMImproper(const SelectorMImproper &other)
-                  : ConcreteProperty<SelectorMImproper, Property>(),
-                    imps(other.imps)
-{}
+    : ConcreteProperty<SelectorMImproper, Property>(), imps(other.imps)
+{
+}
 
 SelectorMImproper::~SelectorMImproper()
-{}
+{
+}
 
-const char* SelectorMImproper::typeName()
+const char *SelectorMImproper::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<SelectorMImproper>());
 }
 
-SelectorMImproper& SelectorMImproper::operator=(const SelectorMImproper &other)
+SelectorMImproper &SelectorMImproper::operator=(const SelectorMImproper &other)
 {
     if (this != &other)
     {
@@ -455,8 +430,9 @@ SelectorMImproper SelectorMImproper::operator[](const ImproperID &id) const
                 ret.imps.append(r);
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     return ret;
@@ -564,7 +540,6 @@ MoleculeGroup SelectorMImproper::toMoleculeGroup() const
     }
 
     return grp;
-
 }
 
 SelectResult SelectorMImproper::toSelectResult() const
@@ -708,7 +683,7 @@ CutGroup SelectorMImproper::cutGroup(const CGID &cgid, const PropertyMap &map) c
 
 SelectorM<Atom> SelectorMImproper::atoms() const
 {
-    QList< Selector<Atom> > ret;
+    QList<Selector<Atom>> ret;
 
     for (const auto &d : this->imps)
     {
@@ -745,7 +720,7 @@ SelectorM<Atom> SelectorMImproper::atoms(const AtomID &atomid, const PropertyMap
 
 SelectorM<Residue> SelectorMImproper::residues() const
 {
-    QList< Selector<Residue> > ret;
+    QList<Selector<Residue>> ret;
 
     for (const auto &d : this->imps)
     {
@@ -782,7 +757,7 @@ SelectorM<Residue> SelectorMImproper::residues(const ResID &resid, const Propert
 
 SelectorM<Chain> SelectorMImproper::chains() const
 {
-    QList< Selector<Chain> > ret;
+    QList<Selector<Chain>> ret;
 
     for (const auto &d : this->imps)
     {
@@ -819,7 +794,7 @@ SelectorM<Chain> SelectorMImproper::chains(const ChainID &chainid, const Propert
 
 SelectorM<Segment> SelectorMImproper::segments() const
 {
-    QList< Selector<Segment> > ret;
+    QList<Selector<Segment>> ret;
 
     for (const auto &d : this->imps)
     {
@@ -856,7 +831,7 @@ SelectorM<Segment> SelectorMImproper::segments(const SegID &segid, const Propert
 
 SelectorM<CutGroup> SelectorMImproper::cutGroups() const
 {
-    QList< Selector<CutGroup> > ret;
+    QList<Selector<CutGroup>> ret;
 
     for (const auto &d : this->imps)
     {
@@ -897,8 +872,7 @@ SelectResult SelectorMImproper::search(const QString &search_string) const
     return search(this->toSelectResult());
 }
 
-SelectResult SelectorMImproper::search(const QString &search_string,
-                                       const PropertyMap &map) const
+SelectResult SelectorMImproper::search(const QString &search_string, const PropertyMap &map) const
 {
     Select search(search_string);
     return search(this->toSelectResult(), map);
@@ -1070,41 +1044,33 @@ QString SelectorMImproper::toString() const
 
         if (n <= 10)
         {
-            for (int i=0; i<n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 const auto view = this->operator[](i);
 
-                parts.append(QString("%1: %2 %3")
-                    .arg(i).arg(view.data().number().toString())
-                    .arg(view.toString()));
+                parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
             }
         }
         else
         {
-            for (int i=0; i<5; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 const auto view = this->operator[](i);
 
-                parts.append(QString("%1: %2 %3")
-                    .arg(i).arg(view.data().number().toString())
-                    .arg(view.toString()));
+                parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
             }
 
             parts.append("...");
 
-            for (int i=n-5; i<n; ++i)
+            for (int i = n - 5; i < n; ++i)
             {
                 const auto view = this->operator[](i);
 
-                parts.append(QString("%1: %2 %3")
-                    .arg(i).arg(view.data().number().toString())
-                    .arg(view.toString()));
+                parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
             }
         }
 
-        return QObject::tr("SelectorMImproper( size=%2\n%3\n)")
-                    .arg(n)
-                    .arg(parts.join("\n"));
+        return QObject::tr("SelectorMImproper( size=%2\n%3\n)").arg(n).arg(parts.join("\n"));
     }
 }
 
@@ -1120,7 +1086,7 @@ SelectorMImproper SelectorMImproper::add(const SelectorMImproper &other) const
         }
         else if (ret.imps.last().isSameMolecule(value))
         {
-            for (int i=0; i<value.count(); ++i)
+            for (int i = 0; i < value.count(); ++i)
             {
                 ret._append(value(i));
             }
@@ -1201,8 +1167,7 @@ bool SelectorMImproper::hasMetadata(const SireBase::PropertyName &key) const
     return false;
 }
 
-bool SelectorMImproper::hasMetadata(const SireBase::PropertyName &key,
-                                 const SireBase::PropertyName &metakey) const
+bool SelectorMImproper::hasMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey) const
 {
     for (const auto &val : imps)
     {
@@ -1213,14 +1178,14 @@ bool SelectorMImproper::hasMetadata(const SireBase::PropertyName &key,
     return false;
 }
 
-template<class T>
+template <class T>
 inline QSet<T> _to_set(const QList<T> &l)
 {
-    #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-        return l.toSet();
-    #else
-        return QSet<T>(l.constBegin(), l.constEnd());
-    #endif
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    return l.toSet();
+#else
+    return QSet<T>(l.constBegin(), l.constEnd());
+#endif
 }
 
 QStringList SelectorMImproper::propertyKeys() const
@@ -1284,11 +1249,11 @@ QList<SireBase::PropertyPtr> SelectorMImproper::property(const SireBase::Propert
             props += val.property(key);
             has_prop = true;
         }
-        catch(const SireError::exception&)
+        catch (const SireError::exception &)
         {
             PropertyPtr null(new NullProperty());
 
-            for (int i=0; i<val.count(); ++i)
+            for (int i = 0; i < val.count(); ++i)
             {
                 props.append(null);
             }
@@ -1296,15 +1261,15 @@ QList<SireBase::PropertyPtr> SelectorMImproper::property(const SireBase::Propert
     }
 
     if (not has_prop)
-        throw SireBase::missing_property(QObject::tr(
-            "None of the impropers in this container have a property called %1.")
-                .arg(key.source()), CODELOC);
+        throw SireBase::missing_property(
+            QObject::tr("None of the impropers in this container have a property called %1.").arg(key.source()),
+            CODELOC);
 
     return props;
 }
 
 QList<SireBase::PropertyPtr> SelectorMImproper::property(const SireBase::PropertyName &key,
-                                                      const Property &default_value) const
+                                                         const Property &default_value) const
 {
     QList<SireBase::PropertyPtr> props;
 
@@ -1365,8 +1330,7 @@ QList<SireUnits::Dimension::GeneralUnit> SelectorMImproper::energies() const
     return this->energies(PropertyMap());
 }
 
-QList<SireUnits::Dimension::GeneralUnit> SelectorMImproper::energies(
-                                    const SireBase::PropertyMap &map) const
+QList<SireUnits::Dimension::GeneralUnit> SelectorMImproper::energies(const SireBase::PropertyMap &map) const
 {
     QList<SireUnits::Dimension::GeneralUnit> e;
 
@@ -1383,8 +1347,7 @@ SireUnits::Dimension::GeneralUnit SelectorMImproper::energy() const
     return this->energy(PropertyMap());
 }
 
-SireUnits::Dimension::GeneralUnit SelectorMImproper::energy(
-                                const SireBase::PropertyMap &map) const
+SireUnits::Dimension::GeneralUnit SelectorMImproper::energy(const SireBase::PropertyMap &map) const
 {
     SireUnits::Dimension::GeneralUnit nrg(0);
 

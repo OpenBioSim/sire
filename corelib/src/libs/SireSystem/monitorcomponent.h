@@ -30,78 +30,76 @@
 
 #include "systemmonitor.h"
 
-#include "SireMaths/accumulator.h"
 #include "SireCAS/symbol.h"
+#include "SireMaths/accumulator.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class MonitorComponent;
+    class MonitorComponent;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::MonitorComponent&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::MonitorComponent&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::MonitorComponent &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::MonitorComponent &);
 
 namespace SireSystem
 {
 
-using SireMaths::Accumulator;
+    using SireMaths::Accumulator;
 
-using SireCAS::Symbol;
+    using SireCAS::Symbol;
 
-/** This monitor is used to monitor the value of a component of the system.
-    It can be used to generate an average of that component. It could be
-    used, for example, to generate average energies, or accumulate
-    free energies during a simulation
+    /** This monitor is used to monitor the value of a component of the system.
+        It can be used to generate an average of that component. It could be
+        used, for example, to generate average energies, or accumulate
+        free energies during a simulation
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT MonitorComponent
-        : public SireBase::ConcreteProperty<MonitorComponent,SystemMonitor>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT MonitorComponent : public SireBase::ConcreteProperty<MonitorComponent, SystemMonitor>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const MonitorComponent&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, MonitorComponent&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const MonitorComponent &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, MonitorComponent &);
 
-public:
-    MonitorComponent();
-    MonitorComponent(const Symbol &component);
-    MonitorComponent(const Symbol &component,
-                     const Accumulator &accumulator);
+    public:
+        MonitorComponent();
+        MonitorComponent(const Symbol &component);
+        MonitorComponent(const Symbol &component, const Accumulator &accumulator);
 
-    MonitorComponent(const MonitorComponent &other);
+        MonitorComponent(const MonitorComponent &other);
 
-    ~MonitorComponent();
+        ~MonitorComponent();
 
-    MonitorComponent& operator=(const MonitorComponent &other);
+        MonitorComponent &operator=(const MonitorComponent &other);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    bool operator==(const MonitorComponent &other) const;
-    bool operator!=(const MonitorComponent &other) const;
+        bool operator==(const MonitorComponent &other) const;
+        bool operator!=(const MonitorComponent &other) const;
 
-    const Symbol& component() const;
-    const Accumulator& accumulator() const;
+        const Symbol &component() const;
+        const Accumulator &accumulator() const;
 
-    void clearStatistics();
+        void clearStatistics();
 
-    void monitor(System &system);
+        void monitor(System &system);
 
-private:
-    /** The symbol representing the component being monitored */
-    Symbol monitored_component;
+    private:
+        /** The symbol representing the component being monitored */
+        Symbol monitored_component;
 
-    /** The accumulator that is used to accumulate the average
-        (and other properties) */
-    SireMaths::AccumulatorPtr accume;
-};
+        /** The accumulator that is used to accumulate the average
+            (and other properties) */
+        SireMaths::AccumulatorPtr accume;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::MonitorComponent )
+Q_DECLARE_METATYPE(SireSystem::MonitorComponent)
 
-SIRE_EXPOSE_CLASS( SireSystem::MonitorComponent )
+SIRE_EXPOSE_CLASS(SireSystem::MonitorComponent)
 
 SIRE_END_HEADER
 

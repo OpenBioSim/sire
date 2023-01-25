@@ -33,10 +33,10 @@ using namespace SireUnits::Dimension;
 
 Angle SireUnits::acute(Angle angle)
 {
-    const Angle three_sixty = 360*degrees;
-    const Angle one_eighty = 180*degrees;
+    const Angle three_sixty = 360 * degrees;
+    const Angle one_eighty = 180 * degrees;
 
-    //unwind the angle...
+    // unwind the angle...
     while (angle < 0)
     {
         angle += three_sixty;

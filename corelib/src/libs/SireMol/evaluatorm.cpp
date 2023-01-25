@@ -26,30 +26,30 @@
 \*********************************************/
 
 #include "evaluatorm.h"
-#include "atomcoords.h"
-#include "atommasses.h"
+#include "angleid.h"
 #include "atomcharges.h"
+#include "atomcoords.h"
 #include "atomelements.h"
+#include "atommasses.h"
 #include "atommatcher.h"
 #include "atommatchers.h"
 #include "bondid.h"
-#include "angleid.h"
-#include "dihedralid.h"
 #include "connectivity.h"
+#include "core.h"
+#include "dihedralid.h"
+#include "editor.hpp"
 #include "molecule.h"
 #include "mover.hpp"
-#include "editor.hpp"
 #include "selectormol.h"
-#include "core.h"
 
 #include "SireVol/coordgroup.h"
 
-#include "SireMaths/sphere.h"
+#include "SireMaths/accumulator.h"
 #include "SireMaths/axisset.h"
 #include "SireMaths/line.h"
-#include "SireMaths/triangle.h"
+#include "SireMaths/sphere.h"
 #include "SireMaths/torsion.h"
-#include "SireMaths/accumulator.h"
+#include "SireMaths/triangle.h"
 
 #include "SireBase/errors.h"
 #include "SireMol/errors.h"
@@ -69,25 +69,25 @@ using namespace SireStream;
 
 static const RegisterMetaType<EvaluatorM> r_eval;
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream &ds, const EvaluatorM &eval)
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds, const EvaluatorM &eval)
 {
     writeHeader(ds, r_eval, 1);
 
     SharedDataStream sds(ds);
 
-    sds << eval.vws << static_cast<const Property&>(eval);
+    sds << eval.vws << static_cast<const Property &>(eval);
 
     return ds;
 }
 
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream &ds, EvaluatorM &eval)
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, EvaluatorM &eval)
 {
     VersionID v = readHeader(ds, r_eval);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> eval.vws >> static_cast<Property&>(eval);
+        sds >> eval.vws >> static_cast<Property &>(eval);
     }
     else
         throw version_error(v, "1", r_eval, CODELOC);
@@ -96,7 +96,8 @@ SIREMOL_EXPORT QDataStream& operator>>(QDataStream &ds, EvaluatorM &eval)
 }
 
 EvaluatorM::EvaluatorM() : ConcreteProperty<EvaluatorM, Property>()
-{}
+{
+}
 
 EvaluatorM::EvaluatorM(const SelectorMol &mols) : ConcreteProperty<EvaluatorM, Property>()
 {
@@ -108,19 +109,20 @@ EvaluatorM::EvaluatorM(const SelectorMol &mols) : ConcreteProperty<EvaluatorM, P
     }
 }
 
-EvaluatorM::EvaluatorM(const EvaluatorM &other)
-           : ConcreteProperty<EvaluatorM, Property>(other), vws(other.vws)
-{}
-
-EvaluatorM::~EvaluatorM()
-{}
-
-const char* EvaluatorM::typeName()
+EvaluatorM::EvaluatorM(const EvaluatorM &other) : ConcreteProperty<EvaluatorM, Property>(other), vws(other.vws)
 {
-    return QMetaType::typeName( qMetaTypeId<EvaluatorM>() );
 }
 
-EvaluatorM& EvaluatorM::operator=(const EvaluatorM &other)
+EvaluatorM::~EvaluatorM()
+{
+}
+
+const char *EvaluatorM::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<EvaluatorM>());
+}
+
+EvaluatorM &EvaluatorM::operator=(const EvaluatorM &other)
 {
     if (this != &other)
     {
@@ -165,9 +167,7 @@ bool EvaluatorM::isEmpty() const
 
 QString EvaluatorM::toString() const
 {
-    return QObject::tr("EvaluatorM( num_molecules=%1 num_atoms=%2 )")
-            .arg(this->nMolecules())
-            .arg(this->nAtoms());
+    return QObject::tr("EvaluatorM( num_molecules=%1 num_atoms=%2 )").arg(this->nMolecules()).arg(this->nAtoms());
 }
 
 SireUnits::Dimension::MolarMass EvaluatorM::mass() const
@@ -182,7 +182,7 @@ SireUnits::Dimension::MolarMass EvaluatorM::mass(const SireBase::PropertyMap &ma
 
     auto m = this->vws[0].evaluate().mass(map);
 
-    for (int i=1; i<this->vws.count(); ++i)
+    for (int i = 1; i < this->vws.count(); ++i)
     {
         m += this->vws[i].evaluate().mass(map);
     }
@@ -202,7 +202,7 @@ SireUnits::Dimension::Charge EvaluatorM::charge(const PropertyMap &map) const
 
     auto c = this->vws[0].evaluate().charge(map);
 
-    for (int i=1; i<this->vws.count(); ++i)
+    for (int i = 1; i < this->vws.count(); ++i)
     {
         c += this->vws[i].evaluate().charge(map);
     }
@@ -232,7 +232,7 @@ AABox EvaluatorM::aaBox(const PropertyMap &map) const
 
     auto box = this->vws[0].evaluate().aaBox(map);
 
-    for (int i=1; i<this->vws.count(); ++i)
+    for (int i = 1; i < this->vws.count(); ++i)
     {
         box += this->vws[i].evaluate().aaBox(map);
     }
@@ -268,11 +268,11 @@ Vector EvaluatorM::centroid(const PropertyMap &map) const
 
     const auto coords_property = map["coordinates"];
 
-    for (int i=0; i<this->vws.count(); ++i)
+    for (int i = 0; i < this->vws.count(); ++i)
     {
         const auto atoms = this->vws[i].atoms();
 
-        for (int j=0; j<atoms.count(); ++j)
+        for (int j = 0; j < atoms.count(); ++j)
         {
             natoms += 1;
             cent += atoms(j).property<Vector>(coords_property);
@@ -309,11 +309,11 @@ Vector EvaluatorM::centerOfMass(const PropertyMap &map) const
     Vector com(0);
     double mass(0);
 
-    for (int i=0; i<this->vws.count(); ++i)
+    for (int i = 0; i < this->vws.count(); ++i)
     {
         const auto atoms = this->vws[i].atoms();
 
-        for (int j=0; j<atoms.count(); ++j)
+        for (int j = 0; j < atoms.count(); ++j)
         {
             const auto &atom = atoms(j);
 
@@ -329,14 +329,14 @@ Vector EvaluatorM::centerOfMass(const PropertyMap &map) const
             }
             else
             {
-                throw SireBase::missing_property(QObject::tr(
-                    "There is no mass or element property in %1, so it is "
-                    "not possible to calculate the center of mass.")
-                        .arg(atom.toString()), CODELOC);
+                throw SireBase::missing_property(QObject::tr("There is no mass or element property in %1, so it is "
+                                                             "not possible to calculate the center of mass.")
+                                                     .arg(atom.toString()),
+                                                 CODELOC);
             }
 
             mass += atommass;
-            com += atommass*atom.property<Vector>(coords_property);
+            com += atommass * atom.property<Vector>(coords_property);
         }
     }
 

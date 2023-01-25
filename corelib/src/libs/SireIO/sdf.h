@@ -25,7 +25,6 @@
   *
 \*********************************************/
 
-
 #ifndef SIREIO_SDF_H
 #define SIREIO_SDF_H
 
@@ -38,117 +37,109 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class SDF;
+    class SDF;
 }
 
 namespace SireMol
 {
-class Atom;
-class MolEditor;
-class MoleculeInfoData;
-}
+    class Atom;
+    class MolEditor;
+    class MoleculeInfoData;
+} // namespace SireMol
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::SDF&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::SDF&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::SDF &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::SDF &);
 
 namespace SireIO
 {
 
-namespace detail
-{
-    class SDFMolecule;
-}
+    namespace detail
+    {
+        class SDFMolecule;
+    }
 
-/** This class holds a parser for reading and writing
-    Structure Data File (SDF) molecular file formats
+    /** This class holds a parser for reading and writing
+        Structure Data File (SDF) molecular file formats
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT SDF : public SireBase::ConcreteProperty<SDF,MoleculeParser>
-{
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT SDF : public SireBase::ConcreteProperty<SDF, MoleculeParser>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const SDF&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, SDF&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const SDF &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, SDF &);
 
-public:
-    SDF();
-    SDF(const QString &filename,
-        const PropertyMap &map = PropertyMap());
+    public:
+        SDF();
+        SDF(const QString &filename, const PropertyMap &map = PropertyMap());
 
-    SDF(const QStringList &lines,
-        const PropertyMap &map = PropertyMap());
-    SDF(const SireSystem::System &system,
-        const PropertyMap &map = PropertyMap());
+        SDF(const QStringList &lines, const PropertyMap &map = PropertyMap());
+        SDF(const SireSystem::System &system, const PropertyMap &map = PropertyMap());
 
-    SDF(const SDF &other);
+        SDF(const SDF &other);
 
-    ~SDF();
+        ~SDF();
 
-    SDF& operator=(const SDF &other);
+        SDF &operator=(const SDF &other);
 
-    bool operator==(const SDF &other) const;
-    bool operator!=(const SDF &other) const;
+        bool operator==(const SDF &other) const;
+        bool operator!=(const SDF &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    MoleculeParserPtr construct(const QString &filename,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QString &filename, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const QStringList &lines,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const SireSystem::System &system,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const SireSystem::System &system, const PropertyMap &map) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    QString formatName() const;
-    QString formatDescription() const;
-    QStringList formatSuffix() const;
+        QString formatName() const;
+        QString formatDescription() const;
+        QStringList formatSuffix() const;
 
-    QStringList parseWarnings() const;
+        QStringList parseWarnings() const;
 
-    int nMolecules() const;
+        int nMolecules() const;
 
-    int nAtoms() const;
-    int nAtoms(int i) const;
+        int nAtoms() const;
+        int nAtoms(int i) const;
 
-    bool isTopology() const;
-    bool isFrame() const;
+        bool isTopology() const;
+        bool isFrame() const;
 
-    int nFrames() const;
-    SireMol::Frame getFrame(int i) const;
+        int nFrames() const;
+        SireMol::Frame getFrame(int i) const;
 
-protected:
-    SireSystem::System startSystem(const PropertyMap &map) const;
+    protected:
+        SireSystem::System startSystem(const PropertyMap &map) const;
 
-private:
-    void assertSane() const;
-    void parseLines(const PropertyMap &map);
+    private:
+        void assertSane() const;
+        void parseLines(const PropertyMap &map);
 
-    void parseMoleculeLines(const PropertyMap &map,
-                            const QStringList &lines);
+        void parseMoleculeLines(const PropertyMap &map, const QStringList &lines);
 
-    SireMol::MolStructureEditor getMolStructure(const detail::SDFMolecule &mol,
-        const SireBase::PropertyName &cutting,
-        const QString &resname) const;
+        SireMol::MolStructureEditor getMolStructure(const detail::SDFMolecule &mol, const SireBase::PropertyName &cutting,
+                                                    const QString &resname) const;
 
-    SireMol::MolEditor getMolecule(int imol, const PropertyMap &map = PropertyMap()) const;
+        SireMol::MolEditor getMolecule(int imol, const PropertyMap &map = PropertyMap()) const;
 
-    /** Any molecules that have been loaded from the file */
-    QList<detail::SDFMolecule> molecules;
+        /** Any molecules that have been loaded from the file */
+        QList<detail::SDFMolecule> molecules;
 
-    /** Any warnings that were raised when reading the file. */
-    QStringList parse_warnings;
-};
+        /** Any warnings that were raised when reading the file. */
+        QStringList parse_warnings;
+    };
 
-}
+} // namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::SDF )
+Q_DECLARE_METATYPE(SireIO::SDF)
 
-SIRE_EXPOSE_CLASS( SireIO::SDF )
+SIRE_EXPOSE_CLASS(SireIO::SDF)
 
 SIRE_END_HEADER
 

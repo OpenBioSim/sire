@@ -33,262 +33,253 @@
 
 #include "SireID/idorset.hpp"
 
-#include "SireMol/atomidx.h"
 #include "SireMol/atomidentifier.h"
+#include "SireMol/atomidx.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class GetPoint;
+    class GetPoint;
 
-class NullGetPoint;
-class GetCOMPoint;
-class GetCOGPoint;
-class GetCentroidPoint;
-}
+    class NullGetPoint;
+    class GetCOMPoint;
+    class GetCOGPoint;
+    class GetCentroidPoint;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::GetPoint&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::GetPoint&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::GetPoint &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::GetPoint &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::NullGetPoint&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::NullGetPoint&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::NullGetPoint &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::NullGetPoint &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::GetCOMPoint&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::GetCOMPoint&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::GetCOMPoint &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::GetCOMPoint &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::GetCOGPoint&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::GetCOGPoint&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::GetCOGPoint &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::GetCOGPoint &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::GetCentroidPoint&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::GetCentroidPoint&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::GetCentroidPoint &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::GetCentroidPoint &);
 
 namespace SireMaths
 {
-class Vector;
+    class Vector;
 }
 
 namespace SireMol
 {
-class MoleculeView;
+    class MoleculeView;
 }
 
 namespace SireMove
 {
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-using SireMaths::Vector;
+    using SireMaths::Vector;
 
-using SireMol::AtomID;
-using SireMol::MoleculeView;
+    using SireMol::AtomID;
+    using SireMol::MoleculeView;
 
-/** This is the base class of the function objects that are
-    used to return the coordinates of a point in space based
-    on the passed PartialMolecule. This is used, for example,
-    to find the center of rotation of a set of atoms
+    /** This is the base class of the function objects that are
+        used to return the coordinates of a point in space based
+        on the passed PartialMolecule. This is used, for example,
+        to find the center of rotation of a set of atoms
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT GetPoint : public SireBase::Property
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT GetPoint : public SireBase::Property
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const GetPoint&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, GetPoint&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const GetPoint &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, GetPoint &);
 
-public:
-    GetPoint();
-    GetPoint(const GetPoint &other);
+    public:
+        GetPoint();
+        GetPoint(const GetPoint &other);
 
-    virtual ~GetPoint();
+        virtual ~GetPoint();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual GetPoint* clone() const=0;
+        virtual GetPoint *clone() const = 0;
 
-    virtual Vector getPoint(const MoleculeView &molecule,
-                            const PropertyMap &map = PropertyMap()) const=0;
+        virtual Vector getPoint(const MoleculeView &molecule, const PropertyMap &map = PropertyMap()) const = 0;
 
-    Vector operator()(const MoleculeView &molecule) const;
-    Vector operator()(const MoleculeView &molecule, const PropertyMap &map) const;
+        Vector operator()(const MoleculeView &molecule) const;
+        Vector operator()(const MoleculeView &molecule, const PropertyMap &map) const;
 
-    static NullGetPoint null();
+        static NullGetPoint null();
 
-protected:
-    GetPoint& operator=(const GetPoint &other);
+    protected:
+        GetPoint &operator=(const GetPoint &other);
 
-    bool operator==(const GetPoint &other) const;
-    bool operator!=(const GetPoint &other) const;
-};
+        bool operator==(const GetPoint &other) const;
+        bool operator!=(const GetPoint &other) const;
+    };
 
-/** This is the null GetPoint function - this just returns
-    the point (0,0,0) for all passed molecule views
+    /** This is the null GetPoint function - this just returns
+        the point (0,0,0) for all passed molecule views
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT NullGetPoint
-            : public SireBase::ConcreteProperty<NullGetPoint,GetPoint>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT NullGetPoint : public SireBase::ConcreteProperty<NullGetPoint, GetPoint>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const NullGetPoint&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullGetPoint&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const NullGetPoint &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, NullGetPoint &);
 
-public:
-    NullGetPoint();
-    NullGetPoint(const NullGetPoint &other);
+    public:
+        NullGetPoint();
+        NullGetPoint(const NullGetPoint &other);
 
-    ~NullGetPoint();
+        ~NullGetPoint();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    NullGetPoint& operator=(const NullGetPoint &other);
+        NullGetPoint &operator=(const NullGetPoint &other);
 
-    bool operator==(const NullGetPoint &other) const;
-    bool operator!=(const NullGetPoint &other) const;
+        bool operator==(const NullGetPoint &other) const;
+        bool operator!=(const NullGetPoint &other) const;
 
-    Vector getPoint(const MoleculeView &molecule,
-                    const PropertyMap &map = PropertyMap()) const;
-};
+        Vector getPoint(const MoleculeView &molecule, const PropertyMap &map = PropertyMap()) const;
+    };
 
-/** This function returns the center of geometry (COG) of the
-    atoms in the passed view of the molecule
+    /** This function returns the center of geometry (COG) of the
+        atoms in the passed view of the molecule
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT GetCOGPoint
-            : public SireBase::ConcreteProperty<GetCOGPoint,GetPoint>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT GetCOGPoint : public SireBase::ConcreteProperty<GetCOGPoint, GetPoint>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const GetCOGPoint&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, GetCOGPoint&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const GetCOGPoint &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, GetCOGPoint &);
 
-public:
-    GetCOGPoint();
+    public:
+        GetCOGPoint();
 
-    GetCOGPoint(const AtomID &atomid);
-    GetCOGPoint(const AtomID &atomid0, const AtomID &atomid1);
-    GetCOGPoint(const QList<SireMol::AtomIdentifier> &atomids);
+        GetCOGPoint(const AtomID &atomid);
+        GetCOGPoint(const AtomID &atomid0, const AtomID &atomid1);
+        GetCOGPoint(const QList<SireMol::AtomIdentifier> &atomids);
 
-    GetCOGPoint(const GetCOGPoint &other);
+        GetCOGPoint(const GetCOGPoint &other);
 
-    ~GetCOGPoint();
+        ~GetCOGPoint();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    GetCOGPoint& operator=(const GetCOGPoint &other);
+        GetCOGPoint &operator=(const GetCOGPoint &other);
 
-    bool operator==(const GetCOGPoint &other) const;
-    bool operator!=(const GetCOGPoint &other) const;
+        bool operator==(const GetCOGPoint &other) const;
+        bool operator!=(const GetCOGPoint &other) const;
 
-    const AtomID& atomID() const;
+        const AtomID &atomID() const;
 
-    Vector getPoint(const MoleculeView &molecule,
-                    const PropertyMap &map = PropertyMap()) const;
+        Vector getPoint(const MoleculeView &molecule, const PropertyMap &map = PropertyMap()) const;
 
-private:
-    /** The list of AtomIDs to use to limit the atoms over which the
-        COG is calculated */
-    SireID::IDOrSet<AtomID> atomids;
-};
+    private:
+        /** The list of AtomIDs to use to limit the atoms over which the
+            COG is calculated */
+        SireID::IDOrSet<AtomID> atomids;
+    };
 
-/** This function returns the center of mass (COG) of the
-    atoms in the passed view of the molecule
+    /** This function returns the center of mass (COG) of the
+        atoms in the passed view of the molecule
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT GetCOMPoint
-            : public SireBase::ConcreteProperty<GetCOMPoint,GetPoint>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT GetCOMPoint : public SireBase::ConcreteProperty<GetCOMPoint, GetPoint>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const GetCOMPoint&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, GetCOMPoint&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const GetCOMPoint &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, GetCOMPoint &);
 
-public:
-    GetCOMPoint();
+    public:
+        GetCOMPoint();
 
-    GetCOMPoint(const AtomID &atomid);
-    GetCOMPoint(const AtomID &atomid0, const AtomID &atomid1);
-    GetCOMPoint(const QList<SireMol::AtomIdentifier> &atomids);
+        GetCOMPoint(const AtomID &atomid);
+        GetCOMPoint(const AtomID &atomid0, const AtomID &atomid1);
+        GetCOMPoint(const QList<SireMol::AtomIdentifier> &atomids);
 
-    GetCOMPoint(const GetCOMPoint &other);
+        GetCOMPoint(const GetCOMPoint &other);
 
-    ~GetCOMPoint();
+        ~GetCOMPoint();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    GetCOMPoint& operator=(const GetCOMPoint &other);
+        GetCOMPoint &operator=(const GetCOMPoint &other);
 
-    bool operator==(const GetCOMPoint &other) const;
-    bool operator!=(const GetCOMPoint &other) const;
+        bool operator==(const GetCOMPoint &other) const;
+        bool operator!=(const GetCOMPoint &other) const;
 
-    const AtomID& atomID() const;
+        const AtomID &atomID() const;
 
-    Vector getPoint(const MoleculeView &molecule,
-                    const PropertyMap &map = PropertyMap()) const;
+        Vector getPoint(const MoleculeView &molecule, const PropertyMap &map = PropertyMap()) const;
 
-private:
-    /** The list of AtomIDs to use to limit the atoms over which the
-        COG is calculated */
-    SireID::IDOrSet<AtomID> atomids;
-};
+    private:
+        /** The list of AtomIDs to use to limit the atoms over which the
+            COG is calculated */
+        SireID::IDOrSet<AtomID> atomids;
+    };
 
-/** This function returns the centroid of the
-    atoms in the passed view of the molecule
+    /** This function returns the centroid of the
+        atoms in the passed view of the molecule
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT GetCentroidPoint
-            : public SireBase::ConcreteProperty<GetCentroidPoint,GetPoint>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT GetCentroidPoint : public SireBase::ConcreteProperty<GetCentroidPoint, GetPoint>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const GetCentroidPoint&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, GetCentroidPoint&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const GetCentroidPoint &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, GetCentroidPoint &);
 
-public:
-    GetCentroidPoint();
+    public:
+        GetCentroidPoint();
 
-    GetCentroidPoint(const AtomID &atomid);
-    GetCentroidPoint(const AtomID &atomid0, const AtomID &atomid1);
-    GetCentroidPoint(const QList<SireMol::AtomIdentifier> &atomids);
+        GetCentroidPoint(const AtomID &atomid);
+        GetCentroidPoint(const AtomID &atomid0, const AtomID &atomid1);
+        GetCentroidPoint(const QList<SireMol::AtomIdentifier> &atomids);
 
-    GetCentroidPoint(const GetCentroidPoint &other);
+        GetCentroidPoint(const GetCentroidPoint &other);
 
-    ~GetCentroidPoint();
+        ~GetCentroidPoint();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    GetCentroidPoint& operator=(const GetCentroidPoint &other);
+        GetCentroidPoint &operator=(const GetCentroidPoint &other);
 
-    bool operator==(const GetCentroidPoint &other) const;
-    bool operator!=(const GetCentroidPoint &other) const;
+        bool operator==(const GetCentroidPoint &other) const;
+        bool operator!=(const GetCentroidPoint &other) const;
 
-    const AtomID& atomID() const;
+        const AtomID &atomID() const;
 
-    Vector getPoint(const MoleculeView &molecule,
-                    const PropertyMap &map = PropertyMap()) const;
+        Vector getPoint(const MoleculeView &molecule, const PropertyMap &map = PropertyMap()) const;
 
-private:
-    /** The list of AtomIDs to use to limit the atoms over which the
-        COG is calculated */
-    SireID::IDOrSet<AtomID> atomids;
-};
+    private:
+        /** The list of AtomIDs to use to limit the atoms over which the
+            COG is calculated */
+        SireID::IDOrSet<AtomID> atomids;
+    };
 
-typedef SireBase::PropPtr<GetPoint> GetPointPtr;
+    typedef SireBase::PropPtr<GetPoint> GetPointPtr;
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::NullGetPoint )
-Q_DECLARE_METATYPE( SireMove::GetCOMPoint )
-Q_DECLARE_METATYPE( SireMove::GetCOGPoint )
-Q_DECLARE_METATYPE( SireMove::GetCentroidPoint )
+Q_DECLARE_METATYPE(SireMove::NullGetPoint)
+Q_DECLARE_METATYPE(SireMove::GetCOMPoint)
+Q_DECLARE_METATYPE(SireMove::GetCOGPoint)
+Q_DECLARE_METATYPE(SireMove::GetCentroidPoint)
 
-SIRE_EXPOSE_CLASS( SireMove::GetPoint )
-SIRE_EXPOSE_CLASS( SireMove::NullGetPoint )
-SIRE_EXPOSE_CLASS( SireMove::GetCOMPoint )
-SIRE_EXPOSE_CLASS( SireMove::GetCOGPoint )
-SIRE_EXPOSE_CLASS( SireMove::GetCentroidPoint )
+SIRE_EXPOSE_CLASS(SireMove::GetPoint)
+SIRE_EXPOSE_CLASS(SireMove::NullGetPoint)
+SIRE_EXPOSE_CLASS(SireMove::GetCOMPoint)
+SIRE_EXPOSE_CLASS(SireMove::GetCOGPoint)
+SIRE_EXPOSE_CLASS(SireMove::GetCentroidPoint)
 
-SIRE_EXPOSE_PROPERTY( SireMove::GetPointPtr, SireMove::GetPoint )
+SIRE_EXPOSE_PROPERTY(SireMove::GetPointPtr, SireMove::GetPoint)
 
 SIRE_END_HEADER
 

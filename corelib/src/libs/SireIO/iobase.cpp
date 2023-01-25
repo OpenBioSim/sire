@@ -27,17 +27,17 @@
 
 #include "iobase.h"
 
+#include "SireMol/cuttingfunction.h"
 #include "SireMol/molecule.h"
 #include "SireMol/molidx.h"
 #include "SireMol/mover.hpp"
-#include "SireMol/cuttingfunction.h"
 
 #include "SireError/errors.h"
 
 #include "SireStream/datastream.h"
 
-#include <QFile>
 #include <QDebug>
+#include <QFile>
 
 using namespace SireIO;
 using namespace SireMol;
@@ -49,16 +49,17 @@ using namespace SireStream;
 ////////////
 
 IOParametersBase::IOParametersBase()
-{}
+{
+}
 
 IOParametersBase::~IOParametersBase()
-{}
+{
+}
 
 PropertyName IOParametersBase::coords_property("coordinates");
 PropertyName IOParametersBase::elements_property("element");
 
-PropertyName IOParametersBase::cutting_function( "cutting-function",
-                                                 CuttingFunction::null() );
+PropertyName IOParametersBase::cutting_function("cutting-function", CuttingFunction::null());
 
 ////////////
 //////////// Implementation of IOBase
@@ -66,15 +67,18 @@ PropertyName IOParametersBase::cutting_function( "cutting-function",
 
 /** Constructor */
 IOBase::IOBase() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 IOBase::IOBase(const IOBase &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 IOBase::~IOBase()
-{}
+{
+}
 
 /** Read all of the molecules contained in the data 'data', using
     the (optional) passed properties in 'map', and returning a
@@ -94,19 +98,18 @@ MoleculeGroup IOBase::read(const QByteArray &data, const PropertyMap &map) const
     in the file, and with the molecule group name being 'filename' */
 MoleculeGroup IOBase::read(const QString &filename, const PropertyMap &map) const
 {
-    //open the file for reading
+    // open the file for reading
     QFile fle(filename);
 
     if (not fle.exists())
-        throw SireError::file_error( QObject::tr(
-            "Cannot find the file \"%1\".").arg(filename), CODELOC );
+        throw SireError::file_error(QObject::tr("Cannot find the file \"%1\".").arg(filename), CODELOC);
 
-    if (not fle.open(QIODevice::ReadOnly|QIODevice::Text))
+    if (not fle.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         throw SireError::file_error(fle, CODELOC);
     }
 
-    //get all of the data out of the file
+    // get all of the data out of the file
     QByteArray contents = fle.readAll();
     fle.close();
 
@@ -136,10 +139,11 @@ MoleculeGroup IOBase::read(QIODevice &dev, const PropertyMap &map) const
     if (not dev.isReadable())
     {
         throw SireError::io_error(QObject::tr("Cannot read molecules from an unreadble "
-                                              "device!"), CODELOC );
+                                              "device!"),
+                                  CODELOC);
     }
 
-    //get all of the data from the device
+    // get all of the data from the device
     QByteArray contents = dev.readAll();
 
     if (contents.isEmpty())
@@ -147,7 +151,7 @@ MoleculeGroup IOBase::read(QIODevice &dev, const PropertyMap &map) const
 
     MoleculeGroup molecules = this->readMols(contents, map);
 
-    //maybe one day try to name the group...
+    // maybe one day try to name the group...
 
     return molecules;
 }
@@ -171,7 +175,7 @@ Molecule IOBase::readMolecule(const QString &filename, const PropertyMap &map) c
 /** Simple overload designed to prevent confusion with QByteArray function */
 Molecule IOBase::readMolecule(const char *filename, const PropertyMap &map) const
 {
-    return this->readMolecule( QLatin1String(filename), map );
+    return this->readMolecule(QLatin1String(filename), map);
 }
 
 /** Read a single molecule from the passed IO device - this returns
@@ -196,21 +200,20 @@ QByteArray IOBase::write(const MoleculeGroup &molgroup, const PropertyMap &map) 
 /** Write the molecules in the passed group to the file called 'filename'.
     This writes the molecules in the same order as they appear in the
     passed group. */
-void IOBase::write(const MoleculeGroup &molgroup, const QString &filename,
-                   const PropertyMap &map) const
+void IOBase::write(const MoleculeGroup &molgroup, const QString &filename, const PropertyMap &map) const
 {
-    //write the group to a binary blob
+    // write the group to a binary blob
     QByteArray data = this->writeMols(molgroup, map);
 
-    //open a file into which to write the molecules
+    // open a file into which to write the molecules
     QFile fle(filename);
 
-    if (not fle.open(QIODevice::WriteOnly|QIODevice::Text))
+    if (not fle.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         throw SireError::file_error(fle);
     }
 
-    //dump the blob into the file
+    // dump the blob into the file
     if (fle.write(data) == -1)
     {
         throw SireError::file_error(fle);
@@ -224,21 +227,20 @@ QByteArray IOBase::write(const Molecules &molecules, const PropertyMap &map) con
 }
 
 /** Write the molecules in the passed group to the file called 'filename'. */
-void IOBase::write(const Molecules &molecules, const QString &filename,
-                   const PropertyMap &map) const
+void IOBase::write(const Molecules &molecules, const QString &filename, const PropertyMap &map) const
 {
-    //write the group to a binary blob
+    // write the group to a binary blob
     QByteArray data = this->writeMols(molecules, map);
 
-    //open a file into which to write the molecules
+    // open a file into which to write the molecules
     QFile fle(filename);
 
-    if (not fle.open(QIODevice::WriteOnly|QIODevice::Text))
+    if (not fle.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         throw SireError::file_error(fle);
     }
 
-    //dump the blob into the file
+    // dump the blob into the file
     if (fle.write(data) == -1)
     {
         throw SireError::file_error(fle);
@@ -248,26 +250,24 @@ void IOBase::write(const Molecules &molecules, const QString &filename,
 /** Write the passed molecule to memory, which is returned */
 QByteArray IOBase::write(const MoleculeView &molecule, const PropertyMap &map) const
 {
-    return this->write( Molecules(molecule), map );
+    return this->write(Molecules(molecule), map);
 }
 
 /** Write the passed molecule to the file called 'filename' */
-void IOBase::write(const MoleculeView &molecule, const QString &filename,
-                   const PropertyMap &map) const
+void IOBase::write(const MoleculeView &molecule, const QString &filename, const PropertyMap &map) const
 {
-    this->write( Molecules(molecule), filename, map );
+    this->write(Molecules(molecule), filename, map);
 }
 
 /** Write the molecules in the passed group to the IO device 'dev'.
     This writes the molecules in the same order as they appear in the
     passed group. */
-void IOBase::write(const MoleculeGroup &molgroup, QIODevice &dev,
-                   const PropertyMap &map) const
+void IOBase::write(const MoleculeGroup &molgroup, QIODevice &dev, const PropertyMap &map) const
 {
-    //write the group to a binary blob
+    // write the group to a binary blob
     QByteArray data = this->writeMols(molgroup, map);
 
-    //dump the blob to the device
+    // dump the blob to the device
     if (dev.write(data) == -1)
     {
         throw SireError::file_error(dev.errorString(), CODELOC);
@@ -275,13 +275,12 @@ void IOBase::write(const MoleculeGroup &molgroup, QIODevice &dev,
 }
 
 /** Write the molecules in the passed group to the IO device 'dev'. */
-void IOBase::write(const Molecules &molecules, QIODevice &dev,
-                   const PropertyMap &map) const
+void IOBase::write(const Molecules &molecules, QIODevice &dev, const PropertyMap &map) const
 {
-    //write the group to a binary blob
+    // write the group to a binary blob
     QByteArray data = this->writeMols(molecules, map);
 
-    //dump the blob into the file
+    // dump the blob into the file
     if (dev.write(data) == -1)
     {
         throw SireError::file_error(dev.errorString(), CODELOC);
@@ -289,13 +288,12 @@ void IOBase::write(const Molecules &molecules, QIODevice &dev,
 }
 
 /** Write the passed molecule to the IO device 'dev' */
-void IOBase::write(const MoleculeView &molecule, QIODevice &dev,
-                   const PropertyMap &map) const
+void IOBase::write(const MoleculeView &molecule, QIODevice &dev, const PropertyMap &map) const
 {
-    this->write( Molecules(molecule), dev, map );
+    this->write(Molecules(molecule), dev, map);
 }
 
-Q_GLOBAL_STATIC( NullIO, globalNullIOBase );
+Q_GLOBAL_STATIC(NullIO, globalNullIOBase);
 
 /** Return the global null IOBase object (a PDB writer) */
 NullIO IOBase::null()
@@ -314,7 +312,7 @@ QDataStream &operator<<(QDataStream &ds, const NullIO &nullio)
 {
     writeHeader(ds, r_nullio, 1);
 
-    ds << static_cast<const IOBase&>(nullio);
+    ds << static_cast<const IOBase &>(nullio);
 
     return ds;
 }
@@ -326,7 +324,7 @@ QDataStream &operator>>(QDataStream &ds, NullIO &nullio)
 
     if (v == 1)
     {
-        ds >> static_cast<IOBase&>(nullio);
+        ds >> static_cast<IOBase &>(nullio);
     }
     else
         throw version_error(v, "1", r_nullio, CODELOC);
@@ -335,55 +333,58 @@ QDataStream &operator>>(QDataStream &ds, NullIO &nullio)
 }
 
 /** Constructor */
-NullIO::NullIO() : ConcreteProperty<NullIO,IOBase>()
-{}
+NullIO::NullIO() : ConcreteProperty<NullIO, IOBase>()
+{
+}
 
 /** Copy constructor */
-NullIO::NullIO(const NullIO &other) : ConcreteProperty<NullIO,IOBase>(other)
-{}
+NullIO::NullIO(const NullIO &other) : ConcreteProperty<NullIO, IOBase>(other)
+{
+}
 
 /** Destructor */
 NullIO::~NullIO()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullIO& NullIO::operator=(const NullIO &other)
+NullIO &NullIO::operator=(const NullIO &other)
 {
     IOBase::operator=(other);
     return *this;
 }
 
 /** Comparison operator */
-bool NullIO::operator==(const NullIO&) const
+bool NullIO::operator==(const NullIO &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool NullIO::operator!=(const NullIO&) const
+bool NullIO::operator!=(const NullIO &) const
 {
     return false;
 }
 
 /** Nothing will be read */
-MoleculeGroup NullIO::readMols(const QByteArray&, const PropertyMap&) const
+MoleculeGroup NullIO::readMols(const QByteArray &, const PropertyMap &) const
 {
     return MoleculeGroup();
 }
 
 /** Nothing will be written */
-QByteArray NullIO::writeMols(const MoleculeGroup&, const PropertyMap&) const
+QByteArray NullIO::writeMols(const MoleculeGroup &, const PropertyMap &) const
 {
     return QByteArray();
 }
 
 /** Nothing will be written */
-QByteArray NullIO::writeMols(const Molecules&, const PropertyMap&) const
+QByteArray NullIO::writeMols(const Molecules &, const PropertyMap &) const
 {
     return QByteArray();
 }
 
-const char* NullIO::typeName()
+const char *NullIO::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullIO>() );
+    return QMetaType::typeName(qMetaTypeId<NullIO>());
 }

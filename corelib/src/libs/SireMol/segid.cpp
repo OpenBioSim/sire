@@ -36,19 +36,19 @@
 
 #include "molinfo.h"
 
-#include "mover.hpp"
 #include "editor.hpp"
+#include "mover.hpp"
 
-#include "partialmolecule.h"
-#include "segment.h"
-#include "chain.h"
-#include "residue.h"
-#include "cutgroup.h"
 #include "atom.h"
+#include "chain.h"
+#include "cutgroup.h"
+#include "partialmolecule.h"
+#include "residue.h"
+#include "segment.h"
 
-#include "molecules.h"
 #include "moleculegroup.h"
 #include "moleculegroups.h"
+#include "molecules.h"
 
 #include "SireMol/errors.h"
 
@@ -61,15 +61,18 @@ using namespace SireID;
 
 /** Constructor */
 SegID::SegID() : ID()
-{}
+{
+}
 
 /** Copy constructor */
 SegID::SegID(const SegID &other) : ID(other)
-{}
+{
+}
 
 /** Destructor */
 SegID::~SegID()
-{}
+{
+}
 
 /** Return an AtomID constructed from the passed string */
 SegIdentifier SegID::fromString(const QString &id)
@@ -132,73 +135,73 @@ IDAndSet<SegID> SegID::operator&(const SegID &other) const
 }
 
 /** Combine two ID types */
-GroupAtomID<SegID,AtomID> SegID::operator+(const AtomID &other) const
+GroupAtomID<SegID, AtomID> SegID::operator+(const AtomID &other) const
 {
-    return GroupAtomID<SegID,AtomID>(*this, other);
+    return GroupAtomID<SegID, AtomID>(*this, other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupAtomID<SegID,AtomID> SegID::operator&&(const AtomID &other) const
+GroupAtomID<SegID, AtomID> SegID::operator&&(const AtomID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupAtomID<SegID,AtomID> SegID::operator&(const AtomID &other) const
-{
-    return this->operator+(other);
-}
-
-/** Combine two ID types */
-GroupGroupID<SegID,CGID> SegID::operator+(const CGID &other) const
-{
-    return GroupGroupID<SegID,CGID>(*this, other);
-}
-
-/** Syntactic sugar for operator+ */
-GroupGroupID<SegID,CGID> SegID::operator&&(const CGID &other) const
-{
-    return this->operator+(other);
-}
-
-/** Syntactic sugar for operator+ */
-GroupGroupID<SegID,CGID> SegID::operator&(const CGID &other) const
+GroupAtomID<SegID, AtomID> SegID::operator&(const AtomID &other) const
 {
     return this->operator+(other);
 }
 
 /** Combine two ID types */
-GroupGroupID<SegID,ResID> SegID::operator+(const ResID &other) const
+GroupGroupID<SegID, CGID> SegID::operator+(const CGID &other) const
 {
-    return GroupGroupID<SegID,ResID>(*this, other);
+    return GroupGroupID<SegID, CGID>(*this, other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<SegID,ResID> SegID::operator&&(const ResID &other) const
+GroupGroupID<SegID, CGID> SegID::operator&&(const CGID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<SegID,ResID> SegID::operator&(const ResID &other) const
+GroupGroupID<SegID, CGID> SegID::operator&(const CGID &other) const
 {
     return this->operator+(other);
 }
 
 /** Combine two ID types */
-GroupGroupID<SegID,ChainID> SegID::operator+(const ChainID &other) const
+GroupGroupID<SegID, ResID> SegID::operator+(const ResID &other) const
 {
-    return GroupGroupID<SegID,ChainID>(*this, other);
+    return GroupGroupID<SegID, ResID>(*this, other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<SegID,ChainID> SegID::operator&&(const ChainID &other) const
+GroupGroupID<SegID, ResID> SegID::operator&&(const ResID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<SegID,ChainID> SegID::operator&(const ChainID &other) const
+GroupGroupID<SegID, ResID> SegID::operator&(const ResID &other) const
+{
+    return this->operator+(other);
+}
+
+/** Combine two ID types */
+GroupGroupID<SegID, ChainID> SegID::operator+(const ChainID &other) const
+{
+    return GroupGroupID<SegID, ChainID>(*this, other);
+}
+
+/** Syntactic sugar for operator+ */
+GroupGroupID<SegID, ChainID> SegID::operator&&(const ChainID &other) const
+{
+    return this->operator+(other);
+}
+
+/** Syntactic sugar for operator+ */
+GroupGroupID<SegID, ChainID> SegID::operator&(const ChainID &other) const
 {
     return this->operator+(other);
 }
@@ -264,25 +267,25 @@ IDAndSet<SegID> SegID::operator-(const SegID &other) const
 }
 
 /** Return this and not other */
-GroupAtomID<SegID,AtomID> SegID::operator-(const AtomID &other) const
+GroupAtomID<SegID, AtomID> SegID::operator-(const AtomID &other) const
 {
     return this->operator+(other.invert());
 }
 
 /** Return this and not other */
-GroupGroupID<SegID,CGID> SegID::operator-(const CGID &other) const
+GroupGroupID<SegID, CGID> SegID::operator-(const CGID &other) const
 {
     return this->operator+(other.invert());
 }
 
 /** Return this and not other */
-GroupGroupID<SegID,ResID> SegID::operator-(const ResID &other) const
+GroupGroupID<SegID, ResID> SegID::operator-(const ResID &other) const
 {
     return this->operator+(other.invert());
 }
 
 /** Return this and not other */
-GroupGroupID<SegID,ChainID> SegID::operator-(const ChainID &other) const
+GroupGroupID<SegID, ChainID> SegID::operator-(const ChainID &other) const
 {
     return this->operator+(other.invert());
 }
@@ -326,9 +329,8 @@ AtomsIn<SegID> SegID::atoms(int i, int j) const
 void SegID::processMatches(QList<SegIdx> &matches, const MolInfo &molinfo) const
 {
     if (matches.isEmpty())
-        throw SireMol::missing_segment( QObject::tr(
-            "There are no segments that match the ID \"%1\".")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_segment(
+            QObject::tr("There are no segments that match the ID \"%1\".").arg(this->toString()), CODELOC);
 
     std::sort(matches.begin(), matches.end());
 }
@@ -338,9 +340,9 @@ void SegID::processMatches(QList<SegIdx> &matches, const MolInfo &molinfo) const
     \throw SireMol::missing_segment
     \throw SireError::invalid_index
 */
-QList<SegIdx> SegID::map(const MoleculeView &molview, const PropertyMap&) const
+QList<SegIdx> SegID::map(const MoleculeView &molview, const PropertyMap &) const
 {
-    QList<SegIdx> segidxs = this->map( molview.data().info() );
+    QList<SegIdx> segidxs = this->map(molview.data().info());
 
     if (molview.selectedAll())
         return segidxs;
@@ -359,9 +361,9 @@ QList<SegIdx> SegID::map(const MoleculeView &molview, const PropertyMap&) const
         }
 
         if (segidxs.isEmpty())
-            throw SireMol::missing_segment( QObject::tr(
-                    "No atoms matching %1 can be found in the passed molecule.")
-                        .arg(this->toString()), CODELOC );
+            throw SireMol::missing_segment(
+                QObject::tr("No atoms matching %1 can be found in the passed molecule.").arg(this->toString()),
+                CODELOC);
 
         return segidxs;
     }
@@ -378,10 +380,10 @@ Segment SegID::selectFrom(const MoleculeView &molview, const PropertyMap &map) c
     QList<SegIdx> segidxs = this->map(molview, map);
 
     if (segidxs.count() > 1)
-        throw SireMol::duplicate_segment( QObject::tr(
-                "More than one atom matches the ID %1 (atoms %2).")
-                    .arg(this->toString()).arg(Sire::toString(segidxs)),
-                        CODELOC );
+        throw SireMol::duplicate_segment(QObject::tr("More than one atom matches the ID %1 (atoms %2).")
+                                             .arg(this->toString())
+                                             .arg(Sire::toString(segidxs)),
+                                         CODELOC);
 
     return Segment(molview.data(), segidxs.at(0));
 }
@@ -392,8 +394,7 @@ Segment SegID::selectFrom(const MoleculeView &molview, const PropertyMap &map) c
     \throw SireError::invalid_index
     \throw SireMol::duplicate_segment
 */
-Selector<Segment> SegID::selectAllFrom(const MoleculeView &molview,
-                                     const PropertyMap &map) const
+Selector<Segment> SegID::selectAllFrom(const MoleculeView &molview, const PropertyMap &map) const
 {
     QList<SegIdx> segidxs = this->map(molview, map);
 
@@ -405,30 +406,28 @@ Selector<Segment> SegID::selectAllFrom(const MoleculeView &molview,
 
     \throw SireMol::missing_segment
 */
-QHash< MolNum,Selector<Segment> >
-SegID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
+QHash<MolNum, Selector<Segment>> SegID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<Segment> > selected_atoms;
+    QHash<MolNum, Selector<Segment>> selected_atoms;
 
-    //loop over all molecules...
-    for (Molecules::const_iterator it = molecules.constBegin();
-         it != molecules.constEnd();
-         ++it)
+    // loop over all molecules...
+    for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
     {
         try
         {
-            //try to find this atom in this molecule
-            selected_atoms.insert( it.key(), this->selectAllFrom(*it,map) );
+            // try to find this atom in this molecule
+            selected_atoms.insert(it.key(), this->selectAllFrom(*it, map));
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (selected_atoms.isEmpty())
-        throw SireMol::missing_segment( QObject::tr(
-            "There was no atom matching the ID \"%1\" in "
-            "the set of molecules.")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_segment(QObject::tr("There was no atom matching the ID \"%1\" in "
+                                                   "the set of molecules.")
+                                           .arg(this->toString()),
+                                       CODELOC);
 
     return selected_atoms;
 }
@@ -441,24 +440,24 @@ SegID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 */
 Segment SegID::selectFrom(const Molecules &molecules, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<Segment> > mols = this->selectAllFrom(molecules, map);
+    QHash<MolNum, Selector<Segment>> mols = this->selectAllFrom(molecules, map);
 
     if (mols.count() > 1)
-        throw SireMol::duplicate_segment( QObject::tr(
-            "More than one molecule contains an atom that "
-            "matches this ID (%1). These molecules have numbers %2.")
-                .arg(this->toString()).arg(Sire::toString(mols.keys())),
-                    CODELOC );
+        throw SireMol::duplicate_segment(QObject::tr("More than one molecule contains an atom that "
+                                                     "matches this ID (%1). These molecules have numbers %2.")
+                                             .arg(this->toString())
+                                             .arg(Sire::toString(mols.keys())),
+                                         CODELOC);
 
     const Selector<Segment> &atoms = *(mols.constBegin());
 
     if (atoms.count() > 1)
-        throw SireMol::duplicate_segment( QObject::tr(
-            "While only one molecule (MolNum == %1) "
-            "contains an atom that matches this ID (%2), it contains "
-            "more than one atom that matches.")
-                .arg(atoms.data().number()).arg(this->toString()),
-                    CODELOC );
+        throw SireMol::duplicate_segment(QObject::tr("While only one molecule (MolNum == %1) "
+                                                     "contains an atom that matches this ID (%2), it contains "
+                                                     "more than one atom that matches.")
+                                             .arg(atoms.data().number())
+                                             .arg(this->toString()),
+                                         CODELOC);
 
     return atoms(0);
 }
@@ -469,8 +468,7 @@ Segment SegID::selectFrom(const Molecules &molecules, const PropertyMap &map) co
     \throw SireMol::missing_segment
     \throw SireMol::duplicate_segment
 */
-Segment SegID::selectFrom(const MoleculeGroup &molgroup,
-                        const PropertyMap &map) const
+Segment SegID::selectFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     return this->selectFrom(molgroup.molecules(), map);
 }
@@ -480,9 +478,7 @@ Segment SegID::selectFrom(const MoleculeGroup &molgroup,
 
     \throw SireMol::missing_segment
 */
-QHash< MolNum,Selector<Segment> >
-SegID::selectAllFrom(const MoleculeGroup &molgroup,
-                      const PropertyMap &map) const
+QHash<MolNum, Selector<Segment>> SegID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     return this->selectAllFrom(molgroup.molecules(), map);
 }
@@ -493,8 +489,7 @@ SegID::selectAllFrom(const MoleculeGroup &molgroup,
     \throw SireMol::missing_segment
     \throw SireMol::duplicate_segment
 */
-Segment SegID::selectFrom(const MolGroupsBase &molgroups,
-                        const PropertyMap &map) const
+Segment SegID::selectFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     return this->selectFrom(molgroups.molecules(), map);
 }
@@ -504,27 +499,25 @@ Segment SegID::selectFrom(const MolGroupsBase &molgroups,
 
     \throw SireMol::missing_segment
 */
-QHash< MolNum,Selector<Segment> >
-SegID::selectAllFrom(const MolGroupsBase &molgroups,
-                      const PropertyMap &map) const
+QHash<MolNum, Selector<Segment>> SegID::selectAllFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     return this->selectAllFrom(molgroups.molecules(), map);
 }
 
-//fully instantiate template classes
+// fully instantiate template classes
 namespace SireID
 {
     template class Specify<SegID>;
     template class IDAndSet<SegID>;
     template class IDOrSet<SegID>;
-}
+} // namespace SireID
 
 namespace SireMol
 {
     template class AtomsIn<SegID>;
 }
 
-static const RegisterMetaType< Specify<SegID> > r_specify_segid;
-static const RegisterMetaType< AtomsIn<SegID> > r_atomsin_segid;
-static const RegisterMetaType< IDAndSet<SegID> > r_idandset_segid;
-static const RegisterMetaType< IDOrSet<SegID> > r_idorset_segid;
+static const RegisterMetaType<Specify<SegID>> r_specify_segid;
+static const RegisterMetaType<AtomsIn<SegID>> r_atomsin_segid;
+static const RegisterMetaType<IDAndSet<SegID>> r_idandset_segid;
+static const RegisterMetaType<IDOrSet<SegID>> r_idorset_segid;

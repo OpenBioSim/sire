@@ -30,211 +30,210 @@
 
 #include <QVector>
 
-#include "SireUnits/dimensions.h"
 #include "SireBase/property.h"
+#include "SireUnits/dimensions.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class HistogramBin;
-class HistogramValue;
-class Histogram;
-}
+    class HistogramBin;
+    class HistogramValue;
+    class Histogram;
+} // namespace SireMaths
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::HistogramBin&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::HistogramBin&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::HistogramBin &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::HistogramBin &);
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::HistogramValue&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::HistogramValue&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::HistogramValue &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::HistogramValue &);
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Histogram&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Histogram&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Histogram &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Histogram &);
 
 namespace SireMaths
 {
 
-/** This class represents a single histogram bin */
-class SIREMATHS_EXPORT HistogramBin
-{
+    /** This class represents a single histogram bin */
+    class SIREMATHS_EXPORT HistogramBin
+    {
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const HistogramBin&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, HistogramBin&);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const HistogramBin &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, HistogramBin &);
 
-public:
-    HistogramBin();
-    HistogramBin(double minval, double maxval);
+    public:
+        HistogramBin();
+        HistogramBin(double minval, double maxval);
 
-    HistogramBin(const HistogramBin &other);
+        HistogramBin(const HistogramBin &other);
 
-    HistogramBin& operator=(const HistogramBin &other);
+        HistogramBin &operator=(const HistogramBin &other);
 
-    bool operator==(const HistogramBin &other) const;
-    bool operator!=(const HistogramBin &other) const;
+        bool operator==(const HistogramBin &other) const;
+        bool operator!=(const HistogramBin &other) const;
 
-    double minimum() const;
-    double middle() const;
-    double maximum() const;
+        double minimum() const;
+        double middle() const;
+        double maximum() const;
 
-    QString toString() const;
+        QString toString() const;
 
-private:
-    /** The minimum value of the bin */
-    double minval;
+    private:
+        /** The minimum value of the bin */
+        double minval;
 
-    /** The maximum value of the bin */
-    double maxval;
-};
+        /** The maximum value of the bin */
+        double maxval;
+    };
 
-/** This class represents a single histogram bin with its associated value */
-class SIREMATHS_EXPORT HistogramValue : public HistogramBin
-{
+    /** This class represents a single histogram bin with its associated value */
+    class SIREMATHS_EXPORT HistogramValue : public HistogramBin
+    {
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const HistogramValue&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, HistogramValue&);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const HistogramValue &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, HistogramValue &);
 
-public:
-    HistogramValue();
-    HistogramValue(const HistogramBin &bin, double value);
+    public:
+        HistogramValue();
+        HistogramValue(const HistogramBin &bin, double value);
 
-    HistogramValue(const HistogramValue &other);
+        HistogramValue(const HistogramValue &other);
 
-    ~HistogramValue();
+        ~HistogramValue();
 
-    HistogramValue& operator=(const HistogramValue &other);
+        HistogramValue &operator=(const HistogramValue &other);
 
-    bool operator==(const HistogramValue &other) const;
-    bool operator!=(const HistogramValue &other) const;
+        bool operator==(const HistogramValue &other) const;
+        bool operator!=(const HistogramValue &other) const;
 
-    double value() const;
+        double value() const;
 
-    QString toString() const;
+        QString toString() const;
 
-private:
-    /** The actual value in the bin */
-    double val;
-};
+    private:
+        /** The actual value in the bin */
+        double val;
+    };
 
-/** This class holds a simple one-dimensional (x,y) histogram of values.
+    /** This class holds a simple one-dimensional (x,y) histogram of values.
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT Histogram
-        : public SireBase::ConcreteProperty<Histogram,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Histogram : public SireBase::ConcreteProperty<Histogram, SireBase::Property>
+    {
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Histogram&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Histogram&);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Histogram &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Histogram &);
 
-public:
-    Histogram();
+    public:
+        Histogram();
 
-    Histogram(double binwidth);
-    Histogram(double binwidth, const QVector<double> &values);
+        Histogram(double binwidth);
+        Histogram(double binwidth, const QVector<double> &values);
 
-    Histogram(const Histogram &other);
+        Histogram(const Histogram &other);
 
-    ~Histogram();
+        ~Histogram();
 
-    Histogram& operator=(const Histogram &other);
+        Histogram &operator=(const Histogram &other);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    Histogram* clone() const;
+        Histogram *clone() const;
 
-    bool operator==(const Histogram &other) const;
-    bool operator!=(const Histogram &other) const;
+        bool operator==(const Histogram &other) const;
+        bool operator!=(const Histogram &other) const;
 
-    Histogram& operator+=(const Histogram &other);
-    Histogram& operator+=(double value);
-    Histogram& operator+=(const QVector<double> &values);
+        Histogram &operator+=(const Histogram &other);
+        Histogram &operator+=(double value);
+        Histogram &operator+=(const QVector<double> &values);
 
-    Histogram operator+(const Histogram &other) const;
-    Histogram operator+(double value) const;
-    Histogram operator+(const QVector<double> &values) const;
+        Histogram operator+(const Histogram &other) const;
+        Histogram operator+(double value) const;
+        Histogram operator+(const QVector<double> &values) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    HistogramValue operator[](int i) const;
+        HistogramValue operator[](int i) const;
 
-    HistogramValue at(int i) const;
+        HistogramValue at(int i) const;
 
-    int count() const;
-    int size() const;
+        int count() const;
+        int size() const;
 
-    QVector<HistogramValue> values() const;
-    QVector<HistogramValue> normalDistribution() const;
+        QVector<HistogramValue> values() const;
+        QVector<HistogramValue> normalDistribution() const;
 
-    void accumulate(double value);
-    void accumulate(double value, double weight);
+        void accumulate(double value);
+        void accumulate(double value, double weight);
 
-    void accumulate(const QVector<double> &values);
+        void accumulate(const QVector<double> &values);
 
-    void accumulate(const Histogram &other);
+        void accumulate(const Histogram &other);
 
-    void add(double value);
-    void add(double value, double weight);
+        void add(double value);
+        void add(double value, double weight);
 
-    void add(const QVector<double> &values);
+        void add(const QVector<double> &values);
 
-    void add(const Histogram &other);
+        void add(const Histogram &other);
 
-    double sumOfBins() const;
+        double sumOfBins() const;
 
-    double binWidth() const;
+        double binWidth() const;
 
-    double mean() const;
-    double median() const;
-    double mode() const;
+        double mean() const;
+        double median() const;
+        double mode() const;
 
-    double skew() const;
-    double kirtosis() const;
+        double skew() const;
+        double kirtosis() const;
 
-    double meanOfSquares() const;
+        double meanOfSquares() const;
 
-    double range() const;
+        double range() const;
 
-    double standardDeviation() const;
+        double standardDeviation() const;
 
-    static double tValue(int nsamples, double level);
-    double tValue(double level) const;
+        static double tValue(int nsamples, double level);
+        double tValue(double level) const;
 
-    double standardError() const;
-    double standardError(double level) const;
+        double standardError() const;
+        double standardError(double level) const;
 
-    double maximumValue() const;
-    double minimumValue() const;
+        double maximumValue() const;
+        double minimumValue() const;
 
-    Histogram normalise() const;
+        Histogram normalise() const;
 
-    Histogram resize(double binwidth) const;
+        Histogram resize(double binwidth) const;
 
-private:
-    /** The values in each of the bins */
-    QHash<qint64,double> binvals;
+    private:
+        /** The values in each of the bins */
+        QHash<qint64, double> binvals;
 
-    /** The bin width */
-    double binwidth;
+        /** The bin width */
+        double binwidth;
 
-    /** The mean value */
-    double avgval;
+        /** The mean value */
+        double avgval;
 
-    /** The mean square value */
-    double avgval2;
+        /** The mean square value */
+        double avgval2;
 
-    /** The sum of weights */
-    double sum_of_bins;
-};
+        /** The sum of weights */
+        double sum_of_bins;
+    };
 
-}
+} // namespace SireMaths
 
-Q_DECLARE_METATYPE( SireMaths::Histogram )
+Q_DECLARE_METATYPE(SireMaths::Histogram)
 
-SIRE_EXPOSE_CLASS( SireMaths::HistogramBin )
-SIRE_EXPOSE_CLASS( SireMaths::HistogramValue )
-SIRE_EXPOSE_CLASS( SireMaths::Histogram )
+SIRE_EXPOSE_CLASS(SireMaths::HistogramBin)
+SIRE_EXPOSE_CLASS(SireMaths::HistogramValue)
+SIRE_EXPOSE_CLASS(SireMaths::Histogram)
 
 SIRE_END_HEADER
 

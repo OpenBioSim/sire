@@ -32,10 +32,10 @@
 
 #include "SireError/errors.h"
 
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 
 #include <QElapsedTimer>
 
@@ -74,17 +74,17 @@ QDataStream &operator>>(QDataStream &ds, Transform &trans)
 }
 
 /** Constructor (no transformation) */
-Transform::Transform() : delta(0), rotcent(0), rotmat( Quaternion::identity() )
-{}
+Transform::Transform() : delta(0), rotcent(0), rotmat(Quaternion::identity())
+{
+}
 
 /** Construct to only translate by 'delta' */
-Transform::Transform(const Vector &del)
-          : delta(del), rotcent(0), rotmat( Quaternion::identity() )
-{}
+Transform::Transform(const Vector &del) : delta(del), rotcent(0), rotmat(Quaternion::identity())
+{
+}
 
 /** Construct to only rotate using 'rotmat' around the rotation center 'center' */
-Transform::Transform(const Quaternion &mat, const Vector &center)
-          : delta(0), rotcent(center), rotmat(mat)
+Transform::Transform(const Quaternion &mat, const Vector &center) : delta(0), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -93,8 +93,7 @@ Transform::Transform(const Quaternion &mat, const Vector &center)
 }
 
 /** Construct to only rotate using 'rotmat' around the rotation center 'center' */
-Transform::Transform(const Matrix &mat, const Vector &center)
-          : delta(0), rotcent(center), rotmat(mat)
+Transform::Transform(const Matrix &mat, const Vector &center) : delta(0), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -105,7 +104,7 @@ Transform::Transform(const Matrix &mat, const Vector &center)
 /** Construct to translate by delta and to rotate using 'rotmat' around the rotation
     center 'center' */
 Transform::Transform(const Vector &del, const Quaternion &mat, const Vector &center)
-          : delta(del), rotcent(center), rotmat(mat)
+    : delta(del), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -116,7 +115,7 @@ Transform::Transform(const Vector &del, const Quaternion &mat, const Vector &cen
 /** Construct to translate by delta and to rotate using 'rotmat' around the rotation
     center 'center' */
 Transform::Transform(const Vector &del, const Matrix &mat, const Vector &center)
-          : delta(del), rotcent(center), rotmat(mat)
+    : delta(del), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -125,16 +124,17 @@ Transform::Transform(const Vector &del, const Matrix &mat, const Vector &center)
 }
 
 /** Copy constructor */
-Transform::Transform(const Transform &other)
-          : delta(other.delta), rotcent(other.rotcent), rotmat(other.rotmat)
-{}
+Transform::Transform(const Transform &other) : delta(other.delta), rotcent(other.rotcent), rotmat(other.rotmat)
+{
+}
 
 /** Destructor */
 Transform::~Transform()
-{}
+{
+}
 
 /** Copy assignment operator */
-Transform& Transform::operator=(const Transform &other)
+Transform &Transform::operator=(const Transform &other)
 {
     if (this != &other)
     {
@@ -158,12 +158,12 @@ bool Transform::operator!=(const Transform &other) const
     return not operator==(other);
 }
 
-const char* Transform::typeName()
+const char *Transform::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Transform>() );
+    return QMetaType::typeName(qMetaTypeId<Transform>());
 }
 
-const char* Transform::what() const
+const char *Transform::what() const
 {
     return Transform::typeName();
 }
@@ -187,31 +187,30 @@ QString Transform::toString() const
 
     else if (delta.isZero())
     {
-        return QObject::tr("Transform( rotate by %1 about %2 )")
-                    .arg(rotmat.toString()).arg(rotcent.toString());
+        return QObject::tr("Transform( rotate by %1 about %2 )").arg(rotmat.toString()).arg(rotcent.toString());
     }
     else if (rotmat.isIdentity())
     {
-        return QObject::tr("Transform( translate by %1 )")
-                    .arg(delta.toString());
+        return QObject::tr("Transform( translate by %1 )").arg(delta.toString());
     }
     else
     {
         return QObject::tr("Transform( rotate by %1 about %2 then translate by %3 )")
-                .arg(rotmat.toString()).arg(rotcent.toString())
-                .arg(delta.toString());
+            .arg(rotmat.toString())
+            .arg(rotcent.toString())
+            .arg(delta.toString());
     }
 }
 
 /** Apply this transformation to the passed point, returning the result */
 Vector Transform::operator()(const Vector &point) const
 {
-    return delta + rotcent + rotmat.rotate(point-rotcent);
+    return delta + rotcent + rotmat.rotate(point - rotcent);
 }
 
 /** Apply this transformation to all of the passed points. Note that this
     modifies the points themselves and returns a pointer to the same array */
-Vector* Transform::apply(Vector *points, int sz) const
+Vector *Transform::apply(Vector *points, int sz) const
 {
     if (sz == 0 or (delta.isZero() and rotmat.isIdentity()))
         return points;
@@ -220,7 +219,7 @@ Vector* Transform::apply(Vector *points, int sz) const
     {
         if (rotmat.isIdentity())
         {
-            for (int i=0; i<sz; ++i)
+            for (int i = 0; i < sz; ++i)
             {
                 points[i] += delta;
             }
@@ -229,31 +228,31 @@ Vector* Transform::apply(Vector *points, int sz) const
         {
             if (rotcent.isZero())
             {
-                for (int i=0; i<sz; ++i)
+                for (int i = 0; i < sz; ++i)
                 {
                     points[i] = rotmat.rotate(points[i]);
                 }
             }
             else
             {
-                for (int i=0; i<sz; ++i)
+                for (int i = 0; i < sz; ++i)
                 {
-                    points[i] = rotcent + rotmat.rotate(points[i]-rotcent);
+                    points[i] = rotcent + rotmat.rotate(points[i] - rotcent);
                 }
             }
         }
         else if (rotcent.isZero())
         {
-            for (int i=0; i<sz; ++i)
+            for (int i = 0; i < sz; ++i)
             {
                 points[i] = delta + rotmat.rotate(points[i]);
             }
         }
         else
         {
-            for (int i=0; i<sz; ++i)
+            for (int i = 0; i < sz; ++i)
             {
-                points[i] = delta + rotcent + rotmat.rotate(points[i]-rotcent);
+                points[i] = delta + rotcent + rotmat.rotate(points[i] - rotcent);
             }
         }
 
@@ -318,7 +317,7 @@ static QVector<Vector> translate(const QVector<Vector> &v, const Vector &delta)
 {
     QVector<Vector> v2(v);
 
-    for (int i=0; i<v.count(); ++i)
+    for (int i = 0; i < v.count(); ++i)
     {
         v2[i] += delta;
     }
@@ -330,7 +329,7 @@ static QVector<Vector> rotate(const QVector<Vector> &v, const Matrix &rotmat)
 {
     QVector<Vector> v2(v);
 
-    for (int i=0; i<v.count(); ++i)
+    for (int i = 0; i < v.count(); ++i)
     {
         v2[i] = rotmat * v2[i];
     }
@@ -354,7 +353,7 @@ namespace SireMaths
             n = p.count();
         }
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             x.accumulate(p[i].x());
             y.accumulate(p[i].y());
@@ -371,21 +370,19 @@ namespace SireMaths
         if (p.isEmpty() or q.isEmpty())
             return 0;
 
-        if (n < 0 or n > qMin(p.count(),q.count()))
+        if (n < 0 or n > qMin(p.count(), q.count()))
         {
             n = qMin(p.count(), q.count());
         }
 
         Average msd;
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
-            msd.accumulate( pow_2(p[i].x()-q[i].x()) +
-                            pow_2(p[i].y()-q[i].y()) +
-                            pow_2(p[i].z()-q[i].z()) );
+            msd.accumulate(pow_2(p[i].x() - q[i].x()) + pow_2(p[i].y() - q[i].y()) + pow_2(p[i].z() - q[i].z()));
         }
 
-        return std::sqrt( msd.average() );
+        return std::sqrt(msd.average());
     }
 
     /** Use the kabasch algorithm (http://en.wikipedia.org/wiki/Kabsch_algorithm)
@@ -428,17 +425,16 @@ namespace SireMaths
         (note that the C++ implement that I have here is licensed under the GPL,
          as stated at the top of this file)
     */
-    Matrix kabasch(const QVector<Vector> &p,
-                                    const QVector<Vector> &q)
+    Matrix kabasch(const QVector<Vector> &p, const QVector<Vector> &q)
     {
         if (p.isEmpty() or q.isEmpty())
             return Matrix::identity();
 
-        //calculate the covariance matrix
+        // calculate the covariance matrix
         Matrix c = Matrix::covariance(p, q);
 
-        //calculate the single value decomposition of this in V S W^T
-        boost::tuple<Matrix,Matrix,Matrix> svd = c.svd();
+        // calculate the single value decomposition of this in V S W^T
+        boost::tuple<Matrix, Matrix, Matrix> svd = c.svd();
 
         Matrix v = svd.get<0>();
         Matrix s = svd.get<1>();
@@ -448,16 +444,16 @@ namespace SireMaths
 
         if (det_vw < 0)
         {
-            for (int i=0; i<3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
-                v(i,2) = -v(i,2);
+                v(i, 2) = -v(i, 2);
             }
         }
 
-        //now create the rotation matrix
+        // now create the rotation matrix
         Matrix r = v * w;
 
-        //ensure that this is a rotation matrix (has a determinant of 1)
+        // ensure that this is a rotation matrix (has a determinant of 1)
         double det = r.determinant();
 
         // Determinant can be zero if one molecule is planar, i.e. z component of
@@ -473,10 +469,10 @@ namespace SireMaths
             for (auto &x : q2)
                 x += Vector(0, 0, 1);
 
-            //calculate the covariance matrix
+            // calculate the covariance matrix
             c = Matrix::covariance(p2, q2);
 
-            //calculate the single value decomposition of this in V S W^T
+            // calculate the single value decomposition of this in V S W^T
             svd = c.svd();
 
             v = svd.get<0>();
@@ -487,24 +483,24 @@ namespace SireMaths
 
             if (det_vw < 0)
             {
-                for (int i=0; i<3; ++i)
+                for (int i = 0; i < 3; ++i)
                 {
-                    v(i,2) = -v(i,2);
+                    v(i, 2) = -v(i, 2);
                 }
             }
 
-            //now create the rotation matrix
+            // now create the rotation matrix
             r = v * w;
 
-            //ensure that this is a rotation matrix (has a determinant of 1)
+            // ensure that this is a rotation matrix (has a determinant of 1)
             det = r.determinant();
 
             if (not SireMaths::areEqual(det, 1.0))
             {
-                throw SireError::program_bug( QObject::tr(
-                        "Attempt to find the alignment matrix failed to produce a valid "
-                        "rotation matrix. Determinant should be 1. It is equal to %1.")
-                            .arg(det), CODELOC );
+                throw SireError::program_bug(QObject::tr("Attempt to find the alignment matrix failed to produce a valid "
+                                                         "rotation matrix. Determinant should be 1. It is equal to %1.")
+                                                 .arg(det),
+                                             CODELOC);
             }
         }
 
@@ -552,16 +548,15 @@ namespace SireMaths
         (note that the C++ implement that I have here is licensed under the GPL,
          as stated at the top of this file)
     */
-    Transform kabaschFit(const QVector<Vector> &p,
-                                          const QVector<Vector> &q)
+    Transform kabaschFit(const QVector<Vector> &p, const QVector<Vector> &q)
     {
         if (p.isEmpty() or q.isEmpty())
             return Transform();
 
-        //find the maximum point in p
+        // find the maximum point in p
         Vector step_size(0);
 
-        for (int i=0; i<qMin(p.count(),q.count()); ++i)
+        for (int i = 0; i < qMin(p.count(), q.count()); ++i)
         {
             step_size = step_size.max(q[i]);
         }
@@ -570,60 +565,60 @@ namespace SireMaths
 
         QVector<Vector> q2(q);
 
-        q2 = translate(q, Vector(0,0,0) );
+        q2 = translate(q, Vector(0, 0, 0));
 
-        Matrix rotmat_best = kabasch(p,q2);
+        Matrix rotmat_best = kabasch(p, q2);
 
-        double rmsd_best = getRMSD( p, rotate(q2,rotmat_best) );
+        double rmsd_best = getRMSD(p, rotate(q2, rotmat_best));
 
         Vector delta(0);
 
         while (true)
         {
-            for (int i=0; i<3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 Vector tmp = delta;
                 tmp.set(i, tmp[i] + step_size[i]);
 
-                q2 = translate(q,tmp);
-                Matrix rotmat = kabasch(p,q2);
-                double rmsd = getRMSD( p, rotate(q2,rotmat) );
+                q2 = translate(q, tmp);
+                Matrix rotmat = kabasch(p, q2);
+                double rmsd = getRMSD(p, rotate(q2, rotmat));
 
                 if (rmsd < rmsd_best)
                 {
-                    //this has improved the fit
+                    // this has improved the fit
                     rmsd_best = rmsd;
                     rotmat_best = rotmat;
                     delta = tmp;
                 }
                 else
                 {
-                    //try the other way
+                    // try the other way
                     tmp = delta;
                     tmp.set(i, tmp[i] - step_size[i]);
 
-                    q2 = translate(q,tmp);
-                    rotmat = kabasch(p,q2);
-                    rmsd = getRMSD( p, rotate(q2,rotmat) );
+                    q2 = translate(q, tmp);
+                    rotmat = kabasch(p, q2);
+                    rmsd = getRMSD(p, rotate(q2, rotmat));
 
                     if (rmsd < rmsd_best)
                     {
-                        //this has improved the fit
+                        // this has improved the fit
                         rmsd_best = rmsd;
                         rotmat_best = rotmat;
                         delta = tmp;
                     }
                     else
                     {
-                        //we need to reduce the amount by which we are searching
-                        step_size.set(i, 0.5*step_size[i]);
+                        // we need to reduce the amount by which we are searching
+                        step_size.set(i, 0.5 * step_size[i]);
                     }
                 }
             }
 
             bool finished = true;
 
-            for (int i=0; i<3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 if (step_size[i] > threshold[i])
                 {
@@ -644,24 +639,22 @@ namespace SireMaths
         points in 'p'. If 'fit' is true, then this performs an RMSD
         fit to find the optimal translation vector (as opposed to merely
         taking the difference of centroids) */
-    Transform getAlignment(const QVector<Vector> &p,
-                                            const QVector<Vector> &q,
-                                            bool fit)
+    Transform getAlignment(const QVector<Vector> &p, const QVector<Vector> &q, bool fit)
     {
         if (p.isEmpty() or q.isEmpty())
             return Transform();
 
-        //first, translate p and q so that their centroids
-        //are at (0,0,0)
+        // first, translate p and q so that their centroids
+        // are at (0,0,0)
 
-        //calculate the difference in centroids of p and q
+        // calculate the difference in centroids of p and q
         const int n = qMin(p.count(), q.count());
 
-        Vector cp = getCentroid(p,n);
-        Vector cq = getCentroid(q,n);
+        Vector cp = getCentroid(p, n);
+        Vector cq = getCentroid(q, n);
 
         QVector<Vector> pc(n), qc(n);
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             pc[i] = p[i] - cp;
             qc[i] = q[i] - cq;
@@ -677,7 +670,7 @@ namespace SireMaths
         {
             Matrix rotmat = kabasch(pc, qc);
 
-            return Transform(cp-cq, rotmat, cq);
+            return Transform(cp - cq, rotmat, cq);
         }
     }
 
@@ -685,9 +678,7 @@ namespace SireMaths
         is true, then this performs an RMSD
         fit to find the optimal translation vector (as opposed to merely
         taking the difference of centroids) */
-    QVector<Vector> align(const QVector<Vector> &p,
-                                           const QVector<Vector> &q,
-                                           bool fit)
+    QVector<Vector> align(const QVector<Vector> &p, const QVector<Vector> &q, bool fit)
     {
         if (p.isEmpty() or q.isEmpty())
             return q;

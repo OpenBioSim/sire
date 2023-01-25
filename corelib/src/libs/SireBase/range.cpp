@@ -33,13 +33,13 @@
 using namespace SireBase;
 using namespace SireStream;
 
-static const RegisterMetaType<Range> r_range( MAGIC_ONLY, "SireBase::Range" );
+static const RegisterMetaType<Range> r_range(MAGIC_ONLY, "SireBase::Range");
 
 QDataStream &operator<<(QDataStream &ds, const Range &range)
 {
     writeHeader(ds, r_range, 1);
 
-    ds << static_cast<const Property&>(range);
+    ds << static_cast<const Property &>(range);
 
     return ds;
 }
@@ -50,7 +50,7 @@ QDataStream &operator>>(QDataStream &ds, Range &range)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(range);
+        ds >> static_cast<Property &>(range);
     }
     else
         throw version_error(v, "1", r_range, CODELOC);
@@ -60,27 +60,31 @@ QDataStream &operator>>(QDataStream &ds, Range &range)
 
 /** Constructor */
 Range::Range() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 Range::Range(const Range &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 Range::~Range()
-{}
+{
+}
 
 /** Copy assignment */
-Range& Range::operator=(const Range &other)
+Range &Range::operator=(const Range &other)
 {
     Property::operator=(other);
     return *this;
 }
 
 /** Return a null simple range for null */
-const Range& Range::null()
+const Range &Range::null()
 {
-    return *(create_shared_null<SimpleRange>());;
+    return *(create_shared_null<SimpleRange>());
+    ;
 }
 
 /** Return the range that represents the single value 'i' */
@@ -92,11 +96,11 @@ RangePtr Range::create(qint64 i)
 /** Return the range that represents the range from [start,end) */
 RangePtr Range::create(qint64 start, qint64 end)
 {
-    return SimpleRange(start,end);
+    return SimpleRange(start, end);
 }
 
 /** Return the range that represents the range from [start,end,increment) */
 RangePtr Range::create(qint64 start, qint64 end, qint64 increment)
 {
-    return SimpleRange(start,end,increment);
+    return SimpleRange(start, end, increment);
 }

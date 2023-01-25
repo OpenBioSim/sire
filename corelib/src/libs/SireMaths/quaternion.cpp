@@ -26,12 +26,12 @@
 \*********************************************/
 
 #include "quaternion.h"
-#include "vector.h"
 #include "matrix.h"
 #include "sincos.h"
+#include "vector.h"
 
-#include <QString>
 #include <QRegExp>
+#include <QString>
 #include <cmath>
 
 #include <QDebug>
@@ -46,8 +46,7 @@ static const RegisterMetaType<Quaternion> r_quat(NO_ROOT);
 /** Serialise to a binary data stream */
 QDataStream &operator<<(QDataStream &ds, const Quaternion &quat)
 {
-    writeHeader(ds, r_quat, 1)  << quat.sc[0] << quat.sc[1]
-                                << quat.sc[2] << quat.sc[3];
+    writeHeader(ds, r_quat, 1) << quat.sc[0] << quat.sc[1] << quat.sc[2] << quat.sc[3];
 
     return ds;
 }
@@ -70,7 +69,7 @@ QDataStream &operator>>(QDataStream &ds, Quaternion &quat)
 /** Construct a null (identity) quaternion */
 Quaternion::Quaternion()
 {
-    for (int i=0; i<3; i++)
+    for (int i = 0; i < 3; i++)
         sc[i] = 0.0;
 
     sc[3] = 1.0;
@@ -84,7 +83,7 @@ Quaternion::Quaternion(double x, double y, double z, double w)
     sc[2] = z;
     sc[3] = w;
 
-    double lgth2 = sc[0]*sc[0] + sc[1]*sc[1] + sc[2]*sc[2] + sc[3]*sc[3];
+    double lgth2 = sc[0] * sc[0] + sc[1] * sc[1] + sc[2] * sc[2] + sc[3] * sc[3];
 
     if (lgth2 != double(1.0))
     {
@@ -97,19 +96,19 @@ Quaternion::Quaternion(double x, double y, double z, double w)
 }
 
 /** Copy constructor */
-Quaternion::Quaternion(const Quaternion& p)
+Quaternion::Quaternion(const Quaternion &p)
 {
-    for (int i=0; i<4; i++)
+    for (int i = 0; i < 4; i++)
         sc[i] = p.sc[i];
 }
 
 /** Construct a quaternion which represents a rotation of 'angle' around 'axis' */
 Quaternion::Quaternion(SireUnits::Dimension::Angle angle, const Vector &axis)
 {
-    //the unit quaternion can be represented by;
-    // Q = cos(theta) + u*sin(theta)
-    // which represents a rotation of 2*theta around the
-    // vector u
+    // the unit quaternion can be represented by;
+    //  Q = cos(theta) + u*sin(theta)
+    //  which represents a rotation of 2*theta around the
+    //  vector u
 
     double ang = double(angle) * 0.5;
     double sintheta, costheta;
@@ -117,7 +116,7 @@ Quaternion::Quaternion(SireUnits::Dimension::Angle angle, const Vector &axis)
 
     sc[3] = costheta;
 
-    //the vector must be normalised
+    // the vector must be normalised
     double lngth2 = axis.length2();
 
     if (lngth2 != 1)
@@ -145,7 +144,8 @@ Quaternion::Quaternion(const Matrix &m)
 }
 
 Quaternion::~Quaternion()
-{}
+{
+}
 
 bool Quaternion::isIdentity() const
 {
@@ -154,24 +154,24 @@ bool Quaternion::isIdentity() const
 
 const Quaternion SireMaths::operator*(const Quaternion &q, const Vector &p)
 {
-    //quaternion multiplication - p is [0, p]
-    double nw = -p.sc[0]*q.sc[0] - p.sc[1]*q.sc[1] - p.sc[2]*q.sc[2];
+    // quaternion multiplication - p is [0, p]
+    double nw = -p.sc[0] * q.sc[0] - p.sc[1] * q.sc[1] - p.sc[2] * q.sc[2];
 
-    //do the cross product
-    double cx = (q.sc[1]*p.z())-(q.sc[2]*p.y());
-    double cy = (q.sc[2]*p.x())-(q.sc[0]*p.z());
-    double cz = (q.sc[0]*p.y())-(q.sc[1]*p.x());
+    // do the cross product
+    double cx = (q.sc[1] * p.z()) - (q.sc[2] * p.y());
+    double cy = (q.sc[2] * p.x()) - (q.sc[0] * p.z());
+    double cz = (q.sc[0] * p.y()) - (q.sc[1] * p.x());
 
-    double nx = q.sc[3]*p.x() + cx;
-    double ny = q.sc[3]*p.y() + cy;
-    double nz = q.sc[3]*p.z() + cz;
+    double nx = q.sc[3] * p.x() + cx;
+    double ny = q.sc[3] * p.y() + cy;
+    double nz = q.sc[3] * p.z() + cz;
 
-    return Quaternion(nx,ny,nz,nw);
+    return Quaternion(nx, ny, nz, nw);
 }
 
 const Quaternion SireMaths::operator*(const Vector &p, const Quaternion &q)
 {
-    return q*p;
+    return q * p;
 }
 
 /** Convert into a matrix */
@@ -190,41 +190,33 @@ Matrix Quaternion::toMatrix() const
         |                                              |
     */
 
-    return
-     Matrix( 1.0-(2.0*sc[1]*sc[1])-(2.0*sc[2]*sc[2]), (2.0*sc[0]*sc[1])-(2.0*sc[3]*sc[2]),
-             (2.0*sc[0]*sc[2])+(2.0*sc[1]*sc[3]),
-             (2.0*sc[0]*sc[1])+(2.0*sc[3]*sc[2]), 1.0-(2.0*sc[0]*sc[0])-(2.0*sc[2]*sc[2]),
-             (2.0*sc[1]*sc[2])-(2.0*sc[3]*sc[0]),
-             (2.0*sc[0]*sc[2])-(2.0*sc[1]*sc[3]), (2.0*sc[1]*sc[2])+(2.0*sc[0]*sc[3]),
-             1.0-(2.0*sc[0]*sc[0])-(2.0*sc[1]*sc[1]) );
+    return Matrix(1.0 - (2.0 * sc[1] * sc[1]) - (2.0 * sc[2] * sc[2]), (2.0 * sc[0] * sc[1]) - (2.0 * sc[3] * sc[2]),
+                  (2.0 * sc[0] * sc[2]) + (2.0 * sc[1] * sc[3]), (2.0 * sc[0] * sc[1]) + (2.0 * sc[3] * sc[2]),
+                  1.0 - (2.0 * sc[0] * sc[0]) - (2.0 * sc[2] * sc[2]), (2.0 * sc[1] * sc[2]) - (2.0 * sc[3] * sc[0]),
+                  (2.0 * sc[0] * sc[2]) - (2.0 * sc[1] * sc[3]), (2.0 * sc[1] * sc[2]) + (2.0 * sc[0] * sc[3]),
+                  1.0 - (2.0 * sc[0] * sc[0]) - (2.0 * sc[1] * sc[1]));
 }
 
 /** Use this quaternion to rotate 'p' */
 Vector Quaternion::rotate(const Vector &p) const
 {
-    double sx2 = sc[0]*sc[0];
-    double sy2 = sc[1]*sc[1];
-    double sz2 = sc[2]*sc[2];
+    double sx2 = sc[0] * sc[0];
+    double sy2 = sc[1] * sc[1];
+    double sz2 = sc[2] * sc[2];
 
-    double sxy = sc[0]*sc[1];
-    double sxz = sc[0]*sc[2];
-    double syz = sc[1]*sc[2];
+    double sxy = sc[0] * sc[1];
+    double sxz = sc[0] * sc[2];
+    double syz = sc[1] * sc[2];
 
-    double swx = sc[0]*sc[3];
-    double swy = sc[1]*sc[3];
-    double swz = sc[2]*sc[3];
+    double swx = sc[0] * sc[3];
+    double swy = sc[1] * sc[3];
+    double swz = sc[2] * sc[3];
 
-    return Vector( 2.0*( ( 0.5 - sy2 - sz2 )*p.x()
-                       + ( sxy - swz )      *p.y()
-                       + ( sxz + swy )      *p.z()),
+    return Vector(2.0 * ((0.5 - sy2 - sz2) * p.x() + (sxy - swz) * p.y() + (sxz + swy) * p.z()),
 
-                   2.0*( ( sxy + swz )      *p.x()
-                       + ( 0.5 - sx2 - sz2 )*p.y()
-                       + ( syz - swx )      *p.z()),
+                  2.0 * ((sxy + swz) * p.x() + (0.5 - sx2 - sz2) * p.y() + (syz - swx) * p.z()),
 
-                   2.0*( ( sxz - swy )      *p.x()
-                       + ( syz + swx )      *p.y()
-                       + ( 0.5 - sx2 - sy2 )*p.z()) );
+                  2.0 * ((sxz - swy) * p.x() + (syz + swx) * p.y() + (0.5 - sx2 - sy2) * p.z()));
 }
 
 /** Use the quaternion to rotate all of the points in 'p' */
@@ -233,35 +225,29 @@ QVector<Vector> Quaternion::rotate(const QVector<Vector> &points) const
     if (this->isIdentity())
         return points;
 
-    const double sx2 = sc[0]*sc[0];
-    const double sy2 = sc[1]*sc[1];
-    const double sz2 = sc[2]*sc[2];
+    const double sx2 = sc[0] * sc[0];
+    const double sy2 = sc[1] * sc[1];
+    const double sz2 = sc[2] * sc[2];
 
-    const double sxy = sc[0]*sc[1];
-    const double sxz = sc[0]*sc[2];
-    const double syz = sc[1]*sc[2];
+    const double sxy = sc[0] * sc[1];
+    const double sxz = sc[0] * sc[2];
+    const double syz = sc[1] * sc[2];
 
-    const double swx = sc[0]*sc[3];
-    const double swy = sc[1]*sc[3];
-    const double swz = sc[2]*sc[3];
+    const double swx = sc[0] * sc[3];
+    const double swy = sc[1] * sc[3];
+    const double swz = sc[2] * sc[3];
 
     QVector<Vector> ret(points);
 
-    for (int i=0; i<ret.count(); ++i)
+    for (int i = 0; i < ret.count(); ++i)
     {
         Vector &p = ret[i];
 
-        p = Vector( 2.0*( ( 0.5 - sy2 - sz2 ) *p.x()
-                         + ( sxy - swz )      *p.y()
-                         + ( sxz + swy )      *p.z()),
+        p = Vector(2.0 * ((0.5 - sy2 - sz2) * p.x() + (sxy - swz) * p.y() + (sxz + swy) * p.z()),
 
-                    2.0*( ( sxy + swz )       *p.x()
-                        + ( 0.5 - sx2 - sz2 ) *p.y()
-                        + ( syz - swx )       *p.z()),
+                   2.0 * ((sxy + swz) * p.x() + (0.5 - sx2 - sz2) * p.y() + (syz - swx) * p.z()),
 
-                    2.0*( ( sxz - swy )       *p.x()
-                        + ( syz + swx )       *p.y()
-                        + ( 0.5 - sx2 - sy2 ) *p.z()) );
+                   2.0 * ((sxz - swy) * p.x() + (syz + swx) * p.y() + (0.5 - sx2 - sy2) * p.z()));
     }
 
     return ret;
@@ -277,23 +263,26 @@ Quaternion Quaternion::identity()
 void Quaternion::fromMatrix(const Matrix &m)
 {
     if (not SireMaths::areEqual(m.determinant(), 1.0))
-        throw SireMaths::domain_error( QObject::tr(
-                "You can only convert a rotation matrix to a quaternion. Rotation matrices "
-                "have a determinant of 1.0, while the matrix you passed has a determinant of "
-                "%1\n%2").arg(m.determinant()).arg(m.toString()), CODELOC );
+        throw SireMaths::domain_error(
+            QObject::tr("You can only convert a rotation matrix to a quaternion. Rotation matrices "
+                        "have a determinant of 1.0, while the matrix you passed has a determinant of "
+                        "%1\n%2")
+                .arg(m.determinant())
+                .arg(m.toString()),
+            CODELOC);
 
-  /* Thanks to http://www.flipcode.com/documents/matrfaq.html#Q54
+    /* Thanks to http://www.flipcode.com/documents/matrfaq.html#Q54
 
-  A rotation may be converted back to a quaternion through the use of
-  the following algorithm:
+    A rotation may be converted back to a quaternion through the use of
+    the following algorithm:
 
-  The process is performed in the following stages, which are as follows:
+    The process is performed in the following stages, which are as follows:
 
-    Calculate the trace of the matrix T from the equation:
+      Calculate the trace of the matrix T from the equation:
 
-      T = mat[0] + mat[5] + mat[10] + 1
+        T = mat[0] + mat[5] + mat[10] + 1
 
-   */
+     */
     const double trace = m.xx() + m.yy() + m.zz() + 1;
 
     /*
@@ -310,14 +299,14 @@ void Quaternion::fromMatrix(const Matrix &m)
 
       Z = ( mat[4] - mat[1] ) * S
     */
-    if (trace > 0.00001)  // use 0.00001 to avoid numerical instability near 0
+    if (trace > 0.00001) // use 0.00001 to avoid numerical instability near 0
     {
         double s = 0.5 / sqrt(trace);
         sc[3] = 0.25 / s;
 
-        sc[0] = (m.zy()-m.yz())*s;
-        sc[1] = (m.xz()-m.zx())*s;
-        sc[2] = (m.yx()-m.xy())*s;
+        sc[0] = (m.zy() - m.yz()) * s;
+        sc[1] = (m.xz() - m.zx()) * s;
+        sc[2] = (m.yx() - m.xy()) * s;
     }
     else
     {
@@ -326,7 +315,7 @@ void Quaternion::fromMatrix(const Matrix &m)
         then identify which major diagonal element has the greatest
         value. */
 
-        if ( (m.zz() >= m.yy()) and (m.zz() >= m.xx()) )
+        if ((m.zz() >= m.yy()) and (m.zz() >= m.xx()))
         {
             /* Column 2:
             S  = sqrt( 1.0 + mr[10] - mr[0] - mr[5] ) * 2;
@@ -336,7 +325,7 @@ void Quaternion::fromMatrix(const Matrix &m)
             Qz = 0.5 / S;
             Qw = (mr[1] + mr[4] ) / S; */
 
-            double s = sqrt( 1 + m.zz() - m.xx() - m.yy() ) * 2;
+            double s = sqrt(1 + m.zz() - m.xx() - m.yy()) * 2;
 
             sc[0] = (m.xz() + m.zx()) / s;
             sc[1] = (m.zy() + m.yz()) / s;
@@ -345,15 +334,15 @@ void Quaternion::fromMatrix(const Matrix &m)
         }
         else if (m.yy() >= m.xx())
         {
-           /* Column 1:
-            S  = sqrt( 1.0 + mr[5] - mr[0] - mr[10] ) * 2;
+            /* Column 1:
+             S  = sqrt( 1.0 + mr[5] - mr[0] - mr[10] ) * 2;
 
-            Qx = (mr[1] + mr[4] ) / S;
-            Qy = 0.5 / S;
-            Qz = (mr[6] + mr[9] ) / S;
-            Qw = (mr[2] + mr[8] ) / S; */
+             Qx = (mr[1] + mr[4] ) / S;
+             Qy = 0.5 / S;
+             Qz = (mr[6] + mr[9] ) / S;
+             Qw = (mr[2] + mr[8] ) / S; */
 
-            double s = sqrt( 1.0 + m.yy() - m.zz() - m.xx() ) * 2;
+            double s = sqrt(1.0 + m.yy() - m.zz() - m.xx()) * 2;
 
             sc[0] = (m.yx() + m.xy()) / s;
             sc[1] = 0.5 / s;
@@ -370,7 +359,7 @@ void Quaternion::fromMatrix(const Matrix &m)
             Qz = (mr[2] + mr[8] ) / S;
             Qw = (mr[6] + mr[9] ) / S; */
 
-            double s = sqrt( 1.0 + m.xx() - m.yy() - m.zz() ) * 2;
+            double s = sqrt(1.0 + m.xx() - m.yy() - m.zz()) * 2;
             sc[0] = 0.5 / s;
             sc[1] = (m.yx() + m.xy()) / s;
             sc[2] = (m.xz() + m.zx()) / s;
@@ -390,8 +379,7 @@ void Quaternion::fromMatrix(const Matrix &m)
 /** Return a string representation of this Quaternion */
 QString Quaternion::toString() const
 {
-    return QString("(%1, %2, %3, %4)")
-                .arg(sc[0]).arg(sc[1]).arg(sc[2]).arg(sc[3]);
+    return QString("(%1, %2, %3, %4)").arg(sc[0]).arg(sc[1]).arg(sc[2]).arg(sc[3]);
 }
 
 QRegExp quatregexp("([0-9.-]+),\\s{0,}([0-9.-]+),\\s{0,}([0-9.-]+),\\s{0,}([0-9.-]+)");
@@ -399,18 +387,16 @@ QRegExp quatregexp("([0-9.-]+),\\s{0,}([0-9.-]+),\\s{0,}([0-9.-]+),\\s{0,}([0-9.
 /** Construct a Vector from the QString representation returned by 'toString()' */
 Quaternion Quaternion::fromString(const QString &str)
 {
-    //use a regexp to extract the contents...
+    // use a regexp to extract the contents...
     if (quatregexp.indexIn(str) != -1)
     {
-        Quaternion q(quatregexp.cap(1).toFloat(),
-                    quatregexp.cap(2).toFloat(),
-                    quatregexp.cap(3).toFloat(),
-                    quatregexp.cap(4).toFloat());
+        Quaternion q(quatregexp.cap(1).toFloat(), quatregexp.cap(2).toFloat(), quatregexp.cap(3).toFloat(),
+                     quatregexp.cap(4).toFloat());
         q.renormalise();
         return q;
     }
     else
-       return Quaternion();
+        return Quaternion();
 }
 
 /** Return the spherical linear interpolation (slerp) of this quaternion
@@ -418,15 +404,15 @@ Quaternion Quaternion::fromString(const QString &str)
     at lambda=0 and the other returned at lambda=1 */
 Quaternion Quaternion::slerp(const Quaternion &q, double lambda) const
 {
-    //slerp(q1,q2,lambda) = q1*(q1^-1*q2)^lambda
+    // slerp(q1,q2,lambda) = q1*(q1^-1*q2)^lambda
 
     if (lambda <= 0.0)
-      return *this;
+        return *this;
     else if (lambda >= 1.0)
-      return q;
+        return q;
     else
     {
-        return *this * (this->inverse()*q).pow(lambda);
+        return *this * (this->inverse() * q).pow(lambda);
     }
 }
 
@@ -437,10 +423,10 @@ Quaternion Quaternion::pow(double n) const
     // q = cos(theta) + u*sin(theta)
     // q^n = cos(n*theta) + u*sin(n*theta)
 
-    double ntheta = n*sc[3];
+    double ntheta = n * sc[3];
     double sintheta, costheta;
     SireMaths::sincos(ntheta, &sintheta, &costheta);
-    return Quaternion(sc[0]*sintheta,sc[1]*sintheta,sc[2]*sintheta,costheta);
+    return Quaternion(sc[0] * sintheta, sc[1] * sintheta, sc[2] * sintheta, costheta);
 }
 
 double Quaternion::x() const
@@ -465,112 +451,107 @@ double Quaternion::w() const
 
 bool Quaternion::operator==(const Quaternion &p1) const
 {
-    return p1.sc[0] == sc[0] and p1.sc[1] == sc[1] and p1.sc[2] == sc[2]
-                  and p1.sc[3] == sc[3];
+    return p1.sc[0] == sc[0] and p1.sc[1] == sc[1] and p1.sc[2] == sc[2] and p1.sc[3] == sc[3];
 }
 
 bool Quaternion::operator!=(const Quaternion &p1) const
 {
-    return p1.sc[0] != sc[0] or p1.sc[1] != sc[1] or p1.sc[2] != sc[2]
-                  or p1.sc[3] != sc[3];
+    return p1.sc[0] != sc[0] or p1.sc[1] != sc[1] or p1.sc[2] != sc[2] or p1.sc[3] != sc[3];
 }
 
-const Quaternion SireMaths::operator*(const Quaternion &p1,
-                                                       const Quaternion &p2)
+const Quaternion SireMaths::operator*(const Quaternion &p1, const Quaternion &p2)
 {
-    //quaternion multiplication - if quat = [w1, v1], then
+    // quaternion multiplication - if quat = [w1, v1], then
 
     // [w1,v1][w2,v2] = [w1w2 - v1.v2, w1v2 + w2v1 + v1xv2]
 
-    //calculate new 'w'
-    double nw = p1.sc[3]*p2.sc[3] - (p1.sc[0]*p2.sc[0] + p1.sc[1]*p2.sc[1] + p1.sc[2]*p2.sc[2]);
+    // calculate new 'w'
+    double nw = p1.sc[3] * p2.sc[3] - (p1.sc[0] * p2.sc[0] + p1.sc[1] * p2.sc[1] + p1.sc[2] * p2.sc[2]);
 
-    //now do cross product, 'v1xv2'
-    double cx = (p1.sc[1]*p2.sc[2])-(p1.sc[2]*p2.sc[1]);
-    double cy = (p1.sc[2]*p2.sc[0])-(p1.sc[0]*p2.sc[2]);
-    double cz = (p1.sc[0]*p2.sc[1])-(p1.sc[1]*p2.sc[0]);
+    // now do cross product, 'v1xv2'
+    double cx = (p1.sc[1] * p2.sc[2]) - (p1.sc[2] * p2.sc[1]);
+    double cy = (p1.sc[2] * p2.sc[0]) - (p1.sc[0] * p2.sc[2]);
+    double cz = (p1.sc[0] * p2.sc[1]) - (p1.sc[1] * p2.sc[0]);
 
-    double nx = p1.sc[3]*p2.sc[0] + p2.sc[3]*p1.sc[0] + cx;
-    double ny = p1.sc[3]*p2.sc[1] + p2.sc[3]*p1.sc[1] + cy;
-    double nz = p1.sc[3]*p2.sc[2] + p2.sc[3]*p1.sc[2] + cz;
+    double nx = p1.sc[3] * p2.sc[0] + p2.sc[3] * p1.sc[0] + cx;
+    double ny = p1.sc[3] * p2.sc[1] + p2.sc[3] * p1.sc[1] + cy;
+    double nz = p1.sc[3] * p2.sc[2] + p2.sc[3] * p1.sc[2] + cz;
 
-    return Quaternion(nx,ny,nz,nw);
+    return Quaternion(nx, ny, nz, nw);
 }
 
-Quaternion& Quaternion::operator=(const Quaternion &p)
+Quaternion &Quaternion::operator=(const Quaternion &p)
 {
-    for (int i=0; i<4; i++)
+    for (int i = 0; i < 4; i++)
         sc[i] = p.sc[i];
 
     return *this;
 }
 
-const Quaternion SireMaths::operator+(const Quaternion &p1,
-                                                       const Quaternion &p2)
+const Quaternion SireMaths::operator+(const Quaternion &p1, const Quaternion &p2)
 {
-    return Quaternion(p1.sc[0]+p2.sc[0],p1.sc[1]+p2.sc[1],p1.sc[2]+p2.sc[2],p1.sc[3]+p2.sc[3]);
+    return Quaternion(p1.sc[0] + p2.sc[0], p1.sc[1] + p2.sc[1], p1.sc[2] + p2.sc[2], p1.sc[3] + p2.sc[3]);
 }
 
-const Quaternion SireMaths::operator-(const Quaternion &p1,
-                                                       const Quaternion &p2)
+const Quaternion SireMaths::operator-(const Quaternion &p1, const Quaternion &p2)
 {
-    return Quaternion(p1.sc[0]-p2.sc[0],p1.sc[1]-p2.sc[1],p1.sc[2]-p2.sc[2],p1.sc[3]-p2.sc[3]);
+    return Quaternion(p1.sc[0] - p2.sc[0], p1.sc[1] - p2.sc[1], p1.sc[2] - p2.sc[2], p1.sc[3] - p2.sc[3]);
 }
 
 /** Return the inverse of the quaternion
     - since the length=1 this is the same as the conjugate */
 Quaternion Quaternion::inverse() const
 {
-    return Quaternion(-sc[0],-sc[1],-sc[2],sc[3]);
+    return Quaternion(-sc[0], -sc[1], -sc[2], sc[3]);
 }
 
 /** Return the conjugate of the quaternion */
 Quaternion Quaternion::conjugate() const
 {
-    return Quaternion(-sc[0],-sc[1],-sc[2],sc[3]);
+    return Quaternion(-sc[0], -sc[1], -sc[2], sc[3]);
 }
 
 /** Return the dot product of this with another quaternion */
 double Quaternion::dot(const Quaternion &q) const
 {
-    return sc[0]*q.sc[0] + sc[1]*q.sc[1] + sc[2]*q.sc[2] + sc[3]*q.sc[3];
+    return sc[0] * q.sc[0] + sc[1] * q.sc[1] + sc[2] * q.sc[2] + sc[3] * q.sc[3];
 }
 
 /** Renormalise the quaternion */
 void Quaternion::renormalise()
 {
-    double l = invSqrt(sc[0]*sc[0]+sc[1]*sc[1]+sc[2]*sc[2]+sc[3]*sc[3]);
+    double l = invSqrt(sc[0] * sc[0] + sc[1] * sc[1] + sc[2] * sc[2] + sc[3] * sc[3]);
     sc[0] *= l;
     sc[1] *= l;
     sc[2] *= l;
     sc[3] *= l;
 }
 
-const char* Quaternion::typeName()
+const char *Quaternion::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Quaternion>() );
+    return QMetaType::typeName(qMetaTypeId<Quaternion>());
 }
 
 /** In-place addition operator */
-Quaternion& Quaternion::operator+=(const Quaternion &p)
+Quaternion &Quaternion::operator+=(const Quaternion &p)
 {
-    return this->operator=( *this + p );
+    return this->operator=(*this + p);
 }
 
 /** In-place subtraction operator */
-Quaternion& Quaternion::operator-=(const Quaternion &p)
+Quaternion &Quaternion::operator-=(const Quaternion &p)
 {
-    return this->operator=( *this - p );
+    return this->operator=(*this - p);
 }
 
 /** In-place multiplication operator */
-Quaternion& Quaternion::operator*=(const Quaternion &p)
+Quaternion &Quaternion::operator*=(const Quaternion &p)
 {
-    return this->operator=( *this * p );
+    return this->operator=(*this * p);
 }
 
 /** In-place multiplication operator */
-Quaternion& Quaternion::operator*=(const Vector &p)
+Quaternion &Quaternion::operator*=(const Vector &p)
 {
-    return this->operator=( *this * p );
+    return this->operator=(*this * p);
 }

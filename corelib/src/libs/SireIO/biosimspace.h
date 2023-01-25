@@ -43,7 +43,11 @@ SIRE_BEGIN_HEADER
 using namespace SireBase;
 using namespace SireMaths;
 using namespace SireMol;
-using namespace SireSystem;
+
+namespace SireSystem
+{
+    class System;
+}
 
 namespace SireIO
 {
@@ -59,9 +63,7 @@ namespace SireIO
         \retval is_water
             Whether the molecule is a water.
      */
-    SIREIO_EXPORT bool isWater(
-            const Molecule& molecule,
-            const PropertyMap& map = PropertyMap());
+    SIREIO_EXPORT bool isWater(const Molecule &molecule, const PropertyMap &map = PropertyMap());
 
     //! Test whether the passed water molecule matches standard AMBER
     /*! format water topologies.
@@ -75,9 +77,7 @@ namespace SireIO
         \retval is_water
             Whether the molecule is an AMBER format water.
      */
-    SIREIO_EXPORT bool isAmberWater(
-            const Molecule& molecule,
-            const PropertyMap& map = PropertyMap());
+    SIREIO_EXPORT bool isAmberWater(const Molecule &molecule, const PropertyMap &map = PropertyMap());
 
     //! Test whether the passed water molecule matches standard GROMACS
     /*! format water topologies.
@@ -91,23 +91,13 @@ namespace SireIO
         \retval is_water
             Whether the molecule is a GROMACS format water.
      */
-    SIREIO_EXPORT bool isGromacsWater(
-            const Molecule& molecule,
-            const PropertyMap& map = PropertyMap());
+    SIREIO_EXPORT bool isGromacsWater(const Molecule &molecule, const PropertyMap &map = PropertyMap());
 
-    Molecule _pvt_setAmberWater(
-            Molecule& molecule,
-            const Molecule& water,
-            const QString& model,
-            bool has_virtual,
-            const PropertyMap& map = PropertyMap());
+    Molecule _pvt_setAmberWater(Molecule &molecule, const Molecule &water, const QString &model, bool has_virtual,
+                                const PropertyMap &map = PropertyMap());
 
-    Molecule _pvt_setGromacsWater(
-            Molecule& molecule,
-            const Molecule& water,
-            const QString& model,
-            bool has_virtual,
-            const PropertyMap& map = PropertyMap());
+    Molecule _pvt_setGromacsWater(Molecule &molecule, const Molecule &water, const QString &model, bool has_virtual,
+                                  const PropertyMap &map = PropertyMap());
 
     //! Set all water molecules in the passed system to the appropriate AMBER
     /*! format topology.
@@ -124,10 +114,7 @@ namespace SireIO
         \retval system
             The system with updated water topology.
      */
-    SIREIO_EXPORT System setAmberWater(
-            const System& system,
-            const QString& model,
-            const PropertyMap& map = PropertyMap());
+    SIREIO_EXPORT SireSystem::System setAmberWater(const SireSystem::System &system, const QString &model, const PropertyMap &map = PropertyMap());
 
     //! Set all water molecules in the passed system to the appropriate GROMACS
     /*! format topology.
@@ -144,10 +131,8 @@ namespace SireIO
         \retval system
             The system with updated water topology.
      */
-    SIREIO_EXPORT System setGromacsWater(
-            const System& system,
-            const QString& model,
-            const PropertyMap& map = PropertyMap());
+    SIREIO_EXPORT SireSystem::System setGromacsWater(const SireSystem::System &system, const QString &model,
+                                                     const PropertyMap &map = PropertyMap());
 
     //! Set all water molecules in the passed system to the appropriate AMBER
     /*! format topology.
@@ -164,10 +149,8 @@ namespace SireIO
         \retval system
             The system with updated water topology.
      */
-    SIREIO_EXPORT SelectResult setAmberWater(
-            const SelectResult& molecules,
-            const QString& model,
-            const PropertyMap& map = PropertyMap());
+    SIREIO_EXPORT SelectResult setAmberWater(const SelectResult &molecules, const QString &model,
+                                             const PropertyMap &map = PropertyMap());
 
     //! Set all water molecules in the passed system to the appropriate GROMACS
     /*! format topology.
@@ -185,10 +168,8 @@ namespace SireIO
             The system with updated water topology.
 
      */
-    SIREIO_EXPORT SelectResult setGromacsWater(
-            const SelectResult& molecules,
-            const QString& model,
-            const PropertyMap& map = PropertyMap());
+    SIREIO_EXPORT SelectResult setGromacsWater(const SelectResult &molecules, const QString &model,
+                                               const PropertyMap &map = PropertyMap());
 
     //! Renumber the constituents of a system (residues and atoms) so that
     /*! they are unique and are in ascending order.
@@ -202,14 +183,9 @@ namespace SireIO
         \retval system
             The system with renumbered constituents.
      */
-    SIREIO_EXPORT System renumberConstituents(
-            const System& system,
-            unsigned mol_offset=0);
+    SIREIO_EXPORT SireSystem::System renumberConstituents(const SireSystem::System &system, unsigned mol_offset = 0);
 
-    Molecule pvt_renumberConstituents(
-            Molecule& molecule,
-            const unsigned residue_offset,
-            const unsigned atom_offset);
+    Molecule pvt_renumberConstituents(Molecule &molecule, const unsigned residue_offset, const unsigned atom_offset);
 
     //! Update a molecule in the system with a different UUID while
     /*! preserving the molecular ordering. Normally we would need to
@@ -228,10 +204,7 @@ namespace SireIO
         \retval system
             The system with renumbered constituents.
      */
-    SIREIO_EXPORT System updateAndPreserveOrder(
-            const System& system,
-            const Molecule& molecule,
-            unsigned index);
+    SIREIO_EXPORT SireSystem::System updateAndPreserveOrder(const SireSystem::System &system, const Molecule &molecule, unsigned index);
 
     //! Redistribute mass of heavy atoms connected to bonded hydrogens into
     /*! the hydrogen atoms. This allows use of larger simulation integration
@@ -255,11 +228,8 @@ namespace SireIO
         \retval system
             The system with repartitioned hydrogen mass.
      */
-    SIREIO_EXPORT System repartitionHydrogenMass(
-            const System& system,
-            const double factor=4,
-            const unsigned water=0,
-            const PropertyMap& map = PropertyMap());
+    SIREIO_EXPORT SireSystem::System repartitionHydrogenMass(const SireSystem::System &system, const double factor = 4, const unsigned water = 0,
+                                                             const PropertyMap &map = PropertyMap());
 
     //! Redistribute mass of heavy atoms connected to bonded hydrogens into
     /*! the hydrogen atoms. This allows use of larger simulation integration
@@ -283,11 +253,8 @@ namespace SireIO
         \retval system
             The system with repartitioned hydrogen mass.
      */
-    SIREIO_EXPORT Molecule repartitionHydrogenMass(
-            Molecule& molecule,
-            const double factor=4,
-            const unsigned water=0,
-            const PropertyMap& map = PropertyMap());
+    SIREIO_EXPORT Molecule repartitionHydrogenMass(Molecule &molecule, const double factor = 4, const unsigned water = 0,
+                                                   const PropertyMap &map = PropertyMap());
 
     //! Update the coordinates and velocities of system0 with those from
     /*! system1.
@@ -303,13 +270,9 @@ namespace SireIO
             The system with updated coordinates and velocities and a mapping
             between the molecule indices in both systems.
      */
-    SIREIO_EXPORT boost::tuple<System, QHash<MolIdx, MolIdx> > updateCoordinatesAndVelocities(
-            const System& system0,
-            const System& system1,
-            const QHash<MolIdx, MolIdx>& molecule_mapping,
-            const bool is_lambda1=false,
-            const PropertyMap& map0 = PropertyMap(),
-            const PropertyMap& map1 = PropertyMap());
+    SIREIO_EXPORT boost::tuple<SireSystem::System, QHash<MolIdx, MolIdx>> updateCoordinatesAndVelocities(
+        const SireSystem::System &system0, const SireSystem::System &system1, const QHash<MolIdx, MolIdx> &molecule_mapping,
+        const bool is_lambda1 = false, const PropertyMap &map0 = PropertyMap(), const PropertyMap &map1 = PropertyMap());
 
     //! Update the coordinates and velocities of original_system with those from
     /*! updated_system.
@@ -334,27 +297,23 @@ namespace SireIO
             The system with updated coordinates and velocities and a mapping
             between the molecule indices in both systems.
      */
-    SIREIO_EXPORT boost::tuple<System, QHash<MolIdx, MolIdx> > updateCoordinatesAndVelocities(
-            const System& original_system,
-            const System& renumbered_system,
-            const System& updated_system,
-            const QHash<MolIdx, MolIdx>& molecule_mapping,
-            const bool is_lambda1=false,
-            const PropertyMap& map0 = PropertyMap(),
-            const PropertyMap& map1 = PropertyMap());
+    SIREIO_EXPORT boost::tuple<SireSystem::System, QHash<MolIdx, MolIdx>> updateCoordinatesAndVelocities(
+        const SireSystem::System &original_system, const SireSystem::System &renumbered_system, const SireSystem::System &updated_system,
+        const QHash<MolIdx, MolIdx> &molecule_mapping, const bool is_lambda1 = false,
+        const PropertyMap &map0 = PropertyMap(), const PropertyMap &map1 = PropertyMap());
 
-    Vector cross(const Vector& v0, const Vector& v1);
-}
+    Vector cross(const Vector &v0, const Vector &v1);
+} // namespace SireIO
 
-SIRE_EXPOSE_FUNCTION( SireIO::isWater )
-SIRE_EXPOSE_FUNCTION( SireIO::isAmberWater )
-SIRE_EXPOSE_FUNCTION( SireIO::isGromacsWater )
-SIRE_EXPOSE_FUNCTION( SireIO::setAmberWater )
-SIRE_EXPOSE_FUNCTION( SireIO::setGromacsWater )
-SIRE_EXPOSE_FUNCTION( SireIO::renumberConstituents )
-SIRE_EXPOSE_FUNCTION( SireIO::updateAndPreserveOrder )
-SIRE_EXPOSE_FUNCTION( SireIO::repartitionHydrogenMass )
-SIRE_EXPOSE_FUNCTION( SireIO::updateCoordinatesAndVelocities )
+SIRE_EXPOSE_FUNCTION(SireIO::isWater)
+SIRE_EXPOSE_FUNCTION(SireIO::isAmberWater)
+SIRE_EXPOSE_FUNCTION(SireIO::isGromacsWater)
+SIRE_EXPOSE_FUNCTION(SireIO::setAmberWater)
+SIRE_EXPOSE_FUNCTION(SireIO::setGromacsWater)
+SIRE_EXPOSE_FUNCTION(SireIO::renumberConstituents)
+SIRE_EXPOSE_FUNCTION(SireIO::updateAndPreserveOrder)
+SIRE_EXPOSE_FUNCTION(SireIO::repartitionHydrogenMass)
+SIRE_EXPOSE_FUNCTION(SireIO::updateCoordinatesAndVelocities)
 
 SIRE_END_HEADER
 

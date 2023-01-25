@@ -45,30 +45,26 @@ int _map(int val, int n, bool auto_fix)
     if (auto_fix)
     {
         if (val >= n)
-            val = n-1;
+            val = n - 1;
 
         if (val < 0)
             val = 0;
     }
     else if (val < 0 or val >= n)
-        throw SireError::invalid_index(QObject::tr(
-            "Invalid index for a container with count == %1"
-                    ).arg(n), CODELOC);
+        throw SireError::invalid_index(QObject::tr("Invalid index for a container with count == %1").arg(n), CODELOC);
 
     return val;
 }
 
-SliceIterator::SliceIterator()
-              : i(0), start(0), stop(0), step(0)
-{}
+SliceIterator::SliceIterator() : i(0), start(0), stop(0), step(0)
+{
+}
 
 SliceIterator::SliceIterator(const Slice &slice, int n, bool auto_fix)
-              : i(slice.start), start(slice.start),
-                stop(slice.stop), step(slice.step)
+    : i(slice.start), start(slice.start), stop(slice.stop), step(slice.step)
 {
     if (n <= 0)
-        throw SireError::invalid_index(
-            QObject::tr("Cannot slice an empty container!"), CODELOC);
+        throw SireError::invalid_index(QObject::tr("Cannot slice an empty container!"), CODELOC);
 
     start = slice.start;
 
@@ -87,7 +83,7 @@ SliceIterator::SliceIterator(const Slice &slice, int n, bool auto_fix)
     if (stop == _unset)
     {
         if (step >= 0)
-            stop = n-1;
+            stop = n - 1;
         else
             stop = 0;
     }
@@ -101,7 +97,7 @@ SliceIterator::SliceIterator(const Slice &slice, int n, bool auto_fix)
                 stop = start;
             }
             else if (stop != 0)
-                stop = _map(stop-1, n, auto_fix);
+                stop = _map(stop - 1, n, auto_fix);
         }
         else
         {
@@ -111,7 +107,7 @@ SliceIterator::SliceIterator(const Slice &slice, int n, bool auto_fix)
                 stop = start;
             }
             else
-                stop = _map(stop+1, n, auto_fix);
+                stop = _map(stop + 1, n, auto_fix);
         }
     }
 
@@ -131,14 +127,15 @@ SliceIterator::SliceIterator(const Slice &slice, int n, bool auto_fix)
 }
 
 SliceIterator::SliceIterator(const SliceIterator &other)
-              : i(other.i), start(other.start),
-                stop(other.stop), step(other.step)
-{}
+    : i(other.i), start(other.start), stop(other.stop), step(other.step)
+{
+}
 
 SliceIterator::~SliceIterator()
-{}
+{
+}
 
-SliceIterator& SliceIterator::next()
+SliceIterator &SliceIterator::next()
 {
     i += step;
     return *this;
@@ -158,14 +155,16 @@ int SliceIterator::value() const
 }
 
 Slice::Slice() : start(_unset), stop(_unset), step(_unset)
-{}
+{
+}
 
-Slice::Slice(const Slice &other)
-      : start(other.start), stop(other.stop), step(other.step)
-{}
+Slice::Slice(const Slice &other) : start(other.start), stop(other.stop), step(other.step)
+{
+}
 
 Slice::~Slice()
-{}
+{
+}
 
 Slice Slice::fromStartStop(int _start, int _stop, int _step)
 {
@@ -187,7 +186,7 @@ Slice Slice::fromStart(int _start, int _step)
     return s;
 }
 
-Slice& Slice::operator=(const Slice &other)
+Slice &Slice::operator=(const Slice &other)
 {
     start = other.start;
     stop = other.stop;
@@ -205,12 +204,12 @@ bool Slice::operator!=(const Slice &other) const
     return not operator==(other);
 }
 
-const char* Slice::what() const
+const char *Slice::what() const
 {
     return Slice::typeName();
 }
 
-const char* Slice::typeName()
+const char *Slice::typeName()
 {
     return "SireBase::Slice";
 }

@@ -35,56 +35,54 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class BeadEditor;
+    class BeadEditor;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::BeadEditor&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::BeadEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::BeadEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::BeadEditor &);
 
 namespace SireMol
 {
 
-class BeadEditor;
-typedef Editor<BeadEditor, Bead> BeadEditorBase;
+    class BeadEditor;
+    typedef Editor<BeadEditor, Bead> BeadEditorBase;
 
-/** This is an editor for a single bead in a molecule
+    /** This is an editor for a single bead in a molecule
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT BeadEditor
-        : public SireBase::ConcreteProperty< BeadEditor,Editor<BeadEditor,Bead> >
-{
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT BeadEditor : public SireBase::ConcreteProperty<BeadEditor, Editor<BeadEditor, Bead>>
+    {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const BeadEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, BeadEditor&);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const BeadEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, BeadEditor &);
 
-public:
-    BeadEditor();
+    public:
+        BeadEditor();
 
-    BeadEditor(const Bead &bead);
+        BeadEditor(const Bead &bead);
 
-    BeadEditor(const BeadEditor &other);
+        BeadEditor(const BeadEditor &other);
 
-    ~BeadEditor();
+        ~BeadEditor();
 
-    BeadEditor& operator=(const Bead &bead);
-    BeadEditor& operator=(const BeadEditor &other);
+        BeadEditor &operator=(const Bead &bead);
+        BeadEditor &operator=(const BeadEditor &other);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    Bead commit() const;
-};
+        Bead commit() const;
+    };
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::BeadEditor );
+Q_DECLARE_METATYPE(SireMol::BeadEditor);
 
-SIRE_EXPOSE_CLASS( SireMol::BeadEditor )
+SIRE_EXPOSE_CLASS(SireMol::BeadEditor)
 
-SIRE_EXPOSE_ALIAS( (SireMol::Editor<SireMol::BeadEditor, SireMol::Bead>),
-                    SireMol::BeadEditorBase )
+SIRE_EXPOSE_ALIAS((SireMol::Editor<SireMol::BeadEditor, SireMol::Bead>), SireMol::BeadEditorBase)
 
 SIRE_END_HEADER
 

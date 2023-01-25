@@ -26,22 +26,23 @@
 \*********************************************/
 
 #include "expression.h"
+#include "expressions.h"
+#include "complexvalues.h"
 #include "exbase.h"
-#include "sum.h"
-#include "product.h"
-#include "symbol.h"
-#include "symbols.h"
 #include "functions.h"
+#include "i.h"
+#include "identities.h"
+#include "integrationconstant.h"
 #include "power.h"
 #include "powerconstant.h"
-#include "identities.h"
+#include "product.h"
+#include "sum.h"
+#include "symbol.h"
+#include "symbols.h"
 #include "values.h"
-#include "complexvalues.h"
-#include "i.h"
-#include "integrationconstant.h"
 
-#include "SireMaths/maths.h"
 #include "SireMaths/complex.h"
+#include "SireMaths/maths.h"
 
 #include "SireStream/datastream.h"
 
@@ -76,19 +77,23 @@ SIRECAS_EXPORT QDataStream &operator>>(QDataStream &ds, Expression &ex)
 
 /** Construct an empty (zero) expression */
 Expression::Expression() : fac(0)
-{}
+{
+}
 
 /** Construct a constant expression equal to 'constant' */
 Expression::Expression(int constant) : fac(constant)
-{}
+{
+}
 
 /** Construct a constant expression equal to 'constant' */
 Expression::Expression(double constant) : fac(constant)
-{}
+{
+}
 
 /** Construct a constant expression equal to 'constant' */
 Expression::Expression(const Rational &constant) : fac(SireMaths::toDouble(constant))
-{}
+{
+}
 
 /** Construct a constant expression equal to 'constant' */
 Expression::Expression(const Complex &constant)
@@ -110,8 +115,7 @@ Expression::Expression(const Complex &constant)
 }
 
 /** Construct an expression that is equal to 1*(base) */
-Expression::Expression(const ExpressionBase &base)
-           : exbase(base), fac(1)
+Expression::Expression(const ExpressionBase &base) : exbase(base), fac(1)
 {
     if (exbase.isConstant() and not exbase.isComplex())
     {
@@ -121,8 +125,7 @@ Expression::Expression(const ExpressionBase &base)
 }
 
 /** Construct an expression that is equal to 1*(base) */
-Expression::Expression(const ExBase &base)
-           : exbase(base), fac(1)
+Expression::Expression(const ExBase &base) : exbase(base), fac(1)
 {
     if (exbase.isConstant() and not exbase.isComplex())
     {
@@ -132,16 +135,17 @@ Expression::Expression(const ExBase &base)
 }
 
 /** Copy constructor */
-Expression::Expression(const Expression &other)
-           : exbase(other.exbase), fac(other.fac)
-{}
+Expression::Expression(const Expression &other) : exbase(other.exbase), fac(other.fac)
+{
+}
 
 /** Destructor */
 Expression::~Expression()
-{}
+{
+}
 
 /** Assignment operator */
-Expression& Expression::operator=(const Expression &other)
+Expression &Expression::operator=(const Expression &other)
 {
     exbase = other.exbase;
     fac = other.fac;
@@ -149,27 +153,27 @@ Expression& Expression::operator=(const Expression &other)
 }
 
 /** self-addition */
-Expression& Expression::operator+=(const Expression &other)
+Expression &Expression::operator+=(const Expression &other)
 {
-    return operator=( this->add(other) );
+    return operator=(this->add(other));
 }
 
 /** self-subtraction */
-Expression& Expression::operator-=(const Expression &other)
+Expression &Expression::operator-=(const Expression &other)
 {
-    return operator=( this->subtract(other) );
+    return operator=(this->subtract(other));
 }
 
 /** self-multiplication */
-Expression& Expression::operator*=(const Expression &other)
+Expression &Expression::operator*=(const Expression &other)
 {
-    return operator=( this->multiply(other) );
+    return operator=(this->multiply(other));
 }
 
 /** self-division */
-Expression& Expression::operator/=(const Expression &other)
+Expression &Expression::operator/=(const Expression &other)
 {
-    return operator=( this->divide(other) );
+    return operator=(this->divide(other));
 }
 
 /** Evaluate the numerical value of this expression, using the values
@@ -216,7 +220,7 @@ Expression Expression::pow(int n) const
     else if (this->isConstant())
         return SireMaths::pow(evaluate(ComplexValues()), n);
     else
-        return IntegerPower( *this, n ).reduce();
+        return IntegerPower(*this, n).reduce();
 }
 
 /** Return this expression raised to the rational power 'n' */
@@ -227,18 +231,18 @@ Expression Expression::pow(const Rational &n) const
     else if (this->isConstant())
         return SireMaths::pow(evaluate(ComplexValues()), n);
     else
-        return RationalPower( *this, n ).reduce();
+        return RationalPower(*this, n).reduce();
 }
 
 /** Return this expression raised to a real number power */
 Expression Expression::pow(double n) const
 {
-    if (SireMaths::areEqual(n,1.0))
+    if (SireMaths::areEqual(n, 1.0))
         return *this;
     else if (this->isConstant())
         return SireMaths::pow(evaluate(ComplexValues()), n);
     else
-        return RealPower( *this, n ).reduce();
+        return RealPower(*this, n).reduce();
 }
 
 /** Return this expresssion raised to a complex power */
@@ -249,7 +253,7 @@ Expression Expression::pow(const Complex &n) const
     else if (this->isConstant())
         return SireMaths::pow(evaluate(ComplexValues()), n);
     else
-        return ComplexPower( *this, n ).reduce();
+        return ComplexPower(*this, n).reduce();
 }
 
 /** Return this expression raised to a function */
@@ -258,7 +262,7 @@ Expression Expression::pow(const Expression &n) const
     if (n.isConstant())
         return pow(n.evaluate(ComplexValues()));
     else
-        return Power( *this, n ).reduce();
+        return Power(*this, n).reduce();
 }
 
 /** Return 1 / expression */
@@ -282,7 +286,7 @@ Expression Expression::cubed() const
 /** Return the nth root of this expression */
 Expression Expression::root(int n) const
 {
-    return this->pow( Rational(1,n) );
+    return this->pow(Rational(1, n));
 }
 
 /** Return the negative of this expression */
@@ -364,18 +368,18 @@ Expression Expression::multiply(const Complex &z) const
     if (z.isReal())
         return multiply(z.real());
     else if (SireMaths::isZero(z.real()))
-        return Product( *this, z.imag() * I() ).reduce();
+        return Product(*this, z.imag() * I()).reduce();
     else
-        return Product( *this, z.real() + z.imag()*I() ).reduce();
+        return Product(*this, z.real() + z.imag() * I()).reduce();
 }
 
 /** Return an expression that is this multiplied by 'ex' */
 Expression Expression::multiply(const Expression &ex) const
 {
     if (this->isConstant())
-        return ex.multiply( this->evaluate(ComplexValues()) );
+        return ex.multiply(this->evaluate(ComplexValues()));
     else if (ex.isConstant())
-        return multiply( ex.evaluate(ComplexValues()) );
+        return multiply(ex.evaluate(ComplexValues()));
     else
         return Product(*this, ex).reduce();
 }
@@ -383,23 +387,23 @@ Expression Expression::multiply(const Expression &ex) const
 /** Return an expression that is this divided by 'val' */
 Expression Expression::divide(double val) const
 {
-    if ( SireMaths::areEqual(val,1.0) )
+    if (SireMaths::areEqual(val, 1.0))
         return *this;
     else
-        return multiply( double(1.0) / val );
+        return multiply(double(1.0) / val);
 }
 
 /** Return an expression that is divided by the complex number z */
 Expression Expression::divide(const Complex &z) const
 {
-    return multiply( z.inverse() );
+    return multiply(z.inverse());
 }
 
 /** Return an expression that is this / ex */
 Expression Expression::divide(const Expression &ex) const
 {
     if (ex.isConstant())
-        return divide( ex.evaluate(ComplexValues()) );
+        return divide(ex.evaluate(ComplexValues()));
     else
         return multiply(ex.invert());
 }
@@ -444,8 +448,8 @@ Expression Expression::differentiate(const Symbol &symbol, int level) const
         return Expression(0);
     else
     {
-        //calculate the differential of the base expression with respect
-        //to symbol
+        // calculate the differential of the base expression with respect
+        // to symbol
         Expression diff = fac * exbase.differentiate(symbol);
 
         if (not diff.isZero())
@@ -453,7 +457,7 @@ Expression Expression::differentiate(const Symbol &symbol, int level) const
             if (level == 1)
                 return diff;
             else
-                return diff.differentiate(symbol, level-1);
+                return diff.differentiate(symbol, level - 1);
         }
         else
             return diff;
@@ -463,7 +467,7 @@ Expression Expression::differentiate(const Symbol &symbol, int level) const
 /** Synonym for differentiate */
 Expression Expression::diff(const Symbol &symbol, int level) const
 {
-    return differentiate(symbol,level);
+    return differentiate(symbol, level);
 }
 
 /** Integrate this expression with respect to 'symbol' and return the
@@ -476,10 +480,10 @@ Expression Expression::integrate(const Symbol &symbol) const
     if (this->isZero())
         return Expression(0);
     else if (not exbase.isFunction(symbol))
-        //exbase is constant with respect to 'symbol' - return symbol*exbase + C
-        return fac*exbase*symbol + IntegrationConstant();
+        // exbase is constant with respect to 'symbol' - return symbol*exbase + C
+        return fac * exbase * symbol + IntegrationConstant();
     else
-        //calculate the integral with respect to the symbol (add integration constant)
+        // calculate the integral with respect to the symbol (add integration constant)
         return fac * exbase.integrate(symbol) + IntegrationConstant();
 }
 
@@ -494,7 +498,7 @@ Expression Expression::integ(const Symbol &symbol) const
     returns this expression */
 Expression Expression::series(const Symbol &symbol, int n) const
 {
-    return fac * exbase.series(symbol,n);
+    return fac * exbase.series(symbol, n);
 }
 
 /** Return whether or not this expression is equal to '0' for all values */
@@ -537,9 +541,9 @@ QString Expression::toString() const
     {
         QString basestr = exbase.toString();
 
-        if ( SireMaths::areEqual(fac,1.0) )
+        if (SireMaths::areEqual(fac, 1.0))
             return basestr;
-        else if ( SireMaths::areEqual(fac,-1.0) )
+        else if (SireMaths::areEqual(fac, -1.0))
         {
             if (this->isCompound())
                 return QString("-[%1]").arg(basestr);
@@ -563,9 +567,9 @@ QString Expression::toOpenMMString() const
     {
         QString basestr = exbase.toOpenMMString();
 
-        if ( SireMaths::areEqual(fac,1.0) )
+        if (SireMaths::areEqual(fac, 1.0))
             return basestr;
-        else if ( SireMaths::areEqual(fac,-1.0) )
+        else if (SireMaths::areEqual(fac, -1.0))
         {
             if (this->isCompound())
                 return QString("-(%1)").arg(basestr);
@@ -579,9 +583,8 @@ QString Expression::toOpenMMString() const
     }
 }
 
-
 /** Return the ExpressionBase base-part of this expression */
-const ExpressionBase& Expression::base() const
+const ExpressionBase &Expression::base() const
 {
     return exbase;
 }
@@ -624,18 +627,16 @@ QList<Factor> Expression::expand(const Symbol &symbol) const
 
     if (fac != 1)
     {
-        for (QList<Factor>::iterator it = factors.begin();
-             it != factors.end();
-             ++it)
+        for (QList<Factor>::iterator it = factors.begin(); it != factors.end(); ++it)
         {
-            *it = Factor( it->symbol(), fac * it->factor(), it->power() );
+            *it = Factor(it->symbol(), fac * it->factor(), it->power());
         }
     }
 
     return factors;
 }
 
-const char* Expression::typeName()
+const char *Expression::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Expression>() );
+    return QMetaType::typeName(qMetaTypeId<Expression>());
 }

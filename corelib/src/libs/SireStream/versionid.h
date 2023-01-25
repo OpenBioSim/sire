@@ -35,7 +35,7 @@ SIRE_BEGIN_HEADER
 namespace SireStream
 {
 
-typedef quint32 VersionID;
+    typedef quint32 VersionID;
 
 }
 

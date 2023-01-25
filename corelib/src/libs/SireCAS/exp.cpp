@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "exp.h"
-#include "values.h"
 #include "complexvalues.h"
 #include "integrationconstant.h"
+#include "values.h"
 
 #include "SireStream/datastream.h"
 
@@ -44,8 +44,7 @@ static const RegisterMetaType<Exp> r_exp;
 /** Serialise an Exp to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Exp &exp)
 {
-    writeHeader(ds, r_exp, 1)
-          << exp.pwr << static_cast<const PowerFunction&>(exp);
+    writeHeader(ds, r_exp, 1) << exp.pwr << static_cast<const PowerFunction &>(exp);
 
     return ds;
 }
@@ -57,7 +56,7 @@ QDataStream &operator>>(QDataStream &ds, Exp &exp)
 
     if (v == 1)
     {
-        ds >> exp.pwr >> static_cast<PowerFunction&>(exp);
+        ds >> exp.pwr >> static_cast<PowerFunction &>(exp);
     }
     else
         throw version_error(v, "1", r_exp, CODELOC);
@@ -67,33 +66,36 @@ QDataStream &operator>>(QDataStream &ds, Exp &exp)
 
 /** Construct an empty Exp (e^0) */
 Exp::Exp() : PowerFunction()
-{}
+{
+}
 
 /** Construct e^power */
 Exp::Exp(const Expression &power) : PowerFunction(), pwr(power)
-{}
+{
+}
 
 /** Copy constructor */
 Exp::Exp(const Exp &other) : PowerFunction(), pwr(other.pwr)
-{}
+{
+}
 
 /** Destructor */
 Exp::~Exp()
-{}
+{
+}
 
 /** Comparison operator */
 bool Exp::operator==(const ExBase &other) const
 {
-    const Exp *other_exp = dynamic_cast<const Exp*>(&other);
+    const Exp *other_exp = dynamic_cast<const Exp *>(&other);
 
-    return other_exp != 0 and typeid(other).name() == typeid(*this).name()
-             and pwr == other_exp->pwr;
+    return other_exp != 0 and typeid(other).name() == typeid(*this).name() and pwr == other_exp->pwr;
 }
 
 /** Return a hash of this Exp function */
 uint Exp::hash() const
 {
-    return ( r_exp.magicID() << 16) | (pwr.hash() & 0x0000FFFF);
+    return (r_exp.magicID() << 16) | (pwr.hash() & 0x0000FFFF);
 }
 
 /** Return a string representation of this function */
@@ -108,13 +110,13 @@ QString Exp::toString() const
 /** Evaluate this expression at 'values' */
 double Exp::evaluate(const Values &values) const
 {
-    return std::exp( pwr.evaluate(values) );
+    return std::exp(pwr.evaluate(values));
 }
 
 /** Complex evaluate */
 Complex Exp::evaluate(const ComplexValues &values) const
 {
-    return SireMaths::exp( pwr.evaluate(values) );
+    return SireMaths::exp(pwr.evaluate(values));
 }
 
 /** Differentiatial of e^x is e^x */
@@ -133,7 +135,7 @@ Expression Exp::integrate(const Symbol &symbol) const
 /** Return the core of this power */
 Expression Exp::core() const
 {
-    return Expression( SireMaths::e );
+    return Expression(SireMaths::e);
 }
 
 /** Return the power of this power */
@@ -142,9 +144,9 @@ Expression Exp::power() const
     return pwr;
 }
 
-const char* Exp::typeName()
+const char *Exp::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Exp>() );
+    return QMetaType::typeName(qMetaTypeId<Exp>());
 }
 
 /////////////
@@ -156,7 +158,7 @@ static const RegisterMetaType<Ln> r_ln;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Ln &ln)
 {
-    writeHeader(ds, r_ln, 1) << static_cast<const SingleFunc&>(ln);
+    writeHeader(ds, r_ln, 1) << static_cast<const SingleFunc &>(ln);
 
     return ds;
 }
@@ -168,7 +170,7 @@ QDataStream &operator>>(QDataStream &ds, Ln &ln)
 
     if (v == 1)
     {
-        ds >> static_cast<SingleFunc&>(ln);
+        ds >> static_cast<SingleFunc &>(ln);
     }
     else
         throw version_error(v, "1", r_ln, CODELOC);
@@ -178,26 +180,29 @@ QDataStream &operator>>(QDataStream &ds, Ln &ln)
 
 /** Construct an empty ln (ln(0)) */
 Ln::Ln() : SingleFunc()
-{}
+{
+}
 
 /** Construct ln(expression) */
 Ln::Ln(const Expression &expression) : SingleFunc(expression)
-{}
+{
+}
 
 /** Copy constructor */
 Ln::Ln(const Ln &other) : SingleFunc(other)
-{}
+{
+}
 
 /** Destructor */
 Ln::~Ln()
-{}
+{
+}
 
 /** Comparison operator */
 bool Ln::operator==(const ExBase &other) const
 {
-    const Ln *other_ln = dynamic_cast<const Ln*>(&other);
-    return other_ln != 0 and typeid(other).name() == typeid(*this).name()
-             and this->argument() == other_ln->argument();
+    const Ln *other_ln = dynamic_cast<const Ln *>(&other);
+    return other_ln != 0 and typeid(other).name() == typeid(*this).name() and this->argument() == other_ln->argument();
 }
 
 /** Return the magic for this function */
@@ -209,13 +214,13 @@ uint Ln::magic() const
 /** Evaluate this function */
 double Ln::evaluate(const Values &values) const
 {
-    return std::log( x().evaluate(values) );
+    return std::log(x().evaluate(values));
 }
 
 /** Complex evaluation */
 Complex Ln::evaluate(const ComplexValues &values) const
 {
-    return SireMaths::log( x().evaluate(values) );
+    return SireMaths::log(x().evaluate(values));
 }
 
 /** differential of ln(x) = 1/x */
@@ -228,22 +233,20 @@ Expression Ln::diff() const
 /** Integral of ln(x) = x ln(x) - x + C */
 Expression Ln::integ() const
 {
-    return x()*Ln(x()) - x();
+    return x() * Ln(x()) - x();
 }
 
-const char* Ln::typeName()
+const char *Ln::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Ln>() );
+    return QMetaType::typeName(qMetaTypeId<Ln>());
 }
 
-Ln* Ln::clone() const
+Ln *Ln::clone() const
 {
     return new Ln(*this);
 }
 
-
-Exp* Exp::clone() const
+Exp *Exp::clone() const
 {
     return new Exp(*this);
 }
-

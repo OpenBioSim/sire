@@ -35,21 +35,21 @@ SIRE_BEGIN_HEADER
 namespace SireError
 {
 
-class exception;
+    class exception;
 
-SIREERROR_EXPORT void setProcessString(const QString &s);
-SIREERROR_EXPORT void setThreadString(const QString &s);
+    SIREERROR_EXPORT void setProcessString(const QString &s);
+    SIREERROR_EXPORT void setThreadString(const QString &s);
 
-SIREERROR_EXPORT QString getProcessString();
-SIREERROR_EXPORT QString getThreadString();
-SIREERROR_EXPORT QString getPIDString();
+    SIREERROR_EXPORT QString getProcessString();
+    SIREERROR_EXPORT QString getThreadString();
+    SIREERROR_EXPORT QString getPIDString();
 
-SIREERROR_EXPORT void printError(const SireError::exception &e);
-SIREERROR_EXPORT void printError(const QString &s);
+    SIREERROR_EXPORT void printError(const SireError::exception &e);
+    SIREERROR_EXPORT void printError(const QString &s);
 
-}
+} // namespace SireError
 
-SIRE_EXPOSE_FUNCTION( SireError::printError );
+SIRE_EXPOSE_FUNCTION(SireError::printError);
 
 SIRE_END_HEADER
 

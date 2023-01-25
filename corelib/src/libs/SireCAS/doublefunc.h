@@ -29,103 +29,101 @@
 #define SIRECAS_DOUBLEFUNC_H
 
 #include "exbase.h"
-#include "symbol.h"
-#include "symbols.h"
-#include "functions.h"
 #include "expression.h"
 #include "expressions.h"
+#include "functions.h"
+#include "symbol.h"
+#include "symbols.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class DoubleFunc;
+    class DoubleFunc;
 }
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::DoubleFunc&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::DoubleFunc&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::DoubleFunc &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::DoubleFunc &);
 
 namespace SireCAS
 {
 
-/** Base class of all double-expression functions ( e.g. f(x(), y()) )
+    /** Base class of all double-expression functions ( e.g. f(x(), y()) )
 
-    @author Christopher Woods
-*/
-class SIRECAS_EXPORT DoubleFunc : public ExBase
-{
+        @author Christopher Woods
+    */
+    class SIRECAS_EXPORT DoubleFunc : public ExBase
+    {
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const DoubleFunc&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, DoubleFunc&);
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const DoubleFunc &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, DoubleFunc &);
 
-public:
-    DoubleFunc();
-    DoubleFunc(const Expression &x, const Expression &y);
+    public:
+        DoubleFunc();
+        DoubleFunc(const Expression &x, const Expression &y);
 
-    DoubleFunc(const DoubleFunc &other);
+        DoubleFunc(const DoubleFunc &other);
 
-    ~DoubleFunc();
+        ~DoubleFunc();
 
-    DoubleFunc& operator=(const DoubleFunc &other);
+        DoubleFunc &operator=(const DoubleFunc &other);
 
-    uint hash() const;
+        uint hash() const;
 
-    const Expression& x() const;
-    const Expression& y() const;
+        const Expression &x() const;
+        const Expression &y() const;
 
-    Expression conjugate() const;
+        Expression conjugate() const;
 
-    bool isFunction(const Symbol &symbol) const;
-    bool isConstant() const;
-    bool isComplex() const;
-    bool isCompound() const;
+        bool isFunction(const Symbol &symbol) const;
+        bool isConstant() const;
+        bool isComplex() const;
+        bool isCompound() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    Expression substitute(const Identities &identities) const;
-    Symbols symbols() const;
-    Functions functions() const;
-    Expressions children() const;
+        Expression substitute(const Identities &identities) const;
+        Symbols symbols() const;
+        Functions functions() const;
+        Expressions children() const;
 
-    Expression differentiate(const Symbol &symbol) const;
-    Expression integrate(const Symbol &symbol) const;
+        Expression differentiate(const Symbol &symbol) const;
+        Expression integrate(const Symbol &symbol) const;
 
-    QList<Factor> expand(const Symbol &symbol) const;
+        QList<Factor> expand(const Symbol &symbol) const;
 
-protected:
+    protected:
+        virtual Expression functionOf(const Expression &x, const Expression &y) const = 0;
 
-    virtual Expression functionOf(const Expression &x,
-                                  const Expression &y) const=0;
+        virtual QString stringRep() const = 0;
 
-    virtual QString stringRep() const=0;
+        virtual uint magic() const = 0;
 
-    virtual uint magic() const=0;
-
-    /** The two expressions that this function operates on */
-    Expression ex0, ex1;
-};
+        /** The two expressions that this function operates on */
+        Expression ex0, ex1;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the first argument - viewed as this is f( x(), y() ) */
-SIRE_ALWAYS_INLINE const Expression& DoubleFunc::x() const
-{
-    return ex0;
-}
+    /** Return the first argument - viewed as this is f( x(), y() ) */
+    SIRE_ALWAYS_INLINE const Expression &DoubleFunc::x() const
+    {
+        return ex0;
+    }
 
-/** Return the second argument - viewed as this is f( x(), y() ) */
-SIRE_ALWAYS_INLINE const Expression& DoubleFunc::y() const
-{
-    return ex1;
-}
+    /** Return the second argument - viewed as this is f( x(), y() ) */
+    SIRE_ALWAYS_INLINE const Expression &DoubleFunc::y() const
+    {
+        return ex1;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-/** To declare a new function copy Min or Max (in minmax.h) */
+    /** To declare a new function copy Min or Max (in minmax.h) */
 
-}
+} // namespace SireCAS
 
-SIRE_EXPOSE_CLASS( SireCAS::DoubleFunc )
+SIRE_EXPOSE_CLASS(SireCAS::DoubleFunc)
 
 SIRE_END_HEADER
 

@@ -63,33 +63,34 @@ QDataStream &operator>>(QDataStream &ds, CGIdentifier &cgid)
         SireStream::loadPolyPointer(ds, cgid.d);
     }
     else
-        throw version_error( v, "1", r_cgid, CODELOC );
+        throw version_error(v, "1", r_cgid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 CGIdentifier::CGIdentifier() : CGID()
-{}
+{
+}
 
 /** Construct from the passed CGID */
-CGIdentifier::CGIdentifier(const CGID &cgid)
-             : CGID()
+CGIdentifier::CGIdentifier(const CGID &cgid) : CGID()
 {
     if (cgid.isA<CGIdentifier>())
         d = cgid.asA<CGIdentifier>().d;
     else if (not cgid.isNull())
-        d.reset( cgid.clone() );
+        d.reset(cgid.clone());
 }
 
 /** Copy constructor */
-CGIdentifier::CGIdentifier(const CGIdentifier &other)
-             : CGID(other), d(other.d)
-{}
+CGIdentifier::CGIdentifier(const CGIdentifier &other) : CGID(other), d(other.d)
+{
+}
 
 /** Destructor */
 CGIdentifier::~CGIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool CGIdentifier::isNull() const
@@ -116,7 +117,7 @@ QString CGIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const CGID& CGIdentifier::base() const
+const CGID &CGIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -125,14 +126,14 @@ const CGID& CGIdentifier::base() const
 }
 
 /** Copy assignment operator */
-CGIdentifier& CGIdentifier::operator=(const CGIdentifier &other)
+CGIdentifier &CGIdentifier::operator=(const CGIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-CGIdentifier& CGIdentifier::operator=(const CGID &other)
+CGIdentifier &CGIdentifier::operator=(const CGID &other)
 {
     if (other.isA<CGIdentifier>())
         d = other.asA<CGIdentifier>().d;
@@ -203,9 +204,9 @@ QList<CGIdx> CGIdentifier::map(const MolInfo &molinfo) const
         return d->map(molinfo);
 }
 
-const char* CGIdentifier::typeName()
+const char *CGIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CGIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<CGIdentifier>());
 }
 
 /////////
@@ -219,7 +220,7 @@ QDataStream &operator<<(QDataStream &ds, const CGIdx &cgidx)
 {
     writeHeader(ds, r_cgidx, 1);
 
-    ds << static_cast<const SireID::Index_T_<CGIdx>&>(cgidx);
+    ds << static_cast<const SireID::Index_T_<CGIdx> &>(cgidx);
 
     return ds;
 }
@@ -231,27 +232,29 @@ QDataStream &operator>>(QDataStream &ds, CGIdx &cgidx)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Index_T_<CGIdx>&>(cgidx);
+        ds >> static_cast<SireID::Index_T_<CGIdx> &>(cgidx);
     }
     else
-        throw version_error( v, "1", r_cgidx, CODELOC );
+        throw version_error(v, "1", r_cgidx, CODELOC);
 
     return ds;
 }
 
 CGIdx::CGIdx() : SireID::Index_T_<CGIdx>(), CGID()
-{}
+{
+}
 
-CGIdx::CGIdx(qint32 idx)
-          : SireID::Index_T_<CGIdx>(idx), CGID()
-{}
+CGIdx::CGIdx(qint32 idx) : SireID::Index_T_<CGIdx>(idx), CGID()
+{
+}
 
-CGIdx::CGIdx(const CGIdx &other)
-          : SireID::Index_T_<CGIdx>(other), CGID(other)
-{}
+CGIdx::CGIdx(const CGIdx &other) : SireID::Index_T_<CGIdx>(other), CGID(other)
+{
+}
 
 CGIdx::~CGIdx()
-{}
+{
+}
 
 CGIdx CGIdx::null()
 {
@@ -273,7 +276,7 @@ QString CGIdx::toString() const
     return QString("CGIdx(%1)").arg(_idx);
 }
 
-CGIdx& CGIdx::operator=(const CGIdx &other)
+CGIdx &CGIdx::operator=(const CGIdx &other)
 {
     SireID::IndexBase::operator=(other);
     CGID::operator=(other);
@@ -290,9 +293,9 @@ QList<CGIdx> CGIdx::map(const MolInfo &molinfo) const
     return molinfo.map(*this);
 }
 
-const char* CGIdx::typeName()
+const char *CGIdx::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CGIdx>() );
+    return QMetaType::typeName(qMetaTypeId<CGIdx>());
 }
 
 /////////
@@ -306,7 +309,7 @@ QDataStream &operator<<(QDataStream &ds, const CGName &cgname)
 {
     writeHeader(ds, r_cgname, 1);
 
-    ds << static_cast<const SireID::Name&>(cgname);
+    ds << static_cast<const SireID::Name &>(cgname);
 
     return ds;
 }
@@ -318,29 +321,34 @@ QDataStream &operator>>(QDataStream &ds, CGName &cgname)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Name&>(cgname);
+        ds >> static_cast<SireID::Name &>(cgname);
     }
     else
-        throw version_error( v, "1", r_cgname, CODELOC );
+        throw version_error(v, "1", r_cgname, CODELOC);
 
     return ds;
 }
 
 CGName::CGName() : SireID::Name(), CGID()
-{}
+{
+}
 
 CGName::CGName(const QString &name) : SireID::Name(name), CGID()
-{}
+{
+}
 
 CGName::CGName(const QString &name, SireID::CaseSensitivity case_sensitivity)
-       : SireID::Name(name, case_sensitivity), CGID()
-{}
+    : SireID::Name(name, case_sensitivity), CGID()
+{
+}
 
 CGName::CGName(const CGName &other) : SireID::Name(other), CGID(other)
-{}
+{
+}
 
 CGName::~CGName()
-{}
+{
+}
 
 bool CGName::isNull() const
 {
@@ -360,7 +368,7 @@ QString CGName::toString() const
         return QString("CGName('%1', isCaseSensitive=False)").arg(_name);
 }
 
-CGName& CGName::operator=(const CGName &other)
+CGName &CGName::operator=(const CGName &other)
 {
     SireID::Name::operator=(other);
     CGID::operator=(other);
@@ -387,25 +395,22 @@ QList<CGIdx> CGName::map(const MolInfo &molinfo) const
     return molinfo.map(*this);
 }
 
-const char* CGName::typeName()
+const char *CGName::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CGName>() );
+    return QMetaType::typeName(qMetaTypeId<CGName>());
 }
 
-CGIdentifier* CGIdentifier::clone() const
+CGIdentifier *CGIdentifier::clone() const
 {
     return new CGIdentifier(*this);
 }
 
-
-CGName* CGName::clone() const
+CGName *CGName::clone() const
 {
     return new CGName(*this);
 }
 
-
-CGIdx* CGIdx::clone() const
+CGIdx *CGIdx::clone() const
 {
     return new CGIdx(*this);
 }
-

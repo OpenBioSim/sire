@@ -32,16 +32,15 @@
 namespace SireBase
 {
 
-namespace detail
-{
+    namespace detail
+    {
 
-void ChunkedVector_throwOutOfRangeError(int i, int n)
-{
-    throw SireError::invalid_index( QObject::tr(
-        "Invalid index (%1) for a ChunkedVector of size %2.")
-            .arg(i).arg(n), CODELOC );
-}
+        void ChunkedVector_throwOutOfRangeError(int i, int n)
+        {
+            throw SireError::invalid_index(QObject::tr("Invalid index (%1) for a ChunkedVector of size %2.").arg(i).arg(n),
+                                           CODELOC);
+        }
 
-}
+    } // namespace detail
 
-}
+} // namespace SireBase

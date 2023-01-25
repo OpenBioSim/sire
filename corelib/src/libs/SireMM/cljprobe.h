@@ -38,189 +38,185 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class CoulombProbe;
-class LJProbe;
-class CLJProbe;
-}
+    class CoulombProbe;
+    class LJProbe;
+    class CLJProbe;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CoulombProbe&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CoulombProbe&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CoulombProbe &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CoulombProbe &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJProbe&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJProbe&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJProbe &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJProbe &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::LJProbe&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::LJProbe&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::LJProbe &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::LJProbe &);
 
 namespace SireMM
 {
 
-/** This is a probe charge that can be used to probe the
-    coulomb electric field or potential in a forcefield */
-class SIREMM_EXPORT CoulombProbe
-        : public SireBase::ConcreteProperty<CoulombProbe,SireFF::Probe>
-{
+    /** This is a probe charge that can be used to probe the
+        coulomb electric field or potential in a forcefield */
+    class SIREMM_EXPORT CoulombProbe : public SireBase::ConcreteProperty<CoulombProbe, SireFF::Probe>
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CoulombProbe&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CoulombProbe&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CoulombProbe &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CoulombProbe &);
 
-public:
-    CoulombProbe();
-    CoulombProbe(SireUnits::Dimension::Charge charge);
-    CoulombProbe(const CLJProbe &cljprobe);
-    CoulombProbe(const SireFF::Probe &probe);
+    public:
+        CoulombProbe();
+        CoulombProbe(SireUnits::Dimension::Charge charge);
+        CoulombProbe(const CLJProbe &cljprobe);
+        CoulombProbe(const SireFF::Probe &probe);
 
-    CoulombProbe(const CoulombProbe &other);
+        CoulombProbe(const CoulombProbe &other);
 
-    ~CoulombProbe();
+        ~CoulombProbe();
 
-    CoulombProbe& operator=(const CoulombProbe &other);
+        CoulombProbe &operator=(const CoulombProbe &other);
 
-    bool operator==(const CoulombProbe &other) const;
-    bool operator!=(const CoulombProbe &other) const;
+        bool operator==(const CoulombProbe &other) const;
+        bool operator!=(const CoulombProbe &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    SireUnits::Dimension::Charge charge() const;
-    double reducedCharge() const;
+        SireUnits::Dimension::Charge charge() const;
+        double reducedCharge() const;
 
-private:
-    /** The actual charge on the probe */
-    SireUnits::Dimension::Charge chg;
+    private:
+        /** The actual charge on the probe */
+        SireUnits::Dimension::Charge chg;
 
-    /** The charge in reduced units */
-    double reduced_chg;
-};
+        /** The charge in reduced units */
+        double reduced_chg;
+    };
 
-/** This is a probe charge that can be used to probe the
-    LJ field or potential in a forcefield */
-class SIREMM_EXPORT LJProbe
-        : public SireBase::ConcreteProperty<LJProbe,SireFF::Probe>
-{
+    /** This is a probe charge that can be used to probe the
+        LJ field or potential in a forcefield */
+    class SIREMM_EXPORT LJProbe : public SireBase::ConcreteProperty<LJProbe, SireFF::Probe>
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const LJProbe&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, LJProbe&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const LJProbe &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, LJProbe &);
 
-public:
-    LJProbe();
-    LJProbe(const LJParameter &ljparam);
-    LJProbe(const CLJProbe &cljprobe);
-    LJProbe(const SireFF::Probe &probe);
+    public:
+        LJProbe();
+        LJProbe(const LJParameter &ljparam);
+        LJProbe(const CLJProbe &cljprobe);
+        LJProbe(const SireFF::Probe &probe);
 
-    LJProbe(const LJProbe &other);
+        LJProbe(const LJProbe &other);
 
-    ~LJProbe();
+        ~LJProbe();
 
-    LJProbe& operator=(const LJProbe &other);
+        LJProbe &operator=(const LJProbe &other);
 
-    bool operator==(const LJProbe &other) const;
-    bool operator!=(const LJProbe &other) const;
+        bool operator==(const LJProbe &other) const;
+        bool operator!=(const LJProbe &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const LJParameter& lj() const;
+        const LJParameter &lj() const;
 
-private:
-    /** The LJ parameter that represents the probe */
-    LJParameter ljparam;
-};
+    private:
+        /** The LJ parameter that represents the probe */
+        LJParameter ljparam;
+    };
 
-/** This is a probe used to probe the coulomb+LJ field
-    or potential at points in a forcefield */
-class SIREMM_EXPORT CLJProbe
-        : public SireBase::ConcreteProperty<CLJProbe,SireFF::Probe>
-{
+    /** This is a probe used to probe the coulomb+LJ field
+        or potential at points in a forcefield */
+    class SIREMM_EXPORT CLJProbe : public SireBase::ConcreteProperty<CLJProbe, SireFF::Probe>
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJProbe&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJProbe&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJProbe &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJProbe &);
 
-public:
-    CLJProbe();
-    CLJProbe(SireUnits::Dimension::Charge charge);
-    CLJProbe(const LJParameter &ljparam);
-    CLJProbe(SireUnits::Dimension::Charge charge, const LJParameter &ljparam);
+    public:
+        CLJProbe();
+        CLJProbe(SireUnits::Dimension::Charge charge);
+        CLJProbe(const LJParameter &ljparam);
+        CLJProbe(SireUnits::Dimension::Charge charge, const LJParameter &ljparam);
 
-    CLJProbe(const CoulombProbe &probe);
-    CLJProbe(const LJProbe &probe);
-    CLJProbe(const SireFF::Probe &probe);
+        CLJProbe(const CoulombProbe &probe);
+        CLJProbe(const LJProbe &probe);
+        CLJProbe(const SireFF::Probe &probe);
 
-    CLJProbe(const CLJProbe &cljprobe);
+        CLJProbe(const CLJProbe &cljprobe);
 
-    ~CLJProbe();
+        ~CLJProbe();
 
-    CLJProbe& operator=(const CLJProbe &other);
+        CLJProbe &operator=(const CLJProbe &other);
 
-    bool operator==(const CLJProbe &other) const;
-    bool operator!=(const CLJProbe &other) const;
+        bool operator==(const CLJProbe &other) const;
+        bool operator!=(const CLJProbe &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    SireUnits::Dimension::Charge charge() const;
-    double reducedCharge() const;
+        SireUnits::Dimension::Charge charge() const;
+        double reducedCharge() const;
 
-    const LJParameter& lj() const;
+        const LJParameter &lj() const;
 
-private:
-    /** The LJ parameter that represents the probe */
-    LJParameter ljparam;
+    private:
+        /** The LJ parameter that represents the probe */
+        LJParameter ljparam;
 
-    /** The charge on the probe */
-    SireUnits::Dimension::Charge chg;
+        /** The charge on the probe */
+        SireUnits::Dimension::Charge chg;
 
-    /** The charge in reduced units */
-    double reduced_chg;
-};
+        /** The charge in reduced units */
+        double reduced_chg;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the charge on the probe */
-SIRE_ALWAYS_INLINE SireUnits::Dimension::Charge CoulombProbe::charge() const
-{
-    return chg;
-}
+    /** Return the charge on the probe */
+    SIRE_ALWAYS_INLINE SireUnits::Dimension::Charge CoulombProbe::charge() const
+    {
+        return chg;
+    }
 
-/** Return the reduced charge on the probe */
-SIRE_ALWAYS_INLINE double CoulombProbe::reducedCharge() const
-{
-    return reduced_chg;
-}
+    /** Return the reduced charge on the probe */
+    SIRE_ALWAYS_INLINE double CoulombProbe::reducedCharge() const
+    {
+        return reduced_chg;
+    }
 
-/** Return the LJ parameters for this probe */
-SIRE_ALWAYS_INLINE const LJParameter& LJProbe::lj() const
-{
-    return ljparam;
-}
+    /** Return the LJ parameters for this probe */
+    SIRE_ALWAYS_INLINE const LJParameter &LJProbe::lj() const
+    {
+        return ljparam;
+    }
 
-/** Return the charge on the probe */
-SIRE_ALWAYS_INLINE SireUnits::Dimension::Charge CLJProbe::charge() const
-{
-    return chg;
-}
+    /** Return the charge on the probe */
+    SIRE_ALWAYS_INLINE SireUnits::Dimension::Charge CLJProbe::charge() const
+    {
+        return chg;
+    }
 
-/** Return the reduced charge on the probe */
-SIRE_ALWAYS_INLINE double CLJProbe::reducedCharge() const
-{
-    return reduced_chg;
-}
+    /** Return the reduced charge on the probe */
+    SIRE_ALWAYS_INLINE double CLJProbe::reducedCharge() const
+    {
+        return reduced_chg;
+    }
 
-/** Return the LJ parameters for this probe */
-SIRE_ALWAYS_INLINE const LJParameter& CLJProbe::lj() const
-{
-    return ljparam;
-}
-
+    /** Return the LJ parameters for this probe */
+    SIRE_ALWAYS_INLINE const LJParameter &CLJProbe::lj() const
+    {
+        return ljparam;
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::CoulombProbe )
-Q_DECLARE_METATYPE( SireMM::LJProbe )
-Q_DECLARE_METATYPE( SireMM::CLJProbe )
+Q_DECLARE_METATYPE(SireMM::CoulombProbe)
+Q_DECLARE_METATYPE(SireMM::LJProbe)
+Q_DECLARE_METATYPE(SireMM::CLJProbe)
 
-SIRE_EXPOSE_CLASS( SireMM::CoulombProbe )
-SIRE_EXPOSE_CLASS( SireMM::LJProbe )
-SIRE_EXPOSE_CLASS( SireMM::CLJProbe )
+SIRE_EXPOSE_CLASS(SireMM::CoulombProbe)
+SIRE_EXPOSE_CLASS(SireMM::LJProbe)
+SIRE_EXPOSE_CLASS(SireMM::CLJProbe)
 
 SIRE_END_HEADER
 

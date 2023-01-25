@@ -64,13 +64,12 @@ QDataStream &operator>>(QDataStream &ds, Stereoscopy &s)
 }
 
 /** Constructor (default is an undefined stereoscopy) */
-Stereoscopy::Stereoscopy()
-            : ConcreteProperty<Stereoscopy,Property>(), stereo_type(-1)
-{}
+Stereoscopy::Stereoscopy() : ConcreteProperty<Stereoscopy, Property>(), stereo_type(-1)
+{
+}
 
 /** Construct from the passed string */
-Stereoscopy::Stereoscopy(const QString &str)
-            : ConcreteProperty<Stereoscopy,Property>()
+Stereoscopy::Stereoscopy(const QString &str) : ConcreteProperty<Stereoscopy, Property>()
 {
     auto s = str.trimmed().toLower();
 
@@ -83,15 +82,14 @@ Stereoscopy::Stereoscopy(const QString &str)
     else if (s == "undefined")
         this->stereo_type = -1;
     else
-        throw SireError::invalid_arg(QObject::tr(
-            "Cannot interpret stereo type '%1'. Should be one of "
-            "'up', 'down', 'not stereo' or 'undefined'.")
-              .arg(str), CODELOC);
+        throw SireError::invalid_arg(QObject::tr("Cannot interpret stereo type '%1'. Should be one of "
+                                                 "'up', 'down', 'not stereo' or 'undefined'.")
+                                         .arg(str),
+                                     CODELOC);
 }
 
 /** Construct from the the passed number */
-Stereoscopy::Stereoscopy(int value)
-            : ConcreteProperty<Stereoscopy,Property>()
+Stereoscopy::Stereoscopy(int value) : ConcreteProperty<Stereoscopy, Property>()
 {
     if (value == 0 or value == 1 or value == -1 or value == 6)
     {
@@ -99,24 +97,26 @@ Stereoscopy::Stereoscopy(int value)
     }
     else
     {
-        throw SireError::invalid_arg(QObject::tr(
-            "Invalid stereo type '%1'. Should be an integer in "
-            "[-1, 0, 1, 6]").arg(value), CODELOC);
+        throw SireError::invalid_arg(QObject::tr("Invalid stereo type '%1'. Should be an integer in "
+                                                 "[-1, 0, 1, 6]")
+                                         .arg(value),
+                                     CODELOC);
     }
 }
 
 /** Copy constructor */
 Stereoscopy::Stereoscopy(const Stereoscopy &other)
-         : ConcreteProperty<Stereoscopy,Property>(other),
-           stereo_type(other.stereo_type)
-{}
+    : ConcreteProperty<Stereoscopy, Property>(other), stereo_type(other.stereo_type)
+{
+}
 
 /** Destructor */
 Stereoscopy::~Stereoscopy()
-{}
+{
+}
 
 /** Copy assignment operator */
-Stereoscopy& Stereoscopy::operator=(const Stereoscopy &other)
+Stereoscopy &Stereoscopy::operator=(const Stereoscopy &other)
 {
     stereo_type = other.stereo_type;
     return *this;
@@ -134,27 +134,25 @@ bool Stereoscopy::operator!=(const Stereoscopy &other) const
     return not this->operator==(other);
 }
 
-const char* Stereoscopy::typeName()
+const char *Stereoscopy::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Stereoscopy>() );
+    return QMetaType::typeName(qMetaTypeId<Stereoscopy>());
 }
 
 QString Stereoscopy::toString() const
 {
     switch (this->stereo_type)
     {
-        case 0:
-            return "not stereo";
-        case 1:
-            return "up";
-        case 6:
-            return "down";
-        case -1:
-            return "undefined";
-        default:
-            throw SireError::program_bug(
-                QObject::tr("Should not get here: %1").arg(this->stereo_type),
-                  CODELOC);
+    case 0:
+        return "not stereo";
+    case 1:
+        return "up";
+    case 6:
+        return "down";
+    case -1:
+        return "undefined";
+    default:
+        throw SireError::program_bug(QObject::tr("Should not get here: %1").arg(this->stereo_type), CODELOC);
     }
 }
 

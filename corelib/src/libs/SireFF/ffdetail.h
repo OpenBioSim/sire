@@ -28,83 +28,83 @@
 #ifndef SIREFF_FFDETAIL_H
 #define SIREFF_FFDETAIL_H
 
-#include "SireBase/property.h"
 #include "SireBase/properties.h"
+#include "SireBase/property.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireFF
 {
-class FFDetail;
+    class FFDetail;
 }
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::FFDetail&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::FFDetail&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::FFDetail &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::FFDetail &);
 
 namespace SireFF
 {
 
-using SireBase::Property;
-using SireBase::Properties;
+    using SireBase::Properties;
+    using SireBase::Property;
 
-/** This is the base class of the classes that provide details about
-    the forcefield of a molecule or system. The details include the
-    canonical name of the forcefield. When specialised into
-    SireMM::MMDetail it describes whether it uses LJ parameters,
-    combining rules, default 1-4 scale factors, functional forms
-    of internal parameters etc. etc.
+    /** This is the base class of the classes that provide details about
+        the forcefield of a molecule or system. The details include the
+        canonical name of the forcefield. When specialised into
+        SireMM::MMDetail it describes whether it uses LJ parameters,
+        combining rules, default 1-4 scale factors, functional forms
+        of internal parameters etc. etc.
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFDetail : public SireBase::Property
-{
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFDetail : public SireBase::Property
+    {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const FFDetail&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFDetail&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const FFDetail &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, FFDetail &);
 
-public:
-    FFDetail();
-    FFDetail(const QString &name);
+    public:
+        FFDetail();
+        FFDetail(const QString &name);
 
-    FFDetail(const FFDetail &other);
+        FFDetail(const FFDetail &other);
 
-    virtual ~FFDetail();
+        virtual ~FFDetail();
 
-    virtual FFDetail* clone() const=0;
+        virtual FFDetail *clone() const = 0;
 
-    FFDetail& operator=(const FFDetail &other);
+        FFDetail &operator=(const FFDetail &other);
 
-    bool operator==(const FFDetail &other) const;
-    bool operator!=(const FFDetail &other) const;
+        bool operator==(const FFDetail &other) const;
+        bool operator!=(const FFDetail &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString name() const;
+        QString name() const;
 
-    Properties properties() const;
+        Properties properties() const;
 
-    bool isNull() const;
+        bool isNull() const;
 
-    virtual bool isCompatibleWith(const FFDetail &other) const=0;
-    void assertCompatibleWith(const FFDetail &other) const;
+        virtual bool isCompatibleWith(const FFDetail &other) const = 0;
+        void assertCompatibleWith(const FFDetail &other) const;
 
-    static SireBase::PropertyPtr get(QString forcefield);
-    static QStringList forcefields();
+        static SireBase::PropertyPtr get(QString forcefield);
+        static QStringList forcefields();
 
-protected:
-    void setProperty(const QString &key, const Property &value);
-    const Property& property(const QString &key) const;
+    protected:
+        void setProperty(const QString &key, const Property &value);
+        const Property &property(const QString &key) const;
 
-    static SireBase::PropertyPtr registerForceField(const FFDetail &ff);
+        static SireBase::PropertyPtr registerForceField(const FFDetail &ff);
 
-private:
-    /** The store of all of the forcefield properties */
-    Properties props;
-};
+    private:
+        /** The store of all of the forcefield properties */
+        Properties props;
+    };
 
-}
+} // namespace SireFF
 
-SIRE_EXPOSE_CLASS( SireFF::FFDetail )
+SIRE_EXPOSE_CLASS(SireFF::FFDetail)
 
 SIRE_END_HEADER
 

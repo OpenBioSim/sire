@@ -36,76 +36,75 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class BeadIdx;
+    class BeadIdx;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::BeadIdx&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::BeadIdx&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::BeadIdx &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::BeadIdx &);
 
 namespace SireMol
 {
 
-class CGAtomIdx;
+    class CGAtomIdx;
 
-/** This is an ID object that is used to index CutGroups
+    /** This is an ID object that is used to index CutGroups
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT BeadIdx
-       : public SireID::Index_T_<BeadIdx>, public BeadID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const BeadIdx&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, BeadIdx&);
-
-public:
-    BeadIdx();
-
-    explicit BeadIdx(qint32 idx);
-
-    BeadIdx(const BeadIdx &other);
-
-    ~BeadIdx();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT BeadIdx : public SireID::Index_T_<BeadIdx>, public BeadID
     {
-        return SireID::Index_T_<BeadIdx>::what();
-    }
 
-    BeadIdx* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const BeadIdx &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, BeadIdx &);
 
-    static BeadIdx null();
+    public:
+        BeadIdx();
 
-    bool isNull() const;
+        explicit BeadIdx(qint32 idx);
 
-    uint hash() const;
+        BeadIdx(const BeadIdx &other);
 
-    QString toString() const;
+        ~BeadIdx();
 
-    BeadIdx& operator=(const BeadIdx &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return SireID::Index_T_<BeadIdx>::what();
+        }
 
-    using SireID::Index_T_<BeadIdx>::operator=;
+        BeadIdx *clone() const;
 
-    using SireID::Index_T_<BeadIdx>::operator==;
-    using SireID::Index_T_<BeadIdx>::operator!=;
+        static BeadIdx null();
 
-    using SireID::Index_T_<BeadIdx>::operator+=;
-    using SireID::Index_T_<BeadIdx>::operator++;
-    using SireID::Index_T_<BeadIdx>::operator-=;
-    using SireID::Index_T_<BeadIdx>::operator--;
+        bool isNull() const;
 
-    using SireID::Index_T_<BeadIdx>::map;
-};
+        uint hash() const;
 
-}
+        QString toString() const;
+
+        BeadIdx &operator=(const BeadIdx &other);
+
+        bool operator==(const SireID::ID &other) const;
+
+        using SireID::Index_T_<BeadIdx>::operator=;
+
+        using SireID::Index_T_<BeadIdx>::operator==;
+        using SireID::Index_T_<BeadIdx>::operator!=;
+
+        using SireID::Index_T_<BeadIdx>::operator+=;
+        using SireID::Index_T_<BeadIdx>::operator++;
+        using SireID::Index_T_<BeadIdx>::operator-=;
+        using SireID::Index_T_<BeadIdx>::operator--;
+
+        using SireID::Index_T_<BeadIdx>::map;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::BeadIdx);
 
-SIRE_EXPOSE_CLASS( SireMol::BeadIdx )
+SIRE_EXPOSE_CLASS(SireMol::BeadIdx)
 
 SIRE_END_HEADER
 

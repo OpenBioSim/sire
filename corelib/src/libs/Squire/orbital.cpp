@@ -38,14 +38,14 @@ using namespace SireStream;
 //////////// Implementation of Orbital
 ////////////
 
-static const RegisterMetaType<Orbital> r_orbital( MAGIC_ONLY, Orbital::typeName() );
+static const RegisterMetaType<Orbital> r_orbital(MAGIC_ONLY, Orbital::typeName());
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Orbital &orbital)
 {
     writeHeader(ds, r_orbital, 1);
 
-    ds << static_cast<const Property&>(orbital);
+    ds << static_cast<const Property &>(orbital);
 
     return ds;
 }
@@ -57,7 +57,7 @@ QDataStream &operator>>(QDataStream &ds, Orbital &orbital)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(orbital);
+        ds >> static_cast<Property &>(orbital);
     }
     else
         throw version_error(v, "1", r_orbital, CODELOC);
@@ -67,18 +67,21 @@ QDataStream &operator>>(QDataStream &ds, Orbital &orbital)
 
 /** Constructor */
 Orbital::Orbital() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 Orbital::Orbital(const Orbital &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 Orbital::~Orbital()
-{}
+{
+}
 
 /** Copy assignment operator */
-Orbital& Orbital::operator=(const Orbital &other)
+Orbital &Orbital::operator=(const Orbital &other)
 {
     Property::operator=(other);
     return *this;
@@ -96,7 +99,7 @@ bool Orbital::operator!=(const Orbital &other) const
     return Property::operator!=(other);
 }
 
-const char* Orbital::typeName()
+const char *Orbital::typeName()
 {
     return "Squire::Orbital";
 }
@@ -105,15 +108,14 @@ const char* Orbital::typeName()
 //////////// Implementation of OrbitalShell
 ////////////
 
-static const RegisterMetaType<OrbitalShell> r_orbshell( MAGIC_ONLY,
-                                                        OrbitalShell::typeName() );
+static const RegisterMetaType<OrbitalShell> r_orbshell(MAGIC_ONLY, OrbitalShell::typeName());
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const OrbitalShell &orbshell)
 {
     writeHeader(ds, r_orbshell, 1);
 
-    ds << static_cast<const Orbital&>(orbshell);
+    ds << static_cast<const Orbital &>(orbshell);
 
     return ds;
 }
@@ -125,7 +127,7 @@ QDataStream &operator>>(QDataStream &ds, OrbitalShell &orbshell)
 
     if (v == 1)
     {
-        ds >> static_cast<Orbital&>(orbshell);
+        ds >> static_cast<Orbital &>(orbshell);
     }
     else
         throw version_error(v, "1", r_orbshell, CODELOC);
@@ -135,18 +137,21 @@ QDataStream &operator>>(QDataStream &ds, OrbitalShell &orbshell)
 
 /** Constructor */
 OrbitalShell::OrbitalShell() : Orbital()
-{}
+{
+}
 
 /** Copy constructor */
 OrbitalShell::OrbitalShell(const OrbitalShell &other) : Orbital(other)
-{}
+{
+}
 
 /** Destructor */
 OrbitalShell::~OrbitalShell()
-{}
+{
+}
 
 /** Copy assignment operator */
-OrbitalShell& OrbitalShell::operator=(const OrbitalShell &other)
+OrbitalShell &OrbitalShell::operator=(const OrbitalShell &other)
 {
     Orbital::operator=(other);
     return *this;
@@ -164,7 +169,7 @@ bool OrbitalShell::operator!=(const OrbitalShell &other) const
     return Orbital::operator!=(other);
 }
 
-const char* OrbitalShell::typeName()
+const char *OrbitalShell::typeName()
 {
     return "Squire::OrbitalShell";
 }
@@ -173,14 +178,14 @@ const char* OrbitalShell::typeName()
 //////////// Implementation of ShellPair
 ////////////
 
-static const RegisterMetaType<ShellPair> r_shellpair( MAGIC_ONLY, ShellPair::typeName() );
+static const RegisterMetaType<ShellPair> r_shellpair(MAGIC_ONLY, ShellPair::typeName());
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const ShellPair &pair)
 {
     writeHeader(ds, r_shellpair, 1);
 
-    ds << static_cast<const Property&>(pair);
+    ds << static_cast<const Property &>(pair);
 
     return ds;
 }
@@ -192,7 +197,7 @@ QDataStream &operator>>(QDataStream &ds, ShellPair &pair)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(pair);
+        ds >> static_cast<Property &>(pair);
     }
     else
         throw version_error(v, "1", r_shellpair, CODELOC);
@@ -202,18 +207,21 @@ QDataStream &operator>>(QDataStream &ds, ShellPair &pair)
 
 /** Constructor */
 ShellPair::ShellPair() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 ShellPair::ShellPair(const ShellPair &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 ShellPair::~ShellPair()
-{}
+{
+}
 
 /** Copy assignment operator */
-ShellPair& ShellPair::operator=(const ShellPair &other)
+ShellPair &ShellPair::operator=(const ShellPair &other)
 {
     Property::operator=(other);
     return *this;
@@ -231,7 +239,7 @@ bool ShellPair::operator!=(const ShellPair &other) const
     return Property::operator!=(other);
 }
 
-const char* ShellPair::typeName()
+const char *ShellPair::typeName()
 {
     return "Squire::ShellPair";
 }

@@ -35,46 +35,48 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-namespace parser
-{
-    class SIREMOL_EXPORT Parser
+    namespace parser
     {
-    public:
-        Parser()
-        {}
+        class SIREMOL_EXPORT Parser
+        {
+        public:
+            Parser()
+            {
+            }
 
-        virtual ~Parser()
-        {}
+            virtual ~Parser()
+            {
+            }
 
-        static void install_parser(Parser *parser);
+            static void install_parser(Parser *parser);
 
-        virtual bool has_token(const QString &token)=0;
+            virtual bool has_token(const QString &token) = 0;
 
-        virtual QString get_token(const QString &token)=0;
+            virtual QString get_token(const QString &token) = 0;
 
-        virtual void set_token(const QString &token, const QString &selection)=0;
+            virtual void set_token(const QString &token, const QString &selection) = 0;
 
-        virtual void delete_token(const QString &token)=0;
+            virtual void delete_token(const QString &token) = 0;
 
-        virtual void delete_all_tokens()=0;
+            virtual void delete_all_tokens() = 0;
 
-        virtual void reset_tokens()=0;
+            virtual void reset_tokens() = 0;
 
-        virtual SireMol::parser::SelectEnginePtr parse(const QString &str)=0;
+            virtual SireMol::parser::SelectEnginePtr parse(const QString &str) = 0;
 
-        static Parser& globalParser();
+            static Parser &globalParser();
 
-    private:
-        static Parser* global_parser;
-    };
+        private:
+            static Parser *global_parser;
+        };
 
-    void set_token(const QString &token, const QString &selection);
-    void reset_tokens();
+        void set_token(const QString &token, const QString &selection);
+        void reset_tokens();
 
-    SireMol::parser::SelectEnginePtr parse(const QString &str);
-}
+        SireMol::parser::SelectEnginePtr parse(const QString &str);
+    } // namespace parser
 
-}
+} // namespace SireMol
 
 SIRE_END_HEADER
 

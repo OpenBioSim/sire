@@ -28,414 +28,408 @@
 #ifndef SIREMATHS_ACCUMULATOR_H
 #define SIREMATHS_ACCUMULATOR_H
 
-#include "SireBase/property.h"
 #include "SireBase/chunkedvector.hpp"
+#include "SireBase/property.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class Accumulator;
-class NullAccumulator;
-class Average;
-class AverageAndStddev;
-class ExpAverage;
-class Median;
-class RecordValues;
-}
+    class Accumulator;
+    class NullAccumulator;
+    class Average;
+    class AverageAndStddev;
+    class ExpAverage;
+    class Median;
+    class RecordValues;
+} // namespace SireMaths
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Accumulator&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Accumulator&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Accumulator &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Accumulator &);
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::NullAccumulator&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::NullAccumulator&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::NullAccumulator &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::NullAccumulator &);
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Average&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Average&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Average &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Average &);
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::AverageAndStddev&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::AverageAndStddev&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::AverageAndStddev &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::AverageAndStddev &);
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::ExpAverage&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::ExpAverage&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::ExpAverage &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::ExpAverage &);
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Median&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Median&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Median &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Median &);
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::RecordValues&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::RecordValues&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::RecordValues &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::RecordValues &);
 
 namespace SireMaths
 {
 
-/** This is the base class of all Accumulators - these are objects
-    that can accumulate values and calculate properties of that
-    collection of values - e.g. they could accumulate the values
-    so that the mean average could be collected, or so that the
-    maximum and minimum values could be determined etc.
+    /** This is the base class of all Accumulators - these are objects
+        that can accumulate values and calculate properties of that
+        collection of values - e.g. they could accumulate the values
+        so that the mean average could be collected, or so that the
+        maximum and minimum values could be determined etc.
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT Accumulator : public SireBase::Property
-{
-
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Accumulator&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Accumulator&);
-
-public:
-    Accumulator();
-
-    Accumulator(const Accumulator &other);
-
-    virtual ~Accumulator();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Accumulator : public SireBase::Property
     {
-        return "SireMaths::Accumulator";
-    }
 
-    virtual Accumulator* clone() const=0;
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Accumulator &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Accumulator &);
 
-    virtual int nSamples() const;
+    public:
+        Accumulator();
 
-    virtual void accumulate(double value);
+        Accumulator(const Accumulator &other);
 
-    virtual void accumulate(const QVector<double> &values);
-    virtual void accumulate(const QList<double> &values);
+        virtual ~Accumulator();
 
-    virtual void clear();
+        static const char *typeName()
+        {
+            return "SireMaths::Accumulator";
+        }
 
-    static const NullAccumulator& null();
+        virtual Accumulator *clone() const = 0;
 
-protected:
-    Accumulator& operator=(const Accumulator &other);
+        virtual int nSamples() const;
 
-    bool operator==(const Accumulator &other) const;
-    bool operator!=(const Accumulator &other) const;
+        virtual void accumulate(double value);
 
-    void add(int nsteps);
+        virtual void accumulate(const QVector<double> &values);
+        virtual void accumulate(const QList<double> &values);
 
-private:
-    /** The number of values that have been accumulated */
-    quint32 nvalues;
-};
+        virtual void clear();
 
-/** This is the null accumulator that doesn't accumulate anything
+        static const NullAccumulator &null();
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT NullAccumulator
-            : public SireBase::ConcreteProperty<NullAccumulator,Accumulator>
-{
+    protected:
+        Accumulator &operator=(const Accumulator &other);
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const NullAccumulator&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, NullAccumulator&);
+        bool operator==(const Accumulator &other) const;
+        bool operator!=(const Accumulator &other) const;
 
-public:
-    NullAccumulator();
+        void add(int nsteps);
 
-    NullAccumulator(const NullAccumulator &other);
+    private:
+        /** The number of values that have been accumulated */
+        quint32 nvalues;
+    };
 
-    ~NullAccumulator();
+    /** This is the null accumulator that doesn't accumulate anything
 
-    NullAccumulator& operator=(const NullAccumulator &other);
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT NullAccumulator : public SireBase::ConcreteProperty<NullAccumulator, Accumulator>
+    {
 
-    static const char* typeName();
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const NullAccumulator &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, NullAccumulator &);
 
-    bool operator==(const NullAccumulator &other) const;
-    bool operator!=(const NullAccumulator &other) const;
+    public:
+        NullAccumulator();
 
-    void accumulate(double value);
-};
+        NullAccumulator(const NullAccumulator &other);
 
-/** This class is used to accumulate the mean average of a collection
-    of values
+        ~NullAccumulator();
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT Average
-            : public SireBase::ConcreteProperty<Average,Accumulator>
-{
+        NullAccumulator &operator=(const NullAccumulator &other);
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Average&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Average&);
+        static const char *typeName();
 
-public:
-    Average();
+        bool operator==(const NullAccumulator &other) const;
+        bool operator!=(const NullAccumulator &other) const;
 
-    Average(const Average &other);
+        void accumulate(double value);
+    };
 
-    ~Average();
+    /** This class is used to accumulate the mean average of a collection
+        of values
 
-    Average& operator=(const Average &other);
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Average : public SireBase::ConcreteProperty<Average, Accumulator>
+    {
 
-    static const char* typeName();
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Average &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Average &);
 
-    bool operator==(const Average &other) const;
-    bool operator!=(const Average &other) const;
+    public:
+        Average();
 
-    Average operator+(const Average &other) const;
-    Average& operator+=(const Average &other);
+        Average(const Average &other);
 
-    QString toString() const;
+        ~Average();
 
-    void clear();
+        Average &operator=(const Average &other);
 
-    void accumulate(double value);
+        static const char *typeName();
 
-    double average() const;
+        bool operator==(const Average &other) const;
+        bool operator!=(const Average &other) const;
 
-    operator double() const;
+        Average operator+(const Average &other) const;
+        Average &operator+=(const Average &other);
 
-private:
-    /** The current average value */
-    double avgval;
-};
+        QString toString() const;
 
-/** This class is used to accumulate the mean average
-    and standard deviation of a collection of values
+        void clear();
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT AverageAndStddev
-         : public SireBase::ConcreteProperty<AverageAndStddev,Average>
-{
+        void accumulate(double value);
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const AverageAndStddev&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, AverageAndStddev&);
+        double average() const;
 
-public:
-    AverageAndStddev();
+        operator double() const;
 
-    AverageAndStddev(const AverageAndStddev &other);
+    private:
+        /** The current average value */
+        double avgval;
+    };
 
-    ~AverageAndStddev();
+    /** This class is used to accumulate the mean average
+        and standard deviation of a collection of values
 
-    AverageAndStddev& operator=(const AverageAndStddev &other);
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT AverageAndStddev : public SireBase::ConcreteProperty<AverageAndStddev, Average>
+    {
 
-    AverageAndStddev operator+(const AverageAndStddev &other) const;
-    AverageAndStddev& operator+=(const AverageAndStddev &other);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const AverageAndStddev &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, AverageAndStddev &);
 
-    static const char* typeName();
+    public:
+        AverageAndStddev();
 
-    bool operator==(const AverageAndStddev &other) const;
-    bool operator!=(const AverageAndStddev &other) const;
+        AverageAndStddev(const AverageAndStddev &other);
 
-    void clear();
+        ~AverageAndStddev();
 
-    QString toString() const;
+        AverageAndStddev &operator=(const AverageAndStddev &other);
 
-    void accumulate(double value);
+        AverageAndStddev operator+(const AverageAndStddev &other) const;
+        AverageAndStddev &operator+=(const AverageAndStddev &other);
 
-    double stddev() const;
-    double standardDeviation() const;
+        static const char *typeName();
 
-    double meanOfSquares() const;
+        bool operator==(const AverageAndStddev &other) const;
+        bool operator!=(const AverageAndStddev &other) const;
 
-    double standardError() const;
-    double standardError(int level) const;
+        void clear();
 
-private:
-    /** The current average of the squares */
-    double avgval2;
-};
+        QString toString() const;
 
-/** This class is used to accumulate the exponential average
-    of a collection of values - this is the average formed
-    as;
+        void accumulate(double value);
 
-    avg =  scale * ln( Mean of e^(value/scale) )
+        double stddev() const;
+        double standardDeviation() const;
 
-    It is used to weight the average, e.g. if scale = -kT
-    then this Boltzmann weights the average
+        double meanOfSquares() const;
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT ExpAverage
-            : public SireBase::ConcreteProperty<ExpAverage,Accumulator>
-{
+        double standardError() const;
+        double standardError(int level) const;
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const ExpAverage&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, ExpAverage&);
+    private:
+        /** The current average of the squares */
+        double avgval2;
+    };
 
-public:
-    ExpAverage(double scale=1);
+    /** This class is used to accumulate the exponential average
+        of a collection of values - this is the average formed
+        as;
 
-    ExpAverage(const ExpAverage &other);
+        avg =  scale * ln( Mean of e^(value/scale) )
 
-    ~ExpAverage();
+        It is used to weight the average, e.g. if scale = -kT
+        then this Boltzmann weights the average
 
-    ExpAverage& operator=(const ExpAverage &other);
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT ExpAverage : public SireBase::ConcreteProperty<ExpAverage, Accumulator>
+    {
 
-    ExpAverage operator+(const ExpAverage &other) const;
-    ExpAverage& operator+=(const ExpAverage &other);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const ExpAverage &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, ExpAverage &);
 
-    static const char* typeName();
+    public:
+        ExpAverage(double scale = 1);
 
-    bool operator==(const ExpAverage &other) const;
-    bool operator!=(const ExpAverage &other) const;
+        ExpAverage(const ExpAverage &other);
 
-    void clear();
+        ~ExpAverage();
 
-    QString toString() const;
+        ExpAverage &operator=(const ExpAverage &other);
 
-    void accumulate(double value);
+        ExpAverage operator+(const ExpAverage &other) const;
+        ExpAverage &operator+=(const ExpAverage &other);
 
-    double average() const;
-    double average2() const;
+        static const char *typeName();
 
-    operator double() const;
+        bool operator==(const ExpAverage &other) const;
+        bool operator!=(const ExpAverage &other) const;
 
-protected:
-    double scaleFactor() const;
+        void clear();
 
-private:
-    /** The intermediate in the average calculation */
-    double avgval;
+        QString toString() const;
 
-    /** The average of the squared value in the calculation */
-    double avgval2;
+        void accumulate(double value);
 
-    /** The scaling factor */
-    double sclfac;
-};
+        double average() const;
+        double average2() const;
 
-/** This class is used to calculate the maximum, minimum and median
-    of a collection of values
+        operator double() const;
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT Median
-            : public SireBase::ConcreteProperty<Median,Accumulator>
-{
+    protected:
+        double scaleFactor() const;
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Median&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Median&);
+    private:
+        /** The intermediate in the average calculation */
+        double avgval;
 
-public:
-    Median();
+        /** The average of the squared value in the calculation */
+        double avgval2;
 
-    Median(const Median &other);
+        /** The scaling factor */
+        double sclfac;
+    };
 
-    ~Median();
+    /** This class is used to calculate the maximum, minimum and median
+        of a collection of values
 
-    Median& operator=(const Median &other);
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Median : public SireBase::ConcreteProperty<Median, Accumulator>
+    {
 
-    static const char* typeName();
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Median &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Median &);
 
-    bool operator==(const Median &other) const;
-    bool operator!=(const Median &other) const;
+    public:
+        Median();
 
-    void clear();
+        Median(const Median &other);
 
-    QString toString() const;
+        ~Median();
 
-    void accumulate(double value);
+        Median &operator=(const Median &other);
 
-    double max() const;
-    double maximum() const;
+        static const char *typeName();
 
-    double median() const;
+        bool operator==(const Median &other) const;
+        bool operator!=(const Median &other) const;
 
-    double min() const;
-    double minimum() const;
+        void clear();
 
-    operator double() const;
+        QString toString() const;
 
-private:
-    /** The current minimum value */
-    double minval;
+        void accumulate(double value);
 
-    /** The current maximum value */
-    double maxval;
-};
+        double max() const;
+        double maximum() const;
 
-/** This class is used to collect a record of all of the values.
-    This allows you to extract the values and calculate whatever
-    statistical property you wish in post-production
+        double median() const;
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT RecordValues
-            : public SireBase::ConcreteProperty<RecordValues,Accumulator>
-{
+        double min() const;
+        double minimum() const;
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const RecordValues&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, RecordValues&);
+        operator double() const;
 
-public:
-    RecordValues();
+    private:
+        /** The current minimum value */
+        double minval;
 
-    RecordValues(const RecordValues &other);
+        /** The current maximum value */
+        double maxval;
+    };
 
-    ~RecordValues();
+    /** This class is used to collect a record of all of the values.
+        This allows you to extract the values and calculate whatever
+        statistical property you wish in post-production
 
-    RecordValues& operator=(const RecordValues &other);
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT RecordValues : public SireBase::ConcreteProperty<RecordValues, Accumulator>
+    {
 
-    static const char* typeName();
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const RecordValues &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, RecordValues &);
 
-    bool operator==(const RecordValues &other) const;
-    bool operator!=(const RecordValues &other) const;
+    public:
+        RecordValues();
 
-    void clear();
+        RecordValues(const RecordValues &other);
 
-    QString toString() const;
+        ~RecordValues();
 
-    void accumulate(double value);
+        RecordValues &operator=(const RecordValues &other);
 
-    double max() const;
-    double maximum() const;
+        static const char *typeName();
 
-    double median() const;
-    double mean() const;
+        bool operator==(const RecordValues &other) const;
+        bool operator!=(const RecordValues &other) const;
 
-    double min() const;
-    double minimum() const;
+        void clear();
 
-    double sum() const;
-    double sum2() const;
+        QString toString() const;
 
-    double meanOfSquares() const;
+        void accumulate(double value);
 
-    double standardDeviation() const;
-    double stddev() const;
+        double max() const;
+        double maximum() const;
 
-    int count() const;
-    int size() const;
-    int nValues() const;
+        double median() const;
+        double mean() const;
 
-    operator double() const;
+        double min() const;
+        double minimum() const;
 
-    QVector<double> values() const;
+        double sum() const;
+        double sum2() const;
 
-private:
-    /** The record of all values */
-    SireBase::ChunkedVector<double,2048> vals;
-};
+        double meanOfSquares() const;
 
-typedef SireBase::PropPtr<Accumulator> AccumulatorPtr;
+        double standardDeviation() const;
+        double stddev() const;
 
-}
+        int count() const;
+        int size() const;
+        int nValues() const;
 
-Q_DECLARE_METATYPE( SireMaths::NullAccumulator )
-Q_DECLARE_METATYPE( SireMaths::Average )
-Q_DECLARE_METATYPE( SireMaths::AverageAndStddev )
-Q_DECLARE_METATYPE( SireMaths::ExpAverage )
-Q_DECLARE_METATYPE( SireMaths::Median )
-Q_DECLARE_METATYPE( SireMaths::RecordValues )
+        operator double() const;
 
-SIRE_EXPOSE_CLASS( SireMaths::Accumulator )
-SIRE_EXPOSE_CLASS( SireMaths::NullAccumulator )
-SIRE_EXPOSE_CLASS( SireMaths::Average )
-SIRE_EXPOSE_CLASS( SireMaths::AverageAndStddev )
-SIRE_EXPOSE_CLASS( SireMaths::ExpAverage )
-SIRE_EXPOSE_CLASS( SireMaths::Median )
-SIRE_EXPOSE_CLASS( SireMaths::RecordValues )
+        QVector<double> values() const;
 
-SIRE_EXPOSE_PROPERTY( SireMaths::AccumulatorPtr, SireMaths::Accumulator )
+    private:
+        /** The record of all values */
+        SireBase::ChunkedVector<double, 2048> vals;
+    };
 
-SIRE_EXPOSE_ALIAS( SireBase::Array2D<SireBase::PropPtr<SireMaths::Accumulator> >,
-                   SireBase::Array2D_SireMaths_AccumulatorPtr_ )
+    typedef SireBase::PropPtr<Accumulator> AccumulatorPtr;
+
+} // namespace SireMaths
+
+Q_DECLARE_METATYPE(SireMaths::NullAccumulator)
+Q_DECLARE_METATYPE(SireMaths::Average)
+Q_DECLARE_METATYPE(SireMaths::AverageAndStddev)
+Q_DECLARE_METATYPE(SireMaths::ExpAverage)
+Q_DECLARE_METATYPE(SireMaths::Median)
+Q_DECLARE_METATYPE(SireMaths::RecordValues)
+
+SIRE_EXPOSE_CLASS(SireMaths::Accumulator)
+SIRE_EXPOSE_CLASS(SireMaths::NullAccumulator)
+SIRE_EXPOSE_CLASS(SireMaths::Average)
+SIRE_EXPOSE_CLASS(SireMaths::AverageAndStddev)
+SIRE_EXPOSE_CLASS(SireMaths::ExpAverage)
+SIRE_EXPOSE_CLASS(SireMaths::Median)
+SIRE_EXPOSE_CLASS(SireMaths::RecordValues)
+
+SIRE_EXPOSE_PROPERTY(SireMaths::AccumulatorPtr, SireMaths::Accumulator)
+
+SIRE_EXPOSE_ALIAS(SireBase::Array2D<SireBase::PropPtr<SireMaths::Accumulator>>,
+                  SireBase::Array2D_SireMaths_AccumulatorPtr_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 #include "SireBase/array2d.hpp"

@@ -38,104 +38,103 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class CombineProperties;
+    class CombineProperties;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::CombineProperties&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::CombineProperties&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::CombineProperties &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::CombineProperties &);
 
 namespace SireBase
 {
 
-/** This is the base class of a property alias which provides
-    a combination of existing properties. Use this to build
-    properties that don't exist independently, but are
-    rather built by combining together other properties.
+    /** This is the base class of a property alias which provides
+        a combination of existing properties. Use this to build
+        properties that don't exist independently, but are
+        rather built by combining together other properties.
 
-    For a good example, see SireVol::CombineSpaces
+        For a good example, see SireVol::CombineSpaces
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT CombineProperties : public Property
-{
-
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const CombineProperties&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, CombineProperties&);
-
-public:
-    typedef QVector<PropertyName>::const_iterator const_iterator;
-    typedef const_iterator iterator;
-
-    CombineProperties();
-
-    CombineProperties(const PropertyName &property0);
-
-    CombineProperties(const PropertyName &property0,
-                      const PropertyName &property1);
-
-    CombineProperties(const QList<PropertyName> &properties);
-    CombineProperties(const QList<QString> &properties);
-
-    CombineProperties(const QVector<PropertyName> &properties);
-    CombineProperties(const QVector<QString> &properties);
-
-    CombineProperties(const CombineProperties &other);
-
-    ~CombineProperties();
-
-    static const char* typeName()
-    {
-        return "SireBase::CombineProperties";
-    }
-
-    const PropertyName& operator[](int i) const;
-
-    const PropertyName& at(int i) const;
-
-    QString toString() const;
-
-    int nSources() const;
-    int count() const;
-    int size() const;
-
-    bool isEmpty() const;
-
-    const_iterator constBegin() const;
-    const_iterator begin() const;
-
-    const_iterator constEnd() const;
-    const_iterator end() const;
-
-    const Property& combinedProperty() const;
-
-    /** Update this combined property by fetching the necessary
-        properties to combine from 'properties'
-
-        \throw SireBase::missing_property
-        \throw SireError::invalid_cast
-        \throw SireError::incompatible_error
+        @author Christopher Woods
     */
-    virtual void updateFrom(const Properties &properties)=0;
+    class SIREBASE_EXPORT CombineProperties : public Property
+    {
 
-protected:
-    CombineProperties& operator=(const CombineProperties &other);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const CombineProperties &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, CombineProperties &);
 
-    bool operator==(const CombineProperties &other) const;
-    bool operator!=(const CombineProperties &other) const;
+    public:
+        typedef QVector<PropertyName>::const_iterator const_iterator;
+        typedef const_iterator iterator;
 
-    void setCombinedProperty(const Property &property);
+        CombineProperties();
 
-private:
-    /** The sources of the properties to be combined together */
-    QVector<PropertyName> property_sources;
+        CombineProperties(const PropertyName &property0);
 
-    /** The combined property */
-    PropertyPtr combined_property;
-};
+        CombineProperties(const PropertyName &property0, const PropertyName &property1);
 
-}
+        CombineProperties(const QList<PropertyName> &properties);
+        CombineProperties(const QList<QString> &properties);
 
-SIRE_EXPOSE_CLASS( SireBase::CombineProperties )
+        CombineProperties(const QVector<PropertyName> &properties);
+        CombineProperties(const QVector<QString> &properties);
+
+        CombineProperties(const CombineProperties &other);
+
+        ~CombineProperties();
+
+        static const char *typeName()
+        {
+            return "SireBase::CombineProperties";
+        }
+
+        const PropertyName &operator[](int i) const;
+
+        const PropertyName &at(int i) const;
+
+        QString toString() const;
+
+        int nSources() const;
+        int count() const;
+        int size() const;
+
+        bool isEmpty() const;
+
+        const_iterator constBegin() const;
+        const_iterator begin() const;
+
+        const_iterator constEnd() const;
+        const_iterator end() const;
+
+        const Property &combinedProperty() const;
+
+        /** Update this combined property by fetching the necessary
+            properties to combine from 'properties'
+
+            \throw SireBase::missing_property
+            \throw SireError::invalid_cast
+            \throw SireError::incompatible_error
+        */
+        virtual void updateFrom(const Properties &properties) = 0;
+
+    protected:
+        CombineProperties &operator=(const CombineProperties &other);
+
+        bool operator==(const CombineProperties &other) const;
+        bool operator!=(const CombineProperties &other) const;
+
+        void setCombinedProperty(const Property &property);
+
+    private:
+        /** The sources of the properties to be combined together */
+        QVector<PropertyName> property_sources;
+
+        /** The combined property */
+        PropertyPtr combined_property;
+    };
+
+} // namespace SireBase
+
+SIRE_EXPOSE_CLASS(SireBase::CombineProperties)
 
 SIRE_END_HEADER
 

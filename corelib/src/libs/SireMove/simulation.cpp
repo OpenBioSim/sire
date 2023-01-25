@@ -37,24 +37,27 @@ using namespace SireCluster;
 
 /** Null constructor */
 Simulation::Simulation()
-{}
+{
+}
 
 /** Internal function used to construct from the promise
     of a running simulation */
-Simulation::Simulation(const SireCluster::Promise &promise)
-           : sim_promise(promise)
-{}
+Simulation::Simulation(const SireCluster::Promise &promise) : sim_promise(promise)
+{
+}
 
 /** Copy constructor */
 Simulation::Simulation(const Simulation &other) : sim_promise(other.sim_promise)
-{}
+{
+}
 
 /** Destructor */
 Simulation::~Simulation()
-{}
+{
+}
 
 /** Copy assignment operator */
-Simulation& Simulation::operator=(const Simulation &other)
+Simulation &Simulation::operator=(const Simulation &other)
 {
     sim_promise = other.sim_promise;
     return *this;
@@ -74,9 +77,9 @@ bool Simulation::operator!=(const Simulation &other) const
 
 /** Run the simulation contained in the simulation WorkPacket 'simpacket'
     on the node 'node' */
-Simulation Simulation::run( Node &node, const SimPacket &simpacket )
+Simulation Simulation::run(Node &node, const SimPacket &simpacket)
 {
-    return Simulation( node.startJob(simpacket) );
+    return Simulation(node.startJob(simpacket));
 }
 
 /** Run a simulation consisting of 'nmoves' moves (in 'moves')
@@ -84,11 +87,9 @@ Simulation Simulation::run( Node &node, const SimPacket &simpacket )
     statistics if 'record_stats' is true. This runs the
     simulation on the node 'node'. This runs 'nmoves_per_chunk'
     moves in every chunk of the simulation. */
-Simulation Simulation::run( Node &node,
-                            const System &system, const Moves &moves,
-                            int nmoves, bool record_stats )
+Simulation Simulation::run(Node &node, const System &system, const Moves &moves, int nmoves, bool record_stats)
 {
-    return Simulation::run( node, SimPacket(system, moves, nmoves, record_stats) );
+    return Simulation::run(node, SimPacket(system, moves, nmoves, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves (in 'move')
@@ -96,12 +97,9 @@ Simulation Simulation::run( Node &node,
     statistics if 'record_stats' is true. This runs the
     simulation on the node 'node'. This runs 'nmoves_per_chunk'
     moves in every chunk of the simulation. */
-Simulation Simulation::run( Node &node,
-                            const System &system, const Move &move,
-                            int nmoves, bool record_stats )
+Simulation Simulation::run(Node &node, const System &system, const Move &move, int nmoves, bool record_stats)
 {
-    return Simulation::run( node, SimPacket(system, SameMoves(move),
-                                            nmoves, record_stats) );
+    return Simulation::run(node, SimPacket(system, SameMoves(move), nmoves, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves (in 'moves')
@@ -109,13 +107,10 @@ Simulation Simulation::run( Node &node,
     statistics if 'record_stats' is true. This runs the
     simulation on the node 'node'. This runs 'nmoves_per_chunk'
     moves in every chunk of the simulation. */
-Simulation Simulation::run( Node &node,
-                            const System &system, const Moves &moves,
-                            int nmoves, int nmoves_per_chunk,
-                            bool record_stats )
+Simulation Simulation::run(Node &node, const System &system, const Moves &moves, int nmoves, int nmoves_per_chunk,
+                           bool record_stats)
 {
-    return Simulation::run( node, SimPacket(system, moves, nmoves,
-                                            nmoves_per_chunk, record_stats) );
+    return Simulation::run(node, SimPacket(system, moves, nmoves, nmoves_per_chunk, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves (in 'move')
@@ -123,13 +118,10 @@ Simulation Simulation::run( Node &node,
     statistics if 'record_stats' is true. This runs the
     simulation on the node 'node'. This runs 'nmoves_per_chunk'
     moves in every chunk of the simulation. */
-Simulation Simulation::run( Node &node,
-                            const System &system, const Move &move,
-                            int nmoves, int nmoves_per_chunk,
-                            bool record_stats )
+Simulation Simulation::run(Node &node, const System &system, const Move &move, int nmoves, int nmoves_per_chunk,
+                           bool record_stats)
 {
-    return Simulation::run( node, SimPacket(system, SameMoves(move), nmoves,
-                                            nmoves_per_chunk, record_stats) );
+    return Simulation::run(node, SimPacket(system, SameMoves(move), nmoves, nmoves_per_chunk, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves of the system
@@ -137,11 +129,9 @@ Simulation Simulation::run( Node &node,
     statistics if 'record_stats' is true. This runs the
     simulation on the node 'node'. This runs 'nmoves_per_chunk'
     moves in every chunk of the simulation. */
-Simulation Simulation::run( Node &node,
-                            const SimStore &simstore,
-                            int nmoves, bool record_stats )
+Simulation Simulation::run(Node &node, const SimStore &simstore, int nmoves, bool record_stats)
 {
-    return Simulation::run( node, SimPacket(simstore, nmoves, record_stats) );
+    return Simulation::run(node, SimPacket(simstore, nmoves, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves  of the system
@@ -149,27 +139,24 @@ Simulation Simulation::run( Node &node,
     statistics if 'record_stats' is true. This runs the
     simulation on the node 'node'. This runs 'nmoves_per_chunk'
     moves in every chunk of the simulation. */
-Simulation Simulation::run( Node &node,
-                            const SimStore &simstore,
-                            int nmoves, int nmoves_per_chunk,
-                            bool record_stats )
+Simulation Simulation::run(Node &node, const SimStore &simstore, int nmoves, int nmoves_per_chunk, bool record_stats)
 {
-    return Simulation::run( node, SimPacket(simstore, nmoves,
-                                            nmoves_per_chunk, record_stats) );
+    return Simulation::run(node, SimPacket(simstore, nmoves, nmoves_per_chunk, record_stats));
 }
 
 /** Run the simulation contained in the simulation WorkPacket 'simpacket'
     in the current thread */
-Simulation Simulation::run( const SimPacket &simpacket )
+Simulation Simulation::run(const SimPacket &simpacket)
 {
     Nodes nodes;
 
     ThisThread this_thread = nodes.borrowThisThread();
 
     if (nodes.isEmpty())
-        throw SireError::unavailable_resource( QObject::tr(
-            "This thread is unavailable for running a simulation. It is already "
-            "busy doing something else!"), CODELOC );
+        throw SireError::unavailable_resource(
+            QObject::tr("This thread is unavailable for running a simulation. It is already "
+                        "busy doing something else!"),
+            CODELOC);
 
     Node node = nodes.getNode();
 
@@ -184,21 +171,18 @@ Simulation Simulation::run( const SimPacket &simpacket )
     of the System 'system', optionally recording simulation
     statistics if 'record_stats' is true. This runs the
     simulation in the current thread */
-Simulation Simulation::run( const System &system, const Moves &moves,
-                            int nmoves, bool record_stats )
+Simulation Simulation::run(const System &system, const Moves &moves, int nmoves, bool record_stats)
 {
-    return Simulation::run( SimPacket(system, moves, nmoves, record_stats) );
+    return Simulation::run(SimPacket(system, moves, nmoves, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves (in 'move')
     of the System 'system', optionally recording simulation
     statistics if 'record_stats' is true. This runs the
     simulation in the current thread */
-Simulation Simulation::run( const System &system, const Move &move,
-                            int nmoves, bool record_stats )
+Simulation Simulation::run(const System &system, const Move &move, int nmoves, bool record_stats)
 {
-    return Simulation::run( SimPacket(system, SameMoves(move),
-                                      nmoves, record_stats) );
+    return Simulation::run(SimPacket(system, SameMoves(move), nmoves, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves (in 'moves')
@@ -206,12 +190,10 @@ Simulation Simulation::run( const System &system, const Move &move,
     statistics if 'record_stats' is true. This runs the
     simulation in the current thread. This runs 'nmoves_per_chunk'
     moves in every chunk of the simulation. */
-Simulation Simulation::run( const System &system, const Moves &moves,
-                            int nmoves, int nmoves_per_chunk,
-                            bool record_stats )
+Simulation Simulation::run(const System &system, const Moves &moves, int nmoves, int nmoves_per_chunk,
+                           bool record_stats)
 {
-    return Simulation::run( SimPacket(system, moves, nmoves,
-                                      nmoves_per_chunk, record_stats) );
+    return Simulation::run(SimPacket(system, moves, nmoves, nmoves_per_chunk, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves (in 'move')
@@ -219,22 +201,18 @@ Simulation Simulation::run( const System &system, const Moves &moves,
     statistics if 'record_stats' is true. This runs the
     simulation in the current thread. This runs 'nmoves_per_chunk'
     moves in every chunk of the simulation. */
-Simulation Simulation::run( const System &system, const Move &move,
-                            int nmoves, int nmoves_per_chunk,
-                            bool record_stats )
+Simulation Simulation::run(const System &system, const Move &move, int nmoves, int nmoves_per_chunk, bool record_stats)
 {
-    return Simulation::run( SimPacket(system, SameMoves(move), nmoves,
-                                      nmoves_per_chunk, record_stats) );
+    return Simulation::run(SimPacket(system, SameMoves(move), nmoves, nmoves_per_chunk, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves of the system
     in 'simstore' (which also contains the moves) optionally recording simulation
     statistics if 'record_stats' is true. This runs the
     simulation in the current thread */
-Simulation Simulation::run( const SimStore &simstore,
-                            int nmoves, bool record_stats )
+Simulation Simulation::run(const SimStore &simstore, int nmoves, bool record_stats)
 {
-    return Simulation::run( SimPacket(simstore, nmoves, record_stats) );
+    return Simulation::run(SimPacket(simstore, nmoves, record_stats));
 }
 
 /** Run a simulation consisting of 'nmoves' moves of the system
@@ -242,12 +220,9 @@ Simulation Simulation::run( const SimStore &simstore,
     statistics if 'record_stats' is true. This runs the
     simulation in the current thread. This runs 'nmoves_per_chunk'
     moves in every chunk of the simulation. */
-Simulation Simulation::run( const SimStore &simstore,
-                            int nmoves, int nmoves_per_chunk,
-                            bool record_stats )
+Simulation Simulation::run(const SimStore &simstore, int nmoves, int nmoves_per_chunk, bool record_stats)
 {
-    return Simulation::run( SimPacket(simstore, nmoves,
-                                      nmoves_per_chunk, record_stats) );
+    return Simulation::run(SimPacket(simstore, nmoves, nmoves_per_chunk, record_stats));
 }
 
 /** Abort the simulation */
@@ -299,7 +274,7 @@ bool Simulation::hasFinished()
 
     else
     {
-        //we aren't running any more - lets see what happened
+        // we aren't running any more - lets see what happened
         if (this->isError() or this->wasAborted())
             return false;
 
@@ -309,7 +284,7 @@ bool Simulation::hasFinished()
 
             return sim.nCompleted() == sim.nMoves();
         }
-        catch(...)
+        catch (...)
         {
             return false;
         }
@@ -353,17 +328,17 @@ SimPacket Simulation::input()
 
         if (initial_packet.isNull())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the input simulation WorkPacket? How has "
-                "it become null?"), CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the input simulation WorkPacket? How has "
+                                                     "it become null?"),
+                                         CODELOC);
         }
 
         if (not initial_packet.isA<SimPacket>())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the input simulation WorkPacket? How has "
-                "it turned into a %1?").arg(initial_packet.base().what()),
-                    CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the input simulation WorkPacket? How has "
+                                                     "it turned into a %1?")
+                                             .arg(initial_packet.base().what()),
+                                         CODELOC);
         }
 
         return initial_packet.asA<SimPacket>();
@@ -394,17 +369,17 @@ SimPacket Simulation::interimResult()
 
         if (interim_packet.isNull())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the interim simulation WorkPacket? How has "
-                "it become null?"), CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the interim simulation WorkPacket? How has "
+                                                     "it become null?"),
+                                         CODELOC);
         }
 
         if (not interim_packet.isA<SimPacket>())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the interim simulation WorkPacket? How has "
-                "it turned into a %1?").arg(interim_packet.base().what()),
-                    CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the interim simulation WorkPacket? How has "
+                                                     "it turned into a %1?")
+                                             .arg(interim_packet.base().what()),
+                                         CODELOC);
         }
 
         return interim_packet.asA<SimPacket>();
@@ -435,17 +410,17 @@ SimPacket Simulation::result()
 
         if (result_packet.isNull())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the simulation result WorkPacket? How has "
-                "it become null?"), CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the simulation result WorkPacket? How has "
+                                                     "it become null?"),
+                                         CODELOC);
         }
 
         if (not result_packet.isA<SimPacket>())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the simulation result WorkPacket? How has "
-                "it turned into a %1?").arg(result_packet.base().what()),
-                    CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the simulation result WorkPacket? How has "
+                                                     "it turned into a %1?")
+                                             .arg(result_packet.base().what()),
+                                         CODELOC);
         }
 
         return result_packet.asA<SimPacket>();

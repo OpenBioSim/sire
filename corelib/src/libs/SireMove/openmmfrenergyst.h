@@ -32,55 +32,54 @@
 #include "integrator.h"
 
 #ifdef SIRE_USE_OPENMM
-    #include <OpenMM.h>   // CONDITIONAL_INCLUDE
+#include <OpenMM.h> // CONDITIONAL_INCLUDE
 #endif
 
-#include <cstdio>
-#include "SireUnits/temperature.h"
 #include "SireSystem/system.h"
+#include "SireUnits/temperature.h"
 #include <boost/tuple/tuple.hpp>
+#include <cstdio>
 SIRE_BEGIN_HEADER
 
 #ifdef SIRE_USE_OPENMM
 
-        namespace SireMove {
+namespace SireMove
+{
     class OpenMMFrEnergyST;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::OpenMMFrEnergyST&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::OpenMMFrEnergyST&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::OpenMMFrEnergyST &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::OpenMMFrEnergyST &);
 
-namespace SireMove {
+namespace SireMove
+{
 
     /** This class implements single topology a free energy method using OpenMM.
 
         @author Julien Michel,Gaetano Calabro and Antonia Mey
      */
-    class SIREMOVE_EXPORT OpenMMFrEnergyST
-    : public SireBase::ConcreteProperty<OpenMMFrEnergyST, Integrator> {
-        friend QDataStream& ::operator<<(QDataStream&, const OpenMMFrEnergyST&);
-        friend QDataStream& ::operator>>(QDataStream&, OpenMMFrEnergyST&);
+    class SIREMOVE_EXPORT OpenMMFrEnergyST : public SireBase::ConcreteProperty<OpenMMFrEnergyST, Integrator>
+    {
+        friend QDataStream & ::operator<<(QDataStream &, const OpenMMFrEnergyST &);
+        friend QDataStream & ::operator>>(QDataStream &, OpenMMFrEnergyST &);
 
     public:
         OpenMMFrEnergyST(bool frequent_save_velocities = false);
 
-        OpenMMFrEnergyST(const MoleculeGroup &molecule_group,
-                const MoleculeGroup &solutes,
-                const MoleculeGroup &solute_hard,
-                const MoleculeGroup &solute_todummy,
-                const MoleculeGroup & solute_fromdummy,
-                bool frequent_save_velocities = false);
+        OpenMMFrEnergyST(const MoleculeGroup &molecule_group, const MoleculeGroup &solutes,
+                         const MoleculeGroup &solute_hard, const MoleculeGroup &solute_todummy,
+                         const MoleculeGroup &solute_fromdummy, bool frequent_save_velocities = false);
 
         OpenMMFrEnergyST(const OpenMMFrEnergyST &other);
 
         ~OpenMMFrEnergyST();
 
-        OpenMMFrEnergyST& operator=(const OpenMMFrEnergyST &other);
+        OpenMMFrEnergyST &operator=(const OpenMMFrEnergyST &other);
 
         bool operator==(const OpenMMFrEnergyST &other) const;
         bool operator!=(const OpenMMFrEnergyST &other) const;
 
-        static const char* typeName();
+        static const char *typeName();
 
         QString toString() const;
 
@@ -90,24 +89,20 @@ namespace SireMove {
 
         void initialise();
 
-
         SireUnits::Dimension::MolarEnergy getPotentialEnergy(const System &system);
 
         System minimiseEnergy(System &system, double tolerance, int max_iteration);
 
-        System annealSystemToLambda(System &system, SireUnits::Dimension::Time anneal_step_size,
-                int annealing_steps);
+        System annealSystemToLambda(System &system, SireUnits::Dimension::Time anneal_step_size, int annealing_steps);
 
-        void integrate(IntegratorWorkspace &workspace,
-                const Symbol &nrg_component,
-                SireUnits::Dimension::Time timestep,
-                int nmoves, bool record_stats);
+        void integrate(IntegratorWorkspace &workspace, const Symbol &nrg_component, SireUnits::Dimension::Time timestep,
+                       int nmoves, bool record_stats);
 
         IntegratorWorkspacePtr createWorkspace(const PropertyMap &map = PropertyMap()) const;
         IntegratorWorkspacePtr createWorkspace(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap()) const;
 
-	QString getCombiningRules(void);
-	void setCombiningRules(QString);
+        QString getCombiningRules(void);
+        void setCombiningRules(QString);
 
         QString getCutoffType(void);
         void setCutoffType(QString);
@@ -180,7 +175,7 @@ namespace SireMove {
         QVector<double> getForwardMetropolis(void);
         QVector<double> getBackwardMetropolis(void);
 
-        QVector<QVector <double> > getReducedPerturbedEnergies(void);
+        QVector<QVector<double>> getReducedPerturbedEnergies(void);
 
         QString getIntegrator(void);
         void setIntegrator(QString);
@@ -200,20 +195,18 @@ namespace SireMove {
         int getRandomSeed(void);
         void setRandomSeed(int);
 
-	void setDebug(bool);
+        void setDebug(bool);
 
     private:
-        void createContext(IntegratorWorkspace &workspace,
-                SireUnits::Dimension::Time timestep);
+        void createContext(IntegratorWorkspace &workspace, SireUnits::Dimension::Time timestep);
         void destroyContext();
-        void updateBoxDimensions(OpenMM::State &state_openmm,
-				 QVector<QVector<Vector>> &buffered_dimensions,
-				 AtomicVelocityWorkspace &ws);
+        void updateBoxDimensions(OpenMM::State &state_openmm, QVector<QVector<Vector>> &buffered_dimensions,
+                                 AtomicVelocityWorkspace &ws);
 
         double getPotentialEnergyAtLambda(double lambda);
         void updateOpenMMContextLambda(double lambda);
-        boost::tuples::tuple<double, double, double> calculateGradient(double increment_plus,
-        double increment_minus, double potential_energy_lambda, double beta);
+        boost::tuples::tuple<double, double, double> calculateGradient(double increment_plus, double increment_minus,
+                                                                       double potential_energy_lambda, double beta);
         QVector<double> computeReducedPerturbedEnergies(double);
         void emptyContainers(void);
 
@@ -231,15 +224,15 @@ namespace SireMove {
         MolGroupPtr solutefromdummy;
 
         /**Try instead to...keep a copy of OpenMM::System */
-        OpenMM::System* openmm_system;
+        OpenMM::System *openmm_system;
 
-        OpenMM::Context* openmm_context;
+        OpenMM::Context *openmm_context;
 
         /** Whether the openmm system and the context have been initialised*/
         bool isSystemInitialised;
         bool isContextInitialised;
 
-	QString combiningRules;
+        QString combiningRules;
         QString CutoffType;
         SireUnits::Dimension::Length cutoff_distance;
         double field_dielectric;
@@ -287,7 +280,7 @@ namespace SireMove {
 
         QVector<double> backward_Metropolis;
 
-        QVector<QVector <double> > reduced_perturbed_energies;
+        QVector<QVector<double>> reduced_perturbed_energies;
 
         QVector<bool> perturbed_energies;
 
@@ -299,17 +292,14 @@ namespace SireMove {
 
         SireUnits::Dimension::Time timeskip;
 
-
         bool reinitialise_context;
 
         bool Debug;
 
         int random_seed;
-
     };
 
-
-}
+} // namespace SireMove
 
 Q_DECLARE_METATYPE(SireMove::OpenMMFrEnergyST)
 
@@ -319,24 +309,27 @@ SIRE_END_HEADER
 
 #else // SIRE_USE_OPENMM
 
-        namespace SireMove {
+namespace SireMove
+{
 
-    class OpenMMFrEnergyST {
+    class OpenMMFrEnergyST
+    {
     public:
-
-        OpenMMFrEnergyST() {
+        OpenMMFrEnergyST()
+        {
         }
 
-        ~OpenMMFrEnergyST() {
+        ~OpenMMFrEnergyST()
+        {
         }
 
-        static const char* typeName() {
+        static const char *typeName()
+        {
             return "SireMM::OpenMMFrEnergyST";
         }
-
     };
 
-}
+} // namespace SireMove
 
 Q_DECLARE_METATYPE(SireMove::OpenMMFrEnergyST)
 

@@ -37,13 +37,13 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-typedef AtomProperty< SireMol::Radical > AtomRadicals;
+    typedef AtomProperty<SireMol::Radical> AtomRadicals;
 
 }
 
-Q_DECLARE_METATYPE( SireMol::AtomRadicals );
+Q_DECLARE_METATYPE(SireMol::AtomRadicals);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireMol::Radical, SireMol::AtomRadicals )
+SIRE_EXPOSE_ATOM_PROPERTY(SireMol::Radical, SireMol::AtomRadicals)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireMol::AtomProperty<SireMol::Radical>;

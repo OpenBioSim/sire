@@ -29,8 +29,8 @@
 #define SIREBASE_PROPERTYMAP_H
 
 #include <QHash>
-#include <QString>
 #include <QList>
+#include <QString>
 
 #include "property.h"
 
@@ -38,190 +38,190 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class PropertyName;
-class PropertyMap;
-}
+    class PropertyName;
+    class PropertyMap;
+} // namespace SireBase
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::PropertyName&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::PropertyName&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::PropertyName &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::PropertyName &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::PropertyMap&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::PropertyMap&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::PropertyMap &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::PropertyMap &);
 
 namespace SireBase
 {
 
-class Properties;
+    class Properties;
 
-/** This class is used to store the registered name of the
-    property (used as the offial name of the property
-    by the code in the program, e.g. "coordinates" is the
-    official name of the coordinates property, "charges"
-    is the official name of the charges), the name for
-    the property assigned by the user (so the user can
-    say that the "charges" property is actually in the
-    property called "my charges") and an overridden
-    value for the property that is used instead of
-    the value found in the object being queried
-    (so the user can say to use a specific value of
-     a property)
+    /** This class is used to store the registered name of the
+        property (used as the offial name of the property
+        by the code in the program, e.g. "coordinates" is the
+        official name of the coordinates property, "charges"
+        is the official name of the charges), the name for
+        the property assigned by the user (so the user can
+        say that the "charges" property is actually in the
+        property called "my charges") and an overridden
+        value for the property that is used instead of
+        the value found in the object being queried
+        (so the user can say to use a specific value of
+         a property)
 
-    This class is not used directly by the code, but
-    is instead used as part of the Property::set( ) function,
-    so that the user can write;
+        This class is not used directly by the code, but
+        is instead used as part of the Property::set( ) function,
+        so that the user can write;
 
-    cljff.add( mol, Property::set("charges","chgs") +
-                    Property::set("ljs","ljparams") );
+        cljff.add( mol, Property::set("charges","chgs") +
+                        Property::set("ljs","ljparams") );
 
-    The PropertyMap/PropertyName classes provide a kwargs
-    like interface for the C++ classes - indeed the python
-    wrappers should allow code to be written like;
+        The PropertyMap/PropertyName classes provide a kwargs
+        like interface for the C++ classes - indeed the python
+        wrappers should allow code to be written like;
 
-    cljff.add( mol, {"charges" : "chgs", "ljs" : "ljparams"} )
+        cljff.add( mol, {"charges" : "chgs", "ljs" : "ljparams"} )
 
-    or
+        or
 
-    cljff.add( mol, charges=="charges", ljs=="ljparams" )
+        cljff.add( mol, charges=="charges", ljs=="ljparams" )
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT PropertyName
-{
-
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const PropertyName&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, PropertyName&);
-
-public:
-    PropertyName();
-    PropertyName(const char* source);
-
-    PropertyName(const QString &source);
-    PropertyName(const QString &source, const Property &default_value);
-
-    PropertyName(const Property &value);
-
-    PropertyName(const PropertyName &other);
-
-    ~PropertyName();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT PropertyName
     {
-        return PropertyName::typeName();
-    }
 
-    PropertyName& operator=(const PropertyName &other);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const PropertyName &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, PropertyName &);
 
-    bool operator==(const PropertyName &other) const;
-    bool operator!=(const PropertyName &other) const;
+    public:
+        PropertyName();
+        PropertyName(const char *source);
 
-    bool hasSource() const;
-    bool hasValue() const;
+        PropertyName(const QString &source);
+        PropertyName(const QString &source, const Property &default_value);
 
-    bool hasDefaultValue() const;
+        PropertyName(const Property &value);
 
-    bool isNull() const;
+        PropertyName(const PropertyName &other);
 
-    const QString& source() const;
-    const Property& value() const;
+        ~PropertyName();
 
-    QString toString() const;
+        static const char *typeName();
 
-    static PropertyName none();
+        const char *what() const
+        {
+            return PropertyName::typeName();
+        }
 
-private:
-    /** The name to use to find the property in the
-        Properties container */
-    QString src;
+        PropertyName &operator=(const PropertyName &other);
 
-    /** The supplied or default value of the property */
-    PropertyPtr val;
+        bool operator==(const PropertyName &other) const;
+        bool operator!=(const PropertyName &other) const;
 
-    /** Is the supplied value a default value? */
-    bool value_is_default;
-};
+        bool hasSource() const;
+        bool hasValue() const;
 
-/** This is the class that holds the collection of user-supplied
-    optional properties and their locations to functions.
+        bool hasDefaultValue() const;
 
-    This class allows the following code to be written;
+        bool isNull() const;
 
-    cljff.add( mol, Property::set("charges","chgs") +
-                    Property::set("ljs","ljparams") );
+        const QString &source() const;
+        const Property &value() const;
 
-    The PropertyMap/PropertyName classes provide a kwargs
-    like interface for the C++ classes - indeed the python
-    wrappers should allow code to be written like;
+        QString toString() const;
 
-    cljff.add( mol, {"charges" : "chgs", "ljs" : "ljparams"} )
+        static PropertyName none();
 
-    or
+    private:
+        /** The name to use to find the property in the
+            Properties container */
+        QString src;
 
-    cljff.add( mol, charges="charges", ljs="ljparams" )
+        /** The supplied or default value of the property */
+        PropertyPtr val;
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT PropertyMap
-{
+        /** Is the supplied value a default value? */
+        bool value_is_default;
+    };
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const PropertyMap&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, PropertyMap&);
+    /** This is the class that holds the collection of user-supplied
+        optional properties and their locations to functions.
 
-public:
-    PropertyMap();
-    PropertyMap(const QString &property, const PropertyName &propname);
+        This class allows the following code to be written;
 
-    PropertyMap(const QHash<QString,PropertyName> &propnames);
+        cljff.add( mol, Property::set("charges","chgs") +
+                        Property::set("ljs","ljparams") );
 
-    PropertyMap(const PropertyMap &other);
+        The PropertyMap/PropertyName classes provide a kwargs
+        like interface for the C++ classes - indeed the python
+        wrappers should allow code to be written like;
 
-    ~PropertyMap();
+        cljff.add( mol, {"charges" : "chgs", "ljs" : "ljparams"} )
 
-    static const char* typeName();
+        or
 
-    const char* what() const
+        cljff.add( mol, charges="charges", ljs="ljparams" )
+
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT PropertyMap
     {
-        return PropertyMap::typeName();
-    }
 
-    PropertyMap& operator=(const PropertyMap &other);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const PropertyMap &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, PropertyMap &);
 
-    PropertyMap operator+(const PropertyMap &other) const;
+    public:
+        PropertyMap();
+        PropertyMap(const QString &property, const PropertyName &propname);
 
-    bool operator==(const PropertyMap &other) const;
-    bool operator!=(const PropertyMap &other) const;
+        PropertyMap(const QHash<QString, PropertyName> &propnames);
 
-    PropertyName operator[](const char *name) const;
-    PropertyName operator[](const QString &name) const;
-    PropertyName operator[](const PropertyName &name) const;
+        PropertyMap(const PropertyMap &other);
 
-    bool isDefault() const;
+        ~PropertyMap();
 
-    bool specified(const char *name) const;
-    bool specified(const QString &name) const;
-    bool specified(const PropertyName &name) const;
+        static const char *typeName();
 
-    void set(const QString &name, const PropertyName &source);
+        const char *what() const
+        {
+            return PropertyMap::typeName();
+        }
 
-    PropertyMap merge(const PropertyMap &other) const;
+        PropertyMap &operator=(const PropertyMap &other);
 
-    QString toString() const;
+        PropertyMap operator+(const PropertyMap &other) const;
 
-    const QHash<QString,PropertyName> toDict() const;
+        bool operator==(const PropertyMap &other) const;
+        bool operator!=(const PropertyMap &other) const;
 
-private:
-    /** Hash indexing all of the PropertyNames */
-    QHash<QString,PropertyName> propmap;
-};
+        PropertyName operator[](const char *name) const;
+        PropertyName operator[](const QString &name) const;
+        PropertyName operator[](const PropertyName &name) const;
 
-}
+        bool isDefault() const;
+
+        bool specified(const char *name) const;
+        bool specified(const QString &name) const;
+        bool specified(const PropertyName &name) const;
+
+        void set(const QString &name, const PropertyName &source);
+
+        PropertyMap merge(const PropertyMap &other) const;
+
+        QString toString() const;
+
+        const QHash<QString, PropertyName> toDict() const;
+
+    private:
+        /** Hash indexing all of the PropertyNames */
+        QHash<QString, PropertyName> propmap;
+    };
+
+} // namespace SireBase
 
 Q_DECLARE_METATYPE(SireBase::PropertyName);
 Q_DECLARE_METATYPE(SireBase::PropertyMap);
 
-SIRE_EXPOSE_CLASS( SireBase::PropertyMap )
-SIRE_EXPOSE_CLASS( SireBase::PropertyName )
+SIRE_EXPOSE_CLASS(SireBase::PropertyMap)
+SIRE_EXPOSE_CLASS(SireBase::PropertyName)
 
 SIRE_END_HEADER
 

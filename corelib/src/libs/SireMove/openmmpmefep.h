@@ -36,58 +36,56 @@
 #include <boost/tuple/tuple.hpp>
 
 #ifdef SIRE_USE_OPENMM
-    #include <OpenMM.h>
+#include <OpenMM.h>
 #endif
 
-#include "integrator.h"
-#include "SireUnits/temperature.h"
 #include "SireSystem/system.h"
+#include "SireUnits/temperature.h"
+#include "integrator.h"
 
 SIRE_BEGIN_HEADER
 
 #ifdef SIRE_USE_OPENMM
 
-namespace SireMove {
+namespace SireMove
+{
     class OpenMMPMEFEP;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::OpenMMPMEFEP&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::OpenMMPMEFEP&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::OpenMMPMEFEP &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::OpenMMPMEFEP &);
 
-namespace SireMove {
+namespace SireMove
+{
     using tmpl_str = const QString;
 
     /** This class implements the single topology free energy method using
-	OpenMM.
+    OpenMM.
 
         @author Julien Michel, Gaetano Calabro, Antonia Mey, Hannes H Loeffler
      */
-    class SIREMOVE_EXPORT OpenMMPMEFEP
-    : public SireBase::ConcreteProperty<OpenMMPMEFEP, Integrator> {
-        friend QDataStream& ::operator<<(QDataStream&, const OpenMMPMEFEP&);
-        friend QDataStream& ::operator>>(QDataStream&, OpenMMPMEFEP&);
+    class SIREMOVE_EXPORT OpenMMPMEFEP : public SireBase::ConcreteProperty<OpenMMPMEFEP, Integrator>
+    {
+        friend QDataStream & ::operator<<(QDataStream &, const OpenMMPMEFEP &);
+        friend QDataStream & ::operator>>(QDataStream &, OpenMMPMEFEP &);
 
     public:
         OpenMMPMEFEP(bool frequent_save_velocities = false);
 
-        OpenMMPMEFEP(const MoleculeGroup &molecule_group,
-		     const MoleculeGroup &solutes,
-		     const MoleculeGroup &solute_hard,
-		     const MoleculeGroup &solute_todummy,
-		     const MoleculeGroup &solute_fromdummy,
-		     bool frequent_save_velocities = false
-		     );
+        OpenMMPMEFEP(const MoleculeGroup &molecule_group, const MoleculeGroup &solutes, const MoleculeGroup &solute_hard,
+                     const MoleculeGroup &solute_todummy, const MoleculeGroup &solute_fromdummy,
+                     bool frequent_save_velocities = false);
 
         OpenMMPMEFEP(const OpenMMPMEFEP &other);
 
         ~OpenMMPMEFEP();
 
-        OpenMMPMEFEP& operator=(const OpenMMPMEFEP &other);
+        OpenMMPMEFEP &operator=(const OpenMMPMEFEP &other);
 
         bool operator==(const OpenMMPMEFEP &other) const;
         bool operator!=(const OpenMMPMEFEP &other) const;
 
-        static const char* typeName();
+        static const char *typeName();
 
         QString toString() const;
 
@@ -101,19 +99,16 @@ namespace SireMove {
 
         System minimiseEnergy(System &system, double tolerance, int max_iteration);
 
-        System annealSystemToLambda(System &system, SireUnits::Dimension::Time anneal_step_size,
-                int annealing_steps);
+        System annealSystemToLambda(System &system, SireUnits::Dimension::Time anneal_step_size, int annealing_steps);
 
-        void integrate(IntegratorWorkspace &workspace,
-                const Symbol &nrg_component,
-                SireUnits::Dimension::Time timestep,
-                int nmoves, bool record_stats);
+        void integrate(IntegratorWorkspace &workspace, const Symbol &nrg_component, SireUnits::Dimension::Time timestep,
+                       int nmoves, bool record_stats);
 
         IntegratorWorkspacePtr createWorkspace(const PropertyMap &map = PropertyMap()) const;
         IntegratorWorkspacePtr createWorkspace(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap()) const;
 
-	QString getCombiningRules(void);
-	void setCombiningRules(QString);
+        QString getCombiningRules(void);
+        void setCombiningRules(QString);
 
         QString getCutoffType(void);
 
@@ -185,7 +180,7 @@ namespace SireMove {
         QVector<double> getForwardMetropolis(void);
         QVector<double> getBackwardMetropolis(void);
 
-        QVector<QVector <double> > getReducedPerturbedEnergies(void);
+        QVector<QVector<double>> getReducedPerturbedEnergies(void);
 
         QString getIntegrator(void);
         void setIntegrator(QString);
@@ -205,20 +200,18 @@ namespace SireMove {
         int getRandomSeed(void);
         void setRandomSeed(int);
 
-	void setDebug(bool);
+        void setDebug(bool);
 
     private:
-        void createContext(IntegratorWorkspace &workspace,
-                SireUnits::Dimension::Time timestep);
+        void createContext(IntegratorWorkspace &workspace, SireUnits::Dimension::Time timestep);
         void destroyContext();
-        void updateBoxDimensions(OpenMM::State &state_openmm,
-				 QVector<QVector<Vector>> &buffered_dimensions,
-				 AtomicVelocityWorkspace &ws);
+        void updateBoxDimensions(OpenMM::State &state_openmm, QVector<QVector<Vector>> &buffered_dimensions,
+                                 AtomicVelocityWorkspace &ws);
 
         double getPotentialEnergyAtLambda(double lambda);
         void updateOpenMMContextLambda(double lambda);
-        boost::tuples::tuple<double, double, double> calculateGradient(double increment_plus,
-        double increment_minus, double potential_energy_lambda, double beta);
+        boost::tuples::tuple<double, double, double> calculateGradient(double increment_plus, double increment_minus,
+                                                                       double potential_energy_lambda, double beta);
         QVector<double> computeReducedPerturbedEnergies(double);
         void emptyContainers(void);
 
@@ -226,7 +219,7 @@ namespace SireMove {
         void addMCBarostat(OpenMM::System &system);
 
         /** Whether or not to save the velocities after every step, or to save them
-	    at the end of all of the steps */
+        at the end of all of the steps */
         bool frequent_save_velocities;
         /** The Molecule Group on which the integrator operates */
         MolGroupPtr molgroup;
@@ -240,15 +233,15 @@ namespace SireMove {
         MolGroupPtr solutefromdummy;
 
         /**Try instead to...keep a copy of OpenMM::System */
-        OpenMM::System* openmm_system;
+        OpenMM::System *openmm_system;
 
-        OpenMM::Context* openmm_context;
+        OpenMM::Context *openmm_context;
 
         /** Whether the openmm system and the context have been initialised*/
         bool isSystemInitialised;
         bool isContextInitialised;
 
-	QString combiningRules;
+        QString combiningRules;
         QString CutoffType;
         SireUnits::Dimension::Length cutoff_distance;
         double field_dielectric;
@@ -296,7 +289,7 @@ namespace SireMove {
 
         QVector<double> backward_Metropolis;
 
-        QVector<QVector <double> > reduced_perturbed_energies;
+        QVector<QVector<double>> reduced_perturbed_energies;
 
         QVector<bool> perturbed_energies;
 
@@ -314,34 +307,34 @@ namespace SireMove {
 
         int random_seed;
 
-	static tmpl_str GENERAL;
-	static tmpl_str GENERAL_SIGMA[2];
+        static tmpl_str GENERAL;
+        static tmpl_str GENERAL_SIGMA[2];
 
-	static tmpl_str TODUMMY;
-	static tmpl_str TODUMMY_SIGMA[2];
+        static tmpl_str TODUMMY;
+        static tmpl_str TODUMMY_SIGMA[2];
 
-	static tmpl_str FROMDUMMY;
-	static tmpl_str FROMDUMMY_SIGMA[2];
+        static tmpl_str FROMDUMMY;
+        static tmpl_str FROMDUMMY_SIGMA[2];
 
-	static tmpl_str FROMTODUMMY;
-	static tmpl_str FROMTODUMMY_SIGMA[2];
+        static tmpl_str FROMTODUMMY;
+        static tmpl_str FROMTODUMMY_SIGMA[2];
 
-	static tmpl_str INTRA_14_CLJ;
-	static tmpl_str INTRA_14_CLJ_SIGMA[2];
+        static tmpl_str INTRA_14_CLJ;
+        static tmpl_str INTRA_14_CLJ_SIGMA[2];
 
-	static tmpl_str CORR_RECIP;
+        static tmpl_str CORR_RECIP;
 
-	/* "Light" atoms are defined to have a mass of HMASS or smaller.  This
-           ensures that hydrogens in the HMR scheme will be constraint.  The
-           specific value of 5.0 assumes that the HMR factor does not exceed
-           4.0 and the heavy atom in CH3 or NH3 does have a minimum mass (see
-           OpenMMMD.py) larger than HMASS.  In this way hydrogens and heavier
-           atoms (assuming no elements between H and C) should be cleanly
-           separated by mass. */
+        /* "Light" atoms are defined to have a mass of HMASS or smaller.  This
+               ensures that hydrogens in the HMR scheme will be constraint.  The
+               specific value of 5.0 assumes that the HMR factor does not exceed
+               4.0 and the heavy atom in CH3 or NH3 does have a minimum mass (see
+               OpenMMMD.py) larger than HMASS.  In this way hydrogens and heavier
+               atoms (assuming no elements between H and C) should be cleanly
+               separated by mass. */
         const double HMASS = 5.0; // g/mol
         const double SMALL = 0.0001;
     };
-}
+} // namespace SireMove
 
 Q_DECLARE_METATYPE(SireMove::OpenMMPMEFEP)
 
@@ -351,21 +344,26 @@ SIRE_END_HEADER
 
 #else // SIRE_USE_OPENMM
 
-namespace SireMove {
+namespace SireMove
+{
 
-    class OpenMMPMEFEP {
+    class OpenMMPMEFEP
+    {
     public:
+        OpenMMPMEFEP()
+        {
+        }
 
-        OpenMMPMEFEP() {}
+        ~OpenMMPMEFEP()
+        {
+        }
 
-        ~OpenMMPMEFEP() {}
-
-        static const char* typeName()
-	{
+        static const char *typeName()
+        {
             return "SireMM::OpenMMPMEFEP";
         }
     };
-}
+} // namespace SireMove
 
 Q_DECLARE_METATYPE(SireMove::OpenMMPMEFEP)
 

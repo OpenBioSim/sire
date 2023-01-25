@@ -38,17 +38,15 @@ using namespace SireStream;
 static const RegisterMetaType<SupraSimPacket> r_suprasimpacket;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const SupraSimPacket &suprasimpacket)
+QDataStream &operator<<(QDataStream &ds, const SupraSimPacket &suprasimpacket)
 {
     writeHeader(ds, r_suprasimpacket, 1);
 
     SharedDataStream sds(ds);
 
-    sds << suprasimpacket.supra_system << suprasimpacket.supra_moves
-        << suprasimpacket.n_supra_moves << suprasimpacket.ncompleted
-        << suprasimpacket.record_stats
-        << static_cast<const WorkPacketBase&>(suprasimpacket);
+    sds << suprasimpacket.supra_system << suprasimpacket.supra_moves << suprasimpacket.n_supra_moves
+        << suprasimpacket.ncompleted << suprasimpacket.record_stats
+        << static_cast<const WorkPacketBase &>(suprasimpacket);
 
     return ds;
 }
@@ -62,10 +60,8 @@ QDataStream &operator>>(QDataStream &ds, SupraSimPacket &suprasimpacket)
     {
         SharedDataStream sds(ds);
 
-        sds >> suprasimpacket.supra_system >> suprasimpacket.supra_moves
-            >> suprasimpacket.n_supra_moves >> suprasimpacket.ncompleted
-            >> suprasimpacket.record_stats
-            >> static_cast<WorkPacketBase&>(suprasimpacket);
+        sds >> suprasimpacket.supra_system >> suprasimpacket.supra_moves >> suprasimpacket.n_supra_moves >>
+            suprasimpacket.ncompleted >> suprasimpacket.record_stats >> static_cast<WorkPacketBase &>(suprasimpacket);
     }
     else
         throw version_error(v, "1", r_suprasimpacket, CODELOC);
@@ -74,37 +70,34 @@ QDataStream &operator>>(QDataStream &ds, SupraSimPacket &suprasimpacket)
 }
 
 /** Null constructor */
-SupraSimPacket::SupraSimPacket()
-               : WorkPacketBase(), n_supra_moves(0), ncompleted(0), record_stats(false)
-{}
+SupraSimPacket::SupraSimPacket() : WorkPacketBase(), n_supra_moves(0), ncompleted(0), record_stats(false)
+{
+}
 
 /** Construct to perform the passed supra-moves on the passed supra-system.
     The packet is to run 'nmoves' blocks of these moves, recording
     statistics if 'record_stats' is true */
-SupraSimPacket::SupraSimPacket(const SupraSystem &suprasystem,
-                               const SupraMoves &supramoves,
-                               int nmoves, bool recording_stats)
-               : WorkPacketBase(),
-                 supra_system(suprasystem), supra_moves(supramoves),
-                 n_supra_moves(nmoves), ncompleted(0), record_stats(recording_stats)
-{}
+SupraSimPacket::SupraSimPacket(const SupraSystem &suprasystem, const SupraMoves &supramoves, int nmoves,
+                               bool recording_stats)
+    : WorkPacketBase(), supra_system(suprasystem), supra_moves(supramoves), n_supra_moves(nmoves), ncompleted(0),
+      record_stats(recording_stats)
+{
+}
 
 /** Copy constructor */
 SupraSimPacket::SupraSimPacket(const SupraSimPacket &other)
-               : WorkPacketBase(other),
-                 supra_system(other.supra_system),
-                 supra_moves(other.supra_moves),
-                 n_supra_moves(other.n_supra_moves),
-                 ncompleted(other.ncompleted),
-                 record_stats(other.record_stats)
-{}
+    : WorkPacketBase(other), supra_system(other.supra_system), supra_moves(other.supra_moves),
+      n_supra_moves(other.n_supra_moves), ncompleted(other.ncompleted), record_stats(other.record_stats)
+{
+}
 
 /** Destructor */
 SupraSimPacket::~SupraSimPacket()
-{}
+{
+}
 
 /** Copy assignment operator */
-SupraSimPacket& SupraSimPacket::operator=(const SupraSimPacket &other)
+SupraSimPacket &SupraSimPacket::operator=(const SupraSimPacket &other)
 {
     if (this != &other)
     {
@@ -123,12 +116,9 @@ SupraSimPacket& SupraSimPacket::operator=(const SupraSimPacket &other)
 /** Comparison operator */
 bool SupraSimPacket::operator==(const SupraSimPacket &other) const
 {
-    return (this == &other) or
-           (supra_system == other.supra_system and
-            supra_moves == other.supra_moves and
-            n_supra_moves == other.n_supra_moves and
-            ncompleted == other.ncompleted and
-            record_stats == other.record_stats);
+    return (this == &other) or (supra_system == other.supra_system and supra_moves == other.supra_moves and
+                                n_supra_moves == other.n_supra_moves and ncompleted == other.ncompleted and
+                                record_stats == other.record_stats);
 }
 
 /** Comparison operator */
@@ -150,18 +140,18 @@ bool SupraSimPacket::shouldPack() const
 /** This will be large...! */
 int SupraSimPacket::approximatePacketSize() const
 {
-    //128 MB
-    return 128*1024*1024;
+    // 128 MB
+    return 128 * 1024 * 1024;
 }
 
 /** Return the supra-system being simulated */
-const SupraSystem& SupraSimPacket::system() const
+const SupraSystem &SupraSimPacket::system() const
 {
     return supra_system;
 }
 
 /** Return the supra-moves being applied to the supra-system */
-const SupraMoves& SupraSimPacket::moves() const
+const SupraMoves &SupraSimPacket::moves() const
 {
     return supra_moves;
 }
@@ -197,19 +187,19 @@ float SupraSimPacket::chunk()
     if (ncompleted >= n_supra_moves)
         return 100.0;
 
-    supra_moves.edit().move( supra_system.edit(), 1, record_stats );
+    supra_moves.edit().move(supra_system.edit(), 1, record_stats);
 
     ++ncompleted;
 
-    return 100.0 * ( float(ncompleted) / float(n_supra_moves) );
+    return 100.0 * (float(ncompleted) / float(n_supra_moves));
 }
 
-const char* SupraSimPacket::typeName()
+const char *SupraSimPacket::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SupraSimPacket>() );
+    return QMetaType::typeName(qMetaTypeId<SupraSimPacket>());
 }
 
-SupraSimPacket* SupraSimPacket::clone() const
+SupraSimPacket *SupraSimPacket::clone() const
 {
     return new SupraSimPacket(*this);
 }

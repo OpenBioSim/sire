@@ -36,62 +36,61 @@ SIRE_BEGIN_HEADER
 
 namespace SireVol
 {
-class CombineSpaces;
+    class CombineSpaces;
 }
 
-SIREVOL_EXPORT QDataStream& operator<<(QDataStream&, const SireVol::CombineSpaces&);
-SIREVOL_EXPORT QDataStream& operator>>(QDataStream&, SireVol::CombineSpaces&);
+SIREVOL_EXPORT QDataStream &operator<<(QDataStream &, const SireVol::CombineSpaces &);
+SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::CombineSpaces &);
 
 namespace SireVol
 {
 
-using SireBase::PropertyName;
-using SireBase::Properties;
+    using SireBase::Properties;
+    using SireBase::PropertyName;
 
-/** This is a property which creates a SireVol::CombinedSpace object
-    of the specified properties (which must all be space objects
-    themselves)
+    /** This is a property which creates a SireVol::CombinedSpace object
+        of the specified properties (which must all be space objects
+        themselves)
 
-    @author Christopher Woods
-*/
-class SIREVOL_EXPORT CombineSpaces
-        : public SireBase::ConcreteProperty<CombineSpaces,SireBase::CombineProperties>
-{
+        @author Christopher Woods
+    */
+    class SIREVOL_EXPORT CombineSpaces : public SireBase::ConcreteProperty<CombineSpaces, SireBase::CombineProperties>
+    {
 
-friend SIREVOL_EXPORT QDataStream& ::operator<<(QDataStream&, const CombineSpaces&);
-friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, CombineSpaces&);
+        friend SIREVOL_EXPORT QDataStream & ::operator<<(QDataStream &, const CombineSpaces &);
+        friend SIREVOL_EXPORT QDataStream & ::operator>>(QDataStream &, CombineSpaces &);
 
-public:
-    CombineSpaces();
+    public:
+        CombineSpaces();
 
-    CombineSpaces(const PropertyName &source);
-    CombineSpaces(const PropertyName &source0, const PropertyName &source1);
+        CombineSpaces(const PropertyName &source);
+        CombineSpaces(const PropertyName &source0, const PropertyName &source1);
 
-    CombineSpaces(const QList<PropertyName> &sources);
-    CombineSpaces(const QVector<PropertyName> &sources);
+        CombineSpaces(const QList<PropertyName> &sources);
+        CombineSpaces(const QVector<PropertyName> &sources);
 
-    CombineSpaces(const QList<QString> &sources);
-    CombineSpaces(const QVector<QString> &sources);
+        CombineSpaces(const QList<QString> &sources);
+        CombineSpaces(const QVector<QString> &sources);
 
-    CombineSpaces(const CombineSpaces &other);
+        CombineSpaces(const CombineSpaces &other);
 
-    ~CombineSpaces();
+        ~CombineSpaces();
 
-    CombineSpaces& operator=(const CombineSpaces &other);
+        CombineSpaces &operator=(const CombineSpaces &other);
 
-    bool operator==(const CombineSpaces &other) const;
-    bool operator!=(const CombineSpaces &other) const;
+        bool operator==(const CombineSpaces &other) const;
+        bool operator!=(const CombineSpaces &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    void updateFrom(const Properties &properties);
-};
+        void updateFrom(const Properties &properties);
+    };
 
-}
+} // namespace SireVol
 
-Q_DECLARE_METATYPE( SireVol::CombineSpaces )
+Q_DECLARE_METATYPE(SireVol::CombineSpaces)
 
-SIRE_EXPOSE_CLASS( SireVol::CombineSpaces )
+SIRE_EXPOSE_CLASS(SireVol::CombineSpaces)
 
 SIRE_END_HEADER
 

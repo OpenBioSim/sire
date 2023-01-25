@@ -30,635 +30,617 @@
 
 #include "SireBase/propertymap.h"
 
-#include "SireFF/g1ff.h"
 #include "SireFF/ff3d.h"
 #include "SireFF/forcetable.h"
+#include "SireFF/g1ff.h"
 
 #include "SireFF/detail/ffmolecules3d.h"
 
+#include "clj14group.h"
 #include "internalcomponent.h"
 #include "internalparameters.h"
-#include "clj14group.h"
 
 namespace SireMM
 {
-class InternalFF;
+    class InternalFF;
 }
 
-SIREMM_EXPORT QDataStream &operator<<(QDataStream&, const SireMM::InternalFF&);
-SIREMM_EXPORT QDataStream &operator>>(QDataStream&, SireMM::InternalFF&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::InternalFF &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::InternalFF &);
 
 namespace SireVol
 {
-class CoordGroup;
+    class CoordGroup;
 }
 
 namespace SireMM
 {
 
-using SireFF::ForceField;
-using SireFF::G1FF;
-using SireFF::FF3D;
-using SireFF::EnergyTable;
-using SireFF::ForceTable;
-using SireFF::MolForceTable;
-using SireFF::FieldTable;
-using SireFF::PotentialTable;
-using SireFF::Probe;
-using SireFF::FFComponent;
+    using SireFF::EnergyTable;
+    using SireFF::FF3D;
+    using SireFF::FFComponent;
+    using SireFF::FieldTable;
+    using SireFF::ForceField;
+    using SireFF::ForceTable;
+    using SireFF::G1FF;
+    using SireFF::MolForceTable;
+    using SireFF::PotentialTable;
+    using SireFF::Probe;
 
-using SireMol::MolNum;
-using SireMol::PartialMolecule;
-using SireMol::MoleculeGroup;
+    using SireMol::MoleculeGroup;
+    using SireMol::MolNum;
+    using SireMol::PartialMolecule;
 
-using SireVol::CoordGroup;
+    using SireVol::CoordGroup;
 
-using SireBase::Property;
-using SireBase::Properties;
-using SireBase::PropertyMap;
-using SireBase::PropertyName;
+    using SireBase::Properties;
+    using SireBase::Property;
+    using SireBase::PropertyMap;
+    using SireBase::PropertyName;
 
-/** This class provides the default name of the
-    property that contains the bond parameters */
-class SIREMM_EXPORT BondParameterName
-{
-public:
-    BondParameterName()
-    {}
-
-    ~BondParameterName()
-    {}
-
-    const PropertyName& bond() const
+    /** This class provides the default name of the
+        property that contains the bond parameters */
+    class SIREMM_EXPORT BondParameterName
     {
-        return bond_param;
-    }
+    public:
+        BondParameterName()
+        {
+        }
 
-private:
-    static PropertyName bond_param;
-};
+        ~BondParameterName()
+        {
+        }
 
-/** This class provides the default name of the
-    property that contains the angle parameters */
-class SIREMM_EXPORT AngleParameterName
-{
-public:
-    AngleParameterName()
-    {}
+        const PropertyName &bond() const
+        {
+            return bond_param;
+        }
 
-    ~AngleParameterName()
-    {}
+    private:
+        static PropertyName bond_param;
+    };
 
-    const PropertyName& angle() const
+    /** This class provides the default name of the
+        property that contains the angle parameters */
+    class SIREMM_EXPORT AngleParameterName
     {
-        return angle_param;
-    }
+    public:
+        AngleParameterName()
+        {
+        }
 
-private:
-    static PropertyName angle_param;
-};
+        ~AngleParameterName()
+        {
+        }
 
-/** This class provides the default name of the
-    property that contains the dihedral parameters */
-class SIREMM_EXPORT DihedralParameterName
-{
-public:
-    DihedralParameterName()
-    {}
+        const PropertyName &angle() const
+        {
+            return angle_param;
+        }
 
-    ~DihedralParameterName()
-    {}
+    private:
+        static PropertyName angle_param;
+    };
 
-    const PropertyName& dihedral() const
+    /** This class provides the default name of the
+        property that contains the dihedral parameters */
+    class SIREMM_EXPORT DihedralParameterName
     {
-        return dihedral_param;
-    }
+    public:
+        DihedralParameterName()
+        {
+        }
 
-private:
-    static PropertyName dihedral_param;
-};
+        ~DihedralParameterName()
+        {
+        }
 
-/** This class provides the default name of the
-    property that contains the improper parameters */
-class SIREMM_EXPORT ImproperParameterName
-{
-public:
-    ImproperParameterName()
-    {}
+        const PropertyName &dihedral() const
+        {
+            return dihedral_param;
+        }
 
-    ~ImproperParameterName()
-    {}
+    private:
+        static PropertyName dihedral_param;
+    };
 
-    const PropertyName& improper() const
+    /** This class provides the default name of the
+        property that contains the improper parameters */
+    class SIREMM_EXPORT ImproperParameterName
     {
-        return improper_param;
-    }
+    public:
+        ImproperParameterName()
+        {
+        }
 
-private:
-    static PropertyName improper_param;
-};
+        ~ImproperParameterName()
+        {
+        }
 
-/** This class provides the default name of the
-    property that contains the Urey-Bradley parameters */
-class SIREMM_EXPORT UreyBradleyParameterName
-{
-public:
-    UreyBradleyParameterName()
-    {}
+        const PropertyName &improper() const
+        {
+            return improper_param;
+        }
 
-    ~UreyBradleyParameterName()
-    {}
+    private:
+        static PropertyName improper_param;
+    };
 
-    const PropertyName& ureyBradley() const
+    /** This class provides the default name of the
+        property that contains the Urey-Bradley parameters */
+    class SIREMM_EXPORT UreyBradleyParameterName
     {
-        return ub_param;
-    }
+    public:
+        UreyBradleyParameterName()
+        {
+        }
 
-private:
-    static PropertyName ub_param;
-};
+        ~UreyBradleyParameterName()
+        {
+        }
 
-/** This class provides the default name of the
-    property that contains the stretch-stretch parameters */
-class SIREMM_EXPORT StretchStretchParameterName
-{
-public:
-    StretchStretchParameterName()
-    {}
+        const PropertyName &ureyBradley() const
+        {
+            return ub_param;
+        }
 
-    ~StretchStretchParameterName()
-    {}
+    private:
+        static PropertyName ub_param;
+    };
 
-    const PropertyName& stretchStretch() const
+    /** This class provides the default name of the
+        property that contains the stretch-stretch parameters */
+    class SIREMM_EXPORT StretchStretchParameterName
     {
-        return ss_param;
-    }
+    public:
+        StretchStretchParameterName()
+        {
+        }
 
-private:
-    static PropertyName ss_param;
-};
+        ~StretchStretchParameterName()
+        {
+        }
 
-/** This class provides the default name of the
-    property that contains the stretch-bend parameters */
-class SIREMM_EXPORT StretchBendParameterName
-{
-public:
-    StretchBendParameterName()
-    {}
+        const PropertyName &stretchStretch() const
+        {
+            return ss_param;
+        }
 
-    ~StretchBendParameterName()
-    {}
+    private:
+        static PropertyName ss_param;
+    };
 
-    const PropertyName& stretchBend() const
+    /** This class provides the default name of the
+        property that contains the stretch-bend parameters */
+    class SIREMM_EXPORT StretchBendParameterName
     {
-        return sb_param;
-    }
+    public:
+        StretchBendParameterName()
+        {
+        }
 
-private:
-    static PropertyName sb_param;
-};
+        ~StretchBendParameterName()
+        {
+        }
 
-/** This class provides the default name of the
-    property that contains the bend-bend parameters */
-class SIREMM_EXPORT BendBendParameterName
-{
-public:
-    BendBendParameterName()
-    {}
+        const PropertyName &stretchBend() const
+        {
+            return sb_param;
+        }
 
-    ~BendBendParameterName()
-    {}
+    private:
+        static PropertyName sb_param;
+    };
 
-    const PropertyName& bendBend() const
+    /** This class provides the default name of the
+        property that contains the bend-bend parameters */
+    class SIREMM_EXPORT BendBendParameterName
     {
-        return bb_param;
-    }
+    public:
+        BendBendParameterName()
+        {
+        }
 
-private:
-    static PropertyName bb_param;
-};
+        ~BendBendParameterName()
+        {
+        }
 
-/** This class provides the default name of the
-    property that contains the stretch-bend-torsion parameters */
-class SIREMM_EXPORT StretchBendTorsionParameterName
-{
-public:
-    StretchBendTorsionParameterName()
-    {}
+        const PropertyName &bendBend() const
+        {
+            return bb_param;
+        }
 
-    ~StretchBendTorsionParameterName()
-    {}
+    private:
+        static PropertyName bb_param;
+    };
 
-    const PropertyName& stretchBendTorsion() const
+    /** This class provides the default name of the
+        property that contains the stretch-bend-torsion parameters */
+    class SIREMM_EXPORT StretchBendTorsionParameterName
     {
-        return sbt_param;
-    }
+    public:
+        StretchBendTorsionParameterName()
+        {
+        }
 
-private:
-    static PropertyName sbt_param;
-};
+        ~StretchBendTorsionParameterName()
+        {
+        }
 
-/** This class provides the default name of the
-    property that contains the non-bonded 1-4 scale factors */
-class IntrascaleParameterName
-{
-public:
-    IntrascaleParameterName()
-    {}
+        const PropertyName &stretchBendTorsion() const
+        {
+            return sbt_param;
+        }
 
-    ~IntrascaleParameterName()
-    {}
+    private:
+        static PropertyName sbt_param;
+    };
 
-    const PropertyName& intrascale() const
+    /** This class provides the default name of the
+        property that contains the non-bonded 1-4 scale factors */
+    class IntrascaleParameterName
     {
-        return intra_param;
-    }
-
-private:
-    static PropertyName intra_param;
-};
-
-/** This class provides the default name of the properties
-    that contain the bond, angle, dihedral and Urey-Bradley parameters */
-class SIREMM_EXPORT InternalParameterNames
-            : public BondParameterName, public AngleParameterName,
-              public DihedralParameterName,
-              public ImproperParameterName, public UreyBradleyParameterName,
-              public StretchStretchParameterName,
-              public StretchBendParameterName,
-              public BendBendParameterName,
-              public StretchBendTorsionParameterName,
-              public IntrascaleParameterName
-{
-public:
-    InternalParameterNames()
-            : BondParameterName(), AngleParameterName(),
-              DihedralParameterName(),
-              ImproperParameterName(), UreyBradleyParameterName(),
-              StretchStretchParameterName(), StretchBendParameterName(),
-              BendBendParameterName(), StretchBendTorsionParameterName(),
-              IntrascaleParameterName()
-    {}
-
-    ~InternalParameterNames()
-    {}
-};
-
-/** This class provides the default name of the properties
-    that contain the internal and 3D coordinates properties */
-class SIREMM_EXPORT InternalParameterNames3D
-                    : public InternalParameterNames,
-                      public SireFF::detail::Coords3DParameterName
-{
-public:
-    InternalParameterNames3D() : InternalParameterNames(),
-                                 SireFF::detail::Coords3DParameterName()
-    {}
-
-    ~InternalParameterNames3D()
-    {}
-};
-
-/** This potential provides energies and forces caused by
-    molecular mechanics style internal intramolecular
-    terms, e.g. bond, angle, dihedral, urey bradley
-
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT InternalPotential
-{
-public:
-    typedef InternalEnergy Energy;
-    typedef Energy::Components Components;
-
-    typedef InternalParameterNames3D ParameterNames;
-
-    typedef InternalParameters3D Parameters;
-
-    typedef SireFF::detail::FFMolecule<InternalPotential> Molecule;
-    typedef SireFF::detail::FFMolecules<InternalPotential> Molecules;
-    typedef Molecules::ChangedMolecule ChangedMolecule;
-
-    ~InternalPotential();
-
-    static const InternalSymbols& symbols();
-
-    static const ParameterNames& parameters();
-
-    InternalPotential::Parameters
-    getParameters(const PartialMolecule &molecule,
-                  const PropertyMap &map) const;
-
-    InternalPotential::Parameters
-    updateParameters(const InternalPotential::Parameters &old_params,
-                     const PartialMolecule &old_molecule,
-                     const PartialMolecule &new_molecule,
-                     const PropertyMap &map) const;
-
-    InternalPotential::Parameters
-    updateParameters(const InternalPotential::Parameters &old_params,
-                     const PartialMolecule &old_molecule,
-                     const PartialMolecule &new_molecule,
-                     const PropertyMap &old_map,
-                     const PropertyMap &new_map) const;
-
-    InternalPotential::Molecule
-    parameterise(const PartialMolecule &molecule,
-                 const PropertyMap &map) const;
-
-    InternalPotential::Molecules
-    parameterise(const MoleculeGroup &molecules,
-                 const PropertyMap &map) const;
-
-protected:
-    InternalPotential(bool isstrict=false);
-    InternalPotential(const InternalPotential &other);
-
-    InternalPotential& operator=(const InternalPotential &other);
+    public:
+        IntrascaleParameterName()
+        {
+        }
+
+        ~IntrascaleParameterName()
+        {
+        }
+
+        const PropertyName &intrascale() const
+        {
+            return intra_param;
+        }
+
+    private:
+        static PropertyName intra_param;
+    };
+
+    /** This class provides the default name of the properties
+        that contain the bond, angle, dihedral and Urey-Bradley parameters */
+    class SIREMM_EXPORT InternalParameterNames : public BondParameterName,
+                                                 public AngleParameterName,
+                                                 public DihedralParameterName,
+                                                 public ImproperParameterName,
+                                                 public UreyBradleyParameterName,
+                                                 public StretchStretchParameterName,
+                                                 public StretchBendParameterName,
+                                                 public BendBendParameterName,
+                                                 public StretchBendTorsionParameterName,
+                                                 public IntrascaleParameterName
+    {
+    public:
+        InternalParameterNames()
+            : BondParameterName(), AngleParameterName(), DihedralParameterName(), ImproperParameterName(),
+              UreyBradleyParameterName(), StretchStretchParameterName(), StretchBendParameterName(),
+              BendBendParameterName(), StretchBendTorsionParameterName(), IntrascaleParameterName()
+        {
+        }
+
+        ~InternalParameterNames()
+        {
+        }
+    };
+
+    /** This class provides the default name of the properties
+        that contain the internal and 3D coordinates properties */
+    class SIREMM_EXPORT InternalParameterNames3D : public InternalParameterNames,
+                                                   public SireFF::detail::Coords3DParameterName
+    {
+    public:
+        InternalParameterNames3D() : InternalParameterNames(), SireFF::detail::Coords3DParameterName()
+        {
+        }
+
+        ~InternalParameterNames3D()
+        {
+        }
+    };
 
-    void calculateEnergy(const InternalPotential::Molecule &molecule,
-                         InternalPotential::Energy &energy,
-                         double scale_energy=1) const;
+    /** This potential provides energies and forces caused by
+        molecular mechanics style internal intramolecular
+        terms, e.g. bond, angle, dihedral, urey bradley
 
-    void calculateForce(const InternalPotential::Molecule &molecule,
-                        MolForceTable &forces,
-                        double scale_force=1) const;
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT InternalPotential
+    {
+    public:
+        typedef InternalEnergy Energy;
+        typedef Energy::Components Components;
+
+        typedef InternalParameterNames3D ParameterNames;
 
-    void calculateBondForce(const InternalPotential::Molecule &molecule,
-                            MolForceTable &forces,
-                            double scale_force=1) const;
+        typedef InternalParameters3D Parameters;
+
+        typedef SireFF::detail::FFMolecule<InternalPotential> Molecule;
+        typedef SireFF::detail::FFMolecules<InternalPotential> Molecules;
+        typedef Molecules::ChangedMolecule ChangedMolecule;
+
+        ~InternalPotential();
 
-    void calculateAngleForce(const InternalPotential::Molecule &molecule,
-                             MolForceTable &forces,
-                             double scale_force=1) const;
+        static const InternalSymbols &symbols();
 
-    void calculateDihedralForce(const InternalPotential::Molecule &molecule,
-                                MolForceTable &forces,
-                                double scale_force=1) const;
+        static const ParameterNames &parameters();
 
-    void calculateImproperForce(const InternalPotential::Molecule &molecule,
-                                MolForceTable &forces,
-                                double scale_force=1) const;
+        InternalPotential::Parameters getParameters(const PartialMolecule &molecule, const PropertyMap &map) const;
 
-    void calculateUBForce(const InternalPotential::Molecule &molecule,
-                          MolForceTable &forces,
-                          double scale_force=1) const;
+        InternalPotential::Parameters updateParameters(const InternalPotential::Parameters &old_params,
+                                                       const PartialMolecule &old_molecule,
+                                                       const PartialMolecule &new_molecule, const PropertyMap &map) const;
 
-    void calculateSSForce(const InternalPotential::Molecule &molecule,
-                          MolForceTable &forces,
-                          double scale_force=1) const;
+        InternalPotential::Parameters updateParameters(const InternalPotential::Parameters &old_params,
+                                                       const PartialMolecule &old_molecule,
+                                                       const PartialMolecule &new_molecule, const PropertyMap &old_map,
+                                                       const PropertyMap &new_map) const;
 
-    void calculateSBForce(const InternalPotential::Molecule &molecule,
-                          MolForceTable &forces,
-                          double scale_force=1) const;
+        InternalPotential::Molecule parameterise(const PartialMolecule &molecule, const PropertyMap &map) const;
 
-    void calculateBBForce(const InternalPotential::Molecule &molecule,
-                          MolForceTable &forces,
-                          double scale_force=1) const;
+        InternalPotential::Molecules parameterise(const MoleculeGroup &molecules, const PropertyMap &map) const;
 
-    void calculateSBTForce(const InternalPotential::Molecule &molecule,
-                           MolForceTable &forces,
-                           double scale_force=1) const;
+    protected:
+        InternalPotential(bool isstrict = false);
+        InternalPotential(const InternalPotential &other);
 
-    void calculateForce(const InternalPotential::Molecule &molecule,
-                        MolForceTable &forces,
-                        const Symbol &symbol,
-                        const Components &components,
-                        double scale_force=1) const;
+        InternalPotential &operator=(const InternalPotential &other);
 
-    bool isstrict;
+        void calculateEnergy(const InternalPotential::Molecule &molecule, InternalPotential::Energy &energy,
+                             double scale_energy = 1) const;
 
-private:
-    void calculatePhysicalEnergy(const GroupInternalParameters &group_params,
-                                 const CoordGroup *cgroup_array,
-                                 InternalPotential::Energy &energy,
-                                 double scale_energy) const;
+        void calculateForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                            double scale_force = 1) const;
 
-    void calculateNonPhysicalEnergy(const GroupInternalParameters &group_params,
-                                    const CoordGroup *cgroup_array,
-                                    InternalPotential::Energy &energy,
-                                    double scale_energy) const;
+        void calculateBondForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                                double scale_force = 1) const;
 
-    void calculateCrossEnergy(const GroupInternalParameters &group_params,
-                              const CoordGroup *cgroup_array,
-                              InternalPotential::Energy &energy,
-                              double scale_energy) const;
+        void calculateAngleForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                                 double scale_force = 1) const;
 
-    static ParameterNames param_names;
-    static InternalSymbols internal_symbols;
-};
+        void calculateDihedralForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                                    double scale_force = 1) const;
 
-/** This is a forcefield that calculates the energies and forces
-    caused by molecular mechanics style internal intramolecular
-    potentials, e.g. bond, angle, dihedral, urey bradley terms
+        void calculateImproperForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                                    double scale_force = 1) const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT InternalFF
-            : public SireBase::ConcreteProperty<InternalFF,G1FF>,
-              public FF3D,
-              protected InternalPotential
-{
+        void calculateUBForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                              double scale_force = 1) const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const InternalFF&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, InternalFF&);
+        void calculateSSForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                              double scale_force = 1) const;
 
-public:
-    typedef InternalPotential::Components Components;
-    typedef InternalPotential::ParameterNames ParameterNames;
+        void calculateSBForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                              double scale_force = 1) const;
 
-    InternalFF();
-    InternalFF(const QString &name);
+        void calculateBBForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                              double scale_force = 1) const;
 
-    InternalFF(const InternalFF &other);
+        void calculateSBTForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                               double scale_force = 1) const;
 
-    ~InternalFF();
+        void calculateForce(const InternalPotential::Molecule &molecule, MolForceTable &forces, const Symbol &symbol,
+                            const Components &components, double scale_force = 1) const;
 
-    static const char* typeName();
+        bool isstrict;
 
-    InternalFF* clone() const;
+    private:
+        void calculatePhysicalEnergy(const GroupInternalParameters &group_params, const CoordGroup *cgroup_array,
+                                     InternalPotential::Energy &energy, double scale_energy) const;
 
-    InternalFF& operator=(const InternalFF &other);
+        void calculateNonPhysicalEnergy(const GroupInternalParameters &group_params, const CoordGroup *cgroup_array,
+                                        InternalPotential::Energy &energy, double scale_energy) const;
 
-    bool operator==(const InternalFF &other) const;
-    bool operator!=(const InternalFF &other) const;
+        void calculateCrossEnergy(const GroupInternalParameters &group_params, const CoordGroup *cgroup_array,
+                                  InternalPotential::Energy &energy, double scale_energy) const;
 
-    const InternalSymbols& symbols() const;
-    const ParameterNames& parameters() const;
-    const Components& components() const;
+        static ParameterNames param_names;
+        static InternalSymbols internal_symbols;
+    };
 
-    bool setStrict(bool isstrict);
-    bool isStrict() const;
+    /** This is a forcefield that calculates the energies and forces
+        caused by molecular mechanics style internal intramolecular
+        potentials, e.g. bond, angle, dihedral, urey bradley terms
 
-    void setArithmeticCombiningRules(bool on);
-    void setGeometricCombiningRules(bool on);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT InternalFF : public SireBase::ConcreteProperty<InternalFF, G1FF>,
+                                     public FF3D,
+                                     protected InternalPotential
+    {
 
-    CLJFunction::COMBINING_RULES combiningRules() const;
-    bool setCombiningRules(CLJFunction::COMBINING_RULES rules);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const InternalFF &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, InternalFF &);
 
-    bool usingArithmeticCombiningRules() const;
-    bool usingGeometricCombiningRules() const;
+    public:
+        typedef InternalPotential::Components Components;
+        typedef InternalPotential::ParameterNames ParameterNames;
 
-    void enable14Calculation();
-    void disable14Calculation();
-    bool setUse14Calculation(bool on);
-    bool uses14Calculation() const;
+        InternalFF();
+        InternalFF(const QString &name);
 
-    bool setProperty(const QString &name, const Property &property);
-    const Property& property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
-    const Properties& properties() const;
+        InternalFF(const InternalFF &other);
 
-    SireUnits::Dimension::MolarEnergy energy();
-    SireUnits::Dimension::MolarEnergy energy(const Symbol &component);
+        ~InternalFF();
 
-    void energy(EnergyTable &energytable, double scale_energy=1);
+        static const char *typeName();
 
-    void energy(EnergyTable &energytable, const Symbol &symbol,
-		double scale_energy=1);
+        InternalFF *clone() const;
 
-    void force(ForceTable &forcetable, double scale_force=1);
+        InternalFF &operator=(const InternalFF &other);
 
-    void force(ForceTable &forcetable, const Symbol &symbol,
-               double scale_force=1);
+        bool operator==(const InternalFF &other) const;
+        bool operator!=(const InternalFF &other) const;
 
-    void field(FieldTable &fieldtable, double scale_field=1);
+        const InternalSymbols &symbols() const;
+        const ParameterNames &parameters() const;
+        const Components &components() const;
 
-    void field(FieldTable &fieldtable, const Symbol &component,
-               double scale_field=1);
+        bool setStrict(bool isstrict);
+        bool isStrict() const;
 
-    void potential(PotentialTable &potentialtable, double scale_potential=1);
+        void setArithmeticCombiningRules(bool on);
+        void setGeometricCombiningRules(bool on);
 
-    void potential(PotentialTable &potentialtable, const Symbol &component,
-                   double scale_potential=1);
+        CLJFunction::COMBINING_RULES combiningRules() const;
+        bool setCombiningRules(CLJFunction::COMBINING_RULES rules);
 
-    void field(FieldTable &fieldtable, const Probe &probe, double scale_field=1);
+        bool usingArithmeticCombiningRules() const;
+        bool usingGeometricCombiningRules() const;
 
-    void field(FieldTable &fieldtable, const Symbol &component,
-               const Probe &probe, double scale_field=1);
+        void enable14Calculation();
+        void disable14Calculation();
+        bool setUse14Calculation(bool on);
+        bool uses14Calculation() const;
 
-    void potential(PotentialTable &potentialtable, const Probe &probe,
-                   double scale_potential=1);
+        bool setProperty(const QString &name, const Property &property);
+        const Property &property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
+        const Properties &properties() const;
 
-    void potential(PotentialTable &potentialtable, const Symbol &component,
-                   const Probe &probe, double scale_potential=1);
+        SireUnits::Dimension::MolarEnergy energy();
+        SireUnits::Dimension::MolarEnergy energy(const Symbol &component);
 
-    void mustNowRecalculateFromScratch();
+        void energy(EnergyTable &energytable, double scale_energy = 1);
 
-protected:
-    const FFComponent& _pvt_components() const;
+        void energy(EnergyTable &energytable, const Symbol &symbol, double scale_energy = 1);
 
-    void recalculateEnergy();
+        void force(ForceTable &forcetable, double scale_force = 1);
 
-    void _pvt_added(const PartialMolecule &mol, const PropertyMap &map);
+        void force(ForceTable &forcetable, const Symbol &symbol, double scale_force = 1);
 
-    void _pvt_removed(const PartialMolecule &mol);
+        void field(FieldTable &fieldtable, double scale_field = 1);
 
-    void _pvt_changed(const SireMol::Molecule &molecule, bool auto_update);
-    void _pvt_changed(const QList<SireMol::Molecule> &molecules, bool auto_update);
+        void field(FieldTable &fieldtable, const Symbol &component, double scale_field = 1);
 
-    void _pvt_removedAll();
+        void potential(PotentialTable &potentialtable, double scale_potential = 1);
 
-    bool _pvt_wouldChangeProperties(MolNum molnum,
-                                    const PropertyMap &map) const;
+        void potential(PotentialTable &potentialtable, const Symbol &component, double scale_potential = 1);
 
-    void _pvt_updateName();
+        void field(FieldTable &fieldtable, const Probe &probe, double scale_field = 1);
 
-private:
-    typedef InternalPotential::Molecule Molecule;
-    typedef InternalPotential::Molecules Molecules;
-    typedef InternalPotential::ChangedMolecule ChangedMolecule;
+        void field(FieldTable &fieldtable, const Symbol &component, const Probe &probe, double scale_field = 1);
 
-    bool recordingChanges() const;
-    void recordChange(const ChangedMolecule &change);
+        void potential(PotentialTable &potentialtable, const Probe &probe, double scale_potential = 1);
 
-    /** All of the molecules currently in this forcefield */
-    Molecules mols;
+        void potential(PotentialTable &potentialtable, const Symbol &component, const Probe &probe,
+                       double scale_potential = 1);
 
-    /** The list of molecules that have changed since the last evaluation.
-        While ffmols only contains the newest version of the molecule,
-        this list contains both the newest version, and the version of the
-        molecule at the last energy evaluation. */
-    QHash<MolNum,ChangedMolecule> changed_mols;
+        void mustNowRecalculateFromScratch();
 
-    /** The CLJ14Group that is used to calculate the 1-4 nonbonded energy
-        of all contained molecules */
-    QHash<MolNum,CLJ14Group> cljgroups;
+    protected:
+        const FFComponent &_pvt_components() const;
 
-    /** All of the (non-default) property maps for the molecules */
-    QHash<MolNum,PropertyMap> propmaps;
+        void recalculateEnergy();
 
-    /** The energy components available for this forcefield */
-    Components ffcomponents;
+        void _pvt_added(const PartialMolecule &mol, const PropertyMap &map);
 
-    /** The properties of this forcefield */
-    Properties props;
+        void _pvt_removed(const PartialMolecule &mol);
 
-    /** Whether or not to calculate 1-4 nonbonded energies */
-    bool calc_14_nrgs;
-};
+        void _pvt_changed(const SireMol::Molecule &molecule, bool auto_update);
+        void _pvt_changed(const QList<SireMol::Molecule> &molecules, bool auto_update);
+
+        void _pvt_removedAll();
+
+        bool _pvt_wouldChangeProperties(MolNum molnum, const PropertyMap &map) const;
+
+        void _pvt_updateName();
+
+    private:
+        typedef InternalPotential::Molecule Molecule;
+        typedef InternalPotential::Molecules Molecules;
+        typedef InternalPotential::ChangedMolecule ChangedMolecule;
+
+        bool recordingChanges() const;
+        void recordChange(const ChangedMolecule &change);
+
+        /** All of the molecules currently in this forcefield */
+        Molecules mols;
+
+        /** The list of molecules that have changed since the last evaluation.
+            While ffmols only contains the newest version of the molecule,
+            this list contains both the newest version, and the version of the
+            molecule at the last energy evaluation. */
+        QHash<MolNum, ChangedMolecule> changed_mols;
+
+        /** The CLJ14Group that is used to calculate the 1-4 nonbonded energy
+            of all contained molecules */
+        QHash<MolNum, CLJ14Group> cljgroups;
+
+        /** All of the (non-default) property maps for the molecules */
+        QHash<MolNum, PropertyMap> propmaps;
+
+        /** The energy components available for this forcefield */
+        Components ffcomponents;
+
+        /** The properties of this forcefield */
+        Properties props;
+
+        /** Whether or not to calculate 1-4 nonbonded energies */
+        bool calc_14_nrgs;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-////////
-//////// Inline functions of InternalFF
-////////
+    ////////
+    //////// Inline functions of InternalFF
+    ////////
 
-SIRE_ALWAYS_INLINE SireUnits::Dimension::MolarEnergy InternalFF::energy()
-{
-    return G1FF::energy();
-}
+    SIRE_ALWAYS_INLINE SireUnits::Dimension::MolarEnergy InternalFF::energy()
+    {
+        return G1FF::energy();
+    }
 
-SIRE_ALWAYS_INLINE SireUnits::Dimension::MolarEnergy InternalFF::energy(const Symbol &component)
-{
-    return G1FF::energy(component);
-}
+    SIRE_ALWAYS_INLINE SireUnits::Dimension::MolarEnergy InternalFF::energy(const Symbol &component)
+    {
+        return G1FF::energy(component);
+    }
 
-/** Return all of the symbols used in the internal energy functions */
-SIRE_ALWAYS_INLINE const InternalSymbols& InternalFF::symbols() const
-{
-    return InternalPotential::symbols();
-}
+    /** Return all of the symbols used in the internal energy functions */
+    SIRE_ALWAYS_INLINE const InternalSymbols &InternalFF::symbols() const
+    {
+        return InternalPotential::symbols();
+    }
 
-/** Return the names of all of the properties used to store the
-    parameters for this potential */
-SIRE_ALWAYS_INLINE const InternalFF::ParameterNames& InternalFF::parameters() const
-{
-    return InternalPotential::parameters();
-}
+    /** Return the names of all of the properties used to store the
+        parameters for this potential */
+    SIRE_ALWAYS_INLINE const InternalFF::ParameterNames &InternalFF::parameters() const
+    {
+        return InternalPotential::parameters();
+    }
 
-/** Return all of the symbols representing the components
-    of this forcefield */
-SIRE_ALWAYS_INLINE const InternalFF::Components& InternalFF::components() const
-{
-    return ffcomponents;
-}
+    /** Return all of the symbols representing the components
+        of this forcefield */
+    SIRE_ALWAYS_INLINE const InternalFF::Components &InternalFF::components() const
+    {
+        return ffcomponents;
+    }
 
-/** Return whether or not this strictly include terms that
-    involve *only* selected atoms. Otherwise this includes
-    terms that involve at least one selected atom */
-SIRE_ALWAYS_INLINE bool InternalFF::isStrict() const
-{
-    return isstrict;
-}
+    /** Return whether or not this strictly include terms that
+        involve *only* selected atoms. Otherwise this includes
+        terms that involve at least one selected atom */
+    SIRE_ALWAYS_INLINE bool InternalFF::isStrict() const
+    {
+        return isstrict;
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::InternalFF );
+Q_DECLARE_METATYPE(SireMM::InternalFF);
 
-SIRE_EXPOSE_CLASS( SireMM::BondParameterName )
-SIRE_EXPOSE_CLASS( SireMM::AngleParameterName )
-SIRE_EXPOSE_CLASS( SireMM::DihedralParameterName )
-SIRE_EXPOSE_CLASS( SireMM::ImproperParameterName )
-SIRE_EXPOSE_CLASS( SireMM::UreyBradleyParameterName )
-SIRE_EXPOSE_CLASS( SireMM::StretchStretchParameterName )
-SIRE_EXPOSE_CLASS( SireMM::StretchBendParameterName )
-SIRE_EXPOSE_CLASS( SireMM::BendBendParameterName )
-SIRE_EXPOSE_CLASS( SireMM::StretchBendTorsionParameterName )
-SIRE_EXPOSE_CLASS( SireMM::InternalParameterNames )
-SIRE_EXPOSE_CLASS( SireMM::InternalParameterNames3D )
-SIRE_EXPOSE_CLASS( SireMM::InternalFF )
+SIRE_EXPOSE_CLASS(SireMM::BondParameterName)
+SIRE_EXPOSE_CLASS(SireMM::AngleParameterName)
+SIRE_EXPOSE_CLASS(SireMM::DihedralParameterName)
+SIRE_EXPOSE_CLASS(SireMM::ImproperParameterName)
+SIRE_EXPOSE_CLASS(SireMM::UreyBradleyParameterName)
+SIRE_EXPOSE_CLASS(SireMM::StretchStretchParameterName)
+SIRE_EXPOSE_CLASS(SireMM::StretchBendParameterName)
+SIRE_EXPOSE_CLASS(SireMM::BendBendParameterName)
+SIRE_EXPOSE_CLASS(SireMM::StretchBendTorsionParameterName)
+SIRE_EXPOSE_CLASS(SireMM::InternalParameterNames)
+SIRE_EXPOSE_CLASS(SireMM::InternalParameterNames3D)
+SIRE_EXPOSE_CLASS(SireMM::InternalFF)
 
 #endif

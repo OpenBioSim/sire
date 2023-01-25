@@ -30,317 +30,309 @@
 #ifndef SIREMOL_CGEDITOR_H
 #define SIREMOL_CGEDITOR_H
 
-#include "structureeditor.h"
 #include "cutgroup.h"
+#include "structureeditor.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class CGEditor;
-class CGStructureEditor;
-}
+    class CGEditor;
+    class CGStructureEditor;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::CGEditor&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::CGEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::CGEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::CGEditor &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::CGStructureEditor&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::CGStructureEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::CGStructureEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::CGStructureEditor &);
 
 namespace std
 {
-class slice;
+    class slice;
 }
 
 namespace SireMol
 {
 
-class MolStructureEditor;
-class SegStructureEditor;
-class ChainStructureEditor;
-class ResStructureEditor;
-class CGStructureEditor;
-class AtomStructureEditor;
+    class MolStructureEditor;
+    class SegStructureEditor;
+    class ChainStructureEditor;
+    class ResStructureEditor;
+    class CGStructureEditor;
+    class AtomStructureEditor;
 
-class MolEditor;
-class SegEditor;
-class ChainEditor;
-class ResEditor;
-class CGEditor;
-class AtomEditor;
+    class MolEditor;
+    class SegEditor;
+    class ChainEditor;
+    class ResEditor;
+    class CGEditor;
+    class AtomEditor;
 
-class CGIdx;
-class CGID;
-class ResIdx;
-class ResID;
+    class CGIdx;
+    class CGID;
+    class ResIdx;
+    class ResID;
 
-class CGEditor;
-typedef Editor<CGEditor, CutGroup> CGEditorBase;
+    class CGEditor;
+    typedef Editor<CGEditor, CutGroup> CGEditorBase;
 
-/** This class is used to edit the non-structural parts of a CutGroup
+    /** This class is used to edit the non-structural parts of a CutGroup
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT CGEditor
-        : public SireBase::ConcreteProperty< CGEditor, Editor<CGEditor, CutGroup> >
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const CGEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CGEditor&);
-
-public:
-    CGEditor();
-
-    CGEditor(const CutGroup &cutgroup);
-
-    CGEditor(const CGEditor &other);
-
-    ~CGEditor();
-
-    CGEditor& operator=(const CutGroup &cutgroup);
-    CGEditor& operator=(const CGEditor &other);
-
-    static const char* typeName();
-
-    QString toString() const;
-
-    CGEditor& rename(const CGName &name);
-    CGStructureEditor reindex(CGIdx index) const;
-
-    MolStructureEditor remove() const;
-
-    AtomStructureEditor add(const AtomName &atomname) const;
-    AtomStructureEditor add(AtomNum atomnum) const;
-
-    CGStructureEditor remove(const AtomID &atomid) const;
-
-    CGStructureEditor remove(int i) const;
-
-    CGStructureEditor transfer(const AtomID &atomid, const CGID &cgid) const;
-    CGStructureEditor transfer(int i, const CGID &cgid) const;
-
-    CGStructureEditor transferAll(const CGID &cgid) const;
-
-    CutGroup commit() const;
-};
-
-/** This is the class used to edit a CutGroup's structure
-
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT CGStructureEditor : public StructureEditor
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const CGStructureEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CGStructureEditor&);
-
-public:
-    CGStructureEditor();
-    CGStructureEditor(const CutGroup &cutgroup);
-    CGStructureEditor(const StructureEditor &data, CGIdx cgidx);
-
-    CGStructureEditor(const CGStructureEditor &other);
-
-    ~CGStructureEditor();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT CGEditor : public SireBase::ConcreteProperty<CGEditor, Editor<CGEditor, CutGroup>>
     {
-        return CGStructureEditor::typeName();
-    }
 
-    CGStructureEditor* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const CGEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, CGEditor &);
 
-    CGStructureEditor& operator=(const CutGroup &cutgroup);
-    CGStructureEditor& operator=(const CGStructureEditor &other);
+    public:
+        CGEditor();
 
-    bool selectedAll() const;
+        CGEditor(const CutGroup &cutgroup);
 
-    QString toString() const;
+        CGEditor(const CGEditor &other);
 
-    const CGName& name() const;
-    CGIdx index() const;
+        ~CGEditor();
 
-    int nAtoms() const;
+        CGEditor &operator=(const CutGroup &cutgroup);
+        CGEditor &operator=(const CGEditor &other);
 
-    MolStructureEditor molecule();
+        static const char *typeName();
 
-    AtomStructureEditor atom(int i);
-    AtomStructureEditor atom(const AtomID &atomid);
+        QString toString() const;
 
-    AtomStructureEditor select(int i);
-    AtomStructureEditor select(const AtomID &atomid);
+        CGEditor &rename(const CGName &name);
+        CGStructureEditor reindex(CGIdx index) const;
 
-    CGStructureEditor& rename(const CGName &name);
-    CGStructureEditor& reindex(CGIdx index);
+        MolStructureEditor remove() const;
 
-    MolStructureEditor remove();
+        AtomStructureEditor add(const AtomName &atomname) const;
+        AtomStructureEditor add(AtomNum atomnum) const;
 
-    AtomStructureEditor add(const AtomName &atomname);
-    AtomStructureEditor add(AtomNum atomnum);
+        CGStructureEditor remove(const AtomID &atomid) const;
 
-    CGStructureEditor& remove(const AtomID &atomid);
+        CGStructureEditor remove(int i) const;
 
-    CGStructureEditor& remove(int i);
+        CGStructureEditor transfer(const AtomID &atomid, const CGID &cgid) const;
+        CGStructureEditor transfer(int i, const CGID &cgid) const;
 
-    CGStructureEditor& transfer(const AtomID &atomid, const CGID &cgid);
-    CGStructureEditor& transfer(int i, const CGID &cgid);
+        CGStructureEditor transferAll(const CGID &cgid) const;
 
-    CGStructureEditor& transferAll(const CGID &cgid);
+        CutGroup commit() const;
+    };
 
-    template<class T>
-    T property(const QString &key) const;
+    /** This is the class used to edit a CutGroup's structure
 
-    template<class T>
-    T metadata(const QString &metakey) const;
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT CGStructureEditor : public StructureEditor
+    {
 
-    template<class T>
-    T metadata(const QString &key, const QString &metakey) const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const CGStructureEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, CGStructureEditor &);
 
-    template<class T>
-    CGStructureEditor& setProperty(const QString &key, const T &value);
+    public:
+        CGStructureEditor();
+        CGStructureEditor(const CutGroup &cutgroup);
+        CGStructureEditor(const StructureEditor &data, CGIdx cgidx);
 
-    template<class T>
-    CGStructureEditor& setMetadata(const QString &metakey, const T &value);
+        CGStructureEditor(const CGStructureEditor &other);
 
-    template<class T>
-    CGStructureEditor& setMetadata(const QString &key, const QString &metakey,
-                                   const T &value);
+        ~CGStructureEditor();
 
-    CutGroup commit() const;
+        static const char *typeName();
 
-    operator CutGroup() const;
+        const char *what() const
+        {
+            return CGStructureEditor::typeName();
+        }
 
-private:
-    /** Unique ID number for this CutGroup in the molecule editor */
-    quint32 uid;
-};
+        CGStructureEditor *clone() const;
+
+        CGStructureEditor &operator=(const CutGroup &cutgroup);
+        CGStructureEditor &operator=(const CGStructureEditor &other);
+
+        bool selectedAll() const;
+
+        QString toString() const;
+
+        const CGName &name() const;
+        CGIdx index() const;
+
+        int nAtoms() const;
+
+        MolStructureEditor molecule();
+
+        AtomStructureEditor atom(int i);
+        AtomStructureEditor atom(const AtomID &atomid);
+
+        AtomStructureEditor select(int i);
+        AtomStructureEditor select(const AtomID &atomid);
+
+        CGStructureEditor &rename(const CGName &name);
+        CGStructureEditor &reindex(CGIdx index);
+
+        MolStructureEditor remove();
+
+        AtomStructureEditor add(const AtomName &atomname);
+        AtomStructureEditor add(AtomNum atomnum);
+
+        CGStructureEditor &remove(const AtomID &atomid);
+
+        CGStructureEditor &remove(int i);
+
+        CGStructureEditor &transfer(const AtomID &atomid, const CGID &cgid);
+        CGStructureEditor &transfer(int i, const CGID &cgid);
+
+        CGStructureEditor &transferAll(const CGID &cgid);
+
+        template <class T>
+        T property(const QString &key) const;
+
+        template <class T>
+        T metadata(const QString &metakey) const;
+
+        template <class T>
+        T metadata(const QString &key, const QString &metakey) const;
+
+        template <class T>
+        CGStructureEditor &setProperty(const QString &key, const T &value);
+
+        template <class T>
+        CGStructureEditor &setMetadata(const QString &metakey, const T &value);
+
+        template <class T>
+        CGStructureEditor &setMetadata(const QString &key, const QString &metakey, const T &value);
+
+        CutGroup commit() const;
+
+        operator CutGroup() const;
+
+    private:
+        /** Unique ID number for this CutGroup in the molecule editor */
+        quint32 uid;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the value for this CutGroup of the property at key 'key'.
-    Note that this property *must* be of type CGProperty<T> for
-    this to work!
+    /** Return the value for this CutGroup of the property at key 'key'.
+        Note that this property *must* be of type CGProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T CGStructureEditor::property(const QString &key) const
-{
-    const QVariant &value = this->getCGProperty(uid, key);
-    return this->_pvt_getProperty<T>(key, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T CGStructureEditor::property(const QString &key) const
+    {
+        const QVariant &value = this->getCGProperty(uid, key);
+        return this->_pvt_getProperty<T>(key, value);
+    }
 
-/** Return the value for this CutGroup of the metadata at metakey 'metakey'.
-    Note that this property *must* be of type CGProperty<T> for
-    this to work!
+    /** Return the value for this CutGroup of the metadata at metakey 'metakey'.
+        Note that this property *must* be of type CGProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T CGStructureEditor::metadata(const QString &metakey) const
-{
-    const QVariant &value = this->getCGMetadata(uid, metakey);
-    return this->_pvt_getMetadata<T>(metakey, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T CGStructureEditor::metadata(const QString &metakey) const
+    {
+        const QVariant &value = this->getCGMetadata(uid, metakey);
+        return this->_pvt_getMetadata<T>(metakey, value);
+    }
 
-/** Return the value for this CutGroup of the metadata at metakey 'metakey'
-    for the property at key 'key'.
+    /** Return the value for this CutGroup of the metadata at metakey 'metakey'
+        for the property at key 'key'.
 
-    Note that this property *must* be of type CGProperty<T> for
-    this to work!
+        Note that this property *must* be of type CGProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T CGStructureEditor::metadata(const QString &key,
-                              const QString &metakey) const
-{
-    const QVariant &value = this->getCGMetadata(uid, key, metakey);
-    return this->_pvt_getMetadata<T>(key, metakey, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T CGStructureEditor::metadata(const QString &key, const QString &metakey) const
+    {
+        const QVariant &value = this->getCGMetadata(uid, key, metakey);
+        return this->_pvt_getMetadata<T>(key, metakey, value);
+    }
 
-/** Set the property at key 'key' to have the value 'value' for this CutGroup.
-    Note that an exception will be thrown if an existing property for
-    this key is not of type CGProperty<T>
+    /** Set the property at key 'key' to have the value 'value' for this CutGroup.
+        Note that an exception will be thrown if an existing property for
+        this key is not of type CGProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-CGStructureEditor& CGStructureEditor::setProperty(const QString &key,
-                                                  const T &value)
-{
-    this->assertValidCutGroup(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    CGStructureEditor &CGStructureEditor::setProperty(const QString &key, const T &value)
+    {
+        this->assertValidCutGroup(uid);
 
-    //create space for this property
-    this->_pvt_createSpaceForProperty< CGProperty<T> >(key);
+        // create space for this property
+        this->_pvt_createSpaceForProperty<CGProperty<T>>(key);
 
-    //now set the value of the property
-    this->_pvt_setCGProperty(uid, key, QVariant::fromValue<T>(value));
+        // now set the value of the property
+        this->_pvt_setCGProperty(uid, key, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Set the metadata at metakey 'metakey' to have the value 'value' for
-    this CutGroup. Note that an exception will be thrown if an existing
-    property for this metakey is not of type CGProperty<T>
+    /** Set the metadata at metakey 'metakey' to have the value 'value' for
+        this CutGroup. Note that an exception will be thrown if an existing
+        property for this metakey is not of type CGProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-CGStructureEditor& CGStructureEditor::setMetadata(const QString &metakey,
-                                                  const T &value)
-{
-    this->assertValidCutGroup(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    CGStructureEditor &CGStructureEditor::setMetadata(const QString &metakey, const T &value)
+    {
+        this->assertValidCutGroup(uid);
 
-    //create space for this metadata
-    this->_pvt_createSpaceForMetadata< CGProperty<T> >(metakey);
+        // create space for this metadata
+        this->_pvt_createSpaceForMetadata<CGProperty<T>>(metakey);
 
-    //now set the value of this metadata
-    this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
+        // now set the value of this metadata
+        this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Set the metadata at metakey 'metakey' for the property at
-    key 'key' to have the value 'value' for
-    this CutGroup. Note that an exception will be thrown if an existing
-    property for this metakey is not of type CGProperty<T>
+    /** Set the metadata at metakey 'metakey' for the property at
+        key 'key' to have the value 'value' for
+        this CutGroup. Note that an exception will be thrown if an existing
+        property for this metakey is not of type CGProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-CGStructureEditor& CGStructureEditor::setMetadata(const QString &key,
-                                                  const QString &metakey,
-                                                  const T &value)
-{
-    this->assertValidCutGroup(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    CGStructureEditor &CGStructureEditor::setMetadata(const QString &key, const QString &metakey, const T &value)
+    {
+        this->assertValidCutGroup(uid);
 
-    //create space for this metadata
-    this->_pvt_createSpaceForMetadata< CGProperty<T> >(key, metakey);
+        // create space for this metadata
+        this->_pvt_createSpaceForMetadata<CGProperty<T>>(key, metakey);
 
-    //now set the value of this metadata
-    this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
+        // now set the value of this metadata
+        this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::CGEditor );
-Q_DECLARE_METATYPE( SireMol::CGStructureEditor );
+Q_DECLARE_METATYPE(SireMol::CGEditor);
+Q_DECLARE_METATYPE(SireMol::CGStructureEditor);
 
-SIRE_EXPOSE_ALIAS( (SireMol::Editor<SireMol::CGEditor, SireMol::CutGroup>),
-                    SireMol::CGEditorBase )
+SIRE_EXPOSE_ALIAS((SireMol::Editor<SireMol::CGEditor, SireMol::CutGroup>), SireMol::CGEditorBase)
 
-SIRE_EXPOSE_CLASS( SireMol::CGEditor )
-SIRE_EXPOSE_CLASS( SireMol::CGStructureEditor )
+SIRE_EXPOSE_CLASS(SireMol::CGEditor)
+SIRE_EXPOSE_CLASS(SireMol::CGStructureEditor)
 
 SIRE_END_HEADER
 

@@ -25,8 +25,8 @@
   *
 \*********************************************/
 
-#include "SireMaths/multifloat.h"
 #include "SireMaths/multidouble.h"
+#include "SireMaths/multifloat.h"
 #include "SireMaths/multiint.h"
 
 #include <QDebug>
@@ -41,14 +41,14 @@ void intTests()
 
     QVector<qint32> vals(size);
 
-    for (int i=0; i<size; ++i)
+    for (int i = 0; i < size; ++i)
     {
         vals[i] = i;
     }
 
     QVector<MultiInt> mi = MultiInt::fromArray(vals);
 
-    for (int i=0; i<mi.count(); ++i)
+    for (int i = 0; i < mi.count(); ++i)
     {
         qDebug() << mi[i].toString() << mi[i].toBinaryString();
     }
@@ -56,7 +56,7 @@ void intTests()
     MultiInt m = mi[0];
 
     qDebug() << "ROTATE";
-    for (int i=0; i<MultiInt::size(); ++i)
+    for (int i = 0; i < MultiInt::size(); ++i)
     {
         qDebug() << i << m.toString();
         m = m.rotate();
@@ -67,10 +67,10 @@ void intTests()
     qDebug() << m.reinterpretCastToFloat().toBinaryString();
 
     qDebug() << "ADD";
-    qDebug() << (m+m).toString();
+    qDebug() << (m + m).toString();
 
     qDebug() << "SUB";
-    qDebug() << (m-m).toString();
+    qDebug() << (m - m).toString();
 
     qDebug() << "COMPARE ==";
     qDebug() << (m.compareEqual(m)).toBinaryString();
@@ -95,9 +95,9 @@ int main(int argc, const char **argv)
 {
     QVector<float> vals;
 
-    for (int i=1; i<=MultiFloat::size(); ++i)
+    for (int i = 1; i <= MultiFloat::size(); ++i)
     {
-        vals.append( i );
+        vals.append(i);
     }
 
     MultiFloat mf(vals);
@@ -118,7 +118,7 @@ int main(int argc, const char **argv)
     qDebug() << md2.toString();
 
     qDebug() << "ROTATE";
-    for (int i=1; i<=MultiFloat::size(); ++i)
+    for (int i = 1; i <= MultiFloat::size(); ++i)
     {
         mf = mf.rotate();
         md = md.rotate();
@@ -130,7 +130,7 @@ int main(int argc, const char **argv)
     qDebug() << mf.sqrt().toString();
     qDebug() << md.sqrt().toString();
 
-    for (int i=MultiFloat::count()+1; i<= 101; ++i)
+    for (int i = MultiFloat::count() + 1; i <= 101; ++i)
     {
         vals.append(i);
     }
@@ -138,7 +138,7 @@ int main(int argc, const char **argv)
     QVector<MultiFloat> mfarray = MultiFloat::fromArray(vals);
     QVector<MultiDouble> mdarray = MultiDouble::fromArray(vals);
 
-    for (int i=0; i<mfarray.count(); ++i)
+    for (int i = 0; i < mfarray.count(); ++i)
     {
         qDebug() << mfarray[i].toString();
         qDebug() << mdarray[i].toString();
@@ -153,14 +153,14 @@ int main(int argc, const char **argv)
 
     qDebug() << "\nAbs tests";
 
-    for (int i=0; i<MultiFloat::size(); ++i)
+    for (int i = 0; i < MultiFloat::size(); ++i)
     {
         vals[i] = 0.1 * i;
     }
 
     a = MultiFloat(vals.constData(), MultiFloat::size());
 
-    for (int i=0; i<MultiFloat::size(); ++i)
+    for (int i = 0; i < MultiFloat::size(); ++i)
     {
         vals[i] = -0.1 * i;
     }
@@ -176,5 +176,4 @@ int main(int argc, const char **argv)
     */
 
     return 0;
-
 }

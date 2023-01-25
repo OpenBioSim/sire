@@ -36,13 +36,13 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-typedef AtomProperty<BeadNum> AtomBeads;
+    typedef AtomProperty<BeadNum> AtomBeads;
 
 }
 
-Q_DECLARE_METATYPE( SireMol::AtomBeads );
+Q_DECLARE_METATYPE(SireMol::AtomBeads);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireMol::BeadNum, SireMol::AtomBeads )
+SIRE_EXPOSE_ATOM_PROPERTY(SireMol::BeadNum, SireMol::AtomBeads)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireMol::AtomProperty<SireMol::BeadNum>;

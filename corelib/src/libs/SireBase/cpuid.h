@@ -36,73 +36,73 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class CPUID;
+    class CPUID;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::CPUID&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::CPUID&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::CPUID &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::CPUID &);
 
 namespace SireBase
 {
 
-/** This class obtains and displays the capabilities and ID of
-    the CPU at runtime
+    /** This class obtains and displays the capabilities and ID of
+        the CPU at runtime
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT CPUID : public ConcreteProperty<CPUID,Property>
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT CPUID : public ConcreteProperty<CPUID, Property>
+    {
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const CPUID&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, CPUID&);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const CPUID &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, CPUID &);
 
-public:
-    CPUID();
-    CPUID(const CPUID &other);
+    public:
+        CPUID();
+        CPUID(const CPUID &other);
 
-    ~CPUID();
+        ~CPUID();
 
-    CPUID& operator=(const CPUID &other);
+        CPUID &operator=(const CPUID &other);
 
-    bool operator==(const CPUID &other) const;
-    bool operator!=(const CPUID &other) const;
+        bool operator==(const CPUID &other) const;
+        bool operator!=(const CPUID &other) const;
 
-    CPUID* clone() const;
+        CPUID *clone() const;
 
-    const char* what() const;
-    static const char* typeName();
+        const char *what() const;
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    bool supports(const QString &feature) const;
+        bool supports(const QString &feature) const;
 
-    QStringList supportableFeatures() const;
+        QStringList supportableFeatures() const;
 
-    QStringList supportedFeatures() const;
+        QStringList supportedFeatures() const;
 
-    QString vendor() const;
-    QString brand() const;
+        QString vendor() const;
+        QString brand() const;
 
-    int clockSpeed() const;
-    int numCores() const;
+        int clockSpeed() const;
+        int numCores() const;
 
-    bool supportsSSE2() const;
-    bool supportsAVX() const;
+        bool supportsSSE2() const;
+        bool supportsAVX() const;
 
-private:
-    QHash<QString,QString>* getCPUID();
+    private:
+        QHash<QString, QString> *getCPUID();
 
-    /** A simple dictionary of key-value pairs for the CPU */
-    QHash<QString,QString> props;
+        /** A simple dictionary of key-value pairs for the CPU */
+        QHash<QString, QString> props;
 
-    static QHash<QString,QString> *global_props;
-};
+        static QHash<QString, QString> *global_props;
+    };
 
-}
+} // namespace SireBase
 
-Q_DECLARE_METATYPE( SireBase::CPUID )
+Q_DECLARE_METATYPE(SireBase::CPUID)
 
-SIRE_EXPOSE_CLASS( SireBase::CPUID )
+SIRE_EXPOSE_CLASS(SireBase::CPUID)
 
 SIRE_END_HEADER
 

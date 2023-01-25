@@ -34,331 +34,330 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class Cos;
-class Sin;
-class Tan;
-class Csc;
-class Sec;
-class Cot;
-}
+    class Cos;
+    class Sin;
+    class Tan;
+    class Csc;
+    class Sec;
+    class Cot;
+} // namespace SireCAS
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Cos&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Cos&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Cos &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Cos &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Sin&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Sin&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Sin &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Sin &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Tan&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Tan&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Tan &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Tan &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Csc&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Csc&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Csc &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Csc &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Sec&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Sec&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Sec &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Sec &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Cot&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Cot&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Cot &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Cot &);
 
 namespace SireCAS
 {
 
-/** Cosine */
-class SIRECAS_EXPORT Cos : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Cos&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Cos&);
-
-public:
-    Cos();
-    Cos(const Expression &ex);
-
-    Cos(const Cos &other);
-
-    ~Cos();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
+    /** Cosine */
+    class SIRECAS_EXPORT Cos : public SingleFunc
     {
-        return Cos::typeName();
-    }
 
-    Cos* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Cos &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Cos &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        Cos();
+        Cos(const Expression &ex);
 
-protected:
-    Expression functionOf(const Expression &arg) const
+        Cos(const Cos &other);
+
+        ~Cos();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Cos::typeName();
+        }
+
+        Cos *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Cos(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "cos";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Sine */
+    class SIRECAS_EXPORT Sin : public SingleFunc
     {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Cos(arg));
-    }
 
-    QString stringRep() const
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Sin &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Sin &);
+
+    public:
+        Sin();
+        Sin(const Expression &ex);
+
+        Sin(const Sin &other);
+
+        ~Sin();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Sin::typeName();
+        }
+
+        Sin *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Sin(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "sin";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Tangent */
+    class SIRECAS_EXPORT Tan : public SingleFunc
     {
-        return "cos";
-    }
 
-    uint magic() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Tan &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Tan &);
 
-    Expression diff() const;
-    Expression integ() const;
+    public:
+        Tan();
+        Tan(const Expression &ex);
 
-};
+        Tan(const Tan &other);
 
-/** Sine */
-class SIRECAS_EXPORT Sin : public SingleFunc
-{
+        ~Tan();
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Sin&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Sin&);
+        bool operator==(const ExBase &other) const;
 
-public:
-    Sin();
-    Sin(const Expression &ex);
+        static const char *typeName();
 
-    Sin(const Sin &other);
+        const char *what() const
+        {
+            return Tan::typeName();
+        }
 
-    ~Sin();
+        Tan *clone() const;
 
-    bool operator==(const ExBase &other) const;
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
 
-    static const char* typeName();
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Tan(arg));
+        }
 
-    const char* what() const
+        QString stringRep() const
+        {
+            return "tan";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Secant */
+    class SIRECAS_EXPORT Sec : public SingleFunc
     {
-        return Sin::typeName();
-    }
 
-    Sin* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Sec &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Sec &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        Sec();
+        Sec(const Expression &ex);
 
-protected:
-    Expression functionOf(const Expression &arg) const
+        Sec(const Sec &other);
+
+        ~Sec();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Sec::typeName();
+        }
+
+        Sec *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Sec(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "sec";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Cosecant */
+    class SIRECAS_EXPORT Csc : public SingleFunc
     {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Sin(arg));
-    }
 
-    QString stringRep() const
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Csc &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Csc &);
+
+    public:
+        Csc();
+        Csc(const Expression &ex);
+
+        Csc(const Csc &other);
+
+        ~Csc();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Csc::typeName();
+        }
+
+        Csc *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Csc(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "csc";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Cotangent */
+    class SIRECAS_EXPORT Cot : public SingleFunc
     {
-        return "sin";
-    }
 
-    uint magic() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Cot &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Cot &);
 
-    Expression diff() const;
-    Expression integ() const;
-};
+    public:
+        Cot();
+        Cot(const Expression &ex);
 
-/** Tangent */
-class SIRECAS_EXPORT Tan : public SingleFunc
-{
+        Cot(const Cot &other);
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Tan&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Tan&);
+        ~Cot();
 
-public:
-    Tan();
-    Tan(const Expression &ex);
+        bool operator==(const ExBase &other) const;
 
-    Tan(const Tan &other);
+        static const char *typeName();
 
-    ~Tan();
+        const char *what() const
+        {
+            return Cot::typeName();
+        }
 
-    bool operator==(const ExBase &other) const;
+        Cot *clone() const;
 
-    static const char* typeName();
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
 
-    const char* what() const
-    {
-        return Tan::typeName();
-    }
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Cot(arg));
+        }
 
-    Tan* clone() const;
+        QString stringRep() const
+        {
+            return "cot";
+        }
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+        uint magic() const;
 
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Tan(arg));
-    }
+        Expression diff() const;
+        Expression integ() const;
+    };
 
-    QString stringRep() const
-    {
-        return "tan";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-/** Secant */
-class SIRECAS_EXPORT Sec : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Sec&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Sec&);
-
-public:
-    Sec();
-    Sec(const Expression &ex);
-
-    Sec(const Sec &other);
-
-    ~Sec();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return Sec::typeName();
-    }
-
-    Sec* clone() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Sec(arg));
-    }
-
-    QString stringRep() const
-    {
-        return "sec";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-/** Cosecant */
-class SIRECAS_EXPORT Csc : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Csc&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Csc&);
-
-public:
-    Csc();
-    Csc(const Expression &ex);
-
-    Csc(const Csc &other);
-
-    ~Csc();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return Csc::typeName();
-    }
-
-    Csc* clone() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Csc(arg));
-    }
-
-    QString stringRep() const
-    {
-        return "csc";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-/** Cotangent */
-class SIRECAS_EXPORT Cot : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Cot&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Cot&);
-
-public:
-    Cot();
-    Cot(const Expression &ex);
-
-    Cot(const Cot &other);
-
-    ~Cot();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char *what() const
-    {
-        return Cot::typeName();
-    }
-
-    Cot* clone() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Cot(arg));
-    }
-
-    QString stringRep() const
-    {
-        return "cot";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-}
+} // namespace SireCAS
 
 Q_DECLARE_METATYPE(SireCAS::Cos)
 Q_DECLARE_METATYPE(SireCAS::Sin)
@@ -367,12 +366,12 @@ Q_DECLARE_METATYPE(SireCAS::Csc)
 Q_DECLARE_METATYPE(SireCAS::Sec)
 Q_DECLARE_METATYPE(SireCAS::Cot)
 
-SIRE_EXPOSE_CLASS( SireCAS::Cos )
-SIRE_EXPOSE_CLASS( SireCAS::Sin )
-SIRE_EXPOSE_CLASS( SireCAS::Tan )
-SIRE_EXPOSE_CLASS( SireCAS::Csc )
-SIRE_EXPOSE_CLASS( SireCAS::Sec )
-SIRE_EXPOSE_CLASS( SireCAS::Cot )
+SIRE_EXPOSE_CLASS(SireCAS::Cos)
+SIRE_EXPOSE_CLASS(SireCAS::Sin)
+SIRE_EXPOSE_CLASS(SireCAS::Tan)
+SIRE_EXPOSE_CLASS(SireCAS::Csc)
+SIRE_EXPOSE_CLASS(SireCAS::Sec)
+SIRE_EXPOSE_CLASS(SireCAS::Cot)
 
 SIRE_END_HEADER
 

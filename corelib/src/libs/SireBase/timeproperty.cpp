@@ -62,43 +62,44 @@ QDataStream &operator>>(QDataStream &ds, TimeProperty &prop)
 }
 
 /** Constructor - this constructs the integer "0" */
-TimeProperty::TimeProperty() : ConcreteProperty<TimeProperty,Property>(), val(0)
-{}
+TimeProperty::TimeProperty() : ConcreteProperty<TimeProperty, Property>(), val(0)
+{
+}
 
 /** Construct from the passed length */
-TimeProperty::TimeProperty(Time value)
-               : ConcreteProperty<TimeProperty,Property>(), val(value)
-{}
+TimeProperty::TimeProperty(Time value) : ConcreteProperty<TimeProperty, Property>(), val(value)
+{
+}
 
 /** Construct from a Property */
-TimeProperty::TimeProperty(const Property &other)
-               : ConcreteProperty<TimeProperty,Property>(other)
+TimeProperty::TimeProperty(const Property &other) : ConcreteProperty<TimeProperty, Property>(other)
 {
     if (other.isA<VariantProperty>())
     {
         val = other.asA<VariantProperty>().convertTo<Time>();
     }
     else
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast a %s into a TimeProperty").arg(other.toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast a %s into a TimeProperty").arg(other.toString()),
+                                      CODELOC);
 }
 
 /** Copy constructor */
-TimeProperty::TimeProperty(const TimeProperty &other)
-               : ConcreteProperty<TimeProperty,Property>(other), val(other.val)
-{}
+TimeProperty::TimeProperty(const TimeProperty &other) : ConcreteProperty<TimeProperty, Property>(other), val(other.val)
+{
+}
 
 /** Destructor */
 TimeProperty::~TimeProperty()
-{}
-
-const char* TimeProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<TimeProperty>() );
+}
+
+const char *TimeProperty::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<TimeProperty>());
 }
 
 /** Copy assignment operator */
-TimeProperty& TimeProperty::operator=(const TimeProperty &other)
+TimeProperty &TimeProperty::operator=(const TimeProperty &other)
 {
     if (this != &other)
     {

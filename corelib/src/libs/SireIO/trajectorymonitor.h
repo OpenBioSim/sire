@@ -46,97 +46,93 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class TrajectoryMonitor;
+    class TrajectoryMonitor;
 }
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::TrajectoryMonitor&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::TrajectoryMonitor&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::TrajectoryMonitor &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::TrajectoryMonitor &);
 
 class QTemporaryFile;
 
 namespace SireIO
 {
 
-using SireSystem::System;
+    using SireSystem::System;
 
-using SireMol::MoleculeGroup;
-using SireMol::MGIdentifier;
-using SireMol::MGID;
+    using SireMol::MGID;
+    using SireMol::MGIdentifier;
+    using SireMol::MoleculeGroup;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-/** This is a monitor that can be used to save a trajectory
-    of an arbitrary collection of molecules from the system
+    /** This is a monitor that can be used to save a trajectory
+        of an arbitrary collection of molecules from the system
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT TrajectoryMonitor
-    : public SireBase::ConcreteProperty<TrajectoryMonitor,SireSystem::SystemMonitor>
-{
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT TrajectoryMonitor : public SireBase::ConcreteProperty<TrajectoryMonitor, SireSystem::SystemMonitor>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const TrajectoryMonitor&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, TrajectoryMonitor&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const TrajectoryMonitor &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, TrajectoryMonitor &);
 
-public:
-    TrajectoryMonitor();
+    public:
+        TrajectoryMonitor();
 
-    TrajectoryMonitor(const MoleculeGroup &molgroup,
-                      const PropertyMap &map = PropertyMap());
+        TrajectoryMonitor(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    TrajectoryMonitor(const MoleculeGroup &molgroup, const IOBase &writer,
-                      const PropertyMap &map = PropertyMap());
+        TrajectoryMonitor(const MoleculeGroup &molgroup, const IOBase &writer, const PropertyMap &map = PropertyMap());
 
-    TrajectoryMonitor(const MGID &mgid, const PropertyMap &map = PropertyMap());
+        TrajectoryMonitor(const MGID &mgid, const PropertyMap &map = PropertyMap());
 
-    TrajectoryMonitor(const MGID &mgid, const IOBase &writer,
-                      const PropertyMap &map = PropertyMap());
+        TrajectoryMonitor(const MGID &mgid, const IOBase &writer, const PropertyMap &map = PropertyMap());
 
-    TrajectoryMonitor(const TrajectoryMonitor &other);
+        TrajectoryMonitor(const TrajectoryMonitor &other);
 
-    ~TrajectoryMonitor();
+        ~TrajectoryMonitor();
 
-    TrajectoryMonitor& operator=(const TrajectoryMonitor &other);
+        TrajectoryMonitor &operator=(const TrajectoryMonitor &other);
 
-    bool operator==(const TrajectoryMonitor &other) const;
-    bool operator!=(const TrajectoryMonitor &other) const;
+        bool operator==(const TrajectoryMonitor &other) const;
+        bool operator!=(const TrajectoryMonitor &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    void clearStatistics();
+        void clearStatistics();
 
-    void monitor(System &system);
+        void monitor(System &system);
 
-    void setTempDir(const QString &tempdir);
+        void setTempDir(const QString &tempdir);
 
-    void writeToDisk(const QString &file_template) const;
+        void writeToDisk(const QString &file_template) const;
 
-private:
-    /** The IO object used to create the coordinates file(s)
-        from the system */
-    IOPtr io_writer;
+    private:
+        /** The IO object used to create the coordinates file(s)
+            from the system */
+        IOPtr io_writer;
 
-    /** The ID of the molecule group that is being written */
-    MGIdentifier mgid;
+        /** The ID of the molecule group that is being written */
+        MGIdentifier mgid;
 
-    /** Temporary files containing each frame of the animation */
-    QList< QPair< QString,boost::shared_ptr<QTemporaryFile> > > traj_frames;
+        /** Temporary files containing each frame of the animation */
+        QList<QPair<QString, boost::shared_ptr<QTemporaryFile>>> traj_frames;
 
-    /** The system space for each frame of the trajectory */
-    QList<SireVol::SpacePtr> space_frames;
+        /** The system space for each frame of the trajectory */
+        QList<SireVol::SpacePtr> space_frames;
 
-    /** The property map used to find the properties that will
-        be written to the trajectory frame */
-    PropertyMap mol_properties;
+        /** The property map used to find the properties that will
+            be written to the trajectory frame */
+        PropertyMap mol_properties;
 
-    /** Name of the directory in which to save the temporary files */
-    QString temp_dir;
-};
+        /** Name of the directory in which to save the temporary files */
+        QString temp_dir;
+    };
 
-}
+} // namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::TrajectoryMonitor )
+Q_DECLARE_METATYPE(SireIO::TrajectoryMonitor)
 
-SIRE_EXPOSE_CLASS( SireIO::TrajectoryMonitor )
+SIRE_EXPOSE_CLASS(SireIO::TrajectoryMonitor)
 
 SIRE_END_HEADER
 

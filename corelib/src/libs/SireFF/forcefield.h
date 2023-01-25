@@ -36,134 +36,121 @@ SIRE_BEGIN_HEADER
 
 namespace SireFF
 {
-class NullFF;
+    class NullFF;
 }
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::NullFF&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::NullFF&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::NullFF &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::NullFF &);
 
 namespace SireFF
 {
 
-/** This is a completely null forcefield. It has zero energy!
+    /** This is a completely null forcefield. It has zero energy!
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT NullFF : public SireBase::ConcreteProperty<NullFF,FF>
-{
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT NullFF : public SireBase::ConcreteProperty<NullFF, FF>
+    {
 
-friend const NullFF& FF::null();
+        friend const NullFF &FF::null();
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const NullFF&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, NullFF&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const NullFF &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, NullFF &);
 
-public:
-    NullFF();
-    NullFF(const NullFF &other);
+    public:
+        NullFF();
+        NullFF(const NullFF &other);
 
-    ~NullFF();
+        ~NullFF();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const FFComponent& components() const;
+        const FFComponent &components() const;
 
-    NullFF& operator=(const NullFF &other);
+        NullFF &operator=(const NullFF &other);
 
-    bool operator==(const NullFF &other) const;
-    bool operator!=(const NullFF &other) const;
+        bool operator==(const NullFF &other) const;
+        bool operator!=(const NullFF &other) const;
 
-    const MoleculeGroup& at(MGNum mgnum) const;
+        const MoleculeGroup &at(MGNum mgnum) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool setProperty(const QString &name, const Property &value);
-    const Property& property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
-    const Properties& properties() const;
-    void mustNowRecalculateFromScratch();
+        bool setProperty(const QString &name, const Property &value);
+        const Property &property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
+        const Properties &properties() const;
+        void mustNowRecalculateFromScratch();
 
-    bool needsAccepting() const;
-    void accept();
+        bool needsAccepting() const;
+        void accept();
 
-protected:
-    void recalculateEnergy();
-    void group_add(quint32 i, const MoleculeView &molview,
-                   const PropertyMap &map);
-    void group_add(quint32 i, const ViewsOfMol &molviews,
-                   const PropertyMap &map);
-    void group_add(quint32 i, const Molecules &molecules,
-                   const PropertyMap &map);
-    void group_add(quint32 i, const MoleculeGroup &molgroup,
-                   const PropertyMap &map);
-    bool group_addIfUnique(quint32 i, const MoleculeView &molview,
-                           const PropertyMap &map);
-    ViewsOfMol group_addIfUnique(quint32 i, const ViewsOfMol &molviews,
-                                 const PropertyMap &map);
-    QList<ViewsOfMol> group_addIfUnique(quint32 i, const Molecules &molecules,
-                                        const PropertyMap &map);
-    QList<ViewsOfMol> group_addIfUnique(quint32 i, const MoleculeGroup &molgroup,
-                                        const PropertyMap &map);
+    protected:
+        void recalculateEnergy();
+        void group_add(quint32 i, const MoleculeView &molview, const PropertyMap &map);
+        void group_add(quint32 i, const ViewsOfMol &molviews, const PropertyMap &map);
+        void group_add(quint32 i, const Molecules &molecules, const PropertyMap &map);
+        void group_add(quint32 i, const MoleculeGroup &molgroup, const PropertyMap &map);
+        bool group_addIfUnique(quint32 i, const MoleculeView &molview, const PropertyMap &map);
+        ViewsOfMol group_addIfUnique(quint32 i, const ViewsOfMol &molviews, const PropertyMap &map);
+        QList<ViewsOfMol> group_addIfUnique(quint32 i, const Molecules &molecules, const PropertyMap &map);
+        QList<ViewsOfMol> group_addIfUnique(quint32 i, const MoleculeGroup &molgroup, const PropertyMap &map);
 
-    bool group_remove(quint32 i, const MoleculeView &molview);
-    ViewsOfMol group_remove(quint32 i, const ViewsOfMol &molviews);
-    QList<ViewsOfMol> group_remove(quint32 i, const Molecules &molecules);
-    QList<ViewsOfMol> group_remove(quint32 i, const MoleculeGroup &molgroup);
+        bool group_remove(quint32 i, const MoleculeView &molview);
+        ViewsOfMol group_remove(quint32 i, const ViewsOfMol &molviews);
+        QList<ViewsOfMol> group_remove(quint32 i, const Molecules &molecules);
+        QList<ViewsOfMol> group_remove(quint32 i, const MoleculeGroup &molgroup);
 
-    bool group_removeAll(quint32 i, const MoleculeView &molview);
-    ViewsOfMol group_removeAll(quint32 i, const ViewsOfMol &molviews);
-    QList<ViewsOfMol> group_removeAll(quint32 i, const Molecules &molecules);
-    QList<ViewsOfMol> group_removeAll(quint32 i, const MoleculeGroup &molgroup);
+        bool group_removeAll(quint32 i, const MoleculeView &molview);
+        ViewsOfMol group_removeAll(quint32 i, const ViewsOfMol &molviews);
+        QList<ViewsOfMol> group_removeAll(quint32 i, const Molecules &molecules);
+        QList<ViewsOfMol> group_removeAll(quint32 i, const MoleculeGroup &molgroup);
 
-    ViewsOfMol group_remove(quint32 i, MolNum molnum);
-    QList<ViewsOfMol> group_remove(quint32 i, const QSet<MolNum> &molnums);
+        ViewsOfMol group_remove(quint32 i, MolNum molnum);
+        QList<ViewsOfMol> group_remove(quint32 i, const QSet<MolNum> &molnums);
 
-    void group_removeAll(quint32 i);
+        void group_removeAll(quint32 i);
 
-    bool group_update(quint32 i, const MoleculeData &moldata, bool auto_commit);
+        bool group_update(quint32 i, const MoleculeData &moldata, bool auto_commit);
 
-    QList<Molecule> group_update(quint32 i, const Molecules &molecules, bool auto_commit);
-    QList<Molecule> group_update(quint32 i, const MoleculeGroup &molgroup, bool auto_commit);
+        QList<Molecule> group_update(quint32 i, const Molecules &molecules, bool auto_commit);
+        QList<Molecule> group_update(quint32 i, const MoleculeGroup &molgroup, bool auto_commit);
 
-    bool group_setContents(quint32 i, const MoleculeView &molview,
-                           const PropertyMap &map);
-    bool group_setContents(quint32 i, const ViewsOfMol &molviews,
-                           const PropertyMap &map);
-    bool group_setContents(quint32 i, const Molecules &molecules,
-                           const PropertyMap &map);
-    bool group_setContents(quint32 i, const MoleculeGroup &molgroup,
-                           const PropertyMap &map);
+        bool group_setContents(quint32 i, const MoleculeView &molview, const PropertyMap &map);
+        bool group_setContents(quint32 i, const ViewsOfMol &molviews, const PropertyMap &map);
+        bool group_setContents(quint32 i, const Molecules &molecules, const PropertyMap &map);
+        bool group_setContents(quint32 i, const MoleculeGroup &molgroup, const PropertyMap &map);
 
-    void _pvt_updateName();
+        void _pvt_updateName();
 
-    const MoleculeGroup& getGroup(MGNum mgnum) const;
+        const MoleculeGroup &getGroup(MGNum mgnum) const;
 
-    void getGroups(const QList<MGNum> &mgnums,
-                   QVarLengthArray<const MoleculeGroup*,10> &groups) const;
+        void getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const;
 
-    QHash<MGNum,const MoleculeGroup*> getGroups() const;
+        QHash<MGNum, const MoleculeGroup *> getGroups() const;
 
-    void group_setName(quint32 i, const QString &new_name);
+        void group_setName(quint32 i, const QString &new_name);
 
-    void reindex();
+        void reindex();
 
-private:
-    NullFF(bool);
+    private:
+        NullFF(bool);
 
-    static NullFF& getSharedNullFF();
+        static NullFF &getSharedNullFF();
 
-    Properties props;
-};
+        Properties props;
+    };
 
-typedef SireBase::PropPtr<FF> FFPtr;
-typedef FFPtr ForceField;
+    typedef SireBase::PropPtr<FF> FFPtr;
+    typedef FFPtr ForceField;
 
-}
+} // namespace SireFF
 
 Q_DECLARE_METATYPE(SireFF::NullFF);
 
-SIRE_EXPOSE_CLASS( SireFF::NullFF )
+SIRE_EXPOSE_CLASS(SireFF::NullFF)
 
-SIRE_EXPOSE_PROPERTY( SireFF::FFPtr, SireFF::FF )
+SIRE_EXPOSE_PROPERTY(SireFF::FFPtr, SireFF::FF)
 
 SIRE_END_HEADER
 

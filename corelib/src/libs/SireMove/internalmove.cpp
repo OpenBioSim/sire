@@ -26,26 +26,25 @@
 \*********************************************/
 
 #include "internalmove.h"
-#include "flexibility.h"
 #include "ensemble.h"
+#include "flexibility.h"
 
 #include "SireSystem/system.h"
 
-#include "SireMol/partialmolecule.h"
+#include "SireMol/angleid.h"
+#include "SireMol/atomidx.h"
+#include "SireMol/bondid.h"
+#include "SireMol/connectivity.h"
+#include "SireMol/core.h"
+#include "SireMol/dihedralid.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/mover.hpp"
-#include "SireMol/atomidx.h"
-#include "SireMol/connectivity.h"
-#include "SireMol/bondid.h"
-#include "SireMol/angleid.h"
-#include "SireMol/dihedralid.h"
-#include "SireMol/core.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireMaths/vectorproperty.h"
 
 #include "SireUnits/dimensions.h"
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
 #include "SireUnits/units.h"
 
@@ -72,10 +71,8 @@ QDataStream &operator<<(QDataStream &ds, const InternalMove &internalmove)
 
     SharedDataStream sds(ds);
 
-    sds << internalmove.smplr
-        << internalmove.center_function
-        << internalmove.flexibility_property
-        << static_cast<const MonteCarlo&>(internalmove);
+    sds << internalmove.smplr << internalmove.center_function << internalmove.flexibility_property
+        << static_cast<const MonteCarlo &>(internalmove);
 
     return ds;
 }
@@ -89,10 +86,8 @@ QDataStream &operator>>(QDataStream &ds, InternalMove &internalmove)
     {
         SharedDataStream sds(ds);
 
-        sds >> internalmove.smplr
-            >> internalmove.center_function
-            >> internalmove.flexibility_property
-            >> static_cast<MonteCarlo&>(internalmove);
+        sds >> internalmove.smplr >> internalmove.center_function >> internalmove.flexibility_property >>
+            static_cast<MonteCarlo &>(internalmove);
     }
     else if (v == 1)
     {
@@ -100,9 +95,7 @@ QDataStream &operator>>(QDataStream &ds, InternalMove &internalmove)
 
         internalmove.center_function = GetCOMPoint();
 
-        sds >> internalmove.smplr
-            >> internalmove.flexibility_property
-            >> static_cast<MonteCarlo&>(internalmove);
+        sds >> internalmove.smplr >> internalmove.flexibility_property >> static_cast<MonteCarlo &>(internalmove);
     }
     else
         throw version_error(v, "1", r_internalmove, CODELOC);
@@ -111,50 +104,48 @@ QDataStream &operator>>(QDataStream &ds, InternalMove &internalmove)
 }
 
 /** Null constructor */
-InternalMove::InternalMove(const PropertyMap &map)
-             : ConcreteProperty<InternalMove,MonteCarlo>(map)
+InternalMove::InternalMove(const PropertyMap &map) : ConcreteProperty<InternalMove, MonteCarlo>(map)
 {
     flexibility_property = map["flexibility"];
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
     center_function = GetCOMPoint();
 }
 
 /** Construct the mover move for the passed group of molecules */
 InternalMove::InternalMove(const MoleculeGroup &molgroup, const PropertyMap &map)
-             : ConcreteProperty<InternalMove,MonteCarlo>(),
-               smplr( UniformSampler(molgroup) )
+    : ConcreteProperty<InternalMove, MonteCarlo>(), smplr(UniformSampler(molgroup))
 {
     flexibility_property = map["flexibility"];
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
-    smplr.edit().setGenerator( this->generator() );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
+    smplr.edit().setGenerator(this->generator());
     center_function = GetCOMPoint();
 }
 
 /** Construct the mover move that samples molecules from the
     passed sampler */
 InternalMove::InternalMove(const Sampler &sampler, const PropertyMap &map)
-             : ConcreteProperty<InternalMove,MonteCarlo>(),
-               smplr(sampler)
+    : ConcreteProperty<InternalMove, MonteCarlo>(), smplr(sampler)
 {
     flexibility_property = map["flexibility"];
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
-    smplr.edit().setGenerator( this->generator() );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
+    smplr.edit().setGenerator(this->generator());
     center_function = GetCOMPoint();
 }
 
 /** Copy constructor */
 InternalMove::InternalMove(const InternalMove &other)
-             : ConcreteProperty<InternalMove,MonteCarlo>(other),
-               smplr(other.smplr), center_function(other.center_function),
-               flexibility_property(other.flexibility_property)
-{}
+    : ConcreteProperty<InternalMove, MonteCarlo>(other), smplr(other.smplr), center_function(other.center_function),
+      flexibility_property(other.flexibility_property)
+{
+}
 
 /** Destructor */
 InternalMove::~InternalMove()
-{}
+{
+}
 
 /** Copy assignment operator */
-InternalMove& InternalMove::operator=(const InternalMove &other)
+InternalMove &InternalMove::operator=(const InternalMove &other)
 {
     if (this != &other)
     {
@@ -170,8 +161,7 @@ InternalMove& InternalMove::operator=(const InternalMove &other)
 /** Comparison operator */
 bool InternalMove::operator==(const InternalMove &other) const
 {
-    return MonteCarlo::operator==(other) and smplr == other.smplr and
-           center_function == other.center_function and
+    return MonteCarlo::operator==(other) and smplr == other.smplr and center_function == other.center_function and
            flexibility_property == other.flexibility_property;
 }
 
@@ -185,38 +175,38 @@ bool InternalMove::operator!=(const InternalMove &other) const
 QString InternalMove::toString() const
 {
     return QObject::tr("InternalMove( nAccepted() = %1 nRejected() == %2 )")
-                            .arg( this->nAccepted() )
-                            .arg( this->nRejected() );
+        .arg(this->nAccepted())
+        .arg(this->nRejected());
 }
 
 /** Set the sampler used to sample molecules for this move */
 void InternalMove::setSampler(const Sampler &sampler)
 {
     smplr = sampler;
-    smplr.edit().setGenerator( this->generator() );
+    smplr.edit().setGenerator(this->generator());
 }
 
 /** Set the sampler so that it draws molecules uniformly from the
     molecule group 'molgroup' */
 void InternalMove::setSampler(const MoleculeGroup &molgroup)
 {
-    this->setSampler( UniformSampler(molgroup) );
+    this->setSampler(UniformSampler(molgroup));
 }
 
 /** Return the sampler used to sample molecules to move */
-const Sampler& InternalMove::sampler() const
+const Sampler &InternalMove::sampler() const
 {
     return smplr;
 }
 
 /** Return the molecule group that is sampled for this move */
-const MoleculeGroup& InternalMove::moleculeGroup() const
+const MoleculeGroup &InternalMove::moleculeGroup() const
 {
     return smplr->group();
 }
 
 /** Return the property used to find the flexibility of each molecule*/
-const PropertyName& InternalMove::flexibilityProperty() const
+const PropertyName &InternalMove::flexibilityProperty() const
 {
     return flexibility_property;
 }
@@ -235,7 +225,7 @@ void InternalMove::setCenterOfMolecule(const GetPoint &cf)
 }
 
 /** Return the function used to find the center of the molecule */
-const GetPoint& InternalMove::centerOfMolecule() const
+const GetPoint &InternalMove::centerOfMolecule() const
 {
     return center_function.read();
 }
@@ -252,7 +242,7 @@ void InternalMove::setGenerator(const RanGenerator &rangenerator)
     passed temperature */
 void InternalMove::_pvt_setTemperature(const Temperature &temperature)
 {
-    MonteCarlo::setEnsemble( Ensemble::NVT(temperature) );
+    MonteCarlo::setEnsemble(Ensemble::NVT(temperature));
 }
 
 double clipDouble(double value)
@@ -279,21 +269,21 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
         const PropertyMap &map = Move::propertyMap();
         const PropertyName &center_property = map["center"];
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
-            double old_nrg = system.energy( this->energyComponent() );
+            double old_nrg = system.energy(this->energyComponent());
             System old_system(system);
             SamplerPtr old_sampler(smplr);
 
             double old_bias = 1;
             double new_bias = 1;
 
-            //move one molecule
-            //update the sampler with the latest version of the molecules
+            // move one molecule
+            // update the sampler with the latest version of the molecules
             smplr.edit().updateFrom(system);
 
-            //this will randomly select one molecule
-            tuple<PartialMolecule,double> mol_and_bias = smplr.read().sample();
+            // this will randomly select one molecule
+            tuple<PartialMolecule, double> mol_and_bias = smplr.read().sample();
 
             const PartialMolecule &oldmol = mol_and_bias.get<0>();
 
@@ -320,7 +310,7 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
             int ndihedrals = flex_dihs.count();
 
             // Select bonds
-            if ( nbonds == 0  || maxbondvar < 0  || maxbondvar >= nbonds )
+            if (nbonds == 0 || maxbondvar < 0 || maxbondvar >= nbonds)
             {
                 moved_bonds = flex_bonds;
             }
@@ -330,8 +320,8 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
                 while (movecount < maxbondvar)
                 {
                     int rand = this->generator().randInt(0, nbonds - 1);
-                    const BondID &bond = flex_bonds.at( rand );
-                    if ( not moved_bonds.contains(bond) )
+                    const BondID &bond = flex_bonds.at(rand);
+                    if (not moved_bonds.contains(bond))
                     {
                         moved_bonds.append(bond);
                         ++movecount;
@@ -340,7 +330,7 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
             }
 
             // Select angles
-            if ( nangles == 0  || maxanglevar < 0  || maxanglevar >= nangles )
+            if (nangles == 0 || maxanglevar < 0 || maxanglevar >= nangles)
             {
                 moved_angles = flex_angs;
             }
@@ -350,8 +340,8 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
                 while (movecount < maxanglevar)
                 {
                     int rand = this->generator().randInt(0, nangles - 1);
-                    const AngleID &angle = flex_angs.at( rand );
-                    if ( not moved_angles.contains(angle) )
+                    const AngleID &angle = flex_angs.at(rand);
+                    if (not moved_angles.contains(angle))
                     {
                         moved_angles.append(angle);
                         ++movecount;
@@ -360,7 +350,7 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
             }
 
             // Select dihedrals
-            if ( ndihedrals == 0  || maxdihedralvar < 0  || maxdihedralvar >= ndihedrals )
+            if (ndihedrals == 0 || maxdihedralvar < 0 || maxdihedralvar >= ndihedrals)
             {
                 moved_dihedrals = flex_dihs;
             }
@@ -370,8 +360,8 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
                 while (movecount < maxdihedralvar)
                 {
                     int rand = this->generator().randInt(0, ndihedrals - 1);
-                    const DihedralID &dihedral = flex_dihs.at( rand );
-                    if ( not moved_dihedrals.contains(dihedral) )
+                    const DihedralID &dihedral = flex_dihs.at(rand);
+                    if (not moved_dihedrals.contains(dihedral))
                     {
                         moved_dihedrals.append(dihedral);
                         ++movecount;
@@ -383,8 +373,7 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
             // ensure that this doesn't change as a result of this move
             // (we can't have an internal move cause rigid body translation
             //  of the molecule)
-            const bool has_center_property = (oldmol.selectedAll() and
-                                              oldmol.hasProperty(center_property));
+            const bool has_center_property = (oldmol.selectedAll() and oldmol.hasProperty(center_property));
 
             Vector old_center;
 
@@ -394,7 +383,7 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
             }
             else
             {
-                old_center = center_function.read()(oldmol,map);
+                old_center = center_function.read()(oldmol, map);
             }
 
             // Now actually move the selected dofs
@@ -405,10 +394,9 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
 
             foreach (const BondID &bond, moved_bonds)
             {
-                //const Length bond_delta_value = flex.bond_deltas[bond];
+                // const Length bond_delta_value = flex.bond_deltas[bond];
                 double bond_delta_value = clipDouble(flex.delta(bond));
-                bond_delta = Length( this->generator().rand(-bond_delta_value,
-                                                             bond_delta_value) );
+                bond_delta = Length(this->generator().rand(-bond_delta_value, bond_delta_value));
 
                 mol_mover.change(bond, bond_delta, map);
             }
@@ -418,10 +406,9 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
 
             foreach (const AngleID &angle, moved_angles)
             {
-                //const Angle angle_delta_value = flex.angle_deltas[angle];
+                // const Angle angle_delta_value = flex.angle_deltas[angle];
                 double angle_delta_value = clipDouble(flex.delta(angle));
-                angle_delta = Angle( this->generator().rand(-angle_delta_value,
-                                                             angle_delta_value) );
+                angle_delta = Angle(this->generator().rand(-angle_delta_value, angle_delta_value));
 
                 mol_mover.change(angle, angle_delta, map);
             }
@@ -432,13 +419,12 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
             foreach (const DihedralID &dihedral, moved_dihedrals)
             {
                 double angle_delta_value = clipDouble(flex.delta(dihedral));
-                dihedral_delta =  Angle( this->generator().rand(-angle_delta_value,
-                                                                 angle_delta_value) );
+                dihedral_delta = Angle(this->generator().rand(-angle_delta_value, angle_delta_value));
 
                 // 50% chance to either rotate around central bond or to just change that dihedral
                 if (this->generator().randBool())
                 {
-                    //move only this specific dihedral
+                    // move only this specific dihedral
                     mol_mover.change(dihedral, dihedral_delta, map);
                 }
                 else
@@ -447,13 +433,12 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
                     centralbond = BondID(dihedral.atom1(), dihedral.atom2());
                     mol_mover.change(centralbond, dihedral_delta, map);
                 }
-
             }
 
             Molecule newmol = mol_mover.commit();
 
-            //evaluate the new center of geometry, and translate the molecule
-            //to correct for any motion
+            // evaluate the new center of geometry, and translate the molecule
+            // to correct for any motion
             Vector new_center;
 
             if (has_center_property)
@@ -462,32 +447,31 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
             }
             else
             {
-                new_center = center_function.read()(newmol,map);
+                new_center = center_function.read()(newmol, map);
             }
 
             if (old_center != new_center)
             {
-                newmol = newmol.move().translate( old_center-new_center, map ).commit();
+                newmol = newmol.move().translate(old_center - new_center, map).commit();
             }
 
-            //update the system with the new coordinates
+            // update the system with the new coordinates
             system.update(newmol);
 
-            //get the new bias on this molecule
+            // get the new bias on this molecule
             smplr.edit().updateFrom(system);
 
             if (smplr.read().isBiased())
-                new_bias = smplr.read().probabilityOf( PartialMolecule(newmol,
-                                                                       oldmol.selection()) );
+                new_bias = smplr.read().probabilityOf(PartialMolecule(newmol, oldmol.selection()));
 
-            //calculate the energy of the system
-            double new_nrg = system.energy( this->energyComponent() );
+            // calculate the energy of the system
+            double new_nrg = system.energy(this->energyComponent());
 
-            //accept or reject the move based on the change of energy
-            //and the biasing factors
+            // accept or reject the move based on the change of energy
+            // and the biasing factors
             if (not this->test(new_nrg, old_nrg, new_bias, old_bias))
             {
-                //the move has been rejected - reset the state
+                // the move has been rejected - reset the state
                 smplr = old_sampler;
                 system = old_system;
             }
@@ -498,7 +482,7 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         system = old_system_state;
         this->operator=(old_state);
@@ -506,7 +490,7 @@ void InternalMove::move(System &system, int nmoves, bool record_stats)
     }
 }
 
-const char* InternalMove::typeName()
+const char *InternalMove::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<InternalMove>() );
+    return QMetaType::typeName(qMetaTypeId<InternalMove>());
 }

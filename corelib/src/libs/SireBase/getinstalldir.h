@@ -42,7 +42,7 @@ namespace SireBase
     SIREBASE_EXPORT QString getBundledLibDir();
     SIREBASE_EXPORT QString getShareDir();
 
-    SIREBASE_EXPORT QString getSireDir(const QString &path, bool assert_exists=true);
+    SIREBASE_EXPORT QString getSireDir(const QString &path, bool assert_exists = true);
 
     SIREBASE_EXPORT QString getRepositoryURL();
     SIREBASE_EXPORT QString getRepositoryVersion();
@@ -50,7 +50,7 @@ namespace SireBase
     SIREBASE_EXPORT bool getRepositoryVersionIsClean();
 
     SIREBASE_EXPORT QString getReleaseVersion();
-}
+} // namespace SireBase
 
 SIRE_EXPOSE_FUNCTION(SireBase::getInstallDir)
 SIRE_EXPOSE_FUNCTION(SireBase::setInstallDir)

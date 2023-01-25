@@ -45,33 +45,28 @@ using namespace SireStream;
 ////////// Implementation of Sampler
 //////////
 
-static const RegisterMetaType<Sampler> r_sampler(MAGIC_ONLY,
-                                                 "SireMove::Sampler");
+static const RegisterMetaType<Sampler> r_sampler(MAGIC_ONLY, "SireMove::Sampler");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const Sampler &sampler)
+QDataStream &operator<<(QDataStream &ds, const Sampler &sampler)
 {
     writeHeader(ds, r_sampler, 1);
 
     SharedDataStream sds(ds);
-    sds << sampler.molgroup << sampler.rangen
-        << static_cast<const Property&>(sampler);
+    sds << sampler.molgroup << sampler.rangen << static_cast<const Property &>(sampler);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                        Sampler &sampler)
+QDataStream &operator>>(QDataStream &ds, Sampler &sampler)
 {
     VersionID v = readHeader(ds, r_sampler);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> sampler.molgroup >> sampler.rangen
-            >> static_cast<Property&>(sampler);
+        sds >> sampler.molgroup >> sampler.rangen >> static_cast<Property &>(sampler);
     }
     else
         throw version_error(v, "1", r_sampler, CODELOC);
@@ -81,25 +76,27 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Empty constructor */
 Sampler::Sampler() : Property()
-{}
+{
+}
 
 /** Construct a sampler that picks molecules at random from the
     molecule group 'molgroup' */
-Sampler::Sampler(const MoleculeGroup &moleculegroup)
-        : Property(), molgroup(moleculegroup)
-{}
+Sampler::Sampler(const MoleculeGroup &moleculegroup) : Property(), molgroup(moleculegroup)
+{
+}
 
 /** Copy constructor */
-Sampler::Sampler(const Sampler &other)
-        : Property(other), molgroup(other.molgroup), rangen(other.rangen)
-{}
+Sampler::Sampler(const Sampler &other) : Property(other), molgroup(other.molgroup), rangen(other.rangen)
+{
+}
 
 /** Destructor */
 Sampler::~Sampler()
-{}
+{
+}
 
 /** Copy assignment */
-Sampler& Sampler::operator=(const Sampler &other)
+Sampler &Sampler::operator=(const Sampler &other)
 {
     Property::operator=(other);
 
@@ -147,12 +144,12 @@ void Sampler::setGroup(const MoleculeGroup &moleculegroup)
     in the System 'system' */
 void Sampler::updateFrom(const System &system)
 {
-    if (system.contains( molgroup.read().number() ))
+    if (system.contains(molgroup.read().number()))
     {
         const MoleculeGroup &new_group = system[molgroup.read().number()];
 
         if (new_group.version() != molgroup.read().version())
-            //the molecule group has changed - update it
-            this->setGroup( system[molgroup.read().number()] );
+            // the molecule group has changed - update it
+            this->setGroup(system[molgroup.read().number()]);
     }
 }

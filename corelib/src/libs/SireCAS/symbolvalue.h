@@ -35,37 +35,39 @@ SIRE_BEGIN_HEADER
 namespace SireCAS
 {
 
-/** Unique ID number given to all symbols */
-typedef quint32 SymbolID;
+    /** Unique ID number given to all symbols */
+    typedef quint32 SymbolID;
 
-/** Small class that holds a SymbolID number and an associated value */
-class SIRECAS_EXPORT SymbolValue
-{
-public:
-    SymbolValue(SymbolID id, double val) : _val(val), _id(id)
-    {}
-
-    ~SymbolValue()
-    {}
-
-    SymbolID ID() const
+    /** Small class that holds a SymbolID number and an associated value */
+    class SIRECAS_EXPORT SymbolValue
     {
-        return _id;
-    }
+    public:
+        SymbolValue(SymbolID id, double val) : _val(val), _id(id)
+        {
+        }
 
-    double value() const
-    {
-        return _val;
-    }
-private:
+        ~SymbolValue()
+        {
+        }
 
-    double _val;
-    SymbolID _id;
-};
+        SymbolID ID() const
+        {
+            return _id;
+        }
 
-}
+        double value() const
+        {
+            return _val;
+        }
 
-SIRE_EXPOSE_CLASS( SireCAS::SymbolValue )
+    private:
+        double _val;
+        SymbolID _id;
+    };
+
+} // namespace SireCAS
+
+SIRE_EXPOSE_CLASS(SireCAS::SymbolValue)
 
 SIRE_END_HEADER
 

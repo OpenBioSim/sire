@@ -60,11 +60,11 @@ namespace SireSearch
         double delta = abs(val1 - val0);
         double eps = get_approx_epsilon();
 
-        //check absolute difference is less than epsilon
+        // check absolute difference is less than epsilon
         if (delta <= eps)
             return true;
 
-        //check relative difference is less than eps
+        // check relative difference is less than eps
         return delta <= 0.5 * eps * (abs(val0) + abs(val1));
     }
 
@@ -92,4 +92,4 @@ namespace SireSearch
     {
         return val1 < val0 or approx_equal(val0, val1);
     }
-}
+} // namespace SireSearch

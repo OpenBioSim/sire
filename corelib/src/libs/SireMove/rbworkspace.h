@@ -37,134 +37,132 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class RBWorkspace;
+    class RBWorkspace;
 }
 
-QDataStream& operator<<(QDataStream&, const SireMove::RBWorkspace&);
-QDataStream& operator>>(QDataStream&, SireMove::RBWorkspace&);
+QDataStream &operator<<(QDataStream &, const SireMove::RBWorkspace &);
+QDataStream &operator>>(QDataStream &, SireMove::RBWorkspace &);
 
 namespace SireMove
 {
 
-using SireMaths::Matrix;
-using SireMaths::Quaternion;
+    using SireMaths::Matrix;
+    using SireMaths::Quaternion;
 
-using SireMol::ViewsOfMol;
+    using SireMol::ViewsOfMol;
 
-/** This class provides a workspace for integrators that perform
-    rigid body integration of atomic velocities and coordinates
+    /** This class provides a workspace for integrators that perform
+        rigid body integration of atomic velocities and coordinates
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT RBWorkspace
-       : public SireBase::ConcreteProperty<RBWorkspace,IntegratorWorkspace>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT RBWorkspace : public SireBase::ConcreteProperty<RBWorkspace, IntegratorWorkspace>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const RBWorkspace&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, RBWorkspace&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const RBWorkspace &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, RBWorkspace &);
 
-public:
-    RBWorkspace(const PropertyMap &map = PropertyMap());
-    RBWorkspace(const MoleculeGroup &molgroup,
-                const PropertyMap &map = PropertyMap());
+    public:
+        RBWorkspace(const PropertyMap &map = PropertyMap());
+        RBWorkspace(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    RBWorkspace(const RBWorkspace &other);
+        RBWorkspace(const RBWorkspace &other);
 
-    ~RBWorkspace();
+        ~RBWorkspace();
 
-    RBWorkspace& operator=(const RBWorkspace &other);
+        RBWorkspace &operator=(const RBWorkspace &other);
 
-    bool operator==(const RBWorkspace &other) const;
-    bool operator!=(const RBWorkspace &other) const;
+        bool operator==(const RBWorkspace &other) const;
+        bool operator!=(const RBWorkspace &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    SireUnits::Dimension::MolarEnergy kineticEnergy() const;
-    SireUnits::Dimension::MolarEnergy kineticEnergy(MolNum molnum) const;
-    SireUnits::Dimension::MolarEnergy kineticEnergy(const MoleculeView &molview) const;
+        SireUnits::Dimension::MolarEnergy kineticEnergy() const;
+        SireUnits::Dimension::MolarEnergy kineticEnergy(MolNum molnum) const;
+        SireUnits::Dimension::MolarEnergy kineticEnergy(const MoleculeView &molview) const;
 
-    PropertyName beadingProperty() const;
+        PropertyName beadingProperty() const;
 
-    int nBeads() const;
+        int nBeads() const;
 
-    int nAtoms(int ibead) const;
+        int nAtoms(int ibead) const;
 
-    bool setSystem(const System &system);
+        bool setSystem(const System &system);
 
-    bool calculateForces(const Symbol &nrg_component);
+        bool calculateForces(const Symbol &nrg_component);
 
-    void regenerateVelocities(const VelocityGenerator &generator);
+        void regenerateVelocities(const VelocityGenerator &generator);
 
-    void commitCoordinates();
-    void commitVelocities();
+        void commitCoordinates();
+        void commitVelocities();
 
-    void commitCoordinatesAndVelocities();
+        void commitCoordinatesAndVelocities();
 
-    Vector* beadCoordsArray();
-    Quaternion* beadOrientationArray();
+        Vector *beadCoordsArray();
+        Quaternion *beadOrientationArray();
 
-    Vector* beadLinearMomentaArray();
-    Vector* beadAngularMomentaArray();
+        Vector *beadLinearMomentaArray();
+        Vector *beadAngularMomentaArray();
 
-    const double* beadMassesArray() const;
-    const Vector* beadInertiasArray() const;
+        const double *beadMassesArray() const;
+        const Vector *beadInertiasArray() const;
 
-    const Vector* beadForcesArray() const;
-    const Vector* beadTorquesArray() const;
+        const Vector *beadForcesArray() const;
+        const Vector *beadTorquesArray() const;
 
-protected:
-    void changedProperty(const QString &property);
+    protected:
+        void changedProperty(const QString &property);
 
-private:
-    void rebuildFromScratch();
+    private:
+        void rebuildFromScratch();
 
-    /** The coordinates of the atoms of each bead in the center of
-        mass / principle inertia tensor frame. These
-        will be constant, as the atoms don't move relative
-        to the center of mass / inertia frame - they
-        are used to convert from that frame to the
-        world cartesian frame */
-    QVector< QVector<Vector> > atom_int_coords;
+        /** The coordinates of the atoms of each bead in the center of
+            mass / principle inertia tensor frame. These
+            will be constant, as the atoms don't move relative
+            to the center of mass / inertia frame - they
+            are used to convert from that frame to the
+            world cartesian frame */
+        QVector<QVector<Vector>> atom_int_coords;
 
-    /** The index of the bead in which each atom exists */
-    QVector< QPair< qint32,QVector<qint32> > > atoms_to_beads;
+        /** The index of the bead in which each atom exists */
+        QVector<QPair<qint32, QVector<qint32>>> atoms_to_beads;
 
-    /** The center of mass coordinates of each bead */
-    QVector<Vector> bead_coordinates;
+        /** The center of mass coordinates of each bead */
+        QVector<Vector> bead_coordinates;
 
-    /** The matrix to map from bead internal coordinates
-        to World cartesian coordinates */
-    QVector<Matrix> bead_to_world;
+        /** The matrix to map from bead internal coordinates
+            to World cartesian coordinates */
+        QVector<Matrix> bead_to_world;
 
-    /** The orientation quaternion for each bead */
-    QVector<Quaternion> bead_orientations;
+        /** The orientation quaternion for each bead */
+        QVector<Quaternion> bead_orientations;
 
-    /** All of the beads' linear momenta */
-    QVector<Vector> bead_linear_momenta;
+        /** All of the beads' linear momenta */
+        QVector<Vector> bead_linear_momenta;
 
-    /** All of the beads' angular momenta */
-    QVector<Vector> bead_angular_momenta;
+        /** All of the beads' angular momenta */
+        QVector<Vector> bead_angular_momenta;
 
-    /** All of the forces for all of the beads */
-    QVector<Vector> bead_forces;
+        /** All of the forces for all of the beads */
+        QVector<Vector> bead_forces;
 
-    /** All of the torques acting on all of the beads */
-    QVector<Vector> bead_torques;
+        /** All of the torques acting on all of the beads */
+        QVector<Vector> bead_torques;
 
-    /** The mass of each bead */
-    QVector<double> bead_masses;
+        /** The mass of each bead */
+        QVector<double> bead_masses;
 
-    /** The diagonals of the inertia tensor for each bead */
-    QVector<Vector> bead_inertia;
+        /** The diagonals of the inertia tensor for each bead */
+        QVector<Vector> bead_inertia;
 
-    /** The generator used to get the initial
-        linear and angular velocities */
-    VelGenPtr vel_generator;
-};
+        /** The generator used to get the initial
+            linear and angular velocities */
+        VelGenPtr vel_generator;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::RBWorkspace )
+Q_DECLARE_METATYPE(SireMove::RBWorkspace)
 
 SIRE_END_HEADER
 

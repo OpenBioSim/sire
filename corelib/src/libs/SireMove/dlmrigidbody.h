@@ -34,75 +34,71 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class DLMRigidBody;
+    class DLMRigidBody;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::DLMRigidBody&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::DLMRigidBody&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::DLMRigidBody &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::DLMRigidBody &);
 
 namespace SireMove
 {
 
-/** This class implements the rigid body dynamics integrator
-    as described in;
+    /** This class implements the rigid body dynamics integrator
+        as described in;
 
-    "Symplectic splitting methods for rigid body molecular dynamics"
-    Andreas Dullweber, Benedict Leimkuhler, Robert McLachlan
+        "Symplectic splitting methods for rigid body molecular dynamics"
+        Andreas Dullweber, Benedict Leimkuhler, Robert McLachlan
 
-    J. Chem. Phys., 107:15, 5840-5851, 1997
+        J. Chem. Phys., 107:15, 5840-5851, 1997
 
-    This is a time-reversible, symplectic integrator for
-    general rigid bodies
+        This is a time-reversible, symplectic integrator for
+        general rigid bodies
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT DLMRigidBody
-        : public SireBase::ConcreteProperty<DLMRigidBody,Integrator>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT DLMRigidBody : public SireBase::ConcreteProperty<DLMRigidBody, Integrator>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const DLMRigidBody&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, DLMRigidBody&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const DLMRigidBody &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, DLMRigidBody &);
 
-public:
-    DLMRigidBody(bool frequent_save_velocities = false);
+    public:
+        DLMRigidBody(bool frequent_save_velocities = false);
 
-    DLMRigidBody(const DLMRigidBody &other);
+        DLMRigidBody(const DLMRigidBody &other);
 
-    ~DLMRigidBody();
+        ~DLMRigidBody();
 
-    DLMRigidBody& operator=(const DLMRigidBody &other);
+        DLMRigidBody &operator=(const DLMRigidBody &other);
 
-    bool operator==(const DLMRigidBody &other) const;
-    bool operator!=(const DLMRigidBody &other) const;
+        bool operator==(const DLMRigidBody &other) const;
+        bool operator!=(const DLMRigidBody &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    Ensemble ensemble() const;
+        Ensemble ensemble() const;
 
-    bool isTimeReversible() const;
+        bool isTimeReversible() const;
 
-    void integrate(IntegratorWorkspace &workspace,
-                   const Symbol &nrg_component,
-                   SireUnits::Dimension::Time timestep,
-                   int nmoves, bool record_stats);
+        void integrate(IntegratorWorkspace &workspace, const Symbol &nrg_component, SireUnits::Dimension::Time timestep,
+                       int nmoves, bool record_stats);
 
-    IntegratorWorkspacePtr createWorkspace(const PropertyMap &map = PropertyMap()) const;
-    IntegratorWorkspacePtr createWorkspace(const MoleculeGroup &molgroup,
-                                           const PropertyMap &map = PropertyMap()) const;
+        IntegratorWorkspacePtr createWorkspace(const PropertyMap &map = PropertyMap()) const;
+        IntegratorWorkspacePtr createWorkspace(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap()) const;
 
-private:
-    /** Whether or not to save velocities at every step
-        (or just at the end of all steps) */
-    bool frequent_save_velocities;
-};
+    private:
+        /** Whether or not to save velocities at every step
+            (or just at the end of all steps) */
+        bool frequent_save_velocities;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::DLMRigidBody )
+Q_DECLARE_METATYPE(SireMove::DLMRigidBody)
 
-SIRE_EXPOSE_CLASS( SireMove::DLMRigidBody )
+SIRE_EXPOSE_CLASS(SireMove::DLMRigidBody)
 
 SIRE_END_HEADER
 

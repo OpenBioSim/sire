@@ -30,18 +30,18 @@
 
 #include <QSet>
 
-#include "molinfo.h"
 #include "atomidx.h"
+#include "molinfo.h"
 
 #include "atomid.h"
 #include "cgid.h"
-#include "resid.h"
 #include "chainid.h"
+#include "resid.h"
 #include "segid.h"
 
 #include "atomidentifier.h"
-#include "chainidentifier.h"
 #include "cgidentifier.h"
+#include "chainidentifier.h"
 #include "residentifier.h"
 #include "segidentifier.h"
 
@@ -49,233 +49,212 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-template<class GROUP,class ATOM>
-class GroupAtomID;
+    template <class GROUP, class ATOM>
+    class GroupAtomID;
 }
 
-template<class GROUP,class ATOM>
-QDataStream& operator<<(QDataStream&, const SireMol::GroupAtomID<GROUP,ATOM>&);
-template<class GROUP,class ATOM>
-QDataStream& operator>>(QDataStream&, SireMol::GroupAtomID<GROUP,ATOM>&);
+template <class GROUP, class ATOM>
+QDataStream &operator<<(QDataStream &, const SireMol::GroupAtomID<GROUP, ATOM> &);
+template <class GROUP, class ATOM>
+QDataStream &operator>>(QDataStream &, SireMol::GroupAtomID<GROUP, ATOM> &);
 
 namespace SireMol
 {
 
-class ResID;
-class ChainID;
-class SegID;
-class CGID;
+    class ResID;
+    class ChainID;
+    class SegID;
+    class CGID;
 
-/** This is the base class of GroupAtomID, used to abstract
-    template-independent parts away from the template code.
+    /** This is the base class of GroupAtomID, used to abstract
+        template-independent parts away from the template code.
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT GroupAtomIDBase : public AtomID
-{
-public:
-    GroupAtomIDBase();
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT GroupAtomIDBase : public AtomID
+    {
+    public:
+        GroupAtomIDBase();
 
-    GroupAtomIDBase(const GroupAtomIDBase &other);
+        GroupAtomIDBase(const GroupAtomIDBase &other);
 
-    ~GroupAtomIDBase();
+        ~GroupAtomIDBase();
 
-protected:
-    void throwMissingAtom(const MolInfo &molinfo) const;
-};
+    protected:
+        void throwMissingAtom(const MolInfo &molinfo) const;
+    };
 
-/** This class represents an Atom ID that is comprised of both
-    an AtomID part and an ID of a group in the molecule (e.g.
-    a Residue, Segment, Chain or CutGroup)
+    /** This class represents an Atom ID that is comprised of both
+        an AtomID part and an ID of a group in the molecule (e.g.
+        a Residue, Segment, Chain or CutGroup)
 
-    @author Christopher Woods
-*/
-template<class GROUP, class ATOM>
-class SIREMOL_EXPORT GroupAtomID : public GroupAtomIDBase
-{
+        @author Christopher Woods
+    */
+    template <class GROUP, class ATOM>
+    class SIREMOL_EXPORT GroupAtomID : public GroupAtomIDBase
+    {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<<>(QDataStream&, const GroupAtomID<GROUP,ATOM>&);
-friend SIREMOL_EXPORT QDataStream& ::operator>><>(QDataStream&, GroupAtomID<GROUP,ATOM>&);
+        friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const GroupAtomID<GROUP, ATOM> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, GroupAtomID<GROUP, ATOM> &);
 
-public:
-    GroupAtomID();
+    public:
+        GroupAtomID();
 
-    GroupAtomID(const GROUP &groupid, const ATOM &atomid);
+        GroupAtomID(const GROUP &groupid, const ATOM &atomid);
 
-    GroupAtomID(const GroupAtomID &other);
+        GroupAtomID(const GroupAtomID &other);
 
-    ~GroupAtomID();
+        ~GroupAtomID();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    GroupAtomID<GROUP,ATOM>* clone() const;
+        GroupAtomID<GROUP, ATOM> *clone() const;
 
-    bool operator==(const GroupAtomID<GROUP,ATOM> &other) const;
+        bool operator==(const GroupAtomID<GROUP, ATOM> &other) const;
 
-    bool operator!=(const GroupAtomID<GROUP,ATOM> &other) const;
+        bool operator!=(const GroupAtomID<GROUP, ATOM> &other) const;
 
-    bool operator==(const SireID::ID &other) const;
+        bool operator==(const SireID::ID &other) const;
 
-    uint hash() const;
+        uint hash() const;
 
-    bool isNull() const;
+        bool isNull() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    QList<AtomIdx> map(const MolInfo &molinfo) const;
+        QList<AtomIdx> map(const MolInfo &molinfo) const;
 
-private:
-    typename GROUP::Identifier groupid;
-    typename ATOM::Identifier atomid;
-};
+    private:
+        typename GROUP::Identifier groupid;
+        typename ATOM::Identifier atomid;
+    };
 
-/** Null constructor */
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-GroupAtomID<GROUP,ATOM>::GroupAtomID()
-                        : GroupAtomIDBase()
-{}
+    /** Null constructor */
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE GroupAtomID<GROUP, ATOM>::GroupAtomID() : GroupAtomIDBase()
+    {
+    }
 
-/** Construct using the passed group and atom IDs */
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-GroupAtomID<GROUP,ATOM>::GroupAtomID(const GROUP &group,
-                                     const ATOM &atom)
-                        : GroupAtomIDBase(),
-                          groupid(group), atomid(atom)
-{}
+    /** Construct using the passed group and atom IDs */
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE GroupAtomID<GROUP, ATOM>::GroupAtomID(const GROUP &group, const ATOM &atom)
+        : GroupAtomIDBase(), groupid(group), atomid(atom)
+    {
+    }
 
-/** Copy constructor */
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-GroupAtomID<GROUP,ATOM>::GroupAtomID(const GroupAtomID<GROUP,ATOM> &other)
-                        : GroupAtomIDBase(other),
-                          groupid(other.groupid), atomid(other.atomid)
-{}
+    /** Copy constructor */
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE GroupAtomID<GROUP, ATOM>::GroupAtomID(const GroupAtomID<GROUP, ATOM> &other)
+        : GroupAtomIDBase(other), groupid(other.groupid), atomid(other.atomid)
+    {
+    }
 
-/** Destructor */
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-GroupAtomID<GROUP,ATOM>::~GroupAtomID()
-{}
+    /** Destructor */
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE GroupAtomID<GROUP, ATOM>::~GroupAtomID()
+    {
+    }
 
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-const char* GroupAtomID<GROUP,ATOM>::typeName()
-{
-    return QMetaType::typeName( qMetaTypeId< GroupAtomID<GROUP,ATOM> >() );
-}
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE const char *GroupAtomID<GROUP, ATOM>::typeName()
+    {
+        return QMetaType::typeName(qMetaTypeId<GroupAtomID<GROUP, ATOM>>());
+    }
 
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-const char* GroupAtomID<GROUP,ATOM>::what() const
-{
-    return GroupAtomID<GROUP,ATOM>::typeName();
-}
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE const char *GroupAtomID<GROUP, ATOM>::what() const
+    {
+        return GroupAtomID<GROUP, ATOM>::typeName();
+    }
 
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-GroupAtomID<GROUP,ATOM>* GroupAtomID<GROUP,ATOM>::clone() const
-{
-    return new GroupAtomID<GROUP,ATOM>(*this);
-}
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE GroupAtomID<GROUP, ATOM> *GroupAtomID<GROUP, ATOM>::clone() const
+    {
+        return new GroupAtomID<GROUP, ATOM>(*this);
+    }
 
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-bool GroupAtomID<GROUP,ATOM>::operator==(const GroupAtomID<GROUP,ATOM> &other) const
-{
-    return groupid == other.groupid and
-           atomid == other.atomid;
-}
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE bool GroupAtomID<GROUP, ATOM>::operator==(const GroupAtomID<GROUP, ATOM> &other) const
+    {
+        return groupid == other.groupid and atomid == other.atomid;
+    }
 
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-bool GroupAtomID<GROUP,ATOM>::operator!=(const GroupAtomID<GROUP,ATOM> &other) const
-{
-    return not this->operator==(other);
-}
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE bool GroupAtomID<GROUP, ATOM>::operator!=(const GroupAtomID<GROUP, ATOM> &other) const
+    {
+        return not this->operator==(other);
+    }
 
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-bool GroupAtomID<GROUP,ATOM>::operator==(const SireID::ID &other) const
-{
-    return SireID::ID::compare< GroupAtomID<GROUP,ATOM> >(*this, other);
-}
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE bool GroupAtomID<GROUP, ATOM>::operator==(const SireID::ID &other) const
+    {
+        return SireID::ID::compare<GroupAtomID<GROUP, ATOM>>(*this, other);
+    }
 
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-uint GroupAtomID<GROUP,ATOM>::hash() const
-{
-    return (groupid.hash() << 16) | (atomid.hash() & 0x0000FFFF);
-}
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE uint GroupAtomID<GROUP, ATOM>::hash() const
+    {
+        return (groupid.hash() << 16) | (atomid.hash() & 0x0000FFFF);
+    }
 
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-bool GroupAtomID<GROUP,ATOM>::isNull() const
-{
-    return groupid.isNull() and atomid.isNull();
-}
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE bool GroupAtomID<GROUP, ATOM>::isNull() const
+    {
+        return groupid.isNull() and atomid.isNull();
+    }
 
-/** Return a string representation of this ID */
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-QString GroupAtomID<GROUP,ATOM>::toString() const
-{
-    return QString("%1 and %2").arg(groupid.toString(), atomid.toString());
-}
+    /** Return a string representation of this ID */
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE QString GroupAtomID<GROUP, ATOM>::toString() const
+    {
+        return QString("%1 and %2").arg(groupid.toString(), atomid.toString());
+    }
 
-/** Map this combined ID back to the indicies of the atoms that match this ID
+    /** Map this combined ID back to the indicies of the atoms that match this ID
 
-    \throw ???::missing_GROUP
-    \throw SireMol::missing_atom
-    \throw SireError::invalid_index
-*/
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-QList<AtomIdx> GroupAtomID<GROUP,ATOM>::map(const MolInfo &molinfo) const
-{
-    if (this->isNull())
-        return molinfo.getAtoms();
-    else if (atomid.isNull())
-        return molinfo.getAtomsIn(groupid);
-    else if (groupid.isNull())
-        return atomid.map(molinfo);
+        \throw ???::missing_GROUP
+        \throw SireMol::missing_atom
+        \throw SireError::invalid_index
+    */
+    template <class GROUP, class ATOM>
+    SIRE_OUTOFLINE_TEMPLATE QList<AtomIdx> GroupAtomID<GROUP, ATOM>::map(const MolInfo &molinfo) const
+    {
+        if (this->isNull())
+            return molinfo.getAtoms();
+        else if (atomid.isNull())
+            return molinfo.getAtomsIn(groupid);
+        else if (groupid.isNull())
+            return atomid.map(molinfo);
 
-    QList<AtomIdx> atomidxs =
-                MolInfo::intersection(atomid.map(molinfo),
-                                      molinfo.getAtomsIn(groupid) );
+        QList<AtomIdx> atomidxs = MolInfo::intersection(atomid.map(molinfo), molinfo.getAtomsIn(groupid));
 
-    if (atomidxs.isEmpty())
-        this->throwMissingAtom(molinfo);
+        if (atomidxs.isEmpty())
+            this->throwMissingAtom(molinfo);
 
-    return atomidxs;
-}
+        return atomidxs;
+    }
 
-typedef GroupAtomID<ResID,AtomID> ResAtomID;
-typedef GroupAtomID<ChainID,AtomID> ChainAtomID;
-typedef GroupAtomID<SegID,AtomID> SegAtomID;
-typedef GroupAtomID<CGID,AtomID> CGAtomID;
+    typedef GroupAtomID<ResID, AtomID> ResAtomID;
+    typedef GroupAtomID<ChainID, AtomID> ChainAtomID;
+    typedef GroupAtomID<SegID, AtomID> SegAtomID;
+    typedef GroupAtomID<CGID, AtomID> CGAtomID;
 
-}
+} // namespace SireMol
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 /** Serialise to a binary datastream */
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator<<(QDataStream &ds,
-                        const SireMol::GroupAtomID<GROUP,ATOM> &groupatomid)
+template <class GROUP, class ATOM>
+SIRE_OUTOFLINE_TEMPLATE QDataStream &operator<<(QDataStream &ds, const SireMol::GroupAtomID<GROUP, ATOM> &groupatomid)
 {
     ds << groupatomid.groupid << groupatomid.atomid;
     return ds;
 }
 
 /** Extract from a binary datastream */
-template<class GROUP, class ATOM>
-SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator>>(QDataStream &ds,
-                        SireMol::GroupAtomID<GROUP,ATOM> &groupatomid)
+template <class GROUP, class ATOM>
+SIRE_OUTOFLINE_TEMPLATE QDataStream &operator>>(QDataStream &ds, SireMol::GroupAtomID<GROUP, ATOM> &groupatomid)
 {
     ds >> groupatomid.groupid >> groupatomid.atomid;
     return ds;
@@ -287,21 +266,17 @@ Q_DECLARE_METATYPE(SireMol::ChainAtomID);
 Q_DECLARE_METATYPE(SireMol::SegAtomID);
 Q_DECLARE_METATYPE(SireMol::CGAtomID);
 
-SIRE_EXPOSE_CLASS( SireMol::GroupAtomIDBase )
-SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::ResID, SireMol::AtomID>),
-                    SireMol::ResAtomID )
-SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::ChainID, SireMol::AtomID>),
-                    SireMol::ChainAtomID )
-SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::SegID, SireMol::AtomID>),
-                    SireMol::SegAtomID )
-SIRE_EXPOSE_ALIAS( (SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID>),
-                    SireMol::CGAtomID )
+SIRE_EXPOSE_CLASS(SireMol::GroupAtomIDBase)
+SIRE_EXPOSE_ALIAS((SireMol::GroupAtomID<SireMol::ResID, SireMol::AtomID>), SireMol::ResAtomID)
+SIRE_EXPOSE_ALIAS((SireMol::GroupAtomID<SireMol::ChainID, SireMol::AtomID>), SireMol::ChainAtomID)
+SIRE_EXPOSE_ALIAS((SireMol::GroupAtomID<SireMol::SegID, SireMol::AtomID>), SireMol::SegAtomID)
+SIRE_EXPOSE_ALIAS((SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID>), SireMol::CGAtomID)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
-template class SireMol::GroupAtomID<SireMol::ResID,SireMol::AtomID>;
-template class SireMol::GroupAtomID<SireMol::ChainID,SireMol::AtomID>;
-template class SireMol::GroupAtomID<SireMol::SegID,SireMol::AtomID>;
-template class SireMol::GroupAtomID<SireMol::CGID,SireMol::AtomID>;
+template class SireMol::GroupAtomID<SireMol::ResID, SireMol::AtomID>;
+template class SireMol::GroupAtomID<SireMol::ChainID, SireMol::AtomID>;
+template class SireMol::GroupAtomID<SireMol::SegID, SireMol::AtomID>;
+template class SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID>;
 #endif
 
 SIRE_END_HEADER

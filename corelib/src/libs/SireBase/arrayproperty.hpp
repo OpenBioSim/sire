@@ -36,550 +36,501 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-template<class T>
-class ArrayProperty;
+    template <class T>
+    class ArrayProperty;
 }
 
-template<class T>
-QDataStream& operator<<(QDataStream&, const SireBase::ArrayProperty<T>&);
-template<class T>
-QDataStream& operator>>(QDataStream&, SireBase::ArrayProperty<T>&);
+template <class T>
+QDataStream &operator<<(QDataStream &, const SireBase::ArrayProperty<T> &);
+template <class T>
+QDataStream &operator>>(QDataStream &, SireBase::ArrayProperty<T> &);
 
 namespace SireBase
 {
 
-namespace detail
-{
-    SIREBASE_EXPORT int checkIndex(int i, int count);
-}
+    namespace detail
+    {
+        SIREBASE_EXPORT int checkIndex(int i, int count);
+    }
 
-/** This class provides a thin Property wrapper around an array.
-    This is useful when you want to store a large array of a basic
-    type without transforming all of the elements into property objects
+    /** This class provides a thin Property wrapper around an array.
+        This is useful when you want to store a large array of a basic
+        type without transforming all of the elements into property objects
 
-    @author Christopher Woods
-*/
-template<class T>
-class ArrayProperty : public Property
-{
+        @author Christopher Woods
+    */
+    template <class T>
+    class ArrayProperty : public Property
+    {
 
-public:
-    ArrayProperty();
-    ArrayProperty(const T &value);
+    public:
+        ArrayProperty();
+        ArrayProperty(const T &value);
 
-    ~ArrayProperty();
+        ~ArrayProperty();
 
-    T operator[](int i) const;
+        T operator[](int i) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    QVector<T> array() const;
+        QVector<T> array() const;
 
-    int count() const;
-    int size() const;
+        int count() const;
+        int size() const;
 
-    void append(T value);
-    void append(const ArrayProperty<T> &values);
+        void append(T value);
+        void append(const ArrayProperty<T> &values);
 
-    T at(int i) const;
+        T at(int i) const;
 
-    T getitem(int i) const;
+        T getitem(int i) const;
 
-    void clear();
+        void clear();
 
-    bool empty() const;
-    bool isEmpty() const;
+        bool empty() const;
+        bool isEmpty() const;
 
-    void insert(int i, T value);
+        void insert(int i, T value);
 
-    void move(int from, int to);
+        void move(int from, int to);
 
-    void pop_back();
-    void pop_front();
-    void prepend(T value);
-    void push_back(T value);
-    void push_front(T value);
+        void pop_back();
+        void pop_front();
+        void prepend(T value);
+        void push_back(T value);
+        void push_front(T value);
 
-    void removeAt(int i);
-    void removeFirst();
-    void removeLast();
+        void removeAt(int i);
+        void removeFirst();
+        void removeLast();
 
-    void replace(int i, T value);
+        void replace(int i, T value);
 
-    void swap(ArrayProperty<T> &other);
+        void swap(ArrayProperty<T> &other);
 
-    void swap(int i, int j);
+        void swap(int i, int j);
 
-    T takeAt(int i);
-    T takeFirst();
-    T takeLast();
+        T takeAt(int i);
+        T takeFirst();
+        T takeLast();
 
-    QList<T> toList() const;
-    QVector<T> toVector() const;
+        QList<T> toList() const;
+        QVector<T> toVector() const;
 
-    QVector<T> value() const;
+        QVector<T> value() const;
 
-protected:
-    /** These functions must be reimplemented by the deriving class */
-    ArrayProperty(const QList<T> &array);
-    ArrayProperty(const QVector<T> &array);
-    ArrayProperty(const ArrayProperty<T> &other);
+    protected:
+        /** These functions must be reimplemented by the deriving class */
+        ArrayProperty(const QList<T> &array);
+        ArrayProperty(const QVector<T> &array);
+        ArrayProperty(const ArrayProperty<T> &other);
 
-    ArrayProperty<T>& operator=(const ArrayProperty &other);
+        ArrayProperty<T> &operator=(const ArrayProperty &other);
 
-    bool operator==(const ArrayProperty &other) const;
-    bool operator!=(const ArrayProperty &other) const;
+        bool operator==(const ArrayProperty &other) const;
+        bool operator!=(const ArrayProperty &other) const;
 
-    QVector<T> operator+(const ArrayProperty<T> &other) const;
-    ArrayProperty<T>& operator+=(const ArrayProperty<T> &other);
+        QVector<T> operator+(const ArrayProperty<T> &other) const;
+        ArrayProperty<T> &operator+=(const ArrayProperty<T> &other);
 
-    /** The actual array */
-    QVector<T> a;
-};
+        /** The actual array */
+        QVector<T> a;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Constructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-ArrayProperty<T>::ArrayProperty() : Property()
-{}
-
-/** Construct from a single value */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-ArrayProperty<T>::ArrayProperty(const T &value) : Property()
-{
-    a.append(value);
-}
-
-/** Construct from the passed list */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-ArrayProperty<T>::ArrayProperty(const QList<T> &array) : Property()
-{
-    if (not array.isEmpty())
+    /** Constructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE ArrayProperty<T>::ArrayProperty() : Property()
     {
-        a.reserve(array.count());
+    }
 
-        for (typename QList<T>::const_iterator it = array.constBegin();
-             it != array.constEnd();
-             ++it)
+    /** Construct from a single value */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE ArrayProperty<T>::ArrayProperty(const T &value) : Property()
+    {
+        a.append(value);
+    }
+
+    /** Construct from the passed list */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE ArrayProperty<T>::ArrayProperty(const QList<T> &array) : Property()
+    {
+        if (not array.isEmpty())
         {
-            a.append(*it);
+            a.reserve(array.count());
+
+            for (typename QList<T>::const_iterator it = array.constBegin(); it != array.constEnd(); ++it)
+            {
+                a.append(*it);
+            }
         }
     }
-}
 
-/** Construct from the passed array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-ArrayProperty<T>::ArrayProperty(const QVector<T> &array)
-                 : Property(), a(array)
-{}
-
-/** Copy constructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-ArrayProperty<T>::ArrayProperty(const ArrayProperty<T> &other)
-                 : Property(other), a(other.a)
-{}
-
-/** Destructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-ArrayProperty<T>::~ArrayProperty()
-{}
-
-/** Copy assignment operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-ArrayProperty<T>& ArrayProperty<T>::operator=(const ArrayProperty &other)
-{
-    a = other.a;
-    return *this;
-}
-
-/** Comparison operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool ArrayProperty<T>::operator==(const ArrayProperty &other) const
-{
-    return a == other.a;
-}
-
-/** Comparison operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool ArrayProperty<T>::operator!=(const ArrayProperty &other) const
-{
-    return a != other.a;
-}
-
-/** Return the sum of the two arrays (join them together) */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QVector<T> ArrayProperty<T>::operator+(const ArrayProperty<T> &other) const
-{
-    return a + other.a;
-}
-
-/** Add the contents of the other array onto this array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-ArrayProperty<T>& ArrayProperty<T>::operator+=(const ArrayProperty<T> &other)
-{
-    a += other.a;
-    return *this;
-}
-
-/** Return the ith element of the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T ArrayProperty<T>::operator[](int i) const
-{
-    return a.constData()[ detail::checkIndex(i, a.count()) ];
-}
-
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QString ArrayProperty<T>::toString() const
-{
-    if (this->isEmpty())
+    /** Construct from the passed array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE ArrayProperty<T>::ArrayProperty(const QVector<T> &array) : Property(), a(array)
     {
-        return QObject::tr("%1::empty").arg(this->what());
     }
-    else
+
+    /** Copy constructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE ArrayProperty<T>::ArrayProperty(const ArrayProperty<T> &other) : Property(other), a(other.a)
     {
-        QStringList parts;
+    }
 
-        const auto n = this->count();
+    /** Destructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE ArrayProperty<T>::~ArrayProperty()
+    {
+    }
 
-        if (n <= 10)
+    /** Copy assignment operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE ArrayProperty<T> &ArrayProperty<T>::operator=(const ArrayProperty &other)
+    {
+        a = other.a;
+        return *this;
+    }
+
+    /** Comparison operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool ArrayProperty<T>::operator==(const ArrayProperty &other) const
+    {
+        return a == other.a;
+    }
+
+    /** Comparison operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool ArrayProperty<T>::operator!=(const ArrayProperty &other) const
+    {
+        return a != other.a;
+    }
+
+    /** Return the sum of the two arrays (join them together) */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QVector<T> ArrayProperty<T>::operator+(const ArrayProperty<T> &other) const
+    {
+        return a + other.a;
+    }
+
+    /** Add the contents of the other array onto this array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE ArrayProperty<T> &ArrayProperty<T>::operator+=(const ArrayProperty<T> &other)
+    {
+        a += other.a;
+        return *this;
+    }
+
+    /** Return the ith element of the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T ArrayProperty<T>::operator[](int i) const
+    {
+        return a.constData()[detail::checkIndex(i, a.count())];
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QString ArrayProperty<T>::toString() const
+    {
+        if (this->isEmpty())
         {
-            for (int i=0; i<n; ++i)
-            {
-                parts.append(QObject::tr("%1: %2").arg(i)
-                                        .arg(Sire::toString(this->operator[](i))));
-            }
+            return QObject::tr("%1::empty").arg(this->what());
         }
         else
         {
-            for (int i=0; i<5; ++i)
+            QStringList parts;
+
+            const auto n = this->count();
+
+            if (n <= 10)
             {
-                parts.append(QObject::tr("%1: %2").arg(i)
-                                        .arg(Sire::toString(this->operator[](i))));
+                for (int i = 0; i < n; ++i)
+                {
+                    parts.append(QObject::tr("%1: %2").arg(i).arg(Sire::toString(this->operator[](i))));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 5; ++i)
+                {
+                    parts.append(QObject::tr("%1: %2").arg(i).arg(Sire::toString(this->operator[](i))));
+                }
+
+                parts.append("...");
+
+                for (int i = n - 5; i < n; ++i)
+                {
+                    parts.append(QObject::tr("%1: %2").arg(i).arg(Sire::toString(this->operator[](i))));
+                }
             }
 
-            parts.append("...");
-
-            for (int i=n-5; i<n; ++i)
-            {
-                parts.append(QObject::tr("%1: %2").arg(i)
-                                        .arg(Sire::toString(this->operator[](i))));
-            }
+            return QObject::tr("%1( size=%2\n%3\n)").arg(this->what()).arg(n).arg(parts.join("\n"));
         }
-
-        return QObject::tr("%1( size=%2\n%3\n)")
-                        .arg(this->what()).arg(n).arg(parts.join("\n"));
     }
-}
 
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QVector<T> ArrayProperty<T>::array() const
-{
-    return a;
-}
-
-/** Return the number of elements in the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-int ArrayProperty<T>::count() const
-{
-    return a.count();
-}
-
-/** Return the size of the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-int ArrayProperty<T>::size() const
-{
-    return a.size();
-}
-
-/** Append the passed value onto the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::append(T value)
-{
-    a.append(value);
-}
-
-/** Append the passed array on this array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::append(const ArrayProperty<T> &values)
-{
-    if (not values.isEmpty())
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QVector<T> ArrayProperty<T>::array() const
     {
-        a.reserve( a.count() + values.count() );
+        return a;
+    }
 
-        for (int i=0; i<values.count(); ++i)
+    /** Return the number of elements in the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE int ArrayProperty<T>::count() const
+    {
+        return a.count();
+    }
+
+    /** Return the size of the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE int ArrayProperty<T>::size() const
+    {
+        return a.size();
+    }
+
+    /** Append the passed value onto the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::append(T value)
+    {
+        a.append(value);
+    }
+
+    /** Append the passed array on this array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::append(const ArrayProperty<T> &values)
+    {
+        if (not values.isEmpty())
         {
-            a.append( values.a.constData()[i] );
+            a.reserve(a.count() + values.count());
+
+            for (int i = 0; i < values.count(); ++i)
+            {
+                a.append(values.a.constData()[i]);
+            }
         }
     }
-}
 
-/** Return the ith element of the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T ArrayProperty<T>::at(int i) const
-{
-    return a.constData()[ detail::checkIndex(i,a.count()) ];
-}
-
-/** Return the ith element of the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T ArrayProperty<T>::getitem(int i) const
-{
-    return this->at(i);
-}
-
-/** Clear the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::clear()
-{
-    a.clear();
-}
-
-/** Return whether or not the array is empty */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool ArrayProperty<T>::empty() const
-{
-    return a.isEmpty();
-}
-
-/** Return whether or not the array is empty */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool ArrayProperty<T>::isEmpty() const
-{
-    return a.isEmpty();
-}
-
-/** Insert the passed value into the array at index i */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::insert(int i, T value)
-{
-    a.insert(i, value);
-}
-
-/** Move the item at index 'from' to index 'to' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::move(int from, int to)
-{
-    from = detail::checkIndex(from, a.count());
-    to = detail::checkIndex(to, a.count());
-
-    if (from != to)
+    /** Return the ith element of the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T ArrayProperty<T>::at(int i) const
     {
+        return a.constData()[detail::checkIndex(i, a.count())];
+    }
+
+    /** Return the ith element of the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T ArrayProperty<T>::getitem(int i) const
+    {
+        return this->at(i);
+    }
+
+    /** Clear the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::clear()
+    {
+        a.clear();
+    }
+
+    /** Return whether or not the array is empty */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool ArrayProperty<T>::empty() const
+    {
+        return a.isEmpty();
+    }
+
+    /** Return whether or not the array is empty */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool ArrayProperty<T>::isEmpty() const
+    {
+        return a.isEmpty();
+    }
+
+    /** Insert the passed value into the array at index i */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::insert(int i, T value)
+    {
+        a.insert(i, value);
+    }
+
+    /** Move the item at index 'from' to index 'to' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::move(int from, int to)
+    {
+        from = detail::checkIndex(from, a.count());
+        to = detail::checkIndex(to, a.count());
+
+        if (from != to)
+        {
+            QList<T> list = a.toList();
+            list.move(from, to);
+            a = list.toVector();
+        }
+    }
+
+    /** Pop the last element of the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::pop_back()
+    {
+        a.pop_back();
+    }
+
+    /** Pop the first element of the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::pop_front()
+    {
+        a.pop_front();
+    }
+
+    /** Prepend the passed value onto the beginning of the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::prepend(T value)
+    {
+        a.prepend(value);
+    }
+
+    /** Push the passed value onto the back of the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::push_back(T value)
+    {
+        a.push_back(value);
+    }
+
+    /** Push the passed value onto the front of the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::push_front(T value)
+    {
+        a.push_front(value);
+    }
+
+    /** Remove the value at index 'i' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::removeAt(int i)
+    {
+        i = detail::checkIndex(i, a.count());
+
         QList<T> list = a.toList();
-        list.move(from,to);
+        list.removeAt(i);
         a = list.toVector();
     }
-}
 
-/** Pop the last element of the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::pop_back()
-{
-    a.pop_back();
-}
-
-/** Pop the first element of the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::pop_front()
-{
-    a.pop_front();
-}
-
-/** Prepend the passed value onto the beginning of the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::prepend(T value)
-{
-    a.prepend(value);
-}
-
-/** Push the passed value onto the back of the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::push_back(T value)
-{
-    a.push_back(value);
-}
-
-/** Push the passed value onto the front of the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::push_front(T value)
-{
-    a.push_front(value);
-}
-
-/** Remove the value at index 'i' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::removeAt(int i)
-{
-    i = detail::checkIndex(i,a.count());
-
-    QList<T> list = a.toList();
-    list.removeAt(i);
-    a = list.toVector();
-}
-
-/** Remove the first item from the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::removeFirst()
-{
-    QList<T> list = a.toList();
-    list.removeFirst();
-    a = list.toVector();
-}
-
-/** Remove the last item from the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::removeLast()
-{
-    QList<T> list = a.toList();
-    list.removeLast();
-    a = list.toVector();
-}
-
-/** Replace the item at index 'i' with the passed value */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::replace(int i, T value)
-{
-    a.replace( detail::checkIndex(i,a.count()), value );
-}
-
-/** Swap this array with 'other' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::swap(ArrayProperty<T> &other)
-{
-    QVector<T> tmp = a;
-    a = other.a;
-    other.a = tmp;
-}
-
-/** Swap the items at indicies i and j */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void ArrayProperty<T>::swap(int i, int j)
-{
-    i = detail::checkIndex(i,a.count());
-    j = detail::checkIndex(j,a.count());
-
-    if (i != j)
+    /** Remove the first item from the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::removeFirst()
     {
-        T tmp = a[i];
-        a[i] = a[j];
-        a[j] = tmp;
-    }
-}
-
-/** Take the item at index i */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T ArrayProperty<T>::takeAt(int i)
-{
-    i = detail::checkIndex(i,a.count());
-
-    QList<T> list = a.toList();
-    T val = list.takeAt(i);
-    a = list.toVector();
-    return val;
-}
-
-/** Take the first item from the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T ArrayProperty<T>::takeFirst()
-{
-    QList<T> list = a.toList();
-    T val = list.takeFirst();
-    a = list.toVector();
-    return val;
-}
-
-/** Take the last item from the array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T ArrayProperty<T>::takeLast()
-{
-    QList<T> list = a.toList();
-    T val = list.takeLast();
-    a = list.toVector();
-    return val;
-}
-
-/** Return this array as a QList<T> */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QList<T> ArrayProperty<T>::toList() const
-{
-    QList<T> list;
-
-    for (int i=0; i<a.count(); ++i)
-    {
-        list.append( a.constData()[i] );
+        QList<T> list = a.toList();
+        list.removeFirst();
+        a = list.toVector();
     }
 
-    return list;
-}
+    /** Remove the last item from the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::removeLast()
+    {
+        QList<T> list = a.toList();
+        list.removeLast();
+        a = list.toVector();
+    }
 
-/** Return this array as a QVector<T> */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QVector<T> ArrayProperty<T>::toVector() const
-{
-    return a;
-}
+    /** Replace the item at index 'i' with the passed value */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::replace(int i, T value)
+    {
+        a.replace(detail::checkIndex(i, a.count()), value);
+    }
 
-/** Return the actual array */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QVector<T> ArrayProperty<T>::value() const
-{
-    return a;
-}
+    /** Swap this array with 'other' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::swap(ArrayProperty<T> &other)
+    {
+        QVector<T> tmp = a;
+        a = other.a;
+        other.a = tmp;
+    }
+
+    /** Swap the items at indicies i and j */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void ArrayProperty<T>::swap(int i, int j)
+    {
+        i = detail::checkIndex(i, a.count());
+        j = detail::checkIndex(j, a.count());
+
+        if (i != j)
+        {
+            T tmp = a[i];
+            a[i] = a[j];
+            a[j] = tmp;
+        }
+    }
+
+    /** Take the item at index i */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T ArrayProperty<T>::takeAt(int i)
+    {
+        i = detail::checkIndex(i, a.count());
+
+        QList<T> list = a.toList();
+        T val = list.takeAt(i);
+        a = list.toVector();
+        return val;
+    }
+
+    /** Take the first item from the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T ArrayProperty<T>::takeFirst()
+    {
+        QList<T> list = a.toList();
+        T val = list.takeFirst();
+        a = list.toVector();
+        return val;
+    }
+
+    /** Take the last item from the array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T ArrayProperty<T>::takeLast()
+    {
+        QList<T> list = a.toList();
+        T val = list.takeLast();
+        a = list.toVector();
+        return val;
+    }
+
+    /** Return this array as a QList<T> */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QList<T> ArrayProperty<T>::toList() const
+    {
+        QList<T> list;
+
+        for (int i = 0; i < a.count(); ++i)
+        {
+            list.append(a.constData()[i]);
+        }
+
+        return list;
+    }
+
+    /** Return this array as a QVector<T> */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QVector<T> ArrayProperty<T>::toVector() const
+    {
+        return a;
+    }
+
+    /** Return the actual array */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QVector<T> ArrayProperty<T>::value() const
+    {
+        return a;
+    }
 
 #endif
 
-}
+} // namespace SireBase
 
-SIRE_EXPOSE_ALIAS( (SireBase::ArrayProperty<QString>),
-                    SireBase::ArrayProperty_QString_ )
+SIRE_EXPOSE_ALIAS((SireBase::ArrayProperty<QString>), SireBase::ArrayProperty_QString_)
 
-SIRE_EXPOSE_ALIAS( (SireBase::ArrayProperty<double>),
-                    SireBase::ArrayProperty_double_ )
+SIRE_EXPOSE_ALIAS((SireBase::ArrayProperty<double>), SireBase::ArrayProperty_double_)
 
-SIRE_EXPOSE_ALIAS( (SireBase::ArrayProperty<long long>),
-                    SireBase::ArrayProperty_int_ )
+SIRE_EXPOSE_ALIAS((SireBase::ArrayProperty<long long>), SireBase::ArrayProperty_int_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireBase::ArrayProperty<QString>;

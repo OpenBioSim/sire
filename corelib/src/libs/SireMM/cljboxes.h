@@ -40,637 +40,630 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class CLJBox;
-class CLJBoxIndex;
-class CLJBoxPtr;
-class CLJBoxes;
-class CLJBoxDistance;
-}
+    class CLJBox;
+    class CLJBoxIndex;
+    class CLJBoxPtr;
+    class CLJBoxes;
+    class CLJBoxDistance;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJBox&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJBox&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJBox &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJBox &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJBoxIndex&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJBoxIndex&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJBoxIndex &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJBoxIndex &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJBoxPtr&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJBoxPtr&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJBoxPtr &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJBoxPtr &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJBoxes&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJBoxes&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJBoxes &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJBoxes &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJBoxDistance&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJBoxDistance&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJBoxDistance &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJBoxDistance &);
 
 namespace SireVol
 {
-class AABox;
-class Space;
-}
+    class AABox;
+    class Space;
+} // namespace SireVol
 
 namespace SireMM
 {
 
-using SireUnits::Dimension::Length;
-using SireVol::Space;
+    using SireUnits::Dimension::Length;
+    using SireVol::Space;
 
-/** This class provides a simple i,j,k index of a box in the grid,
-    with, optionally, the index of a particular atom in the grid box */
-class SIREMM_EXPORT CLJBoxIndex
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJBoxIndex&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJBoxIndex&);
-
-public:
-    CLJBoxIndex();
-    CLJBoxIndex(qint16 i, qint16 j, qint16 k, qint16 atom_idx=-1);
-
-    CLJBoxIndex(const CLJBoxIndex &other);
-
-    ~CLJBoxIndex();
-
-    CLJBoxIndex& operator=(const CLJBoxIndex &other);
-
-    bool operator==(const CLJBoxIndex &other) const;
-    bool operator!=(const CLJBoxIndex &other) const;
-
-    bool operator<(const CLJBoxIndex &other) const;
-    bool operator<=(const CLJBoxIndex &other) const;
-
-    bool operator>(const CLJBoxIndex &other) const;
-    bool operator>=(const CLJBoxIndex &other) const;
-
-    static const char* typeName();
-    const char* what() const;
-
-    QString toString() const;
-
-    qint16 i() const;
-    qint16 j() const;
-    qint16 k() const;
-
-    qint16 index() const;
-
-    bool isNull() const;
-
-    SireVol::AABox box(Length box_length) const;
-
-    CLJBoxIndex boxOnly() const;
-
-    bool sameBox(const CLJBoxIndex &other) const;
-
-    uint hash() const;
-
-    static CLJBoxIndex null();
-
-    bool hasAtomIndex() const;
-
-    CLJBoxIndex min(const CLJBoxIndex &other) const;
-    CLJBoxIndex max(const CLJBoxIndex &other) const;
-
-    static int countNonDummies(const QVector<CLJBoxIndex> &indicies);
-
-    static CLJBoxIndex createWithBoxLength(float x, float y, float z, Length box_length);
-    static CLJBoxIndex createWithInverseBoxLength(float x, float y, float z, float inv_length);
-
-    static CLJBoxIndex createWithBoxLength(const Vector &coords, Length box_length);
-    static CLJBoxIndex createWithInverseBoxLength(const Vector &coords, float inv_length);
-
-private:
-    union
+    /** This class provides a simple i,j,k index of a box in the grid,
+        with, optionally, the index of a particular atom in the grid box */
+    class SIREMM_EXPORT CLJBoxIndex
     {
-        quint64 val;
 
-        struct
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJBoxIndex &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJBoxIndex &);
+
+    public:
+        CLJBoxIndex();
+        CLJBoxIndex(qint16 i, qint16 j, qint16 k, qint16 atom_idx = -1);
+
+        CLJBoxIndex(const CLJBoxIndex &other);
+
+        ~CLJBoxIndex();
+
+        CLJBoxIndex &operator=(const CLJBoxIndex &other);
+
+        bool operator==(const CLJBoxIndex &other) const;
+        bool operator!=(const CLJBoxIndex &other) const;
+
+        bool operator<(const CLJBoxIndex &other) const;
+        bool operator<=(const CLJBoxIndex &other) const;
+
+        bool operator>(const CLJBoxIndex &other) const;
+        bool operator>=(const CLJBoxIndex &other) const;
+
+        static const char *typeName();
+        const char *what() const;
+
+        QString toString() const;
+
+        qint16 i() const;
+        qint16 j() const;
+        qint16 k() const;
+
+        qint16 index() const;
+
+        bool isNull() const;
+
+        SireVol::AABox box(Length box_length) const;
+
+        CLJBoxIndex boxOnly() const;
+
+        bool sameBox(const CLJBoxIndex &other) const;
+
+        uint hash() const;
+
+        static CLJBoxIndex null();
+
+        bool hasAtomIndex() const;
+
+        CLJBoxIndex min(const CLJBoxIndex &other) const;
+        CLJBoxIndex max(const CLJBoxIndex &other) const;
+
+        static int countNonDummies(const QVector<CLJBoxIndex> &indicies);
+
+        static CLJBoxIndex createWithBoxLength(float x, float y, float z, Length box_length);
+        static CLJBoxIndex createWithInverseBoxLength(float x, float y, float z, float inv_length);
+
+        static CLJBoxIndex createWithBoxLength(const Vector &coords, Length box_length);
+        static CLJBoxIndex createWithInverseBoxLength(const Vector &coords, float inv_length);
+
+    private:
+        union
         {
-            qint16 ii;
-            qint16 jj;
-            qint16 kk;
-            qint16 idx;
-        } index;
+            quint64 val;
 
-    } v;
-};
+            struct
+            {
+                qint16 ii;
+                qint16 jj;
+                qint16 kk;
+                qint16 idx;
+            } index;
 
-/** This class represents a single box of CLJ atoms. The CLJ calculation
-    works by dividing space into a series of boxes and working out which
-    boxes are close enough to be within cutoff distance
+        } v;
+    };
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJBox : public SireBase::RefCountData
-{
+    /** This class represents a single box of CLJ atoms. The CLJ calculation
+        works by dividing space into a series of boxes and working out which
+        boxes are close enough to be within cutoff distance
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJBox&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJBox&);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJBox : public SireBase::RefCountData
+    {
 
-public:
-    CLJBox();
-    CLJBox(const CLJBoxIndex &index, Length box_length);
-    CLJBox(const CLJBoxIndex &index, Length box_length, const CLJAtoms &atoms);
-    CLJBox(const CLJBox &other);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJBox &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJBox &);
 
-    ~CLJBox();
+    public:
+        CLJBox();
+        CLJBox(const CLJBoxIndex &index, Length box_length);
+        CLJBox(const CLJBoxIndex &index, Length box_length, const CLJAtoms &atoms);
+        CLJBox(const CLJBox &other);
 
-    CLJBox& operator=(const CLJBox &other);
+        ~CLJBox();
 
-    bool operator==(const CLJBox &other) const;
-    bool operator!=(const CLJBox &other) const;
+        CLJBox &operator=(const CLJBox &other);
 
-    CLJBox operator+(const CLJBox &other) const;
+        bool operator==(const CLJBox &other) const;
+        bool operator!=(const CLJBox &other) const;
 
-    static const char* typeName();
-    const char* what() const;
+        CLJBox operator+(const CLJBox &other) const;
 
-    CLJAtom operator[](int i) const;
+        static const char *typeName();
+        const char *what() const;
 
-    CLJAtom at(int i) const;
-    CLJAtom getitem(int i) const;
+        CLJAtom operator[](int i) const;
 
-    int count() const;
-    int size() const;
+        CLJAtom at(int i) const;
+        CLJAtom getitem(int i) const;
 
-    bool isEmpty() const;
+        int count() const;
+        int size() const;
 
-    QString toString() const;
+        bool isEmpty() const;
 
-    const CLJAtoms& atoms() const;
+        QString toString() const;
 
-    int nAtoms() const;
+        const CLJAtoms &atoms() const;
 
-    CLJBox squeeze() const;
+        int nAtoms() const;
 
-    CLJBoxIndex add(const CLJAtom &atom);
-    QVector<CLJBoxIndex> add(const CLJAtoms &atoms);
+        CLJBox squeeze() const;
 
-    void remove(int atom);
-    void remove(const QList<int> &atoms);
-    void remove(const QVector<CLJBoxIndex> &atoms);
+        CLJBoxIndex add(const CLJAtom &atom);
+        QVector<CLJBoxIndex> add(const CLJAtoms &atoms);
 
-    CLJAtom take(int atom);
+        void remove(int atom);
+        void remove(const QList<int> &atoms);
+        void remove(const QVector<CLJBoxIndex> &atoms);
 
-    const CLJBoxIndex& index() const;
-    float boxLength() const;
+        CLJAtom take(int atom);
 
-    SireVol::AABox dimensions() const;
+        const CLJBoxIndex &index() const;
+        float boxLength() const;
 
-private:
-    void findGaps();
+        SireVol::AABox dimensions() const;
 
-    /** The actual atoms in the box */
-    CLJAtoms atms;
+    private:
+        void findGaps();
 
-    /** The indicies of gaps (dummy atoms) in the box */
-    QStack<int> gaps;
+        /** The actual atoms in the box */
+        CLJAtoms atms;
 
-    /** The CLJBoxIndex of this box (gives its location in space) */
-    CLJBoxIndex box_index;
+        /** The indicies of gaps (dummy atoms) in the box */
+        QStack<int> gaps;
 
-    /** The length of each box side */
-    float box_length;
-};
+        /** The CLJBoxIndex of this box (gives its location in space) */
+        CLJBoxIndex box_index;
 
-/** A simple implicitly shared pointer used to hold each CLJBox */
-class SIREMM_EXPORT CLJBoxPtr
-{
+        /** The length of each box side */
+        float box_length;
+    };
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJBoxPtr&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJBoxPtr&);
+    /** A simple implicitly shared pointer used to hold each CLJBox */
+    class SIREMM_EXPORT CLJBoxPtr
+    {
 
-public:
-    CLJBoxPtr();
-    CLJBoxPtr(CLJBox *box);
-    CLJBoxPtr(const CLJBox &box);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJBoxPtr &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJBoxPtr &);
 
-    CLJBoxPtr(const CLJBoxPtr &other);
+    public:
+        CLJBoxPtr();
+        CLJBoxPtr(CLJBox *box);
+        CLJBoxPtr(const CLJBox &box);
 
-    ~CLJBoxPtr();
+        CLJBoxPtr(const CLJBoxPtr &other);
 
-    CLJBoxPtr& operator=(const CLJBoxPtr &other);
-    CLJBoxPtr& operator=(const CLJBox &box);
+        ~CLJBoxPtr();
 
-    bool operator==(const CLJBoxPtr &other) const;
-    bool operator!=(const CLJBoxPtr &other) const;
+        CLJBoxPtr &operator=(const CLJBoxPtr &other);
+        CLJBoxPtr &operator=(const CLJBox &box);
 
-    const CLJBox& read() const;
-    CLJBox& write();
+        bool operator==(const CLJBoxPtr &other) const;
+        bool operator!=(const CLJBoxPtr &other) const;
 
-private:
-    /** Implicitly shared pointer to the box */
-    SireBase::SharedDataPointer<CLJBox> d;
-};
+        const CLJBox &read() const;
+        CLJBox &write();
 
-/** This simple class holds the minimum distance between the two
-    CLJBoxes at specified indicies
+    private:
+        /** Implicitly shared pointer to the box */
+        SireBase::SharedDataPointer<CLJBox> d;
+    };
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJBoxDistance
-{
+    /** This simple class holds the minimum distance between the two
+        CLJBoxes at specified indicies
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJBoxDistance&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJBoxDistance&);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJBoxDistance
+    {
 
-public:
-    CLJBoxDistance();
-    CLJBoxDistance(quint32 box0, quint32 box1, float distance);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJBoxDistance &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJBoxDistance &);
 
-    CLJBoxDistance(const CLJBoxDistance &other);
+    public:
+        CLJBoxDistance();
+        CLJBoxDistance(quint32 box0, quint32 box1, float distance);
 
-    ~CLJBoxDistance();
+        CLJBoxDistance(const CLJBoxDistance &other);
 
-    CLJBoxDistance& operator=(const CLJBoxDistance &other);
+        ~CLJBoxDistance();
 
-    bool operator==(const CLJBoxDistance &other) const;
-    bool operator!=(const CLJBoxDistance &other) const;
+        CLJBoxDistance &operator=(const CLJBoxDistance &other);
 
-    bool operator<(const CLJBoxDistance &other) const;
-    bool operator>(const CLJBoxDistance &other) const;
+        bool operator==(const CLJBoxDistance &other) const;
+        bool operator!=(const CLJBoxDistance &other) const;
 
-    static const char* typeName();
+        bool operator<(const CLJBoxDistance &other) const;
+        bool operator>(const CLJBoxDistance &other) const;
 
-    const char* what() const;
+        static const char *typeName();
 
-    QString toString() const;
+        const char *what() const;
 
-    quint32 box0() const;
-    quint32 box1() const;
+        QString toString() const;
 
-    float distance() const;
+        quint32 box0() const;
+        quint32 box1() const;
 
-private:
-    float dist;
-    quint32 b0;
-    quint32 b1;
-};
+        float distance() const;
 
-/** The set of CLJBox boxes that contain all of the atoms in the system.
-    Space is divided into a series of cubic boxes, and atoms are divided
-    between these so as to speed up the CLJ calculation (atoms in boxes
-    that are separated by more than the cutoff distance do not need to
-    have their interactions evaluated, and there is a natural parallelism
-    between calculating interaction energies between pairs of boxes rather
-    than pairs of atoms)
+    private:
+        float dist;
+        quint32 b0;
+        quint32 b1;
+    };
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJBoxes
-{
+    /** The set of CLJBox boxes that contain all of the atoms in the system.
+        Space is divided into a series of cubic boxes, and atoms are divided
+        between these so as to speed up the CLJ calculation (atoms in boxes
+        that are separated by more than the cutoff distance do not need to
+        have their interactions evaluated, and there is a natural parallelism
+        between calculating interaction energies between pairs of boxes rather
+        than pairs of atoms)
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJBoxes&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJBoxes&);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJBoxes
+    {
 
-public:
-    typedef QVector<CLJBoxPtr> Container;
-    typedef Container::const_iterator const_iterator;
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJBoxes &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJBoxes &);
 
-    CLJBoxes();
-    CLJBoxes(Length box_size);
+    public:
+        typedef QVector<CLJBoxPtr> Container;
+        typedef Container::const_iterator const_iterator;
 
-    CLJBoxes(const CLJAtoms &atoms);
-    CLJBoxes(const CLJAtoms &atoms0, const CLJAtoms &atoms1);
+        CLJBoxes();
+        CLJBoxes(Length box_size);
 
-    CLJBoxes(const CLJAtoms &atoms, Length box_size);
-    CLJBoxes(const CLJAtoms &atoms0, const CLJAtoms &atoms1, Length box_size);
+        CLJBoxes(const CLJAtoms &atoms);
+        CLJBoxes(const CLJAtoms &atoms0, const CLJAtoms &atoms1);
 
-    CLJBoxes(const CLJBoxes &other);
+        CLJBoxes(const CLJAtoms &atoms, Length box_size);
+        CLJBoxes(const CLJAtoms &atoms0, const CLJAtoms &atoms1, Length box_size);
 
-    ~CLJBoxes();
+        CLJBoxes(const CLJBoxes &other);
 
-    CLJBoxes& operator=(const CLJBoxes &other);
+        ~CLJBoxes();
 
-    bool operator==(const CLJBoxes &other) const;
-    bool operator!=(const CLJBoxes &other) const;
+        CLJBoxes &operator=(const CLJBoxes &other);
 
-    CLJAtom operator[](const CLJBoxIndex &idx) const;
+        bool operator==(const CLJBoxes &other) const;
+        bool operator!=(const CLJBoxes &other) const;
 
-    CLJAtom at(const CLJBoxIndex &idx) const;
-    CLJAtom getitem(const CLJBoxIndex &idx) const;
+        CLJAtom operator[](const CLJBoxIndex &idx) const;
 
-    CLJBoxes operator+(const CLJBoxes &other) const;
+        CLJAtom at(const CLJBoxIndex &idx) const;
+        CLJAtom getitem(const CLJBoxIndex &idx) const;
 
-    static const char* typeName();
+        CLJBoxes operator+(const CLJBoxes &other) const;
 
-    const char* what() const;
+        static const char *typeName();
 
-    const CLJBoxPtr* constData() const;
-    const CLJBoxPtr* data() const;
+        const char *what() const;
 
-    QString toString() const;
+        const CLJBoxPtr *constData() const;
+        const CLJBoxPtr *data() const;
 
-    bool isEmpty() const;
+        QString toString() const;
 
-    QVector<CLJBoxIndex> occupiedBoxIndicies() const;
+        bool isEmpty() const;
 
-    const Container& occupiedBoxes() const;
+        QVector<CLJBoxIndex> occupiedBoxIndicies() const;
 
-    const_iterator begin() const;
-    const_iterator constBegin() const;
+        const Container &occupiedBoxes() const;
 
-    const_iterator find(const CLJBoxIndex &box) const;
-    const_iterator constFind(const CLJBoxIndex &box) const;
+        const_iterator begin() const;
+        const_iterator constBegin() const;
 
-    const_iterator end() const;
-    const_iterator constEnd() const;
+        const_iterator find(const CLJBoxIndex &box) const;
+        const_iterator constFind(const CLJBoxIndex &box) const;
 
-    CLJBox boxAt(int i) const;
-    SireVol::AABox boxDimensionsAt(int i) const;
+        const_iterator end() const;
+        const_iterator constEnd() const;
 
-    CLJBox boxAt(const CLJBoxIndex &index) const;
-    SireVol::AABox boxDimensionsAt(const CLJBoxIndex &index) const;
+        CLJBox boxAt(int i) const;
+        SireVol::AABox boxDimensionsAt(int i) const;
 
-    CLJBox boxAt(const Vector &coords) const;
-    SireVol::AABox boxDimensionsAt(const Vector &coords) const;
+        CLJBox boxAt(const CLJBoxIndex &index) const;
+        SireVol::AABox boxDimensionsAt(const CLJBoxIndex &index) const;
 
-    QVector<CLJBox> boxes() const;
-    QVector<SireVol::AABox> boxDimensions() const;
+        CLJBox boxAt(const Vector &coords) const;
+        SireVol::AABox boxDimensionsAt(const Vector &coords) const;
 
-    float getDistance(const CLJBoxIndex &box0, const CLJBoxIndex &box1) const;
-    float getDistance(const Space &space, const CLJBoxIndex &box0, const CLJBoxIndex &box1) const;
-    float getDistance(const Space &space, const CLJBoxIndex &box0, const CLJBoxIndex &box1,
-                      quint32 nx, quint32 ny, quint32 nz) const;
+        QVector<CLJBox> boxes() const;
+        QVector<SireVol::AABox> boxDimensions() const;
 
-    static QVector<CLJBoxDistance> getDistances(const Space &space, const CLJBoxes &boxes);
-    static QVector<CLJBoxDistance> getDistances(const Space &space,
-                                                const CLJBoxes &boxes, Length cutoff);
+        float getDistance(const CLJBoxIndex &box0, const CLJBoxIndex &box1) const;
+        float getDistance(const Space &space, const CLJBoxIndex &box0, const CLJBoxIndex &box1) const;
+        float getDistance(const Space &space, const CLJBoxIndex &box0, const CLJBoxIndex &box1, quint32 nx, quint32 ny,
+                          quint32 nz) const;
 
-    static QVector<CLJBoxDistance> getDistances(const Space &space,
-                                                const CLJBoxes &boxes0, const CLJBoxes &boxes1);
-    static QVector<CLJBoxDistance> getDistances(const Space &space,
-                                                const CLJBoxes &boxes0, const CLJBoxes &boxes1,
-                                                Length cutoff);
+        static QVector<CLJBoxDistance> getDistances(const Space &space, const CLJBoxes &boxes);
+        static QVector<CLJBoxDistance> getDistances(const Space &space, const CLJBoxes &boxes, Length cutoff);
 
-    static QVector<CLJBoxDistance> getDistances(const Space &space,
-                                                const CLJAtoms &atoms0, const CLJBoxes &boxes1);
-    static QVector<CLJBoxDistance> getDistances(const Space &space,
-                                                const CLJAtoms &atoms0, const CLJBoxes &boxes1,
-                                                Length cutoff);
+        static QVector<CLJBoxDistance> getDistances(const Space &space, const CLJBoxes &boxes0, const CLJBoxes &boxes1);
+        static QVector<CLJBoxDistance> getDistances(const Space &space, const CLJBoxes &boxes0, const CLJBoxes &boxes1,
+                                                    Length cutoff);
 
-    QVector<CLJBoxIndex> add(const CLJAtoms &atoms);
+        static QVector<CLJBoxDistance> getDistances(const Space &space, const CLJAtoms &atoms0, const CLJBoxes &boxes1);
+        static QVector<CLJBoxDistance> getDistances(const Space &space, const CLJAtoms &atoms0, const CLJBoxes &boxes1,
+                                                    Length cutoff);
 
-    void remove(const QVector<CLJBoxIndex> &atoms);
+        QVector<CLJBoxIndex> add(const CLJAtoms &atoms);
 
-    CLJAtoms get(const QVector<CLJBoxIndex> &atoms) const;
+        void remove(const QVector<CLJBoxIndex> &atoms);
 
-    CLJAtoms take(const QVector<CLJBoxIndex> &atoms);
+        CLJAtoms get(const QVector<CLJBoxIndex> &atoms) const;
 
-    CLJAtoms atoms() const;
-    CLJAtoms atoms(const QVector<CLJBoxIndex> &atoms) const;
+        CLJAtoms take(const QVector<CLJBoxIndex> &atoms);
 
-    Length length() const;
+        CLJAtoms atoms() const;
+        CLJAtoms atoms(const QVector<CLJBoxIndex> &atoms) const;
 
-    int nAtoms() const;
+        Length length() const;
 
-    int nOccupiedBoxes() const;
+        int nAtoms() const;
 
-    CLJBoxes squeeze() const;
+        int nOccupiedBoxes() const;
 
-private:
-    void constructFrom(const CLJAtoms &atoms0, const CLJAtoms &atoms1);
+        CLJBoxes squeeze() const;
 
-    typedef QMap<CLJBoxIndex,int> ContainerMap;
+    private:
+        void constructFrom(const CLJAtoms &atoms0, const CLJAtoms &atoms1);
 
-    /** The mapping from CLJBoxIndex to index in the array of boxes */
-    ContainerMap box_to_idx;
+        typedef QMap<CLJBoxIndex, int> ContainerMap;
 
-    /** All of the boxes that contain atoms */
-    Container bxs;
+        /** The mapping from CLJBoxIndex to index in the array of boxes */
+        ContainerMap box_to_idx;
 
-    /** The size of the box */
-    float box_length;
-};
+        /** All of the boxes that contain atoms */
+        Container bxs;
+
+        /** The size of the box */
+        float box_length;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return a read-only reference to the contained object */
-SIRE_ALWAYS_INLINE const CLJBox& CLJBoxPtr::read() const
-{
-    return *d;
-}
-
-/** Return the i value of the index */
-SIRE_ALWAYS_INLINE qint16 CLJBoxIndex::i() const
-{
-    return v.index.ii;
-}
-
-/** Return the j value of the index */
-SIRE_ALWAYS_INLINE qint16 CLJBoxIndex::j() const
-{
-    return v.index.jj;
-}
-
-/** Return the k value of the index */
-SIRE_ALWAYS_INLINE qint16 CLJBoxIndex::k() const
-{
-    return v.index.kk;
-}
-
-/** Return a hash of the box index (used for QHash) */
-SIRE_ALWAYS_INLINE uint CLJBoxIndex::hash() const
-{
-    return v.val;
-}
-
-/** Return whether or not this index refers to the same box as 'other' */
-SIRE_ALWAYS_INLINE bool CLJBoxIndex::sameBox(const CLJBoxIndex &other) const
-{
-    return v.index.ii == other.v.index.ii and
-           v.index.jj == other.v.index.jj and
-           v.index.kk == other.v.index.kk;
-}
-
-SIRE_ALWAYS_INLINE uint qHash(const CLJBoxIndex &index)
-{
-    return index.hash();
-}
-
-/** Return the (optionally supplied) index of a particular atom in the box */
-SIRE_ALWAYS_INLINE qint16 CLJBoxIndex::index() const
-{
-    return v.index.idx;
-}
-
-/** Return whether or not this contains an atom index */
-SIRE_ALWAYS_INLINE bool CLJBoxIndex::hasAtomIndex() const
-{
-    return v.index.idx >= 0;
-}
-
-/** Comparison operator */
-SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator==(const CLJBoxIndex &other) const
-{
-    return v.val == other.v.val;
-}
-
-/** Comparison operator */
-SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator!=(const CLJBoxIndex &other) const
-{
-    return not operator==(other);
-}
-
-/** Comparison operator */
-SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator<(const CLJBoxIndex &other) const
-{
-    return v.val < other.v.val;
-}
-
-/** Comparison operator */
-SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator<=(const CLJBoxIndex &other) const
-{
-    return v.val <= other.v.val;
-}
-
-/** Comparison operator */
-SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator>(const CLJBoxIndex &other) const
-{
-    return v.val > other.v.val;
-}
-
-/** Comparison operator */
-SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator>=(const CLJBoxIndex &other) const
-{
-    return v.val >= other.v.val;
-}
-
-/** Return a read/write reference to the contained object */
-SIRE_ALWAYS_INLINE CLJBox& CLJBoxPtr::write()
-{
-    return *d;
-}
-
-/** Return the atoms contained in the box */
-SIRE_ALWAYS_INLINE const CLJAtoms& CLJBox::atoms() const
-{
-    return atms;
-}
-
-/** Return the set of all occupied boxes, indexed by their CLJBoxIndex */
-SIRE_ALWAYS_INLINE const CLJBoxes::Container& CLJBoxes::occupiedBoxes() const
-{
-    return bxs;
-}
-
-/** Return a raw pointer to the array of boxes */
-SIRE_ALWAYS_INLINE const CLJBoxPtr* CLJBoxes::constData() const
-{
-    return bxs.constData();
-}
-
-/** Return a raw pointer to the array of boxes */
-SIRE_ALWAYS_INLINE const CLJBoxPtr* CLJBoxes::data() const
-{
-    return bxs.constData();
-}
-
-/** Return the iterator pointing to the first occupied box */
-SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::begin() const
-{
-    return bxs.begin();
-}
-
-/** Return the iterator pointing to the first occupied box */
-SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::constBegin() const
-{
-    return bxs.constBegin();
-}
-
-/** Return the iterator pointing to the occupied box at index 'box' */
-SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::find(const CLJBoxIndex &box) const
-{
-    ContainerMap::const_iterator it = box_to_idx.constFind(box);
-
-    if (it != box_to_idx.constEnd())
+    /** Return a read-only reference to the contained object */
+    SIRE_ALWAYS_INLINE const CLJBox &CLJBoxPtr::read() const
     {
-        CLJBoxes::const_iterator it2 = bxs.constBegin();
-        for (int i=0; i<it.value(); ++i)
-        {
-            it2++;
-        }
-
-        return it2;
+        return *d;
     }
-    else
+
+    /** Return the i value of the index */
+    SIRE_ALWAYS_INLINE qint16 CLJBoxIndex::i() const
+    {
+        return v.index.ii;
+    }
+
+    /** Return the j value of the index */
+    SIRE_ALWAYS_INLINE qint16 CLJBoxIndex::j() const
+    {
+        return v.index.jj;
+    }
+
+    /** Return the k value of the index */
+    SIRE_ALWAYS_INLINE qint16 CLJBoxIndex::k() const
+    {
+        return v.index.kk;
+    }
+
+    /** Return a hash of the box index (used for QHash) */
+    SIRE_ALWAYS_INLINE uint CLJBoxIndex::hash() const
+    {
+        return v.val;
+    }
+
+    /** Return whether or not this index refers to the same box as 'other' */
+    SIRE_ALWAYS_INLINE bool CLJBoxIndex::sameBox(const CLJBoxIndex &other) const
+    {
+        return v.index.ii == other.v.index.ii and v.index.jj == other.v.index.jj and v.index.kk == other.v.index.kk;
+    }
+
+    SIRE_ALWAYS_INLINE uint qHash(const CLJBoxIndex &index)
+    {
+        return index.hash();
+    }
+
+    /** Return the (optionally supplied) index of a particular atom in the box */
+    SIRE_ALWAYS_INLINE qint16 CLJBoxIndex::index() const
+    {
+        return v.index.idx;
+    }
+
+    /** Return whether or not this contains an atom index */
+    SIRE_ALWAYS_INLINE bool CLJBoxIndex::hasAtomIndex() const
+    {
+        return v.index.idx >= 0;
+    }
+
+    /** Comparison operator */
+    SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator==(const CLJBoxIndex &other) const
+    {
+        return v.val == other.v.val;
+    }
+
+    /** Comparison operator */
+    SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator!=(const CLJBoxIndex &other) const
+    {
+        return not operator==(other);
+    }
+
+    /** Comparison operator */
+    SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator<(const CLJBoxIndex &other) const
+    {
+        return v.val < other.v.val;
+    }
+
+    /** Comparison operator */
+    SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator<=(const CLJBoxIndex &other) const
+    {
+        return v.val <= other.v.val;
+    }
+
+    /** Comparison operator */
+    SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator>(const CLJBoxIndex &other) const
+    {
+        return v.val > other.v.val;
+    }
+
+    /** Comparison operator */
+    SIRE_ALWAYS_INLINE bool CLJBoxIndex::operator>=(const CLJBoxIndex &other) const
+    {
+        return v.val >= other.v.val;
+    }
+
+    /** Return a read/write reference to the contained object */
+    SIRE_ALWAYS_INLINE CLJBox &CLJBoxPtr::write()
+    {
+        return *d;
+    }
+
+    /** Return the atoms contained in the box */
+    SIRE_ALWAYS_INLINE const CLJAtoms &CLJBox::atoms() const
+    {
+        return atms;
+    }
+
+    /** Return the set of all occupied boxes, indexed by their CLJBoxIndex */
+    SIRE_ALWAYS_INLINE const CLJBoxes::Container &CLJBoxes::occupiedBoxes() const
+    {
+        return bxs;
+    }
+
+    /** Return a raw pointer to the array of boxes */
+    SIRE_ALWAYS_INLINE const CLJBoxPtr *CLJBoxes::constData() const
+    {
+        return bxs.constData();
+    }
+
+    /** Return a raw pointer to the array of boxes */
+    SIRE_ALWAYS_INLINE const CLJBoxPtr *CLJBoxes::data() const
+    {
+        return bxs.constData();
+    }
+
+    /** Return the iterator pointing to the first occupied box */
+    SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::begin() const
+    {
+        return bxs.begin();
+    }
+
+    /** Return the iterator pointing to the first occupied box */
+    SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::constBegin() const
+    {
+        return bxs.constBegin();
+    }
+
+    /** Return the iterator pointing to the occupied box at index 'box' */
+    SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::find(const CLJBoxIndex &box) const
+    {
+        ContainerMap::const_iterator it = box_to_idx.constFind(box);
+
+        if (it != box_to_idx.constEnd())
+        {
+            CLJBoxes::const_iterator it2 = bxs.constBegin();
+            for (int i = 0; i < it.value(); ++i)
+            {
+                it2++;
+            }
+
+            return it2;
+        }
+        else
+            return bxs.constEnd();
+    }
+
+    /** Return the iterator pointing to the occupied box at index 'box' */
+    SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::constFind(const CLJBoxIndex &box) const
+    {
+        return this->find(box);
+    }
+
+    /** Return the iterator pointing to one space past the last occupied box */
+    SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::end() const
+    {
+        return bxs.end();
+    }
+
+    /** Return the iterator pointing to one space past the last occupied box */
+    SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::constEnd() const
+    {
         return bxs.constEnd();
-}
+    }
 
-/** Return the iterator pointing to the occupied box at index 'box' */
-SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::constFind(const CLJBoxIndex &box) const
-{
-    return this->find(box);
-}
+    /** Return the index of the first box */
+    SIRE_ALWAYS_INLINE quint32 CLJBoxDistance::box0() const
+    {
+        return b0;
+    }
 
-/** Return the iterator pointing to one space past the last occupied box */
-SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::end() const
-{
-    return bxs.end();
-}
+    /** Return the index of the second box */
+    SIRE_ALWAYS_INLINE quint32 CLJBoxDistance::box1() const
+    {
+        return b1;
+    }
 
-/** Return the iterator pointing to one space past the last occupied box */
-SIRE_ALWAYS_INLINE CLJBoxes::const_iterator CLJBoxes::constEnd() const
-{
-    return bxs.constEnd();
-}
+    /** Return the minimum distance between the boxes */
+    SIRE_ALWAYS_INLINE float CLJBoxDistance::distance() const
+    {
+        return dist;
+    }
 
-/** Return the index of the first box */
-SIRE_ALWAYS_INLINE quint32 CLJBoxDistance::box0() const
-{
-    return b0;
-}
+    /** Return whether or not this is empty (contains no atoms) */
+    SIRE_ALWAYS_INLINE bool CLJBoxes::isEmpty() const
+    {
+        return bxs.isEmpty();
+    }
 
-/** Return the index of the second box */
-SIRE_ALWAYS_INLINE quint32 CLJBoxDistance::box1() const
-{
-    return b1;
-}
+    /** Return whether or not the passed box is empty */
+    SIRE_ALWAYS_INLINE bool CLJBox::isEmpty() const
+    {
+        return atms.isEmpty();
+    }
 
-/** Return the minimum distance between the boxes */
-SIRE_ALWAYS_INLINE float CLJBoxDistance::distance() const
-{
-    return dist;
-}
+    /** Return the index of this box */
+    SIRE_ALWAYS_INLINE const CLJBoxIndex &CLJBox::index() const
+    {
+        return box_index;
+    }
 
-/** Return whether or not this is empty (contains no atoms) */
-SIRE_ALWAYS_INLINE bool CLJBoxes::isEmpty() const
-{
-    return bxs.isEmpty();
-}
-
-/** Return whether or not the passed box is empty */
-SIRE_ALWAYS_INLINE bool CLJBox::isEmpty() const
-{
-    return atms.isEmpty();
-}
-
-/** Return the index of this box */
-SIRE_ALWAYS_INLINE const CLJBoxIndex& CLJBox::index() const
-{
-    return box_index;
-}
-
-/** Return the length of each side of this box */
-SIRE_ALWAYS_INLINE float CLJBox::boxLength() const
-{
-    return box_length;
-}
+    /** Return the length of each side of this box */
+    SIRE_ALWAYS_INLINE float CLJBox::boxLength() const
+    {
+        return box_length;
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::CLJBox )
-Q_DECLARE_METATYPE( SireMM::CLJBoxIndex )
-Q_DECLARE_METATYPE( SireMM::CLJBoxes )
-Q_DECLARE_METATYPE( SireMM::CLJBoxDistance )
+Q_DECLARE_METATYPE(SireMM::CLJBox)
+Q_DECLARE_METATYPE(SireMM::CLJBoxIndex)
+Q_DECLARE_METATYPE(SireMM::CLJBoxes)
+Q_DECLARE_METATYPE(SireMM::CLJBoxDistance)
 
-Q_DECLARE_TYPEINFO( SireMM::CLJBoxIndex, Q_MOVABLE_TYPE );
-Q_DECLARE_TYPEINFO( SireMM::CLJBoxDistance, Q_MOVABLE_TYPE );
+Q_DECLARE_TYPEINFO(SireMM::CLJBoxIndex, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(SireMM::CLJBoxDistance, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMM::CLJBox )
-SIRE_EXPOSE_CLASS( SireMM::CLJBoxIndex )
-SIRE_EXPOSE_CLASS( SireMM::CLJBoxes )
-SIRE_EXPOSE_CLASS( SireMM::CLJBoxDistance )
+SIRE_EXPOSE_CLASS(SireMM::CLJBox)
+SIRE_EXPOSE_CLASS(SireMM::CLJBoxIndex)
+SIRE_EXPOSE_CLASS(SireMM::CLJBoxes)
+SIRE_EXPOSE_CLASS(SireMM::CLJBoxDistance)
 
 SIRE_END_HEADER
 

@@ -30,16 +30,16 @@
 #include "atomeditor.h"
 #include "cgeditor.h"
 #include "chaineditor.h"
-#include "segeditor.h"
 #include "moleditor.h"
+#include "segeditor.h"
 
 #include "atom.h"
-#include "cutgroup.h"
-#include "residue.h"
 #include "chain.h"
-#include "segment.h"
+#include "cutgroup.h"
 #include "molecule.h"
 #include "mover.hpp"
+#include "residue.h"
+#include "segment.h"
 #include "selector.hpp"
 
 #include "groupatomids.h"
@@ -51,10 +51,10 @@ using namespace SireStream;
 
 namespace SireMol
 {
-    //instantiate Editor<Residue> fully
-    template class Editor<ResEditor,Residue>;
-    //template class Editor< Selector<Residue> >;
-}
+    // instantiate Editor<Residue> fully
+    template class Editor<ResEditor, Residue>;
+    // template class Editor< Selector<Residue> >;
+} // namespace SireMol
 
 //////////
 ////////// Implementation of ResEditor
@@ -63,90 +63,90 @@ namespace SireMol
 static const RegisterMetaType<ResEditor> r_reseditor;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const ResEditor &reseditor)
+QDataStream &operator<<(QDataStream &ds, const ResEditor &reseditor)
 {
     writeHeader(ds, r_reseditor, 1);
 
-    ds << static_cast<const Editor<ResEditor,Residue>&>(reseditor);
+    ds << static_cast<const Editor<ResEditor, Residue> &>(reseditor);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       ResEditor &reseditor)
+QDataStream &operator>>(QDataStream &ds, ResEditor &reseditor)
 {
     VersionID v = readHeader(ds, r_reseditor);
 
     if (v == 1)
     {
-        ds >> static_cast<Editor<ResEditor,Residue>&>(reseditor);
+        ds >> static_cast<Editor<ResEditor, Residue> &>(reseditor);
     }
     else
-        throw version_error( v, "1", r_reseditor, CODELOC );
+        throw version_error(v, "1", r_reseditor, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
-ResEditor::ResEditor() : ConcreteProperty< ResEditor,Editor<ResEditor,Residue> >()
-{}
+ResEditor::ResEditor() : ConcreteProperty<ResEditor, Editor<ResEditor, Residue>>()
+{
+}
 
 /** Construct an editor that edits a copy of the residue 'residue' */
-ResEditor::ResEditor(const Residue &residue)
-          : ConcreteProperty< ResEditor,Editor<ResEditor,Residue> >(residue)
-{}
+ResEditor::ResEditor(const Residue &residue) : ConcreteProperty<ResEditor, Editor<ResEditor, Residue>>(residue)
+{
+}
 
 /** Copy constructor */
-ResEditor::ResEditor(const ResEditor &other)
-          : ConcreteProperty< ResEditor,Editor<ResEditor,Residue> >(other)
-{}
+ResEditor::ResEditor(const ResEditor &other) : ConcreteProperty<ResEditor, Editor<ResEditor, Residue>>(other)
+{
+}
 
 /** Destructor */
 ResEditor::~ResEditor()
-{}
+{
+}
 
 /** Copy assignment so that this will edit a copy of 'residue */
-ResEditor& ResEditor::operator=(const Residue &residue)
+ResEditor &ResEditor::operator=(const Residue &residue)
 {
-    Editor<ResEditor,Residue>::operator=(residue);
+    Editor<ResEditor, Residue>::operator=(residue);
     return *this;
 }
 
 /** Copy assignment operator */
-ResEditor& ResEditor::operator=(const ResEditor &other)
+ResEditor &ResEditor::operator=(const ResEditor &other)
 {
-    Editor<ResEditor,Residue>::operator=(other);
+    Editor<ResEditor, Residue>::operator=(other);
     return *this;
 }
 
 /** Return a string representation of this editor */
 QString ResEditor::toString() const
 {
-    return QObject::tr( "Editor{ %1 }" ).arg(Residue::toString());
+    return QObject::tr("Editor{ %1 }").arg(Residue::toString());
 }
 
 /** Rename this residue to 'newname' */
-ResEditor& ResEditor::rename(const ResName &newname)
+ResEditor &ResEditor::rename(const ResName &newname)
 {
     if (newname == this->name())
-        //nothing to do
+        // nothing to do
         return *this;
 
-    d->rename( this->index(), newname );
+    d->rename(this->index(), newname);
 
     return *this;
 }
 
 /** Renumber this residue to 'newnum' */
-ResEditor& ResEditor::renumber(ResNum newnum)
+ResEditor &ResEditor::renumber(ResNum newnum)
 {
     if (newnum == this->number())
-        //nothing to do
+        // nothing to do
         return *this;
 
-    d->renumber( this->index(), newnum );
+    d->renumber(this->index(), newnum);
 
     return *this;
 }
@@ -230,8 +230,7 @@ ResStructureEditor ResEditor::remove(int i) const
     \throw SireMol::duplicate_residue
     \throw SireError::invalid_index
 */
-ResStructureEditor ResEditor::transfer(const AtomID &atomid,
-                                       const ResID &resid) const
+ResStructureEditor ResEditor::transfer(const AtomID &atomid, const ResID &resid) const
 {
     ResStructureEditor editor(*this);
     editor.transfer(atomid, resid);
@@ -271,9 +270,9 @@ Residue ResEditor::commit() const
     return *this;
 }
 
-const char* ResEditor::typeName()
+const char *ResEditor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResEditor>() );
+    return QMetaType::typeName(qMetaTypeId<ResEditor>());
 }
 
 //////////
@@ -283,45 +282,39 @@ const char* ResEditor::typeName()
 static const RegisterMetaType<ResStructureEditor> r_resstructeditor;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const ResStructureEditor &reseditor)
+QDataStream &operator<<(QDataStream &ds, const ResStructureEditor &reseditor)
 {
     writeHeader(ds, r_resstructeditor, 1);
 
-    ds << reseditor.uid
-       << static_cast<const StructureEditor&>(reseditor);
+    ds << reseditor.uid << static_cast<const StructureEditor &>(reseditor);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       ResStructureEditor &reseditor)
+QDataStream &operator>>(QDataStream &ds, ResStructureEditor &reseditor)
 {
     VersionID v = readHeader(ds, r_resstructeditor);
 
     if (v == 1)
     {
-        ds >> reseditor.uid
-           >> static_cast<StructureEditor&>(reseditor);
+        ds >> reseditor.uid >> static_cast<StructureEditor &>(reseditor);
     }
     else
-        throw version_error( v, "1", r_resstructeditor, CODELOC );
+        throw version_error(v, "1", r_resstructeditor, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
-ResStructureEditor::ResStructureEditor()
-                   : StructureEditor(), uid(0)
+ResStructureEditor::ResStructureEditor() : StructureEditor(), uid(0)
 {
-    this->operator=( StructureEditor::addResidue() );
+    this->operator=(StructureEditor::addResidue());
 }
 
 /** Construct an editor to edit the structure of a copy of the
     residue 'residue' */
-ResStructureEditor::ResStructureEditor(const Residue &residue)
-                   : StructureEditor(residue.data())
+ResStructureEditor::ResStructureEditor(const Residue &residue) : StructureEditor(residue.data())
 {
     uid = this->getUID(residue.index());
 }
@@ -331,23 +324,23 @@ ResStructureEditor::ResStructureEditor(const Residue &residue)
 
     \throw SireError::invalid_index
 */
-ResStructureEditor::ResStructureEditor(const StructureEditor &data, ResIdx residx)
-                   : StructureEditor(data)
+ResStructureEditor::ResStructureEditor(const StructureEditor &data, ResIdx residx) : StructureEditor(data)
 {
     uid = this->getUID(residx);
 }
 
 /** Copy constructor */
-ResStructureEditor::ResStructureEditor(const ResStructureEditor &other)
-                   : StructureEditor(other), uid(other.uid)
-{}
+ResStructureEditor::ResStructureEditor(const ResStructureEditor &other) : StructureEditor(other), uid(other.uid)
+{
+}
 
 /** Destructor */
 ResStructureEditor::~ResStructureEditor()
-{}
+{
+}
 
 /** Assign so that this edits a copy of 'residue' */
-ResStructureEditor& ResStructureEditor::operator=(const Residue &residue)
+ResStructureEditor &ResStructureEditor::operator=(const Residue &residue)
 {
     StructureEditor::operator=(residue.data());
     uid = this->getUID(residue.index());
@@ -356,7 +349,7 @@ ResStructureEditor& ResStructureEditor::operator=(const Residue &residue)
 }
 
 /** Copy assignment operator */
-ResStructureEditor& ResStructureEditor::operator=(const ResStructureEditor &other)
+ResStructureEditor &ResStructureEditor::operator=(const ResStructureEditor &other)
 {
     StructureEditor::operator=(other);
     uid = other.uid;
@@ -367,9 +360,7 @@ ResStructureEditor& ResStructureEditor::operator=(const ResStructureEditor &othe
 /** Return a string representation of this editor */
 QString ResStructureEditor::toString() const
 {
-    return QObject::tr( "StructureEditor{ Residue( %1 : %2 ) }" )
-                .arg( this->name() )
-                .arg( this->number() );
+    return QObject::tr("StructureEditor{ Residue( %1 : %2 ) }").arg(this->name()).arg(this->number());
 }
 
 /** Is this editor editing the entire molecule? */
@@ -379,7 +370,7 @@ bool ResStructureEditor::selectedAll() const
 }
 
 /** Return the name of this residue */
-const ResName& ResStructureEditor::name() const
+const ResName &ResStructureEditor::name() const
 {
     return this->resName(uid);
 }
@@ -420,7 +411,7 @@ MolStructureEditor ResStructureEditor::molecule()
 */
 AtomStructureEditor ResStructureEditor::atom(int i)
 {
-    return AtomStructureEditor(*this, atomIdx(atomInResidue(uid,i)));
+    return AtomStructureEditor(*this, atomIdx(atomInResidue(uid, i)));
 }
 
 /** Return an editor for the atom with ID == 'atomid' in
@@ -441,7 +432,7 @@ AtomStructureEditor ResStructureEditor::atom(const AtomID &atomid)
 */
 AtomStructureEditor ResStructureEditor::select(int i)
 {
-    return AtomStructureEditor(*this, atomIdx(atomInResidue(uid,i)));
+    return AtomStructureEditor(*this, atomIdx(atomInResidue(uid, i)));
 }
 
 /** Return an editor for the atom with ID == 'atomid' in
@@ -457,14 +448,14 @@ AtomStructureEditor ResStructureEditor::select(const AtomID &atomid)
 }
 
 /** Rename this residue to 'newname' */
-ResStructureEditor& ResStructureEditor::rename(const ResName &newname)
+ResStructureEditor &ResStructureEditor::rename(const ResName &newname)
 {
     this->renameResidue(uid, newname);
     return *this;
 }
 
 /** Renumber this residue to 'newnum' */
-ResStructureEditor& ResStructureEditor::renumber(ResNum newnum)
+ResStructureEditor &ResStructureEditor::renumber(ResNum newnum)
 {
     this->renumberResidue(uid, newnum);
     return *this;
@@ -473,7 +464,7 @@ ResStructureEditor& ResStructureEditor::renumber(ResNum newnum)
 /** Change the index of this residue to 'newidx'. If this
     is larger than the number of residues in the molecule
     then this residue is moved to the end */
-ResStructureEditor& ResStructureEditor::reindex(ResIdx newidx)
+ResStructureEditor &ResStructureEditor::reindex(ResIdx newidx)
 {
     this->reindexResidue(uid, newidx);
     return *this;
@@ -493,7 +484,7 @@ MolStructureEditor ResStructureEditor::remove()
     \throw SireMol::duplicate_chain
     \throw SireError::invalid_index
 */
-ResStructureEditor& ResStructureEditor::reparent(const ChainID &chainid)
+ResStructureEditor &ResStructureEditor::reparent(const ChainID &chainid)
 {
     this->reparentResidue(uid, this->chainIdx(chainid));
     return *this;
@@ -530,9 +521,9 @@ AtomStructureEditor ResStructureEditor::add(AtomNum atomnum)
     \throw SireMol::missing_atom
     \throw SireError::invalid_index
 */
-ResStructureEditor& ResStructureEditor::remove(const AtomID &atomid)
+ResStructureEditor &ResStructureEditor::remove(const AtomID &atomid)
 {
-    this->removeAtoms( this->index() + atomid );
+    this->removeAtoms(this->index() + atomid);
     return *this;
 }
 
@@ -540,9 +531,9 @@ ResStructureEditor& ResStructureEditor::remove(const AtomID &atomid)
 
     \throw SireError::invalid_index
 */
-ResStructureEditor& ResStructureEditor::remove(int i)
+ResStructureEditor &ResStructureEditor::remove(int i)
 {
-    this->removeAtoms( atomIdx(atomInResidue(uid, i)) );
+    this->removeAtoms(atomIdx(atomInResidue(uid, i)));
     return *this;
 }
 
@@ -554,11 +545,9 @@ ResStructureEditor& ResStructureEditor::remove(int i)
     \throw SireMol::duplicate_residue
     \throw SireError::invalid_index
 */
-ResStructureEditor& ResStructureEditor::transfer(const AtomID &atomid,
-                                                 const ResID &resid)
+ResStructureEditor &ResStructureEditor::transfer(const AtomID &atomid, const ResID &resid)
 {
-    this->reparentAtom( this->getUID(this->index() + atomid),
-                        this->resIdx(resid) );
+    this->reparentAtom(this->getUID(this->index() + atomid), this->resIdx(resid));
 
     return *this;
 }
@@ -570,9 +559,9 @@ ResStructureEditor& ResStructureEditor::transfer(const AtomID &atomid,
     \throw SireMol::duplicate_residue
     \throw SireError::invalid_index
 */
-ResStructureEditor& ResStructureEditor::transfer(int i, const ResID &resid)
+ResStructureEditor &ResStructureEditor::transfer(int i, const ResID &resid)
 {
-    this->reparentAtom( atomInResidue(uid, i), this->resIdx(resid) );
+    this->reparentAtom(atomInResidue(uid, i), this->resIdx(resid));
     return *this;
 }
 
@@ -582,15 +571,15 @@ ResStructureEditor& ResStructureEditor::transfer(int i, const ResID &resid)
     \throw SireMol::duplicate_residue
     \throw SireError::invalid_index
 */
-ResStructureEditor& ResStructureEditor::transferAll(const ResID &resid)
+ResStructureEditor &ResStructureEditor::transferAll(const ResID &resid)
 {
     ResIdx residx = this->resIdx(resid);
 
     int nats = this->nAtoms();
 
-    for (int i=0; i<nats; ++i)
+    for (int i = 0; i < nats; ++i)
     {
-        this->reparentAtom( atomInResidue(uid,i), residx );
+        this->reparentAtom(atomInResidue(uid, i), residx);
     }
 
     return *this;
@@ -599,7 +588,7 @@ ResStructureEditor& ResStructureEditor::transferAll(const ResID &resid)
 /** Commit the changes made by this editor and return the updated residue */
 Residue ResStructureEditor::commit() const
 {
-    return Residue( this->commitChanges(), this->index() );
+    return Residue(this->commitChanges(), this->index());
 }
 
 /** Allow automatic casting to a Residue() */
@@ -608,12 +597,12 @@ ResStructureEditor::operator Residue() const
     return this->commit();
 }
 
-const char* ResStructureEditor::typeName()
+const char *ResStructureEditor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResStructureEditor>() );
+    return QMetaType::typeName(qMetaTypeId<ResStructureEditor>());
 }
 
-ResStructureEditor* ResStructureEditor::clone() const
+ResStructureEditor *ResStructureEditor::clone() const
 {
     return new ResStructureEditor(*this);
 }

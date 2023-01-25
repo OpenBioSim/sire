@@ -32,226 +32,220 @@
 
 #include "move.h"
 
-#include "SireUnits/dimensions.h"
 #include "SireMaths/accumulator.h"
+#include "SireUnits/dimensions.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class Moves;
-class SameMoves;
-}
+    class Moves;
+    class SameMoves;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream &operator<<(QDataStream&, const SireMove::Moves&);
-SIREMOVE_EXPORT QDataStream &operator>>(QDataStream&, SireMove::Moves&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::Moves &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::Moves &);
 
-SIREMOVE_EXPORT QDataStream &operator<<(QDataStream&, const SireMove::SameMoves&);
-SIREMOVE_EXPORT QDataStream &operator>>(QDataStream&, SireMove::SameMoves&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SameMoves &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SameMoves &);
 
 namespace SireMove
 {
 
-using SireCAS::Symbol;
+    using SireCAS::Symbol;
 
-/** This is the base class of all Moves objects. These are objects
-    that contain a collection of moves that are applied to a system
+    /** This is the base class of all Moves objects. These are objects
+        that contain a collection of moves that are applied to a system
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT Moves : public SireBase::Property
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const Moves&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Moves&);
-
-public:
-    Moves();
-
-    Moves(const Moves &other);
-
-    virtual ~Moves();
-
-    virtual Moves* clone() const=0;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT Moves : public SireBase::Property
     {
-        return "SireMove::Moves";
-    }
 
-    const Move& operator[](int i) const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const Moves &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, Moves &);
 
-    int count() const;
-    int size() const;
-    int nMoveTypes() const;
+    public:
+        Moves();
 
-    virtual int nMoves() const;
+        Moves(const Moves &other);
 
-    virtual QString toString() const=0;
+        virtual ~Moves();
 
-    virtual const Symbol& energyComponent() const=0;
-    virtual const PropertyName& spaceProperty() const=0;
+        virtual Moves *clone() const = 0;
 
-    virtual void setEnergyComponent(const Symbol &nrg_component);
-    virtual void setSpaceProperty(const PropertyName &space_property);
+        static const char *typeName()
+        {
+            return "SireMove::Moves";
+        }
 
-    SireUnits::Dimension::MolarEnergy energy(System &system) const;
-    SireUnits::Dimension::Volume volume(const System &system) const;
+        const Move &operator[](int i) const;
 
-    Ensemble ensemble() const;
+        int count() const;
+        int size() const;
+        int nMoveTypes() const;
 
-    bool isConstantEnergy() const;
-    bool isConstantTemperature() const;
-    bool isConstantVolume() const;
-    bool isConstantPressure() const;
-    bool isConstantChemicalPotential() const;
-    bool isConstantFugacity() const;
+        virtual int nMoves() const;
 
-    bool isConstantLambda(const Symbol &lam) const;
+        virtual QString toString() const = 0;
 
-    SireUnits::Dimension::Temperature temperature() const;
-    SireUnits::Dimension::Pressure pressure() const;
-    SireUnits::Dimension::Pressure fugacity() const;
-    SireUnits::Dimension::MolarEnergy chemicalPotential() const;
+        virtual const Symbol &energyComponent() const = 0;
+        virtual const PropertyName &spaceProperty() const = 0;
 
-    virtual void setGenerator(const RanGenerator &rangenerator)=0;
+        virtual void setEnergyComponent(const Symbol &nrg_component);
+        virtual void setSpaceProperty(const PropertyName &space_property);
 
-    void setTemperature(const SireUnits::Dimension::Temperature &temperature);
-    void setPressure(const SireUnits::Dimension::Pressure &pressure);
-    void setChemicalPotential(
-                    const SireUnits::Dimension::MolarEnergy &chemical_potential);
-    void setFugacity(const SireUnits::Dimension::Pressure &fugacity);
+        SireUnits::Dimension::MolarEnergy energy(System &system) const;
+        SireUnits::Dimension::Volume volume(const System &system) const;
 
-    virtual System move(const System &system,
-                        int nmoves=1, bool record_stats=false)=0;
+        Ensemble ensemble() const;
 
-    virtual void clearStatistics()=0;
+        bool isConstantEnergy() const;
+        bool isConstantTemperature() const;
+        bool isConstantVolume() const;
+        bool isConstantPressure() const;
+        bool isConstantChemicalPotential() const;
+        bool isConstantFugacity() const;
 
-    void setCheckRunningTotal(bool on);
-    void setAcceptableDelta(SireUnits::Dimension::MolarEnergy delta);
+        bool isConstantLambda(const Symbol &lam) const;
 
-    SireUnits::Dimension::MolarEnergy acceptableDelta() const;
+        SireUnits::Dimension::Temperature temperature() const;
+        SireUnits::Dimension::Pressure pressure() const;
+        SireUnits::Dimension::Pressure fugacity() const;
+        SireUnits::Dimension::MolarEnergy chemicalPotential() const;
 
-    bool checkingRunningTotal() const;
+        virtual void setGenerator(const RanGenerator &rangenerator) = 0;
 
-    virtual QList<MovePtr> moves() const=0;
+        void setTemperature(const SireUnits::Dimension::Temperature &temperature);
+        void setPressure(const SireUnits::Dimension::Pressure &pressure);
+        void setChemicalPotential(const SireUnits::Dimension::MolarEnergy &chemical_potential);
+        void setFugacity(const SireUnits::Dimension::Pressure &fugacity);
 
-    SireUnits::Dimension::Time timing(int i) const;
+        virtual System move(const System &system, int nmoves = 1, bool record_stats = false) = 0;
 
-    virtual QList<SireUnits::Dimension::Time> timing() const=0;
-    virtual void clearTiming()=0;
+        virtual void clearStatistics() = 0;
 
-    static const SameMoves& null();
+        void setCheckRunningTotal(bool on);
+        void setAcceptableDelta(SireUnits::Dimension::MolarEnergy delta);
 
-protected:
-    void preCheck(System &system) const;
-    void postCheck(System &system) const;
+        SireUnits::Dimension::MolarEnergy acceptableDelta() const;
 
-    Moves& operator=(const Moves &other);
+        bool checkingRunningTotal() const;
 
-    bool operator==(const Moves &other) const;
+        virtual QList<MovePtr> moves() const = 0;
 
-    /** Set the temperature for all moves that have a constant temperature
-        to 'temperature'. It has already been checked that these moves
-        between them sample at constant temperature */
-    virtual void _pvt_setTemperature(
-                            const SireUnits::Dimension::Temperature &temperature)=0;
+        SireUnits::Dimension::Time timing(int i) const;
 
-    /** Set the pressure for all moves that have a constant pressure
-        to 'pressure'. It has already been checked that these moves
-        between them sample at constant pressure */
-    virtual void _pvt_setPressure(
-                            const SireUnits::Dimension::Pressure &pressure)=0;
+        virtual QList<SireUnits::Dimension::Time> timing() const = 0;
+        virtual void clearTiming() = 0;
 
-    /** Set the fugacity for all moves that have a constant fugacity
-        to 'fugacity'. It has already been checked that these moves
-        between them sample at constant fugacity */
-    virtual void _pvt_setFugacity(
-                            const SireUnits::Dimension::Pressure &fugacity)=0;
+        static const SameMoves &null();
 
-private:
-    /** The acceptable delta between the running total and recalcualted total energy */
-    double acceptable_delta;
+    protected:
+        void preCheck(System &system) const;
+        void postCheck(System &system) const;
 
-    /** Whether or not to check the running total against the recalculated
-        total energy in the post-check of the moves */
-    bool check_running_total;
-};
+        Moves &operator=(const Moves &other);
 
-/** This is a Moves class that just applies the same move over and
-    over again
+        bool operator==(const Moves &other) const;
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SameMoves
-         : public SireBase::ConcreteProperty<SameMoves,Moves>
-{
+        /** Set the temperature for all moves that have a constant temperature
+            to 'temperature'. It has already been checked that these moves
+            between them sample at constant temperature */
+        virtual void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature) = 0;
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SameMoves&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SameMoves&);
+        /** Set the pressure for all moves that have a constant pressure
+            to 'pressure'. It has already been checked that these moves
+            between them sample at constant pressure */
+        virtual void _pvt_setPressure(const SireUnits::Dimension::Pressure &pressure) = 0;
 
-public:
-    SameMoves();
-    SameMoves(const Move &move);
+        /** Set the fugacity for all moves that have a constant fugacity
+            to 'fugacity'. It has already been checked that these moves
+            between them sample at constant fugacity */
+        virtual void _pvt_setFugacity(const SireUnits::Dimension::Pressure &fugacity) = 0;
 
-    SameMoves(const SameMoves &other);
+    private:
+        /** The acceptable delta between the running total and recalcualted total energy */
+        double acceptable_delta;
 
-    ~SameMoves();
+        /** Whether or not to check the running total against the recalculated
+            total energy in the post-check of the moves */
+        bool check_running_total;
+    };
 
-    static const char* typeName();
+    /** This is a Moves class that just applies the same move over and
+        over again
 
-    SameMoves& operator=(const SameMoves &other);
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SameMoves : public SireBase::ConcreteProperty<SameMoves, Moves>
+    {
 
-    bool operator==(const SameMoves &other) const;
-    bool operator!=(const SameMoves &other) const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SameMoves &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SameMoves &);
 
-    SameMoves* clone() const;
+    public:
+        SameMoves();
+        SameMoves(const Move &move);
 
-    QString toString() const;
+        SameMoves(const SameMoves &other);
 
-    using Moves::move;
+        ~SameMoves();
 
-    void setEnergyComponent(const Symbol &component);
-    void setSpaceProperty(const PropertyName &spaceproperty);
+        static const char *typeName();
 
-    const Symbol& energyComponent() const;
-    const PropertyName& spaceProperty() const;
+        SameMoves &operator=(const SameMoves &other);
 
-    void setGenerator(const RanGenerator &rangenerator);
+        bool operator==(const SameMoves &other) const;
+        bool operator!=(const SameMoves &other) const;
 
-    System move(const System &system, int nmoves=1, bool record_stats=false);
+        SameMoves *clone() const;
 
-    void clearStatistics();
+        QString toString() const;
 
-    QList<MovePtr> moves() const;
+        using Moves::move;
 
-    QList<SireUnits::Dimension::Time> timing() const;
-    void clearTiming();
+        void setEnergyComponent(const Symbol &component);
+        void setSpaceProperty(const PropertyName &spaceproperty);
 
-private:
-    void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
-    void _pvt_setPressure(const SireUnits::Dimension::Pressure &pressure);
-    void _pvt_setFugacity(const SireUnits::Dimension::Pressure &fugacity);
+        const Symbol &energyComponent() const;
+        const PropertyName &spaceProperty() const;
 
-    bool sampleSameSpaceProperty() const;
+        void setGenerator(const RanGenerator &rangenerator);
 
-    /** The move that will be repeatedly applied */
-    MovePtr mv;
+        System move(const System &system, int nmoves = 1, bool record_stats = false);
 
-    /** The average time to run each move, in nanoseconds */
-    SireMaths::Average avgtime;
-};
+        void clearStatistics();
 
-typedef SireBase::PropPtr<Moves> MovesPtr;
+        QList<MovePtr> moves() const;
 
-}
+        QList<SireUnits::Dimension::Time> timing() const;
+        void clearTiming();
 
-Q_DECLARE_METATYPE( SireMove::SameMoves )
+    private:
+        void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
+        void _pvt_setPressure(const SireUnits::Dimension::Pressure &pressure);
+        void _pvt_setFugacity(const SireUnits::Dimension::Pressure &fugacity);
 
-SIRE_EXPOSE_CLASS( SireMove::Moves )
-SIRE_EXPOSE_CLASS( SireMove::SameMoves )
+        bool sampleSameSpaceProperty() const;
 
-SIRE_EXPOSE_PROPERTY( SireMove::MovesPtr, SireMove::Moves )
+        /** The move that will be repeatedly applied */
+        MovePtr mv;
+
+        /** The average time to run each move, in nanoseconds */
+        SireMaths::Average avgtime;
+    };
+
+    typedef SireBase::PropPtr<Moves> MovesPtr;
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::SameMoves)
+
+SIRE_EXPOSE_CLASS(SireMove::Moves)
+SIRE_EXPOSE_CLASS(SireMove::SameMoves)
+
+SIRE_EXPOSE_PROPERTY(SireMove::MovesPtr, SireMove::Moves)
 
 SIRE_END_HEADER
 

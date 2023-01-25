@@ -28,10 +28,10 @@
 #ifndef SIRESEARCH_PARSER_AST_H
 #define SIRESEARCH_PARSER_AST_H
 
+#include "SireMol/element.h"
+#include "SireMol/select.h"
 #include "SireUnits/dimensions.h"
 #include "SireUnits/units.h"
-#include "SireMol/select.h"
-#include "SireMol/element.h"
 
 #include "SireError/errors.h"
 
@@ -39,7 +39,7 @@
 
 namespace SireBase
 {
-class Slice;
+    class Slice;
 }
 
 SIRE_BEGIN_HEADER
@@ -54,10 +54,10 @@ SIRE_BEGIN_HEADER
 #include <boost/spirit/include/support_line_pos_iterator.hpp>
 
 #include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
 
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
@@ -73,56 +73,106 @@ namespace AST
     using SireMol::parser::SelectEnginePtr;
 
     /** The different objects that can be identified */
-    enum IDObject { ID_UNKNOWN = 0,
-                    ATOM = 1,
-                    BOND = 2,
-                    ANGLE = 3,
-                    DIHEDRAL = 4,
-                    IMPROPER = 5,
-                    RESIDUE = 6,
-                    CHAIN = 7,
-                    SEGMENT = 8,
-                    CUTGROUP = 9,
-                    MOLECULE = 10,
-                    VIEW = 99 };
+    enum IDObject
+    {
+        ID_UNKNOWN = 0,
+        ATOM = 1,
+        BOND = 2,
+        ANGLE = 3,
+        DIHEDRAL = 4,
+        IMPROPER = 5,
+        RESIDUE = 6,
+        CHAIN = 7,
+        SEGMENT = 8,
+        CUTGROUP = 9,
+        MOLECULE = 10,
+        VIEW = 99
+    };
 
     QString idobject_to_string(IDObject obj);
 
     /** The different types of number that can be identified */
-    enum IDNumType { ID_TYP_UNKNOWN = 0, ID_NUMBER = 1, ID_INDEX = 2 };
+    enum IDNumType
+    {
+        ID_TYP_UNKNOWN = 0,
+        ID_NUMBER = 1,
+        ID_INDEX = 2
+    };
 
     QString idnumtype_to_string(IDNumType typ);
 
     /** The different types of logical operation */
-    enum IDOperation { ID_OP_UNKNOWN = 0, ID_AND = 1, ID_OR = 2 };
+    enum IDOperation
+    {
+        ID_OP_UNKNOWN = 0,
+        ID_AND = 1,
+        ID_OR = 2
+    };
 
     QString idoperation_to_string(IDOperation op);
 
     /** The different types of value comparison */
-    enum IDComparison { ID_CMP_UNKNOWN = 0, ID_CMP_LT = 1, ID_CMP_LE = 2,
-                        ID_CMP_EQ = 3, ID_CMP_NE = 4, ID_CMP_GT = 5, ID_CMP_GE = 6,
-                        ID_CMP_AE = 7, ID_CMP_GA = 8, ID_CMP_LA = 9, ID_CMP_NA = 10,
-                        ID_CMP_GAE = 11, ID_CMP_LAE = 12 };
+    enum IDComparison
+    {
+        ID_CMP_UNKNOWN = 0,
+        ID_CMP_LT = 1,
+        ID_CMP_LE = 2,
+        ID_CMP_EQ = 3,
+        ID_CMP_NE = 4,
+        ID_CMP_GT = 5,
+        ID_CMP_GE = 6,
+        ID_CMP_AE = 7,
+        ID_CMP_GA = 8,
+        ID_CMP_LA = 9,
+        ID_CMP_NA = 10,
+        ID_CMP_GAE = 11,
+        ID_CMP_LAE = 12
+    };
 
     QString idcomparison_to_string(IDComparison cmp);
 
     /** The different miscellaneous tokens */
-    enum IDToken { ID_TOKEN_UNKNOWN = 0, ID_WHERE = 1, ID_WITH = 2, ID_IN = 3 };
+    enum IDToken
+    {
+        ID_TOKEN_UNKNOWN = 0,
+        ID_WHERE = 1,
+        ID_WITH = 2,
+        ID_IN = 3
+    };
 
     QString idtoken_to_string(IDToken token);
 
     /** The different bond tokens */
-    enum IDBondToken { ID_BOND_UNKNOWN = 0, ID_BOND_FROM = 1, ID_BOND_TO = 2 };
+    enum IDBondToken
+    {
+        ID_BOND_UNKNOWN = 0,
+        ID_BOND_FROM = 1,
+        ID_BOND_TO = 2
+    };
 
     QString idbondtoken_to_string(IDBondToken token);
 
     /** The different types of coordinate */
-    enum IDCoordType { ID_COORD_UNKNOWN = 0, ID_COORD_CENTER = 1, ID_COORD_CENTER_X = 2,
-                       ID_COORD_CENTER_Y = 3, ID_COORD_CENTER_Z = 4, ID_COORD_MAX = 5,
-                       ID_COORD_MAX_X = 6, ID_COORD_MAX_Y = 7, ID_COORD_MAX_Z = 8,
-                       ID_COORD_MIN = 9, ID_COORD_MIN_X = 10, ID_COORD_MIN_Y = 11,
-                       ID_COORD_MIN_Z = 12, ID_COORD_X = 13, ID_COORD_Y = 14, ID_COORD_Z = 15,
-                       ID_COORD_CLOSEST = 16 };
+    enum IDCoordType
+    {
+        ID_COORD_UNKNOWN = 0,
+        ID_COORD_CENTER = 1,
+        ID_COORD_CENTER_X = 2,
+        ID_COORD_CENTER_Y = 3,
+        ID_COORD_CENTER_Z = 4,
+        ID_COORD_MAX = 5,
+        ID_COORD_MAX_X = 6,
+        ID_COORD_MAX_Y = 7,
+        ID_COORD_MAX_Z = 8,
+        ID_COORD_MIN = 9,
+        ID_COORD_MIN_X = 10,
+        ID_COORD_MIN_Y = 11,
+        ID_COORD_MIN_Z = 12,
+        ID_COORD_X = 13,
+        ID_COORD_Y = 14,
+        ID_COORD_Z = 15,
+        ID_COORD_CLOSEST = 16
+    };
 
     QString idcoordtype_to_string(IDCoordType typ);
 
@@ -171,50 +221,30 @@ namespace AST
     struct Node;
 
     /** Base holder for all of the different ID expressions */
-    using ExpressionVariant = boost::variant<boost::recursive_wrapper<IDNull>,
-                                             boost::recursive_wrapper<IDName>,
-                                             boost::recursive_wrapper<IDNumber>,
-                                             boost::recursive_wrapper<IDElement>,
-                                             boost::recursive_wrapper<IDBinary>,
-                                             boost::recursive_wrapper<IDWith>,
-                                             boost::recursive_wrapper<IDWhere>,
-                                             boost::recursive_wrapper<IDCount>,
-                                             boost::recursive_wrapper<IDNot>,
-                                             boost::recursive_wrapper<IDSubscript>,
-                                             boost::recursive_wrapper<IDWithin>,
-                                             boost::recursive_wrapper<IDWithinVector>,
-                                             boost::recursive_wrapper<IDUser>,
-                                             boost::recursive_wrapper<IDJoin>,
-                                             boost::recursive_wrapper<IDAll>,
-                                             boost::recursive_wrapper<IDBond>,
-                                             boost::recursive_wrapper<IDProperty>,
-                                             boost::recursive_wrapper<IDWater>,
-                                             boost::recursive_wrapper<IDProtein>,
-                                             boost::recursive_wrapper<IDPerturbable>,
-                                             boost::recursive_wrapper<IDMass>,
-                                             boost::recursive_wrapper<IDCharge>,
-                                             boost::recursive_wrapper<IDCmpMass>,
-                                             boost::recursive_wrapper<IDCmpCharge>,
-                                             boost::recursive_wrapper<IDObjMass>,
-                                             boost::recursive_wrapper<IDObjCharge>,
-                                             boost::recursive_wrapper<IDObjCmpMass>,
-                                             boost::recursive_wrapper<IDObjCmpCharge>,
-                                             boost::recursive_wrapper<ExpressionPart>,
-                                             boost::recursive_wrapper<Expression> >;
+    using ExpressionVariant = boost::variant<
+        boost::recursive_wrapper<IDNull>, boost::recursive_wrapper<IDName>, boost::recursive_wrapper<IDNumber>,
+        boost::recursive_wrapper<IDElement>, boost::recursive_wrapper<IDBinary>, boost::recursive_wrapper<IDWith>,
+        boost::recursive_wrapper<IDWhere>, boost::recursive_wrapper<IDCount>, boost::recursive_wrapper<IDNot>,
+        boost::recursive_wrapper<IDSubscript>, boost::recursive_wrapper<IDWithin>, boost::recursive_wrapper<IDWithinVector>,
+        boost::recursive_wrapper<IDUser>, boost::recursive_wrapper<IDJoin>, boost::recursive_wrapper<IDAll>,
+        boost::recursive_wrapper<IDBond>, boost::recursive_wrapper<IDProperty>, boost::recursive_wrapper<IDWater>,
+        boost::recursive_wrapper<IDProtein>, boost::recursive_wrapper<IDPerturbable>, boost::recursive_wrapper<IDMass>,
+        boost::recursive_wrapper<IDCharge>, boost::recursive_wrapper<IDCmpMass>, boost::recursive_wrapper<IDCmpCharge>,
+        boost::recursive_wrapper<IDObjMass>, boost::recursive_wrapper<IDObjCharge>, boost::recursive_wrapper<IDObjCmpMass>,
+        boost::recursive_wrapper<IDObjCmpCharge>, boost::recursive_wrapper<ExpressionPart>,
+        boost::recursive_wrapper<Expression>>;
 
     QString expression_to_string(const ExpressionVariant &expression);
 
     /** Base holder for strings or regular expressions */
-    using NameVariant = boost::variant<boost::recursive_wrapper<RegExpValue>,
-                                       std::string>;
+    using NameVariant = boost::variant<boost::recursive_wrapper<RegExpValue>, std::string>;
 
     /** Base holder for ranges of value comparisons */
-    using RangeVariant = boost::variant<boost::recursive_wrapper<RangeValue>,
-                                        boost::recursive_wrapper<CompareValue> >;
+    using RangeVariant = boost::variant<boost::recursive_wrapper<RangeValue>, boost::recursive_wrapper<CompareValue>>;
 
     /** Base holder for different methods of holding a "where" expression */
-    using IDWhereVariant = boost::variant<boost::recursive_wrapper<IDWhereCompare>,
-                                          boost::recursive_wrapper<IDWhereWithin> >;
+    using IDWhereVariant =
+        boost::variant<boost::recursive_wrapper<IDWhereCompare>, boost::recursive_wrapper<IDWhereWithin>>;
 
     using IDNames = std::vector<IDName>;
     using NameValues = std::vector<NameValue>;
@@ -225,7 +255,7 @@ namespace AST
     {
     public:
         /** In general, use the .toString() function from a class */
-        template<class T>
+        template <class T>
         QString operator()(const T &value) const
         {
             return value.toString();
@@ -243,7 +273,7 @@ namespace AST
     {
     public:
         /** In general, use the .toEngine() function from a class */
-        template<class T>
+        template <class T>
         SelectEnginePtr operator()(const T &value) const
         {
             return value.toEngine();
@@ -254,15 +284,16 @@ namespace AST
     struct LengthValue
     {
         LengthValue() : value(0), unit(1.0)
-        {}
+        {
+        }
 
-        LengthValue& operator+=(double v)
+        LengthValue &operator+=(double v)
         {
             value = v;
             return *this;
         }
 
-        LengthValue& operator+=(SireUnits::Dimension::Length v)
+        LengthValue &operator+=(SireUnits::Dimension::Length v)
         {
             unit = v;
             return *this;
@@ -282,9 +313,10 @@ namespace AST
         LengthValue z;
 
         VectorValue() : _c(0)
-        {}
+        {
+        }
 
-        VectorValue& operator+=(const LengthValue &val)
+        VectorValue &operator+=(const LengthValue &val)
         {
             if (_c == 0)
             {
@@ -305,8 +337,7 @@ namespace AST
                 _c += 1;
             }
             else
-                throw SireMol::parse_error( QObject::tr(
-                    "Cannot add more than there points to a vector"), CODELOC );
+                throw SireMol::parse_error(QObject::tr("Cannot add more than there points to a vector"), CODELOC);
 
             return *this;
         }
@@ -315,24 +346,24 @@ namespace AST
 
     private:
         int _c;
-
     };
 
     /** Struct that holds a regular expression */
     struct RegExpValue
     {
         RegExpValue() : is_case_sensitive(true)
-        {}
+        {
+        }
 
-        template<class T>
-        RegExpValue& operator+=(const T &val)
+        template <class T>
+        RegExpValue &operator+=(const T &val)
         {
             value = val;
             return *this;
         }
 
-        template<class T>
-        RegExpValue& operator*=(const T &val)
+        template <class T>
+        RegExpValue &operator*=(const T &val)
         {
             is_case_sensitive = false;
             return *this;
@@ -351,7 +382,7 @@ namespace AST
 
         QString toString() const
         {
-            return boost::apply_visitor( qstring_visitor(), value );
+            return boost::apply_visitor(qstring_visitor(), value);
         }
     };
 
@@ -368,19 +399,20 @@ namespace AST
     struct RangeValue
     {
         RangeValue() : _c(0)
-        {}
+        {
+        }
 
         std::shared_ptr<int> start;
         std::shared_ptr<int> stop;
         std::shared_ptr<int> step;
 
-        RangeValue& operator*=(const int val)
+        RangeValue &operator*=(const int val)
         {
             _c += 1;
             return *this;
         }
 
-        RangeValue& operator+=(const int val)
+        RangeValue &operator+=(const int val)
         {
             if (_c == 0)
             {
@@ -444,7 +476,8 @@ namespace AST
     struct IDAll
     {
         IDAll(IDObject object = MOLECULE) : name(object)
-        {}
+        {
+        }
 
         IDObject name;
 
@@ -483,11 +516,12 @@ namespace AST
         ExpressionVariant value;
 
         IDUser()
-        {}
+        {
+        }
 
-        IDUser(const std::string t, const ExpressionVariant &s)
-            : token(t), value(s)
-        {}
+        IDUser(const std::string t, const ExpressionVariant &s) : token(t), value(s)
+        {
+        }
 
         QString toString() const;
 
@@ -522,16 +556,17 @@ namespace AST
         RangeValues values;
 
         IDNumber() : name(ID_UNKNOWN), numtype(ID_TYP_UNKNOWN)
-        {}
+        {
+        }
 
-        IDNumber& operator+=(const QPair<IDObject,IDNumType> &v)
+        IDNumber &operator+=(const QPair<IDObject, IDNumType> &v)
         {
             name = v.first;
             numtype = v.second;
             return *this;
         }
 
-        IDNumber& operator+=(const RangeValues &vals)
+        IDNumber &operator+=(const RangeValues &vals)
         {
             values = vals;
             return *this;
@@ -574,9 +609,9 @@ namespace AST
         IDComparison compare;
         std::string value;
 
-        IDProperty& operator/=(int)
+        IDProperty &operator/=(int)
         {
-            //reset the search
+            // reset the search
             property.clear();
             value.clear();
             name = AST::VIEW;
@@ -584,26 +619,26 @@ namespace AST
             return *this;
         }
 
-        IDProperty& operator+=(const std::string &p)
+        IDProperty &operator+=(const std::string &p)
         {
             property = p;
             return *this;
         }
 
-        IDProperty& operator+=(const IDObject &n)
+        IDProperty &operator+=(const IDObject &n)
         {
             this->operator/=(1);
             name = n;
             return *this;
         }
 
-        IDProperty& operator+=(const IDComparison &c)
+        IDProperty &operator+=(const IDComparison &c)
         {
             compare = c;
             return *this;
         }
 
-        IDProperty& operator*=(const std::string &v)
+        IDProperty &operator*=(const std::string &v)
         {
             value = v;
             return *this;
@@ -617,7 +652,7 @@ namespace AST
     /** Struct that holds an ID token that represents a Bond expression,
      *  e.g. bonds within resnum 1, bonds in resnum 1,
      *  bonds from atomnum 1 to atomnum 2
-    */
+     */
     struct IDBond
     {
         IDBondToken from_token;
@@ -634,25 +669,26 @@ namespace AST
     struct IDWith
     {
         IDWith()
-        {}
+        {
+        }
 
         Expression value0;
         IDToken token;
         Expression value1;
 
-        IDWith& operator+=(const Expression &v)
+        IDWith &operator+=(const Expression &v)
         {
             value0 = v;
             return *this;
         }
 
-        IDWith& operator+=(const IDToken &t)
+        IDWith &operator+=(const IDToken &t)
         {
             token = t;
             return *this;
         }
 
-        IDWith& operator*=(const Expression &v)
+        IDWith &operator*=(const Expression &v)
         {
             value1 = v;
             return *this;
@@ -670,18 +706,20 @@ namespace AST
         SireUnits::Dimension::MolarMass units;
 
         IDMass() : value(0.0), units(1.0)
-        {}
+        {
+        }
 
         IDMass(const IDMass &other) : value(other.value), units(other.units)
-        {}
+        {
+        }
 
-        IDMass& operator+=(double v)
+        IDMass &operator+=(double v)
         {
             value = v;
             return *this;
         }
 
-        IDMass& operator+=(SireUnits::Dimension::MolarMass u)
+        IDMass &operator+=(SireUnits::Dimension::MolarMass u)
         {
             units = u;
             return *this;
@@ -733,18 +771,20 @@ namespace AST
         SireUnits::Dimension::Charge units;
 
         IDCharge() : value(0.0), units(1.0)
-        {}
+        {
+        }
 
         IDCharge(const IDCharge &other) : value(other.value), units(other.units)
-        {}
+        {
+        }
 
-        IDCharge& operator+=(double v)
+        IDCharge &operator+=(double v)
         {
             value = v;
             return *this;
         }
 
-        IDCharge& operator+=(SireUnits::Dimension::Charge u)
+        IDCharge &operator+=(SireUnits::Dimension::Charge u)
         {
             units = u;
             return *this;
@@ -796,19 +836,19 @@ namespace AST
         IDComparison compare;
         int value;
 
-        IDCount& operator+=(const Expression &o)
+        IDCount &operator+=(const Expression &o)
         {
             object = o;
             return *this;
         }
 
-        IDCount& operator+=(const IDComparison &c)
+        IDCount &operator+=(const IDComparison &c)
         {
             compare = c;
             return *this;
         }
 
-        IDCount& operator+=(int v)
+        IDCount &operator+=(int v)
         {
             value = v;
             return *this;
@@ -909,167 +949,73 @@ namespace AST
 
         SelectEnginePtr toEngine() const;
     };
-}
+} // namespace AST
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDWithin,
-                           (AST::Expression,value0)
-                           (AST::LengthValue,distance)
-                           (AST::Expression,value1)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDWithin, (AST::Expression, value0)(AST::LengthValue, distance)(AST::Expression, value1))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDCharge,
-                           (double,value)
-                           (SireUnits::Dimension::Charge,units)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDCharge, (double, value)(SireUnits::Dimension::Charge, units))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDMass,
-                           (double,value)
-                           (SireUnits::Dimension::MolarMass,units)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDMass, (double, value)(SireUnits::Dimension::MolarMass, units))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDCmpCharge,
-                           (AST::IDComparison,compare)
-                           (AST::IDCharge,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDCmpCharge, (AST::IDComparison, compare)(AST::IDCharge, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDCmpMass,
-                           (AST::IDComparison,compare)
-                           (AST::IDMass,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDCmpMass, (AST::IDComparison, compare)(AST::IDMass, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDObjCharge,
-                           (AST::IDObject, name)
-                           (AST::IDCharge,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDObjCharge, (AST::IDObject, name)(AST::IDCharge, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDObjMass,
-                           (AST::IDObject, name)
-                           (AST::IDMass,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDObjMass, (AST::IDObject, name)(AST::IDMass, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDObjCmpCharge,
-                           (AST::IDObject, name)
-                           (AST::IDComparison,compare)
-                           (AST::IDCharge,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDObjCmpCharge, (AST::IDObject, name)(AST::IDComparison, compare)(AST::IDCharge, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDObjCmpMass,
-                           (AST::IDObject, name)
-                           (AST::IDComparison,compare)
-                           (AST::IDMass,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDObjCmpMass, (AST::IDObject, name)(AST::IDComparison, compare)(AST::IDMass, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDWithinVector,
-                           (AST::Expression,value0)
-                           (AST::LengthValue,distance)
-                           (AST::VectorValue,value1)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDWithinVector,
+                          (AST::Expression, value0)(AST::LengthValue, distance)(AST::VectorValue, value1))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::LengthValue,
-                           (double,value)
-                           (SireUnits::Dimension::Length,unit)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::LengthValue, (double, value)(SireUnits::Dimension::Length, unit))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDCount,
-                           (AST::Expression,object)
-                           (AST::IDComparison,compare)
-                           (int,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDCount, (AST::Expression, object)(AST::IDComparison, compare)(int, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDWhereWithin,
-                           (AST::LengthValue,distance)
-                           (AST::Expression,value1)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDWhereWithin, (AST::LengthValue, distance)(AST::Expression, value1))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDWhereCompare,
-                           (AST::IDComparison,compare)
-                           (AST::VectorValue,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDWhereCompare, (AST::IDComparison, compare)(AST::VectorValue, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDWhere,
-                           (AST::Expression,value0)
-                           (AST::IDCoordType,typ)
-                           (AST::IDWhereVariant,value1)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDWhere, (AST::Expression, value0)(AST::IDCoordType, typ)(AST::IDWhereVariant, value1))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::NameValue,
-                           (AST::NameVariant,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::NameValue, (AST::NameVariant, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::CompareValue,
-                           (AST::IDComparison,compare)
-                           (int,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::CompareValue, (AST::IDComparison, compare)(int, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDNot,
-                           (AST::Expression,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDNot, (AST::Expression, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDJoin,
-                           (AST::Expression,value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDJoin, (AST::Expression, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDSubscript,
-                           (AST::Expression,value)
-                           (AST::RangeValue,range)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDSubscript, (AST::Expression, value)(AST::RangeValue, range))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::RegExpValue,
-                           (std::string,value)
-                           (bool,is_case_sensitive)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::RegExpValue, (std::string, value)(bool, is_case_sensitive))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDNull,
-                           (AST::IDObject, name),
-                           (AST::NameValues, values)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDNull, (AST::IDObject, name), (AST::NameValues, values))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDName,
-                           (AST::IDObject, name),
-                           (AST::NameValues, values)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDName, (AST::IDObject, name), (AST::NameValues, values))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDElement,
-                           (std::vector<QString>, values)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDElement, (std::vector<QString>, values))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDNumber,
-                           (AST::IDObject, name),
-                           (AST::IDNumType, numtype),
-                           (AST::RangeValues, values)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDNumber, (AST::IDObject, name), (AST::IDNumType, numtype), (AST::RangeValues, values))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDBinary,
-                           (AST::Expression, part0),
-                           (AST::IDOperation, operation),
-                           (AST::Expression, part1)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDBinary, (AST::Expression, part0), (AST::IDOperation, operation),
+                          (AST::Expression, part1))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDWith,
-                           (AST::Expression,value0)
-                           (AST::IDToken,token)
-                           (AST::Expression,value1)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDWith, (AST::Expression, value0)(AST::IDToken, token)(AST::Expression, value1))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::IDBond,
-                           (AST::IDBondToken,from_token)
-                           (AST::Expression,from_value)
-                           (AST::IDBondToken,to_token)
-                           (AST::Expression,to_value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::IDBond, (AST::IDBondToken, from_token)(AST::Expression,
+                                                                      from_value)(AST::IDBondToken,
+                                                                                  to_token)(AST::Expression, to_value))
 
+BOOST_FUSION_ADAPT_STRUCT(AST::Node, (AST::Expression, values))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::Node,
-                           (AST::Expression, values)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::Expression, (AST::ExpressionVariant, value))
 
-BOOST_FUSION_ADAPT_STRUCT( AST::Expression,
-                           (AST::ExpressionVariant, value)
-                         )
-
-BOOST_FUSION_ADAPT_STRUCT( AST::ExpressionPart,
-                           (AST::ExpressionVariant, value)
-                         )
+BOOST_FUSION_ADAPT_STRUCT(AST::ExpressionPart, (AST::ExpressionVariant, value))
 
 SIRE_END_HEADER
 

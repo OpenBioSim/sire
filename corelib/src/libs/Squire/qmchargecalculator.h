@@ -39,122 +39,117 @@ SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class QMChargeCalculator;
-class NullQMChargeCalculator;
-}
+    class QMChargeCalculator;
+    class NullQMChargeCalculator;
+} // namespace Squire
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::QMChargeCalculator&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::QMChargeCalculator&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::QMChargeCalculator &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::QMChargeCalculator &);
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::NullQMChargeCalculator&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::NullQMChargeCalculator&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::NullQMChargeCalculator &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::NullQMChargeCalculator &);
 
 namespace SireMol
 {
-class PartialMolecule;
-class Molecules;
-class MolNum;
-}
+    class PartialMolecule;
+    class Molecules;
+    class MolNum;
+} // namespace SireMol
 
 namespace Squire
 {
 
-using SireMol::PartialMolecule;
-using SireMol::Molecules;
-using SireMol::AtomCharges;
-using SireMol::MolNum;
+    using SireMol::AtomCharges;
+    using SireMol::Molecules;
+    using SireMol::MolNum;
+    using SireMol::PartialMolecule;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-/** This is the base class of all functions which are used
-    to calculate atomic partial charges of molecules from
-    an underlying QM Hamiltonian
+    /** This is the base class of all functions which are used
+        to calculate atomic partial charges of molecules from
+        an underlying QM Hamiltonian
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT QMChargeCalculator : public SireBase::Property
-{
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT QMChargeCalculator : public SireBase::Property
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const QMChargeCalculator&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, QMChargeCalculator&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const QMChargeCalculator &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, QMChargeCalculator &);
 
-public:
-    QMChargeCalculator();
+    public:
+        QMChargeCalculator();
 
-    QMChargeCalculator(const QMChargeCalculator &other);
+        QMChargeCalculator(const QMChargeCalculator &other);
 
-    virtual ~QMChargeCalculator();
+        virtual ~QMChargeCalculator();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual QMChargeCalculator* clone() const=0;
+        virtual QMChargeCalculator *clone() const = 0;
 
-    virtual void setScaleFactor(double sclfactor);
+        virtual void setScaleFactor(double sclfactor);
 
-    double scaleFactor() const;
+        double scaleFactor() const;
 
-    virtual AtomCharges operator()(const PartialMolecule &molecule,
-                                   const PropertyMap &map = PropertyMap()) const=0;
+        virtual AtomCharges operator()(const PartialMolecule &molecule, const PropertyMap &map = PropertyMap()) const = 0;
 
-    AtomCharges calculate(const PartialMolecule &molecule,
-                          const PropertyMap &map = PropertyMap()) const;
+        AtomCharges calculate(const PartialMolecule &molecule, const PropertyMap &map = PropertyMap()) const;
 
-    virtual bool mayChangeCharges(const PartialMolecule &oldmol,
-                                  const PartialMolecule &newmol,
-                                  const PropertyMap &map = PropertyMap()) const=0;
+        virtual bool mayChangeCharges(const PartialMolecule &oldmol, const PartialMolecule &newmol,
+                                      const PropertyMap &map = PropertyMap()) const = 0;
 
-    static const NullQMChargeCalculator& null();
+        static const NullQMChargeCalculator &null();
 
-protected:
-    QMChargeCalculator& operator=(const QMChargeCalculator &other);
+    protected:
+        QMChargeCalculator &operator=(const QMChargeCalculator &other);
 
-    bool operator==(const QMChargeCalculator &other) const;
-    bool operator!=(const QMChargeCalculator &other) const;
+        bool operator==(const QMChargeCalculator &other) const;
+        bool operator!=(const QMChargeCalculator &other) const;
 
-private:
-    /** The scale factor that multiples the calculated charges */
-    double sclfac;
-};
+    private:
+        /** The scale factor that multiples the calculated charges */
+        double sclfac;
+    };
 
-/** This is a null charge calculator - this returns zero
-    charges for every molecule! */
-class SQUIRE_EXPORT NullQMChargeCalculator
-            : public SireBase::ConcreteProperty<NullQMChargeCalculator,QMChargeCalculator>
-{
+    /** This is a null charge calculator - this returns zero
+        charges for every molecule! */
+    class SQUIRE_EXPORT NullQMChargeCalculator
+        : public SireBase::ConcreteProperty<NullQMChargeCalculator, QMChargeCalculator>
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const NullQMChargeCalculator&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, NullQMChargeCalculator&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const NullQMChargeCalculator &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, NullQMChargeCalculator &);
 
-public:
-    NullQMChargeCalculator();
-    NullQMChargeCalculator(const NullQMChargeCalculator &other);
+    public:
+        NullQMChargeCalculator();
+        NullQMChargeCalculator(const NullQMChargeCalculator &other);
 
-    ~NullQMChargeCalculator();
+        ~NullQMChargeCalculator();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    NullQMChargeCalculator& operator=(const NullQMChargeCalculator &other);
+        NullQMChargeCalculator &operator=(const NullQMChargeCalculator &other);
 
-    bool operator==(const NullQMChargeCalculator &other) const;
-    bool operator!=(const NullQMChargeCalculator &other) const;
+        bool operator==(const NullQMChargeCalculator &other) const;
+        bool operator!=(const NullQMChargeCalculator &other) const;
 
-    AtomCharges operator()(const PartialMolecule &molecule,
-                           const PropertyMap &map = PropertyMap()) const;
+        AtomCharges operator()(const PartialMolecule &molecule, const PropertyMap &map = PropertyMap()) const;
 
-    bool mayChangeCharges(const PartialMolecule&, const PartialMolecule&,
-                          const PropertyMap&) const;
-};
+        bool mayChangeCharges(const PartialMolecule &, const PartialMolecule &, const PropertyMap &) const;
+    };
 
-typedef SireBase::PropPtr<QMChargeCalculator> QMChargeCalculatorPtr;
+    typedef SireBase::PropPtr<QMChargeCalculator> QMChargeCalculatorPtr;
 
-}
+} // namespace Squire
 
-Q_DECLARE_METATYPE( Squire::NullQMChargeCalculator )
+Q_DECLARE_METATYPE(Squire::NullQMChargeCalculator)
 
-SIRE_EXPOSE_CLASS( Squire::QMChargeCalculator )
-SIRE_EXPOSE_CLASS( Squire::NullQMChargeCalculator )
+SIRE_EXPOSE_CLASS(Squire::QMChargeCalculator)
+SIRE_EXPOSE_CLASS(Squire::NullQMChargeCalculator)
 
-SIRE_EXPOSE_PROPERTY( Squire::QMChargeCalculatorPtr, Squire::QMChargeCalculator )
+SIRE_EXPOSE_PROPERTY(Squire::QMChargeCalculatorPtr, Squire::QMChargeCalculator)
 
 SIRE_END_HEADER
 

@@ -41,200 +41,218 @@ This file contains the exceptions that can be thrown by the SireSystem library.
 namespace SireSystem
 {
 
-/** This is the base class of all SireSystem errors */
-class SIRESYSTEM_EXPORT siresystem_error : public SireError::exception
-{
-public:
-    siresystem_error() : exception()
-    {}
-
-    siresystem_error(QString err, QString place = QString()) : exception(err,place)
-    {}
-
-    siresystem_error(const siresystem_error &other) : exception(other)
-    {}
-
-    ~siresystem_error() throw()
-    {}
-
-    static const char* typeName()
+    /** This is the base class of all SireSystem errors */
+    class SIRESYSTEM_EXPORT siresystem_error : public SireError::exception
     {
-        return "SireSystem::siresystem_error";
-    }
-};
+    public:
+        siresystem_error() : exception()
+        {
+        }
 
+        siresystem_error(QString err, QString place = QString()) : exception(err, place)
+        {
+        }
 
-/** This exception is thrown when a request is made of
-    a non-existant monitor
+        siresystem_error(const siresystem_error &other) : exception(other)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT missing_monitor : public siresystem_error
-{
-public:
-    missing_monitor() : siresystem_error()
-    {}
+        ~siresystem_error() throw()
+        {
+        }
 
-    missing_monitor(QString err, QString place = QString())
-              : siresystem_error(err,place)
-    {}
+        static const char *typeName()
+        {
+            return "SireSystem::siresystem_error";
+        }
+    };
 
-    missing_monitor(const missing_monitor &other) : siresystem_error(other)
-    {}
+    /** This exception is thrown when a request is made of
+        a non-existant monitor
 
-    ~missing_monitor() throw()
-    {}
-
-    static const char* typeName();
-
-    const char* what() const throw()
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT missing_monitor : public siresystem_error
     {
-        return missing_monitor::typeName();
-    }
+    public:
+        missing_monitor() : siresystem_error()
+        {
+        }
 
-    void throwSelf() const
+        missing_monitor(QString err, QString place = QString()) : siresystem_error(err, place)
+        {
+        }
+
+        missing_monitor(const missing_monitor &other) : siresystem_error(other)
+        {
+        }
+
+        ~missing_monitor() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return missing_monitor::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw missing_monitor(*this);
+        }
+    };
+
+    /** This exception is thrown when multiple monitors match an ID
+        but only one monitor was requested
+
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT duplicate_monitor : public siresystem_error
     {
-        throw missing_monitor(*this);
-    }
-};
+    public:
+        duplicate_monitor() : siresystem_error()
+        {
+        }
 
-/** This exception is thrown when multiple monitors match an ID
-    but only one monitor was requested
+        duplicate_monitor(QString err, QString place = QString()) : siresystem_error(err, place)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT duplicate_monitor : public siresystem_error
-{
-public:
-    duplicate_monitor() : siresystem_error()
-    {}
+        duplicate_monitor(const duplicate_monitor &other) : siresystem_error(other)
+        {
+        }
 
-    duplicate_monitor(QString err, QString place = QString())
-              : siresystem_error(err,place)
-    {}
+        ~duplicate_monitor() throw()
+        {
+        }
 
-    duplicate_monitor(const duplicate_monitor &other) : siresystem_error(other)
-    {}
+        static const char *typeName();
 
-    ~duplicate_monitor() throw()
-    {}
+        const char *what() const throw()
+        {
+            return duplicate_monitor::typeName();
+        }
 
-    static const char* typeName();
+        void throwSelf() const
+        {
+            throw duplicate_monitor(*this);
+        }
+    };
 
-    const char* what() const throw()
+    /** This exception is thrown when a request is made of
+        a non-existant system
+
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT missing_system : public siresystem_error
     {
-        return duplicate_monitor::typeName();
-    }
+    public:
+        missing_system() : siresystem_error()
+        {
+        }
 
-    void throwSelf() const
+        missing_system(QString err, QString place = QString()) : siresystem_error(err, place)
+        {
+        }
+
+        missing_system(const missing_system &other) : siresystem_error(other)
+        {
+        }
+
+        ~missing_system() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return missing_system::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw missing_system(*this);
+        }
+    };
+
+    /** This exception is thrown when multiple systems match an ID
+        but only one system was requested
+
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT duplicate_system : public siresystem_error
     {
-        throw duplicate_monitor(*this);
-    }
-};
+    public:
+        duplicate_system() : siresystem_error()
+        {
+        }
 
-/** This exception is thrown when a request is made of
-    a non-existant system
+        duplicate_system(QString err, QString place = QString()) : siresystem_error(err, place)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT missing_system : public siresystem_error
-{
-public:
-    missing_system() : siresystem_error()
-    {}
+        duplicate_system(const duplicate_system &other) : siresystem_error(other)
+        {
+        }
 
-    missing_system(QString err, QString place = QString())
-              : siresystem_error(err,place)
-    {}
+        ~duplicate_system() throw()
+        {
+        }
 
-    missing_system(const missing_system &other) : siresystem_error(other)
-    {}
+        static const char *typeName();
 
-    ~missing_system() throw()
-    {}
+        const char *what() const throw()
+        {
+            return duplicate_system::typeName();
+        }
 
-    static const char* typeName();
+        void throwSelf() const
+        {
+            throw duplicate_system(*this);
+        }
+    };
 
-    const char* what() const throw()
+    /** This exception is thrown when a violation of a constraint
+        is detected
+
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT constraint_error : public siresystem_error
     {
-        return missing_system::typeName();
-    }
+    public:
+        constraint_error() : siresystem_error()
+        {
+        }
 
-    void throwSelf() const
-    {
-        throw missing_system(*this);
-    }
-};
+        constraint_error(QString err, QString place = QString()) : siresystem_error(err, place)
+        {
+        }
 
-/** This exception is thrown when multiple systems match an ID
-    but only one system was requested
+        constraint_error(const constraint_error &other) : siresystem_error(other)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT duplicate_system : public siresystem_error
-{
-public:
-    duplicate_system() : siresystem_error()
-    {}
+        ~constraint_error() throw()
+        {
+        }
 
-    duplicate_system(QString err, QString place = QString())
-              : siresystem_error(err,place)
-    {}
+        static const char *typeName();
 
-    duplicate_system(const duplicate_system &other) : siresystem_error(other)
-    {}
+        const char *what() const throw()
+        {
+            return constraint_error::typeName();
+        }
 
-    ~duplicate_system() throw()
-    {}
+        void throwSelf() const
+        {
+            throw constraint_error(*this);
+        }
+    };
 
-    static const char* typeName();
-
-    const char* what() const throw()
-    {
-        return duplicate_system::typeName();
-    }
-
-    void throwSelf() const
-    {
-        throw duplicate_system(*this);
-    }
-};
-
-/** This exception is thrown when a violation of a constraint
-    is detected
-
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT constraint_error : public siresystem_error
-{
-public:
-    constraint_error() : siresystem_error()
-    {}
-
-    constraint_error(QString err, QString place = QString())
-              : siresystem_error(err,place)
-    {}
-
-    constraint_error(const constraint_error &other) : siresystem_error(other)
-    {}
-
-    ~constraint_error() throw()
-    {}
-
-    static const char* typeName();
-
-    const char* what() const throw()
-    {
-        return constraint_error::typeName();
-    }
-
-    void throwSelf() const
-    {
-        throw constraint_error(*this);
-    }
-};
-
-}
+} // namespace SireSystem
 
 Q_DECLARE_METATYPE(SireSystem::missing_monitor)
 Q_DECLARE_METATYPE(SireSystem::duplicate_monitor)
