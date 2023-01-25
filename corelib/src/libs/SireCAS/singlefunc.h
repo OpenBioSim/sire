@@ -29,168 +29,166 @@
 #define SIRECAS_SINGLEFUNC_H
 
 #include "exbase.h"
-#include "symbol.h"
-#include "symbols.h"
-#include "functions.h"
 #include "expression.h"
 #include "expressions.h"
+#include "functions.h"
+#include "symbol.h"
+#include "symbols.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class SingleFunc;
+    class SingleFunc;
 }
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::SingleFunc&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::SingleFunc&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::SingleFunc &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::SingleFunc &);
 
 namespace SireCAS
 {
 
-/** Base class of all single-expression functions (e.g. g( f(??) ))
+    /** Base class of all single-expression functions (e.g. g( f(??) ))
 
-    @author Christopher Woods
-*/
-class SIRECAS_EXPORT SingleFunc : public ExBase
-{
+        @author Christopher Woods
+    */
+    class SIRECAS_EXPORT SingleFunc : public ExBase
+    {
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const SingleFunc&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, SingleFunc&);
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const SingleFunc &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, SingleFunc &);
 
-public:
-    SingleFunc();
-    SingleFunc(const Expression &ex);
+    public:
+        SingleFunc();
+        SingleFunc(const Expression &ex);
 
-    SingleFunc(const SingleFunc &other);
+        SingleFunc(const SingleFunc &other);
 
-    ~SingleFunc();
+        ~SingleFunc();
 
-    SingleFunc& operator=(const SingleFunc &other);
+        SingleFunc &operator=(const SingleFunc &other);
 
-    uint hash() const;
+        uint hash() const;
 
-    const Expression& argument() const;
-    const Expression& x() const;
+        const Expression &argument() const;
+        const Expression &x() const;
 
-    Expression conjugate() const;
+        Expression conjugate() const;
 
-    bool isFunction(const Symbol &symbol) const;
-    bool isConstant() const;
-    bool isComplex() const;
-    bool isCompound() const;
+        bool isFunction(const Symbol &symbol) const;
+        bool isConstant() const;
+        bool isComplex() const;
+        bool isCompound() const;
 
-    QString toString() const;
-    QString toOpenMMString() const;
+        QString toString() const;
+        QString toOpenMMString() const;
 
+        Expression substitute(const Identities &identities) const;
+        Symbols symbols() const;
+        Functions functions() const;
+        Expressions children() const;
 
-    Expression substitute(const Identities &identities) const;
-    Symbols symbols() const;
-    Functions functions() const;
-    Expressions children() const;
+        Expression differentiate(const Symbol &symbol) const;
+        Expression integrate(const Symbol &symbol) const;
 
-    Expression differentiate(const Symbol &symbol) const;
-    Expression integrate(const Symbol &symbol) const;
+        QList<Factor> expand(const Symbol &symbol) const;
 
-    QList<Factor> expand(const Symbol &symbol) const;
+    protected:
+        virtual Expression functionOf(const Expression &arg) const = 0;
+        virtual QString stringRep() const = 0;
+        virtual uint magic() const = 0;
 
-protected:
+        virtual Expression diff() const;
+        virtual Expression integ() const;
 
-    virtual Expression functionOf(const Expression &arg) const=0;
-    virtual QString stringRep() const=0;
-    virtual uint magic() const=0;
-
-    virtual Expression diff() const;
-    virtual Expression integ() const;
-
-    /** The expression that this function operates on */
-    Expression ex;
-};
+        /** The expression that this function operates on */
+        Expression ex;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the single argument to this function */
-SIRE_ALWAYS_INLINE const Expression& SingleFunc::argument() const
-{
-    return ex;
-}
-
-/** Synonym for argument() - useful when doing calculus, and viewing
-    the function as being a pure f(x) */
-SIRE_ALWAYS_INLINE const Expression& SingleFunc::x() const
-{
-    return ex;
-}
-
-/** Return a has for the function */
-SIRE_ALWAYS_INLINE uint SingleFunc::hash() const
-{
-    return (magic() << 16) | (ex.hash() & 0x0000FFFF);
-}
-
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
-
-/** To declare a new function, copy the below;
-
-class MyFunc : public SingleFunc
-{
-public:
-    MyFunc();
-    MyFunc(const Expression &ex);
-
-    MyFunc(const MyFunc &other);
-
-    ~MyFunc();
-
-    /// optional functions
-    //Expression series(const Symbol &symbol, int n) const;
-    //Expression simplify(int options=0) const;
-
-    /// required functions
-    bool operator==(const ExBase &other) const;
-
-    const char* what() const
+    /** Return the single argument to this function */
+    SIRE_ALWAYS_INLINE const Expression &SingleFunc::argument() const
     {
-        return "SireCAS::MyFunc";
+        return ex;
     }
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    //required functions
-    ExBase* clone() const
+    /** Synonym for argument() - useful when doing calculus, and viewing
+        the function as being a pure f(x) */
+    SIRE_ALWAYS_INLINE const Expression &SingleFunc::x() const
     {
-        return new MyFunc(*this);
+        return ex;
     }
 
-    Expression functionOf(const Expression &arg) const
+    /** Return a has for the function */
+    SIRE_ALWAYS_INLINE uint SingleFunc::hash() const
     {
-        if (arg == argument())
-            return toExpression();
-        else
-            return MyFunc(arg).toExpression();
+        return (magic() << 16) | (ex.hash() & 0x0000FFFF);
     }
 
-    //optional
-    Expression diff() const;
-    Expression integ() const;
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-    QString stringRep() const
+    /** To declare a new function, copy the below;
+
+    class MyFunc : public SingleFunc
     {
-        return "myfunc";
-    }
+    public:
+        MyFunc();
+        MyFunc(const Expression &ex);
 
-    uint magic() const;
-};
+        MyFunc(const MyFunc &other);
 
-static RegisterExpression<MyFunc> RegisterMyFunc;
+        ~MyFunc();
 
-*/
+        /// optional functions
+        //Expression series(const Symbol &symbol, int n) const;
+        //Expression simplify(int options=0) const;
 
-}
+        /// required functions
+        bool operator==(const ExBase &other) const;
 
-SIRE_EXPOSE_CLASS( SireCAS::SingleFunc )
+        const char* what() const
+        {
+            return "SireCAS::MyFunc";
+        }
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        //required functions
+        ExBase* clone() const
+        {
+            return new MyFunc(*this);
+        }
+
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return toExpression();
+            else
+                return MyFunc(arg).toExpression();
+        }
+
+        //optional
+        Expression diff() const;
+        Expression integ() const;
+
+        QString stringRep() const
+        {
+            return "myfunc";
+        }
+
+        uint magic() const;
+    };
+
+    static RegisterExpression<MyFunc> RegisterMyFunc;
+
+    */
+
+} // namespace SireCAS
+
+SIRE_EXPOSE_CLASS(SireCAS::SingleFunc)
 
 SIRE_END_HEADER
 

@@ -34,400 +34,364 @@
 
 namespace SireMM
 {
-class CLJRFFunction;
-class CLJIntraRFFunction;
-class CLJSoftRFFunction;
-class CLJSoftIntraRFFunction;
-}
+    class CLJRFFunction;
+    class CLJIntraRFFunction;
+    class CLJSoftRFFunction;
+    class CLJSoftIntraRFFunction;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJRFFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJRFFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJRFFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJRFFunction &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJIntraRFFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJIntraRFFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJIntraRFFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJIntraRFFunction &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJSoftRFFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJSoftRFFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJSoftRFFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJSoftRFFunction &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJSoftIntraRFFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJSoftIntraRFFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJSoftIntraRFFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJSoftIntraRFFunction &);
 
 namespace SireMM
 {
 
-/** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
-    CLJAtoms using a reaction field cutoff
+    /** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
+        CLJAtoms using a reaction field cutoff
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJRFFunction
-        : public SireBase::ConcreteProperty<CLJRFFunction,CLJCutoffFunction>
-{
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJRFFunction : public SireBase::ConcreteProperty<CLJRFFunction, CLJCutoffFunction>
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJRFFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJRFFunction&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJRFFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJRFFunction &);
 
-public:
-    CLJRFFunction();
-    CLJRFFunction(Length cutoff);
-    CLJRFFunction(Length coul_cutoff, Length lj_cutoff);
+    public:
+        CLJRFFunction();
+        CLJRFFunction(Length cutoff);
+        CLJRFFunction(Length coul_cutoff, Length lj_cutoff);
 
-    CLJRFFunction(const Space &space, Length cutoff);
-    CLJRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
+        CLJRFFunction(const Space &space, Length cutoff);
+        CLJRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
 
-    CLJRFFunction(Length cutoff, COMBINING_RULES combining_rules);
-    CLJRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
+        CLJRFFunction(Length cutoff, COMBINING_RULES combining_rules);
+        CLJRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    CLJRFFunction(const Space &space, COMBINING_RULES combining_rules);
-    CLJRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
-    CLJRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
-                     COMBINING_RULES combining_rules);
+        CLJRFFunction(const Space &space, COMBINING_RULES combining_rules);
+        CLJRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
+        CLJRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    CLJRFFunction(const CLJRFFunction &other);
+        CLJRFFunction(const CLJRFFunction &other);
 
-    ~CLJRFFunction();
+        ~CLJRFFunction();
 
-    CLJRFFunction& operator=(const CLJRFFunction &other);
+        CLJRFFunction &operator=(const CLJRFFunction &other);
 
-    bool operator==(const CLJRFFunction &other) const;
-    bool operator!=(const CLJRFFunction &other) const;
+        bool operator==(const CLJRFFunction &other) const;
+        bool operator!=(const CLJRFFunction &other) const;
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    CLJRFFunction* clone() const;
+        CLJRFFunction *clone() const;
 
-    Properties properties() const;
-    CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
-    PropertyPtr property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
+        Properties properties() const;
+        CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
+        PropertyPtr property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
 
-    void setDielectric(float dielectric);
-    float dielectric() const;
+        void setDielectric(float dielectric);
+        float dielectric() const;
 
-    bool supportsGridCalculation() const;
+        bool supportsGridCalculation() const;
 
-    static CLJFunctionPtr defaultRFFunction();
+        static CLJFunctionPtr defaultRFFunction();
 
-protected:
-    void calcVacEnergyAri(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+    protected:
+        void calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-    void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
-
-    void calcVacEnergyGeo(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
-
-    void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
-
-    void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
-
-    void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
-
-    void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
-
-    void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
-
-    double calcVacCoulombEnergyAri(const CLJAtoms &atoms) const;
-    double calcVacCoulombEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                                   float min_distance) const;
-
-    double calcVacLJEnergyAri(const CLJAtoms &atoms) const;
-    double calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
+        void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
                               float min_distance) const;
 
-    void calcVacGrid(const CLJAtoms &atoms, const GridInfo &gridinfo,
-                     const int start, const int end, float *gridpot) const;
+        void calcVacEnergyGeo(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-    void calcBoxGrid(const CLJAtoms &atoms, const GridInfo &gridinfo,
-                     const Vector &box_dimensions,
-                     const int start, const int end, float *gridpot) const;
+        void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-private:
-    /** The dielectric constant */
-    float diel;
-};
+        void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-/** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
-    CLJAtoms using a reaction field cutoff
+        void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJIntraRFFunction
-        : public SireBase::ConcreteProperty<CLJIntraRFFunction,CLJIntraFunction>
-{
+        void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJIntraRFFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJIntraRFFunction&);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-public:
-    CLJIntraRFFunction();
-    CLJIntraRFFunction(Length cutoff);
-    CLJIntraRFFunction(Length coul_cutoff, Length lj_cutoff);
+        double calcVacCoulombEnergyAri(const CLJAtoms &atoms) const;
+        double calcVacCoulombEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, float min_distance) const;
 
-    CLJIntraRFFunction(const Space &space, Length cutoff);
-    CLJIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
+        double calcVacLJEnergyAri(const CLJAtoms &atoms) const;
+        double calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, float min_distance) const;
 
-    CLJIntraRFFunction(Length cutoff, COMBINING_RULES combining_rules);
-    CLJIntraRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
+        void calcVacGrid(const CLJAtoms &atoms, const GridInfo &gridinfo, const int start, const int end,
+                         float *gridpot) const;
 
-    CLJIntraRFFunction(const Space &space, COMBINING_RULES combining_rules);
-    CLJIntraRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
-    CLJIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
-                          COMBINING_RULES combining_rules);
+        void calcBoxGrid(const CLJAtoms &atoms, const GridInfo &gridinfo, const Vector &box_dimensions, const int start,
+                         const int end, float *gridpot) const;
 
-    CLJIntraRFFunction(const CLJIntraRFFunction &other);
+    private:
+        /** The dielectric constant */
+        float diel;
+    };
 
-    ~CLJIntraRFFunction();
+    /** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
+        CLJAtoms using a reaction field cutoff
 
-    CLJIntraRFFunction& operator=(const CLJIntraRFFunction &other);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJIntraRFFunction : public SireBase::ConcreteProperty<CLJIntraRFFunction, CLJIntraFunction>
+    {
 
-    bool operator==(const CLJIntraRFFunction &other) const;
-    bool operator!=(const CLJIntraRFFunction &other) const;
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJIntraRFFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJIntraRFFunction &);
 
-    static const char* typeName();
-    const char* what() const;
+    public:
+        CLJIntraRFFunction();
+        CLJIntraRFFunction(Length cutoff);
+        CLJIntraRFFunction(Length coul_cutoff, Length lj_cutoff);
 
-    CLJIntraRFFunction* clone() const;
+        CLJIntraRFFunction(const Space &space, Length cutoff);
+        CLJIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
 
-    Properties properties() const;
-    CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
-    PropertyPtr property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
+        CLJIntraRFFunction(Length cutoff, COMBINING_RULES combining_rules);
+        CLJIntraRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    void setDielectric(float dielectric);
-    float dielectric() const;
+        CLJIntraRFFunction(const Space &space, COMBINING_RULES combining_rules);
+        CLJIntraRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
+        CLJIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    static CLJFunctionPtr defaultRFFunction();
+        CLJIntraRFFunction(const CLJIntraRFFunction &other);
 
-protected:
-    void calcVacEnergyAri(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        ~CLJIntraRFFunction();
 
-    void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        CLJIntraRFFunction &operator=(const CLJIntraRFFunction &other);
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        bool operator==(const CLJIntraRFFunction &other) const;
+        bool operator!=(const CLJIntraRFFunction &other) const;
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        static const char *typeName();
+        const char *what() const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        CLJIntraRFFunction *clone() const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg
-                          , float min_distance) const;
+        Properties properties() const;
+        CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
+        PropertyPtr property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        void setDielectric(float dielectric);
+        float dielectric() const;
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
+        static CLJFunctionPtr defaultRFFunction();
 
-private:
-    /** The dielectric constant */
-    float diel;
-};
+    protected:
+        void calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
+        void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-/** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
-    CLJAtoms using a reaction field cutoff, and provides a soft-core
-    potential that can soften molecules that are involved in free energy calculations
+        void calcVacEnergyGeo(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJSoftRFFunction
-        : public SireBase::ConcreteProperty<CLJSoftRFFunction,CLJSoftFunction>
-{
+        void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJSoftRFFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJSoftRFFunction&);
+        void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-public:
-    CLJSoftRFFunction();
-    CLJSoftRFFunction(Length cutoff);
-    CLJSoftRFFunction(Length coul_cutoff, Length lj_cutoff);
+        void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-    CLJSoftRFFunction(const Space &space, Length cutoff);
-    CLJSoftRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-    CLJSoftRFFunction(Length cutoff, COMBINING_RULES combining_rules);
-    CLJSoftRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-    CLJSoftRFFunction(const Space &space, COMBINING_RULES combining_rules);
-    CLJSoftRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
-    CLJSoftRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
-                     COMBINING_RULES combining_rules);
+    private:
+        /** The dielectric constant */
+        float diel;
+    };
 
-    CLJSoftRFFunction(const CLJSoftRFFunction &other);
+    /** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
+        CLJAtoms using a reaction field cutoff, and provides a soft-core
+        potential that can soften molecules that are involved in free energy calculations
 
-    ~CLJSoftRFFunction();
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJSoftRFFunction : public SireBase::ConcreteProperty<CLJSoftRFFunction, CLJSoftFunction>
+    {
 
-    CLJSoftRFFunction& operator=(const CLJSoftRFFunction &other);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJSoftRFFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJSoftRFFunction &);
 
-    bool operator==(const CLJSoftRFFunction &other) const;
-    bool operator!=(const CLJSoftRFFunction &other) const;
+    public:
+        CLJSoftRFFunction();
+        CLJSoftRFFunction(Length cutoff);
+        CLJSoftRFFunction(Length coul_cutoff, Length lj_cutoff);
 
-    static const char* typeName();
-    const char* what() const;
+        CLJSoftRFFunction(const Space &space, Length cutoff);
+        CLJSoftRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
 
-    QString toString() const;
+        CLJSoftRFFunction(Length cutoff, COMBINING_RULES combining_rules);
+        CLJSoftRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    CLJSoftRFFunction* clone() const;
+        CLJSoftRFFunction(const Space &space, COMBINING_RULES combining_rules);
+        CLJSoftRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
+        CLJSoftRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    Properties properties() const;
-    CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
-    PropertyPtr property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
+        CLJSoftRFFunction(const CLJSoftRFFunction &other);
 
-    void setDielectric(float dielectric);
-    float dielectric() const;
+        ~CLJSoftRFFunction();
 
-    static CLJFunctionPtr defaultRFFunction();
+        CLJSoftRFFunction &operator=(const CLJSoftRFFunction &other);
 
-protected:
-    void calcVacEnergyAri(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        bool operator==(const CLJSoftRFFunction &other) const;
+        bool operator!=(const CLJSoftRFFunction &other) const;
 
-    void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        static const char *typeName();
+        const char *what() const;
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        QString toString() const;
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        CLJSoftRFFunction *clone() const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        Properties properties() const;
+        CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
+        PropertyPtr property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
+        void setDielectric(float dielectric);
+        float dielectric() const;
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        static CLJFunctionPtr defaultRFFunction();
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
+    protected:
+        void calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-private:
-    /** The dielectric constant */
-    float diel;
-};
+        void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-/** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
-    CLJAtoms using a reaction field cutoff, and provides a soft-core
-    potential that can soften molecules that are involved in free energy calculations
+        void calcVacEnergyGeo(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJSoftIntraRFFunction
-        : public SireBase::ConcreteProperty<CLJSoftIntraRFFunction,CLJSoftIntraFunction>
-{
+        void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJSoftIntraRFFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJSoftIntraRFFunction&);
+        void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-public:
-    CLJSoftIntraRFFunction();
-    CLJSoftIntraRFFunction(Length cutoff);
-    CLJSoftIntraRFFunction(Length coul_cutoff, Length lj_cutoff);
+        void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-    CLJSoftIntraRFFunction(const Space &space, Length cutoff);
-    CLJSoftIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-    CLJSoftIntraRFFunction(Length cutoff, COMBINING_RULES combining_rules);
-    CLJSoftIntraRFFunction(Length coul_cutoff, Length lj_cutoff,
-                              COMBINING_RULES combining_rules);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-    CLJSoftIntraRFFunction(const Space &space, COMBINING_RULES combining_rules);
-    CLJSoftIntraRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
-    CLJSoftIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
-                              COMBINING_RULES combining_rules);
+    private:
+        /** The dielectric constant */
+        float diel;
+    };
 
-    CLJSoftIntraRFFunction(const CLJSoftIntraRFFunction &other);
+    /** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
+        CLJAtoms using a reaction field cutoff, and provides a soft-core
+        potential that can soften molecules that are involved in free energy calculations
 
-    ~CLJSoftIntraRFFunction();
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJSoftIntraRFFunction
+        : public SireBase::ConcreteProperty<CLJSoftIntraRFFunction, CLJSoftIntraFunction>
+    {
 
-    CLJSoftIntraRFFunction& operator=(const CLJSoftIntraRFFunction &other);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJSoftIntraRFFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJSoftIntraRFFunction &);
 
-    bool operator==(const CLJSoftIntraRFFunction &other) const;
-    bool operator!=(const CLJSoftIntraRFFunction &other) const;
+    public:
+        CLJSoftIntraRFFunction();
+        CLJSoftIntraRFFunction(Length cutoff);
+        CLJSoftIntraRFFunction(Length coul_cutoff, Length lj_cutoff);
 
-    static const char* typeName();
-    const char* what() const;
+        CLJSoftIntraRFFunction(const Space &space, Length cutoff);
+        CLJSoftIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
 
-    CLJSoftIntraRFFunction* clone() const;
+        CLJSoftIntraRFFunction(Length cutoff, COMBINING_RULES combining_rules);
+        CLJSoftIntraRFFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    Properties properties() const;
-    CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
-    PropertyPtr property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
+        CLJSoftIntraRFFunction(const Space &space, COMBINING_RULES combining_rules);
+        CLJSoftIntraRFFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
+        CLJSoftIntraRFFunction(const Space &space, Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    void setDielectric(float dielectric);
-    float dielectric() const;
+        CLJSoftIntraRFFunction(const CLJSoftIntraRFFunction &other);
 
-    static CLJFunctionPtr defaultRFFunction();
+        ~CLJSoftIntraRFFunction();
 
-protected:
-    void calcVacEnergyAri(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        CLJSoftIntraRFFunction &operator=(const CLJSoftIntraRFFunction &other);
 
-    void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        bool operator==(const CLJSoftIntraRFFunction &other) const;
+        bool operator!=(const CLJSoftIntraRFFunction &other) const;
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        static const char *typeName();
+        const char *what() const;
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        CLJSoftIntraRFFunction *clone() const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        Properties properties() const;
+        CLJFunctionPtr setProperty(const QString &name, const Property &value) const;
+        PropertyPtr property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
+        void setDielectric(float dielectric);
+        float dielectric() const;
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        static CLJFunctionPtr defaultRFFunction();
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
+    protected:
+        void calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-private:
-    /** The dielectric constant */
-    float diel;
-};
+        void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-}
+        void calcVacEnergyGeo(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-Q_DECLARE_METATYPE( SireMM::CLJRFFunction )
-Q_DECLARE_METATYPE( SireMM::CLJIntraRFFunction )
+        void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-Q_DECLARE_METATYPE( SireMM::CLJSoftRFFunction )
-Q_DECLARE_METATYPE( SireMM::CLJSoftIntraRFFunction );
+        void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-SIRE_EXPOSE_CLASS( SireMM::CLJRFFunction )
-SIRE_EXPOSE_CLASS( SireMM::CLJIntraRFFunction )
+        void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-SIRE_EXPOSE_CLASS( SireMM::CLJSoftRFFunction )
-SIRE_EXPOSE_CLASS( SireMM::CLJSoftIntraRFFunction )
+        void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
+
+        void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
+
+    private:
+        /** The dielectric constant */
+        float diel;
+    };
+
+} // namespace SireMM
+
+Q_DECLARE_METATYPE(SireMM::CLJRFFunction)
+Q_DECLARE_METATYPE(SireMM::CLJIntraRFFunction)
+
+Q_DECLARE_METATYPE(SireMM::CLJSoftRFFunction)
+Q_DECLARE_METATYPE(SireMM::CLJSoftIntraRFFunction);
+
+SIRE_EXPOSE_CLASS(SireMM::CLJRFFunction)
+SIRE_EXPOSE_CLASS(SireMM::CLJIntraRFFunction)
+
+SIRE_EXPOSE_CLASS(SireMM::CLJSoftRFFunction)
+SIRE_EXPOSE_CLASS(SireMM::CLJSoftIntraRFFunction)
 
 #endif

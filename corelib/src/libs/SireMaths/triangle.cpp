@@ -42,8 +42,7 @@ static const RegisterMetaType<Triangle> r_triangle(NO_ROOT);
 /** Serialise to a binary data stream */
 QDataStream &operator<<(QDataStream &ds, const Triangle &triangle)
 {
-    writeHeader(ds, r_triangle, 1)
-          << triangle.points[0] << triangle.points[1] << triangle.points[2];
+    writeHeader(ds, r_triangle, 1) << triangle.points[0] << triangle.points[1] << triangle.points[2];
 
     return ds;
 }
@@ -65,7 +64,8 @@ QDataStream &operator>>(QDataStream &ds, Triangle &triangle)
 
 /** Create a zero triangle */
 Triangle::Triangle()
-{}
+{
+}
 
 /** Create a triangle from point 0 -> 1 -> 2 */
 Triangle::Triangle(const Vector &point0, const Vector &point1, const Vector &point2)
@@ -78,24 +78,25 @@ Triangle::Triangle(const Vector &point0, const Vector &point1, const Vector &poi
 /** Copy constructor */
 Triangle::Triangle(const Triangle &other)
 {
-    for (int i=0; i<3; ++i)
+    for (int i = 0; i < 3; ++i)
         points[i] = other.points[i];
 }
 
 /** Destructor */
 Triangle::~Triangle()
-{}
+{
+}
 
 /** Return a string representation of the triangle */
 QString Triangle::toString() const
 {
     return QObject::tr("Triangle: Angles %1 degs, %2 degs, %3 degs")
-                .arg(angle0().to(degrees))
-                .arg(angle1().to(degrees))
-                .arg(angle2().to(degrees));
+        .arg(angle0().to(degrees))
+        .arg(angle1().to(degrees))
+        .arg(angle2().to(degrees));
 }
 
-const char* Triangle::typeName()
+const char *Triangle::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Triangle>() );
+    return QMetaType::typeName(qMetaTypeId<Triangle>());
 }

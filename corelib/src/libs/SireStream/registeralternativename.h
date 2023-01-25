@@ -37,7 +37,7 @@ namespace SireStream
     SIRESTREAM_EXPORT void registerAlternativeName(const char *type_name, const char *alternative);
 
     /** This class is used for static initialisation to register alternative names */
-    template<class T>
+    template <class T>
     class RegisterAlternativeName
     {
     public:
@@ -47,14 +47,15 @@ namespace SireStream
         }
 
         ~RegisterAlternativeName()
-        {}
+        {
+        }
     };
 
     namespace detail
     {
         QSet<QString> getAlternativeNames(QString type_name);
     }
-}
+} // namespace SireStream
 
 SIRE_END_HEADER
 

@@ -30,312 +30,304 @@
 #ifndef SIREMOL_SEGEDITOR_H
 #define SIREMOL_SEGEDITOR_H
 
-#include "structureeditor.h"
 #include "segment.h"
+#include "structureeditor.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class SegEditor;
-class SegStructureEditor;
-}
+    class SegEditor;
+    class SegStructureEditor;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::SegEditor&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::SegEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::SegEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::SegEditor &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::SegStructureEditor&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::SegStructureEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::SegStructureEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::SegStructureEditor &);
 
 namespace SireMol
 {
 
-class MolStructureEditor;
-class SegStructureEditor;
-class ChainStructureEditor;
-class ResStructureEditor;
-class CGStructureEditor;
-class AtomStructureEditor;
+    class MolStructureEditor;
+    class SegStructureEditor;
+    class ChainStructureEditor;
+    class ResStructureEditor;
+    class CGStructureEditor;
+    class AtomStructureEditor;
 
-class MolEditor;
-class SegEditor;
-class ChainEditor;
-class ResEditor;
-class CGEditor;
-class AtomEditor;
+    class MolEditor;
+    class SegEditor;
+    class ChainEditor;
+    class ResEditor;
+    class CGEditor;
+    class AtomEditor;
 
-class CGIdx;
-class CGID;
-class ResIdx;
-class ResID;
+    class CGIdx;
+    class CGID;
+    class ResIdx;
+    class ResID;
 
-class SegEditor;
-typedef Editor<SegEditor, Segment> SegEditorBase;
+    class SegEditor;
+    typedef Editor<SegEditor, Segment> SegEditorBase;
 
-/** This class is used to edit the non-structural parts of a segment
+    /** This class is used to edit the non-structural parts of a segment
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT SegEditor
-        : public SireBase::ConcreteProperty< SegEditor,Editor<SegEditor,Segment> >
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const SegEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SegEditor&);
-
-public:
-    SegEditor();
-
-    SegEditor(const Segment &residue);
-
-    SegEditor(const SegEditor &other);
-
-    ~SegEditor();
-
-    SegEditor& operator=(const Segment &residue);
-    SegEditor& operator=(const SegEditor &other);
-
-    static const char* typeName();
-
-    QString toString() const;
-
-    SegEditor& rename(const SegName &name);
-    SegStructureEditor reindex(SegIdx index) const;
-
-    MolStructureEditor remove() const;
-
-    AtomStructureEditor add(const AtomName &atomname) const;
-    AtomStructureEditor add(AtomNum atomnum) const;
-
-    SegStructureEditor remove(const AtomID &atomid) const;
-
-    SegStructureEditor remove(int i) const;
-
-    SegStructureEditor transfer(const AtomID &atomid, const SegID &segid) const;
-    SegStructureEditor transfer(int i, const SegID &segid) const;
-
-    SegStructureEditor transferAll(const SegID &segid) const;
-
-    Segment commit() const;
-};
-
-/** This is the class used to edit a segment's structure
-
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT SegStructureEditor : public StructureEditor
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const SegStructureEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SegStructureEditor&);
-
-public:
-    SegStructureEditor();
-    SegStructureEditor(const Segment &residue);
-    SegStructureEditor(const StructureEditor &data, SegIdx residx);
-
-    SegStructureEditor(const SegStructureEditor &other);
-
-    ~SegStructureEditor();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT SegEditor : public SireBase::ConcreteProperty<SegEditor, Editor<SegEditor, Segment>>
     {
-        return SegStructureEditor::typeName();
-    }
 
-    SegStructureEditor* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const SegEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, SegEditor &);
 
-    SegStructureEditor& operator=(const Segment &residue);
-    SegStructureEditor& operator=(const SegStructureEditor &other);
+    public:
+        SegEditor();
 
-    QString toString() const;
+        SegEditor(const Segment &residue);
 
-    bool selectedAll() const;
+        SegEditor(const SegEditor &other);
 
-    const SegName &name() const;
-    SegIdx index() const;
+        ~SegEditor();
 
-    int nAtoms() const;
+        SegEditor &operator=(const Segment &residue);
+        SegEditor &operator=(const SegEditor &other);
 
-    MolStructureEditor molecule();
+        static const char *typeName();
 
-    AtomStructureEditor atom(int i);
-    AtomStructureEditor atom(const AtomID &atomid);
+        QString toString() const;
 
-    AtomStructureEditor select(int i);
-    AtomStructureEditor select(const AtomID &atomid);
+        SegEditor &rename(const SegName &name);
+        SegStructureEditor reindex(SegIdx index) const;
 
-    SegStructureEditor& rename(const SegName &name);
-    SegStructureEditor& reindex(SegIdx index);
+        MolStructureEditor remove() const;
 
-    MolStructureEditor remove();
+        AtomStructureEditor add(const AtomName &atomname) const;
+        AtomStructureEditor add(AtomNum atomnum) const;
 
-    AtomStructureEditor add(const AtomName &atomname);
-    AtomStructureEditor add(AtomNum atomnum);
+        SegStructureEditor remove(const AtomID &atomid) const;
 
-    SegStructureEditor& remove(const AtomID &atomid);
+        SegStructureEditor remove(int i) const;
 
-    SegStructureEditor& remove(int i);
+        SegStructureEditor transfer(const AtomID &atomid, const SegID &segid) const;
+        SegStructureEditor transfer(int i, const SegID &segid) const;
 
-    SegStructureEditor& transfer(const AtomID &atomid, const SegID &segid);
-    SegStructureEditor& transfer(int i, const SegID &segid);
+        SegStructureEditor transferAll(const SegID &segid) const;
 
-    SegStructureEditor& transferAll(const SegID &segid);
+        Segment commit() const;
+    };
 
-    template<class T>
-    T property(const QString &key) const;
+    /** This is the class used to edit a segment's structure
 
-    template<class T>
-    T metadata(const QString &metakey) const;
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT SegStructureEditor : public StructureEditor
+    {
 
-    template<class T>
-    T metadata(const QString &key, const QString &metakey) const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const SegStructureEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, SegStructureEditor &);
 
-    template<class T>
-    SegStructureEditor& setProperty(const QString &key, const T &value);
+    public:
+        SegStructureEditor();
+        SegStructureEditor(const Segment &residue);
+        SegStructureEditor(const StructureEditor &data, SegIdx residx);
 
-    template<class T>
-    SegStructureEditor& setMetadata(const QString &metakey, const T &value);
+        SegStructureEditor(const SegStructureEditor &other);
 
-    template<class T>
-    SegStructureEditor& setMetadata(const QString &key, const QString &metakey,
-                                    const T &value);
+        ~SegStructureEditor();
 
-    Segment commit() const;
+        static const char *typeName();
 
-    operator Segment() const;
+        const char *what() const
+        {
+            return SegStructureEditor::typeName();
+        }
 
-private:
-    /** The unique ID for this segment in the molecule editor */
-    quint32 uid;
-};
+        SegStructureEditor *clone() const;
+
+        SegStructureEditor &operator=(const Segment &residue);
+        SegStructureEditor &operator=(const SegStructureEditor &other);
+
+        QString toString() const;
+
+        bool selectedAll() const;
+
+        const SegName &name() const;
+        SegIdx index() const;
+
+        int nAtoms() const;
+
+        MolStructureEditor molecule();
+
+        AtomStructureEditor atom(int i);
+        AtomStructureEditor atom(const AtomID &atomid);
+
+        AtomStructureEditor select(int i);
+        AtomStructureEditor select(const AtomID &atomid);
+
+        SegStructureEditor &rename(const SegName &name);
+        SegStructureEditor &reindex(SegIdx index);
+
+        MolStructureEditor remove();
+
+        AtomStructureEditor add(const AtomName &atomname);
+        AtomStructureEditor add(AtomNum atomnum);
+
+        SegStructureEditor &remove(const AtomID &atomid);
+
+        SegStructureEditor &remove(int i);
+
+        SegStructureEditor &transfer(const AtomID &atomid, const SegID &segid);
+        SegStructureEditor &transfer(int i, const SegID &segid);
+
+        SegStructureEditor &transferAll(const SegID &segid);
+
+        template <class T>
+        T property(const QString &key) const;
+
+        template <class T>
+        T metadata(const QString &metakey) const;
+
+        template <class T>
+        T metadata(const QString &key, const QString &metakey) const;
+
+        template <class T>
+        SegStructureEditor &setProperty(const QString &key, const T &value);
+
+        template <class T>
+        SegStructureEditor &setMetadata(const QString &metakey, const T &value);
+
+        template <class T>
+        SegStructureEditor &setMetadata(const QString &key, const QString &metakey, const T &value);
+
+        Segment commit() const;
+
+        operator Segment() const;
+
+    private:
+        /** The unique ID for this segment in the molecule editor */
+        quint32 uid;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the value for this segment of the property at key 'key'.
-    Note that this property *must* be of type SegProperty<T> for
-    this to work!
+    /** Return the value for this segment of the property at key 'key'.
+        Note that this property *must* be of type SegProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T SegStructureEditor::property(const QString &key) const
-{
-    const QVariant &value = this->getSegProperty(uid, key);
-    return this->_pvt_getProperty<T>(key, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T SegStructureEditor::property(const QString &key) const
+    {
+        const QVariant &value = this->getSegProperty(uid, key);
+        return this->_pvt_getProperty<T>(key, value);
+    }
 
-/** Return the value for this segment of the metadata at metakey 'metakey'.
-    Note that this property *must* be of type SegProperty<T> for
-    this to work!
+    /** Return the value for this segment of the metadata at metakey 'metakey'.
+        Note that this property *must* be of type SegProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T SegStructureEditor::metadata(const QString &metakey) const
-{
-    const QVariant &value = this->getSegMetadata(uid, metakey);
-    return this->_pvt_getMetadata<T>(metakey, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T SegStructureEditor::metadata(const QString &metakey) const
+    {
+        const QVariant &value = this->getSegMetadata(uid, metakey);
+        return this->_pvt_getMetadata<T>(metakey, value);
+    }
 
-/** Return the value for this segment of the metadata at metakey 'metakey'
-    for the property at key 'key'.
+    /** Return the value for this segment of the metadata at metakey 'metakey'
+        for the property at key 'key'.
 
-    Note that this property *must* be of type SegProperty<T> for
-    this to work!
+        Note that this property *must* be of type SegProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T SegStructureEditor::metadata(const QString &key,
-                               const QString &metakey) const
-{
-    const QVariant &value = this->getSegMetadata(uid, key, metakey);
-    return this->_pvt_getMetadata<T>(key, metakey, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T SegStructureEditor::metadata(const QString &key, const QString &metakey) const
+    {
+        const QVariant &value = this->getSegMetadata(uid, key, metakey);
+        return this->_pvt_getMetadata<T>(key, metakey, value);
+    }
 
-/** Set the property at key 'key' to have the value 'value' for this segment.
-    Note that an exception will be thrown if an existing property for
-    this key is not of type SegProperty<T>
+    /** Set the property at key 'key' to have the value 'value' for this segment.
+        Note that an exception will be thrown if an existing property for
+        this key is not of type SegProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-SegStructureEditor& SegStructureEditor::setProperty(const QString &key,
-                                                    const T &value)
-{
-    this->assertValidSegment(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    SegStructureEditor &SegStructureEditor::setProperty(const QString &key, const T &value)
+    {
+        this->assertValidSegment(uid);
 
-    //create space for this property
-    this->_pvt_createSpaceForProperty< SegProperty<T> >(key);
+        // create space for this property
+        this->_pvt_createSpaceForProperty<SegProperty<T>>(key);
 
-    //now set the value of the property
-    this->_pvt_setSegProperty(uid, key, QVariant::fromValue<T>(value));
+        // now set the value of the property
+        this->_pvt_setSegProperty(uid, key, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Set the metadata at metakey 'metakey' to have the value 'value' for
-    this segment. Note that an exception will be thrown if an existing
-    property for this metakey is not of type SegProperty<T>
+    /** Set the metadata at metakey 'metakey' to have the value 'value' for
+        this segment. Note that an exception will be thrown if an existing
+        property for this metakey is not of type SegProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-SegStructureEditor& SegStructureEditor::setMetadata(const QString &metakey,
-                                                    const T &value)
-{
-    this->assertValidSegment(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    SegStructureEditor &SegStructureEditor::setMetadata(const QString &metakey, const T &value)
+    {
+        this->assertValidSegment(uid);
 
-    //create space for this metadata
-    this->_pvt_createSpaceForMetadata< SegProperty<T> >(metakey);
+        // create space for this metadata
+        this->_pvt_createSpaceForMetadata<SegProperty<T>>(metakey);
 
-    //now set the value of this metadata
-    this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
+        // now set the value of this metadata
+        this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Set the metadata at metakey 'metakey' for the property at
-    key 'key' to have the value 'value' for
-    this segment. Note that an exception will be thrown if an existing
-    property for this metakey is not of type SegProperty<T>
+    /** Set the metadata at metakey 'metakey' for the property at
+        key 'key' to have the value 'value' for
+        this segment. Note that an exception will be thrown if an existing
+        property for this metakey is not of type SegProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-SegStructureEditor& SegStructureEditor::setMetadata(const QString &key,
-                                                    const QString &metakey,
-                                                    const T &value)
-{
-    this->assertValidSegment(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    SegStructureEditor &SegStructureEditor::setMetadata(const QString &key, const QString &metakey, const T &value)
+    {
+        this->assertValidSegment(uid);
 
-    //create space for this metadata
-    this->_pvt_createSpaceForMetadata< SegProperty<T> >(key, metakey);
+        // create space for this metadata
+        this->_pvt_createSpaceForMetadata<SegProperty<T>>(key, metakey);
 
-    //now set the value of this metadata
-    this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
+        // now set the value of this metadata
+        this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::SegEditor );
-Q_DECLARE_METATYPE( SireMol::SegStructureEditor );
+Q_DECLARE_METATYPE(SireMol::SegEditor);
+Q_DECLARE_METATYPE(SireMol::SegStructureEditor);
 
-SIRE_EXPOSE_CLASS( SireMol::SegEditor )
-SIRE_EXPOSE_CLASS( SireMol::SegStructureEditor )
+SIRE_EXPOSE_CLASS(SireMol::SegEditor)
+SIRE_EXPOSE_CLASS(SireMol::SegStructureEditor)
 
-SIRE_EXPOSE_ALIAS( (SireMol::Editor<SireMol::SegEditor, SireMol::Segment>),
-                    SireMol::SegEditorBase )
+SIRE_EXPOSE_ALIAS((SireMol::Editor<SireMol::SegEditor, SireMol::Segment>), SireMol::SegEditorBase)
 
 SIRE_END_HEADER
 

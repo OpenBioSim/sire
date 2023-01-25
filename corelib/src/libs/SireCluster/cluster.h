@@ -30,8 +30,8 @@
 
 #include "sireglobal.h"
 
-#include <QUuid>
 #include <QList>
+#include <QUuid>
 
 #include <boost/shared_ptr.hpp>
 
@@ -40,90 +40,90 @@ SIRE_BEGIN_HEADER
 namespace SireCluster
 {
 
-class Nodes;
+    class Nodes;
 
-class Backend;
-class Frontend;
+    class Backend;
+    class Frontend;
 
-namespace MPI
-{
-class ReservationManager;
-}
+    namespace MPI
+    {
+        class ReservationManager;
+    }
 
-/** This class provides the global registry for all nodes in the cluster.
-    A node is defined as a resource that can run a WorkPacket. A node
-    consists of a Backend (the object in which the WorkPacket is
-    run) and a Frontend (the object that allows the node to communicate
-    with the Backend)
+    /** This class provides the global registry for all nodes in the cluster.
+        A node is defined as a resource that can run a WorkPacket. A node
+        consists of a Backend (the object in which the WorkPacket is
+        run) and a Frontend (the object that allows the node to communicate
+        with the Backend)
 
-    @author Christopher Woods
-*/
-class SIRECLUSTER_EXPORT Cluster
-{
+        @author Christopher Woods
+    */
+    class SIRECLUSTER_EXPORT Cluster
+    {
 
-friend class Backend;
-friend class SireCluster::MPI::ReservationManager;
+        friend class Backend;
+        friend class SireCluster::MPI::ReservationManager;
 
-public:
-    static QList<QUuid> localUIDs();
+    public:
+        static QList<QUuid> localUIDs();
 
-    static QList<QUuid> UIDs();
+        static QList<QUuid> UIDs();
 
-    static bool isLocal(const QUuid &uid);
+        static bool isLocal(const QUuid &uid);
 
-    static int getRank();
-    static int getCount();
+        static int getRank();
+        static int getCount();
 
-    static void start(int ppn=1);
+        static void start(int ppn = 1);
 
-    static void shutdown();
+        static void shutdown();
 
-    static void wait();
+        static void wait();
 
-    static bool isRunning();
+        static bool isRunning();
 
-    static bool supportsMPI();
+        static bool supportsMPI();
 
-    static Nodes getNode();
-    static Nodes getNode(int timeout);
+        static Nodes getNode();
+        static Nodes getNode(int timeout);
 
-    static Nodes getNode(const QUuid &uid);
-    static Nodes getNode(const QUuid &uid, int timeout);
+        static Nodes getNode(const QUuid &uid);
+        static Nodes getNode(const QUuid &uid, int timeout);
 
-    static Nodes getNodes(int nnodes);
-    static Nodes getNodes(int nnodes, int timeout);
+        static Nodes getNodes(int nnodes);
+        static Nodes getNodes(int nnodes, int timeout);
 
-    static Nodes getNodes(const QList<QUuid> &uids);
-    static Nodes getNodes(const QList<QUuid> &uids, int timeout);
+        static Nodes getNodes(const QList<QUuid> &uids);
+        static Nodes getNodes(const QList<QUuid> &uids, int timeout);
 
-    static Nodes getAllNodes();
-    static Nodes getAllNodes(int timeout);
+        static Nodes getAllNodes();
+        static Nodes getAllNodes(int timeout);
 
-protected:
-    static void registerBackend(const Backend &backend);  // called by Backend
+    protected:
+        static void registerBackend(const Backend &backend); // called by Backend
 
-    static QList<Frontend> localBackends(); // call by ReservationManager
+        static QList<Frontend> localBackends(); // call by ReservationManager
 
-private:
-    static Frontend _pvt_getFrontend();
-    static Frontend _pvt_getFrontend(const QUuid &uid);
+    private:
+        static Frontend _pvt_getFrontend();
+        static Frontend _pvt_getFrontend(const QUuid &uid);
 
-    static QList<Frontend> _pvt_getFrontends(int n);
-    static QList<Frontend> _pvt_getFrontends(int n, const QUuid &uid);
+        static QList<Frontend> _pvt_getFrontends(int n);
+        static QList<Frontend> _pvt_getFrontends(int n, const QUuid &uid);
 
-    static Frontend getFrontend();
-    static Frontend getFrontend(int timeout);
+        static Frontend getFrontend();
+        static Frontend getFrontend(int timeout);
 
-    static QList<Frontend> getFrontends(int n);
-    static QList<Frontend> getFrontends(int n, int timeout);
+        static QList<Frontend> getFrontends(int n);
+        static QList<Frontend> getFrontends(int n, int timeout);
 
-    static Frontend getFrontend(const QUuid &uid);
-    static Frontend getFrontend(const QUuid &uid, int timeout);
-};
+        static Frontend getFrontend(const QUuid &uid);
+        static Frontend getFrontend(const QUuid &uid, int timeout);
+    };
 
-}
+} // namespace SireCluster
 
-SIRE_EXPOSE_CLASS( SireCluster::Cluster )
+SIRE_EXPOSE_CLASS(SireCluster::Cluster)
 
 SIRE_END_HEADER
 

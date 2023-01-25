@@ -34,71 +34,68 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class Tinker;
+    class Tinker;
 }
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::Tinker&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::Tinker&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::Tinker &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::Tinker &);
 
 namespace SireIO
 {
 
-/** This class holds all of the sources and default values of the
-    properties and parameters used by the Tinker reader/writer
+    /** This class holds all of the sources and default values of the
+        properties and parameters used by the Tinker reader/writer
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT TinkerParameters : public IOParametersBase
-{
-public:
-    TinkerParameters();
-    ~TinkerParameters();
-};
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT TinkerParameters : public IOParametersBase
+    {
+    public:
+        TinkerParameters();
+        ~TinkerParameters();
+    };
 
-/** This class is used to read and write files in Tinker format
+    /** This class is used to read and write files in Tinker format
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT Tinker : public SireBase::ConcreteProperty<Tinker,IOBase>
-{
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT Tinker : public SireBase::ConcreteProperty<Tinker, IOBase>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const Tinker&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, Tinker&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const Tinker &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, Tinker &);
 
-public:
-    Tinker();
-    Tinker(const Tinker &other);
+    public:
+        Tinker();
+        Tinker(const Tinker &other);
 
-    ~Tinker();
+        ~Tinker();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    Tinker& operator=(const Tinker &other);
+        Tinker &operator=(const Tinker &other);
 
-    bool operator==(const Tinker &other) const;
-    bool operator!=(const Tinker &other) const;
+        bool operator==(const Tinker &other) const;
+        bool operator!=(const Tinker &other) const;
 
-    static const TinkerParameters& parameters();
+        static const TinkerParameters &parameters();
 
-    void loadParameters(const QString &prmfile);
+        void loadParameters(const QString &prmfile);
 
-protected:
-    MoleculeGroup readMols(const QByteArray &data,
-                           const PropertyMap &map) const;
+    protected:
+        MoleculeGroup readMols(const QByteArray &data, const PropertyMap &map) const;
 
-    QByteArray writeMols(const MoleculeGroup &molgroup,
-                         const PropertyMap &map) const;
+        QByteArray writeMols(const MoleculeGroup &molgroup, const PropertyMap &map) const;
 
-    QByteArray writeMols(const Molecules &molecules,
-                         const PropertyMap &map) const;
-};
+        QByteArray writeMols(const Molecules &molecules, const PropertyMap &map) const;
+    };
 
-}
+} // namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::Tinker )
+Q_DECLARE_METATYPE(SireIO::Tinker)
 
-SIRE_EXPOSE_CLASS( SireIO::TinkerParameters )
-SIRE_EXPOSE_CLASS( SireIO::Tinker )
+SIRE_EXPOSE_CLASS(SireIO::TinkerParameters)
+SIRE_EXPOSE_CLASS(SireIO::Tinker)
 
 SIRE_END_HEADER
 

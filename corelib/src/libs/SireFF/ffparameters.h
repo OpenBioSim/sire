@@ -36,195 +36,192 @@ SIRE_BEGIN_HEADER
 
 namespace SireFF
 {
-class FFParameters;
-class FFParametersArray;
+    class FFParameters;
+    class FFParametersArray;
 
-class NullFFParameters;
-class NullFFParametersArray;
+    class NullFFParameters;
+    class NullFFParametersArray;
 
-}
+} // namespace SireFF
 
-QDataStream& operator<<(QDataStream&, const SireFF::FFParameters&);
-QDataStream& operator>>(QDataStream&, SireFF::FFParameters&);
+QDataStream &operator<<(QDataStream &, const SireFF::FFParameters &);
+QDataStream &operator>>(QDataStream &, SireFF::FFParameters &);
 
-QDataStream& operator<<(QDataStream&, const SireFF::FFParametersArray&);
-QDataStream& operator>>(QDataStream&, SireFF::FFParametersArray&);
+QDataStream &operator<<(QDataStream &, const SireFF::FFParametersArray &);
+QDataStream &operator>>(QDataStream &, SireFF::FFParametersArray &);
 
-QDataStream& operator<<(QDataStream&, const SireFF::NullFFParameters&);
-QDataStream& operator>>(QDataStream&, SireFF::NullFFParameters&);
+QDataStream &operator<<(QDataStream &, const SireFF::NullFFParameters &);
+QDataStream &operator>>(QDataStream &, SireFF::NullFFParameters &);
 
-QDataStream& operator<<(QDataStream&, const SireFF::NullFFParametersArray&);
-QDataStream& operator>>(QDataStream&, SireFF::NullFFParametersArray&);
+QDataStream &operator<<(QDataStream &, const SireFF::NullFFParametersArray &);
+QDataStream &operator>>(QDataStream &, SireFF::NullFFParametersArray &);
 
 namespace SireFF
 {
 
-typedef SireBase::PropPtr<FFParameters> FFParametersPtr;
-typedef SireBase::PropPtr<FFParametersArray> FFParametersArrayPtr;
+    typedef SireBase::PropPtr<FFParameters> FFParametersPtr;
+    typedef SireBase::PropPtr<FFParametersArray> FFParametersArrayPtr;
 
-/** This is the virtual base class of all FFParameters. These classes
-    are used to hold the extracted parameters for beads in a forcefield
-    in a format that allows for rapid processing by the forcefield.
+    /** This is the virtual base class of all FFParameters. These classes
+        are used to hold the extracted parameters for beads in a forcefield
+        in a format that allows for rapid processing by the forcefield.
 
-    The FFParameters holds all of the forcefield parameters for a single
-    bead in the forcefield. All of the parameters for all of the beads
-    are held in the corresponding FFParametersArray-derived class.
+        The FFParameters holds all of the forcefield parameters for a single
+        bead in the forcefield. All of the parameters for all of the beads
+        are held in the corresponding FFParametersArray-derived class.
 
-    These classes are designed to be used internally by the forcefields
-    and are not designed to be part of the public API
+        These classes are designed to be used internally by the forcefields
+        and are not designed to be part of the public API
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFParameters : public SireBase::Property
-{
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFParameters : public SireBase::Property
+    {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const FFParameters&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFParameters&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const FFParameters &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, FFParameters &);
 
-public:
-    FFParameters();
-    FFParameters(const FFParameters &other);
+    public:
+        FFParameters();
+        FFParameters(const FFParameters &other);
 
-    virtual ~FFParameters();
+        virtual ~FFParameters();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual FFParameters* clone() const=0;
+        virtual FFParameters *clone() const = 0;
 
-    virtual FFParametersArrayPtr toArray() const=0;
+        virtual FFParametersArrayPtr toArray() const = 0;
 
-    static NullFFParameters null();
+        static NullFFParameters null();
 
-protected:
-    FFParameters& operator=(const FFParameters &other);
+    protected:
+        FFParameters &operator=(const FFParameters &other);
 
-    bool operator==(const FFParameters &other) const;
-    bool operator!=(const FFParameters &other) const;
-};
+        bool operator==(const FFParameters &other) const;
+        bool operator!=(const FFParameters &other) const;
+    };
 
-/** This is the virtual base class of all FFParametersArray objects. These
-    classes are used to hold all of the parameters for all of the beads
-    in the forcefield, in a format that allows for rapid computation by
-    the forcefield.
+    /** This is the virtual base class of all FFParametersArray objects. These
+        classes are used to hold all of the parameters for all of the beads
+        in the forcefield, in a format that allows for rapid computation by
+        the forcefield.
 
-    The parameters for an individual bead are held in the corresponding
-    FFParameters-derived class.
+        The parameters for an individual bead are held in the corresponding
+        FFParameters-derived class.
 
-    These classes are designed to be used internally by the forcefields
-    and are not designed to be part of the public API
+        These classes are designed to be used internally by the forcefields
+        and are not designed to be part of the public API
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFParametersArray : public SireBase::Property
-{
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFParametersArray : public SireBase::Property
+    {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const FFParametersArray&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFParametersArray&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const FFParametersArray &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, FFParametersArray &);
 
-public:
-    FFParametersArray();
-    FFParametersArray(const FFParametersArray &other);
+    public:
+        FFParametersArray();
+        FFParametersArray(const FFParametersArray &other);
 
-    virtual ~FFParametersArray();
+        virtual ~FFParametersArray();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual FFParametersArray* clone() const=0;
+        virtual FFParametersArray *clone() const = 0;
 
-    static NullFFParametersArray null();
+        static NullFFParametersArray null();
 
-    virtual FFParametersPtr operator[](int i) const=0;
+        virtual FFParametersPtr operator[](int i) const = 0;
 
-    FFParametersPtr at(int i) const;
+        FFParametersPtr at(int i) const;
 
-    virtual int count() const=0;
-    virtual bool isEmpty() const=0;
+        virtual int count() const = 0;
+        virtual bool isEmpty() const = 0;
 
-    virtual void append(const FFParameters &params)=0;
-    virtual void append(const FFParametersArray &params)=0;
+        virtual void append(const FFParameters &params) = 0;
+        virtual void append(const FFParametersArray &params) = 0;
 
-    virtual void update(int idx, const FFParameters &params)=0;
-    virtual void update(const QVarLengthArray<int> &idxs,
-                        const FFParametersArray &params)=0;
+        virtual void update(int idx, const FFParameters &params) = 0;
+        virtual void update(const QVarLengthArray<int> &idxs, const FFParametersArray &params) = 0;
 
-    virtual void remove(int idx)=0;
-    virtual void remove(const QVarLengthArray<int> &idxs)=0;
+        virtual void remove(int idx) = 0;
+        virtual void remove(const QVarLengthArray<int> &idxs) = 0;
 
-    virtual void removeAll()=0;
+        virtual void removeAll() = 0;
 
-protected:
-    FFParametersArray& operator=(const FFParametersArray &other);
+    protected:
+        FFParametersArray &operator=(const FFParametersArray &other);
 
-    bool operator==(const FFParametersArray &other) const;
-    bool operator!=(const FFParametersArray &other) const;
-};
+        bool operator==(const FFParametersArray &other) const;
+        bool operator!=(const FFParametersArray &other) const;
+    };
 
-/** Null FFParameters */
-class SIREFF_EXPORT NullFFParameters
-            : public SireBase::ConcreteProperty<NullFFParameters,FFParameters>
-{
+    /** Null FFParameters */
+    class SIREFF_EXPORT NullFFParameters : public SireBase::ConcreteProperty<NullFFParameters, FFParameters>
+    {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const NullFFParameters&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, NullFFParameters&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const NullFFParameters &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, NullFFParameters &);
 
-public:
-    NullFFParameters();
-    NullFFParameters(const NullFFParameters &other);
+    public:
+        NullFFParameters();
+        NullFFParameters(const NullFFParameters &other);
 
-    ~NullFFParameters();
+        ~NullFFParameters();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    NullFFParameters& operator=(const NullFFParameters &other);
+        NullFFParameters &operator=(const NullFFParameters &other);
 
-    bool operator==(const NullFFParameters &other) const;
-    bool operator!=(const NullFFParameters &other) const;
+        bool operator==(const NullFFParameters &other) const;
+        bool operator!=(const NullFFParameters &other) const;
 
-    FFParametersArrayPtr toArray() const;
-};
+        FFParametersArrayPtr toArray() const;
+    };
 
-/** Null FFParameters */
-class SIREFF_EXPORT NullFFParametersArray
-            : public SireBase::ConcreteProperty<NullFFParametersArray,FFParametersArray>
-{
+    /** Null FFParameters */
+    class SIREFF_EXPORT NullFFParametersArray : public SireBase::ConcreteProperty<NullFFParametersArray, FFParametersArray>
+    {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const NullFFParametersArray&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, NullFFParametersArray&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const NullFFParametersArray &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, NullFFParametersArray &);
 
-public:
-    NullFFParametersArray();
-    NullFFParametersArray(const NullFFParametersArray &other);
+    public:
+        NullFFParametersArray();
+        NullFFParametersArray(const NullFFParametersArray &other);
 
-    ~NullFFParametersArray();
+        ~NullFFParametersArray();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    NullFFParametersArray& operator=(const NullFFParametersArray &other);
+        NullFFParametersArray &operator=(const NullFFParametersArray &other);
 
-    bool operator==(const NullFFParametersArray &other) const;
-    bool operator!=(const NullFFParametersArray &other) const;
+        bool operator==(const NullFFParametersArray &other) const;
+        bool operator!=(const NullFFParametersArray &other) const;
 
-    FFParametersPtr operator[](int i) const;
+        FFParametersPtr operator[](int i) const;
 
-    int count() const;
-    bool isEmpty() const;
+        int count() const;
+        bool isEmpty() const;
 
-    void append(const FFParameters &params);
-    void append(const FFParametersArray &params);
+        void append(const FFParameters &params);
+        void append(const FFParametersArray &params);
 
-    void update(int idx, const FFParameters &params);
-    void update(const QVarLengthArray<int> &idxs, const FFParametersArray &params);
+        void update(int idx, const FFParameters &params);
+        void update(const QVarLengthArray<int> &idxs, const FFParametersArray &params);
 
-    void remove(int idx);
-    void remove(const QVarLengthArray<int> &idxs);
+        void remove(int idx);
+        void remove(const QVarLengthArray<int> &idxs);
 
-    void removeAll();
-};
+        void removeAll();
+    };
 
 } // end of namespace SireFF
 
-Q_DECLARE_METATYPE( SireFF::NullFFParameters )
-Q_DECLARE_METATYPE( SireFF::NullFFParametersArray )
+Q_DECLARE_METATYPE(SireFF::NullFFParameters)
+Q_DECLARE_METATYPE(SireFF::NullFFParametersArray)
 
 SIRE_END_HEADER
 

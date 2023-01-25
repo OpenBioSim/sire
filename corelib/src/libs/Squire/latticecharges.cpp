@@ -45,7 +45,7 @@ using namespace SireBase;
 /** Create a null charge at the origin */
 LatticeCharge::LatticeCharge()
 {
-    for (int i=0; i<4; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         d[i] = 0;
     }
@@ -105,10 +105,11 @@ LatticeCharge::LatticeCharge(const LatticeCharge &other)
 
 /** Destructor */
 LatticeCharge::~LatticeCharge()
-{}
+{
+}
 
 /** Copy assignment operator */
-LatticeCharge& LatticeCharge::operator=(const LatticeCharge &other)
+LatticeCharge &LatticeCharge::operator=(const LatticeCharge &other)
 {
     if (this != &other)
     {
@@ -122,15 +123,15 @@ LatticeCharge& LatticeCharge::operator=(const LatticeCharge &other)
 /** Comparison operator */
 bool LatticeCharge::operator==(const LatticeCharge &other) const
 {
-    return d[0] == other.d[0] and d[1] == other.d[1] and
-           d[2] == other.d[2] and d[3] == other.d[3] and nprotons == other.nprotons;
+    return d[0] == other.d[0] and d[1] == other.d[1] and d[2] == other.d[2] and d[3] == other.d[3] and
+           nprotons == other.nprotons;
 }
 
 /** Comparison operator */
 bool LatticeCharge::operator!=(const LatticeCharge &other) const
 {
-    return d[0] != other.d[0] or d[1] != other.d[1] or
-           d[2] != other.d[2] or d[3] != other.d[3] or nprotons != other.nprotons;
+    return d[0] != other.d[0] or d[1] != other.d[1] or d[2] != other.d[2] or d[3] != other.d[3] or
+           nprotons != other.nprotons;
 }
 
 /** Return the element associated with this lattice point (may be dummy) */
@@ -145,16 +146,18 @@ Element LatticeCharge::element() const
 
 /** Construct an empty set of charges */
 LatticeCharges::LatticeCharges()
-{}
+{
+}
 
 /** Copy constructor */
-LatticeCharges::LatticeCharges(const LatticeCharges &other)
-               : lattice_charges(other.lattice_charges)
-{}
+LatticeCharges::LatticeCharges(const LatticeCharges &other) : lattice_charges(other.lattice_charges)
+{
+}
 
 /** Destructor */
 LatticeCharges::~LatticeCharges()
-{}
+{
+}
 
 /** Reserve space for 'n' lattice charges - this is useful to speed
     things up by preventing memory reallocations if you already have
@@ -192,15 +195,15 @@ int LatticeCharges::count() const
 
     \throw SireError::invalid_index
 */
-const LatticeCharge& LatticeCharges::operator[](int i) const
+const LatticeCharge &LatticeCharges::operator[](int i) const
 {
-    return lattice_charges.constData()[ Index(i).map(lattice_charges.count()) ];
+    return lattice_charges.constData()[Index(i).map(lattice_charges.count())];
 }
 
 /** Set the ith lattice point equal to 'point' */
 void LatticeCharges::set(int i, const LatticeCharge &point)
 {
-    lattice_charges[ Index(i).map(lattice_charges.count()) ] = point;
+    lattice_charges[Index(i).map(lattice_charges.count())] = point;
 }
 
 /** Set the element of the ith point to 'element' */
@@ -208,7 +211,7 @@ void LatticeCharges::setElement(int i, const SireMol::Element &element)
 {
     LatticeCharge old = this->operator[](i);
 
-    this->set( i, LatticeCharge(old.x(), old.y(), old.z(), old.charge(), element) );
+    this->set(i, LatticeCharge(old.x(), old.y(), old.z(), old.charge(), element));
 }
 
 /** Set the coordinates of the ith point to 'coords' */
@@ -216,7 +219,7 @@ void LatticeCharges::setCoordinates(int i, const Vector &coords)
 {
     LatticeCharge old = this->operator[](i);
 
-    this->set( i, LatticeCharge(coords.x(), coords.y(), coords.z(), old.charge(), old.element()) );
+    this->set(i, LatticeCharge(coords.x(), coords.y(), coords.z(), old.charge(), old.element()));
 }
 
 /** Set the charge of the ith point to 'charge' */
@@ -224,11 +227,11 @@ void LatticeCharges::setCharge(int i, double charge)
 {
     LatticeCharge old = this->operator[](i);
 
-    this->set( i, LatticeCharge(old.x(), old.y(), old.z(), charge, old.element()) );
+    this->set(i, LatticeCharge(old.x(), old.y(), old.z(), charge, old.element()));
 }
 
 /** Return a raw pointer to the array of lattice charges */
-const LatticeCharge* LatticeCharges::constData() const
+const LatticeCharge *LatticeCharges::constData() const
 {
     return lattice_charges.constData();
 }

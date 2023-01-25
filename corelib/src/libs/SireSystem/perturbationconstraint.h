@@ -30,140 +30,139 @@
 
 #include "moleculeconstraint.h"
 
-#include "SireBase/shareddatapointer.hpp"
 #include "SireBase/refcountdata.h"
+#include "SireBase/shareddatapointer.hpp"
 
-#include "SireMol/perturbation.h"
 #include "SireMol/moleculegroup.h"
+#include "SireMol/perturbation.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class PerturbationConstraint;
+    class PerturbationConstraint;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::PerturbationConstraint&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::PerturbationConstraint&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::PerturbationConstraint &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::PerturbationConstraint &);
 
 namespace SireSystem
 {
 
-using SireMol::Molecule;
-using SireMol::MoleculeGroup;
-using SireMol::MolGroupPtr;
+    using SireMol::Molecule;
+    using SireMol::MoleculeGroup;
+    using SireMol::MolGroupPtr;
 
-using SireMol::Perturbation;
-using SireMol::PerturbationPtr;
+    using SireMol::Perturbation;
+    using SireMol::PerturbationPtr;
 
-using SireCAS::Values;
+    using SireCAS::Values;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-namespace detail
-{
+    namespace detail
+    {
 
-class PerturbationData : public SireBase::RefCountData
-{
-public:
-    PerturbationData();
-    PerturbationData(const PerturbationPtr &perturbation);
+        class PerturbationData : public SireBase::RefCountData
+        {
+        public:
+            PerturbationData();
+            PerturbationData(const PerturbationPtr &perturbation);
 
-    PerturbationData(const PerturbationData &other);
+            PerturbationData(const PerturbationData &other);
 
-    ~PerturbationData();
+            ~PerturbationData();
 
-    bool wouldChange(const Molecule &molecule, const Values &values) const;
+            bool wouldChange(const Molecule &molecule, const Values &values) const;
 
-    Molecule perturb(const Molecule &molecule, const Values &values);
+            Molecule perturb(const Molecule &molecule, const Values &values);
 
-private:
-    /** The actual perturbation */
-    PerturbationPtr pert;
+        private:
+            /** The actual perturbation */
+            PerturbationPtr pert;
 
-    /** The properties required, and the version of
-        the property in the molecule the last time it
-        was updated */
-    QHash<QString,quint64> props;
-};
+            /** The properties required, and the version of
+                the property in the molecule the last time it
+                was updated */
+            QHash<QString, quint64> props;
+        };
 
-}
+    } // namespace detail
 
-/** This constraint is used to constrain part or parts of a z-matrix
-    to particular values - this is useful during single-topology
-    free energy simulations
+    /** This constraint is used to constrain part or parts of a z-matrix
+        to particular values - this is useful during single-topology
+        free energy simulations
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT PerturbationConstraint
-         : public SireBase::ConcreteProperty<PerturbationConstraint,MoleculeConstraint>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT PerturbationConstraint
+        : public SireBase::ConcreteProperty<PerturbationConstraint, MoleculeConstraint>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const PerturbationConstraint&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, PerturbationConstraint&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const PerturbationConstraint &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, PerturbationConstraint &);
 
-public:
-    PerturbationConstraint();
-    PerturbationConstraint(const MoleculeGroup &molgroup,
-                           const PropertyMap &map = PropertyMap());
+    public:
+        PerturbationConstraint();
+        PerturbationConstraint(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    PerturbationConstraint(const PerturbationConstraint &other);
+        PerturbationConstraint(const PerturbationConstraint &other);
 
-    ~PerturbationConstraint();
+        ~PerturbationConstraint();
 
-    PerturbationConstraint& operator=(const PerturbationConstraint &other);
+        PerturbationConstraint &operator=(const PerturbationConstraint &other);
 
-    bool operator==(const PerturbationConstraint &other) const;
-    bool operator!=(const PerturbationConstraint &other) const;
+        bool operator==(const PerturbationConstraint &other) const;
+        bool operator!=(const PerturbationConstraint &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    const MoleculeGroup& moleculeGroup() const;
+        const MoleculeGroup &moleculeGroup() const;
 
-    SireBase::PropertyName perturbationProperty() const;
+        SireBase::PropertyName perturbationProperty() const;
 
-protected:
-    void setSystem(const System &system);
-    bool mayChange(const Delta &delta, quint32 last_subversion) const;
+    protected:
+        void setSystem(const System &system);
+        bool mayChange(const Delta &delta, quint32 last_subversion) const;
 
-    bool fullApply(Delta &delta);
-    bool deltaApply(Delta &delta, quint32 last_subversion);
+        bool fullApply(Delta &delta);
+        bool deltaApply(Delta &delta, quint32 last_subversion);
 
-private:
-    bool pvt_update(Molecule &molecule, const SireCAS::Values &values);
+    private:
+        bool pvt_update(Molecule &molecule, const SireCAS::Values &values);
 
-    /** The molecule group containing the molecules that are affected
-        by these perturbations */
-    MolGroupPtr molgroup;
+        /** The molecule group containing the molecules that are affected
+            by these perturbations */
+        MolGroupPtr molgroup;
 
-    /** The name of the property containing the perturbations
-        to be applied to each molecule in the group */
-    SireBase::PropertyName perts_property;
+        /** The name of the property containing the perturbations
+            to be applied to each molecule in the group */
+        SireBase::PropertyName perts_property;
 
-    typedef QList< SireBase::SharedDataPointer<detail::PerturbationData> > PertDataList;
-    typedef QHash<MolNum,PertDataList> PertDataHash;
+        typedef QList<SireBase::SharedDataPointer<detail::PerturbationData>> PertDataList;
+        typedef QHash<MolNum, PertDataList> PertDataHash;
 
-    /** Information about all of the perturbations about each molecule */
-    PertDataHash pertdata;
+        /** Information about all of the perturbations about each molecule */
+        PertDataHash pertdata;
 
-    /** All of the symbols of components used by all of the perturbations */
-    QSet<SireCAS::Symbol> all_pert_syms;
+        /** All of the symbols of components used by all of the perturbations */
+        QSet<SireCAS::Symbol> all_pert_syms;
 
-    /** The symbols used by the perturbations for each molecule,
-        and their current values */
-    QHash< MolNum,QSet<SireCAS::Symbol> > pert_syms;
+        /** The symbols used by the perturbations for each molecule,
+            and their current values */
+        QHash<MolNum, QSet<SireCAS::Symbol>> pert_syms;
 
-    /** The molecules that must change to maintain the constraint */
-    Molecules changed_mols;
-};
+        /** The molecules that must change to maintain the constraint */
+        Molecules changed_mols;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::PerturbationConstraint )
+Q_DECLARE_METATYPE(SireSystem::PerturbationConstraint)
 
-SIRE_EXPOSE_CLASS( SireSystem::PerturbationConstraint )
+SIRE_EXPOSE_CLASS(SireSystem::PerturbationConstraint)
 
 SIRE_END_HEADER
 

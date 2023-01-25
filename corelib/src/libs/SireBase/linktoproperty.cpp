@@ -43,8 +43,7 @@ QDataStream &operator<<(QDataStream &ds, const LinkToProperty &link)
 
     SharedDataStream sds(ds);
 
-    sds << link.target_source << link.id_filter
-        << static_cast<const Property&>(link);
+    sds << link.target_source << link.id_filter << static_cast<const Property &>(link);
 
     return ds;
 }
@@ -58,44 +57,45 @@ QDataStream &operator>>(QDataStream &ds, LinkToProperty &link)
     {
         SharedDataStream sds(ds);
 
-        sds >> link.target_source >> link.id_filter
-            >> static_cast<Property&>(link);
+        sds >> link.target_source >> link.id_filter >> static_cast<Property &>(link);
     }
     else
-        throw version_error( v, "1", r_link, CODELOC );
+        throw version_error(v, "1", r_link, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
-LinkToProperty::LinkToProperty() : ConcreteProperty<LinkToProperty,Property>()
-{}
+LinkToProperty::LinkToProperty() : ConcreteProperty<LinkToProperty, Property>()
+{
+}
 
 /** Construct to link to the property 'source' */
 LinkToProperty::LinkToProperty(const PropertyName &source)
-               : ConcreteProperty<LinkToProperty,Property>(),
-                 target_source(source)
-{}
+    : ConcreteProperty<LinkToProperty, Property>(), target_source(source)
+{
+}
 
 /** Construct to link to the property 'source' in the objects
     identified by 'filter' */
 LinkToProperty::LinkToProperty(const PropertyName &source, const ID &filter)
-               : ConcreteProperty<LinkToProperty,Property>(),
-                 target_source(source), id_filter(filter)
-{}
+    : ConcreteProperty<LinkToProperty, Property>(), target_source(source), id_filter(filter)
+{
+}
 
 /** Copy constructor */
 LinkToProperty::LinkToProperty(const LinkToProperty &other)
-               : ConcreteProperty<LinkToProperty,Property>(other),
-                 target_source(other.target_source), id_filter(other.id_filter)
-{}
+    : ConcreteProperty<LinkToProperty, Property>(other), target_source(other.target_source), id_filter(other.id_filter)
+{
+}
 
 /** Destructor */
 LinkToProperty::~LinkToProperty()
-{}
+{
+}
 
 /** Copy assignment operator */
-LinkToProperty& LinkToProperty::operator=(const LinkToProperty &other)
+LinkToProperty &LinkToProperty::operator=(const LinkToProperty &other)
 {
     if (this != &other)
     {
@@ -110,22 +110,18 @@ LinkToProperty& LinkToProperty::operator=(const LinkToProperty &other)
 /** Comparison operator */
 bool LinkToProperty::operator==(const LinkToProperty &other) const
 {
-    return target_source == other.target_source and
-           id_filter == other.id_filter and
-           Property::operator==(other);
+    return target_source == other.target_source and id_filter == other.id_filter and Property::operator==(other);
 }
 
 /** Comparison operator */
 bool LinkToProperty::operator!=(const LinkToProperty &other) const
 {
-    return target_source != other.target_source or
-           id_filter != other.id_filter or
-           Property::operator!=(other);
+    return target_source != other.target_source or id_filter != other.id_filter or Property::operator!=(other);
 }
 
-const char* LinkToProperty::typeName()
+const char *LinkToProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<LinkToProperty>() );
+    return QMetaType::typeName(qMetaTypeId<LinkToProperty>());
 }
 
 /** Return a string representation of this link */
@@ -142,13 +138,13 @@ QString LinkToProperty::toString() const
 }
 
 /** Return the target of this link */
-const PropertyName& LinkToProperty::target() const
+const PropertyName &LinkToProperty::target() const
 {
     return target_source;
 }
 
 /** Return any filter for this link (this is null if there is no filter) */
-const SireID::ID& LinkToProperty::filter() const
+const SireID::ID &LinkToProperty::filter() const
 {
     return id_filter.base();
 }

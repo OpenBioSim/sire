@@ -28,8 +28,8 @@
 #ifndef SIREUNITS_CONVERT_H
 #define SIREUNITS_CONVERT_H
 
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
+#include "SireUnits/units.h"
 
 #include <QDebug>
 
@@ -38,63 +38,61 @@ SIRE_BEGIN_HEADER
 namespace SireUnits
 {
 
-/////////////////////////////////////////////////
-// Conversion functions for derived units      //
-/////////////////////////////////////////////////
+    /////////////////////////////////////////////////
+    // Conversion functions for derived units      //
+    /////////////////////////////////////////////////
 
-SIRE_ALWAYS_INLINE double convertFrom(double val, const Dimension::TempBase &from_units)
-{
-    return from_units.convertToInternal(val);
-}
+    SIRE_ALWAYS_INLINE double convertFrom(double val, const Dimension::TempBase &from_units)
+    {
+        return from_units.convertToInternal(val);
+    }
 
-SIRE_ALWAYS_INLINE double convertFrom(double val, const Dimension::Unit &from_units)
-{
-    return from_units.convertToInternal(val);
-}
+    SIRE_ALWAYS_INLINE double convertFrom(double val, const Dimension::Unit &from_units)
+    {
+        return from_units.convertToInternal(val);
+    }
 
-SIRE_ALWAYS_INLINE double convertTo(double val, const Dimension::TempBase &to_units)
-{
-    return to_units.convertFromInternal(val);
-}
+    SIRE_ALWAYS_INLINE double convertTo(double val, const Dimension::TempBase &to_units)
+    {
+        return to_units.convertFromInternal(val);
+    }
 
-SIRE_ALWAYS_INLINE double convertTo(double val, const Dimension::Unit &to_units)
-{
-    return to_units.convertFromInternal(val);
-}
+    SIRE_ALWAYS_INLINE double convertTo(double val, const Dimension::Unit &to_units)
+    {
+        return to_units.convertFromInternal(val);
+    }
 
-SIRE_ALWAYS_INLINE double convert(double val, const Dimension::TempBase &from_units,
-                                  const Dimension::TempBase &to_units)
-{
-    return convertTo( convertFrom(val,from_units), to_units );
-}
+    SIRE_ALWAYS_INLINE double convert(double val, const Dimension::TempBase &from_units,
+                                      const Dimension::TempBase &to_units)
+    {
+        return convertTo(convertFrom(val, from_units), to_units);
+    }
 
-SIRE_ALWAYS_INLINE double convert(double val, const Dimension::Unit &from_units,
-                                  const Dimension::TempBase &to_units)
-{
-    return convertTo( convertFrom(val,from_units), to_units );
-}
+    SIRE_ALWAYS_INLINE double convert(double val, const Dimension::Unit &from_units, const Dimension::TempBase &to_units)
+    {
+        return convertTo(convertFrom(val, from_units), to_units);
+    }
 
-SIRE_ALWAYS_INLINE double convert(double val, const Dimension::Unit &from_units,
-                                  const Dimension::Unit &to_units)
-{
-    return convertTo( convertFrom(val,from_units), to_units );
-}
+    SIRE_ALWAYS_INLINE double convert(double val, const Dimension::Unit &from_units, const Dimension::Unit &to_units)
+    {
+        return convertTo(convertFrom(val, from_units), to_units);
+    }
 
-SIRE_ALWAYS_INLINE double convert(double val, const Dimension::TempBase &to_units)
-{
-    return convertTo(val, to_units);
-}
+    SIRE_ALWAYS_INLINE double convert(double val, const Dimension::TempBase &to_units)
+    {
+        return convertTo(val, to_units);
+    }
 
-SIRE_ALWAYS_INLINE double convert(double val, const Dimension::Unit &to_units)
-{
-    return convertTo(val, to_units);
-}
+    SIRE_ALWAYS_INLINE double convert(double val, const Dimension::Unit &to_units)
+    {
+        return convertTo(val, to_units);
+    }
 
-}
+} // namespace SireUnits
 
-SIRE_EXPOSE_FUNCTION( SireUnits::convert )
-SIRE_EXPOSE_FUNCTION( SireUnits::convertTo )
-SIRE_EXPOSE_FUNCTION( SireUnits::convertFrom )
+SIRE_EXPOSE_FUNCTION(SireUnits::convert)
+SIRE_EXPOSE_FUNCTION(SireUnits::convertTo)
+SIRE_EXPOSE_FUNCTION(SireUnits::convertFrom)
 
 SIRE_END_HEADER
 

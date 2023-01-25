@@ -26,15 +26,15 @@
 \*********************************************/
 
 #include "constant.h"
+#include "complexvalues.h"
 #include "expression.h"
 #include "expressions.h"
+#include "functions.h"
+#include "identities.h"
+#include "integrationconstant.h"
 #include "symbol.h"
 #include "symbols.h"
 #include "values.h"
-#include "complexvalues.h"
-#include "identities.h"
-#include "functions.h"
-#include "integrationconstant.h"
 
 #include "SireStream/datastream.h"
 
@@ -46,8 +46,7 @@ static const RegisterMetaType<Constant> r_constant;
 /** Serialise a constant to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Constant &constant)
 {
-    writeHeader(ds, r_constant, 1)
-            << static_cast<const ExBase&>(constant);
+    writeHeader(ds, r_constant, 1) << static_cast<const ExBase &>(constant);
 
     return ds;
 }
@@ -59,7 +58,7 @@ QDataStream &operator>>(QDataStream &ds, Constant &constant)
 
     if (v == 1)
     {
-        ds >> static_cast<ExBase&>(constant);
+        ds >> static_cast<ExBase &>(constant);
     }
     else
         throw version_error(v, "1", r_constant, CODELOC);
@@ -69,18 +68,21 @@ QDataStream &operator>>(QDataStream &ds, Constant &constant)
 
 /** Construct a constant */
 Constant::Constant() : ExBase()
-{}
+{
+}
 
 /** Copy constructor */
-Constant::Constant(const Constant&) : ExBase()
-{}
+Constant::Constant(const Constant &) : ExBase()
+{
+}
 
 /** Destructor */
 Constant::~Constant()
-{}
+{
+}
 
 /** Differential of a constant is zero */
-Expression Constant::differentiate(const Symbol&) const
+Expression Constant::differentiate(const Symbol &) const
 {
     return 0;
 }
@@ -110,19 +112,19 @@ QString Constant::toString() const
 }
 
 /** Evaluation of a constant is 1 */
-double Constant::evaluate(const Values&) const
+double Constant::evaluate(const Values &) const
 {
     return 1;
 }
 
 /** Evaluation of a constant is 1 */
-Complex Constant::evaluate(const ComplexValues&) const
+Complex Constant::evaluate(const ComplexValues &) const
 {
-    return Complex(1,0);
+    return Complex(1, 0);
 }
 
 /** Can't substitute into a constant */
-Expression Constant::substitute(const Identities&) const
+Expression Constant::substitute(const Identities &) const
 {
     return Expression(*this);
 }
@@ -148,17 +150,16 @@ Expressions Constant::children() const
 QList<Factor> Constant::expand(const Symbol &symbol) const
 {
     QList<Factor> ret;
-    ret.append( Factor( symbol, 1, 0 ) );
+    ret.append(Factor(symbol, 1, 0));
     return ret;
 }
 
-const char* Constant::typeName()
+const char *Constant::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Constant>() );
+    return QMetaType::typeName(qMetaTypeId<Constant>());
 }
 
-Constant* Constant::clone() const
+Constant *Constant::clone() const
 {
     return new Constant(*this);
 }
-

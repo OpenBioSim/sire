@@ -29,15 +29,15 @@
 
 #include "forcefield.h"
 
-#include "SireMol/molecule.h"
-#include "SireMol/mover.hpp"
-#include "SireMol/viewsofmol.h"
-#include "SireMol/partialmolecule.h"
-#include "SireMol/moleculegroup.h"
 #include "SireMol/mgnum.h"
+#include "SireMol/molecule.h"
+#include "SireMol/moleculegroup.h"
+#include "SireMol/mover.hpp"
+#include "SireMol/partialmolecule.h"
+#include "SireMol/viewsofmol.h"
 
-#include "SireError/errors.h"
 #include "SireBase/errors.h"
+#include "SireError/errors.h"
 #include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
@@ -73,28 +73,32 @@ QDataStream &operator>>(QDataStream &ds, NullFF &nullff)
 }
 
 /** Private constructor */
-NullFF::NullFF(bool) : ConcreteProperty<NullFF,FF>()
-{}
+NullFF::NullFF(bool) : ConcreteProperty<NullFF, FF>()
+{
+}
 
-const NullFF& FF::null()
+const NullFF &FF::null()
 {
     return *(create_shared_null<NullFF>());
 }
 
 /** Constructor */
-NullFF::NullFF() : ConcreteProperty<NullFF,FF>()
-{}
+NullFF::NullFF() : ConcreteProperty<NullFF, FF>()
+{
+}
 
 /** Copy constructor */
-NullFF::NullFF(const NullFF &other) : ConcreteProperty<NullFF,FF>(other)
-{}
+NullFF::NullFF(const NullFF &other) : ConcreteProperty<NullFF, FF>(other)
+{
+}
 
 /** Destructor */
 NullFF::~NullFF()
-{}
+{
+}
 
 /** Copy assignment */
-NullFF& NullFF::operator=(const NullFF &other)
+NullFF &NullFF::operator=(const NullFF &other)
 {
     FF::operator=(other);
     return *this;
@@ -119,16 +123,14 @@ QString NullFF::toString() const
 
 bool NullFF::setProperty(const QString &name, const Property &value)
 {
-    throw SireBase::missing_property( QObject::tr(
-        "The null forcefield has no properties!"), CODELOC );
+    throw SireBase::missing_property(QObject::tr("The null forcefield has no properties!"), CODELOC);
 
     return false;
 }
 
-const Property& NullFF::property(const QString &name) const
+const Property &NullFF::property(const QString &name) const
 {
-    throw SireBase::missing_property( QObject::tr(
-        "The null forcefield has no properties!"), CODELOC );
+    throw SireBase::missing_property(QObject::tr("The null forcefield has no properties!"), CODELOC);
 
     return props.property(name);
 }
@@ -138,76 +140,68 @@ bool NullFF::containsProperty(const QString &name) const
     return false;
 }
 
-const Properties& NullFF::properties() const
+const Properties &NullFF::properties() const
 {
     return props;
 }
 
 void NullFF::mustNowRecalculateFromScratch()
-{}
-
-const FFComponent& NullFF::components() const
 {
-    throw SireError::invalid_state( QObject::tr(
-        "The null forcefield has no components!"), CODELOC );
+}
+
+const FFComponent &NullFF::components() const
+{
+    throw SireError::invalid_state(QObject::tr("The null forcefield has no components!"), CODELOC);
 }
 
 void NullFF::recalculateEnergy()
-{}
+{
+}
 
 static void throwNoAdd()
 {
-    throw SireError::invalid_state( QObject::tr(
-        "You cannot add anything to the null forcefield."), CODELOC );
+    throw SireError::invalid_state(QObject::tr("You cannot add anything to the null forcefield."), CODELOC);
 }
 
-void NullFF::group_add(quint32 i, const MoleculeView &molview,
-                       const PropertyMap &map)
+void NullFF::group_add(quint32 i, const MoleculeView &molview, const PropertyMap &map)
 {
     throwNoAdd();
 }
 
-void NullFF::group_add(quint32 i, const ViewsOfMol &molviews,
-                       const PropertyMap &map)
+void NullFF::group_add(quint32 i, const ViewsOfMol &molviews, const PropertyMap &map)
 {
     throwNoAdd();
 }
 
-void NullFF::group_add(quint32 i, const Molecules &molecules,
-                       const PropertyMap &map)
+void NullFF::group_add(quint32 i, const Molecules &molecules, const PropertyMap &map)
 {
     throwNoAdd();
 }
 
-void NullFF::group_add(quint32 i, const MoleculeGroup &molgroup,
-                       const PropertyMap &map)
+void NullFF::group_add(quint32 i, const MoleculeGroup &molgroup, const PropertyMap &map)
 {
     throwNoAdd();
 }
 
-bool NullFF::group_addIfUnique(quint32 i, const MoleculeView &molview,
-                               const PropertyMap &map)
+bool NullFF::group_addIfUnique(quint32 i, const MoleculeView &molview, const PropertyMap &map)
 {
     throwNoAdd();
     return false;
 }
 
-ViewsOfMol NullFF::group_addIfUnique(quint32 i, const ViewsOfMol &molviews,
-                                     const PropertyMap &map)
+ViewsOfMol NullFF::group_addIfUnique(quint32 i, const ViewsOfMol &molviews, const PropertyMap &map)
 {
     throwNoAdd();
     return ViewsOfMol();
 }
 
-QList<ViewsOfMol> NullFF::group_addIfUnique(quint32 i, const Molecules &molecules,
-                                            const PropertyMap &map)
+QList<ViewsOfMol> NullFF::group_addIfUnique(quint32 i, const Molecules &molecules, const PropertyMap &map)
 {
     throwNoAdd();
     throw QList<ViewsOfMol>();
 }
 
-QList<ViewsOfMol> NullFF::group_addIfUnique(quint32 i, const MoleculeGroup &molgroup,
-                                            const PropertyMap &map)
+QList<ViewsOfMol> NullFF::group_addIfUnique(quint32 i, const MoleculeGroup &molgroup, const PropertyMap &map)
 {
     throwNoAdd();
     return QList<ViewsOfMol>();
@@ -215,8 +209,7 @@ QList<ViewsOfMol> NullFF::group_addIfUnique(quint32 i, const MoleculeGroup &molg
 
 static void throwNoRemove()
 {
-    throw SireError::invalid_state( QObject::tr(
-        "You cannot remove anything from the null forcefield."), CODELOC );
+    throw SireError::invalid_state(QObject::tr("You cannot remove anything from the null forcefield."), CODELOC);
 }
 
 bool NullFF::group_remove(quint32 i, const MoleculeView &molview)
@@ -301,33 +294,28 @@ QList<Molecule> NullFF::group_update(quint32 i, const MoleculeGroup &molgroup, b
 
 static void throwNoSetContents()
 {
-    throw SireError::invalid_state( QObject::tr(
-        "You cannot set the contents of a null forcefield!"), CODELOC );
+    throw SireError::invalid_state(QObject::tr("You cannot set the contents of a null forcefield!"), CODELOC);
 }
 
-bool NullFF::group_setContents(quint32 i, const MoleculeView &molview,
-                               const PropertyMap &map)
+bool NullFF::group_setContents(quint32 i, const MoleculeView &molview, const PropertyMap &map)
 {
     throwNoSetContents();
     return false;
 }
 
-bool NullFF::group_setContents(quint32 i, const ViewsOfMol &molviews,
-                               const PropertyMap &map)
+bool NullFF::group_setContents(quint32 i, const ViewsOfMol &molviews, const PropertyMap &map)
 {
     throwNoSetContents();
     return false;
 }
 
-bool NullFF::group_setContents(quint32 i, const Molecules &molecules,
-                               const PropertyMap &map)
+bool NullFF::group_setContents(quint32 i, const Molecules &molecules, const PropertyMap &map)
 {
     throwNoSetContents();
     return false;
 }
 
-bool NullFF::group_setContents(quint32 i, const MoleculeGroup &molgroup,
-                               const PropertyMap &map)
+bool NullFF::group_setContents(quint32 i, const MoleculeGroup &molgroup, const PropertyMap &map)
 {
     throwNoSetContents();
     return false;
@@ -335,36 +323,33 @@ bool NullFF::group_setContents(quint32 i, const MoleculeGroup &molgroup,
 
 void NullFF::_pvt_updateName()
 {
-    throw SireError::invalid_state( QObject::tr(
-        "You cannot change the name of a null forcefield."), CODELOC );
+    throw SireError::invalid_state(QObject::tr("You cannot change the name of a null forcefield."), CODELOC);
 }
 
 static void throwNoGroups()
 {
-    throw SireMol::missing_group( QObject::tr(
-        "There are no molecule groups in the null forcefield!"), CODELOC );
+    throw SireMol::missing_group(QObject::tr("There are no molecule groups in the null forcefield!"), CODELOC);
 }
 
-const MoleculeGroup& NullFF::at(MGNum mgnum) const
+const MoleculeGroup &NullFF::at(MGNum mgnum) const
 {
     throwNoGroups();
     return this->getGroup(mgnum);
 }
 
-const MoleculeGroup& NullFF::getGroup(MGNum mgnum) const
+const MoleculeGroup &NullFF::getGroup(MGNum mgnum) const
 {
     return NullFF::at(mgnum);
 }
 
-void NullFF::getGroups(const QList<MGNum> &mgnums,
-                       QVarLengthArray<const MoleculeGroup*,10> &groups) const
+void NullFF::getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const
 {
     throwNoGroups();
 }
 
-QHash<MGNum,const MoleculeGroup*> NullFF::getGroups() const
+QHash<MGNum, const MoleculeGroup *> NullFF::getGroups() const
 {
-    return QHash<MGNum,const MoleculeGroup*>();
+    return QHash<MGNum, const MoleculeGroup *>();
 }
 
 void NullFF::group_setName(quint32 i, const QString &new_name)
@@ -383,9 +368,10 @@ bool NullFF::needsAccepting() const
 }
 
 void NullFF::accept()
-{}
-
-const char* NullFF::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullFF>() );
+}
+
+const char *NullFF::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullFF>());
 }

@@ -30,98 +30,96 @@
 
 #include "SireCluster/workpacket.h"
 
-#include "suprasubsystem.h"
 #include "suprasubmoves.h"
+#include "suprasubsystem.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class SupraSubSimPacket;
+    class SupraSubSimPacket;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SupraSubSimPacket&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SupraSubSimPacket&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SupraSubSimPacket &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SupraSubSimPacket &);
 
 namespace SireMove
 {
 
-/** This is a workpacket that is used to run part of a SupraSubSim simulation
+    /** This is a workpacket that is used to run part of a SupraSubSim simulation
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SupraSubSimPacket : public SireCluster::WorkPacketBase
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SupraSubSimPacket&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SupraSubSimPacket&);
-
-public:
-    SupraSubSimPacket();
-
-    SupraSubSimPacket(const SupraSubSystem &system,
-                      const SupraSubMoves &moves,
-                      int nmoves, bool record_stats=true);
-
-    SupraSubSimPacket(const SupraSubSimPacket &other);
-
-    ~SupraSubSimPacket();
-
-    SupraSubSimPacket& operator=(const SupraSubSimPacket &other);
-
-    bool operator==(const SupraSubSimPacket &other) const;
-    bool operator!=(const SupraSubSimPacket &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SupraSubSimPacket : public SireCluster::WorkPacketBase
     {
-        return SupraSubSimPacket::typeName();
-    }
 
-    SupraSubSimPacket* clone() const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SupraSubSimPacket &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SupraSubSimPacket &);
 
-    bool shouldPack() const;
-    int approximatePacketSize() const;
+    public:
+        SupraSubSimPacket();
 
-    const SupraSubSystem& subSystem() const;
-    const SupraSubMoves& subMoves() const;
+        SupraSubSimPacket(const SupraSubSystem &system, const SupraSubMoves &moves, int nmoves, bool record_stats = true);
 
-    int nSubMoves() const;
-    int nSubCompleted() const;
+        SupraSubSimPacket(const SupraSubSimPacket &other);
 
-    bool recordingSubStatistics() const;
+        ~SupraSubSimPacket();
 
-    bool hasFinished() const;
+        SupraSubSimPacket &operator=(const SupraSubSimPacket &other);
 
-protected:
-    float chunk();
+        bool operator==(const SupraSubSimPacket &other) const;
+        bool operator!=(const SupraSubSimPacket &other) const;
 
-private:
-    /** The subsystem being simulated */
-    SupraSubSystemPtr sub_system;
+        static const char *typeName();
 
-    /** The moves applied to the subsystem */
-    SupraSubMovesPtr sub_moves;
+        const char *what() const
+        {
+            return SupraSubSimPacket::typeName();
+        }
 
-    /** The number of submoves to be run on the system */
-    quint32 n_sub_moves;
+        SupraSubSimPacket *clone() const;
 
-    /** The number of submoves already run on the system */
-    quint32 ncompleted;
+        bool shouldPack() const;
+        int approximatePacketSize() const;
 
-    /** Whether or not to record sub statistics */
-    bool record_stats;
+        const SupraSubSystem &subSystem() const;
+        const SupraSubMoves &subMoves() const;
 
-    /** Whether or not the sub-system is packed */
-    bool sub_system_was_packed;
-};
+        int nSubMoves() const;
+        int nSubCompleted() const;
 
-}
+        bool recordingSubStatistics() const;
 
-Q_DECLARE_METATYPE( SireMove::SupraSubSimPacket )
+        bool hasFinished() const;
 
-SIRE_EXPOSE_CLASS( SireMove::SupraSubSimPacket )
+    protected:
+        float chunk();
+
+    private:
+        /** The subsystem being simulated */
+        SupraSubSystemPtr sub_system;
+
+        /** The moves applied to the subsystem */
+        SupraSubMovesPtr sub_moves;
+
+        /** The number of submoves to be run on the system */
+        quint32 n_sub_moves;
+
+        /** The number of submoves already run on the system */
+        quint32 ncompleted;
+
+        /** Whether or not to record sub statistics */
+        bool record_stats;
+
+        /** Whether or not the sub-system is packed */
+        bool sub_system_was_packed;
+    };
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::SupraSubSimPacket)
+
+SIRE_EXPOSE_CLASS(SireMove::SupraSubSimPacket)
 
 SIRE_END_HEADER
 

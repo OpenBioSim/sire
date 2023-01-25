@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "molwithresid.h"
-#include "molecules.h"
 #include "moleculegroup.h"
 #include "moleculegroups.h"
+#include "molecules.h"
 #include "moleculeview.h"
 #include "viewsofmol.h"
 
@@ -63,43 +63,47 @@ QDataStream &operator>>(QDataStream &ds, MolWithResID &mol)
         sds >> mol.resid;
     }
     else
-        throw version_error( v, "1", r_mol, CODELOC );
+        throw version_error(v, "1", r_mol, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 MolWithResID::MolWithResID() : MolID()
-{}
+{
+}
 
 /** Construct to match any molecule that contains the residue with name 'resname' */
-MolWithResID::MolWithResID(const QString &resname)
-             : MolID(), resid( ResName(resname) )
-{}
+MolWithResID::MolWithResID(const QString &resname) : MolID(), resid(ResName(resname))
+{
+}
 
 /** Construct to match any molecule that contains the residue with name 'resname'.
     (allowing you to specify whether the name match should be case sensitive or not) */
 MolWithResID::MolWithResID(const QString &resname, SireID::CaseSensitivity case_sensitivity)
-             : MolID(), resid( ResName(resname,case_sensitivity) )
-{}
+    : MolID(), resid(ResName(resname, case_sensitivity))
+{
+}
 
 /** Construct to match any molecule that contains the residue with number 'resnum' */
-MolWithResID::MolWithResID(int resnum)
-             : MolID(), resid( ResNum(resnum) )
-{}
+MolWithResID::MolWithResID(int resnum) : MolID(), resid(ResNum(resnum))
+{
+}
 
 /** Construct to match any molecule that contains the residue that matches ID 'resid' */
-MolWithResID::MolWithResID(const ResID &id)
-             : MolID(), resid(id)
-{}
+MolWithResID::MolWithResID(const ResID &id) : MolID(), resid(id)
+{
+}
 
 /** Copy constructor */
 MolWithResID::MolWithResID(const MolWithResID &other) : MolID(other), resid(other.resid)
-{}
+{
+}
 
 /** Destructor */
 MolWithResID::~MolWithResID()
-{}
+{
+}
 
 bool MolWithResID::isNull() const
 {
@@ -119,14 +123,14 @@ QString MolWithResID::toString() const
         return QObject::tr("MolWithResID{ residue = %1 }").arg(resid.toString());
 }
 
-MolWithResID& MolWithResID::operator=(const MolWithResID &other)
+MolWithResID &MolWithResID::operator=(const MolWithResID &other)
 {
     resid = other.resid;
     MolID::operator=(other);
     return *this;
 }
 
-MolWithResID* MolWithResID::clone() const
+MolWithResID *MolWithResID::clone() const
 {
     return new MolWithResID(*this);
 }
@@ -147,7 +151,7 @@ bool MolWithResID::operator!=(const MolWithResID &other) const
 }
 
 /** Return the residue ID that is used to find the residue (and thus the molecule) */
-const ResID& MolWithResID::resID() const
+const ResID &MolWithResID::resID() const
 {
     return resid;
 }
@@ -164,9 +168,7 @@ QList<MolNum> MolWithResID::map(const Molecules &molecules) const
     {
         SireError::FastExceptionFlag f = SireError::exception::enableFastExceptions();
 
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd();
-             ++it)
+        for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
             try
             {
@@ -188,20 +190,22 @@ QList<MolNum> MolWithResID::map(const Molecules &molecules) const
                     }
 
                     if (is_selected)
-                        molnums.append( it.key() );
+                        molnums.append(it.key());
                 }
                 else
                     molnums.append(it.key());
             }
-            catch(...)
-            {}
+            catch (...)
+            {
+            }
         }
     }
 
     if (molnums.isEmpty())
-        throw SireMol::missing_molecule( QObject::tr(
-            "There is no molecule with residue matching \"%1\" in the set of molecules.")
-                .arg(resid.toString()), CODELOC );
+        throw SireMol::missing_molecule(
+            QObject::tr("There is no molecule with residue matching \"%1\" in the set of molecules.")
+                .arg(resid.toString()),
+            CODELOC);
 
     return molnums;
 }
@@ -216,8 +220,7 @@ QList<MolNum> MolWithResID::map(const MolGroupsBase &molgroups) const
     return this->map(molgroups.molecules());
 }
 
-const char* MolWithResID::typeName()
+const char *MolWithResID::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MolWithResID>() );
+    return QMetaType::typeName(qMetaTypeId<MolWithResID>());
 }
-

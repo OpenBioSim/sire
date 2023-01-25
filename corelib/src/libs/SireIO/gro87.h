@@ -36,157 +36,153 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class Gro87;
+    class Gro87;
 }
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::Gro87&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::Gro87&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::Gro87 &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::Gro87 &);
 
-namespace SireMol{ class MoleculeInfoData; }
+namespace SireMol
+{
+    class MoleculeInfoData;
+}
 
 namespace SireIO
 {
 
-/** This class holds a parser for reading and writing Gromacs Gro87 files.
+    /** This class holds a parser for reading and writing Gromacs Gro87 files.
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT Gro87 : public SireBase::ConcreteProperty<Gro87,MoleculeParser>
-{
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT Gro87 : public SireBase::ConcreteProperty<Gro87, MoleculeParser>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const Gro87&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, Gro87&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const Gro87 &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, Gro87 &);
 
-public:
-    Gro87();
-    Gro87(const QString &filename,
-          const PropertyMap &map = PropertyMap());
+    public:
+        Gro87();
+        Gro87(const QString &filename, const PropertyMap &map = PropertyMap());
 
-    Gro87(const QStringList &lines,
-          const PropertyMap &map = PropertyMap());
-    Gro87(const SireSystem::System &system,
-          const PropertyMap &map = PropertyMap());
+        Gro87(const QStringList &lines, const PropertyMap &map = PropertyMap());
+        Gro87(const SireSystem::System &system, const PropertyMap &map = PropertyMap());
 
-    Gro87(const Gro87 &other);
+        Gro87(const Gro87 &other);
 
-    ~Gro87();
+        ~Gro87();
 
-    Gro87& operator=(const Gro87 &other);
+        Gro87 &operator=(const Gro87 &other);
 
-    bool operator==(const Gro87 &other) const;
-    bool operator!=(const Gro87 &other) const;
+        bool operator==(const Gro87 &other) const;
+        bool operator!=(const Gro87 &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    int count() const;
-    int size() const;
+        int count() const;
+        int size() const;
 
-    Gro87 operator[](int i) const;
+        Gro87 operator[](int i) const;
 
-    MoleculeParserPtr construct(const QString &filename,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QString &filename, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const QStringList &lines,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const SireSystem::System &system,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const SireSystem::System &system, const PropertyMap &map) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    QString formatName() const;
-    QString formatDescription() const;
-    QStringList formatSuffix() const;
+        QString formatName() const;
+        QString formatDescription() const;
+        QStringList formatSuffix() const;
 
-    QString title() const;
+        QString title() const;
 
-    double time() const;
-    double time(int frame) const;
+        double time() const;
+        double time(int frame) const;
 
-    int nAtoms() const;
-    int nResidues() const;
+        int nAtoms() const;
+        int nResidues() const;
 
-    bool hasCoordinates() const;
-    bool hasVelocities() const;
+        bool hasCoordinates() const;
+        bool hasVelocities() const;
 
-    bool isTopology() const;
-    bool isFrame() const;
-    int nFrames() const;
-    SireMol::Frame getFrame(int i) const;
+        bool isTopology() const;
+        bool isFrame() const;
+        int nFrames() const;
+        SireMol::Frame getFrame(int i) const;
 
-    QVector<SireMaths::Vector> coordinates() const;
-    QVector<SireMaths::Vector> velocities() const;
+        QVector<SireMaths::Vector> coordinates() const;
+        QVector<SireMaths::Vector> velocities() const;
 
-    QVector<qint64> atomNumbers() const;
-    QVector<QString> atomNames() const;
+        QVector<qint64> atomNumbers() const;
+        QVector<QString> atomNames() const;
 
-    QVector<QString> residueNames() const;
-    QVector<qint64> residueNumbers() const;
+        QVector<QString> residueNames() const;
+        QVector<qint64> residueNumbers() const;
 
-    QVector<SireMaths::Vector> coordinates(int frame) const;
-    QVector<SireMaths::Vector> velocities(int frame) const;
+        QVector<SireMaths::Vector> coordinates(int frame) const;
+        QVector<SireMaths::Vector> velocities(int frame) const;
 
-    SireMaths::Vector boxV1() const;
-    SireMaths::Vector boxV2() const;
-    SireMaths::Vector boxV3() const;
+        SireMaths::Vector boxV1() const;
+        SireMaths::Vector boxV2() const;
+        SireMaths::Vector boxV3() const;
 
-    SireMaths::Vector boxV1(int frame) const;
-    SireMaths::Vector boxV2(int frame) const;
-    SireMaths::Vector boxV3(int frame) const;
+        SireMaths::Vector boxV1(int frame) const;
+        SireMaths::Vector boxV2(int frame) const;
+        SireMaths::Vector boxV3(int frame) const;
 
-    QStringList warnings() const;
+        QStringList warnings() const;
 
-protected:
-    SireSystem::System startSystem(const PropertyMap &map) const;
-    void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
+    protected:
+        SireSystem::System startSystem(const PropertyMap &map) const;
+        void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
 
-private:
-    void assertSane() const;
-    void parseLines(const PropertyMap &map);
+    private:
+        void assertSane() const;
+        void parseLines(const PropertyMap &map);
 
-    int findAtom(const SireMol::MoleculeInfoData &molinfo,
-                 int atomidx, int hint=0, bool *ids_match=0) const;
+        int findAtom(const SireMol::MoleculeInfoData &molinfo, int atomidx, int hint = 0, bool *ids_match = 0) const;
 
-    void finaliseSystem(SireSystem::System &system, const PropertyMap &map) const;
+        void finaliseSystem(SireSystem::System &system, const PropertyMap &map) const;
 
-    /** The title of the file */
-    QString ttle;
+        /** The title of the file */
+        QString ttle;
 
-    /** The current time of the simulation in picoseconds */
-    QVector<double> current_time;
+        /** The current time of the simulation in picoseconds */
+        QVector<double> current_time;
 
-    /** The coordinate data in internal units (angstroms) */
-    QVector< QVector<SireMaths::Vector> > coords;
+        /** The coordinate data in internal units (angstroms) */
+        QVector<QVector<SireMaths::Vector>> coords;
 
-    /** The velocity data in internal units (angstrom/picosecond) */
-    QVector< QVector<SireMaths::Vector> > vels;
+        /** The velocity data in internal units (angstrom/picosecond) */
+        QVector<QVector<SireMaths::Vector>> vels;
 
-    /** The box dimensions - each of the three vectors */
-    QVector<SireMaths::Vector> box_v1, box_v2, box_v3;
+        /** The box dimensions - each of the three vectors */
+        QVector<SireMaths::Vector> box_v1, box_v2, box_v3;
 
-    /** The residue numbers */
-    QVector<qint64> resnums;
+        /** The residue numbers */
+        QVector<qint64> resnums;
 
-    /** The residue names */
-    QVector<QString> resnams;
+        /** The residue names */
+        QVector<QString> resnams;
 
-    /** The atom names */
-    QVector<QString> atmnams;
+        /** The atom names */
+        QVector<QString> atmnams;
 
-    /** The atom numbers */
-    QVector<qint64> atmnums;
+        /** The atom numbers */
+        QVector<qint64> atmnums;
 
-    /** Any warnings that were raised when reading the file */
-    QStringList parse_warnings;
-};
+        /** Any warnings that were raised when reading the file */
+        QStringList parse_warnings;
+    };
 
-}
+} // namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::Gro87 )
+Q_DECLARE_METATYPE(SireIO::Gro87)
 
-SIRE_EXPOSE_CLASS( SireIO::Gro87 )
+SIRE_EXPOSE_CLASS(SireIO::Gro87)
 
 SIRE_END_HEADER
 

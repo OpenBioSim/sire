@@ -39,7 +39,7 @@ static const RegisterMetaType<IntegrationConstant> r_intconst;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const IntegrationConstant &ic)
 {
-    writeHeader(ds, r_intconst, 1) << static_cast<const Symbol&>(ic);
+    writeHeader(ds, r_intconst, 1) << static_cast<const Symbol &>(ic);
 
     return ds;
 }
@@ -51,7 +51,7 @@ QDataStream &operator>>(QDataStream &ds, IntegrationConstant &ic)
 
     if (v == 1)
     {
-        ds >> static_cast<Symbol&>(ic);
+        ds >> static_cast<Symbol &>(ic);
     }
     else
         throw version_error(v, "1", r_intconst, CODELOC);
@@ -60,23 +60,24 @@ QDataStream &operator>>(QDataStream &ds, IntegrationConstant &ic)
 }
 
 /** Constructor */
-IntegrationConstant::IntegrationConstant()
-                    : Symbol("C")
-{}
+IntegrationConstant::IntegrationConstant() : Symbol("C")
+{
+}
 
 /** Copy constructor */
-IntegrationConstant::IntegrationConstant( const IntegrationConstant &other )
-                    : Symbol(other)
-{}
+IntegrationConstant::IntegrationConstant(const IntegrationConstant &other) : Symbol(other)
+{
+}
 
 /** Destructor */
 IntegrationConstant::~IntegrationConstant()
-{}
+{
+}
 
 /** Comparison operator */
 bool IntegrationConstant::operator==(const ExBase &other) const
 {
-    const IntegrationConstant *other_ic = dynamic_cast<const IntegrationConstant*>(&other);
+    const IntegrationConstant *other_ic = dynamic_cast<const IntegrationConstant *>(&other);
 
     return other_ic != 0 and typeid(other).name() == typeid(*this).name();
 }
@@ -84,29 +85,28 @@ bool IntegrationConstant::operator==(const ExBase &other) const
 /** Return a hash for this object */
 uint IntegrationConstant::hash() const
 {
-    return ( r_intconst.magicID() << 16 ) | ( r_intconst.magicID() << 16 );
+    return (r_intconst.magicID() << 16) | (r_intconst.magicID() << 16);
 }
 
 /** Cannot integrate an expression containing an integration constant. This
     is to prevent integration constants from multiple integrations from
     appearing in the expression. */
-Expression IntegrationConstant::integrate(const Symbol&) const
+Expression IntegrationConstant::integrate(const Symbol &) const
 {
-    throw SireCAS::unavailable_integral(QObject::tr(
-        "Cannot integrate an IntegrationConstant. You must remove all "
-        "integration constants from an expression before you can integrate "
-        "it again (e.g. via ex.substitute(IntegrationConstant() == 0))."), CODELOC);
+    throw SireCAS::unavailable_integral(QObject::tr("Cannot integrate an IntegrationConstant. You must remove all "
+                                                    "integration constants from an expression before you can integrate "
+                                                    "it again (e.g. via ex.substitute(IntegrationConstant() == 0))."),
+                                        CODELOC);
 
     return Expression();
 }
 
-const char* IntegrationConstant::typeName()
+const char *IntegrationConstant::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<IntegrationConstant>() );
+    return QMetaType::typeName(qMetaTypeId<IntegrationConstant>());
 }
 
-IntegrationConstant* IntegrationConstant::clone() const
+IntegrationConstant *IntegrationConstant::clone() const
 {
     return new IntegrationConstant(*this);
 }
-

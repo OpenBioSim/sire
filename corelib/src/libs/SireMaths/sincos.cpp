@@ -33,9 +33,9 @@
 
 void test_sincos(bool verbose)
 {
-    for (int i=-50; i<=50; ++i)
+    for (int i = -50; i <= 50; ++i)
     {
-        double x = 0.1*i;
+        double x = 0.1 * i;
 
         double sval = std::sin(x);
         double cval = std::cos(x);
@@ -53,4 +53,4 @@ void test_sincos(bool verbose)
     }
 }
 
-SIRE_UNITTEST( test_sincos )
+SIRE_UNITTEST(test_sincos)

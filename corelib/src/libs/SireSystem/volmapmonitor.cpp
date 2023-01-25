@@ -27,13 +27,13 @@
 
 #include "volmapmonitor.h"
 
+#include "SireMol/atomcoords.h"
 #include "SireMol/atomelements.h"
 #include "SireMol/atommasses.h"
-#include "SireMol/atomcoords.h"
-#include "SireMol/molecule.h"
-#include "SireMol/partialmolecule.h"
-#include "SireMol/moleculegroup.h"
 #include "SireMol/mgnum.h"
+#include "SireMol/molecule.h"
+#include "SireMol/moleculegroup.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireVol/gridinfo.h"
 
@@ -62,7 +62,7 @@ QDataStream &operator<<(QDataStream &ds, const VolMapMonitor &mon)
 
     SharedDataStream sds(ds);
 
-    sds << mon.molgroup << mon.propmap << mon.volmap << static_cast<const SystemMonitor&>(mon);
+    sds << mon.molgroup << mon.propmap << mon.volmap << static_cast<const SystemMonitor &>(mon);
 
     return ds;
 }
@@ -75,7 +75,7 @@ QDataStream &operator>>(QDataStream &ds, VolMapMonitor &mon)
     {
         SharedDataStream sds(ds);
 
-        sds >> mon.molgroup >> mon.propmap >> mon.volmap >> static_cast<SystemMonitor&>(mon);
+        sds >> mon.molgroup >> mon.propmap >> mon.volmap >> static_cast<SystemMonitor &>(mon);
     }
     else
         throw version_error(v, "1", r_mon, CODELOC);
@@ -87,67 +87,63 @@ static const VolumeMap::MapType map_type = VolumeMap::AVERAGE;
 static const VolumeMap::FillType fill_type = VolumeMap::VDW_RADIUS;
 
 /** Null constructor */
-VolMapMonitor::VolMapMonitor()
-              : ConcreteProperty<VolMapMonitor,SystemMonitor>(),
-                volmap(map_type, fill_type)
-{}
+VolMapMonitor::VolMapMonitor() : ConcreteProperty<VolMapMonitor, SystemMonitor>(), volmap(map_type, fill_type)
+{
+}
 
 /** Construct specifying the grid spacing */
 VolMapMonitor::VolMapMonitor(const SireUnits::Dimension::Length &grid_spacing)
-              : ConcreteProperty<VolMapMonitor,SystemMonitor>(),
-                volmap(grid_spacing, map_type, fill_type)
-{}
+    : ConcreteProperty<VolMapMonitor, SystemMonitor>(), volmap(grid_spacing, map_type, fill_type)
+{
+}
 
 /** Construct, specifying the molecule group to be monitored */
 VolMapMonitor::VolMapMonitor(const MoleculeGroup &group, const PropertyMap &map)
-              : ConcreteProperty<VolMapMonitor,SystemMonitor>(),
-                molgroup(group), propmap(map), volmap(map_type, fill_type)
-{}
+    : ConcreteProperty<VolMapMonitor, SystemMonitor>(), molgroup(group), propmap(map), volmap(map_type, fill_type)
+{
+}
 
 /** Construct, specifying the molecule group to be monitored and the grid spacing
     for the occupancy grid */
-VolMapMonitor::VolMapMonitor(const MoleculeGroup &group,
-                             const SireUnits::Dimension::Length &grid_spacing,
+VolMapMonitor::VolMapMonitor(const MoleculeGroup &group, const SireUnits::Dimension::Length &grid_spacing,
                              const PropertyMap &map)
-              : ConcreteProperty<VolMapMonitor,SystemMonitor>(),
-                molgroup(group), propmap(map), volmap(grid_spacing,fill_type,map_type)
-{}
+    : ConcreteProperty<VolMapMonitor, SystemMonitor>(), molgroup(group), propmap(map),
+      volmap(grid_spacing, fill_type, map_type)
+{
+}
 
 /** Construct, specifying the molecule group to be monitored
     and whether or not to ignore light atoms */
-VolMapMonitor::VolMapMonitor(const MoleculeGroup &group,
-                             bool skip_light_atoms,
-                             const PropertyMap &map)
-              : ConcreteProperty<VolMapMonitor,SystemMonitor>(),
-                molgroup(group), propmap(map), volmap(fill_type,map_type)
+VolMapMonitor::VolMapMonitor(const MoleculeGroup &group, bool skip_light_atoms, const PropertyMap &map)
+    : ConcreteProperty<VolMapMonitor, SystemMonitor>(), molgroup(group), propmap(map), volmap(fill_type, map_type)
 {
     volmap.setSkipLightAtoms(skip_light_atoms);
 }
 
 /** Construct, specifying the molecule group to be monitored, the grid spacing
     for the occupancy grid, and whether or not to ignore light atoms */
-VolMapMonitor::VolMapMonitor(const MoleculeGroup &group,
-                             const SireUnits::Dimension::Length &grid_spacing,
-                             bool skip_light_atoms,
-                             const PropertyMap &map)
-              : ConcreteProperty<VolMapMonitor,SystemMonitor>(),
-                molgroup(group), propmap(map), volmap(grid_spacing,map_type,fill_type)
+VolMapMonitor::VolMapMonitor(const MoleculeGroup &group, const SireUnits::Dimension::Length &grid_spacing,
+                             bool skip_light_atoms, const PropertyMap &map)
+    : ConcreteProperty<VolMapMonitor, SystemMonitor>(), molgroup(group), propmap(map),
+      volmap(grid_spacing, map_type, fill_type)
 {
     volmap.setSkipLightAtoms(skip_light_atoms);
 }
 
 /** Copy constructor */
 VolMapMonitor::VolMapMonitor(const VolMapMonitor &other)
-              : ConcreteProperty<VolMapMonitor,SystemMonitor>(),
-                molgroup(other.molgroup), propmap(other.propmap), volmap(other.volmap)
-{}
+    : ConcreteProperty<VolMapMonitor, SystemMonitor>(), molgroup(other.molgroup), propmap(other.propmap),
+      volmap(other.volmap)
+{
+}
 
 /** Destructor */
 VolMapMonitor::~VolMapMonitor()
-{}
+{
+}
 
 /** Copy assignment operator */
-VolMapMonitor& VolMapMonitor::operator=(const VolMapMonitor &other)
+VolMapMonitor &VolMapMonitor::operator=(const VolMapMonitor &other)
 {
     if (this != &other)
     {
@@ -162,9 +158,7 @@ VolMapMonitor& VolMapMonitor::operator=(const VolMapMonitor &other)
 /** Comparison operator */
 bool VolMapMonitor::operator==(const VolMapMonitor &other) const
 {
-    return molgroup == other.molgroup and
-           propmap == other.propmap and
-           volmap == other.volmap;
+    return molgroup == other.molgroup and propmap == other.propmap and volmap == other.volmap;
 }
 
 /** Comparison operator */
@@ -173,12 +167,12 @@ bool VolMapMonitor::operator!=(const VolMapMonitor &other) const
     return not operator==(other);
 }
 
-const char* VolMapMonitor::typeName()
+const char *VolMapMonitor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<VolMapMonitor>() );
+    return QMetaType::typeName(qMetaTypeId<VolMapMonitor>());
 }
 
-const char* VolMapMonitor::what() const
+const char *VolMapMonitor::what() const
 {
     return VolMapMonitor::typeName();
 }
@@ -186,13 +180,13 @@ const char* VolMapMonitor::what() const
 QString VolMapMonitor::toString() const
 {
     return QObject::tr("VolMapMonitor( group() == %1, gridInfo() == %2, nSamples() == %3 )")
-                .arg(group().toString())
-                .arg(gridInfo().toString())
-                .arg(nSamples());
+        .arg(group().toString())
+        .arg(gridInfo().toString())
+        .arg(nSamples());
 }
 
 /** Return the molecule group whose atoms are being monitored */
-const MoleculeGroup& VolMapMonitor::group() const
+const MoleculeGroup &VolMapMonitor::group() const
 {
     return molgroup.read();
 }
@@ -278,7 +272,7 @@ void VolMapMonitor::monitor(System &system)
 {
     MolGroupPtr group_to_monitor;
 
-    //now update the molecule group, if needed
+    // now update the molecule group, if needed
     if (system.contains(group().number()))
     {
         group_to_monitor = system[group().number()];

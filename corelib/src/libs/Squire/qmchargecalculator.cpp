@@ -28,9 +28,9 @@
 #include "qmchargecalculator.h"
 
 #include "SireMol/molecule.h"
-#include "SireMol/partialmolecule.h"
 #include "SireMol/molecules.h"
 #include "SireMol/molnum.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -44,34 +44,30 @@ using namespace SireStream;
 ////////////// Implementation of ChargeCalculator
 //////////////
 
-static const RegisterMetaType<QMChargeCalculator> r_chgcalc( MAGIC_ONLY,
-                                                    QMChargeCalculator::typeName() );
+static const RegisterMetaType<QMChargeCalculator> r_chgcalc(MAGIC_ONLY, QMChargeCalculator::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const QMChargeCalculator &chgcalc)
+QDataStream &operator<<(QDataStream &ds, const QMChargeCalculator &chgcalc)
 {
     writeHeader(ds, r_chgcalc, 2);
 
-    ds << chgcalc.sclfac
-       << static_cast<const Property&>(chgcalc);
+    ds << chgcalc.sclfac << static_cast<const Property &>(chgcalc);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          QMChargeCalculator &chgcalc)
+QDataStream &operator>>(QDataStream &ds, QMChargeCalculator &chgcalc)
 {
     VersionID v = readHeader(ds, r_chgcalc);
 
     if (v == 2)
     {
-        ds >> chgcalc.sclfac >> static_cast<Property&>(chgcalc);
+        ds >> chgcalc.sclfac >> static_cast<Property &>(chgcalc);
     }
     else if (v == 1)
     {
-        ds >> static_cast<Property&>(chgcalc);
+        ds >> static_cast<Property &>(chgcalc);
 
         chgcalc.sclfac = 1;
     }
@@ -83,19 +79,21 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 QMChargeCalculator::QMChargeCalculator() : Property(), sclfac(1)
-{}
+{
+}
 
 /** Copy constructor */
-QMChargeCalculator::QMChargeCalculator(const QMChargeCalculator &other)
-                   : Property(other), sclfac(other.sclfac)
-{}
+QMChargeCalculator::QMChargeCalculator(const QMChargeCalculator &other) : Property(other), sclfac(other.sclfac)
+{
+}
 
 /** Destructor */
 QMChargeCalculator::~QMChargeCalculator()
-{}
+{
+}
 
 /** Copy assignment operator */
-QMChargeCalculator& QMChargeCalculator::operator=(const QMChargeCalculator &other)
+QMChargeCalculator &QMChargeCalculator::operator=(const QMChargeCalculator &other)
 {
     sclfac = other.sclfac;
     Property::operator=(other);
@@ -114,14 +112,13 @@ bool QMChargeCalculator::operator!=(const QMChargeCalculator &other) const
     return sclfac != other.sclfac or Property::operator!=(other);
 }
 
-const char* QMChargeCalculator::typeName()
+const char *QMChargeCalculator::typeName()
 {
     return "Squire::QMChargeCalculator";
 }
 
 /** Return the partial charges on the molecule 'molecule' */
-AtomCharges QMChargeCalculator::calculate(const PartialMolecule &molecule,
-                                        const PropertyMap &map) const
+AtomCharges QMChargeCalculator::calculate(const PartialMolecule &molecule, const PropertyMap &map) const
 {
     return this->operator()(molecule, map);
 }
@@ -138,7 +135,7 @@ void QMChargeCalculator::setScaleFactor(double scl)
     sclfac = scl;
 }
 
-const NullQMChargeCalculator& QMChargeCalculator::null()
+const NullQMChargeCalculator &QMChargeCalculator::null()
 {
     return *(create_shared_null<NullQMChargeCalculator>());
 }
@@ -150,25 +147,23 @@ const NullQMChargeCalculator& QMChargeCalculator::null()
 static const RegisterMetaType<NullQMChargeCalculator> r_nullchg;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const NullQMChargeCalculator &nullchg)
+QDataStream &operator<<(QDataStream &ds, const NullQMChargeCalculator &nullchg)
 {
     writeHeader(ds, r_nullchg, 1);
 
-    ds << static_cast<const QMChargeCalculator&>(nullchg);
+    ds << static_cast<const QMChargeCalculator &>(nullchg);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          NullQMChargeCalculator &nullchg)
+QDataStream &operator>>(QDataStream &ds, NullQMChargeCalculator &nullchg)
 {
     VersionID v = readHeader(ds, r_nullchg);
 
     if (v == 1)
     {
-        ds >> static_cast<QMChargeCalculator&>(nullchg);
+        ds >> static_cast<QMChargeCalculator &>(nullchg);
     }
     else
         throw version_error(v, "1", r_nullchg, CODELOC);
@@ -177,26 +172,28 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Constructor */
-NullQMChargeCalculator::NullQMChargeCalculator()
-                     : ConcreteProperty<NullQMChargeCalculator,QMChargeCalculator>()
-{}
+NullQMChargeCalculator::NullQMChargeCalculator() : ConcreteProperty<NullQMChargeCalculator, QMChargeCalculator>()
+{
+}
 
 /** Copy constructor */
 NullQMChargeCalculator::NullQMChargeCalculator(const NullQMChargeCalculator &other)
-                     : ConcreteProperty<NullQMChargeCalculator,QMChargeCalculator>(other)
-{}
+    : ConcreteProperty<NullQMChargeCalculator, QMChargeCalculator>(other)
+{
+}
 
 /** Destructor */
 NullQMChargeCalculator::~NullQMChargeCalculator()
-{}
-
-const char* NullQMChargeCalculator::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullQMChargeCalculator>() );
+}
+
+const char *NullQMChargeCalculator::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullQMChargeCalculator>());
 }
 
 /** Copy assignment operator */
-NullQMChargeCalculator& NullQMChargeCalculator::operator=(const NullQMChargeCalculator &other)
+NullQMChargeCalculator &NullQMChargeCalculator::operator=(const NullQMChargeCalculator &other)
 {
     QMChargeCalculator::operator=(other);
     return *this;
@@ -216,8 +213,7 @@ bool NullQMChargeCalculator::operator!=(const NullQMChargeCalculator &other) con
 
 /** Return the charges calculate for the passed molecule - this returns
     zero charges! */
-AtomCharges NullQMChargeCalculator::operator()(const PartialMolecule &molecule,
-                                             const PropertyMap&) const
+AtomCharges NullQMChargeCalculator::operator()(const PartialMolecule &molecule, const PropertyMap &) const
 {
     AtomCharges charges(molecule.data().info());
 
@@ -227,9 +223,8 @@ AtomCharges NullQMChargeCalculator::operator()(const PartialMolecule &molecule,
 /** Return whether or not the change from 'oldmol' to 'newmol'
     may change the charges. Use this function to see if
     a charge calculation is required */
-bool NullQMChargeCalculator::mayChangeCharges(const PartialMolecule&,
-                                              const PartialMolecule&,
-                                              const PropertyMap&) const
+bool NullQMChargeCalculator::mayChangeCharges(const PartialMolecule &, const PartialMolecule &,
+                                              const PropertyMap &) const
 {
     return false;
 }

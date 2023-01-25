@@ -29,15 +29,15 @@
 
 #include "SireFF/forcetable.h"
 
-#include "SireCAS/symbols.h"
-#include "SireCAS/values.h"
 #include "SireCAS/conditional.h"
 #include "SireCAS/power.h"
+#include "SireCAS/symbols.h"
+#include "SireCAS/values.h"
 
 #include "SireID/index.h"
 
-#include "SireUnits/units.h"
 #include "SireUnits/angle.h"
+#include "SireUnits/units.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -62,16 +62,14 @@ using namespace SireUnits::Dimension;
 static const RegisterMetaType<DihedralRestraint> r_dihrest;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const DihedralRestraint &dihrest)
+QDataStream &operator<<(QDataStream &ds, const DihedralRestraint &dihrest)
 {
     writeHeader(ds, r_dihrest, 1);
 
     SharedDataStream sds(ds);
 
-    sds << dihrest.p[0] << dihrest.p[1] << dihrest.p[2] << dihrest.p[3]
-        << dihrest.force_expression
-        << static_cast<const ExpressionRestraint3D&>(dihrest);
+    sds << dihrest.p[0] << dihrest.p[1] << dihrest.p[2] << dihrest.p[3] << dihrest.force_expression
+        << static_cast<const ExpressionRestraint3D &>(dihrest);
 
     return ds;
 }
@@ -85,35 +83,31 @@ QDataStream &operator>>(QDataStream &ds, DihedralRestraint &dihrest)
     {
         SharedDataStream sds(ds);
 
-        sds >> dihrest.p[0] >> dihrest.p[1] >> dihrest.p[2] >> dihrest.p[3]
-            >> dihrest.force_expression
-            >> static_cast<ExpressionRestraint3D&>(dihrest);
+        sds >> dihrest.p[0] >> dihrest.p[1] >> dihrest.p[2] >> dihrest.p[3] >> dihrest.force_expression >>
+            static_cast<ExpressionRestraint3D &>(dihrest);
 
-        dihrest.intra_molecule_points = Point::areIntraMoleculePoints(dihrest.p[0],
-                                                                   dihrest.p[1]) and
-                                        Point::areIntraMoleculePoints(dihrest.p[0],
-                                                                   dihrest.p[2]) and
-                                        Point::areIntraMoleculePoints(dihrest.p[0],
-                                                                   dihrest.p[3]);
+        dihrest.intra_molecule_points = Point::areIntraMoleculePoints(dihrest.p[0], dihrest.p[1]) and
+                                        Point::areIntraMoleculePoints(dihrest.p[0], dihrest.p[2]) and
+                                        Point::areIntraMoleculePoints(dihrest.p[0], dihrest.p[3]);
     }
     else
-        throw version_error( v, "1", r_dihrest, CODELOC );
+        throw version_error(v, "1", r_dihrest, CODELOC);
 
     return ds;
 }
 
-Q_GLOBAL_STATIC_WITH_ARGS( Symbol, getPhiSymbol, ("phi") );
+Q_GLOBAL_STATIC_WITH_ARGS(Symbol, getPhiSymbol, ("phi"));
 
 /** Return the symbol that represents the dihedral angle between the points (phi) */
-const Symbol& DihedralRestraint::phi()
+const Symbol &DihedralRestraint::phi()
 {
     return *(getPhiSymbol());
 }
 
 /** Constructor */
-DihedralRestraint::DihedralRestraint()
-                  : ConcreteProperty<DihedralRestraint,ExpressionRestraint3D>()
-{}
+DihedralRestraint::DihedralRestraint() : ConcreteProperty<DihedralRestraint, ExpressionRestraint3D>()
+{
+}
 
 void DihedralRestraint::calculatePhi()
 {
@@ -122,16 +116,14 @@ void DihedralRestraint::calculatePhi()
         SireUnits::Dimension::Angle angle;
 
         if (intra_molecule_points)
-            //we don't use the space when calculating intra-molecular angles
-            angle = Vector::dihedral( p[0].read().point(), p[1].read().point(),
-                                      p[2].read().point(), p[3].read().point() );
+            // we don't use the space when calculating intra-molecular angles
+            angle =
+                Vector::dihedral(p[0].read().point(), p[1].read().point(), p[2].read().point(), p[3].read().point());
         else
-            angle = this->space().calcDihedral( p[0].read().point(),
-                                                p[1].read().point(),
-                                                p[2].read().point(),
-                                                p[3].read().point() );
+            angle = this->space().calcDihedral(p[0].read().point(), p[1].read().point(), p[2].read().point(),
+                                               p[3].read().point());
 
-        ExpressionRestraint3D::_pvt_setValue( phi(), angle );
+        ExpressionRestraint3D::_pvt_setValue(phi(), angle);
     }
 }
 
@@ -139,10 +131,9 @@ void DihedralRestraint::calculatePhi()
     three points 'point0', 'point1' and 'point2' (theta == a(012)),
     restraining the angle within these points using the expression
     'restraint' */
-DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &point1,
-                                     const PointRef &point2, const PointRef &point3,
-                                     const Expression &restraint)
-                  : ConcreteProperty<DihedralRestraint,ExpressionRestraint3D>(restraint)
+DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &point1, const PointRef &point2,
+                                     const PointRef &point3, const Expression &restraint)
+    : ConcreteProperty<DihedralRestraint, ExpressionRestraint3D>(restraint)
 {
     p[0] = point0;
     p[1] = point1;
@@ -154,8 +145,7 @@ DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &poi
     if (force_expression.isConstant())
         force_expression = force_expression.evaluate(Values());
 
-    intra_molecule_points = Point::areIntraMoleculePoints(p[0], p[1]) and
-                            Point::areIntraMoleculePoints(p[0], p[2]) and
+    intra_molecule_points = Point::areIntraMoleculePoints(p[0], p[1]) and Point::areIntraMoleculePoints(p[0], p[2]) and
                             Point::areIntraMoleculePoints(p[0], p[3]);
 
     this->calculatePhi();
@@ -165,10 +155,9 @@ DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &poi
     three points 'point0', 'point1' and 'point2' (theta == a(012)),
     restraining the angle within these points using the expression
     'restraint' */
-DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &point1,
-                                     const PointRef &point2, const PointRef &point3,
-                                     const Expression &restraint, const Values &values)
-     : ConcreteProperty<DihedralRestraint,ExpressionRestraint3D>(restraint, values)
+DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &point1, const PointRef &point2,
+                                     const PointRef &point3, const Expression &restraint, const Values &values)
+    : ConcreteProperty<DihedralRestraint, ExpressionRestraint3D>(restraint, values)
 {
     p[0] = point0;
     p[1] = point1;
@@ -180,8 +169,7 @@ DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &poi
     if (force_expression.isConstant())
         force_expression = force_expression.evaluate(Values());
 
-    intra_molecule_points = Point::areIntraMoleculePoints(p[0], p[1]) and
-                            Point::areIntraMoleculePoints(p[0], p[2]) and
+    intra_molecule_points = Point::areIntraMoleculePoints(p[0], p[1]) and Point::areIntraMoleculePoints(p[0], p[2]) and
                             Point::areIntraMoleculePoints(p[0], p[3]);
 
     this->calculatePhi();
@@ -189,12 +177,10 @@ DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &poi
 
 /** Internal constructor used to construct a restraint using the specified
     points, energy expression and force expression */
-DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &point1,
-                                     const PointRef &point2, const PointRef &point3,
-                                     const Expression &nrg_restraint,
+DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &point1, const PointRef &point2,
+                                     const PointRef &point3, const Expression &nrg_restraint,
                                      const Expression &force_restraint)
-           : ConcreteProperty<DihedralRestraint,ExpressionRestraint3D>(nrg_restraint),
-             force_expression(force_restraint)
+    : ConcreteProperty<DihedralRestraint, ExpressionRestraint3D>(nrg_restraint), force_expression(force_restraint)
 {
     p[0] = point0;
     p[1] = point1;
@@ -208,15 +194,14 @@ DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &poi
     else
     {
         if (not this->restraintFunction().symbols().contains(force_expression.symbols()))
-            throw SireError::incompatible_error( QObject::tr(
-                "You cannot use a force function which uses more symbols "
-                "(%1) than the energy function (%2).")
-                    .arg( Sire::toString(force_expression.symbols()),
-                          Sire::toString(restraintFunction().symbols()) ), CODELOC );
+            throw SireError::incompatible_error(
+                QObject::tr("You cannot use a force function which uses more symbols "
+                            "(%1) than the energy function (%2).")
+                    .arg(Sire::toString(force_expression.symbols()), Sire::toString(restraintFunction().symbols())),
+                CODELOC);
     }
 
-    intra_molecule_points = Point::areIntraMoleculePoints(p[0], p[1]) and
-                            Point::areIntraMoleculePoints(p[0], p[2]) and
+    intra_molecule_points = Point::areIntraMoleculePoints(p[0], p[1]) and Point::areIntraMoleculePoints(p[0], p[2]) and
                             Point::areIntraMoleculePoints(p[0], p[3]);
 
     this->calculatePhi();
@@ -224,11 +209,10 @@ DihedralRestraint::DihedralRestraint(const PointRef &point0, const PointRef &poi
 
 /** Copy constructor */
 DihedralRestraint::DihedralRestraint(const DihedralRestraint &other)
-                  : ConcreteProperty<DihedralRestraint,ExpressionRestraint3D>(other),
-                    force_expression(other.force_expression),
-                    intra_molecule_points(other.intra_molecule_points)
+    : ConcreteProperty<DihedralRestraint, ExpressionRestraint3D>(other), force_expression(other.force_expression),
+      intra_molecule_points(other.intra_molecule_points)
 {
-    for (int i=0; i<this->nPoints(); ++i)
+    for (int i = 0; i < this->nPoints(); ++i)
     {
         p[i] = other.p[i];
     }
@@ -236,16 +220,17 @@ DihedralRestraint::DihedralRestraint(const DihedralRestraint &other)
 
 /** Destructor */
 DihedralRestraint::~DihedralRestraint()
-{}
+{
+}
 
 /** Copy assignment operator */
-DihedralRestraint& DihedralRestraint::operator=(const DihedralRestraint &other)
+DihedralRestraint &DihedralRestraint::operator=(const DihedralRestraint &other)
 {
     if (this != &other)
     {
         ExpressionRestraint3D::operator=(other);
 
-        for (int i=0; i<this->nPoints(); ++i)
+        for (int i = 0; i < this->nPoints(); ++i)
         {
             p[i] = other.p[i];
         }
@@ -260,11 +245,8 @@ DihedralRestraint& DihedralRestraint::operator=(const DihedralRestraint &other)
 /** Comparison operator */
 bool DihedralRestraint::operator==(const DihedralRestraint &other) const
 {
-    return this == &other or
-           ( ExpressionRestraint3D::operator==(other) and
-             p[0] == other.p[0] and p[1] == other.p[1] and
-             p[2] == other.p[2] and p[3] == other.p[3] and
-             force_expression == other.force_expression);
+    return this == &other or (ExpressionRestraint3D::operator==(other) and p[0] == other.p[0] and p[1] == other.p[1] and
+                              p[2] == other.p[2] and p[3] == other.p[3] and force_expression == other.force_expression);
 }
 
 /** Comparison operator */
@@ -273,9 +255,9 @@ bool DihedralRestraint::operator!=(const DihedralRestraint &other) const
     return not DihedralRestraint::operator==(other);
 }
 
-const char* DihedralRestraint::typeName()
+const char *DihedralRestraint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<DihedralRestraint>() );
+    return QMetaType::typeName(qMetaTypeId<DihedralRestraint>());
 }
 
 /** This restraint involves four points */
@@ -285,33 +267,33 @@ int DihedralRestraint::nPoints() const
 }
 
 /** Return the ith point */
-const Point& DihedralRestraint::point(int i) const
+const Point &DihedralRestraint::point(int i) const
 {
-    i = Index(i).map( this->nPoints() );
+    i = Index(i).map(this->nPoints());
 
     return p[i].read();
 }
 
 /** Return the first point */
-const Point& DihedralRestraint::point0() const
+const Point &DihedralRestraint::point0() const
 {
     return p[0].read();
 }
 
 /** Return the second point */
-const Point& DihedralRestraint::point1() const
+const Point &DihedralRestraint::point1() const
 {
     return p[1].read();
 }
 
 /** Return the third point */
-const Point& DihedralRestraint::point2() const
+const Point &DihedralRestraint::point2() const
 {
     return p[2].read();
 }
 
 /** Return the fourth point */
-const Point& DihedralRestraint::point3() const
+const Point &DihedralRestraint::point3() const
 {
     return p[3].read();
 }
@@ -342,9 +324,7 @@ Values DihedralRestraint::builtinValues() const
 RestraintPtr DihedralRestraint::differentiate(const Symbol &symbol) const
 {
     if (this->restraintFunction().isFunction(symbol))
-        return DihedralRestraint( p[0], p[1], p[2], p[3],
-                                  restraintFunction().differentiate(symbol),
-                                  this->values() );
+        return DihedralRestraint(p[0], p[1], p[2], p[3], restraintFunction().differentiate(symbol), this->values());
     else
         return NullRestraint();
 }
@@ -361,7 +341,7 @@ void DihedralRestraint::setSpace(const Space &new_space)
 
         try
         {
-            for (int i=0; i<this->nPoints(); ++i)
+            for (int i = 0; i < this->nPoints(); ++i)
             {
                 p[i].edit().setSpace(new_space);
             }
@@ -370,7 +350,7 @@ void DihedralRestraint::setSpace(const Space &new_space)
 
             this->calculatePhi();
         }
-        catch(...)
+        catch (...)
         {
             DihedralRestraint::operator=(old_state);
             throw;
@@ -379,7 +359,7 @@ void DihedralRestraint::setSpace(const Space &new_space)
 }
 
 /** Return the function used to calculate the restraint force */
-const Expression& DihedralRestraint::differentialRestraintFunction() const
+const Expression &DihedralRestraint::differentialRestraintFunction() const
 {
     return force_expression;
 }
@@ -394,13 +374,13 @@ void DihedralRestraint::force(MolForceTable &forcetable, double scale_force) con
     bool in_p2 = p[2].read().contains(forcetable.molNum());
     bool in_p3 = p[3].read().contains(forcetable.molNum());
 
-    if (not (in_p0 or in_p1 or in_p2 or in_p3))
-        //this molecule is not affected by the restraint
+    if (not(in_p0 or in_p1 or in_p2 or in_p3))
+        // this molecule is not affected by the restraint
         return;
 
-    throw SireError::incomplete_code( QObject::tr(
-            "Haven't yet written the code to calculate forces caused "
-            "by a dihedral restraint."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Haven't yet written the code to calculate forces caused "
+                                                 "by a dihedral restraint."),
+                                     CODELOC);
 }
 
 /** Calculate the force acting on the molecules in the forcetable 'forcetable'
@@ -413,13 +393,13 @@ void DihedralRestraint::force(ForceTable &forcetable, double scale_force) const
     bool in_p2 = p[2].read().usesMoleculesIn(forcetable);
     bool in_p3 = p[3].read().usesMoleculesIn(forcetable);
 
-    if (not (in_p0 or in_p1 or in_p2 or in_p3))
-        //this molecule is not affected by the restraint
+    if (not(in_p0 or in_p1 or in_p2 or in_p3))
+        // this molecule is not affected by the restraint
         return;
 
-    throw SireError::incomplete_code( QObject::tr(
-            "Haven't yet written the code to calculate forces caused "
-            "by a dihedral restraint."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Haven't yet written the code to calculate forces caused "
+                                                 "by a dihedral restraint."),
+                                     CODELOC);
 }
 
 /** Update the points of this restraint using new molecule data from 'moldata'
@@ -436,14 +416,14 @@ void DihedralRestraint::update(const MoleculeData &moldata)
 
         try
         {
-            for (int i=0; i<this->nPoints(); ++i)
+            for (int i = 0; i < this->nPoints(); ++i)
             {
                 p[i].edit().update(moldata);
             }
 
             this->calculatePhi();
         }
-        catch(...)
+        catch (...)
         {
             DihedralRestraint::operator=(old_state);
             throw;
@@ -465,14 +445,14 @@ void DihedralRestraint::update(const Molecules &molecules)
 
         try
         {
-            for (int i=0; i<this->nPoints(); ++i)
+            for (int i = 0; i < this->nPoints(); ++i)
             {
                 p[i].edit().update(molecules);
             }
 
             this->calculatePhi();
         }
-        catch(...)
+        catch (...)
         {
             DihedralRestraint::operator=(old_state);
             throw;
@@ -485,7 +465,7 @@ Molecules DihedralRestraint::molecules() const
 {
     Molecules mols;
 
-    for (int i=0; i<this->nPoints(); ++i)
+    for (int i = 0; i < this->nPoints(); ++i)
     {
         mols += p[i].read().molecules();
     }
@@ -497,36 +477,32 @@ Molecules DihedralRestraint::molecules() const
     with number 'molnum' */
 bool DihedralRestraint::contains(MolNum molnum) const
 {
-    return p[0].read().contains(molnum) or p[1].read().contains(molnum) or
-           p[2].read().contains(molnum) or p[3].read().contains(molnum);
+    return p[0].read().contains(molnum) or p[1].read().contains(molnum) or p[2].read().contains(molnum) or
+           p[3].read().contains(molnum);
 }
 
 /** Return whether or not this restraint affects the molecule
     with ID 'molid' */
 bool DihedralRestraint::contains(const MolID &molid) const
 {
-    return p[0].read().contains(molid) or p[1].read().contains(molid) or
-           p[2].read().contains(molid) or p[3].read().contains(molid);
+    return p[0].read().contains(molid) or p[1].read().contains(molid) or p[2].read().contains(molid) or
+           p[3].read().contains(molid);
 }
 
 /** Return whether or not this restraint involves any of the molecules
     that are in the forcetable 'forcetable' */
 bool DihedralRestraint::usesMoleculesIn(const ForceTable &forcetable) const
 {
-    return p[0].read().usesMoleculesIn(forcetable) or
-           p[1].read().usesMoleculesIn(forcetable) or
-           p[2].read().usesMoleculesIn(forcetable) or
-           p[3].read().usesMoleculesIn(forcetable);
+    return p[0].read().usesMoleculesIn(forcetable) or p[1].read().usesMoleculesIn(forcetable) or
+           p[2].read().usesMoleculesIn(forcetable) or p[3].read().usesMoleculesIn(forcetable);
 }
 
 /** Return whether or not this restraint involves any of the molecules
     in 'molecules' */
 bool DihedralRestraint::usesMoleculesIn(const Molecules &molecules) const
 {
-    return p[0].read().usesMoleculesIn(molecules) or
-           p[1].read().usesMoleculesIn(molecules) or
-           p[2].read().usesMoleculesIn(molecules) or
-           p[3].read().usesMoleculesIn(molecules);
+    return p[0].read().usesMoleculesIn(molecules) or p[1].read().usesMoleculesIn(molecules) or
+           p[2].read().usesMoleculesIn(molecules) or p[3].read().usesMoleculesIn(molecules);
 }
 
 static Expression harmonicFunction(double force_constant)
@@ -542,71 +518,59 @@ static Expression diffHarmonicFunction(double force_constant)
     if (SireMaths::isZero(force_constant))
         return 0;
     else
-        return (2*force_constant) * DihedralRestraint::phi();
+        return (2 * force_constant) * DihedralRestraint::phi();
 }
 
 /** Return a distance restraint that applies a harmonic potential between
     the points 'point0' and 'point1' using a force constant 'force_constant' */
-DihedralRestraint DihedralRestraint::harmonic(
-                                        const PointRef &point0,
-                                        const PointRef &point1,
-                                        const PointRef &point2,
-                                        const PointRef &point3,
-                                        const HarmonicAngleForceConstant &force_constant)
+DihedralRestraint DihedralRestraint::harmonic(const PointRef &point0, const PointRef &point1, const PointRef &point2,
+                                              const PointRef &point3, const HarmonicAngleForceConstant &force_constant)
 {
-    return DihedralRestraint(point0, point1, point2, point3,
-                             ::harmonicFunction(force_constant),
+    return DihedralRestraint(point0, point1, point2, point3, ::harmonicFunction(force_constant),
                              ::diffHarmonicFunction(force_constant));
 }
 
 static Expression halfHarmonicFunction(double force_constant, double angle)
 {
-    if ( SireMaths::isZero(force_constant) )
+    if (SireMaths::isZero(force_constant))
         return 0;
 
-    else if ( angle <= 0 )
-        //this is just a harmonic function
+    else if (angle <= 0)
+        // this is just a harmonic function
         return ::harmonicFunction(force_constant);
 
     else
     {
         const Symbol &phi = DihedralRestraint::phi();
-        return Conditional(
-                GreaterThan(phi, angle), force_constant * pow(phi-angle, 2), 0 );
+        return Conditional(GreaterThan(phi, angle), force_constant * pow(phi - angle, 2), 0);
     }
 }
 
 static Expression diffHalfHarmonicFunction(double force_constant, double angle)
 {
-    if ( SireMaths::isZero(force_constant) )
+    if (SireMaths::isZero(force_constant))
         return 0;
 
     else if (angle <= 0)
-        //this is just a harmonic function
+        // this is just a harmonic function
         return ::diffHarmonicFunction(force_constant);
 
     else
     {
         const Symbol &phi = DihedralRestraint::phi();
-        return Conditional( GreaterThan(phi, angle),
-                                (2*force_constant) * (phi-angle), 0 );
+        return Conditional(GreaterThan(phi, angle), (2 * force_constant) * (phi - angle), 0);
     }
 }
 
 /** Return a distance restraint that applied a half-harmonic potential
     between the points 'point0' and 'point1' above a distance 'distance'
     using a force constant 'force_constant' */
-DihedralRestraint DihedralRestraint::halfHarmonic(
-                                        const PointRef &point0,
-                                        const PointRef &point1,
-                                        const PointRef &point2,
-                                        const PointRef &point3,
-                                        const Angle &angle,
-                                        const HarmonicAngleForceConstant &force_constant)
+DihedralRestraint DihedralRestraint::halfHarmonic(const PointRef &point0, const PointRef &point1,
+                                                  const PointRef &point2, const PointRef &point3, const Angle &angle,
+                                                  const HarmonicAngleForceConstant &force_constant)
 {
     double ang = angle.to(radians);
 
-    return DihedralRestraint(point0, point1, point2, point3,
-                          ::halfHarmonicFunction(force_constant, ang),
-                          ::diffHalfHarmonicFunction(force_constant, ang));
+    return DihedralRestraint(point0, point1, point2, point3, ::halfHarmonicFunction(force_constant, ang),
+                             ::diffHalfHarmonicFunction(force_constant, ang));
 }

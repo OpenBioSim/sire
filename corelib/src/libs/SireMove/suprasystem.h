@@ -36,176 +36,173 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class SupraSystem;
+    class SupraSystem;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SupraSystem&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SupraSystem&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SupraSystem &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SupraSystem &);
 
 namespace SireSystem
 {
-class System;
+    class System;
 }
 
 namespace SireMove
 {
 
-using SireSystem::System;
-using SireSystem::SystemMonitor;
-using SireSystem::SystemMonitors;
+    using SireSystem::System;
+    using SireSystem::SystemMonitor;
+    using SireSystem::SystemMonitors;
 
-class SimStore;
-class Moves;
+    class SimStore;
+    class Moves;
 
-class SupraSubSystem;
+    class SupraSubSystem;
 
-/** This is the base class of all supra-systems. A supra-system is a
-    collection of systems, used to perform a simulation that
-    involves making moves on lots of connected sub-systems. A good
-    example is a replica exchange simulation, where each replica
-    is a sub-system, and the ensemble of systems is the supra-system.
+    /** This is the base class of all supra-systems. A supra-system is a
+        collection of systems, used to perform a simulation that
+        involves making moves on lots of connected sub-systems. A good
+        example is a replica exchange simulation, where each replica
+        is a sub-system, and the ensemble of systems is the supra-system.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SupraSystem
-       : public SireBase::ConcreteProperty<SupraSystem,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SupraSystem : public SireBase::ConcreteProperty<SupraSystem, SireBase::Property>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SupraSystem&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SupraSystem&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SupraSystem &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SupraSystem &);
 
-public:
-    SupraSystem();
-    SupraSystem(int n);
-    SupraSystem(const System &system, int n=1);
-    SupraSystem(const QVector<System> &systems);
+    public:
+        SupraSystem();
+        SupraSystem(int n);
+        SupraSystem(const System &system, int n = 1);
+        SupraSystem(const QVector<System> &systems);
 
-    SupraSystem(const SupraSubSystem &subsystem, int n=1);
-    SupraSystem(const SupraSystem &other);
+        SupraSystem(const SupraSubSystem &subsystem, int n = 1);
+        SupraSystem(const SupraSystem &other);
 
-    virtual ~SupraSystem();
+        virtual ~SupraSystem();
 
-    SupraSystem& operator=(const SupraSystem &other);
+        SupraSystem &operator=(const SupraSystem &other);
 
-    bool operator==(const SupraSystem &other) const;
-    bool operator!=(const SupraSystem &other) const;
+        bool operator==(const SupraSystem &other) const;
+        bool operator!=(const SupraSystem &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual SupraSystem* clone() const;
+        virtual SupraSystem *clone() const;
 
-    const SupraSubSystem& operator[](int i) const;
+        const SupraSubSystem &operator[](int i) const;
 
-    const SupraSubSystem& at(int i) const;
+        const SupraSubSystem &at(int i) const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    int nSubSystems() const;
-    int count() const;
-    int size();
+        int nSubSystems() const;
+        int count() const;
+        int size();
 
-    void clearStatistics();
-    void clearSubStatistics();
+        void clearStatistics();
+        void clearSubStatistics();
 
-    void clearAllStatistics();
+        void clearAllStatistics();
 
-    void mustNowRecalculateFromScratch();
+        void mustNowRecalculateFromScratch();
 
-    bool isPacked() const;
-    bool isPackedToMemory() const;
-    bool isPackedToDisk() const;
+        bool isPacked() const;
+        bool isPackedToMemory() const;
+        bool isPackedToDisk() const;
 
-    bool anyPacked() const;
-    bool anyPackedToMemory() const;
-    bool anyPackedToDisk() const;
+        bool anyPacked() const;
+        bool anyPackedToMemory() const;
+        bool anyPackedToDisk() const;
 
-    void pack();
-    void unpack();
+        void pack();
+        void unpack();
 
-    void packToDisk();
-    void packToDisk(const QString &tempdir);
+        void packToDisk();
+        void packToDisk(const QString &tempdir);
 
-    void packToMemory();
+        void packToMemory();
 
-    void pack(int i);
-    void unpack(int i);
+        void pack(int i);
+        void unpack(int i);
 
-    void packToDisk(int i);
-    void packToDisk(int i, const QString &tempdir);
+        void packToDisk(int i);
+        void packToDisk(int i, const QString &tempdir);
 
-    void packToMemory(int i);
+        void packToMemory(int i);
 
-    void setSubSystems(const SupraSystem &system);
+        void setSubSystems(const SupraSystem &system);
 
-    virtual void setSubSystem(int i, const SupraSubSystem &subsystem);
-    void setSubSystem(const SupraSubSystem &subsystem);
+        virtual void setSubSystem(int i, const SupraSubSystem &subsystem);
+        void setSubSystem(const SupraSubSystem &subsystem);
 
-    virtual void setSubSystem(int i, const System &system);
-    void setSubSystem(const System &system);
+        virtual void setSubSystem(int i, const System &system);
+        void setSubSystem(const System &system);
 
-    virtual void setSubMoves(int i, const Moves &moves);
-    void setSubMoves(const Moves &moves);
+        virtual void setSubMoves(int i, const Moves &moves);
+        void setSubMoves(const Moves &moves);
 
-    void setSubSystemAndMoves(int i, const System &system, const Moves &moves);
-    void setSubSystemAndMoves(const System &system, const Moves &moves);
+        void setSubSystemAndMoves(int i, const System &system, const Moves &moves);
+        void setSubSystemAndMoves(const System &system, const Moves &moves);
 
-    virtual void setSubSystemAndMoves(int i, const SimStore &simstore);
-    void setSubSystemAndMoves(const SimStore &simstore);
+        virtual void setSubSystemAndMoves(int i, const SimStore &simstore);
+        void setSubSystemAndMoves(const SimStore &simstore);
 
-    void setSubMonitors(const SystemMonitors &monitors, int frequency=1);
-    void setSubMonitors(int i, const SystemMonitors &monitors, int frequency=1);
+        void setSubMonitors(const SystemMonitors &monitors, int frequency = 1);
+        void setSubMonitors(int i, const SystemMonitors &monitors, int frequency = 1);
 
-    void add(const QString &name, const SystemMonitor &monitor, int frequency=1);
+        void add(const QString &name, const SystemMonitor &monitor, int frequency = 1);
 
-    void add(int i, const QString &name, const SystemMonitor &monitor, int frequency=1);
+        void add(int i, const QString &name, const SystemMonitor &monitor, int frequency = 1);
 
-    void add(const SystemMonitors &monitors, int frequency=1);
-    void add(int i, const SystemMonitors &monitors, int frequency=1);
+        void add(const SystemMonitors &monitors, int frequency = 1);
+        void add(int i, const SystemMonitors &monitors, int frequency = 1);
 
-    virtual void setNSubMoves(int i, int nmoves);
-    void setNSubMoves(int nmoves);
+        virtual void setNSubMoves(int i, int nmoves);
+        void setNSubMoves(int nmoves);
 
-    virtual void setRecordStatistics(int i, bool record_stats);
-    void setRecordStatistics(bool record_stats);
+        virtual void setRecordStatistics(int i, bool record_stats);
+        void setRecordStatistics(bool record_stats);
 
-    virtual void setRecordSubStatistics(int i, bool record_stats);
-    void setRecordSubStatistics(bool record_stats);
+        virtual void setRecordSubStatistics(int i, bool record_stats);
+        void setRecordSubStatistics(bool record_stats);
 
-    void setRecordAllStatistics(int i, bool record_stats);
-    void setRecordAllStatistics(bool record_stats);
+        void setRecordAllStatistics(int i, bool record_stats);
+        void setRecordAllStatistics(bool record_stats);
 
-    virtual void collectSupraStats();
+        virtual void collectSupraStats();
 
-    static const SupraSystem& null();
+        static const SupraSystem &null();
 
-protected:
-    virtual void _pre_pack();
-    virtual void _post_pack();
+    protected:
+        virtual void _pre_pack();
+        virtual void _post_pack();
 
-    virtual void _pre_unpack();
-    virtual void _post_unpack();
+        virtual void _pre_unpack();
+        virtual void _post_unpack();
 
-    const SupraSubSystem& _pvt_subSystem(int i) const;
-    SupraSubSystem& _pvt_subSystem(int i);
+        const SupraSubSystem &_pvt_subSystem(int i) const;
+        SupraSubSystem &_pvt_subSystem(int i);
 
-    void updateSubSystems(const SupraSubSystem *old_system,
-                          const SupraSubSystem *new_system,
-                          QSet<int> &done_systems);
+        void updateSubSystems(const SupraSubSystem *old_system, const SupraSubSystem *new_system, QSet<int> &done_systems);
 
-private:
-    /** The array of all sub systems */
-    QVector<SupraSubSystemPtr> subsystems;
-};
+    private:
+        /** The array of all sub systems */
+        QVector<SupraSubSystemPtr> subsystems;
+    };
 
-typedef SireBase::PropPtr<SupraSystem> SupraSystemPtr;
+    typedef SireBase::PropPtr<SupraSystem> SupraSystemPtr;
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::SupraSystem )
+Q_DECLARE_METATYPE(SireMove::SupraSystem)
 
-SIRE_EXPOSE_CLASS( SireMove::SupraSystem )
+SIRE_EXPOSE_CLASS(SireMove::SupraSystem)
 
-SIRE_EXPOSE_PROPERTY( SireMove::SupraSystemPtr, SireMove::SupraSystem )
+SIRE_EXPOSE_PROPERTY(SireMove::SupraSystemPtr, SireMove::SupraSystem)
 
 SIRE_END_HEADER
 

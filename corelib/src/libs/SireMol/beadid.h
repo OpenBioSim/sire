@@ -35,31 +35,31 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-/** This is the base class of all identifiers that are used
-    to identify a Bead
+    /** This is the base class of all identifiers that are used
+        to identify a Bead
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT BeadID : public SireID::ID
-{
-
-public:
-    BeadID();
-    BeadID(const BeadID &other);
-
-    virtual ~BeadID();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT BeadID : public SireID::ID
     {
-        return "SireMol::BeadID";
-    }
 
-    virtual BeadID* clone() const=0;
-};
+    public:
+        BeadID();
+        BeadID(const BeadID &other);
 
-}
+        virtual ~BeadID();
 
-SIRE_EXPOSE_CLASS( SireMol::BeadID )
+        static const char *typeName()
+        {
+            return "SireMol::BeadID";
+        }
+
+        virtual BeadID *clone() const = 0;
+    };
+
+} // namespace SireMol
+
+SIRE_EXPOSE_CLASS(SireMol::BeadID)
 
 SIRE_END_HEADER
 

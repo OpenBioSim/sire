@@ -37,18 +37,18 @@
 
 #include "SireSearch/ast.h"
 
-#include <QMutex>
-#include <QHash>
 #include <QDebug>
+#include <QHash>
+#include <QMutex>
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_line_pos_iterator.hpp>
 
 #include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
 
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
@@ -56,8 +56,8 @@
 using namespace SireSearch;
 using namespace SireMol;
 
-namespace spirit  = boost::spirit;
-namespace qi      = spirit::qi;
+namespace spirit = boost::spirit;
+namespace qi = spirit::qi;
 namespace unicode = boost::spirit::unicode;
 namespace phoenix = boost::phoenix;
 
@@ -65,10 +65,10 @@ namespace phoenix = boost::phoenix;
 //////// implementation of the user tokens registry
 ////////
 
-typedef qi::symbols<char,AST::IDUser> UserTokens;
+typedef qi::symbols<char, AST::IDUser> UserTokens;
 static UserTokens *_user_tokens = 0;
 
-Q_GLOBAL_STATIC( QMutex, tokensMutex )
+Q_GLOBAL_STATIC(QMutex, tokensMutex)
 
 /** Get the set of user-supplied tokens */
 UserTokens getUserTokens()
@@ -90,13 +90,13 @@ static void reset_tokens()
     _user_tokens = 0;
 }
 
-template<typename IteratorT>
+template <typename IteratorT>
 QString toString(IteratorT begin, IteratorT end)
 {
     QStringList lines;
     for (; begin != end; ++begin)
     {
-        lines.append( QString( *begin ) );
+        lines.append(QString(*begin));
     }
 
     return lines.join("");
@@ -105,41 +105,36 @@ QString toString(IteratorT begin, IteratorT end)
 #include "grammar.h" //file containing the actual grammar - separated to ease reading
 
 /** Function that parses the passed string (represented via its iterators) into an AST::Node */
-template<typename IteratorT>
-AST::Node parse(const IteratorT & begin, const IteratorT & end)
+template <typename IteratorT>
+AST::Node parse(const IteratorT &begin, const IteratorT &end)
 {
-    using LinePosIteratorT  = spirit::line_pos_iterator<IteratorT>;
+    using LinePosIteratorT = spirit::line_pos_iterator<IteratorT>;
 
-    using SkipperGrammarT   = SkipperGrammar<LinePosIteratorT>;
-    using ParserGrammarT    = Grammar<LinePosIteratorT, SkipperGrammarT>;
+    using SkipperGrammarT = SkipperGrammar<LinePosIteratorT>;
+    using ParserGrammarT = Grammar<LinePosIteratorT, SkipperGrammarT>;
 
-    SkipperGrammarT  skipper;
-    ParserGrammarT   grammar;
-    LinePosIteratorT posIterBegin( begin );
-    LinePosIteratorT posIterEnd( end );
+    SkipperGrammarT skipper;
+    ParserGrammarT grammar;
+    LinePosIteratorT posIterBegin(begin);
+    LinePosIteratorT posIterEnd(end);
 
     AST::Node result;
 
-    const bool parseResult = qi::phrase_parse( posIterBegin,
-                                               posIterEnd,
-                                               grammar,
-                                               skipper,
-                                               result );
+    const bool parseResult = qi::phrase_parse(posIterBegin, posIterEnd, grammar, skipper, result);
 
-    if( not (parseResult && posIterBegin == posIterEnd) )
+    if (not(parseResult && posIterBegin == posIterEnd))
     {
-        QString line = toString( LinePosIteratorT(begin), LinePosIteratorT(end) );
-        QString left = toString( posIterBegin, posIterEnd );
+        QString line = toString(LinePosIteratorT(begin), LinePosIteratorT(end));
+        QString left = toString(posIterBegin, posIterEnd);
 
         if (line == left)
-            throw SireMol::parse_error( QObject::tr(
-                "Failed to parse any of the selection '%1'."
-            ).arg(line), CODELOC);
+            throw SireMol::parse_error(QObject::tr("Failed to parse any of the selection '%1'.").arg(line), CODELOC);
         else
-            throw SireMol::parse_error( QObject::tr(
-              "Failed to parse the selection '%1'. "
-              "Successfully parsed the beginning, but failed to parse '%2'.")
-                .arg(line).arg(left), CODELOC );
+            throw SireMol::parse_error(QObject::tr("Failed to parse the selection '%1'. "
+                                                   "Successfully parsed the beginning, but failed to parse '%2'.")
+                                           .arg(line)
+                                           .arg(left),
+                                       CODELOC);
     }
 
     return result;
@@ -156,36 +151,35 @@ static void set_token(const std::string &token, const std::string &str)
     {
         if (token_char.isSpace())
         {
-            throw SireError::invalid_key(QObject::tr(
-                "You cannot use '%1' as the name of a search token as it "
-                "contains a space (or space-like) character. Please replace "
-                "all spaces with, e.g. underscores or hyphens.")
-                    .arg(str_token), CODELOC);
+            throw SireError::invalid_key(QObject::tr("You cannot use '%1' as the name of a search token as it "
+                                                     "contains a space (or space-like) character. Please replace "
+                                                     "all spaces with, e.g. underscores or hyphens.")
+                                             .arg(str_token),
+                                         CODELOC);
         }
     }
 
     // they must also have a size...
     if (str_token.isEmpty())
     {
-        throw SireError::invalid_key(QObject::tr(
-            "You can't use an empty string as the name of a search token."),
-                CODELOC);
+        throw SireError::invalid_key(QObject::tr("You can't use an empty string as the name of a search token."),
+                                     CODELOC);
     }
 
     // they also can't start with a number (or maths) character
     if (not str_token[0].isLetter())
     {
-        throw SireError::invalid_key(QObject::tr(
-            "You cannot use '%1' as the name of a search token as it "
-            "starts with a non-letter character. Please "
-            "use a name that starts with a letter.")
-                .arg(str_token), CODELOC);
+        throw SireError::invalid_key(QObject::tr("You cannot use '%1' as the name of a search token as it "
+                                                 "starts with a non-letter character. Please "
+                                                 "use a name that starts with a letter.")
+                                         .arg(str_token),
+                                     CODELOC);
     }
 
     auto cleaned_token = str_token.toStdString();
 
-    //first check that we *can't* parse the name of the token. We should
-    //not be able to set token names that are valid search terms
+    // first check that we *can't* parse the name of the token. We should
+    // not be able to set token names that are valid search terms
     bool token_is_parseable = false;
     QString part_parseable;
 
@@ -194,7 +188,7 @@ static void set_token(const std::string &token, const std::string &str)
         parse(cleaned_token.begin(), cleaned_token.end());
         token_is_parseable = true;
     }
-    catch(const SireMol::parse_error &e)
+    catch (const SireMol::parse_error &e)
     {
         // we want an exception to be raised as this
         // shows that the token is not parseable
@@ -215,31 +209,33 @@ static void set_token(const std::string &token, const std::string &str)
     {
         if (part_parseable.isEmpty())
         {
-            throw SireError::invalid_key(QObject::tr(
-                "You cannot use '%1' as the name of a search token as this is, "
-                "itself, a valid search phrase. Please choose a name that is not "
-                "an existing search token.").arg(str_token), CODELOC);
+            throw SireError::invalid_key(QObject::tr("You cannot use '%1' as the name of a search token as this is, "
+                                                     "itself, a valid search phrase. Please choose a name that is not "
+                                                     "an existing search token.")
+                                             .arg(str_token),
+                                         CODELOC);
         }
         else
         {
-            throw SireError::invalid_key(QObject::tr(
-                "You cannot use '%1' as the name of a search token as it starts "
-                "with an existing search token. This would confuse the parser. "
-                "Please choose a name that does not start with any existing "
-                "search term. To help, here is the partial-parse message: %2")
-                    .arg(str_token).arg(part_parseable), CODELOC);
+            throw SireError::invalid_key(QObject::tr("You cannot use '%1' as the name of a search token as it starts "
+                                                     "with an existing search token. This would confuse the parser. "
+                                                     "Please choose a name that does not start with any existing "
+                                                     "search term. To help, here is the partial-parse message: %2")
+                                             .arg(str_token)
+                                             .arg(part_parseable),
+                                         CODELOC);
         }
     }
 
-    //first parse this into an AST::Node
-    auto node = parse( str.begin(), str.end() );
+    // first parse this into an AST::Node
+    auto node = parse(str.begin(), str.end());
 
     QMutexLocker lkr(tokensMutex());
 
     if (_user_tokens == 0)
         _user_tokens = new UserTokens();
 
-    _user_tokens->add(cleaned_token, AST::IDUser(token,node.values.value));
+    _user_tokens->add(cleaned_token, AST::IDUser(token, node.values.value));
 }
 
 static bool has_token(const std::string &token)
@@ -257,14 +253,14 @@ static QString get_token(const std::string &token)
     QMutexLocker lkr(tokensMutex());
 
     if (_user_tokens == 0)
-        throw SireError::invalid_key( QObject::tr(
-            "There is no user token '%1'").arg(QString::fromStdString(token)), CODELOC);
+        throw SireError::invalid_key(QObject::tr("There is no user token '%1'").arg(QString::fromStdString(token)),
+                                     CODELOC);
 
     auto p = _user_tokens->find(token);
 
     if (p == 0)
-        throw SireError::invalid_key( QObject::tr(
-            "There is no user token '%1'").arg(QString::fromStdString(token)), CODELOC);
+        throw SireError::invalid_key(QObject::tr("There is no user token '%1'").arg(QString::fromStdString(token)),
+                                     CODELOC);
 
     return expression_to_string(p->value);
 }
@@ -286,7 +282,7 @@ static void delete_token(const std::string &token)
 static AST::Node parse_main(const std::string &str)
 {
     // Read file contents.
-    return parse( str.begin(), str.end() );
+    return parse(str.begin(), str.end());
 }
 
 namespace SireSearch
@@ -294,10 +290,12 @@ namespace SireSearch
     namespace parser
     {
         SearchParser::SearchParser() : SireMol::parser::Parser()
-        {}
+        {
+        }
 
         SearchParser::~SearchParser()
-        {}
+        {
+        }
 
         void SearchParser::install()
         {
@@ -336,7 +334,7 @@ namespace SireSearch
 
         SireMol::parser::SelectEnginePtr SearchParser::parse(const QString &str)
         {
-            auto ast = ::parse_main( str.toStdString() );
+            auto ast = ::parse_main(str.toStdString());
 
             auto engine = ast.toEngine();
 
@@ -345,5 +343,5 @@ namespace SireSearch
 
             return engine;
         }
-    }
-}
+    } // namespace parser
+} // namespace SireSearch

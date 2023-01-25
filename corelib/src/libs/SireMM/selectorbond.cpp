@@ -38,8 +38,8 @@
 
 #include "SireID/index.h"
 
-#include "SireBase/slice.h"
 #include "SireBase/errors.h"
+#include "SireBase/slice.h"
 
 #include "SireUnits/units.h"
 
@@ -62,22 +62,22 @@ using SireMM::detail::IDPair;
 
 static const RegisterMetaType<SelectorBond> r_sbond;
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream &ds, const SelectorBond &sbond)
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const SelectorBond &sbond)
 {
     writeHeader(ds, r_sbond, 1);
     SharedDataStream sds(ds);
-    sds << sbond.bnds << static_cast<const MoleculeView&>(sbond);
+    sds << sbond.bnds << static_cast<const MoleculeView &>(sbond);
     return ds;
 }
 
-SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, SelectorBond &sbond)
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, SelectorBond &sbond)
 {
     auto v = readHeader(ds, r_sbond);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> sbond.bnds >> static_cast<MoleculeView&>(sbond);
+        sds >> sbond.bnds >> static_cast<MoleculeView &>(sbond);
     }
     else
         throw SireStream::version_error(v, "1", r_sbond, CODELOC);
@@ -86,11 +86,11 @@ SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, SelectorBond &sbond)
 }
 
 SelectorBond::SelectorBond() : ConcreteProperty<SelectorBond, MoleculeView>()
-{}
+{
+}
 
-SelectorBond::SelectorBond(const MoleculeView &mol,
-                           const SireBase::PropertyMap &map)
-     : ConcreteProperty<SelectorBond, MoleculeView>(mol)
+SelectorBond::SelectorBond(const MoleculeView &mol, const SireBase::PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>(mol)
 {
     if (mol.data().hasProperty(map["connectivity"]))
     {
@@ -117,8 +117,7 @@ SelectorBond::SelectorBond(const MoleculeView &mol,
     }
 }
 
-SelectorBond::SelectorBond(const Bond &bond)
-             : ConcreteProperty<SelectorBond, MoleculeView>(bond)
+SelectorBond::SelectorBond(const Bond &bond) : ConcreteProperty<SelectorBond, MoleculeView>(bond)
 {
     if (not bond.isEmpty())
     {
@@ -140,31 +139,26 @@ SelectorBond::SelectorBond(const Bond &bond)
     }
 }
 
-SelectorBond::SelectorBond(const MoleculeData &moldata,
-                           const SireBase::PropertyMap &map)
-             : ConcreteProperty<SelectorBond, MoleculeView>()
+SelectorBond::SelectorBond(const MoleculeData &moldata, const SireBase::PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>()
 {
     this->operator=(SelectorBond(Molecule(moldata), map));
 }
 
-inline
-QSet<IDPair> _to_int_set(const QList<BondID> &vals,
-                         const MoleculeInfoData &molinfo)
+inline QSet<IDPair> _to_int_set(const QList<BondID> &vals, const MoleculeInfoData &molinfo)
 {
     QSet<IDPair> s;
     s.reserve(vals.count());
 
     for (const auto &val : vals)
     {
-        s.insert(IDPair(molinfo.atomIdx(val[0]).value(),
-                        molinfo.atomIdx(val[1]).value()));
+        s.insert(IDPair(molinfo.atomIdx(val[0]).value(), molinfo.atomIdx(val[1]).value()));
     }
 
     return s;
 }
 
-inline
-QList<BondID> _from_int_set(const QSet<IDPair> &vals)
+inline QList<BondID> _from_int_set(const QSet<IDPair> &vals)
 {
     QVector<IDPair> v;
     v.reserve(vals.count());
@@ -181,15 +175,13 @@ QList<BondID> _from_int_set(const QSet<IDPair> &vals)
 
     for (const auto &val : v)
     {
-        l.append(BondID(AtomIdx(val.atom0),
-                        AtomIdx(val.atom1)));
+        l.append(BondID(AtomIdx(val.atom0), AtomIdx(val.atom1)));
     }
 
     return l;
 }
 
-inline
-QList<AtomIdx> _filter(const QList<AtomIdx> &atoms, const AtomSelection &selection)
+inline QList<AtomIdx> _filter(const QList<AtomIdx> &atoms, const AtomSelection &selection)
 {
     QList<AtomIdx> ret;
     ret.reserve(atoms.count());
@@ -205,10 +197,7 @@ QList<AtomIdx> _filter(const QList<AtomIdx> &atoms, const AtomSelection &selecti
     return ret;
 }
 
-inline
-QSet<IDPair> _filter(const QSet<IDPair> &bonds,
-                     const QVector<quint32> &atoms,
-                     int position)
+inline QSet<IDPair> _filter(const QSet<IDPair> &bonds, const QVector<quint32> &atoms, int position)
 {
     QSet<IDPair> result;
 
@@ -231,8 +220,7 @@ QSet<IDPair> _filter(const QSet<IDPair> &bonds,
     return result;
 }
 
-inline
-QVector<quint32> _to_int(const Selector<Atom> &atoms)
+inline QVector<quint32> _to_int(const Selector<Atom> &atoms)
 {
     QVector<quint32> ret;
 
@@ -240,7 +228,7 @@ QVector<quint32> _to_int(const Selector<Atom> &atoms)
 
     ret.reserve(n);
 
-    for (int i=0; i<n; ++i)
+    for (int i = 0; i < n; ++i)
     {
         ret.append(atoms.index(i));
     }
@@ -248,8 +236,7 @@ QVector<quint32> _to_int(const Selector<Atom> &atoms)
     return ret;
 }
 
-inline
-QVector<quint32> _to_int(const QList<AtomIdx> &atoms)
+inline QVector<quint32> _to_int(const QList<AtomIdx> &atoms)
 {
     QVector<quint32> ret;
     ret.reserve(atoms.count());
@@ -262,9 +249,8 @@ QVector<quint32> _to_int(const QList<AtomIdx> &atoms)
     return ret;
 }
 
-SelectorBond::SelectorBond(const MoleculeView &mol,
-                           const BondID &bond, const PropertyMap &map)
-             : ConcreteProperty<SelectorBond, MoleculeView>(mol)
+SelectorBond::SelectorBond(const MoleculeView &mol, const BondID &bond, const PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>(mol)
 {
     auto atoms0 = mol.data().info().map(bond.atom0());
     auto atoms1 = mol.data().info().map(bond.atom1());
@@ -295,10 +281,8 @@ SelectorBond::SelectorBond(const MoleculeView &mol,
     }
 }
 
-SelectorBond::SelectorBond(const MoleculeView &mol,
-                           const QList<BondID> &bonds,
-                           const SireBase::PropertyMap &map)
-             : ConcreteProperty<SelectorBond, MoleculeView>(mol)
+SelectorBond::SelectorBond(const MoleculeView &mol, const QList<BondID> &bonds, const SireBase::PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>(mol)
 {
     if (bonds.count() == 1)
     {
@@ -346,9 +330,8 @@ SelectorBond::SelectorBond(const MoleculeView &mol,
     }
 }
 
-SelectorBond::SelectorBond(const MoleculeView &mol,
-                           const AtomID &atom, const PropertyMap &map)
-              : ConcreteProperty<SelectorBond, MoleculeView>(mol)
+SelectorBond::SelectorBond(const MoleculeView &mol, const AtomID &atom, const PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>(mol)
 {
     auto atoms = mol.data().info().map(atom);
 
@@ -374,32 +357,26 @@ SelectorBond::SelectorBond(const MoleculeView &mol,
     }
 }
 
-SelectorBond::SelectorBond(const MoleculeView &mol,
-                           const AtomID &atom0, const AtomID &atom1,
-                           const PropertyMap &map)
-             : ConcreteProperty<SelectorBond, MoleculeView>(mol)
+SelectorBond::SelectorBond(const MoleculeView &mol, const AtomID &atom0, const AtomID &atom1, const PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>(mol)
 {
     this->operator=(SelectorBond(mol, BondID(atom0, atom1), map));
 }
 
-SelectorBond::SelectorBond(const MoleculeData &mol,
-                           const AtomID &atom, const PropertyMap &map)
-             : ConcreteProperty<SelectorBond, MoleculeView>()
+SelectorBond::SelectorBond(const MoleculeData &mol, const AtomID &atom, const PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>()
 {
     this->operator=(SelectorBond(Molecule(mol), atom, map));
 }
 
-SelectorBond::SelectorBond(const MoleculeData &mol,
-                           const AtomID &atom0, const AtomID &atom1,
-                           const PropertyMap &map)
-             : ConcreteProperty<SelectorBond, MoleculeView>()
+SelectorBond::SelectorBond(const MoleculeData &mol, const AtomID &atom0, const AtomID &atom1, const PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>()
 {
     this->operator=(SelectorBond(Molecule(mol), atom0, atom1, map));
 }
 
-SelectorBond::SelectorBond(const Selector<Atom> &atoms,
-                           const PropertyMap &map)
-             : ConcreteProperty<SelectorBond, MoleculeView>(atoms)
+SelectorBond::SelectorBond(const Selector<Atom> &atoms, const PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>(atoms)
 {
     if (this->data().hasProperty(map["connectivity"]))
     {
@@ -416,18 +393,17 @@ SelectorBond::SelectorBond(const Selector<Atom> &atoms,
     }
 }
 
-SelectorBond::SelectorBond(const Selector<Atom> &atoms0,
-                           const Selector<Atom> &atoms1,
-                           const PropertyMap &map)
-             : ConcreteProperty<SelectorBond, MoleculeView>(atoms0)
+SelectorBond::SelectorBond(const Selector<Atom> &atoms0, const Selector<Atom> &atoms1, const PropertyMap &map)
+    : ConcreteProperty<SelectorBond, MoleculeView>(atoms0)
 {
     if (not atoms0.isSameMolecule(atoms1))
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create a bond from atoms in the same molecule. "
-            "%1 and %2 are from different molecules (%3 and %4)")
-                .arg(atoms0.toString()).arg(atoms1.toString())
-                .arg(atoms0.molecule().toString())
-                .arg(atoms1.molecule().toString()), CODELOC);
+        throw SireError::incompatible_error(QObject::tr("You can only create a bond from atoms in the same molecule. "
+                                                        "%1 and %2 are from different molecules (%3 and %4)")
+                                                .arg(atoms0.toString())
+                                                .arg(atoms1.toString())
+                                                .arg(atoms0.molecule().toString())
+                                                .arg(atoms1.molecule().toString()),
+                                            CODELOC);
 
     if (this->data().hasProperty(map["connectivity"]))
     {
@@ -449,18 +425,20 @@ SelectorBond::SelectorBond(const Selector<Atom> &atoms0,
 }
 
 SelectorBond::SelectorBond(const SelectorBond &other)
-     : ConcreteProperty<SelectorBond, MoleculeView>(other), bnds(other.bnds)
-{}
+    : ConcreteProperty<SelectorBond, MoleculeView>(other), bnds(other.bnds)
+{
+}
 
 SelectorBond::~SelectorBond()
-{}
+{
+}
 
-const char* SelectorBond::typeName()
+const char *SelectorBond::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<SelectorBond>());
 }
 
-SelectorBond& SelectorBond::operator=(const SelectorBond &other)
+SelectorBond &SelectorBond::operator=(const SelectorBond &other)
 {
     if (this != &other)
     {
@@ -507,31 +485,27 @@ QString SelectorBond::toString() const
 
     if (this->count() <= 10)
     {
-        for (int i=0; i<this->count(); ++i)
+        for (int i = 0; i < this->count(); ++i)
         {
-            parts.append(QObject::tr("%1: %2").arg(i)
-                            .arg(this->operator()(i).toString()));
+            parts.append(QObject::tr("%1: %2").arg(i).arg(this->operator()(i).toString()));
         }
     }
     else
     {
-        for (int i=0; i<5; ++i)
+        for (int i = 0; i < 5; ++i)
         {
-            parts.append(QObject::tr("%1: %2").arg(i)
-                            .arg(this->operator()(i).toString()));
+            parts.append(QObject::tr("%1: %2").arg(i).arg(this->operator()(i).toString()));
         }
 
         parts.append("...");
 
-        for (int i=this->count()-5; i<this->count(); ++i)
+        for (int i = this->count() - 5; i < this->count(); ++i)
         {
-            parts.append(QObject::tr("%1: %2").arg(i)
-                            .arg(this->operator()(i).toString()));
+            parts.append(QObject::tr("%1: %2").arg(i).arg(this->operator()(i).toString()));
         }
     }
 
-    return QObject::tr("SelectorBond( size=%1\n%2\n)")
-                .arg(this->count()).arg(parts.join("\n"));
+    return QObject::tr("SelectorBond( size=%1\n%2\n)").arg(this->count()).arg(parts.join("\n"));
 }
 
 SelectorBond SelectorBond::add(const Bond &bond) const
@@ -546,12 +520,11 @@ SelectorBond SelectorBond::add(const Bond &bond) const
 
     if (bond.data().number() != this->data().number())
     {
-        throw SireError::incompatible_error(QObject::tr(
-            "You cannot add bonds from a different molecule (%1) to "
-            "a set of bonds from molecule %2.")
-                .arg(bond.data().number())
-                .arg(this->data().number()),
-                    CODELOC);
+        throw SireError::incompatible_error(QObject::tr("You cannot add bonds from a different molecule (%1) to "
+                                                        "a set of bonds from molecule %2.")
+                                                .arg(bond.data().number())
+                                                .arg(this->data().number()),
+                                            CODELOC);
     }
 
     auto atom0 = this->data().info().atomIdx(bond.ID().atom0());
@@ -633,14 +606,14 @@ SelectorBond SelectorBond::operator()(int i, int j) const
 
     if (i <= j)
     {
-        for ( ; i<=j; ++i)
+        for (; i <= j; ++i)
         {
             ret.bnds.append(this->bnds.at(i));
         }
     }
     else
     {
-        for ( ; i >= j; --i)
+        for (; i >= j; --i)
         {
             ret.bnds.append(this->bnds.at(i));
         }
@@ -798,7 +771,7 @@ AtomSelection SelectorBond::selection() const
 
 bool SelectorBond::hasProperty(const PropertyName &key) const
 {
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         if (this->operator()(i).hasProperty(key))
             return true;
@@ -812,8 +785,7 @@ bool SelectorBond::hasMetadata(const PropertyName &key) const
     return false;
 }
 
-bool SelectorBond::hasMetadata(const PropertyName &key,
-                               const PropertyName &metakey) const
+bool SelectorBond::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return false;
 }
@@ -822,7 +794,7 @@ QStringList SelectorBond::propertyKeys() const
 {
     QSet<QString> keys;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         for (const auto &k : this->operator()(i).propertyKeys())
         {
@@ -830,7 +802,7 @@ QStringList SelectorBond::propertyKeys() const
         }
     }
 
-    //QStringList ret(keys.constBegin(), keys.constEnd());
+    // QStringList ret(keys.constBegin(), keys.constEnd());
     QStringList ret = keys.values();
 
     return ret;
@@ -850,7 +822,7 @@ QList<Properties> SelectorBond::properties() const
 {
     QList<Properties> props;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         props.append(this->operator()(i).properties());
     }
@@ -874,33 +846,31 @@ QList<PropertyPtr> SelectorBond::property(const PropertyName &key) const
 
     QList<PropertyPtr> props;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         try
         {
             props.append(this->operator()(i).property(key));
             has_prop = true;
         }
-        catch(const SireError::exception&)
+        catch (const SireError::exception &)
         {
             props.append(NullProperty());
         }
     }
 
     if (not has_prop)
-        throw SireBase::missing_property(QObject::tr(
-            "None of the bonds in this container have a property called %1.")
-                .arg(key.source()), CODELOC);
+        throw SireBase::missing_property(
+            QObject::tr("None of the bonds in this container have a property called %1.").arg(key.source()), CODELOC);
 
     return props;
 }
 
-QList<PropertyPtr> SelectorBond::property(const PropertyName &key,
-                                          const Property &default_value) const
+QList<PropertyPtr> SelectorBond::property(const PropertyName &key, const Property &default_value) const
 {
     QList<PropertyPtr> props;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         props.append(this->operator()(i).property(key, default_value));
     }
@@ -912,7 +882,7 @@ QList<Length> SelectorBond::lengths(const PropertyMap &map) const
 {
     QList<Length> l;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         l.append(this->operator()(i).length(map));
     }
@@ -944,7 +914,7 @@ QList<Expression> SelectorBond::potentials(const PropertyMap &map) const
 {
     QList<Expression> p;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         p.append(this->operator()(i).potential(map));
     }
@@ -961,7 +931,7 @@ QList<GeneralUnit> SelectorBond::energies(const PropertyMap &map) const
 {
     QList<GeneralUnit> nrgs;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         nrgs.append(this->operator()(i).energy(map));
     }
@@ -978,7 +948,7 @@ GeneralUnit SelectorBond::energy(const PropertyMap &map) const
 {
     GeneralUnit nrg(0);
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         nrg += this->operator()(i).energy(map);
     }

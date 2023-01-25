@@ -40,79 +40,78 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-namespace detail
-{
-class ProcessData;
-}
-
-/** This class provides a means to run an external process
-    (executable). This provides the equivalent of
-    std::system, but with added error handling and
-    signal handling (which ensures that any child processes
-    are killed when Sire exits)
-
-    @author Christopher Woods, Lester Hedges
-*/
-class SIREBASE_EXPORT Process
-{
-public:
-    Process();
-    Process(const Process &other);
-
-    ~Process();
-
-    Process& operator=(const Process &other);
-
-    bool operator==(const Process &other) const;
-    bool operator!=(const Process &other) const;
-
-    static const char* typeName()
+    namespace detail
     {
-        return "SireBase::Process";
+        class ProcessData;
     }
 
-    const char* what() const
+    /** This class provides a means to run an external process
+        (executable). This provides the equivalent of
+        std::system, but with added error handling and
+        signal handling (which ensures that any child processes
+        are killed when Sire exits)
+
+        @author Christopher Woods, Lester Hedges
+    */
+    class SIREBASE_EXPORT Process
     {
-        return Process::typeName();
-    }
+    public:
+        Process();
+        Process(const Process &other);
 
-    void wait();
-    bool wait(int ms);
+        ~Process();
 
-    static Process run(const QString &command);
-    static Process run(const QString &command, const QString &stdout_file,
-        const QString &stderr_file);
+        Process &operator=(const Process &other);
 
-    static Process run(const QString &command, const QString& arg);
-    static Process run(const QString &command, const QString& arg,
-        const QString &stdout_file, const QString &stderr_file);
+        bool operator==(const Process &other) const;
+        bool operator!=(const Process &other) const;
 
-    static Process run(const QString &command, const QStringList& arguments);
-    static Process run(const QString &command, const QStringList& arguments,
-        const QString &stdout_file, const QString &stderr_file);
+        static const char *typeName()
+        {
+            return "SireBase::Process";
+        }
 
-    static void killAll();
+        const char *what() const
+        {
+            return Process::typeName();
+        }
 
-    bool isRunning();
-    bool hasFinished();
+        void wait();
+        bool wait(int ms);
 
-    bool isError();
-    bool wasKilled();
+        static Process run(const QString &command);
+        static Process run(const QString &command, const QString &stdout_file, const QString &stderr_file);
 
-    void kill();
+        static Process run(const QString &command, const QString &arg);
+        static Process run(const QString &command, const QString &arg, const QString &stdout_file,
+                           const QString &stderr_file);
 
-private:
-    void cleanUpJob(int status, int child_exit_status);
+        static Process run(const QString &command, const QStringList &arguments);
+        static Process run(const QString &command, const QStringList &arguments, const QString &stdout_file,
+                           const QString &stderr_file);
 
-    void testWait();
+        static void killAll();
 
-    /** PIMPL pointer to the data for this process */
-    boost::shared_ptr<detail::ProcessData> d;
-};
+        bool isRunning();
+        bool hasFinished();
 
-}
+        bool isError();
+        bool wasKilled();
 
-SIRE_EXPOSE_CLASS( SireBase::Process )
+        void kill();
+
+    private:
+        void cleanUpJob(int status, int child_exit_status);
+
+        void testWait();
+
+        /** PIMPL pointer to the data for this process */
+        boost::shared_ptr<detail::ProcessData> d;
+    };
+
+} // namespace SireBase
+
+SIRE_EXPOSE_CLASS(SireBase::Process)
 
 SIRE_END_HEADER
 

@@ -37,28 +37,21 @@ using namespace SireStream;
 static const RegisterMetaType<SupraSubSystem> r_suprasubsystem;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const SupraSubSystem &suprasubsystem)
+QDataStream &operator<<(QDataStream &ds, const SupraSubSystem &suprasubsystem)
 {
     writeHeader(ds, r_suprasubsystem, 1);
 
     SharedDataStream sds(ds);
 
-    sds << suprasubsystem.simstore
-        << suprasubsystem.sys_monitors
-        << suprasubsystem.nsubmoves
-        << suprasubsystem.record_stats
-        << suprasubsystem.record_sub_stats
-        << suprasubsystem.recalc_next_from_scratch
-        << suprasubsystem.clear_subsys_stats
-        << static_cast<const Property&>(suprasubsystem);
+    sds << suprasubsystem.simstore << suprasubsystem.sys_monitors << suprasubsystem.nsubmoves
+        << suprasubsystem.record_stats << suprasubsystem.record_sub_stats << suprasubsystem.recalc_next_from_scratch
+        << suprasubsystem.clear_subsys_stats << static_cast<const Property &>(suprasubsystem);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                        SupraSubSystem &suprasubsystem)
+QDataStream &operator>>(QDataStream &ds, SupraSubSystem &suprasubsystem)
 {
     VersionID v = readHeader(ds, r_suprasubsystem);
 
@@ -66,14 +59,9 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> suprasubsystem.simstore
-            >> suprasubsystem.sys_monitors
-            >> suprasubsystem.nsubmoves
-            >> suprasubsystem.record_stats
-            >> suprasubsystem.record_sub_stats
-            >> suprasubsystem.recalc_next_from_scratch
-            >> suprasubsystem.clear_subsys_stats
-            >> static_cast<Property&>(suprasubsystem);
+        sds >> suprasubsystem.simstore >> suprasubsystem.sys_monitors >> suprasubsystem.nsubmoves >>
+            suprasubsystem.record_stats >> suprasubsystem.record_sub_stats >> suprasubsystem.recalc_next_from_scratch >>
+            suprasubsystem.clear_subsys_stats >> static_cast<Property &>(suprasubsystem);
     }
     else
         throw version_error(v, "1", r_suprasubsystem, CODELOC);
@@ -83,30 +71,26 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 SupraSubSystem::SupraSubSystem()
-               : ConcreteProperty<SupraSubSystem,Property>(),
-                 record_stats(true),
-                 record_sub_stats(true),
-                 recalc_next_from_scratch(false),
-                 clear_subsys_stats(false)
-{}
+    : ConcreteProperty<SupraSubSystem, Property>(), record_stats(true), record_sub_stats(true),
+      recalc_next_from_scratch(false), clear_subsys_stats(false)
+{
+}
 
 /** Copy constructor */
 SupraSubSystem::SupraSubSystem(const SupraSubSystem &other)
-               : ConcreteProperty<SupraSubSystem,Property>(other),
-                 simstore(other.simstore), sys_monitors(other.sys_monitors),
-                 nsubmoves(other.nsubmoves),
-                 record_stats(other.record_stats),
-                 record_sub_stats(other.record_sub_stats),
-                 recalc_next_from_scratch(other.recalc_next_from_scratch),
-                 clear_subsys_stats(other.clear_subsys_stats)
-{}
+    : ConcreteProperty<SupraSubSystem, Property>(other), simstore(other.simstore), sys_monitors(other.sys_monitors),
+      nsubmoves(other.nsubmoves), record_stats(other.record_stats), record_sub_stats(other.record_sub_stats),
+      recalc_next_from_scratch(other.recalc_next_from_scratch), clear_subsys_stats(other.clear_subsys_stats)
+{
+}
 
 /** Destructor */
 SupraSubSystem::~SupraSubSystem()
-{}
+{
+}
 
 /** Copy assignment operator */
-SupraSubSystem& SupraSubSystem::operator=(const SupraSubSystem &other)
+SupraSubSystem &SupraSubSystem::operator=(const SupraSubSystem &other)
 {
     Property::operator=(other);
 
@@ -124,14 +108,11 @@ SupraSubSystem& SupraSubSystem::operator=(const SupraSubSystem &other)
 /** Comparison operator */
 bool SupraSubSystem::operator==(const SupraSubSystem &other) const
 {
-    return (this == &other) or
-           (nsubmoves == other.nsubmoves and
-            record_stats == other.record_stats and
-            record_sub_stats == other.record_sub_stats and
-            recalc_next_from_scratch == other.recalc_next_from_scratch and
-            clear_subsys_stats == other.clear_subsys_stats and
-            sys_monitors == other.sys_monitors and
-            simstore == other.simstore);
+    return (this == &other) or (nsubmoves == other.nsubmoves and record_stats == other.record_stats and
+                                record_sub_stats == other.record_sub_stats and
+                                recalc_next_from_scratch == other.recalc_next_from_scratch and
+                                clear_subsys_stats == other.clear_subsys_stats and
+                                sys_monitors == other.sys_monitors and simstore == other.simstore);
 }
 
 /** Comparison operator */
@@ -140,10 +121,10 @@ bool SupraSubSystem::operator!=(const SupraSubSystem &other) const
     return not this->operator==(other);
 }
 
-Q_GLOBAL_STATIC( SupraSubSystem, supraSubSystem )
+Q_GLOBAL_STATIC(SupraSubSystem, supraSubSystem)
 
 /** Return the global null SupraSubSystem */
-const SupraSubSystem& SupraSubSystem::null()
+const SupraSubSystem &SupraSubSystem::null()
 {
     return *(supraSubSystem());
 }
@@ -165,7 +146,7 @@ const SupraSubSystem& SupraSubSystem::null()
                                  // and are cleared using "subsys.clearSubStatistics()"
                                  // These are collected if record_sub_stats is true
 */
-const SystemMonitors& SupraSubSystem::monitors() const
+const SystemMonitors &SupraSubSystem::monitors() const
 {
     return sys_monitors;
 }
@@ -174,7 +155,7 @@ const SystemMonitors& SupraSubSystem::monitors() const
 
     \throw SireError::invalid_state
 */
-const System& SupraSubSystem::subSystem() const
+const System &SupraSubSystem::subSystem() const
 {
     return simstore.system();
 }
@@ -183,13 +164,13 @@ const System& SupraSubSystem::subSystem() const
 
     \throw SireError::invalid_state
 */
-const Moves& SupraSubSystem::subMoves() const
+const Moves &SupraSubSystem::subMoves() const
 {
     return simstore.moves();
 }
 
 /** Return both the system and moves that are part of this sub-system */
-const SimStore& SupraSubSystem::subSystemAndMoves() const
+const SimStore &SupraSubSystem::subSystemAndMoves() const
 {
     return simstore;
 }
@@ -234,15 +215,18 @@ bool SupraSubSystem::isPackedToMemory() const
 
 /** This function is called just before the system is packed */
 void SupraSubSystem::_pre_pack()
-{}
+{
+}
 
 /** This function is called just after the system is packed */
 void SupraSubSystem::_post_pack()
-{}
+{
+}
 
 /** This function is called just before the system is unpacked */
 void SupraSubSystem::_pre_unpack()
-{}
+{
+}
 
 /** This function is called just after whenever the
     simstore is unpacked */
@@ -351,8 +335,8 @@ void SupraSubSystem::collectStats()
 
     sys_monitors.monitor(system);
 
-    //copy the system back - this is because some of
-    //the monitors may change the system
+    // copy the system back - this is because some of
+    // the monitors may change the system
     simstore.setSystem(system);
 }
 
@@ -373,8 +357,7 @@ void SupraSubSystem::subMove(bool recording_statistics)
     MovesPtr moves = simstore.moves();
     System system = simstore.system();
 
-    system = moves.edit().move(system, nsubmoves,
-                               recording_statistics and record_sub_stats);
+    system = moves.edit().move(system, nsubmoves, recording_statistics and record_sub_stats);
 
     simstore.setSystemAndMoves(system, moves);
 
@@ -486,12 +469,12 @@ void SupraSubSystem::setRecordStatistics(bool recording)
     record_stats = recording;
 }
 
-const char* SupraSubSystem::typeName()
+const char *SupraSubSystem::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SupraSubSystem>() );
+    return QMetaType::typeName(qMetaTypeId<SupraSubSystem>());
 }
 
-SupraSubSystem* SupraSubSystem::clone() const
+SupraSubSystem *SupraSubSystem::clone() const
 {
     return new SupraSubSystem(*this);
 }

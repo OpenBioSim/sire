@@ -25,25 +25,24 @@
   *
 \*********************************************/
 
-
 #include "internalgroupff.h"
 
 #include "SireMaths/line.h"
-#include "SireMaths/triangle.h"
 #include "SireMaths/torsion.h"
+#include "SireMaths/triangle.h"
 
 #include "SireBase/property.h"
-#include "SireBase/stringproperty.h"
 #include "SireBase/propertylist.h"
+#include "SireBase/stringproperty.h"
 
-#include "SireMol/mover.hpp"
 #include "SireMol/mgidx.h"
+#include "SireMol/mover.hpp"
 
 #include "SireFF/detail/atomiccoords3d.h"
 
-#include "SireFF/errors.h"
 #include "SireBase/errors.h"
 #include "SireError/errors.h"
+#include "SireFF/errors.h"
 
 #include "SireUnits/dimensions.h"
 #include "SireUnits/units.h"
@@ -72,26 +71,21 @@ using namespace SireStream;
 static const RegisterMetaType<InternalGroupFF> r_internalff;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                        const InternalGroupFF &internalff)
+QDataStream &operator<<(QDataStream &ds, const InternalGroupFF &internalff)
 {
     writeHeader(ds, r_internalff, 1);
 
     SharedDataStream sds(ds);
 
-    sds << internalff.mols << internalff.mols0 << internalff.mols1
-        << internalff.props
-        << internalff.cljgroups
-        << internalff.cljgroups0 << internalff.cljgroups1
-        << internalff.propmaps
-        << static_cast<const G2FF&>(internalff);
+    sds << internalff.mols << internalff.mols0 << internalff.mols1 << internalff.props << internalff.cljgroups
+        << internalff.cljgroups0 << internalff.cljgroups1 << internalff.propmaps
+        << static_cast<const G2FF &>(internalff);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                        InternalGroupFF &internalff)
+QDataStream &operator>>(QDataStream &ds, InternalGroupFF &internalff)
 {
     VersionID v = readHeader(ds, r_internalff);
 
@@ -99,19 +93,11 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> internalff.mols
-            >> internalff.mols0
-            >> internalff.mols1
-            >> internalff.props
-            >> internalff.cljgroups
-            >> internalff.cljgroups0
-            >> internalff.cljgroups1
-            >> internalff.propmaps
-            >> static_cast<G2FF&>(internalff);
+        sds >> internalff.mols >> internalff.mols0 >> internalff.mols1 >> internalff.props >> internalff.cljgroups >>
+            internalff.cljgroups0 >> internalff.cljgroups1 >> internalff.propmaps >> static_cast<G2FF &>(internalff);
 
         internalff._pvt_updateName();
-        internalff.calc_14_nrgs = internalff.props.property("calculate14")
-                                                  .asABoolean();
+        internalff.calc_14_nrgs = internalff.props.property("calculate14").asABoolean();
     }
     else
         throw version_error(v, "1", r_internalff, CODELOC);
@@ -121,8 +107,7 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 InternalGroupFF::InternalGroupFF()
-                : ConcreteProperty<InternalGroupFF,G2FF>(),
-                  FF3D(), InternalPotential(true), calc_14_nrgs(false)
+    : ConcreteProperty<InternalGroupFF, G2FF>(), FF3D(), InternalPotential(true), calc_14_nrgs(false)
 {
     props.setProperty("calculate14", wrap(calc_14_nrgs));
     props.setProperty("combiningRules", wrap("arithmetic"));
@@ -130,8 +115,7 @@ InternalGroupFF::InternalGroupFF()
 
 /** Construct a named internal forcefield */
 InternalGroupFF::InternalGroupFF(const QString &name)
-                : ConcreteProperty<InternalGroupFF,G2FF>(),
-                  FF3D(), InternalPotential(true), calc_14_nrgs(false)
+    : ConcreteProperty<InternalGroupFF, G2FF>(), FF3D(), InternalPotential(true), calc_14_nrgs(false)
 {
     G2FF::setName(name);
     props.setProperty("calculate14", wrap(calc_14_nrgs));
@@ -140,24 +124,20 @@ InternalGroupFF::InternalGroupFF(const QString &name)
 
 /** Copy constructor */
 InternalGroupFF::InternalGroupFF(const InternalGroupFF &other)
-                : ConcreteProperty<InternalGroupFF,G2FF>(other),
-                  FF3D(other), InternalPotential(other),
-                  mols(other.mols), mols0(other.mols0), mols1(other.mols1),
-                  cljgroups(other.cljgroups),
-                  cljgroups0(other.cljgroups0),
-                  cljgroups1(other.cljgroups1),
-                  propmaps(other.propmaps),
-                  ffcomponents(other.ffcomponents),
-                  props(other.props),
-                  calc_14_nrgs(other.calc_14_nrgs)
-{}
+    : ConcreteProperty<InternalGroupFF, G2FF>(other), FF3D(other), InternalPotential(other), mols(other.mols),
+      mols0(other.mols0), mols1(other.mols1), cljgroups(other.cljgroups), cljgroups0(other.cljgroups0),
+      cljgroups1(other.cljgroups1), propmaps(other.propmaps), ffcomponents(other.ffcomponents), props(other.props),
+      calc_14_nrgs(other.calc_14_nrgs)
+{
+}
 
 /** Destructor */
 InternalGroupFF::~InternalGroupFF()
-{}
+{
+}
 
 /** Copy assignment operator */
-InternalGroupFF& InternalGroupFF::operator=(const InternalGroupFF &other)
+InternalGroupFF &InternalGroupFF::operator=(const InternalGroupFF &other)
 {
     if (this != &other)
     {
@@ -185,8 +165,8 @@ InternalGroupFF& InternalGroupFF::operator=(const InternalGroupFF &other)
 /** Comparison operator */
 bool InternalGroupFF::operator==(const InternalGroupFF &other) const
 {
-    return G2FF::operator==(other) and cljgroups == other.cljgroups and
-           propmaps == other.propmaps and calc_14_nrgs == other.calc_14_nrgs;
+    return G2FF::operator==(other) and cljgroups == other.cljgroups and propmaps == other.propmaps and
+           calc_14_nrgs == other.calc_14_nrgs;
 }
 
 /** Comparison operator */
@@ -199,7 +179,7 @@ bool InternalGroupFF::operator!=(const InternalGroupFF &other) const
     forcefield - this renames the component symbols and the molecule group */
 void InternalGroupFF::_pvt_updateName()
 {
-    ffcomponents = Components( this->name() );
+    ffcomponents = Components(this->name());
     G2FF::_pvt_updateName();
 }
 
@@ -217,32 +197,28 @@ void InternalGroupFF::enable14Calculation()
 
         const ChunkedVector<InternalPotential::Molecule> &mols_array = mols.moleculesByIndex();
 
-        for (int i=0; i<mols.count(); ++i)
+        for (int i = 0; i < mols.count(); ++i)
         {
-            cljgroups.insert( mols_array[i].number(),
-                              CLJ14Group(mols_array[i].molecule(), combining_rules, true,
-                                         propmaps.value(mols_array[i].number(),
-                                                        PropertyMap())) );
+            cljgroups.insert(mols_array[i].number(), CLJ14Group(mols_array[i].molecule(), combining_rules, true,
+                                                                propmaps.value(mols_array[i].number(), PropertyMap())));
         }
 
         const ChunkedVector<InternalPotential::Molecule> &mols0_array = mols0.moleculesByIndex();
 
-        for (int i=0; i<mols0.count(); ++i)
+        for (int i = 0; i < mols0.count(); ++i)
         {
-            cljgroups0.insert( mols0_array[i].number(),
+            cljgroups0.insert(mols0_array[i].number(),
                               CLJ14Group(mols0_array[i].molecule(), combining_rules, true,
-                                         propmaps.value(mols0_array[i].number(),
-                                                        PropertyMap())) );
+                                         propmaps.value(mols0_array[i].number(), PropertyMap())));
         }
 
         const ChunkedVector<InternalPotential::Molecule> &mols1_array = mols1.moleculesByIndex();
 
-        for (int i=0; i<mols1.count(); ++i)
+        for (int i = 0; i < mols1.count(); ++i)
         {
-            cljgroups1.insert( mols1_array[i].number(),
+            cljgroups1.insert(mols1_array[i].number(),
                               CLJ14Group(mols1_array[i].molecule(), combining_rules, true,
-                                         propmaps.value(mols1_array[i].number(),
-                                                        PropertyMap())) );
+                                         propmaps.value(mols1_array[i].number(), PropertyMap())));
         }
 
         props.setProperty("calculate14", wrap(true));
@@ -266,9 +242,9 @@ void InternalGroupFF::disable14Calculation()
 void InternalGroupFF::setArithmeticCombiningRules(bool on)
 {
     if (on)
-        this->setCombiningRules( CLJFunction::ARITHMETIC );
+        this->setCombiningRules(CLJFunction::ARITHMETIC);
     else
-        this->setCombiningRules( CLJFunction::GEOMETRIC );
+        this->setCombiningRules(CLJFunction::GEOMETRIC);
 }
 
 /** Turn on or off use of geometric combining rules when calculating
@@ -276,9 +252,9 @@ void InternalGroupFF::setArithmeticCombiningRules(bool on)
 void InternalGroupFF::setGeometricCombiningRules(bool on)
 {
     if (on)
-        this->setCombiningRules( CLJFunction::GEOMETRIC );
+        this->setCombiningRules(CLJFunction::GEOMETRIC);
     else
-        this->setCombiningRules( CLJFunction::ARITHMETIC );
+        this->setCombiningRules(CLJFunction::ARITHMETIC);
 }
 
 /** Return the type of combining rules used when calculating the 1-4
@@ -293,8 +269,8 @@ CLJFunction::COMBINING_RULES InternalGroupFF::combiningRules() const
         return CLJFunction::GEOMETRIC;
     else
     {
-        qDebug() << "WARNING: COULD NOT INTERPRET COMBINING RULES FROM STRING"
-                 << rules << ". USING ARITHMETIC COMBINING RULES";
+        qDebug() << "WARNING: COULD NOT INTERPRET COMBINING RULES FROM STRING" << rules
+                 << ". USING ARITHMETIC COMBINING RULES";
         return CLJFunction::ARITHMETIC;
     }
 }
@@ -307,14 +283,12 @@ bool InternalGroupFF::setCombiningRules(CLJFunction::COMBINING_RULES rules)
 
     if (rules != old_rules)
     {
-        for (QHash<MolNum,CLJ14Group>::iterator it = cljgroups.begin();
-             it != cljgroups.end();
-             ++it)
+        for (QHash<MolNum, CLJ14Group>::iterator it = cljgroups.begin(); it != cljgroups.end(); ++it)
         {
             it.value().setCombiningRules(rules);
         }
 
-        switch(rules)
+        switch (rules)
         {
         case CLJFunction::ARITHMETIC:
             props.setProperty("combiningRules", wrap("arithmetic"));
@@ -386,29 +360,29 @@ bool InternalGroupFF::setProperty(const QString &name, const Property &value)
         else if (rules == QLatin1String("geometric"))
             new_rules = CLJFunction::GEOMETRIC;
         else
-            throw SireError::invalid_arg( QObject::tr(
-                    "Cannot recognise combining rules type from string '%1'. "
-                    "Available rules are 'arithmetic' and 'geometric'.")
-                        .arg(rules), CODELOC );
+            throw SireError::invalid_arg(QObject::tr("Cannot recognise combining rules type from string '%1'. "
+                                                     "Available rules are 'arithmetic' and 'geometric'.")
+                                             .arg(rules),
+                                         CODELOC);
 
         return this->setCombiningRules(new_rules);
     }
     else if (name == QLatin1String("calculate14"))
     {
-        return this->setUse14Calculation( value.asABoolean() );
+        return this->setUse14Calculation(value.asABoolean());
     }
     else
-        throw SireBase::missing_property( QObject::tr(
-            "InternalGroupFF does not have a property called \"%1\" that "
-            "can be changed. Available properties are [ strict ].")
-                .arg(name), CODELOC );
+        throw SireBase::missing_property(QObject::tr("InternalGroupFF does not have a property called \"%1\" that "
+                                                     "can be changed. Available properties are [ strict ].")
+                                             .arg(name),
+                                         CODELOC);
 }
 
 /** Return the property with name 'name'
 
     \throw SireBase::missing_property
 */
-const Property& InternalGroupFF::property(const QString &name) const
+const Property &InternalGroupFF::property(const QString &name) const
 {
     return props.property(name);
 }
@@ -420,7 +394,7 @@ bool InternalGroupFF::containsProperty(const QString &name) const
 }
 
 /** Return the values of all of the properties of this forcefield */
-const Properties& InternalGroupFF::properties() const
+const Properties &InternalGroupFF::properties() const
 {
     return props;
 }
@@ -430,19 +404,16 @@ const Properties& InternalGroupFF::properties() const
     in the energy table (optionally scaled by 'scale_energy') */
 void InternalGroupFF::energy(EnergyTable &energytable, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "InternalGroupFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("InternalGroupFF does not yet support energy calculations!"), CODELOC);
 }
 
 /** Calculate the energies of molecules in the passed energies table
     caused by the component of this potential represented by
     'symbol', and add them onto the energies already
     in the energy table (optionally scaled by 'scale_energy') */
-void InternalGroupFF::energy(EnergyTable &energytable, const Symbol &symbol,
-			double scale_energy)
+void InternalGroupFF::energy(EnergyTable &energytable, const Symbol &symbol, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "InternalGroupFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("InternalGroupFF does not yet support energy calculations!"), CODELOC);
 }
 
 /** Calculate the forces acting on molecules in the passed force table
@@ -450,32 +421,31 @@ void InternalGroupFF::energy(EnergyTable &energytable, const Symbol &symbol,
     in the force table (optionally scaled by 'scale_force') */
 void InternalGroupFF::force(ForceTable &forcetable, double scale_force)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the force of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the force of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
 /** Calculate the forces acting on molecules in the passed force table
     caused by the component of this potential represented by
     'symbol', and add them onto the forces already
     in the force table (optionally scaled by 'scale_force') */
-void InternalGroupFF::force(ForceTable &forcetable, const Symbol &symbol,
-                            double scale_force)
+void InternalGroupFF::force(ForceTable &forcetable, const Symbol &symbol, double scale_force)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the force of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the force of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
 /** Set it that the forcefield must now be recalculate from scratch */
 void InternalGroupFF::mustNowRecalculateFromScratch()
 {
-    //record that the forcefield is dirty
+    // record that the forcefield is dirty
     G2FF::setDirty();
 }
 
 /** Internal function used to get a handle on the forcefield components */
-const FFComponent& InternalGroupFF::_pvt_components() const
+const FFComponent &InternalGroupFF::_pvt_components() const
 {
     return ffcomponents;
 }
@@ -488,16 +458,13 @@ void InternalGroupFF::recalculateEnergy()
 {
     // we always recalculate from scratch, because it is much easier!
 
-    //nothing appears to have changed, so lets recalculate
-    //everything from scratch
+    // nothing appears to have changed, so lets recalculate
+    // everything from scratch
     const int nmols = mols.count();
 
-    const ChunkedVector<InternalPotential::Molecule> &mols_array
-                                        = mols.moleculesByIndex();
-    const ChunkedVector<InternalPotential::Molecule> &mols0_array
-                                        = mols0.moleculesByIndex();
-    const ChunkedVector<InternalPotential::Molecule> &mols1_array
-                                        = mols1.moleculesByIndex();
+    const ChunkedVector<InternalPotential::Molecule> &mols_array = mols.moleculesByIndex();
+    const ChunkedVector<InternalPotential::Molecule> &mols0_array = mols0.moleculesByIndex();
+    const ChunkedVector<InternalPotential::Molecule> &mols1_array = mols1.moleculesByIndex();
 
     const auto &map0 = mols0.indexesByMolNum();
     const auto &map1 = mols1.indexesByMolNum();
@@ -513,21 +480,21 @@ void InternalGroupFF::recalculateEnergy()
     double cnrg1 = 0;
     double ljnrg1 = 0;
 
-    for (int i=0; i<nmols; ++i)
+    for (int i = 0; i < nmols; ++i)
     {
         const auto molnum = mols_array[i].number();
 
         if (map0.contains(molnum) and map1.contains(molnum))
         {
-            InternalPotential::calculateEnergy( mols_array[i], total_nrg );
-            InternalPotential::calculateEnergy( mols0_array[map0[molnum]], total_nrg0 );
-            InternalPotential::calculateEnergy( mols1_array[map1[molnum]], total_nrg1 );
+            InternalPotential::calculateEnergy(mols_array[i], total_nrg);
+            InternalPotential::calculateEnergy(mols0_array[map0[molnum]], total_nrg0);
+            InternalPotential::calculateEnergy(mols1_array[map1[molnum]], total_nrg1);
 
             if (calc_14_nrgs)
             {
                 auto it = cljgroups.find(molnum);
                 it.value().mustNowRecalculateFromScratch();
-                boost::tuple<double,double> nrg = it.value().energy();
+                boost::tuple<double, double> nrg = it.value().energy();
                 cnrg += nrg.get<0>();
                 ljnrg += nrg.get<1>();
 
@@ -566,8 +533,7 @@ void InternalGroupFF::recalculateEnergy()
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void InternalGroupFF::_pvt_added(quint32 group_id,
-                                 const PartialMolecule &molecule, const PropertyMap &map)
+void InternalGroupFF::_pvt_added(quint32 group_id, const PartialMolecule &molecule, const PropertyMap &map)
 {
     const auto molnum = molecule.data().number();
 
@@ -575,7 +541,7 @@ void InternalGroupFF::_pvt_added(quint32 group_id,
     const auto &group0 = this->select(MGIdx(0));
     const auto &group1 = this->select(MGIdx(1));
 
-    if (not (group0.contains(molnum) and group1.contains(molnum)))
+    if (not(group0.contains(molnum) and group1.contains(molnum)))
     {
         return;
     }
@@ -585,11 +551,11 @@ void InternalGroupFF::_pvt_added(quint32 group_id,
 
     if (mol0.selection().intersects(mol1.selection()))
     {
-        throw SireMol::duplicate_atom(QObject::tr(
-            "One or more atoms of %1:%2 has been added to both groups. You "
-            "must be careful to sure that an atom is not added to both groups.")
-                .arg(molecule.data().name().value()).arg(molnum.value()),
-                    CODELOC);
+        throw SireMol::duplicate_atom(QObject::tr("One or more atoms of %1:%2 has been added to both groups. You "
+                                                  "must be careful to sure that an atom is not added to both groups.")
+                                          .arg(molecule.data().name().value())
+                                          .arg(molnum.value()),
+                                      CODELOC);
     }
 
     mols.add(mol0, map, *this, false);
@@ -612,8 +578,7 @@ void InternalGroupFF::_pvt_added(quint32 group_id,
         }
         else
         {
-            cljgroups.insert(molecule.number(),
-                             CLJ14Group(mol0, combiningRules(), true, map));
+            cljgroups.insert(molecule.number(), CLJ14Group(mol0, combiningRules(), true, map));
             cljgroups[molecule.number()].add(mol1);
         }
 
@@ -623,8 +588,7 @@ void InternalGroupFF::_pvt_added(quint32 group_id,
         }
         else
         {
-            cljgroups0.insert(molecule.number(),
-                              CLJ14Group(mol0, combiningRules(), true, map));
+            cljgroups0.insert(molecule.number(), CLJ14Group(mol0, combiningRules(), true, map));
         }
 
         if (cljgroups1.contains(molecule.number()))
@@ -633,15 +597,13 @@ void InternalGroupFF::_pvt_added(quint32 group_id,
         }
         else
         {
-            cljgroups1.insert(molecule.number(),
-                              CLJ14Group(mol1, combiningRules(), true, map));
+            cljgroups1.insert(molecule.number(), CLJ14Group(mol1, combiningRules(), true, map));
         }
     }
 }
 
 /** Record the fact that the molecule 'mol' has been removed from this forcefield */
-void InternalGroupFF::_pvt_removed(quint32 group_id,
-                                   const PartialMolecule &molecule)
+void InternalGroupFF::_pvt_removed(quint32 group_id, const PartialMolecule &molecule)
 {
     mols.remove(molecule, *this, false);
 
@@ -700,8 +662,7 @@ void InternalGroupFF::_pvt_removed(quint32 group_id,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void InternalGroupFF::_pvt_changed(quint32 group_id,
-                                   const SireMol::Molecule &molecule, bool auto_update)
+void InternalGroupFF::_pvt_changed(quint32 group_id, const SireMol::Molecule &molecule, bool auto_update)
 {
     mols.change(molecule, *this, false);
     mols0.change(molecule, *this, false);
@@ -734,17 +695,16 @@ void InternalGroupFF::_pvt_changed(quint32 group_id,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void InternalGroupFF::_pvt_changed(quint32 group_id,
-                                   const QList<SireMol::Molecule> &molecules, bool auto_update)
+void InternalGroupFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &molecules, bool auto_update)
 {
     InternalGroupFF::Molecules old_mols = mols;
-    QHash<MolNum,CLJ14Group> old_cljgroups = cljgroups;
+    QHash<MolNum, CLJ14Group> old_cljgroups = cljgroups;
 
     InternalGroupFF::Molecules old_mols0 = mols0;
-    QHash<MolNum,CLJ14Group> old_cljgroups0 = cljgroups0;
+    QHash<MolNum, CLJ14Group> old_cljgroups0 = cljgroups0;
 
     InternalGroupFF::Molecules old_mols1 = mols1;
-    QHash<MolNum,CLJ14Group> old_cljgroups1 = cljgroups1;
+    QHash<MolNum, CLJ14Group> old_cljgroups1 = cljgroups1;
 
     try
     {
@@ -776,7 +736,7 @@ void InternalGroupFF::_pvt_changed(quint32 group_id,
 
         this->mustNowRecalculateFromScratch();
     }
-    catch(...)
+    catch (...)
     {
         mols = old_mols;
         mols0 = old_mols0;
@@ -811,8 +771,7 @@ void InternalGroupFF::_pvt_removedAll(quint32 group_id)
 
 /** Return whether or not the supplied property map contains different
     properties for the molecule with number 'molnum' */
-bool InternalGroupFF::_pvt_wouldChangeProperties(quint32 group_id, MolNum molnum,
-                                                 const PropertyMap &map) const
+bool InternalGroupFF::_pvt_wouldChangeProperties(quint32 group_id, MolNum molnum, const PropertyMap &map) const
 {
     if (mols.wouldChangeProperties(molnum, map))
         return true;
@@ -824,74 +783,69 @@ bool InternalGroupFF::_pvt_wouldChangeProperties(quint32 group_id, MolNum molnum
         return false;
 }
 
-const char* InternalGroupFF::typeName()
+const char *InternalGroupFF::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<InternalGroupFF>() );
+    return QMetaType::typeName(qMetaTypeId<InternalGroupFF>());
 }
 
-InternalGroupFF* InternalGroupFF::clone() const
+InternalGroupFF *InternalGroupFF::clone() const
 {
     return new InternalGroupFF(*this);
 }
 
 void InternalGroupFF::field(FieldTable &fieldtable, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
-void InternalGroupFF::field(FieldTable &fieldtable, const Symbol &component,
-                       double scale_field)
+void InternalGroupFF::field(FieldTable &fieldtable, const Symbol &component, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
 void InternalGroupFF::potential(PotentialTable &potentialtable, double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
-void InternalGroupFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                          double scale_potential)
+void InternalGroupFF::potential(PotentialTable &potentialtable, const Symbol &component, double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
 void InternalGroupFF::field(FieldTable &fieldtable, const Probe &probe, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
-void InternalGroupFF::field(FieldTable &fieldtable, const Symbol &component,
-                       const Probe &probe, double scale_field)
+void InternalGroupFF::field(FieldTable &fieldtable, const Symbol &component, const Probe &probe, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
-void InternalGroupFF::potential(PotentialTable &potentialtable, const Probe &probe,
-                           double scale_potential)
+void InternalGroupFF::potential(PotentialTable &potentialtable, const Probe &probe, double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
-void InternalGroupFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                           const Probe &probe, double scale_potential)
+void InternalGroupFF::potential(PotentialTable &potentialtable, const Symbol &component, const Probe &probe,
+                                double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalGroupFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalGroupFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
-

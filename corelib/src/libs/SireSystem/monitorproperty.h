@@ -41,123 +41,125 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class MonitorProperty;
+    class MonitorProperty;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::MonitorProperty&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::MonitorProperty&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::MonitorProperty &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::MonitorProperty &);
 
 namespace SireFF
 {
-class FF;
+    class FF;
 }
 
 namespace SireMol
 {
-class MoleculeGroup;
+    class MoleculeGroup;
 }
 
 namespace SireSystem
 {
 
-using SireFF::FFID;
-using SireFF::FFIdentifier;
-using SireFF::FF;
+    using SireFF::FF;
+    using SireFF::FFID;
+    using SireFF::FFIdentifier;
 
-using SireMol::MoleculeGroup;
-using SireMol::MGID;
-using SireMol::MGIdentifier;
-using SireMol::MolNum;
-using SireMol::Molecules;
+    using SireMol::MGID;
+    using SireMol::MGIdentifier;
+    using SireMol::MoleculeGroup;
+    using SireMol::Molecules;
+    using SireMol::MolNum;
 
-using SireBase::PropertyPtr;
+    using SireBase::PropertyPtr;
 
-/** This monitor is used to monitor the value of system, forcefield or
-    molecule properties during a simulation
+    /** This monitor is used to monitor the value of system, forcefield or
+        molecule properties during a simulation
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT MonitorProperty
-        : public SireBase::ConcreteProperty<MonitorProperty,SystemMonitor>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT MonitorProperty : public SireBase::ConcreteProperty<MonitorProperty, SystemMonitor>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const MonitorProperty&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, MonitorProperty&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const MonitorProperty &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, MonitorProperty &);
 
-public:
-    MonitorProperty();
-    MonitorProperty(const QString &property);
-    MonitorProperty(const QString &property, const MoleculeGroup &molgroup);
-    MonitorProperty(const QString &property, const MGID &mgid);
-    MonitorProperty(const QString &property, const FF &forcefield);
-    MonitorProperty(const QString &property, const FFID &ffid);
+    public:
+        MonitorProperty();
+        MonitorProperty(const QString &property);
+        MonitorProperty(const QString &property, const MoleculeGroup &molgroup);
+        MonitorProperty(const QString &property, const MGID &mgid);
+        MonitorProperty(const QString &property, const FF &forcefield);
+        MonitorProperty(const QString &property, const FFID &ffid);
 
-    MonitorProperty(const MonitorProperty &other);
+        MonitorProperty(const MonitorProperty &other);
 
-    ~MonitorProperty();
+        ~MonitorProperty();
 
-    MonitorProperty& operator=(const MonitorProperty &other);
+        MonitorProperty &operator=(const MonitorProperty &other);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    bool operator==(const MonitorProperty &other) const;
-    bool operator!=(const MonitorProperty &other) const;
+        bool operator==(const MonitorProperty &other) const;
+        bool operator!=(const MonitorProperty &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool monitoringSystemProperty() const;
-    bool monitoringForceFieldProperty() const;
-    bool monitoringMoleculeProperty() const;
+        bool monitoringSystemProperty() const;
+        bool monitoringForceFieldProperty() const;
+        bool monitoringMoleculeProperty() const;
 
-    const QString& property() const;
+        const QString &property() const;
 
-    const MGID& mgID() const;
-    const FFID& ffID() const;
+        const MGID &mgID() const;
+        const FFID &ffID() const;
 
-    void clearStatistics();
+        void clearStatistics();
 
-    QVector<PropertyPtr> properties() const;
-    QVector<PropertyPtr> properties(MolNum molnum) const;
+        QVector<PropertyPtr> properties() const;
+        QVector<PropertyPtr> properties(MolNum molnum) const;
 
-    QList<MolNum> monitoredMolecules() const;
+        QList<MolNum> monitoredMolecules() const;
 
-    void writeToDisk(const QString &filename);
+        void writeToDisk(const QString &filename);
 
-    void monitor(System &system);
+        void monitor(System &system);
 
-private:
-    void monitor(const Molecules &molecules);
+    private:
+        void monitor(const Molecules &molecules);
 
-    /** The name of the property being monitored */
-    QString prop;
+        /** The name of the property being monitored */
+        QString prop;
 
-    /** The ID of the molecule group(s) whose molecules
-        are being monitored */
-    MGIdentifier mgid;
+        /** The ID of the molecule group(s) whose molecules
+            are being monitored */
+        MGIdentifier mgid;
 
-    /** The ID of the forcefield(s) whose properties are being monitored */
-    FFIdentifier ffid;
+        /** The ID of the forcefield(s) whose properties are being monitored */
+        FFIdentifier ffid;
 
-    enum { IS_NULL = 0,
-           SYSTEM_PROPERTY = 1,
-           MOLECULE_PROPERTY = 2,
-           FORCEFIELD_PROPERTY = 3 };
+        enum
+        {
+            IS_NULL = 0,
+            SYSTEM_PROPERTY = 1,
+            MOLECULE_PROPERTY = 2,
+            FORCEFIELD_PROPERTY = 3
+        };
 
-    /** What is being monitored */
-    quint32 what_is_monitored;
+        /** What is being monitored */
+        quint32 what_is_monitored;
 
-    /** The system or forcefield properties */
-    SireBase::ChunkedVector<PropertyPtr,2048> props;
+        /** The system or forcefield properties */
+        SireBase::ChunkedVector<PropertyPtr, 2048> props;
 
-    /** The molecule properties */
-    QHash< MolNum,SireBase::ChunkedVector<PropertyPtr,2048> > molprops;
-};
+        /** The molecule properties */
+        QHash<MolNum, SireBase::ChunkedVector<PropertyPtr, 2048>> molprops;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::MonitorProperty )
+Q_DECLARE_METATYPE(SireSystem::MonitorProperty)
 
-SIRE_EXPOSE_CLASS( SireSystem::MonitorProperty )
+SIRE_EXPOSE_CLASS(SireSystem::MonitorProperty)
 
 SIRE_END_HEADER
 

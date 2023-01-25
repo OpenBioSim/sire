@@ -27,37 +27,36 @@
 
 #include "amberparams.h"
 
-#include "SireMol/molecule.h"
-#include "SireMol/partialmolecule.h"
-#include "SireMol/bondid.h"
 #include "SireMol/angleid.h"
+#include "SireMol/atomidx.h"
+#include "SireMol/bondid.h"
+#include "SireMol/connectivity.h"
 #include "SireMol/dihedralid.h"
 #include "SireMol/improperid.h"
-#include "SireMol/atomidx.h"
-#include "SireMol/connectivity.h"
+#include "SireMol/molecule.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireMol/core.h"
 
-#include "SireMM/gromacsparams.h"
-#include "SireMM/twoatomfunctions.h"
-#include "SireMM/threeatomfunctions.h"
-#include "SireMM/fouratomfunctions.h"
-#include "SireMM/cljnbpairs.h"
-#include "SireMM/bond.h"
 #include "SireMM/angle.h"
+#include "SireMM/bond.h"
+#include "SireMM/cljnbpairs.h"
+#include "SireMM/fouratomfunctions.h"
+#include "SireMM/gromacsparams.h"
+#include "SireMM/threeatomfunctions.h"
+#include "SireMM/twoatomfunctions.h"
 
 #include "SireCAS/expression.h"
+#include "SireCAS/sum.h"
 #include "SireCAS/symbol.h"
 #include "SireCAS/trigfuncs.h"
 #include "SireCAS/values.h"
-#include "SireCAS/sum.h"
-#include "SireCAS/trigfuncs.h"
 
-#include "SireBase/stringproperty.h"
 #include "SireBase/parallel.h"
+#include "SireBase/stringproperty.h"
 
-#include "SireError/errors.h"
 #include "SireBase/errors.h"
+#include "SireError/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -136,8 +135,7 @@ AmberBond::AmberBond(const Expression &f, const Symbol &R) : _k(0), _r0(0)
         {
             if (not factor.power().isConstant())
             {
-                errors.append(QObject::tr("Power of R must be constant, not %1")
-                                  .arg(factor.power().toString()));
+                errors.append(QObject::tr("Power of R must be constant, not %1").arg(factor.power().toString()));
                 continue;
             }
 
@@ -176,15 +174,14 @@ AmberBond::AmberBond(const Expression &f, const Symbol &R) : _k(0), _r0(0)
             }
             else
             {
-                errors.append(QObject::tr("Power of R^2 must equal 2.0, 1.0 or 0.0, not %1")
-                                  .arg(power));
+                errors.append(QObject::tr("Power of R^2 must equal 2.0, 1.0 or 0.0, not %1").arg(power));
                 continue;
             }
         }
         else
         {
-            errors.append(QObject::tr("Cannot have a factor that does not include R. %1")
-                              .arg(factor.symbol().toString()));
+            errors.append(
+                QObject::tr("Cannot have a factor that does not include R. %1").arg(factor.symbol().toString()));
         }
     }
 
@@ -203,18 +200,17 @@ AmberBond::AmberBond(const Expression &f, const Symbol &R) : _k(0), _r0(0)
 
     if (not errors.isEmpty())
     {
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Cannot extract an AmberBond with function K ( %1 - R0 )^2 from the "
-                                                "expression %2, because\n%3")
-                                                .arg(R.toString())
-                                                .arg(f.toString())
-                                                .arg(errors.join("\n")),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot extract an AmberBond with function K ( %1 - R0 )^2 from the "
+                        "expression %2, because\n%3")
+                .arg(R.toString())
+                .arg(f.toString())
+                .arg(errors.join("\n")),
+            CODELOC);
     }
 }
 
-AmberBond::AmberBond(const AmberBond &other)
-    : _k(other._k), _r0(other._r0)
+AmberBond::AmberBond(const AmberBond &other) : _k(other._k), _r0(other._r0)
 {
 }
 
@@ -356,8 +352,7 @@ AmberAngle::AmberAngle(const Expression &f, const Symbol &theta) : _k(0), _theta
         {
             if (not factor.power().isConstant())
             {
-                errors.append(QObject::tr("Power of theta must be constant, not %1")
-                                  .arg(factor.power().toString()));
+                errors.append(QObject::tr("Power of theta must be constant, not %1").arg(factor.power().toString()));
                 continue;
             }
 
@@ -396,15 +391,14 @@ AmberAngle::AmberAngle(const Expression &f, const Symbol &theta) : _k(0), _theta
             }
             else
             {
-                errors.append(QObject::tr("Power of theta^2 must equal 2.0, 1.0 or 0.0, not %1")
-                                  .arg(power));
+                errors.append(QObject::tr("Power of theta^2 must equal 2.0, 1.0 or 0.0, not %1").arg(power));
                 continue;
             }
         }
         else
         {
-            errors.append(QObject::tr("Cannot have a factor that does not include theta. %1")
-                              .arg(factor.symbol().toString()));
+            errors.append(
+                QObject::tr("Cannot have a factor that does not include theta. %1").arg(factor.symbol().toString()));
         }
     }
 
@@ -414,8 +408,7 @@ AmberAngle::AmberAngle(const Expression &f, const Symbol &theta) : _k(0), _theta
     // ktheta0 should be equal to -k theta0
     if (std::abs(_k * _theta0 + 0.5 * ktheta0) > 0.001)
     {
-        errors.append(QObject::tr(
-                          "How can the power of theta be %1. It should be 2 x %2 x %3 = %4.")
+        errors.append(QObject::tr("How can the power of theta be %1. It should be 2 x %2 x %3 = %4.")
                           .arg(ktheta0)
                           .arg(_k)
                           .arg(_theta0)
@@ -424,18 +417,17 @@ AmberAngle::AmberAngle(const Expression &f, const Symbol &theta) : _k(0), _theta
 
     if (not errors.isEmpty())
     {
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Cannot extract an AmberAngle with function K ( %1 - theta0 )^2 from the "
-                                                "expression %2, because\n%3")
-                                                .arg(theta.toString())
-                                                .arg(f.toString())
-                                                .arg(errors.join("\n")),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot extract an AmberAngle with function K ( %1 - theta0 )^2 from the "
+                        "expression %2, because\n%3")
+                .arg(theta.toString())
+                .arg(f.toString())
+                .arg(errors.join("\n")),
+            CODELOC);
     }
 }
 
-AmberAngle::AmberAngle(const AmberAngle &other)
-    : _k(other._k), _theta0(other._theta0)
+AmberAngle::AmberAngle(const AmberAngle &other) : _k(other._k), _theta0(other._theta0)
 {
 }
 
@@ -540,8 +532,7 @@ QDataStream &operator>>(QDataStream &ds, AmberDihPart &dih)
     return ds;
 }
 
-AmberDihPart::AmberDihPart(double k, double periodicity, double phase)
-    : _k(k), _periodicity(periodicity), _phase(phase)
+AmberDihPart::AmberDihPart(double k, double periodicity, double phase) : _k(k), _periodicity(periodicity), _phase(phase)
 {
 }
 
@@ -619,10 +610,7 @@ double AmberDihPart::energy(double phi) const
 
 QString AmberDihPart::toString() const
 {
-    return QObject::tr("AmberDihPart( k = %1, periodicity = %2, phase = %3 )")
-        .arg(_k)
-        .arg(_periodicity)
-        .arg(_phase);
+    return QObject::tr("AmberDihPart( k = %1, periodicity = %2, phase = %3 )").arg(_k).arg(_periodicity).arg(_phase);
 }
 
 ///////////
@@ -697,9 +685,7 @@ AmberDihedral::AmberDihedral(const Expression &f, const Symbol &phi, bool test_r
                 auto F1 = nrg_factor * (3.0 * F3 - 2.0 * params[1]);
 
                 // Convert the expression to a Fourier series.
-                f_copy = Expression(0.5 * (F1 * (1 + Cos(phi)) +
-                                           F2 * (1 - Cos(2 * phi)) +
-                                           F3 * (1 + Cos(3 * phi)) +
+                f_copy = Expression(0.5 * (F1 * (1 + Cos(phi)) + F2 * (1 - Cos(2 * phi)) + F3 * (1 + Cos(3 * phi)) +
                                            F4 * (1 - Cos(4 * phi))));
             }
         }
@@ -819,14 +805,14 @@ AmberDihedral::AmberDihedral(const Expression &f, const Symbol &phi, bool test_r
         }
         else
         {
-            throw SireError::incompatible_error(QObject::tr(
-                                                    "Cannot extract an Amber-format dihedral expression from '%1' as "
-                                                    "the expression must be a series of terms of type "
-                                                    "'k{ 1 + cos[ per %2 - phase ] }'. Errors include\n%3")
-                                                    .arg(f.toString())
-                                                    .arg(phi.toString())
-                                                    .arg(errors.join("\n")),
-                                                CODELOC);
+            throw SireError::incompatible_error(
+                QObject::tr("Cannot extract an Amber-format dihedral expression from '%1' as "
+                            "the expression must be a series of terms of type "
+                            "'k{ 1 + cos[ per %2 - phase ] }'. Errors include\n%3")
+                    .arg(f.toString())
+                    .arg(phi.toString())
+                    .arg(errors.join("\n")),
+                CODELOC);
         }
     }
 
@@ -860,8 +846,7 @@ AmberDihedral::AmberDihedral(const Expression &f, const Symbol &phi, bool test_r
         {
             if (not factor.power().isConstant())
             {
-                errors.append(QObject::tr("Power of phi must be constant, not %1")
-                                  .arg(factor.power().toString()));
+                errors.append(QObject::tr("Power of phi must be constant, not %1").arg(factor.power().toString()));
                 ok = false;
                 continue;
             }
@@ -889,8 +874,7 @@ AmberDihedral::AmberDihedral(const Expression &f, const Symbol &phi, bool test_r
             }
             else
             {
-                errors.append(QObject::tr("Power of phi must equal 1.0 or 0.0, not %1")
-                                  .arg(power));
+                errors.append(QObject::tr("Power of phi must equal 1.0 or 0.0, not %1").arg(power));
                 ok = false;
                 continue;
             }
@@ -904,14 +888,14 @@ AmberDihedral::AmberDihedral(const Expression &f, const Symbol &phi, bool test_r
 
     if (not errors.isEmpty())
     {
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Cannot extract an Amber-format dihedral expression from '%1' as "
-                                                "the expression must be a series of terms of type "
-                                                "'k{ 1 + cos[ per %2 - phase ] }'. Errors include\n%3")
-                                                .arg(f.toString())
-                                                .arg(phi.toString())
-                                                .arg(errors.join("\n")),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot extract an Amber-format dihedral expression from '%1' as "
+                        "the expression must be a series of terms of type "
+                        "'k{ 1 + cos[ per %2 - phase ] }'. Errors include\n%3")
+                .arg(f.toString())
+                .arg(phi.toString())
+                .arg(errors.join("\n")),
+            CODELOC);
     }
 
     // Otherwise, add in all of the terms.
@@ -927,8 +911,7 @@ AmberDihedral::AmberDihedral(const Expression &f, const Symbol &phi, bool test_r
     }
 }
 
-AmberDihedral::AmberDihedral(const AmberDihedral &other)
-    : _parts(other._parts)
+AmberDihedral::AmberDihedral(const AmberDihedral &other) : _parts(other._parts)
 {
 }
 
@@ -1063,8 +1046,7 @@ AmberNB14::AmberNB14(double cscl, double ljscl) : _cscl(cscl), _ljscl(ljscl)
 {
 }
 
-AmberNB14::AmberNB14(const AmberNB14 &other)
-    : _cscl(other._cscl), _ljscl(other._ljscl)
+AmberNB14::AmberNB14(const AmberNB14 &other) : _cscl(other._cscl), _ljscl(other._ljscl)
 {
 }
 
@@ -1190,14 +1172,12 @@ AmberNBDihPart::AmberNBDihPart()
 }
 
 /** Construct from the passed parameters */
-AmberNBDihPart::AmberNBDihPart(const AmberDihPart &dihedral, const AmberNB14 &nb14)
-    : dih(dihedral), nbscl(nb14)
+AmberNBDihPart::AmberNBDihPart(const AmberDihPart &dihedral, const AmberNB14 &nb14) : dih(dihedral), nbscl(nb14)
 {
 }
 
 /** Copy constructor */
-AmberNBDihPart::AmberNBDihPart(const AmberNBDihPart &other)
-    : dih(other.dih), nbscl(other.nbscl)
+AmberNBDihPart::AmberNBDihPart(const AmberNBDihPart &other) : dih(other.dih), nbscl(other.nbscl)
 {
 }
 
@@ -1273,9 +1253,7 @@ const char *AmberNBDihPart::what() const
 
 QString AmberNBDihPart::toString() const
 {
-    return QObject::tr("AmberNBDihPart( param == %1, scl == %2 )")
-        .arg(dih.toString())
-        .arg(nbscl.toString());
+    return QObject::tr("AmberNBDihPart( param == %1, scl == %2 )").arg(dih.toString()).arg(nbscl.toString());
 }
 
 ///////////
@@ -1291,18 +1269,11 @@ QDataStream &operator<<(QDataStream &ds, const AmberParams &amberparam)
 
     SharedDataStream sds(ds);
 
-    sds << amberparam.molinfo
-        << amberparam.amber_charges << amberparam.amber_ljs
-        << amberparam.amber_masses << amberparam.amber_elements
-        << amberparam.amber_types << amberparam.born_radii
-        << amberparam.amber_screens << amberparam.amber_treechains
-        << amberparam.exc_atoms
-        << amberparam.amber_bonds
-        << amberparam.amber_angles << amberparam.amber_dihedrals
-        << amberparam.amber_impropers << amberparam.amber_nb14s
-        << amberparam.radius_set
-        << amberparam.propmap
-        << static_cast<const MoleculeProperty &>(amberparam);
+    sds << amberparam.molinfo << amberparam.amber_charges << amberparam.amber_ljs << amberparam.amber_masses
+        << amberparam.amber_elements << amberparam.amber_types << amberparam.born_radii << amberparam.amber_screens
+        << amberparam.amber_treechains << amberparam.exc_atoms << amberparam.amber_bonds << amberparam.amber_angles
+        << amberparam.amber_dihedrals << amberparam.amber_impropers << amberparam.amber_nb14s << amberparam.radius_set
+        << amberparam.propmap << static_cast<const MoleculeProperty &>(amberparam);
 
     return ds;
 }
@@ -1316,7 +1287,11 @@ QDataStream &operator>>(QDataStream &ds, AmberParams &amberparam)
     {
         SharedDataStream sds(ds);
 
-        sds >> amberparam.molinfo >> amberparam.amber_charges >> amberparam.amber_ljs >> amberparam.amber_masses >> amberparam.amber_elements >> amberparam.amber_types >> amberparam.born_radii >> amberparam.amber_screens >> amberparam.amber_treechains >> amberparam.exc_atoms >> amberparam.amber_bonds >> amberparam.amber_angles >> amberparam.amber_dihedrals >> amberparam.amber_impropers >> amberparam.amber_nb14s >> amberparam.radius_set >> amberparam.propmap >> static_cast<MoleculeProperty &>(amberparam);
+        sds >> amberparam.molinfo >> amberparam.amber_charges >> amberparam.amber_ljs >> amberparam.amber_masses >>
+            amberparam.amber_elements >> amberparam.amber_types >> amberparam.born_radii >> amberparam.amber_screens >>
+            amberparam.amber_treechains >> amberparam.exc_atoms >> amberparam.amber_bonds >> amberparam.amber_angles >>
+            amberparam.amber_dihedrals >> amberparam.amber_impropers >> amberparam.amber_nb14s >>
+            amberparam.radius_set >> amberparam.propmap >> static_cast<MoleculeProperty &>(amberparam);
     }
     else
         throw version_error(v, "2", r_amberparam, CODELOC);
@@ -1363,36 +1338,24 @@ AmberParams::AmberParams(const MoleculeView &mol, const PropertyMap &map)
 }
 
 /** Constructor for the passed molecule*/
-AmberParams::AmberParams(const MoleculeInfo &info)
-    : ConcreteProperty<AmberParams, MoleculeProperty>(),
-      molinfo(info)
+AmberParams::AmberParams(const MoleculeInfo &info) : ConcreteProperty<AmberParams, MoleculeProperty>(), molinfo(info)
 {
 }
 
 /** Constructor for the passed molecule*/
 AmberParams::AmberParams(const MoleculeInfoData &info)
-    : ConcreteProperty<AmberParams, MoleculeProperty>(),
-      molinfo(info)
+    : ConcreteProperty<AmberParams, MoleculeProperty>(), molinfo(info)
 {
 }
 
 /** Copy constructor */
 AmberParams::AmberParams(const AmberParams &other)
-    : ConcreteProperty<AmberParams, MoleculeProperty>(),
-      molinfo(other.molinfo),
-      amber_charges(other.amber_charges), amber_ljs(other.amber_ljs),
-      amber_masses(other.amber_masses), amber_elements(other.amber_elements),
-      amber_types(other.amber_types), born_radii(other.born_radii),
-      amber_screens(other.amber_screens),
-      amber_treechains(other.amber_treechains),
-      exc_atoms(other.exc_atoms),
-      amber_bonds(other.amber_bonds),
-      amber_angles(other.amber_angles),
-      amber_dihedrals(other.amber_dihedrals),
-      amber_impropers(other.amber_impropers),
-      amber_nb14s(other.amber_nb14s),
-      radius_set(other.radius_set),
-      propmap(other.propmap)
+    : ConcreteProperty<AmberParams, MoleculeProperty>(), molinfo(other.molinfo), amber_charges(other.amber_charges),
+      amber_ljs(other.amber_ljs), amber_masses(other.amber_masses), amber_elements(other.amber_elements),
+      amber_types(other.amber_types), born_radii(other.born_radii), amber_screens(other.amber_screens),
+      amber_treechains(other.amber_treechains), exc_atoms(other.exc_atoms), amber_bonds(other.amber_bonds),
+      amber_angles(other.amber_angles), amber_dihedrals(other.amber_dihedrals), amber_impropers(other.amber_impropers),
+      amber_nb14s(other.amber_nb14s), radius_set(other.radius_set), propmap(other.propmap)
 {
 }
 
@@ -1432,7 +1395,13 @@ AmberParams::~AmberParams()
 /** Comparison operator */
 bool AmberParams::operator==(const AmberParams &other) const
 {
-    return (molinfo == other.molinfo and amber_charges == other.amber_charges and amber_ljs == other.amber_ljs and amber_masses == other.amber_masses and amber_elements == other.amber_elements and amber_types == other.amber_types and born_radii == other.born_radii and amber_screens == other.amber_screens and amber_treechains == other.amber_treechains and exc_atoms == other.exc_atoms and amber_bonds == other.amber_bonds and amber_angles == other.amber_angles and amber_dihedrals == other.amber_dihedrals and amber_impropers == other.amber_impropers and amber_nb14s == other.amber_nb14s and radius_set == other.radius_set and propmap == other.propmap);
+    return (molinfo == other.molinfo and amber_charges == other.amber_charges and amber_ljs == other.amber_ljs and
+            amber_masses == other.amber_masses and amber_elements == other.amber_elements and
+            amber_types == other.amber_types and born_radii == other.born_radii and
+            amber_screens == other.amber_screens and amber_treechains == other.amber_treechains and
+            exc_atoms == other.exc_atoms and amber_bonds == other.amber_bonds and amber_angles == other.amber_angles and
+            amber_dihedrals == other.amber_dihedrals and amber_impropers == other.amber_impropers and
+            amber_nb14s == other.amber_nb14s and radius_set == other.radius_set and propmap == other.propmap);
 }
 
 /** Comparison operator */
@@ -1492,110 +1461,106 @@ QStringList AmberParams::validateAndFix()
 
         // All 1-4 scaling factors should match up with actual dihedrals - validate
         // that this is the case and fix any problems if we can
-        tbb::parallel_for(tbb::blocked_range<int>(0, exc_atoms.nGroups()),
-                          [&](const tbb::blocked_range<int> &r)
+        tbb::parallel_for(tbb::blocked_range<int>(0, exc_atoms.nGroups()), [&](const tbb::blocked_range<int> &r)
                           {
-                              for (int icg = r.begin(); icg < r.end(); ++icg)
-                              {
-                                  const int nats0 = molinfo.nAtoms(CGIdx(icg));
+            for (int icg = r.begin(); icg < r.end(); ++icg)
+            {
+                const int nats0 = molinfo.nAtoms(CGIdx(icg));
 
-                                  for (int jcg = 0; jcg < exc_atoms.nGroups(); ++jcg)
-                                  {
-                                      auto group_pairs = exc_atoms.get(CGIdx(icg), CGIdx(jcg));
+                for (int jcg = 0; jcg < exc_atoms.nGroups(); ++jcg)
+                {
+                    auto group_pairs = exc_atoms.get(CGIdx(icg), CGIdx(jcg));
 
-                                      if (group_pairs.isEmpty() and
-                                          group_pairs.defaultValue() == CLJScaleFactor(1, 1))
-                                      {
-                                          // non of the pairs of atoms between these two groups are
-                                          // bonded
-                                          continue;
-                                      }
+                    if (group_pairs.isEmpty() and group_pairs.defaultValue() == CLJScaleFactor(1, 1))
+                    {
+                        // non of the pairs of atoms between these two groups are
+                        // bonded
+                        continue;
+                    }
 
-                                      const int nats1 = molinfo.nAtoms(CGIdx(jcg));
+                    const int nats1 = molinfo.nAtoms(CGIdx(jcg));
 
-                                      // compare all pairs of atoms
-                                      for (int i = 0; i < nats0; ++i)
-                                      {
-                                          for (int j = 0; j < nats1; ++j)
-                                          {
-                                              const auto s = group_pairs.get(i, j);
+                    // compare all pairs of atoms
+                    for (int i = 0; i < nats0; ++i)
+                    {
+                        for (int j = 0; j < nats1; ++j)
+                        {
+                            const auto s = group_pairs.get(i, j);
 
-                                              if ((not(s.coulomb() == 0 or s.coulomb() == 1)) or
-                                                  (not(s.lj() == 0 or s.lj() == 1)))
-                                              {
-                                                  const auto atm0 = molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i)));
-                                                  const auto atm3 = molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j)));
+                            if ((not(s.coulomb() == 0 or s.coulomb() == 1)) or (not(s.lj() == 0 or s.lj() == 1)))
+                            {
+                                const auto atm0 = molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i)));
+                                const auto atm3 = molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j)));
 
-                                                  if (not has_connectivity)
-                                                  {
-                                                      // have to use the connectivity that is implied by the bonds
-                                                      QMutexLocker lkr(&mutex);
-                                                      if (not has_connectivity)
-                                                      {
-                                                          conn = this->connectivity();
-                                                          has_connectivity = true;
-                                                      }
-                                                  }
+                                if (not has_connectivity)
+                                {
+                                    // have to use the connectivity that is implied by the bonds
+                                    QMutexLocker lkr(&mutex);
+                                    if (not has_connectivity)
+                                    {
+                                        conn = this->connectivity();
+                                        has_connectivity = true;
+                                    }
+                                }
 
-                                                  // find the shortest bonded path between these two atoms
-                                                  const auto path = conn.findPath(atm0, atm3, 4);
+                                // find the shortest bonded path between these two atoms
+                                const auto path = conn.findPath(atm0, atm3, 4);
 
-                                                  if (path.count() != 4)
-                                                  {
-                                                      QMutexLocker lkr(&mutex);
-                                                      errors.append(QObject::tr("Have a 1-4 scaling factor (%1/%2) "
-                                                                                "between atoms %3:%4 and %5:%6 despite there being no physical "
-                                                                                "dihedral between these two atoms. All 1-4 scaling factors MUST "
-                                                                                "be associated with "
-                                                                                "physical dihedrals. The shortest path is %7")
-                                                                        .arg(s.coulomb())
-                                                                        .arg(s.lj())
-                                                                        .arg(molinfo.name(atm0).value())
-                                                                        .arg(atm0.value())
-                                                                        .arg(molinfo.name(atm3).value())
-                                                                        .arg(atm3.value())
-                                                                        .arg(Sire::toString(path)));
-                                                      continue;
-                                                  }
+                                if (path.count() != 4)
+                                {
+                                    QMutexLocker lkr(&mutex);
+                                    errors.append(
+                                        QObject::tr("Have a 1-4 scaling factor (%1/%2) "
+                                                    "between atoms %3:%4 and %5:%6 despite there being no physical "
+                                                    "dihedral between these two atoms. All 1-4 scaling factors MUST "
+                                                    "be associated with "
+                                                    "physical dihedrals. The shortest path is %7")
+                                            .arg(s.coulomb())
+                                            .arg(s.lj())
+                                            .arg(molinfo.name(atm0).value())
+                                            .arg(atm0.value())
+                                            .arg(molinfo.name(atm3).value())
+                                            .arg(atm3.value())
+                                            .arg(Sire::toString(path)));
+                                    continue;
+                                }
 
-                                                  // convert the atom IDs into a canonical form
-                                                  auto dih = this->convert(DihedralID(path[0], path[1], path[2], path[3]));
+                                // convert the atom IDs into a canonical form
+                                auto dih = this->convert(DihedralID(path[0], path[1], path[2], path[3]));
 
-                                                  // qDebug() << "ADDING NULL DIHEDRAL FOR" << dih.toString();
+                                // qDebug() << "ADDING NULL DIHEDRAL FOR" << dih.toString();
 
-                                                  // does this bond involve hydrogen?
-                                                  //- this relies on "AtomElements" being full
-                                                  bool contains_hydrogen = false;
+                                // does this bond involve hydrogen?
+                                //- this relies on "AtomElements" being full
+                                bool contains_hydrogen = false;
 
-                                                  if (not amber_elements.isEmpty())
-                                                  {
-                                                      contains_hydrogen =
-                                                          (amber_elements.at(molinfo.cgAtomIdx(dih.atom0())).nProtons() < 2) or
-                                                          (amber_elements.at(molinfo.cgAtomIdx(dih.atom1())).nProtons() < 2) or
-                                                          (amber_elements.at(molinfo.cgAtomIdx(dih.atom2())).nProtons() < 2) or
-                                                          (amber_elements.at(molinfo.cgAtomIdx(dih.atom3())).nProtons() < 2);
-                                                  }
+                                if (not amber_elements.isEmpty())
+                                {
+                                    contains_hydrogen =
+                                        (amber_elements.at(molinfo.cgAtomIdx(dih.atom0())).nProtons() < 2) or
+                                        (amber_elements.at(molinfo.cgAtomIdx(dih.atom1())).nProtons() < 2) or
+                                        (amber_elements.at(molinfo.cgAtomIdx(dih.atom2())).nProtons() < 2) or
+                                        (amber_elements.at(molinfo.cgAtomIdx(dih.atom3())).nProtons() < 2);
+                                }
 
-                                                  // create a null dihedral parameter and add this to the set
-                                                  QMutexLocker lkr(&mutex);
-                                                  new_dihedrals.insert(dih,
-                                                                       qMakePair(AmberDihedral(Expression(0), Symbol("phi")),
-                                                                                 contains_hydrogen));
+                                // create a null dihedral parameter and add this to the set
+                                QMutexLocker lkr(&mutex);
+                                new_dihedrals.insert(
+                                    dih, qMakePair(AmberDihedral(Expression(0), Symbol("phi")), contains_hydrogen));
 
-                                                  // now add in the 1-4 pair
-                                                  BondID nb14pair = this->convert(BondID(dih.atom0(), dih.atom3()));
+                                // now add in the 1-4 pair
+                                BondID nb14pair = this->convert(BondID(dih.atom0(), dih.atom3()));
 
-                                                  // add them to the list of 14 scale factors
-                                                  new_nb14s.insert(nb14pair, AmberNB14(s.coulomb(), s.lj()));
+                                // add them to the list of 14 scale factors
+                                new_nb14s.insert(nb14pair, AmberNB14(s.coulomb(), s.lj()));
 
-                                                  // and remove them from the excluded atoms list
-                                                  new_exc.set(nb14pair.atom0(), nb14pair.atom1(), CLJScaleFactor(0));
-                                              }
-                                          }
-                                      }
-                                  }
-                              }
-                          });
+                                // and remove them from the excluded atoms list
+                                new_exc.set(nb14pair.atom0(), nb14pair.atom1(), CLJScaleFactor(0));
+                            }
+                        }
+                    }
+                }
+            } });
 
         amber_dihedrals = new_dihedrals;
         amber_nb14s = new_nb14s;
@@ -1743,15 +1708,9 @@ AtomStringProperty AmberParams::treeChains() const
 }
 
 /** Set the atom parameters for the specified atom to the provided values */
-void AmberParams::add(const AtomID &atom,
-                      SireUnits::Dimension::Charge charge,
-                      SireUnits::Dimension::MolarMass mass,
-                      const SireMol::Element &element,
-                      const SireMM::LJParameter &ljparam,
-                      const QString &amber_type,
-                      SireUnits::Dimension::Length born_radius,
-                      double screening_parameter,
-                      const QString &treechain)
+void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, SireUnits::Dimension::MolarMass mass,
+                      const SireMol::Element &element, const SireMM::LJParameter &ljparam, const QString &amber_type,
+                      SireUnits::Dimension::Length born_radius, double screening_parameter, const QString &treechain)
 {
     CGAtomIdx idx = molinfo.cgAtomIdx(atom);
 
@@ -1784,9 +1743,7 @@ Connectivity AmberParams::connectivity() const
 {
     auto connectivity = Connectivity(molinfo).edit();
 
-    for (auto it = amber_bonds.constBegin();
-         it != amber_bonds.constEnd();
-         ++it)
+    for (auto it = amber_bonds.constBegin(); it != amber_bonds.constEnd(); ++it)
     {
         connectivity.connect(it.key().atom0(), it.key().atom1());
     }
@@ -1849,9 +1806,7 @@ CLJNBPairs AmberParams::cljScaleFactors() const
     CLJNBPairs nbpairs = this->excludedAtoms();
 
     // now add in all of the 1-4 nonbonded scale factors
-    for (auto it = amber_nb14s.constBegin();
-         it != amber_nb14s.constEnd();
-         ++it)
+    for (auto it = amber_nb14s.constBegin(); it != amber_nb14s.constEnd(); ++it)
     {
         nbpairs.set(it.key().atom0(), it.key().atom1(), it.value().toScaleFactor());
     }
@@ -1880,9 +1835,7 @@ TwoAtomFunctions AmberParams::bondFunctions(const Symbol &R) const
 {
     TwoAtomFunctions funcs(molinfo);
 
-    for (auto it = amber_bonds.constBegin();
-         it != amber_bonds.constEnd();
-         ++it)
+    for (auto it = amber_bonds.constBegin(); it != amber_bonds.constEnd(); ++it)
     {
         funcs.set(it.key(), it.value().first.toExpression(R));
     }
@@ -1916,9 +1869,7 @@ ThreeAtomFunctions AmberParams::angleFunctions(const Symbol &THETA) const
 {
     ThreeAtomFunctions funcs(molinfo);
 
-    for (auto it = amber_angles.constBegin();
-         it != amber_angles.constEnd();
-         ++it)
+    for (auto it = amber_angles.constBegin(); it != amber_angles.constEnd(); ++it)
     {
         funcs.set(it.key(), it.value().first.toExpression(THETA));
     }
@@ -1932,8 +1883,7 @@ ThreeAtomFunctions AmberParams::angleFunctions() const
     return angleFunctions(Symbol("theta"));
 }
 
-void AmberParams::add(const DihedralID &dihedral, double k,
-                      double periodicity, double phase, bool includes_h)
+void AmberParams::add(const DihedralID &dihedral, double k, double periodicity, double phase, bool includes_h)
 {
     // convert the dihedral into AtomIdx indicies
     DihedralID d = this->convert(dihedral);
@@ -1945,8 +1895,7 @@ void AmberParams::add(const DihedralID &dihedral, double k,
     }
     else
     {
-        amber_dihedrals.insert(d, qMakePair(AmberDihedral(AmberDihPart(k, periodicity, phase)),
-                                            includes_h));
+        amber_dihedrals.insert(d, qMakePair(AmberDihedral(AmberDihPart(k, periodicity, phase)), includes_h));
     }
 }
 
@@ -1965,9 +1914,7 @@ FourAtomFunctions AmberParams::dihedralFunctions(const Symbol &PHI) const
 {
     FourAtomFunctions funcs(molinfo);
 
-    for (auto it = amber_dihedrals.constBegin();
-         it != amber_dihedrals.constEnd();
-         ++it)
+    for (auto it = amber_dihedrals.constBegin(); it != amber_dihedrals.constEnd(); ++it)
     {
         funcs.set(it.key(), it.value().first.toExpression(PHI));
     }
@@ -1981,8 +1928,7 @@ FourAtomFunctions AmberParams::dihedralFunctions() const
     return dihedralFunctions(Symbol("phi"));
 }
 
-void AmberParams::add(const ImproperID &improper, double k,
-                      double periodicity, double phase, bool includes_h)
+void AmberParams::add(const ImproperID &improper, double k, double periodicity, double phase, bool includes_h)
 {
     ImproperID imp = this->convert(improper);
 
@@ -1992,8 +1938,7 @@ void AmberParams::add(const ImproperID &improper, double k,
     }
     else
     {
-        amber_impropers.insert(imp, qMakePair(AmberDihedral(AmberDihPart(k, periodicity, phase)),
-                                              includes_h));
+        amber_impropers.insert(imp, qMakePair(AmberDihedral(AmberDihPart(k, periodicity, phase)), includes_h));
     }
 }
 
@@ -2012,9 +1957,7 @@ FourAtomFunctions AmberParams::improperFunctions(const Symbol &PHI) const
 {
     FourAtomFunctions funcs(molinfo);
 
-    for (auto it = amber_impropers.constBegin();
-         it != amber_impropers.constEnd();
-         ++it)
+    for (auto it = amber_impropers.constBegin(); it != amber_impropers.constEnd(); ++it)
     {
         funcs.set(it.key(), it.value().first.toExpression(PHI));
     }
@@ -2048,9 +1991,8 @@ AmberParams &AmberParams::operator+=(const AmberParams &other)
 {
     if (not this->isCompatibleWith(other.info()) or propmap != other.propmap)
     {
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Cannot combine Amber parameters, as the two sets are incompatible!"),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot combine Amber parameters, as the two sets are incompatible!"), CODELOC);
     }
 
     if (not other.amber_charges.isEmpty())
@@ -2137,8 +2079,7 @@ AmberParams &AmberParams::operator+=(const AmberParams &other)
     }
     else if (not other.amber_dihedrals.isEmpty())
     {
-        for (auto it = other.amber_dihedrals.constBegin(); it != other.amber_dihedrals.constEnd();
-             ++it)
+        for (auto it = other.amber_dihedrals.constBegin(); it != other.amber_dihedrals.constEnd(); ++it)
         {
             amber_dihedrals.insert(it.key(), it.value());
         }
@@ -2150,8 +2091,7 @@ AmberParams &AmberParams::operator+=(const AmberParams &other)
     }
     else if (not other.amber_impropers.isEmpty())
     {
-        for (auto it = other.amber_impropers.constBegin(); it != other.amber_impropers.constEnd();
-             ++it)
+        for (auto it = other.amber_impropers.constBegin(); it != other.amber_impropers.constEnd(); ++it)
         {
             amber_impropers.insert(it.key(), it.value());
         }
@@ -2256,9 +2196,7 @@ AtomElements guessElements(const MoleculeInfoData &molinfo, bool *has_elements)
 }
 
 /** Construct the hash of bonds */
-void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs,
-                                    const MoleculeData &moldata,
-                                    const PropertyMap &map)
+void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map)
 {
     // get the set of all bond functions
     const auto potentials = funcs.potentials();
@@ -2268,29 +2206,26 @@ void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs,
     auto bonds_data = bonds.data();
 
     // convert each of these into an AmberBond
-    tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()),
-                      [&](const tbb::blocked_range<int> &r)
+    tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()), [&](const tbb::blocked_range<int> &r)
                       {
-                          for (int i = r.begin(); i < r.end(); ++i)
-                          {
-                              const auto potential = potentials.constData()[i];
+        for (int i = r.begin(); i < r.end(); ++i)
+        {
+            const auto potential = potentials.constData()[i];
 
-                              // convert the atom IDs into a canonical form
-                              BondID bond = this->convert(BondID(potential.atom0(), potential.atom1()));
+            // convert the atom IDs into a canonical form
+            BondID bond = this->convert(BondID(potential.atom0(), potential.atom1()));
 
-                              // does this bond involve hydrogen? - this relies on "AtomElements" being full
-                              bool contains_hydrogen = false;
+            // does this bond involve hydrogen? - this relies on "AtomElements" being full
+            bool contains_hydrogen = false;
 
-                              if (not amber_elements.isEmpty())
-                              {
-                                  contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() == 1) or
-                                                      (amber_elements.at(potential.atom1()).nProtons() == 1);
-                              }
+            if (not amber_elements.isEmpty())
+            {
+                contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() == 1) or
+                                    (amber_elements.at(potential.atom1()).nProtons() == 1);
+            }
 
-                              bonds_data[i] = std::make_tuple(bond, AmberBond(potential.function(), Symbol("r")),
-                                                              contains_hydrogen);
-                          }
-                      });
+            bonds_data[i] = std::make_tuple(bond, AmberBond(potential.function(), Symbol("r")), contains_hydrogen);
+        } });
 
     // finally add all of these into the amber_bonds hash
     amber_bonds.clear();
@@ -2313,9 +2248,7 @@ void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs,
 
         if (amberbond.k() != 0)
         {
-            amber_bonds.insert(std::get<0>(bonds_data[i]),
-                               qMakePair(amberbond,
-                                         std::get<2>(bonds_data[i])));
+            amber_bonds.insert(std::get<0>(bonds_data[i]), qMakePair(amberbond, std::get<2>(bonds_data[i])));
         }
         else if (keep_null_bonds)
         {
@@ -2323,16 +2256,13 @@ void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs,
             // to the current bond length
             const auto &bondid = std::get<0>(bonds_data[i]);
             double r0 = Bond(moldata, bondid).length(map).to(angstrom);
-            amber_bonds.insert(bondid,
-                               qMakePair(AmberBond(0, r0),
-                                         std::get<2>(bonds_data[i])));
+            amber_bonds.insert(bondid, qMakePair(AmberBond(0, r0), std::get<2>(bonds_data[i])));
         }
     }
 }
 
 /** Construct the hash of angles */
-void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs,
-                                     const MoleculeData &moldata,
+void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs, const MoleculeData &moldata,
                                      const PropertyMap &map)
 {
     // get the set of all angle functions
@@ -2343,33 +2273,28 @@ void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs,
     auto angles_data = angles.data();
 
     // convert each of these into an AmberAngle
-    tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()),
-                      [&](const tbb::blocked_range<int> &r)
+    tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()), [&](const tbb::blocked_range<int> &r)
                       {
-                          for (int i = r.begin(); i < r.end(); ++i)
-                          {
-                              const auto potential = potentials.constData()[i];
+        for (int i = r.begin(); i < r.end(); ++i)
+        {
+            const auto potential = potentials.constData()[i];
 
-                              // convert the atom IDs into a canonical form
-                              AngleID angle = this->convert(AngleID(potential.atom0(),
-                                                                    potential.atom1(),
-                                                                    potential.atom2()));
+            // convert the atom IDs into a canonical form
+            AngleID angle = this->convert(AngleID(potential.atom0(), potential.atom1(), potential.atom2()));
 
-                              // does this angle involve hydrogen? - this relies on "AtomElements" being full
-                              bool contains_hydrogen = false;
+            // does this angle involve hydrogen? - this relies on "AtomElements" being full
+            bool contains_hydrogen = false;
 
-                              if (not amber_elements.isEmpty())
-                              {
-                                  contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() < 2) or
-                                                      (amber_elements.at(potential.atom1()).nProtons() < 2) or
-                                                      (amber_elements.at(potential.atom2()).nProtons() < 2);
-                              }
+            if (not amber_elements.isEmpty())
+            {
+                contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() < 2) or
+                                    (amber_elements.at(potential.atom1()).nProtons() < 2) or
+                                    (amber_elements.at(potential.atom2()).nProtons() < 2);
+            }
 
-                              angles_data[i] = std::make_tuple(angle,
-                                                               AmberAngle(potential.function(), Symbol("theta")),
-                                                               contains_hydrogen);
-                          }
-                      });
+            angles_data[i] =
+                std::make_tuple(angle, AmberAngle(potential.function(), Symbol("theta")), contains_hydrogen);
+        } });
 
     // finally add all of these into the amber_angles hash
     amber_angles.clear();
@@ -2392,9 +2317,7 @@ void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs,
 
         if (amberangle.k() != 0)
         {
-            amber_angles.insert(std::get<0>(angles_data[i]),
-                                qMakePair(amberangle,
-                                          std::get<2>(angles_data[i])));
+            amber_angles.insert(std::get<0>(angles_data[i]), qMakePair(amberangle, std::get<2>(angles_data[i])));
         }
         else if (keep_null_angles)
         {
@@ -2402,16 +2325,13 @@ void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs,
             // to the current angle size
             const auto &angid = std::get<0>(angles_data[i]);
             double theta0 = Angle(moldata, angid).size(map).to(radians);
-            amber_angles.insert(angid,
-                                qMakePair(AmberAngle(0, theta0),
-                                          std::get<2>(angles_data[i])));
+            amber_angles.insert(angid, qMakePair(AmberAngle(0, theta0), std::get<2>(angles_data[i])));
         }
     }
 }
 
 /** Construct the hash of dihedrals */
-void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs,
-                                        const MoleculeData &moldata,
+void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata,
                                         const PropertyMap &map)
 {
     // get the set of all dihedral functions
@@ -2422,35 +2342,30 @@ void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs,
     auto dihedrals_data = dihedrals.data();
 
     // convert each of these into an AmberDihedral
-    tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()),
-                      [&](const tbb::blocked_range<int> &r)
+    tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()), [&](const tbb::blocked_range<int> &r)
                       {
-                          for (int i = r.begin(); i < r.end(); ++i)
-                          {
-                              const auto potential = potentials.constData()[i];
+        for (int i = r.begin(); i < r.end(); ++i)
+        {
+            const auto potential = potentials.constData()[i];
 
-                              // convert the atom IDs into a canonical form
-                              DihedralID dihedral = this->convert(DihedralID(potential.atom0(),
-                                                                             potential.atom1(),
-                                                                             potential.atom2(),
-                                                                             potential.atom3()));
+            // convert the atom IDs into a canonical form
+            DihedralID dihedral =
+                this->convert(DihedralID(potential.atom0(), potential.atom1(), potential.atom2(), potential.atom3()));
 
-                              // does this bond involve hydrogen? - this relies on "AtomElements" being full
-                              bool contains_hydrogen = false;
+            // does this bond involve hydrogen? - this relies on "AtomElements" being full
+            bool contains_hydrogen = false;
 
-                              if (not amber_elements.isEmpty())
-                              {
-                                  contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() < 2) or
-                                                      (amber_elements.at(potential.atom1()).nProtons() < 2) or
-                                                      (amber_elements.at(potential.atom2()).nProtons() < 2) or
-                                                      (amber_elements.at(potential.atom3()).nProtons() < 2);
-                              }
+            if (not amber_elements.isEmpty())
+            {
+                contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() < 2) or
+                                    (amber_elements.at(potential.atom1()).nProtons() < 2) or
+                                    (amber_elements.at(potential.atom2()).nProtons() < 2) or
+                                    (amber_elements.at(potential.atom3()).nProtons() < 2);
+            }
 
-                              dihedrals_data[i] = std::make_tuple(dihedral,
-                                                                  AmberDihedral(potential.function(), Symbol("phi")),
-                                                                  contains_hydrogen);
-                          }
-                      });
+            dihedrals_data[i] =
+                std::make_tuple(dihedral, AmberDihedral(potential.function(), Symbol("phi")), contains_hydrogen);
+        } });
 
     // finally add all of these into the amber_dihedrals hash
     amber_dihedrals.clear();
@@ -2459,14 +2374,12 @@ void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs,
     for (int i = 0; i < dihedrals.count(); ++i)
     {
         amber_dihedrals.insert(std::get<0>(dihedrals_data[i]),
-                               qMakePair(std::get<1>(dihedrals_data[i]),
-                                         std::get<2>(dihedrals_data[i])));
+                               qMakePair(std::get<1>(dihedrals_data[i]), std::get<2>(dihedrals_data[i])));
     }
 }
 
 /** Construct the hash of impropers */
-void AmberParams::getAmberImpropersFrom(const FourAtomFunctions &funcs,
-                                        const MoleculeData &moldata,
+void AmberParams::getAmberImpropersFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata,
                                         const PropertyMap &map)
 {
     // get the set of all improper functions
@@ -2477,35 +2390,30 @@ void AmberParams::getAmberImpropersFrom(const FourAtomFunctions &funcs,
     auto impropers_data = impropers.data();
 
     // convert each of these into an AmberDihedral
-    tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()),
-                      [&](const tbb::blocked_range<int> &r)
+    tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()), [&](const tbb::blocked_range<int> &r)
                       {
-                          for (int i = r.begin(); i < r.end(); ++i)
-                          {
-                              const auto potential = potentials.constData()[i];
+        for (int i = r.begin(); i < r.end(); ++i)
+        {
+            const auto potential = potentials.constData()[i];
 
-                              // convert the atom IDs into a canonical form
-                              ImproperID improper = this->convert(ImproperID(potential.atom0(),
-                                                                             potential.atom1(),
-                                                                             potential.atom2(),
-                                                                             potential.atom3()));
+            // convert the atom IDs into a canonical form
+            ImproperID improper =
+                this->convert(ImproperID(potential.atom0(), potential.atom1(), potential.atom2(), potential.atom3()));
 
-                              // does this bond involve hydrogen? - this relies on "AtomElements" being full
-                              bool contains_hydrogen = false;
+            // does this bond involve hydrogen? - this relies on "AtomElements" being full
+            bool contains_hydrogen = false;
 
-                              if (not amber_elements.isEmpty())
-                              {
-                                  contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() < 2) or
-                                                      (amber_elements.at(potential.atom1()).nProtons() < 2) or
-                                                      (amber_elements.at(potential.atom2()).nProtons() < 2) or
-                                                      (amber_elements.at(potential.atom3()).nProtons() < 2);
-                              }
+            if (not amber_elements.isEmpty())
+            {
+                contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() < 2) or
+                                    (amber_elements.at(potential.atom1()).nProtons() < 2) or
+                                    (amber_elements.at(potential.atom2()).nProtons() < 2) or
+                                    (amber_elements.at(potential.atom3()).nProtons() < 2);
+            }
 
-                              impropers_data[i] = std::make_tuple(improper,
-                                                                  AmberDihedral(potential.function(), Symbol("phi")),
-                                                                  contains_hydrogen);
-                          }
-                      });
+            impropers_data[i] =
+                std::make_tuple(improper, AmberDihedral(potential.function(), Symbol("phi")), contains_hydrogen);
+        } });
 
     // finally add all of these into the amber_dihedrals hash
     amber_impropers.clear();
@@ -2514,14 +2422,12 @@ void AmberParams::getAmberImpropersFrom(const FourAtomFunctions &funcs,
     for (int i = 0; i < impropers.count(); ++i)
     {
         amber_impropers.insert(std::get<0>(impropers_data[i]),
-                               qMakePair(std::get<1>(impropers_data[i]),
-                                         std::get<2>(impropers_data[i])));
+                               qMakePair(std::get<1>(impropers_data[i]), std::get<2>(impropers_data[i])));
     }
 }
 
 /** Construct the excluded atom set and 14 NB parameters */
-void AmberParams::getAmberNBsFrom(const CLJNBPairs &nbpairs,
-                                  const FourAtomFunctions &dihedrals)
+void AmberParams::getAmberNBsFrom(const CLJNBPairs &nbpairs, const FourAtomFunctions &dihedrals)
 {
     // first, copy in the CLJNBPairs from the molecule
     exc_atoms = nbpairs;
@@ -2539,8 +2445,7 @@ void AmberParams::getAmberNBsFrom(const CLJNBPairs &nbpairs,
         const auto potential = potentials.constData()[i];
 
         // convert the atom IDs into a canonical form
-        BondID nb14pair = this->convert(BondID(potential.atom0(),
-                                               potential.atom3()));
+        BondID nb14pair = this->convert(BondID(potential.atom0(), potential.atom3()));
 
         const auto molinfo = info();
 
@@ -2597,8 +2502,7 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
         if (not has_ambertypes)
         {
             // look for the atomtypes property
-            amber_types = getProperty<AtomStringProperty>(map["atomtype"], moldata,
-                                                          &has_ambertypes);
+            amber_types = getProperty<AtomStringProperty>(map["atomtype"], moldata, &has_ambertypes);
         }
     }
 
@@ -2622,17 +2526,17 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
     {
         // it is not possible to create the parameter object if we don't have
         // these atom-based parameters
-        throw SireBase::missing_property(QObject::tr(
-                                             "Cannot create an AmberParams object for molecule %1 as it is missing "
-                                             "necessary atom based properties: has_charges = %2, has_ljs = %3, "
-                                             "has_masses = %4, has_elements = %5, has_ambertypes = %6.")
-                                             .arg(Molecule(moldata).toString())
-                                             .arg(has_charges)
-                                             .arg(has_ljs)
-                                             .arg(has_masses)
-                                             .arg(has_elements)
-                                             .arg(has_ambertypes),
-                                         CODELOC);
+        throw SireBase::missing_property(
+            QObject::tr("Cannot create an AmberParams object for molecule %1 as it is missing "
+                        "necessary atom based properties: has_charges = %2, has_ljs = %3, "
+                        "has_masses = %4, has_elements = %5, has_ambertypes = %6.")
+                .arg(Molecule(moldata).toString())
+                .arg(has_charges)
+                .arg(has_ljs)
+                .arg(has_masses)
+                .arg(has_elements)
+                .arg(has_ambertypes),
+            CODELOC);
     }
 
     // now see about the optional born radii and screening parameters
@@ -2640,17 +2544,14 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
 
     born_radii = getProperty<AtomRadii>(map["gb_radii"], moldata, &has_radii);
     amber_screens = getProperty<AtomFloatProperty>(map["gb_screening"], moldata, &has_screening);
-    amber_treechains = getProperty<AtomStringProperty>(map["treechain"],
-                                                       moldata, &has_treechains);
+    amber_treechains = getProperty<AtomStringProperty>(map["treechain"], moldata, &has_treechains);
 
     if (has_radii)
     {
         // see if there is a label for the source of the GB parameters
         bool has_source;
 
-        radius_set = getProperty<StringProperty>(map["gb_radius_set"], moldata,
-                                                 &has_source)
-                         .value();
+        radius_set = getProperty<StringProperty>(map["gb_radius_set"], moldata, &has_source).value();
 
         if (not has_source)
         {
@@ -2668,12 +2569,9 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
     const auto bonds = getProperty<TwoAtomFunctions>(map["bond"], moldata, &has_bonds);
     const auto ub_bonds = getProperty<TwoAtomFunctions>(map["urey_bradley"], moldata, &has_ubs);
     const auto angles = getProperty<ThreeAtomFunctions>(map["angle"], moldata, &has_angles);
-    const auto dihedrals = getProperty<FourAtomFunctions>(map["dihedral"],
-                                                          moldata, &has_dihedrals);
-    const auto impropers = getProperty<FourAtomFunctions>(map["improper"],
-                                                          moldata, &has_impropers);
-    const auto nbpairs = getProperty<CLJNBPairs>(map["intrascale"],
-                                                 moldata, &has_nbpairs);
+    const auto dihedrals = getProperty<FourAtomFunctions>(map["dihedral"], moldata, &has_dihedrals);
+    const auto impropers = getProperty<FourAtomFunctions>(map["improper"], moldata, &has_impropers);
+    const auto nbpairs = getProperty<CLJNBPairs>(map["intrascale"], moldata, &has_nbpairs);
 
     QVector<std::function<void()>> nb_functions;
 
@@ -2720,9 +2618,8 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
 
     if (not errors.isEmpty())
     {
-        throw SireError::io_error(QObject::tr(
-                                      "Problem creating the AmberParams object for molecule %1 : %2. "
-                                      "Errors include:\n%3")
+        throw SireError::io_error(QObject::tr("Problem creating the AmberParams object for molecule %1 : %2. "
+                                              "Errors include:\n%3")
                                       .arg(moldata.name().value())
                                       .arg(moldata.number().value())
                                       .arg(errors.join("\n")),
@@ -2747,8 +2644,7 @@ void AmberParams::_pvt_updateFrom(const MoleculeData &moldata)
     this->_pvt_createFrom(moldata);
 }
 
-PropertyPtr AmberParams::_pvt_makeCompatibleWith(const MoleculeInfoData &newinfo,
-                                                 const AtomMatcher &atommatcher) const
+PropertyPtr AmberParams::_pvt_makeCompatibleWith(const MoleculeInfoData &newinfo, const AtomMatcher &atommatcher) const
 {
     try
     {

@@ -36,73 +36,73 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class MolNum;
+    class MolNum;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MolNum&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MolNum&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MolNum &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MolNum &);
 
 namespace SireMol
 {
 
-/** This ID number is used to identify a Molecule by
-    a unique, program-supplied ID number
+    /** This ID number is used to identify a Molecule by
+        a unique, program-supplied ID number
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MolNum : public SireID::Number, public MolID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MolNum&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MolNum&);
-
-public:
-    MolNum();
-    explicit MolNum(quint32 num);
-
-    MolNum(const MolNum &other);
-
-    ~MolNum();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MolNum : public SireID::Number, public MolID
     {
-        return MolNum::typeName();
-    }
 
-    MolNum* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MolNum &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MolNum &);
 
-    static MolNum getUniqueNumber();
+    public:
+        MolNum();
+        explicit MolNum(quint32 num);
 
-    bool isNull() const;
+        MolNum(const MolNum &other);
 
-    uint hash() const;
+        ~MolNum();
 
-    QString toString() const;
+        static const char *typeName();
 
-    MolNum& operator=(const MolNum &other);
+        const char *what() const
+        {
+            return MolNum::typeName();
+        }
 
-    bool operator==(const SireID::ID &other) const;
+        MolNum *clone() const;
 
-    bool operator==(const MolNum &other) const;
-    bool operator!=(const MolNum &other) const;
+        static MolNum getUniqueNumber();
 
-    bool operator<(const MolNum &other) const;
-    bool operator<=(const MolNum &other) const;
-    bool operator>(const MolNum &other) const;
-    bool operator>=(const MolNum &other) const;
+        bool isNull() const;
 
-    QList<MolNum> map(const Molecules &molecules) const;
-    QList<MolNum> map(const MoleculeGroup&) const;
-    QList<MolNum> map(const MolGroupsBase&) const;
-};
+        uint hash() const;
 
-}
+        QString toString() const;
+
+        MolNum &operator=(const MolNum &other);
+
+        bool operator==(const SireID::ID &other) const;
+
+        bool operator==(const MolNum &other) const;
+        bool operator!=(const MolNum &other) const;
+
+        bool operator<(const MolNum &other) const;
+        bool operator<=(const MolNum &other) const;
+        bool operator>(const MolNum &other) const;
+        bool operator>=(const MolNum &other) const;
+
+        QList<MolNum> map(const Molecules &molecules) const;
+        QList<MolNum> map(const MoleculeGroup &) const;
+        QList<MolNum> map(const MolGroupsBase &) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::MolNum);
 
-SIRE_EXPOSE_CLASS( SireMol::MolNum )
+SIRE_EXPOSE_CLASS(SireMol::MolNum)
 
 SIRE_END_HEADER
 

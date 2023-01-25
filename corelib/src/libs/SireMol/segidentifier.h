@@ -34,83 +34,83 @@
 
 namespace SireMol
 {
-class SegIdentifier;
+    class SegIdentifier;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::SegIdentifier&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::SegIdentifier&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::SegIdentifier &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::SegIdentifier &);
 
 namespace SireMol
 {
 
-class SegIdx;
+    class SegIdx;
 
-/** This is the polymorphic holder of all Segment IDs */
-class SIREMOL_EXPORT SegIdentifier : public SegID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const SegIdentifier&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SegIdentifier&);
-
-public:
-    SegIdentifier();
-    SegIdentifier(const SegID &segid);
-    SegIdentifier(const SegIdentifier &other);
-
-    ~SegIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+    /** This is the polymorphic holder of all Segment IDs */
+    class SIREMOL_EXPORT SegIdentifier : public SegID
     {
-        return SegIdentifier::typeName();
+
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const SegIdentifier &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, SegIdentifier &);
+
+    public:
+        SegIdentifier();
+        SegIdentifier(const SegID &segid);
+        SegIdentifier(const SegIdentifier &other);
+
+        ~SegIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return SegIdentifier::typeName();
+        }
+
+        SegIdentifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const SegID &base() const;
+
+        SegIdentifier &operator=(const SegIdentifier &other);
+        SegIdentifier &operator=(const SegID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const SegIdentifier &other) const;
+        bool operator!=(const SegIdentifier &other) const;
+
+        bool operator==(const SegID &other) const;
+        bool operator!=(const SegID &other) const;
+
+        QList<SegIdx> map(const MolInfo &molinfo) const;
+
+    private:
+        /** Pointer to the SegID */
+        boost::shared_ptr<SegID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const SegIdentifier &segid)
+    {
+        return segid.hash();
     }
 
-    SegIdentifier* clone() const;
+} // namespace SireMol
 
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const SegID& base() const;
-
-    SegIdentifier& operator=(const SegIdentifier &other);
-    SegIdentifier& operator=(const SegID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const SegIdentifier &other) const;
-    bool operator!=(const SegIdentifier &other) const;
-
-    bool operator==(const SegID &other) const;
-    bool operator!=(const SegID &other) const;
-
-    QList<SegIdx> map(const MolInfo &molinfo) const;
-
-private:
-    /** Pointer to the SegID */
-    boost::shared_ptr<SegID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const SegIdentifier &segid)
-{
-    return segid.hash();
-}
-
-}
-
-#include "segidx.h"
 #include "atomidx.h"
+#include "segidx.h"
 
-Q_DECLARE_METATYPE( SireID::Specify<SireMol::SegID> );
-Q_DECLARE_METATYPE( SireMol::AtomsIn<SireMol::SegID> );
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireMol::SegID> );
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireMol::SegID> );
-Q_DECLARE_METATYPE( SireID::MatchAll<SireMol::SegID> );
-Q_DECLARE_METATYPE( SireID::InvertMatch<SireMol::SegID> );
+Q_DECLARE_METATYPE(SireID::Specify<SireMol::SegID>);
+Q_DECLARE_METATYPE(SireMol::AtomsIn<SireMol::SegID>);
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireMol::SegID>);
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireMol::SegID>);
+Q_DECLARE_METATYPE(SireID::MatchAll<SireMol::SegID>);
+Q_DECLARE_METATYPE(SireID::InvertMatch<SireMol::SegID>);
 
 Q_DECLARE_METATYPE(SireMol::SegIdentifier);
 

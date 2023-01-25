@@ -28,8 +28,8 @@
 #include "titrationmove.h"
 #include "titrator.h"
 
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
+#include "SireUnits/units.h"
 
 #include "SireSystem/system.h"
 
@@ -50,7 +50,7 @@ QDataStream &operator<<(QDataStream &ds, const TitrationMove &move)
 {
     writeHeader(ds, r_titrationmove, 1);
 
-    ds << static_cast<const MonteCarlo&>(move);
+    ds << static_cast<const MonteCarlo &>(move);
 
     return ds;
 }
@@ -61,7 +61,7 @@ QDataStream &operator>>(QDataStream &ds, TitrationMove &move)
 
     if (v == 1)
     {
-        ds >> static_cast<MonteCarlo&>(move);
+        ds >> static_cast<MonteCarlo &>(move);
     }
     else
         throw version_error(v, "1", r_titrationmove, CODELOC);
@@ -70,37 +70,38 @@ QDataStream &operator>>(QDataStream &ds, TitrationMove &move)
 }
 
 /** Null constructor */
-TitrationMove::TitrationMove() : ConcreteProperty<TitrationMove,MonteCarlo>()
+TitrationMove::TitrationMove() : ConcreteProperty<TitrationMove, MonteCarlo>()
 {
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
 }
 
 /** Copy constructor */
-TitrationMove::TitrationMove(const TitrationMove &other)
-              : ConcreteProperty<TitrationMove,MonteCarlo>(other)
-{}
+TitrationMove::TitrationMove(const TitrationMove &other) : ConcreteProperty<TitrationMove, MonteCarlo>(other)
+{
+}
 
 /** Destructor */
 TitrationMove::~TitrationMove()
-{}
+{
+}
 
 void TitrationMove::_pvt_setTemperature(const Temperature &temperature)
 {
-    MonteCarlo::setEnsemble( Ensemble::NVT(temperature) );
+    MonteCarlo::setEnsemble(Ensemble::NVT(temperature));
 }
 
-const char* TitrationMove::typeName()
+const char *TitrationMove::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<TitrationMove>() );
+    return QMetaType::typeName(qMetaTypeId<TitrationMove>());
 }
 
-const char* TitrationMove::what() const
+const char *TitrationMove::what() const
 {
     return TitrationMove::typeName();
 }
 
 /** Copy assignment operator */
-TitrationMove& TitrationMove::operator=(const TitrationMove &other)
+TitrationMove &TitrationMove::operator=(const TitrationMove &other)
 {
     if (this != &other)
     {
@@ -126,7 +127,8 @@ bool TitrationMove::operator!=(const TitrationMove &other) const
 QString TitrationMove::toString() const
 {
     return QObject::tr("TitrationMove( nAccept() == %1, nReject() == %2 )")
-                .arg(this->nAccepted()).arg(this->nRejected());
+        .arg(this->nAccepted())
+        .arg(this->nRejected());
 }
 
 /** Actually perform the move */
@@ -135,7 +137,7 @@ void TitrationMove::move(System &system, int nmoves, bool record_stats)
     if (nmoves <= 0)
         return;
 
-    //save our, and the system's, current state
+    // save our, and the system's, current state
     TitrationMove old_state(*this);
     System old_system_state(system);
 
@@ -143,54 +145,53 @@ void TitrationMove::move(System &system, int nmoves, bool record_stats)
     {
         const PropertyMap &map = Move::propertyMap();
 
-        //first, get hold of the titration property of the system. This provides
-        //all of the information about the titratable molecules, and the current
-        //state of all of the titratable molecules
-        Titrator titrator = system.property( map["titrator"] ).asA<Titrator>();
+        // first, get hold of the titration property of the system. This provides
+        // all of the information about the titratable molecules, and the current
+        // state of all of the titratable molecules
+        Titrator titrator = system.property(map["titrator"]).asA<Titrator>();
 
         if (titrator.nIons() == 0 and titrator.nNeutrals() == 0)
-            //there is nothing available to move
+            // there is nothing available to move
             return;
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
-            //get the old total energy of the system
-            double old_nrg = system.energy( this->energyComponent() );
+            // get the old total energy of the system
+            double old_nrg = system.energy(this->energyComponent());
 
-            //save the old system
+            // save the old system
             System old_system(system);
 
             double old_bias = 1;
             double new_bias = 1;
 
-            //now choose two random groups from the set of titratable groups
-            int ion_index = titrator.getIonIndex( generator().randInt(0, titrator.nIons()-1) );
-            int neutral_index = titrator.getNeutralIndex(
-                                            generator().randInt(0, titrator.nNeutrals()-1) );
+            // now choose two random groups from the set of titratable groups
+            int ion_index = titrator.getIonIndex(generator().randInt(0, titrator.nIons() - 1));
+            int neutral_index = titrator.getNeutralIndex(generator().randInt(0, titrator.nNeutrals() - 1));
 
-            //swap the charges of these two groups
+            // swap the charges of these two groups
             titrator.swapCharge(neutral_index, ion_index);
 
-            //apply the titrator to the system. This will update
-            //the charges of the titratable groups and will update
-            //the copy of titrator stored in the system. The return value
-            //is the change in the 'zero' energy caused by this change. This
-            //is used to account for changes in internal state caused by
-            //a titration, e.g. the intraresidue change from an aspartate
-            //to an aspartic acid is not accounted for only by the change
-            //in intramolecular energy from an MM forcefield
+            // apply the titrator to the system. This will update
+            // the charges of the titratable groups and will update
+            // the copy of titrator stored in the system. The return value
+            // is the change in the 'zero' energy caused by this change. This
+            // is used to account for changes in internal state caused by
+            // a titration, e.g. the intraresidue change from an aspartate
+            // to an aspartic acid is not accounted for only by the change
+            // in intramolecular energy from an MM forcefield
             double delta_zero = titrator.applyTo(system);
 
-            //calculate the energy of the system
-            double new_nrg = system.energy( this->energyComponent() );
+            // calculate the energy of the system
+            double new_nrg = system.energy(this->energyComponent());
 
-            //accept or reject the move based on the change of energy
-            //and the biasing factors
+            // accept or reject the move based on the change of energy
+            // and the biasing factors
             if (not this->test(new_nrg + delta_zero, old_nrg, new_bias, old_bias))
             {
-                //the move has been rejected - reset the state
+                // the move has been rejected - reset the state
                 system = old_system;
-                titrator = system.property( map["titrator"] ).asA<Titrator>();
+                titrator = system.property(map["titrator"]).asA<Titrator>();
             }
 
             if (record_stats)
@@ -199,7 +200,7 @@ void TitrationMove::move(System &system, int nmoves, bool record_stats)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         system = old_system_state;

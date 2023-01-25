@@ -32,27 +32,27 @@
 #include "SireBase/parallel.h"
 #include "SireBase/stringproperty.h"
 
-#include "SireCAS/trigfuncs.h"
 #include "SireCAS/sum.h"
+#include "SireCAS/trigfuncs.h"
 
 #include "SireError/errors.h"
 #include "SireIO/errors.h"
 
 #include "SireMM/amberparams.h"
 #include "SireMM/atomljs.h"
-#include "SireMM/internalff.h"
-#include "SireMM/twoatomfunctions.h"
-#include "SireMM/threeatomfunctions.h"
 #include "SireMM/fouratomfunctions.h"
+#include "SireMM/internalff.h"
+#include "SireMM/threeatomfunctions.h"
+#include "SireMM/twoatomfunctions.h"
 
 #include "SireMol/atomcharges.h"
 #include "SireMol/atomelements.h"
 #include "SireMol/atommasses.h"
 #include "SireMol/connectivity.h"
+#include "SireMol/core.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/trajectory.h"
-#include "SireMol/core.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -87,9 +87,8 @@ QDataStream &operator<<(QDataStream &ds, const PSFAtom &psfatom)
 
     SharedDataStream sds(ds);
 
-    sds << psfatom.index << psfatom.mol_idx << psfatom.number << psfatom.segment
-        << psfatom.res_num << psfatom.res_name << psfatom.name << psfatom.type
-        << psfatom.charge << psfatom.mass;
+    sds << psfatom.index << psfatom.mol_idx << psfatom.number << psfatom.segment << psfatom.res_num << psfatom.res_name
+        << psfatom.name << psfatom.type << psfatom.charge << psfatom.mass;
 
     return ds;
 }
@@ -102,9 +101,8 @@ QDataStream &operator>>(QDataStream &ds, PSFAtom &psfatom)
     {
         SharedDataStream sds(ds);
 
-        sds >> psfatom.index >> psfatom.mol_idx >> psfatom.number >> psfatom.segment
-            >> psfatom.res_num >> psfatom.res_name >> psfatom.name >> psfatom.type
-            >> psfatom.charge >> psfatom.mass;
+        sds >> psfatom.index >> psfatom.mol_idx >> psfatom.number >> psfatom.segment >> psfatom.res_num >>
+            psfatom.res_name >> psfatom.name >> psfatom.type >> psfatom.charge >> psfatom.mass;
     }
     else
         throw version_error(v, "1", r_psfatom, CODELOC);
@@ -143,11 +141,10 @@ QDataStream &operator<<(QDataStream &ds, const CharmmPSF &psf)
 {
     writeHeader(ds, r_psf, 1);
 
-    ds << psf.atoms << psf.bonds << psf.mol_bonds << psf.angles << psf.mol_angles
-       << psf.dihedrals << psf.mol_dihedrals << psf.impropers << psf.mol_impropers
-       << psf.nonbonded_exclusions << psf.mol_nonbonded_exclusions << psf.cross_terms
-       << psf.mol_cross_terms << psf.num_to_idx << psf.molecules << psf.charmm_params
-       << psf.box << psf.has_box << static_cast<const MoleculeParser&>(psf);
+    ds << psf.atoms << psf.bonds << psf.mol_bonds << psf.angles << psf.mol_angles << psf.dihedrals << psf.mol_dihedrals
+       << psf.impropers << psf.mol_impropers << psf.nonbonded_exclusions << psf.mol_nonbonded_exclusions
+       << psf.cross_terms << psf.mol_cross_terms << psf.num_to_idx << psf.molecules << psf.charmm_params << psf.box
+       << psf.has_box << static_cast<const MoleculeParser &>(psf);
 
     return ds;
 }
@@ -158,11 +155,10 @@ QDataStream &operator>>(QDataStream &ds, CharmmPSF &psf)
 
     if (v == 1)
     {
-        ds >> psf.atoms >> psf.bonds >> psf.mol_bonds >> psf.angles >> psf.mol_angles
-           >> psf.dihedrals >> psf.mol_dihedrals >> psf.impropers >> psf.mol_impropers
-           >> psf.nonbonded_exclusions >> psf.mol_nonbonded_exclusions >> psf.cross_terms
-           >> psf.mol_cross_terms >> psf.num_to_idx >> psf.molecules >> psf.charmm_params
-           >> psf.box >> psf.has_box >> static_cast<MoleculeParser&>(psf);
+        ds >> psf.atoms >> psf.bonds >> psf.mol_bonds >> psf.angles >> psf.mol_angles >> psf.dihedrals >>
+            psf.mol_dihedrals >> psf.impropers >> psf.mol_impropers >> psf.nonbonded_exclusions >>
+            psf.mol_nonbonded_exclusions >> psf.cross_terms >> psf.mol_cross_terms >> psf.num_to_idx >> psf.molecules >>
+            psf.charmm_params >> psf.box >> psf.has_box >> static_cast<MoleculeParser &>(psf);
     }
     else
         throw version_error(v, "1", r_psf, CODELOC);
@@ -171,28 +167,13 @@ QDataStream &operator>>(QDataStream &ds, CharmmPSF &psf)
 }
 
 /** Default constructor. */
-PSFAtom::PSFAtom() :
-    index(0),
-    mol_idx(0),
-    number(0),
-    res_num(0),
-    type("X"),
-    charge(0),
-    mass(0),
-    is_nb_excluded(false)
+PSFAtom::PSFAtom() : index(0), mol_idx(0), number(0), res_num(0), type("X"), charge(0), mass(0), is_nb_excluded(false)
 {
 }
 
 /** Constructor. */
-PSFAtom::PSFAtom(const QString &line, int index, QStringList &errors) :
-    index(index),
-    mol_idx(0),
-    number(0),
-    res_num(0),
-    type("X"),
-    charge(0),
-    mass(0),
-    is_nb_excluded(false)
+PSFAtom::PSFAtom(const QString &line, int index, QStringList &errors)
+    : index(index), mol_idx(0), number(0), res_num(0), type("X"), charge(0), mass(0), is_nb_excluded(false)
 {
     // Tokenize the line, splitting using a single whitespace character.
     QStringList data = line.simplified().split(QRegExp("\\s"));
@@ -201,8 +182,9 @@ PSFAtom::PSFAtom(const QString &line, int index, QStringList &errors) :
     if (data.count() < 8)
     {
         errors.append(QObject::tr("This doesn't look like a PSF atom "
-            "record! There should be at least 8 records, found %1: %2")
-            .arg(data.count()).arg(line));
+                                  "record! There should be at least 8 records, found %1: %2")
+                          .arg(data.count())
+                          .arg(line));
 
         return;
     }
@@ -214,7 +196,9 @@ PSFAtom::PSFAtom(const QString &line, int index, QStringList &errors) :
     if (not ok)
     {
         errors.append(QObject::tr("Cannot extract the ID number for the atom "
-            "from part (%1) of line '%2'").arg(data[0]).arg(line));
+                                  "from part (%1) of line '%2'")
+                          .arg(data[0])
+                          .arg(line));
 
         return;
     }
@@ -228,7 +212,9 @@ PSFAtom::PSFAtom(const QString &line, int index, QStringList &errors) :
     if (not ok)
     {
         errors.append(QObject::tr("Cannot extract the residue ID number for the atom "
-            "from part (%1) of line '%2'").arg(data[2]).arg(line));
+                                  "from part (%1) of line '%2'")
+                          .arg(data[2])
+                          .arg(line));
 
         return;
     }
@@ -248,7 +234,9 @@ PSFAtom::PSFAtom(const QString &line, int index, QStringList &errors) :
     if (not ok)
     {
         errors.append(QObject::tr("Cannot extract the atom charge "
-            "from part (%1) of line '%2'").arg(data[6]).arg(line));
+                                  "from part (%1) of line '%2'")
+                          .arg(data[6])
+                          .arg(line));
 
         return;
     }
@@ -259,31 +247,24 @@ PSFAtom::PSFAtom(const QString &line, int index, QStringList &errors) :
     if (not ok)
     {
         errors.append(QObject::tr("Cannot extract the atom mass "
-            "from part (%1) of line '%2'").arg(data[7]).arg(line));
+                                  "from part (%1) of line '%2'")
+                          .arg(data[7])
+                          .arg(line));
 
         return;
     }
 }
 
 /** Constructor. */
-PSFAtom::PSFAtom(const SireMol::Atom &atom, const QString &segment,
-    QStringList &errors, const PropertyMap &map) :
-    index(0),
-    mol_idx(0),
-    number(atom.number().value()),
-    segment(segment),
-    res_num(0),
-    name(atom.name().value().toUpper()),
-    type("X"),
-    charge(0),
-    mass(0),
-    is_nb_excluded(false)
+PSFAtom::PSFAtom(const SireMol::Atom &atom, const QString &segment, QStringList &errors, const PropertyMap &map)
+    : index(0), mol_idx(0), number(atom.number().value()), segment(segment), res_num(0),
+      name(atom.name().value().toUpper()), type("X"), charge(0), mass(0), is_nb_excluded(false)
 {
     // The atom is within a residue.
     if (atom.isWithinResidue())
     {
         res_name = atom.residue().name().value().left(4);
-        res_num  = atom.residue().number().value();
+        res_num = atom.residue().number().value();
     }
 
     // Extract the atom type.
@@ -329,9 +310,9 @@ QString PSFAtom::toPSFRecord() const
     return line;
 }
 
-const char* PSFAtom::typeName()
+const char *PSFAtom::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<PSFAtom>() );
+    return QMetaType::typeName(qMetaTypeId<PSFAtom>());
 }
 
 /** Get the atom index. */
@@ -435,7 +416,7 @@ CharmmParam::CharmmParam() : type(-1)
     @param is_xplor
         Whether this is an xplor format record.
  */
-CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, bool is_xplor)
+CharmmParam::CharmmParam(const QString &line, int type, QStringList &errors, bool is_xplor)
     : param_string(line), type(type)
 {
     // Tokenize the line.
@@ -450,8 +431,9 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
         if (data.count() < 4)
         {
             errors.append(QObject::tr("This doesn't look like a CHARMM bond "
-                "parameter record! There should be at least 4 entries, found %1: %2")
-                .arg(data.count()).arg(line));
+                                      "parameter record! There should be at least 4 entries, found %1: %2")
+                              .arg(data.count())
+                              .arg(line));
 
             return;
         }
@@ -469,8 +451,7 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
 
         if (not ok1 or not ok2)
         {
-            errors.append(QObject::tr("Could not read CHARMM bond parameter record! %1")
-                .arg(line));
+            errors.append(QObject::tr("Could not read CHARMM bond parameter record! %1").arg(line));
 
             return;
         }
@@ -487,8 +468,9 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
         if (data.count() < 5)
         {
             errors.append(QObject::tr("This doesn't look like a CHARMM angle "
-                "parameter record! There should be at least 5 entries, found %1: %2")
-                .arg(data.count()).arg(line));
+                                      "parameter record! There should be at least 5 entries, found %1: %2")
+                              .arg(data.count())
+                              .arg(line));
 
             return;
         }
@@ -507,8 +489,7 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
 
         if (not ok1 or not ok2)
         {
-            errors.append(QObject::tr("Could not read CHARMM angle parameter record! %1")
-                .arg(line));
+            errors.append(QObject::tr("Could not read CHARMM angle parameter record! %1").arg(line));
 
             return;
         }
@@ -536,8 +517,10 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
             if (not ok1 or not ok2)
             {
                 errors.append(QObject::tr("Could not read CHARMM Urey-Bradley angle "
-                    "parameters '%1' and '%2' from line '%3'")
-                    .arg(data[5]).arg(data[6]).arg(line));
+                                          "parameters '%1' and '%2' from line '%3'")
+                                  .arg(data[5])
+                                  .arg(data[6])
+                                  .arg(line));
 
                 return;
             }
@@ -555,8 +538,9 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
         if (data.count() < 7)
         {
             errors.append(QObject::tr("This doesn't look like a CHARMM dihedral "
-                "parameter record! There should be at least 7 entries, found %1: %2")
-                .arg(data.count()).arg(line));
+                                      "parameter record! There should be at least 7 entries, found %1: %2")
+                              .arg(data.count())
+                              .arg(line));
 
             return;
         }
@@ -577,8 +561,7 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
 
         if (not ok1 or not ok2 or not ok3)
         {
-            errors.append(QObject::tr("Could not read CHARMM dihedral parameter record! %1")
-                .arg(line));
+            errors.append(QObject::tr("Could not read CHARMM dihedral parameter record! %1").arg(line));
 
             return;
         }
@@ -596,8 +579,9 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
         if (data.count() < 7)
         {
             errors.append(QObject::tr("This doesn't look like a CHARMM improper "
-                "parameter record! There should be at least 6 entries, found %1: %2")
-                .arg(data.count()).arg(line));
+                                      "parameter record! There should be at least 6 entries, found %1: %2")
+                              .arg(data.count())
+                              .arg(line));
 
             return;
         }
@@ -618,8 +602,7 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
 
         if (not ok1 or not ok2 or not ok3)
         {
-            errors.append(QObject::tr("Could not read CHARMM improper parameter record! %1")
-                .arg(line));
+            errors.append(QObject::tr("Could not read CHARMM improper parameter record! %1").arg(line));
 
             return;
         }
@@ -634,14 +617,17 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
     else if (type == 4)
     {
         int min_records = 3;
-        if (not is_xplor) min_records = 4;
+        if (not is_xplor)
+            min_records = 4;
 
         // Check record count.
         if (data.count() < 3)
         {
             errors.append(QObject::tr("This doesn't look like a CHARMM non-bonded "
-                "parameter record! There should be at least %1 entries, found %2: %3")
-                .arg(min_records).arg(data.count()).arg(line));
+                                      "parameter record! There should be at least %1 entries, found %2: %3")
+                              .arg(min_records)
+                              .arg(data.count())
+                              .arg(line));
 
             return;
         }
@@ -667,8 +653,7 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
 
         if (not ok1 or not ok2)
         {
-            errors.append(QObject::tr("Could not read CHARMM non-bonded parameter record! %1")
-                .arg(line));
+            errors.append(QObject::tr("Could not read CHARMM non-bonded parameter record! %1").arg(line));
 
             return;
         }
@@ -706,8 +691,7 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
 
             if (not ok1 or not ok2)
             {
-                errors.append(QObject::tr("Could not read CHARMM non-bonded 1-4 parameter record! %1")
-                    .arg(line));
+                errors.append(QObject::tr("Could not read CHARMM non-bonded 1-4 parameter record! %1").arg(line));
 
                 return;
             }
@@ -722,7 +706,9 @@ CharmmParam::CharmmParam(const QString& line, int type, QStringList &errors, boo
     else
     {
         throw SireError::program_bug(QObject::tr("Unknown parameter type (%1). "
-            "Valid types are 0, 1, 2, 3, 4").arg(type), CODELOC);
+                                                 "Valid types are 0, 1, 2, 3, 4")
+                                         .arg(type),
+                                     CODELOC);
     }
 }
 
@@ -733,13 +719,13 @@ QString CharmmParam::getString() const
 }
 
 /** Return the atoms to which the parameters apply. */
-const QVector<QString>& CharmmParam::getAtoms() const
+const QVector<QString> &CharmmParam::getAtoms() const
 {
     return atoms;
 }
 
 /** Return the parameter terms. */
-const QVector<double>& CharmmParam::getParams() const
+const QVector<double> &CharmmParam::getParams() const
 {
     return params;
 }
@@ -750,61 +736,61 @@ qint64 CharmmParam::getType() const
     return type;
 }
 
-const char* CharmmParam::typeName()
+const char *CharmmParam::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CharmmParam>() );
+    return QMetaType::typeName(qMetaTypeId<CharmmParam>());
 }
 
 /** Constructor */
-CharmmPSF::CharmmPSF() :
-    ConcreteProperty<CharmmPSF,MoleculeParser>(), has_box(false)
-{}
+CharmmPSF::CharmmPSF() : ConcreteProperty<CharmmPSF, MoleculeParser>(), has_box(false)
+{
+}
 
 /** Construct to read in the data from the file called 'filename'. The
 passed property map can be used to pass extra parameters to control
 the parsing */
-CharmmPSF::CharmmPSF(const QString &filename, const PropertyMap &map) :
-    ConcreteProperty<CharmmPSF,MoleculeParser>(filename, map), has_box(false)
+CharmmPSF::CharmmPSF(const QString &filename, const PropertyMap &map)
+    : ConcreteProperty<CharmmPSF, MoleculeParser>(filename, map), has_box(false)
 {
-    //the file has been read into memory and is available via
-    //the MoleculeParser::lines() function.
+    // the file has been read into memory and is available via
+    // the MoleculeParser::lines() function.
 
-    //a parameter has also been read in MoleculeParser to say whether
-    //we are allowed to use multiple cores to parse the file, e.g.
-    //MoleculeParser::usesParallel() will be true
+    // a parameter has also been read in MoleculeParser to say whether
+    // we are allowed to use multiple cores to parse the file, e.g.
+    // MoleculeParser::usesParallel() will be true
 
-    //parse the data in the parse function
+    // parse the data in the parse function
     this->parseLines(map);
 
-    //now make sure that everything is correct with this object
+    // now make sure that everything is correct with this object
     this->assertSane();
 }
 
 /** Construct to read in the data from the passed text lines. The
     passed property map can be used to pass extra parameters to control
     the parsing */
-CharmmPSF::CharmmPSF(const QStringList &lines, const PropertyMap &map) :
-    ConcreteProperty<CharmmPSF,MoleculeParser>(lines, map), has_box(false)
+CharmmPSF::CharmmPSF(const QStringList &lines, const PropertyMap &map)
+    : ConcreteProperty<CharmmPSF, MoleculeParser>(lines, map), has_box(false)
 {
-    //the file has been read into memory and is available via
-    //the MoleculeParser::lines() function.
+    // the file has been read into memory and is available via
+    // the MoleculeParser::lines() function.
 
-    //a parameter has also been read in MoleculeParser to say whether
-    //we are allowed to use multiple cores to parse the file, e.g.
-    //MoleculeParser::usesParallel() will be true
+    // a parameter has also been read in MoleculeParser to say whether
+    // we are allowed to use multiple cores to parse the file, e.g.
+    // MoleculeParser::usesParallel() will be true
 
-    //parse the data in the parse function
+    // parse the data in the parse function
     this->parseLines(map);
 
-    //now make sure that everything is correct with this object
+    // now make sure that everything is correct with this object
     this->assertSane();
 }
 
 /** Construct this parser by extracting all necessary information from the
     passed SireSystem::System, looking for the properties that are specified
     in the passed property map */
-CharmmPSF::CharmmPSF(const SireSystem::System &system, const PropertyMap &map) :
-    ConcreteProperty<CharmmPSF,MoleculeParser>(map), has_box(false)
+CharmmPSF::CharmmPSF(const SireSystem::System &system, const PropertyMap &map)
+    : ConcreteProperty<CharmmPSF, MoleculeParser>(map), has_box(false)
 {
     // Get the MolNums of each molecule in the System - this returns the
     // numbers in MolIdx order.
@@ -828,26 +814,26 @@ CharmmPSF::CharmmPSF(const SireSystem::System &system, const PropertyMap &map) :
     QSet<QString> nonbonded_params;
 
     // Reconstruct the record data for each molecule.
-    for (int i=0; i<nmols; ++i)
+    for (int i = 0; i < nmols; ++i)
     {
         // Create local data objects.
         QVector<PSFAtom> local_atoms;
-        QVector<QVector<qint64> > local_bonds;
-        QVector<QVector<qint64> > local_angles;
-        QVector<QVector<qint64> > local_dihedrals;
-        QVector<QVector<qint64> > local_impropers;
-        QVector<QVector<qint64> > local_nonbonded;
+        QVector<QVector<qint64>> local_bonds;
+        QVector<QVector<qint64>> local_angles;
+        QVector<QVector<qint64>> local_dihedrals;
+        QVector<QVector<qint64>> local_impropers;
+        QVector<QVector<qint64>> local_nonbonded;
 
         // Parse the molecular system.
-        parseMolecule(i, system[molnums[i]].molecule(), local_atoms, local_bonds,
-            local_angles, local_dihedrals, local_impropers, local_nonbonded, bond_params,
-            angle_params, dihedral_params, improper_params, nonbonded_params, parse_warnings, map);
+        parseMolecule(i, system[molnums[i]].molecule(), local_atoms, local_bonds, local_angles, local_dihedrals,
+                      local_impropers, local_nonbonded, bond_params, angle_params, dihedral_params, improper_params,
+                      nonbonded_params, parse_warnings, map);
 
-        atoms                += local_atoms;
-        bonds                += local_bonds;
-        angles               += local_angles;
-        dihedrals            += local_dihedrals;
-        impropers            += local_impropers;
+        atoms += local_atoms;
+        bonds += local_bonds;
+        angles += local_angles;
+        dihedrals += local_dihedrals;
+        impropers += local_impropers;
         nonbonded_exclusions += local_nonbonded;
     }
 
@@ -856,8 +842,8 @@ CharmmPSF::CharmmPSF(const SireSystem::System &system, const PropertyMap &map) :
 
     // Convert the vector of records to a list.
     QStringList lines_list;
-	for (const auto &line : lines)
-		lines_list << line;
+    for (const auto &line : lines)
+        lines_list << line;
 
     // Extract the existing CHARMM parameters.
     try
@@ -956,7 +942,7 @@ CharmmPSF::CharmmPSF(const SireSystem::System &system, const PropertyMap &map) :
             // Note that the non-bonded parameters are output in sorted order, i.e.
             // they aren't grouped into sections as they are in the original forcefield file.
             charmm_params.append("NONBONDED nbxmod  5 atom cdiel shift vatom vdistance vswitch -");
-			charmm_params.append("cutnb 14.0 ctofnb 12.0 ctonnb 10.0 eps 1.0 e14fac 1.0 wmin 1.5");
+            charmm_params.append("cutnb 14.0 ctofnb 12.0 ctonnb 10.0 eps 1.0 e14fac 1.0 wmin 1.5");
             charmm_params.append("                !adm jr., 5/08/91, suggested cutoff scheme");
             charmm_params.append("!");
             charmm_params.append("!V(Lennard-Jones) = Eps,i,j[(Rmin,i,j/ri,j)**12 - 2(Rmin,i,j/ri,j)**6]");
@@ -987,8 +973,8 @@ CharmmPSF::CharmmPSF(const SireSystem::System &system, const PropertyMap &map) :
             auto periodic_box = system.property(map["space"]).asA<PeriodicBox>();
             auto dimensions = periodic_box.dimensions();
 
-            box = TriclinicBox(dimensions.x(), dimensions.y(), dimensions.z(),
-                               90*degrees,   90*degrees,  90*degrees);
+            box =
+                TriclinicBox(dimensions.x(), dimensions.y(), dimensions.z(), 90 * degrees, 90 * degrees, 90 * degrees);
         }
 
         // TriclinicBox.
@@ -999,8 +985,9 @@ CharmmPSF::CharmmPSF(const SireSystem::System &system, const PropertyMap &map) :
 
         has_box = true;
     }
-    catch(...)
-    {}
+    catch (...)
+    {
+    }
 
     // Reparse the lines as a self-consistency check.
     CharmmPSF parsed(lines_list, map);
@@ -1019,35 +1006,24 @@ CharmmPSF::CharmmPSF(const SireSystem::System &system, const PropertyMap &map) :
 }
 
 /** Copy constructor */
-CharmmPSF::CharmmPSF(const CharmmPSF &other) :
-    ConcreteProperty<CharmmPSF,MoleculeParser>(other),
-    atoms(other.atoms),
-    bonds(other.bonds),
-    mol_bonds(other.mol_bonds),
-    angles(other.angles),
-    mol_angles(other.mol_angles),
-    dihedrals(other.dihedrals),
-    mol_dihedrals(other.mol_dihedrals),
-    impropers(other.impropers),
-    mol_impropers(other.mol_impropers),
-    nonbonded_exclusions(other.nonbonded_exclusions),
-    mol_nonbonded_exclusions(other.mol_nonbonded_exclusions),
-    cross_terms(other.cross_terms),
-    mol_cross_terms(other.mol_cross_terms),
-    num_to_idx(other.num_to_idx),
-    molecules(other.molecules),
-    charmm_params(other.charmm_params),
-    box(other.box),
-    has_box(other.has_box),
-    parse_warnings(other.parse_warnings)
-{}
+CharmmPSF::CharmmPSF(const CharmmPSF &other)
+    : ConcreteProperty<CharmmPSF, MoleculeParser>(other), atoms(other.atoms), bonds(other.bonds),
+      mol_bonds(other.mol_bonds), angles(other.angles), mol_angles(other.mol_angles), dihedrals(other.dihedrals),
+      mol_dihedrals(other.mol_dihedrals), impropers(other.impropers), mol_impropers(other.mol_impropers),
+      nonbonded_exclusions(other.nonbonded_exclusions), mol_nonbonded_exclusions(other.mol_nonbonded_exclusions),
+      cross_terms(other.cross_terms), mol_cross_terms(other.mol_cross_terms), num_to_idx(other.num_to_idx),
+      molecules(other.molecules), charmm_params(other.charmm_params), box(other.box), has_box(other.has_box),
+      parse_warnings(other.parse_warnings)
+{
+}
 
 /** Destructor */
 CharmmPSF::~CharmmPSF()
-{}
+{
+}
 
 /** Copy assignment operator */
-CharmmPSF& CharmmPSF::operator=(const CharmmPSF &other)
+CharmmPSF &CharmmPSF::operator=(const CharmmPSF &other)
 {
     if (this != &other)
     {
@@ -1090,13 +1066,13 @@ bool CharmmPSF::operator!=(const CharmmPSF &other) const
 }
 
 /** Return the C++ name for this class */
-const char* CharmmPSF::typeName()
+const char *CharmmPSF::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CharmmPSF>() );
+    return QMetaType::typeName(qMetaTypeId<CharmmPSF>());
 }
 
 /** Return the C++ name for this class */
-const char* CharmmPSF::what() const
+const char *CharmmPSF::what() const
 {
     return CharmmPSF::typeName();
 }
@@ -1113,26 +1089,23 @@ bool CharmmPSF::isFrame() const
 
 /** Return the parser that has been constructed by reading in the passed
     file using the passed properties */
-MoleculeParserPtr CharmmPSF::construct(const QString &filename,
-                                  const PropertyMap &map) const
+MoleculeParserPtr CharmmPSF::construct(const QString &filename, const PropertyMap &map) const
 {
-    return CharmmPSF(filename,map);
+    return CharmmPSF(filename, map);
 }
 
 /** Return the parser that has been constructed by reading in the passed
     text lines using the passed properties */
-MoleculeParserPtr CharmmPSF::construct(const QStringList &lines,
-                                  const PropertyMap &map) const
+MoleculeParserPtr CharmmPSF::construct(const QStringList &lines, const PropertyMap &map) const
 {
-    return CharmmPSF(lines,map);
+    return CharmmPSF(lines, map);
 }
 
 /** Return the parser that has been constructed by extract all necessary
     data from the passed SireSystem::System using the specified properties */
-MoleculeParserPtr CharmmPSF::construct(const SireSystem::System &system,
-                                  const PropertyMap &map) const
+MoleculeParserPtr CharmmPSF::construct(const SireSystem::System &system, const PropertyMap &map) const
 {
-    return CharmmPSF(system,map);
+    return CharmmPSF(system, map);
 }
 
 /** Return a string representation of this parser */
@@ -1143,10 +1116,16 @@ QString CharmmPSF::toString() const
     else
     {
         return QObject::tr("CharmmPSF( nMolecules() = %1, nAtoms() = %2, "
-            "nBonds() = %3, nAngles() = %4, nDihedrals() = %5, "
-            "nImpropers() = %6, nNonBondedExclusions() = %7, nCrossTerms() = %8 )")
-            .arg(nMolecules()).arg(nAtoms()).arg(nBonds()).arg(nAngles()).arg(nDihedrals())
-            .arg(nImpropers()).arg(nNonBondedExclusions()).arg(nCrossTerms());
+                           "nBonds() = %3, nAngles() = %4, nDihedrals() = %5, "
+                           "nImpropers() = %6, nNonBondedExclusions() = %7, nCrossTerms() = %8 )")
+            .arg(nMolecules())
+            .arg(nAtoms())
+            .arg(nBonds())
+            .arg(nAngles())
+            .arg(nDihedrals())
+            .arg(nImpropers())
+            .arg(nNonBondedExclusions())
+            .arg(nCrossTerms());
     }
 }
 
@@ -1157,15 +1136,14 @@ QVector<QString> CharmmPSF::toLines() const
     // http://www.ks.uiuc.edu/Training/Tutorials/namd/namd-tutorial-win-html/node24.html
 
     // No records.
-    if ((nAtoms() + nBonds() + nAngles() + nDihedrals()
-        + nImpropers() + nNonBondedExclusions() + nCrossTerms()) == 0)
+    if ((nAtoms() + nBonds() + nAngles() + nDihedrals() + nImpropers() + nNonBondedExclusions() + nCrossTerms()) == 0)
     {
         return QVector<QString>();
     }
 
     // Helper function to reconstruct record lines.
-    auto generate_line = [](const QVector<QVector<qint64> > &data, int iline,
-        int num_lines, int num_records, int record_width)
+    auto generate_line = [](const QVector<QVector<qint64>> &data, int iline, int num_lines, int num_records,
+                            int record_width)
     {
         // The record line.
         QString line;
@@ -1174,7 +1152,8 @@ QVector<QString> CharmmPSF::toLines() const
         int num_cols = 8;
 
         // Triples have three entries per line, so 9 columns.
-        if (record_width == 3) num_cols = 9;
+        if (record_width == 3)
+            num_cols = 9;
 
         // Work out the number of records per line.
         int records_per_line = num_cols / record_width;
@@ -1185,14 +1164,14 @@ QVector<QString> CharmmPSF::toLines() const
         // Adjust the records per line if we're on the last record line and
         // the total number of records is not a multiple of the records per line.
         if (iline == (num_lines - 1))
-            records_per_line = num_records - records_per_line*(num_lines - 1);
+            records_per_line = num_records - records_per_line * (num_lines - 1);
 
         // Add each record to the line.
-        for (int i=0; i<records_per_line; ++i)
+        for (int i = 0; i < records_per_line; ++i)
         {
-            for (int j=0; j<record_width; j++)
+            for (int j = 0; j < record_width; j++)
             {
-                line.append(QString("%1").arg(data[start+i][j], 8));
+                line.append(QString("%1").arg(data[start + i][j], 8));
             }
         }
 
@@ -1208,7 +1187,7 @@ QVector<QString> CharmmPSF::toLines() const
     lines.append("");
     lines.append("       1 !NTITLE");
     lines.append(QString(" REMARKS DATE:%1    created by Sire")
-         .arg(QDateTime::currentDateTime().toString("dd-MMM-yy  hh:mm:ss")));
+                     .arg(QDateTime::currentDateTime().toString("dd-MMM-yy  hh:mm:ss")));
     lines.append("");
 
     // Add any atom records.
@@ -1221,20 +1200,18 @@ QVector<QString> CharmmPSF::toLines() const
 
         if (usesParallel())
         {
-            tbb::parallel_for(tbb::blocked_range<int>(0, num_records),
-                            [&](const tbb::blocked_range<int> &r)
-            {
-                for (int i=r.begin(); i<r.end(); ++i)
+            tbb::parallel_for(tbb::blocked_range<int>(0, num_records), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    record_lines[i+1] = atoms[i].toPSFRecord();
-                }
-            });
+                    record_lines[i + 1] = atoms[i].toPSFRecord();
+                } });
         }
         else
         {
-            for (int i=0; i<num_records; ++i)
+            for (int i = 0; i < num_records; ++i)
             {
-                record_lines[i+1] = atoms[i].toPSFRecord();
+                record_lines[i + 1] = atoms[i].toPSFRecord();
             }
         }
 
@@ -1248,27 +1225,25 @@ QVector<QString> CharmmPSF::toLines() const
         const int num_records = nBonds();
 
         // There are 4 bond records per line.
-        const int num_lines = qCeil(num_records/4.0);
+        const int num_lines = qCeil(num_records / 4.0);
 
         QVector<QString> record_lines(num_lines + 2);
         record_lines[0] = QString("%1 !NBOND: bonds").arg(num_records, 8);
 
         if (usesParallel())
         {
-            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                            [&](const tbb::blocked_range<int> &r)
-            {
-                for (int i=r.begin(); i<r.end(); ++i)
+            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    record_lines[i+1] = generate_line(bonds, i, num_lines, num_records, 2);
-                }
-            });
+                    record_lines[i + 1] = generate_line(bonds, i, num_lines, num_records, 2);
+                } });
         }
         else
         {
-            for (int i=0; i<num_lines; ++i)
+            for (int i = 0; i < num_lines; ++i)
             {
-                record_lines[i+1] = generate_line(bonds, i, num_lines, num_records, 2);
+                record_lines[i + 1] = generate_line(bonds, i, num_lines, num_records, 2);
             }
         }
 
@@ -1282,27 +1257,25 @@ QVector<QString> CharmmPSF::toLines() const
         const int num_records = nAngles();
 
         // There are 3 angle records per line.
-        const int num_lines = qCeil(num_records/3.0);
+        const int num_lines = qCeil(num_records / 3.0);
 
         QVector<QString> record_lines(num_lines + 2);
         record_lines[0] = QString("%1 !NTHETA: angles").arg(num_records, 8);
 
         if (usesParallel())
         {
-            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                            [&](const tbb::blocked_range<int> &r)
-            {
-                for (int i=r.begin(); i<r.end(); ++i)
+            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    record_lines[i+1] = generate_line(angles, i, num_lines, num_records, 3);
-                }
-            });
+                    record_lines[i + 1] = generate_line(angles, i, num_lines, num_records, 3);
+                } });
         }
         else
         {
-            for (int i=0; i<num_lines; ++i)
+            for (int i = 0; i < num_lines; ++i)
             {
-                record_lines[i+1] = generate_line(angles, i, num_lines, num_records, 3);
+                record_lines[i + 1] = generate_line(angles, i, num_lines, num_records, 3);
             }
         }
 
@@ -1316,27 +1289,25 @@ QVector<QString> CharmmPSF::toLines() const
         const int num_records = nDihedrals();
 
         // There are 2 dihedral records per line.
-        const int num_lines = qCeil(num_records/2.0);
+        const int num_lines = qCeil(num_records / 2.0);
 
         QVector<QString> record_lines(num_lines + 2);
         record_lines[0] = QString("%1 !NPHI: dihedrals").arg(num_records, 8);
 
         if (usesParallel())
         {
-            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                            [&](const tbb::blocked_range<int> &r)
-            {
-                for (int i=r.begin(); i<r.end(); ++i)
+            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    record_lines[i+1] = generate_line(dihedrals, i, num_lines, num_records, 4);
-                }
-            });
+                    record_lines[i + 1] = generate_line(dihedrals, i, num_lines, num_records, 4);
+                } });
         }
         else
         {
-            for (int i=0; i<num_lines; ++i)
+            for (int i = 0; i < num_lines; ++i)
             {
-                record_lines[i+1] = generate_line(dihedrals, i, num_lines, num_records, 4);
+                record_lines[i + 1] = generate_line(dihedrals, i, num_lines, num_records, 4);
             }
         }
 
@@ -1350,27 +1321,25 @@ QVector<QString> CharmmPSF::toLines() const
         const int num_records = nImpropers();
 
         // There are 2 improper records per line.
-        const int num_lines = qCeil(num_records/2.0);
+        const int num_lines = qCeil(num_records / 2.0);
 
         QVector<QString> record_lines(num_lines + 2);
         record_lines[0] = QString("%1 !NIMPHI: impropers").arg(num_records, 8);
 
         if (usesParallel())
         {
-            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                            [&](const tbb::blocked_range<int> &r)
-            {
-                for (int i=r.begin(); i<r.end(); ++i)
+            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    record_lines[i+1] = generate_line(impropers, i, num_lines, num_records, 4);
-                }
-            });
+                    record_lines[i + 1] = generate_line(impropers, i, num_lines, num_records, 4);
+                } });
         }
         else
         {
-            for (int i=0; i<num_lines; ++i)
+            for (int i = 0; i < num_lines; ++i)
             {
-                record_lines[i+1] = generate_line(impropers, i, num_lines, num_records, 4);
+                record_lines[i + 1] = generate_line(impropers, i, num_lines, num_records, 4);
             }
         }
 
@@ -1384,27 +1353,25 @@ QVector<QString> CharmmPSF::toLines() const
         const int num_records = nNonBondedExclusions();
 
         // There are 8 non-nonded exclusion records per line.
-        const int num_lines = qCeil(num_records/8.0);
+        const int num_lines = qCeil(num_records / 8.0);
 
         QVector<QString> record_lines(num_lines + 2);
         record_lines[0] = QString("%1 !NNB").arg(num_records, 8);
 
         if (usesParallel())
         {
-            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                            [&](const tbb::blocked_range<int> &r)
-            {
-                for (int i=r.begin(); i<r.end(); ++i)
+            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    record_lines[i+1] = generate_line(nonbonded_exclusions, i, num_lines, num_records, 1);
-                }
-            });
+                    record_lines[i + 1] = generate_line(nonbonded_exclusions, i, num_lines, num_records, 1);
+                } });
         }
         else
         {
-            for (int i=0; i<num_lines; ++i)
+            for (int i = 0; i < num_lines; ++i)
             {
-                record_lines[i+1] = generate_line(nonbonded_exclusions, i, num_lines, num_records, 1);
+                record_lines[i + 1] = generate_line(nonbonded_exclusions, i, num_lines, num_records, 1);
             }
         }
 
@@ -1418,27 +1385,25 @@ QVector<QString> CharmmPSF::toLines() const
         const int num_records = nCrossTerms();
 
         // There are 2 improper records per line.
-        const int num_lines = qCeil(num_records/2.0);
+        const int num_lines = qCeil(num_records / 2.0);
 
         QVector<QString> record_lines(num_lines + 2);
         record_lines[0] = QString("%1 !NCRTERM: cross-terms").arg(num_records, 8);
 
         if (usesParallel())
         {
-            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                            [&](const tbb::blocked_range<int> &r)
-            {
-                for (int i=r.begin(); i<r.end(); ++i)
+            tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    record_lines[i+1] = generate_line(cross_terms, i, num_lines, num_records, 4);
-                }
-            });
+                    record_lines[i + 1] = generate_line(cross_terms, i, num_lines, num_records, 4);
+                } });
         }
         else
         {
-            for (int i=0; i<num_lines; ++i)
+            for (int i = 0; i < num_lines; ++i)
             {
-                record_lines[i+1] = generate_line(cross_terms, i, num_lines, num_records, 4);
+                record_lines[i + 1] = generate_line(cross_terms, i, num_lines, num_records, 4);
             }
         }
 
@@ -1464,7 +1429,7 @@ QString CharmmPSF::formatDescription() const
 /** Return the suffixes that these files are normally associated with */
 QStringList CharmmPSF::formatSuffix() const
 {
-    static const QStringList suffixes = { "psf" };
+    static const QStringList suffixes = {"psf"};
     return suffixes;
 }
 
@@ -1562,7 +1527,7 @@ int CharmmPSF::nCrossTerms(int i) const
     should raise an exception if the parser is in an invalid state */
 void CharmmPSF::assertSane() const
 {
-    //check state, raise SireError::program_bug if we are in an invalid state
+    // check state, raise SireError::program_bug if we are in an invalid state
 }
 
 /** Internal function that is used to actually parse the data contained
@@ -1572,14 +1537,15 @@ void CharmmPSF::parseLines(const PropertyMap &map)
     int num_atoms = 0;
 
     // Helper function to parse record lines.
-    auto parse_line = [](const QString& line, QVector<QVector<qint64> > &data, int iline,
-        int num_lines, int num_records, int record_width, QStringList &errors)
+    auto parse_line = [](const QString &line, QVector<QVector<qint64>> &data, int iline, int num_lines, int num_records,
+                         int record_width, QStringList &errors)
     {
         // The default number of columns per line.
         int num_cols = 8;
 
         // Triples have three entries per line, so 9 columns.
-        if (record_width == 3) num_cols = 9;
+        if (record_width == 3)
+            num_cols = 9;
 
         // Work out the number of records per line.
         int records_per_line = num_cols / record_width;
@@ -1590,17 +1556,19 @@ void CharmmPSF::parseLines(const PropertyMap &map)
         // Adjust the records per line if we're on the last record line and
         // the total number of records is not a multiple of the records per line.
         if (iline == (num_lines - 1))
-            records_per_line = num_records - records_per_line*(num_lines - 1);
+            records_per_line = num_records - records_per_line * (num_lines - 1);
 
         // Tokenize the line, splitting using a single whitespace character.
         QStringList records = line.simplified().split(QRegExp("\\s"));
 
         // Check that the line has the right number of columns.
-        if (records.count() != (record_width*records_per_line))
+        if (records.count() != (record_width * records_per_line))
         {
             errors.append(QObject::tr("The number of records on the line is "
-                "incorrect. Expected %1, found %2: %3")
-                .arg(num_cols * record_width).arg(records.count()).arg(line));
+                                      "incorrect. Expected %1, found %2: %3")
+                              .arg(num_cols * record_width)
+                              .arg(records.count())
+                              .arg(line));
 
             return;
         }
@@ -1608,16 +1576,18 @@ void CharmmPSF::parseLines(const PropertyMap &map)
         bool ok;
 
         // Validate and store each record.
-        for (int i=0; i<records_per_line; ++i)
+        for (int i = 0; i < records_per_line; ++i)
         {
-            for (int j=0; j<record_width; j++)
+            for (int j = 0; j < record_width; j++)
             {
-                data[start+i][j] = records[i*record_width + j].toInt(&ok);
+                data[start + i][j] = records[i * record_width + j].toInt(&ok);
 
                 if (not ok)
                 {
                     errors.append(QObject::tr("Could not extract data record %1 "
-                        "from line '%2'").arg(records[i]).arg(line));
+                                              "from line '%2'")
+                                      .arg(records[i])
+                                      .arg(line));
 
                     return;
                 }
@@ -1626,7 +1596,7 @@ void CharmmPSF::parseLines(const PropertyMap &map)
     };
 
     // Loop through all lines in the file.
-    for (int iline=0; iline<lines().count(); ++iline)
+    for (int iline = 0; iline < lines().count(); ++iline)
     {
         // Store the line.
         const QString line = lines()[iline];
@@ -1644,15 +1614,16 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             if (not ok)
             {
                 parse_warnings.append(QObject::tr("Cannot extract number of atoms "
-                    "from part (%1) from line '%2'").arg(data.first()).arg(lines()[iline]));
+                                                  "from part (%1) from line '%2'")
+                                          .arg(data.first())
+                                          .arg(lines()[iline]));
 
                 return;
             }
 
             if (num_atoms == 0)
             {
-                parse_warnings.append(QObject::tr("The molecule contains no atoms!: %1")
-                    .arg(lines()[iline]));
+                parse_warnings.append(QObject::tr("The molecule contains no atoms!: %1").arg(lines()[iline]));
 
                 return;
             }
@@ -1666,16 +1637,15 @@ void CharmmPSF::parseLines(const PropertyMap &map)
 
                 QMutex mutex;
 
-                tbb::parallel_for(tbb::blocked_range<int>(0, num_atoms),
-                                [&](const tbb::blocked_range<int> &r)
-                {
+                tbb::parallel_for(tbb::blocked_range<int>(0, num_atoms), [&](const tbb::blocked_range<int> &r)
+                                  {
                     // Create local data objects.
                     QStringList local_errors;
 
-                    for (int i=r.begin(); i<r.end(); ++i)
+                    for (int i = r.begin(); i < r.end(); ++i)
                     {
                         // Parse the data from the atom record.
-                        atoms[i] = PSFAtom(lines()[iline+i], i, local_errors);
+                        atoms[i] = PSFAtom(lines()[iline + i], i, local_errors);
                     }
 
                     if (not local_errors.isEmpty())
@@ -1685,15 +1655,14 @@ void CharmmPSF::parseLines(const PropertyMap &map)
 
                         // Update the warning messages.
                         parse_warnings += local_errors;
-                    }
-                });
+                    } });
 
                 // Fast-forward the line index.
                 iline += (num_atoms - 1);
             }
             else
             {
-                for (int i=0; i<num_atoms; ++i)
+                for (int i = 0; i < num_atoms; ++i)
                 {
                     // Parse the data from the atom record.
                     atoms[i] = PSFAtom(lines()[++iline], i, parse_warnings);
@@ -1711,19 +1680,21 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             if (not ok)
             {
                 parse_warnings.append(QObject::tr("Cannot extract number of bonds "
-                    "from part (%1) from line '%2'").arg(data.first()).arg(lines()[iline]));
+                                                  "from part (%1) from line '%2'")
+                                          .arg(data.first())
+                                          .arg(lines()[iline]));
 
                 return;
             }
 
             // Resize data structures.
             bonds.resize(num_bonds);
-            for (int i=0; i<num_bonds; ++i)
+            for (int i = 0; i < num_bonds; ++i)
                 bonds[i].resize(2);
 
             // Work out the number of record lines.
             // There are 4 bond records per line.
-            const int num_lines = qCeil(num_bonds/4.0);
+            const int num_lines = qCeil(num_bonds / 4.0);
 
             ++iline;
 
@@ -1731,17 +1702,15 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             {
                 QMutex mutex;
 
-                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                                [&](const tbb::blocked_range<int> &r)
-                {
+                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                                  {
                     // Create local data objects.
                     QStringList local_errors;
 
-                    for (int i=r.begin(); i<r.end(); ++i)
+                    for (int i = r.begin(); i < r.end(); ++i)
                     {
                         // Parse a bond record line.
-                        parse_line(lines()[iline+i], bonds, i,
-                            num_lines, num_bonds, 2, local_errors);
+                        parse_line(lines()[iline + i], bonds, i, num_lines, num_bonds, 2, local_errors);
                     }
 
                     if (not local_errors.isEmpty())
@@ -1751,19 +1720,17 @@ void CharmmPSF::parseLines(const PropertyMap &map)
 
                         // Update the warning messages.
                         parse_warnings += local_errors;
-                    }
-                });
+                    } });
 
                 // Fast-forward the line index.
                 iline += (num_lines - 1);
             }
             else
             {
-                for (int i=0; i<num_lines; ++i)
+                for (int i = 0; i < num_lines; ++i)
                 {
                     // Parse a bond record line.
-                    parse_line(lines()[iline+i], bonds, i,
-                        num_lines, num_bonds, 2, parse_warnings);
+                    parse_line(lines()[iline + i], bonds, i, num_lines, num_bonds, 2, parse_warnings);
                 }
             }
         }
@@ -1778,19 +1745,21 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             if (not ok)
             {
                 parse_warnings.append(QObject::tr("Cannot extract number of angles "
-                    "from part (%1) from line '%2'").arg(data.first()).arg(lines()[iline]));
+                                                  "from part (%1) from line '%2'")
+                                          .arg(data.first())
+                                          .arg(lines()[iline]));
 
                 return;
             }
 
             // Resize data structures.
             angles.resize(num_angles);
-            for (int i=0; i<num_angles; ++i)
+            for (int i = 0; i < num_angles; ++i)
                 angles[i].resize(3);
 
             // Work out the number of record lines.
             // There are 3 angle records per line.
-            const int num_lines = qCeil(num_angles/3.0);
+            const int num_lines = qCeil(num_angles / 3.0);
 
             ++iline;
 
@@ -1798,17 +1767,15 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             {
                 QMutex mutex;
 
-                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                                [&](const tbb::blocked_range<int> &r)
-                {
+                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                                  {
                     // Create local data objects.
                     QStringList local_errors;
 
-                    for (int i=r.begin(); i<r.end(); ++i)
+                    for (int i = r.begin(); i < r.end(); ++i)
                     {
                         // Parse an angle record line.
-                        parse_line(lines()[iline+i], angles, i,
-                            num_lines, num_angles, 3, local_errors);
+                        parse_line(lines()[iline + i], angles, i, num_lines, num_angles, 3, local_errors);
                     }
 
                     if (not local_errors.isEmpty())
@@ -1818,19 +1785,17 @@ void CharmmPSF::parseLines(const PropertyMap &map)
 
                         // Update the warning messages.
                         parse_warnings += local_errors;
-                    }
-                });
+                    } });
 
                 // Fast-forward the line index.
                 iline += (num_lines - 1);
             }
             else
             {
-                for (int i=0; i<num_lines; ++i)
+                for (int i = 0; i < num_lines; ++i)
                 {
                     // Parse an angle record line.
-                    parse_line(lines()[iline+i], angles, i,
-                        num_lines, num_angles, 3, parse_warnings);
+                    parse_line(lines()[iline + i], angles, i, num_lines, num_angles, 3, parse_warnings);
                 }
             }
         }
@@ -1845,19 +1810,21 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             if (not ok)
             {
                 parse_warnings.append(QObject::tr("Cannot extract number of dihedrals "
-                    "from part (%1) from line '%2'").arg(data.first()).arg(lines()[iline]));
+                                                  "from part (%1) from line '%2'")
+                                          .arg(data.first())
+                                          .arg(lines()[iline]));
 
                 return;
             }
 
             // Resize data structures.
             dihedrals.resize(num_dihedrals);
-            for (int i=0; i<num_dihedrals; ++i)
+            for (int i = 0; i < num_dihedrals; ++i)
                 dihedrals[i].resize(4);
 
             // Work out the number of record lines.
             // There are 2 dihedral records per line.
-            const int num_lines = qCeil(num_dihedrals/2.0);
+            const int num_lines = qCeil(num_dihedrals / 2.0);
 
             ++iline;
 
@@ -1865,17 +1832,15 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             {
                 QMutex mutex;
 
-                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                                [&](const tbb::blocked_range<int> &r)
-                {
+                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                                  {
                     // Create local data objects.
                     QStringList local_errors;
 
-                    for (int i=r.begin(); i<r.end(); ++i)
+                    for (int i = r.begin(); i < r.end(); ++i)
                     {
                         // Parse a dihedral record line.
-                        parse_line(lines()[iline+i], dihedrals, i,
-                            num_lines, num_dihedrals, 4, local_errors);
+                        parse_line(lines()[iline + i], dihedrals, i, num_lines, num_dihedrals, 4, local_errors);
                     }
 
                     if (not local_errors.isEmpty())
@@ -1885,19 +1850,17 @@ void CharmmPSF::parseLines(const PropertyMap &map)
 
                         // Update the warning messages.
                         parse_warnings += local_errors;
-                    }
-                });
+                    } });
 
                 // Fast-forward the line index.
                 iline += (num_lines - 1);
             }
             else
             {
-                for (int i=0; i<num_lines; ++i)
+                for (int i = 0; i < num_lines; ++i)
                 {
                     // Parse a dihedral record line.
-                    parse_line(lines()[iline+i], dihedrals, i,
-                        num_lines, num_dihedrals, 4, parse_warnings);
+                    parse_line(lines()[iline + i], dihedrals, i, num_lines, num_dihedrals, 4, parse_warnings);
                 }
             }
         }
@@ -1912,19 +1875,21 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             if (not ok)
             {
                 parse_warnings.append(QObject::tr("Cannot extract number of impropers "
-                    "from part (%1) from line '%2'").arg(data.first()).arg(lines()[iline]));
+                                                  "from part (%1) from line '%2'")
+                                          .arg(data.first())
+                                          .arg(lines()[iline]));
 
                 return;
             }
 
             // Resize data structures.
             impropers.resize(num_impropers);
-            for (int i=0; i<num_impropers; ++i)
+            for (int i = 0; i < num_impropers; ++i)
                 impropers[i].resize(4);
 
             // Work out the number of record lines.
             // There are 2 improper records per line.
-            const int num_lines = qCeil(num_impropers/2.0);
+            const int num_lines = qCeil(num_impropers / 2.0);
 
             ++iline;
 
@@ -1932,17 +1897,15 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             {
                 QMutex mutex;
 
-                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                                [&](const tbb::blocked_range<int> &r)
-                {
+                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                                  {
                     // Create local data objects.
                     QStringList local_errors;
 
-                    for (int i=r.begin(); i<r.end(); ++i)
+                    for (int i = r.begin(); i < r.end(); ++i)
                     {
                         // Parse an improper record line.
-                        parse_line(lines()[iline+i], impropers, i,
-                            num_lines, num_impropers, 4, local_errors);
+                        parse_line(lines()[iline + i], impropers, i, num_lines, num_impropers, 4, local_errors);
                     }
 
                     if (not local_errors.isEmpty())
@@ -1952,19 +1915,17 @@ void CharmmPSF::parseLines(const PropertyMap &map)
 
                         // Update the warning messages.
                         parse_warnings += local_errors;
-                    }
-                });
+                    } });
 
                 // Fast-forward the line index.
                 iline += (num_lines - 1);
             }
             else
             {
-                for (int i=0; i<num_lines; ++i)
+                for (int i = 0; i < num_lines; ++i)
                 {
                     // Parse an improper record line.
-                    parse_line(lines()[iline+i], impropers, i,
-                        num_lines, num_impropers, 4, parse_warnings);
+                    parse_line(lines()[iline + i], impropers, i, num_lines, num_impropers, 4, parse_warnings);
                 }
             }
         }
@@ -1979,19 +1940,21 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             if (not ok)
             {
                 parse_warnings.append(QObject::tr("Cannot extract number of non-bonded exclusions "
-                    "from part (%1) from line '%2'").arg(data.first()).arg(lines()[iline]));
+                                                  "from part (%1) from line '%2'")
+                                          .arg(data.first())
+                                          .arg(lines()[iline]));
 
                 return;
             }
 
             // Resize data structures.
             nonbonded_exclusions.resize(num_exclusions);
-            for (int i=0; i<num_exclusions; ++i)
+            for (int i = 0; i < num_exclusions; ++i)
                 nonbonded_exclusions[i].resize(1);
 
             // Work out the number of record lines.
             // There are 8 non-bonded exclusion records per line.
-            const int num_lines = qCeil(num_exclusions/8.0);
+            const int num_lines = qCeil(num_exclusions / 8.0);
 
             ++iline;
 
@@ -1999,17 +1962,16 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             {
                 QMutex mutex;
 
-                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                                [&](const tbb::blocked_range<int> &r)
-                {
+                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                                  {
                     // Create local data objects.
                     QStringList local_errors;
 
-                    for (int i=r.begin(); i<r.end(); ++i)
+                    for (int i = r.begin(); i < r.end(); ++i)
                     {
                         // Parse an angle record line.
-                        parse_line(lines()[iline+i], nonbonded_exclusions, i,
-                            num_lines, num_exclusions, 8, local_errors);
+                        parse_line(lines()[iline + i], nonbonded_exclusions, i, num_lines, num_exclusions, 8,
+                                   local_errors);
                     }
 
                     if (not local_errors.isEmpty())
@@ -2019,19 +1981,18 @@ void CharmmPSF::parseLines(const PropertyMap &map)
 
                         // Update the warning messages.
                         parse_warnings += local_errors;
-                    }
-                });
+                    } });
 
                 // Fast-forward the line index.
                 iline += (num_lines - 1);
             }
             else
             {
-                for (int i=0; i<num_lines; ++i)
+                for (int i = 0; i < num_lines; ++i)
                 {
                     // Parse a non-bonded exclusion record line.
-                    parse_line(lines()[iline+i], nonbonded_exclusions, i,
-                        num_lines, num_exclusions, 8, parse_warnings);
+                    parse_line(lines()[iline + i], nonbonded_exclusions, i, num_lines, num_exclusions, 8,
+                               parse_warnings);
                 }
             }
         }
@@ -2046,19 +2007,21 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             if (not ok)
             {
                 parse_warnings.append(QObject::tr("Cannot extract number of cross terms "
-                    "from part (%1) from line '%2'").arg(data.first()).arg(lines()[iline]));
+                                                  "from part (%1) from line '%2'")
+                                          .arg(data.first())
+                                          .arg(lines()[iline]));
 
                 return;
             }
 
             // Resize data structures.
             cross_terms.resize(num_cross);
-            for (int i=0; i<num_cross; ++i)
+            for (int i = 0; i < num_cross; ++i)
                 cross_terms[i].resize(4);
 
             // Work out the number of record lines.
             // There are 2 cross term records per line.
-            const int num_lines = qCeil(num_cross/2.0);
+            const int num_lines = qCeil(num_cross / 2.0);
 
             ++iline;
 
@@ -2066,17 +2029,15 @@ void CharmmPSF::parseLines(const PropertyMap &map)
             {
                 QMutex mutex;
 
-                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines),
-                                [&](const tbb::blocked_range<int> &r)
-                {
+                tbb::parallel_for(tbb::blocked_range<int>(0, num_lines), [&](const tbb::blocked_range<int> &r)
+                                  {
                     // Create local data objects.
                     QStringList local_errors;
 
-                    for (int i=r.begin(); i<r.end(); ++i)
+                    for (int i = r.begin(); i < r.end(); ++i)
                     {
                         // Parse a cross-term record line.
-                        parse_line(lines()[iline+i], cross_terms, i,
-                            num_lines, num_cross, 4, local_errors);
+                        parse_line(lines()[iline + i], cross_terms, i, num_lines, num_cross, 4, local_errors);
                     }
 
                     if (not local_errors.isEmpty())
@@ -2086,19 +2047,17 @@ void CharmmPSF::parseLines(const PropertyMap &map)
 
                         // Update the warning messages.
                         parse_warnings += local_errors;
-                    }
-                });
+                    } });
 
                 // Fast-forward the line index.
                 iline += (num_lines - 1);
             }
             else
             {
-                for (int i=0; i<num_lines; ++i)
+                for (int i = 0; i < num_lines; ++i)
                 {
                     // Parse a cross-term record line.
-                    parse_line(lines()[iline+i], cross_terms, i,
-                        num_lines, num_cross, 4, parse_warnings);
+                    parse_line(lines()[iline + i], cross_terms, i, num_lines, num_cross, 4, parse_warnings);
                 }
             }
         }
@@ -2138,14 +2097,12 @@ void CharmmPSF::parseLines(const PropertyMap &map)
         @returns
             Whether the parameters are in CHARMM format.
  */
-bool CharmmPSF::parseParameters(
-    const QVector<QString> &parameter_lines,
-    QMultiHash<QString, CharmmParam> &bond_params,
-    QMultiHash<QString, CharmmParam> &angle_params,
-    QMultiHash<QString, CharmmParam> &dihedral_params,
-    QMultiHash<QString, CharmmParam> &improper_params,
-    QMultiHash<QString, CharmmParam> &nonbonded_params,
-    TriclinicBox &box, bool &has_box_params) const
+bool CharmmPSF::parseParameters(const QVector<QString> &parameter_lines, QMultiHash<QString, CharmmParam> &bond_params,
+                                QMultiHash<QString, CharmmParam> &angle_params,
+                                QMultiHash<QString, CharmmParam> &dihedral_params,
+                                QMultiHash<QString, CharmmParam> &improper_params,
+                                QMultiHash<QString, CharmmParam> &nonbonded_params, TriclinicBox &box,
+                                bool &has_box_params) const
 {
     /* CHARMM parameter files are split in sections for different record types,
        i.e. bonds, angles, etc., separated by blank lines.
@@ -2168,7 +2125,7 @@ bool CharmmPSF::parseParameters(
     bool is_charmm = false;
     bool is_xplor = false;
 
-    for (int i=0; i<parameter_lines.count(); ++i)
+    for (int i = 0; i < parameter_lines.count(); ++i)
     {
         // Extract the first word in the line.
         QStringList data = parameter_lines[i].simplified().split(QRegExp("\\s"));
@@ -2198,7 +2155,7 @@ bool CharmmPSF::parseParameters(
                 }
 
                 // Not a comment.
-                if (not (line[0] == '!'))
+                if (not(line[0] == '!'))
                 {
                     CharmmParam param(line, 0, errors);
                     bond_params.insert(generateKey(param.getAtoms(), 0), param);
@@ -2241,7 +2198,7 @@ bool CharmmPSF::parseParameters(
                 }
 
                 // Not a comment.
-                if (not (line[0] == '!'))
+                if (not(line[0] == '!'))
                 {
                     CharmmParam param(line, 1, errors);
                     angle_params.insert(generateKey(param.getAtoms(), 1), param);
@@ -2284,7 +2241,7 @@ bool CharmmPSF::parseParameters(
                 }
 
                 // Not a comment.
-                if (not (line[0] == '!'))
+                if (not(line[0] == '!'))
                 {
                     CharmmParam param(line, 2, errors);
                     dihedral_params.insert(generateKey(param.getAtoms(), 2), param);
@@ -2374,7 +2331,7 @@ bool CharmmPSF::parseParameters(
                 }
 
                 // Not a comment.
-                if (not (line[0] == '!'))
+                if (not(line[0] == '!'))
                 {
                     CharmmParam param(line, 3, errors);
                     improper_params.insert(generateKey(param.getAtoms(), 3), param);
@@ -2423,7 +2380,7 @@ bool CharmmPSF::parseParameters(
                         }
 
                         // Not a comment.
-                        if (not (line[0] == '!'))
+                        if (not(line[0] == '!'))
                         {
                             CharmmParam param(line, 4, errors);
                             nonbonded_params.insert(generateKey(param.getAtoms(), 4), param);
@@ -2474,19 +2431,15 @@ bool CharmmPSF::parseParameters(
                 double zy = data[8].toDouble(&ok_zy);
                 double zz = data[9].toDouble(&ok_zz);
 
-                if (not ok_xx or not ok_xy or not ok_xz or
-                    not ok_yx or not ok_yy or not ok_yz or
-                    not ok_zx or not ok_zy or not ok_zz)
+                if (not ok_xx or not ok_xy or not ok_xz or not ok_yx or not ok_yy or not ok_yz or not ok_zx or
+                    not ok_zy or not ok_zz)
                 {
-                    errors.append(QObject::tr("Could not read NAMD XSC record! %1")
-                        .arg(parameter_lines[i]));
+                    errors.append(QObject::tr("Could not read NAMD XSC record! %1").arg(parameter_lines[i]));
                 }
                 else
                 {
                     // Create a triclinic box object.
-                    box = TriclinicBox(Vector(xx, xy, xz),
-                                       Vector(yx, yy, yz),
-                                       Vector(zx, zy, zz));
+                    box = TriclinicBox(Vector(xx, xy, xz), Vector(yx, yy, yz), Vector(zx, zy, zz));
                     has_box_params = true;
                 }
             }
@@ -2497,13 +2450,15 @@ bool CharmmPSF::parseParameters(
     if (is_charmm & is_xplor)
     {
         errors.append(QObject::tr("The parameter file contains both CHARMM "
-            "and X-PLOR format records!"));
+                                  "and X-PLOR format records!"));
     }
 
     if (not errors.isEmpty())
     {
         throw SireIO::parse_error(QObject::tr("There were errors reading the CHARMM "
-          "parameter file:\n%1").arg(errors.join("\n\n")), CODELOC);
+                                              "parameter file:\n%1")
+                                      .arg(errors.join("\n\n")),
+                                  CODELOC);
     }
 
     return is_charmm;
@@ -2532,15 +2487,13 @@ bool CharmmPSF::parseParameters(
         @return
             The parameterised molecule.
  */
-SireMol::Molecule CharmmPSF::parameteriseMolecule(
-    int imol,
-    const SireMol::Molecule &sire_mol,
-    const QMultiHash<QString, CharmmParam> &bond_params,
-    const QMultiHash<QString, CharmmParam> &angle_params,
-    const QMultiHash<QString, CharmmParam> &dihedral_params,
-    const QMultiHash<QString, CharmmParam> &improper_params,
-    const QMultiHash<QString, CharmmParam> &nonbonded_params,
-    const PropertyMap &map) const
+SireMol::Molecule CharmmPSF::parameteriseMolecule(int imol, const SireMol::Molecule &sire_mol,
+                                                  const QMultiHash<QString, CharmmParam> &bond_params,
+                                                  const QMultiHash<QString, CharmmParam> &angle_params,
+                                                  const QMultiHash<QString, CharmmParam> &dihedral_params,
+                                                  const QMultiHash<QString, CharmmParam> &improper_params,
+                                                  const QMultiHash<QString, CharmmParam> &nonbonded_params,
+                                                  const PropertyMap &map) const
 {
     // Get an editable version of the molecule.
     MolEditor edit_mol = sire_mol.edit();
@@ -2552,24 +2505,24 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
     if (not sire_mol.hasProperty(map["atomtype"]))
     {
         throw SireError::program_bug(QObject::tr("The molecule is missing "
-            "property: \"atomtype\""), CODELOC);
+                                                 "property: \"atomtype\""),
+                                     CODELOC);
     }
 
     // Get the atom type property object.
     const auto &atom_types = sire_mol.property(map["atomtype"]).asA<AtomStringProperty>();
 
     // Symbols for the various molecular potentials.
-    const auto R     = InternalPotential::symbols().bond().r();
-    const auto R_UB  = InternalPotential::symbols().ureyBradley().r();
+    const auto R = InternalPotential::symbols().bond().r();
+    const auto R_UB = InternalPotential::symbols().ureyBradley().r();
     const auto Theta = InternalPotential::symbols().angle().theta();
-    const auto Phi   = InternalPotential::symbols().dihedral().phi();
+    const auto Phi = InternalPotential::symbols().dihedral().phi();
 
     // The molecule has bond connectivity information. Parameterise the bonds.
     if (sire_mol.hasProperty(map["connectivity"]))
     {
         // Get the atom connectivity object.
-        const auto &connectivity = sire_mol.property(map["connectivity"])
-                                           .asA<ConnectivityEditor>();
+        const auto &connectivity = sire_mol.property(map["connectivity"]).asA<ConnectivityEditor>();
 
         // Initialise the bond parameter object.
         TwoAtomFunctions bond_funcs(edit_mol);
@@ -2595,14 +2548,17 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
             if (matches.count() == 0)
             {
                 throw SireError::incompatible_error(QObject::tr("Missing bond parameters "
-                    "for atom types \'%1\' and \'%2\'").arg(atom0).arg(atom1), CODELOC);
+                                                                "for atom types \'%1\' and \'%2\'")
+                                                        .arg(atom0)
+                                                        .arg(atom1),
+                                                    CODELOC);
             }
 
             // Get the bond parameters.
             auto params = matches[0].getParams();
 
             // Create the expression for the bond function.
-            Expression func = params[0] * SireMaths::pow_2( R - params[1] );
+            Expression func = params[0] * SireMaths::pow_2(R - params[1]);
 
             // Don't include zero functions.
             if (func.toString() != "0")
@@ -2629,7 +2585,7 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
         bool has_ub = false;
 
         // Loop over all of the angles.
-        for (int i=0; i<nAngles(imol); ++i)
+        for (int i = 0; i < nAngles(imol); ++i)
         {
             // Get the angle index.
             const int idx = mol_angles[imol][i];
@@ -2640,9 +2596,7 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
             const int idx2 = num_to_idx[angles[idx][2]];
 
             // Create a vector of the atom types.
-            QVector<QString> angle_atoms({atoms[idx0].getType(),
-                                          atoms[idx1].getType(),
-                                          atoms[idx2].getType()});
+            QVector<QString> angle_atoms({atoms[idx0].getType(), atoms[idx1].getType(), atoms[idx2].getType()});
 
             // Find the parameters for the angle.
             auto matches = findParameters(angle_atoms, angle_params, 1);
@@ -2651,38 +2605,37 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
             if (matches.count() == 0)
             {
                 throw SireError::incompatible_error(QObject::tr("Missing angle parameters "
-                    "for atom types \'%1\', \'%2\', and \'%3\'")
-                    .arg(angle_atoms[0]).arg(angle_atoms[1]).arg(angle_atoms[2]), CODELOC);
+                                                                "for atom types \'%1\', \'%2\', and \'%3\'")
+                                                        .arg(angle_atoms[0])
+                                                        .arg(angle_atoms[1])
+                                                        .arg(angle_atoms[2]),
+                                                    CODELOC);
             }
 
             // Get the angle parameters.
             auto params = matches[0].getParams();
 
             // Create the expression for the angle function, converting the angle to radians.
-            Expression func = params[0] * SireMaths::pow_2( Theta - qDegreesToRadians(params[1]) );
+            Expression func = params[0] * SireMaths::pow_2(Theta - qDegreesToRadians(params[1]));
 
             // Don't include zero functions.
             if (func.toString() != "0")
             {
                 // Set the angle function parameter.
-                angle_funcs.set(AtomNum(atoms[idx0].getNumber()),
-                                AtomNum(atoms[idx1].getNumber()),
-                                AtomNum(atoms[idx2].getNumber()),
-                                func);
+                angle_funcs.set(AtomNum(atoms[idx0].getNumber()), AtomNum(atoms[idx1].getNumber()),
+                                AtomNum(atoms[idx2].getNumber()), func);
             }
 
             // Add a Urey-Bradley bond function.
             if (params.count() > 2)
             {
-                func = params[2] * SireMaths::pow_2( R_UB - params[3] );
+                func = params[2] * SireMaths::pow_2(R_UB - params[3]);
 
                 // Don't include zero functions.
                 if (func.toString() != "0")
                 {
                     // Set the Urey-Bradley function parameter.
-                    ub_funcs.set(AtomNum(atoms[idx0].getNumber()),
-                                 AtomNum(atoms[idx2].getNumber()),
-                                 func);
+                    ub_funcs.set(AtomNum(atoms[idx0].getNumber()), AtomNum(atoms[idx2].getNumber()), func);
 
                     // Flag that we've found Urey-Bradley parameters.
                     has_ub = true;
@@ -2707,7 +2660,7 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
         FourAtomFunctions dihedral_funcs(edit_mol);
 
         // Loop over all of the dihedrals.
-        for (int i=0; i<nDihedrals(imol); ++i)
+        for (int i = 0; i < nDihedrals(imol); ++i)
         {
             // Get the dihedral index.
             const int idx = mol_dihedrals[imol][i];
@@ -2719,10 +2672,8 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
             const int idx3 = num_to_idx[dihedrals[idx][3]];
 
             // Create a vector of the atom types.
-            QVector<QString> dihedral_atoms({atoms[idx0].getType(),
-                                             atoms[idx1].getType(),
-                                             atoms[idx2].getType(),
-                                             atoms[idx3].getType()});
+            QVector<QString> dihedral_atoms(
+                {atoms[idx0].getType(), atoms[idx1].getType(), atoms[idx2].getType(), atoms[idx3].getType()});
 
             // Find the parameters for the dihedral.
             auto matches = findParameters(dihedral_atoms, dihedral_params, 2);
@@ -2731,9 +2682,12 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
             if (matches.count() == 0)
             {
                 throw SireError::incompatible_error(QObject::tr("Missing dihedral parameters "
-                    "for atom types \'%1\', \'%2\', \'%3\', and \'%4\'")
-                    .arg(dihedral_atoms[0]).arg(dihedral_atoms[1]).arg(dihedral_atoms[2])
-                    .arg(dihedral_atoms[3]), CODELOC);
+                                                                "for atom types \'%1\', \'%2\', \'%3\', and \'%4\'")
+                                                        .arg(dihedral_atoms[0])
+                                                        .arg(dihedral_atoms[1])
+                                                        .arg(dihedral_atoms[2])
+                                                        .arg(dihedral_atoms[3]),
+                                                    CODELOC);
             }
 
             // A vector of dihedral periodicity values.
@@ -2752,7 +2706,9 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
                 if (param_hash.contains(params[1]))
                 {
                     qDebug() << QObject::tr("Duplicate dihedral term found! Overwriting "
-                        "'%1' with '%2'.").arg(param_hash[params[1]].getString()).arg(match.getString());
+                                            "'%1' with '%2'.")
+                                    .arg(param_hash[params[1]].getString())
+                                    .arg(match.getString());
                 }
 
                 // Insert the dihdedral term into the hash (overwriting existing value).
@@ -2770,18 +2726,15 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
                 auto params = term.value().getParams();
 
                 // Update the function, converting the phase shift to radians.
-                func += params[0] * (1 + Cos(( params[1] * Phi ) - qDegreesToRadians(params[2]) ));
+                func += params[0] * (1 + Cos((params[1] * Phi) - qDegreesToRadians(params[2])));
             }
 
             // Don't include zero functions.
             if (func.toString() != "0")
             {
                 // Set the dihedral function parameter.
-                dihedral_funcs.set(AtomNum(atoms[idx0].getNumber()),
-                                   AtomNum(atoms[idx1].getNumber()),
-                                   AtomNum(atoms[idx2].getNumber()),
-                                   AtomNum(atoms[idx3].getNumber()),
-                                   func);
+                dihedral_funcs.set(AtomNum(atoms[idx0].getNumber()), AtomNum(atoms[idx1].getNumber()),
+                                   AtomNum(atoms[idx2].getNumber()), AtomNum(atoms[idx3].getNumber()), func);
             }
         }
 
@@ -2796,7 +2749,7 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
         FourAtomFunctions improper_funcs(edit_mol);
 
         // Loop over all of the impropers.
-        for (int i=0; i<nImpropers(imol); ++i)
+        for (int i = 0; i < nImpropers(imol); ++i)
         {
             // Get the improper index.
             const int idx = mol_impropers[imol][i];
@@ -2808,10 +2761,8 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
             const int idx3 = num_to_idx[impropers[idx][3]];
 
             // Create a vector of the atom types.
-            QVector<QString> improper_atoms({atoms[idx0].getType(),
-                                             atoms[idx1].getType(),
-                                             atoms[idx2].getType(),
-                                             atoms[idx3].getType()});
+            QVector<QString> improper_atoms(
+                {atoms[idx0].getType(), atoms[idx1].getType(), atoms[idx2].getType(), atoms[idx3].getType()});
 
             // Find the parameters for the improper.
             auto matches = findParameters(improper_atoms, improper_params, 3);
@@ -2820,9 +2771,12 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
             if (matches.count() == 0)
             {
                 throw SireError::incompatible_error(QObject::tr("Missing improper parameters "
-                    "for atom types \'%1\', \'%2\', \'%3\', and \'%4\'")
-                    .arg(improper_atoms[0]).arg(improper_atoms[1]).arg(improper_atoms[2])
-                    .arg(improper_atoms[3]), CODELOC);
+                                                                "for atom types \'%1\', \'%2\', \'%3\', and \'%4\'")
+                                                        .arg(improper_atoms[0])
+                                                        .arg(improper_atoms[1])
+                                                        .arg(improper_atoms[2])
+                                                        .arg(improper_atoms[3]),
+                                                    CODELOC);
             }
 
             // Intialise the function object.
@@ -2839,7 +2793,7 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
                 if (std::abs(params[1]) < 1e-3)
                 {
                     // Intialise the function object, converting the out of plane angle to radians.
-                    func = params[0] * SireMaths::pow_2( Phi - qDegreesToRadians(params[2]) );
+                    func = params[0] * SireMaths::pow_2(Phi - qDegreesToRadians(params[2]));
 
                     // Only use the first match. (Should only be a single match if harmonic.)
                     break;
@@ -2849,7 +2803,7 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
                 else
                 {
                     // Update the function, converting the phase shift to radians.
-                    func += params[0] * (1 + Cos(( params[1] * Phi ) - qDegreesToRadians(params[2]) ));
+                    func += params[0] * (1 + Cos((params[1] * Phi) - qDegreesToRadians(params[2])));
                 }
             }
 
@@ -2857,11 +2811,8 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
             if (func.toString() != "0")
             {
                 // Set the improper function parameter.
-                improper_funcs.set(AtomNum(atoms[idx0].getNumber()),
-                                   AtomNum(atoms[idx1].getNumber()),
-                                   AtomNum(atoms[idx2].getNumber()),
-                                   AtomNum(atoms[idx3].getNumber()),
-                                   func);
+                improper_funcs.set(AtomNum(atoms[idx0].getNumber()), AtomNum(atoms[idx1].getNumber()),
+                                   AtomNum(atoms[idx2].getNumber()), AtomNum(atoms[idx3].getNumber()), func);
             }
         }
 
@@ -2890,7 +2841,7 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
         // Create an actual molecule from the passed object.
         auto mol = sire_mol.molecule();
 
-        for (int i=0; i<nAtoms(imol); ++i)
+        for (int i = 0; i < nAtoms(imol); ++i)
         {
             // Store a reference to the current atom.
             const auto &atom = atoms[molecules[imol][i]];
@@ -2910,7 +2861,7 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
                 auto params = matches[0].getParams();
 
                 // Extract the epsilon and rmin terms.
-                double epsilon = -params[0];    // CHARMM stores minus epsilon.
+                double epsilon = -params[0]; // CHARMM stores minus epsilon.
                 double rmin = params[1];
 
                 /* Convert from rmin to sigma.
@@ -2923,20 +2874,19 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
 
                     where rmin = sigma * 2^(1/6)
                  */
-                double sigma = rmin / qPow(2.0, 1.0/6.0);
+                double sigma = rmin / qPow(2.0, 1.0 / 6.0);
 
-                lj_funcs.set(cgatomidx, LJParameter(sigma * SireUnits::angstrom,
-                                                    epsilon * SireUnits::kcal_per_mol));
+                lj_funcs.set(cgatomidx, LJParameter(sigma * SireUnits::angstrom, epsilon * SireUnits::kcal_per_mol));
 
                 // There are modified 1-4 non-bonded Lennard-Jones parameters for this atom type.
                 if (params.count() == 4)
                 {
                     // Extract the parameters, converting from rmin to sigma.
                     epsilon = -params[2];
-                    sigma = params[3] / qPow(2.0, 1.0/6.0);
+                    sigma = params[3] / qPow(2.0, 1.0 / 6.0);
 
-                    lj_14_funcs.set(cgatomidx, LJParameter(sigma * SireUnits::angstrom,
-                                    epsilon * SireUnits::kcal_per_mol));
+                    lj_14_funcs.set(cgatomidx,
+                                    LJParameter(sigma * SireUnits::angstrom, epsilon * SireUnits::kcal_per_mol));
                 }
             }
 
@@ -3009,28 +2959,20 @@ SireMol::Molecule CharmmPSF::parameteriseMolecule(
     @param map
         The map of user properties.
  */
-void CharmmPSF::parseMolecule(
-        int imol,
-        const SireMol::Molecule &sire_mol,
-        QVector<PSFAtom> &local_atoms,
-        QVector<QVector<qint64> > &local_bonds,
-        QVector<QVector<qint64> > &local_angles,
-        QVector<QVector<qint64> > &local_dihedrals,
-        QVector<QVector<qint64> > &local_impropers,
-        QVector<QVector<qint64> > &local_nonbonded,
-        QSet<QString> &bond_params,
-        QSet<QString> &angle_params,
-        QSet<QString> &dihedral_params,
-        QSet<QString> &improper_params,
-        QSet<QString> &nonbonded_params,
-        QStringList &local_errors,
-        const PropertyMap &map)
+void CharmmPSF::parseMolecule(int imol, const SireMol::Molecule &sire_mol, QVector<PSFAtom> &local_atoms,
+                              QVector<QVector<qint64>> &local_bonds, QVector<QVector<qint64>> &local_angles,
+                              QVector<QVector<qint64>> &local_dihedrals, QVector<QVector<qint64>> &local_impropers,
+                              QVector<QVector<qint64>> &local_nonbonded, QSet<QString> &bond_params,
+                              QSet<QString> &angle_params, QSet<QString> &dihedral_params,
+                              QSet<QString> &improper_params, QSet<QString> &nonbonded_params,
+                              QStringList &local_errors, const PropertyMap &map)
 {
     // Store the number of atoms in the molecule.
     int num_atoms = sire_mol.nAtoms();
 
     // Early exit.
-    if (num_atoms == 0) return;
+    if (num_atoms == 0)
+        return;
 
     // Extract the molecule data.
     const auto moldata = sire_mol.data();
@@ -3039,7 +2981,7 @@ void CharmmPSF::parseMolecule(
     local_atoms.resize(num_atoms);
 
     // Set a default molecule name (used for a "segment" ID in the PSF file).
-    QString segment = QString("M%1").arg(imol+1);
+    QString segment = QString("M%1").arg(imol + 1);
 
     // Extract the existing molecule name.
     if (sire_mol.hasProperty(map["mol_name"]))
@@ -3051,13 +2993,12 @@ void CharmmPSF::parseMolecule(
     {
         QMutex mutex;
 
-        tbb::parallel_for(tbb::blocked_range<int>(0, num_atoms),
-                           [&](const tbb::blocked_range<int> r)
-        {
+        tbb::parallel_for(tbb::blocked_range<int>(0, num_atoms), [&](const tbb::blocked_range<int> r)
+                          {
             // Create local data objects.
             QStringList local_errors;
 
-            for (int i=r.begin(); i<r.end(); ++i)
+            for (int i = r.begin(); i < r.end(); ++i)
             {
                 // Parse atom data.
                 local_atoms[i] = PSFAtom(sire_mol.atom(AtomIdx(i)), segment, local_errors, map);
@@ -3081,12 +3022,11 @@ void CharmmPSF::parseMolecule(
 
                 // Update global error data.
                 parse_warnings += local_errors;
-            }
-        });
+            } });
     }
     else
     {
-        for (int i=0; i<num_atoms; ++i)
+        for (int i = 0; i < num_atoms; ++i)
         {
             // Parse atom data.
             local_atoms[i] = PSFAtom(sire_mol.atom(AtomIdx(i)), segment, local_errors, map);
@@ -3160,10 +3100,11 @@ void CharmmPSF::parseMolecule(
                 }
                 catch (...)
                 {
-                    throw SireError::incompatible_error(QObject::tr(
-                            "Cannot construct a CHARMM improper parameter from "
-                            "expression %1. Supported styles are \"harmonic\" and \"cosine\".")
-                            .arg(func.toString()), CODELOC );
+                    throw SireError::incompatible_error(
+                        QObject::tr("Cannot construct a CHARMM improper parameter from "
+                                    "expression %1. Supported styles are \"harmonic\" and \"cosine\".")
+                            .arg(func.toString()),
+                        CODELOC);
                 }
             }
         }
@@ -3184,7 +3125,7 @@ void CharmmPSF::parseMolecule(
             A vector of the indices of the matching parameter sets.
   */
 QList<CharmmParam> CharmmPSF::findParameters(const QVector<QString> &search_atoms,
-    const QMultiHash<QString, CharmmParam> &params, int type) const
+                                             const QMultiHash<QString, CharmmParam> &params, int type) const
 {
     // Bond params.
     if (type == 0)
@@ -3193,8 +3134,10 @@ QList<CharmmParam> CharmmPSF::findParameters(const QVector<QString> &search_atom
         if (search_atoms.count() != 2)
         {
             throw SireError::program_bug(QObject::tr("Cannot search for CHARMM "
-                "bond parameters, incorrect number of atoms passed. Given "
-                "%1, expected 2").arg(search_atoms.count()), CODELOC);
+                                                     "bond parameters, incorrect number of atoms passed. Given "
+                                                     "%1, expected 2")
+                                             .arg(search_atoms.count()),
+                                         CODELOC);
         }
 
         // Generate the key for this set of atoms.
@@ -3211,8 +3154,10 @@ QList<CharmmParam> CharmmPSF::findParameters(const QVector<QString> &search_atom
         if (search_atoms.count() != 3)
         {
             throw SireError::program_bug(QObject::tr("Cannot search for CHARMM "
-                "angle parameters, incorrect number of atoms passed. Given "
-                "%1, expected 3").arg(search_atoms.count()), CODELOC);
+                                                     "angle parameters, incorrect number of atoms passed. Given "
+                                                     "%1, expected 3")
+                                             .arg(search_atoms.count()),
+                                         CODELOC);
         }
 
         // Generate the key for this set of atoms.
@@ -3229,8 +3174,10 @@ QList<CharmmParam> CharmmPSF::findParameters(const QVector<QString> &search_atom
         if (search_atoms.count() != 4)
         {
             throw SireError::program_bug(QObject::tr("Cannot search for CHARMM "
-                "dihedral parameters, incorrect number of atoms passed. Given "
-                "%1, expected 4").arg(search_atoms.count()), CODELOC);
+                                                     "dihedral parameters, incorrect number of atoms passed. Given "
+                                                     "%1, expected 4")
+                                             .arg(search_atoms.count()),
+                                         CODELOC);
         }
 
         // Generate the key for this set of atoms.
@@ -3257,7 +3204,8 @@ QList<CharmmParam> CharmmPSF::findParameters(const QVector<QString> &search_atom
 
             return matches;
         }
-        else return matches;
+        else
+            return matches;
     }
 
     // Improper params.
@@ -3267,8 +3215,10 @@ QList<CharmmParam> CharmmPSF::findParameters(const QVector<QString> &search_atom
         if (search_atoms.count() != 4)
         {
             throw SireError::program_bug(QObject::tr("Cannot search for CHARMM "
-                "improper parameters, incorrect number of atoms passed. Given "
-                "%1, expected 4").arg(search_atoms.count()), CODELOC);
+                                                     "improper parameters, incorrect number of atoms passed. Given "
+                                                     "%1, expected 4")
+                                             .arg(search_atoms.count()),
+                                         CODELOC);
         }
 
         // Generate the key for this set of atoms.
@@ -3284,12 +3234,12 @@ QList<CharmmParam> CharmmPSF::findParameters(const QVector<QString> &search_atom
             // Backup the original vector of atoms.
             auto copy_atoms = search_atoms;
 
-            for (int i=0; i<4; ++i)
+            for (int i = 0; i < 4; ++i)
             {
                 // Replace atom type 'i' with a wildcard.
                 copy_atoms[i] = "X";
 
-                for (int j=i+1; j<4; ++j)
+                for (int j = i + 1; j < 4; ++j)
                 {
                     // Replace atom type 'j' with a wildcard.
                     copy_atoms[j] = "X";
@@ -3300,9 +3250,9 @@ QList<CharmmParam> CharmmPSF::findParameters(const QVector<QString> &search_atom
                     // Check for matches.
                     matches = params.values(key);
 
-					// Return as soon as a match is found.
+                    // Return as soon as a match is found.
                     if (matches.count() > 0)
-                       return matches;
+                        return matches;
 
                     // Reset the type for atom 'j'.
                     copy_atoms[j] = search_atoms[j];
@@ -3316,14 +3266,17 @@ QList<CharmmParam> CharmmPSF::findParameters(const QVector<QString> &search_atom
             // Return the empty vector.
             return matches;
         }
-        else return matches;
+        else
+            return matches;
     }
 
     // Uknown parameter type.
     else
     {
         throw SireError::program_bug(QObject::tr("Unknown parameter type (%1). "
-            "Valid types are 0-4").arg(type), CODELOC);
+                                                 "Valid types are 0-4")
+                                         .arg(type),
+                                     CODELOC);
     }
 }
 
@@ -3350,8 +3303,9 @@ QString CharmmPSF::generateKey(QVector<QString> words, int type) const
         if (words.count() != 2)
         {
             throw SireError::program_bug(QObject::tr("Incorrect number of "
-                "atoms for bond parameter. Expected 2, found %1.")
-                .arg(words.count()), CODELOC);
+                                                     "atoms for bond parameter. Expected 2, found %1.")
+                                             .arg(words.count()),
+                                         CODELOC);
         }
 
         // Sort the words.
@@ -3363,7 +3317,7 @@ QString CharmmPSF::generateKey(QVector<QString> words, int type) const
         QString key(words[0]);
 
         // Append each word to the key, semicolon separated.
-        for (int i=1; i<words.count(); ++i)
+        for (int i = 1; i < words.count(); ++i)
             key += QString(";%1").arg(words[i]);
 
         return key;
@@ -3372,30 +3326,30 @@ QString CharmmPSF::generateKey(QVector<QString> words, int type) const
     // Angle, dihedral, or improper parameter.
     // Here the atom ordering is significant. The ordering can be reversed
     // without affecting the resulting potential.
-    else if ((type == 1) or
-		     (type == 2) or
-		     (type == 3))
+    else if ((type == 1) or (type == 2) or (type == 3))
     {
         // Store the number of words.
         int num_words = words.count();
 
-		if (type == 1)
-		{
-			if (num_words != 3)
-			{
-				throw SireError::program_bug(QObject::tr("Incorrect number of "
-					"atoms for angle parameter. Expected 3, found %1.")
-					.arg(num_words), CODELOC);
-			}
-		}
-		else
+        if (type == 1)
+        {
+            if (num_words != 3)
+            {
+                throw SireError::program_bug(QObject::tr("Incorrect number of "
+                                                         "atoms for angle parameter. Expected 3, found %1.")
+                                                 .arg(num_words),
+                                             CODELOC);
+            }
+        }
+        else
         {
             if (num_words != 4)
             {
                 throw SireError::program_bug(QObject::tr("Incorrect number of "
-                    "atoms for %1 parameter. Expected 4, found %2.")
-                    .arg((type == 2) ? "dihedral" : "improper")
-                    .arg(num_words), CODELOC);
+                                                         "atoms for %1 parameter. Expected 4, found %2.")
+                                                 .arg((type == 2) ? "dihedral" : "improper")
+                                                 .arg(num_words),
+                                             CODELOC);
             }
         }
 
@@ -3408,15 +3362,17 @@ QString CharmmPSF::generateKey(QVector<QString> words, int type) const
         QString key2(words.last());
 
         // Append each word to the keys, semicolon separated.
-        for (int i=1; i<num_words; ++i)
+        for (int i = 1; i < num_words; ++i)
         {
             key1 += QString(";%1").arg(words[i]);
-            key2 += QString(";%1").arg(words[num_words-1-i]);
+            key2 += QString(";%1").arg(words[num_words - 1 - i]);
         }
 
         // Return the smaller key.
-        if (key1 < key2) return key1;
-        else             return key2;
+        if (key1 < key2)
+            return key1;
+        else
+            return key2;
     }
 
     // Non-bonded parameter.
@@ -3425,8 +3381,9 @@ QString CharmmPSF::generateKey(QVector<QString> words, int type) const
         if (words.count() != 1)
         {
             throw SireError::program_bug(QObject::tr("Incorrect number of "
-                "atoms for non-bonded parameter. Expected 1, found %1.")
-                .arg(words.count()), CODELOC);
+                                                     "atoms for non-bonded parameter. Expected 1, found %1.")
+                                             .arg(words.count()),
+                                         CODELOC);
         }
 
         return words[0];
@@ -3435,8 +3392,10 @@ QString CharmmPSF::generateKey(QVector<QString> words, int type) const
     else
     {
         throw SireError::program_bug(QObject::tr("Invalid parameter "
-            "type key (%1). Supported values are 0-%2.")
-            .arg(type).arg(4), CODELOC);
+                                                 "type key (%1). Supported values are 0-%2.")
+                                         .arg(type)
+                                         .arg(4),
+                                     CODELOC);
     }
 }
 
@@ -3457,18 +3416,16 @@ System CharmmPSF::startSystem(const PropertyMap &map) const
 
     if (usesParallel())
     {
-        tbb::parallel_for(tbb::blocked_range<int>(0, nmols),
-                           [&](tbb::blocked_range<int> r)
-        {
-            for (int i=r.begin(); i<r.end(); ++i)
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
             {
                 mols_array[i] = this->getMolecule(i, map);
-            }
-        });
+            } });
     }
     else
     {
-        for (int i=0; i<nmols; ++i)
+        for (int i = 0; i < nmols; ++i)
         {
             mols_array[i] = this->getMolecule(i, map);
         }
@@ -3515,17 +3472,16 @@ System CharmmPSF::startSystem(const QVector<QString> &param_lines, const Propert
     bool has_box_params = false;
 
     // Parse and validate the parameter file.
-    bool is_charmm = parseParameters(param_lines, bond_params, angle_params,
-        dihedral_params, improper_params, nonbonded_params, box, has_box_params);
+    bool is_charmm = parseParameters(param_lines, bond_params, angle_params, dihedral_params, improper_params,
+                                     nonbonded_params, box, has_box_params);
 
     // Early exit if parameters are missing.
-    if ((nBonds()      > 0 and bond_params.count()     == 0) or
-        (nAngles()     > 0 and angle_params.count()    == 0) or
-        (nDihedrals()  > 0 and dihedral_params.count() == 0) or
-        (nImpropers()  > 0 and improper_params.count() == 0))
+    if ((nBonds() > 0 and bond_params.count() == 0) or (nAngles() > 0 and angle_params.count() == 0) or
+        (nDihedrals() > 0 and dihedral_params.count() == 0) or (nImpropers() > 0 and improper_params.count() == 0))
     {
-        throw SireError::incompatible_error(QObject::tr("The parameter file "
-            "is missing information that is required for generating a system!"));
+        throw SireError::incompatible_error(
+            QObject::tr("The parameter file "
+                        "is missing information that is required for generating a system!"));
     }
 
     // Get the MolNums of each molecule in the System - this returns the
@@ -3545,26 +3501,22 @@ System CharmmPSF::startSystem(const QVector<QString> &param_lines, const Propert
     // Parameterise each molecule in the system.
     if (usesParallel())
     {
-        tbb::parallel_for(tbb::blocked_range<int>(0, num_mols),
-                           [&](const tbb::blocked_range<int> r)
-        {
-            for (int i=r.begin(); i<r.end(); ++i)
+        tbb::parallel_for(tbb::blocked_range<int>(0, num_mols), [&](const tbb::blocked_range<int> r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
             {
                 // Parameterise the molecule.
-                mols[i] = parameteriseMolecule(i, system[molnums[i]].molecule(),
-                    bond_params, angle_params, dihedral_params, improper_params,
-                    nonbonded_params, map);
-            }
-        });
+                mols[i] = parameteriseMolecule(i, system[molnums[i]].molecule(), bond_params, angle_params,
+                                               dihedral_params, improper_params, nonbonded_params, map);
+            } });
     }
     else
     {
-        for (int i=0; i<num_mols; ++i)
+        for (int i = 0; i < num_mols; ++i)
         {
             // Parameterise the molecule.
-            mols[i] = parameteriseMolecule(i, system[molnums[i]].molecule(),
-                bond_params, angle_params, dihedral_params, improper_params,
-                nonbonded_params, map);
+            mols[i] = parameteriseMolecule(i, system[molnums[i]].molecule(), bond_params, angle_params, dihedral_params,
+                                           improper_params, nonbonded_params, map);
         }
     }
 
@@ -3573,7 +3525,7 @@ System CharmmPSF::startSystem(const QVector<QString> &param_lines, const Propert
 
     // Convert the vector of params to a single string.
     QString params_string;
-    for (int i=0; i<param_lines.count(); ++i)
+    for (int i = 0; i < param_lines.count(); ++i)
     {
         QStringList data = param_lines[i].simplified().split(QRegExp("\\s"));
         QString start = data[0];
@@ -3583,14 +3535,18 @@ System CharmmPSF::startSystem(const QVector<QString> &param_lines, const Propert
             continue;
 
         // Append the parameter lines, skipping any box record data.
-        if (start == "#$LABELS") i += 2;
-        else params_string.append(param_lines[i] + "\n");
+        if (start == "#$LABELS")
+            i += 2;
+        else
+            params_string.append(param_lines[i] + "\n");
     }
 
     // Indicate the format of the parameters.
     QString param_format;
-    if (is_charmm) param_format = "CHARMM";
-    else           param_format = "X-PLOR";
+    if (is_charmm)
+        param_format = "CHARMM";
+    else
+        param_format = "X-PLOR";
 
     // Add the CHARMM parameters as a property.
     system.setProperty(map["charmm_params"].source(), StringProperty(params_string));
@@ -3638,10 +3594,7 @@ void CharmmPSF::writeToFile(const QString &filename) const
         QFileInfo fi(filename);
 
         // Create the name of the parameter file.
-        QString param_filename = fi.absolutePath()
-                               + '/'
-                               + fi.completeBaseName()
-                               + ".params";
+        QString param_filename = fi.absolutePath() + '/' + fi.completeBaseName() + ".params";
 
         QFile f(param_filename);
 
@@ -3672,10 +3625,7 @@ void CharmmPSF::writeToFile(const QString &filename) const
         QFileInfo fi(filename);
 
         // Create the name of the XSC file.
-        QString xsc_filename = fi.absolutePath()
-                             + '/'
-                             + fi.completeBaseName()
-                             + ".xsc";
+        QString xsc_filename = fi.absolutePath() + '/' + fi.completeBaseName() + ".xsc";
 
         QFile f(xsc_filename);
 
@@ -3694,9 +3644,15 @@ void CharmmPSF::writeToFile(const QString &filename) const
         QString l1 = "# NAMD extended system configuration output file\n";
         QString l2 = "#$LABELS step a_x a_y a_z b_x b_y b_z c_x c_y c_z o_x o_y o_z s_x s_y s_z s_u s_v s_w\n";
         QString l3 = QString("0 %1 %2 %3 %4 %5 %6 %7 %8 %9 0 0 0 0 0 0 0 0 0\n")
-            .arg(v0.x()).arg(v0.y()).arg(v0.z())
-            .arg(v1.x()).arg(v1.y()).arg(v1.z())
-            .arg(v2.x()).arg(v2.y()).arg(v2.z());
+                         .arg(v0.x())
+                         .arg(v0.y())
+                         .arg(v0.z())
+                         .arg(v1.x())
+                         .arg(v1.y())
+                         .arg(v1.z())
+                         .arg(v2.x())
+                         .arg(v2.y())
+                         .arg(v2.z());
 
         // Write the box data to file.
         ts << l1 << l2 << l3;
@@ -3712,15 +3668,16 @@ MolStructureEditor CharmmPSF::getMolStructure(int imol, const PropertyName &cutt
     if ((imol < 0) or (imol > molecules.count()))
     {
         throw SireError::program_bug(QObject::tr("The molecule index %1 is out of "
-            "range, 0 - %2").arg(imol).arg(molecules.count()), CODELOC);
+                                                 "range, 0 - %2")
+                                         .arg(imol)
+                                         .arg(molecules.count()),
+                                     CODELOC);
     }
 
     // Make sure that there are atoms in the molecule.
     if (molecules[imol].count() == 0)
     {
-        throw SireError::program_bug(QObject::tr(
-            "Strange - there are no atoms in molecule %1?")
-                .arg(imol), CODELOC);
+        throw SireError::program_bug(QObject::tr("Strange - there are no atoms in molecule %1?").arg(imol), CODELOC);
     }
 
     // First step is to build the structure of the molecule, i.e.
@@ -3746,7 +3703,7 @@ MolStructureEditor CharmmPSF::getMolStructure(int imol, const PropertyName &cutt
     QMap<int, QString> num_to_name;
 
     // Loop through all the atoms in the molecule.
-    for (int i=0; i<nAtoms(imol); ++i)
+    for (int i = 0; i < nAtoms(imol); ++i)
     {
         // Store the current atom ID.
         int atom_id = molecules[imol][i];
@@ -3776,11 +3733,15 @@ MolStructureEditor CharmmPSF::getMolStructure(int imol, const PropertyName &cutt
             // This residue number has already appeared with a different name.
             if (atom.getResName() != num_to_name[res_num])
             {
-                throw SireError::incompatible_error(QObject::tr("The parsed data "
-                    "contains non-unique residue numbers! Residue number %1 "
-                    "for atom number %2 is named %3, was previously assigned name %4")
-                    .arg(res_num).arg(atom.getNumber()).arg(atom.getResName())
-                    .arg(num_to_name[res_num]), CODELOC);
+                throw SireError::incompatible_error(
+                    QObject::tr("The parsed data "
+                                "contains non-unique residue numbers! Residue number %1 "
+                                "for atom number %2 is named %3, was previously assigned name %4")
+                        .arg(res_num)
+                        .arg(atom.getNumber())
+                        .arg(atom.getResName())
+                        .arg(num_to_name[res_num]),
+                    CODELOC);
             }
         }
     }
@@ -3853,15 +3814,16 @@ MolEditor CharmmPSF::getMolecule(int imol, const PropertyMap &map) const
     if ((imol < 0) or (imol > molecules.count()))
     {
         throw SireError::program_bug(QObject::tr("The frame index %1 is out of "
-            "range, 0 - %2").arg(imol).arg(molecules.count()), CODELOC);
+                                                 "range, 0 - %2")
+                                         .arg(imol)
+                                         .arg(molecules.count()),
+                                     CODELOC);
     }
 
     // Make sure that there are atoms in the frame.
     if (nAtoms(imol) == 0)
     {
-        throw SireError::program_bug(QObject::tr(
-            "Strange - there are no atoms in molecule %1?")
-                .arg(imol), CODELOC);
+        throw SireError::program_bug(QObject::tr("Strange - there are no atoms in molecule %1?").arg(imol), CODELOC);
     }
 
     // First, construct the layout of the molecule (sorting of atoms into residues and cutgroups).
@@ -3875,11 +3837,11 @@ MolEditor CharmmPSF::getMolecule(int imol, const PropertyMap &map) const
 
     // Instantiate the atom property objects that we need.
     AtomStringProperty types(molinfo);
-    AtomCharges        charges(molinfo);
-    AtomMasses         masses(molinfo);
+    AtomCharges charges(molinfo);
+    AtomMasses masses(molinfo);
 
     // Now loop through the atoms in the molecule and set each property.
-    for (int i=0; i<nAtoms(imol); ++i)
+    for (int i = 0; i < nAtoms(imol); ++i)
     {
         // Store a reference to the current atom.
         const auto &atom = atoms[molecules[imol][i]];
@@ -3906,15 +3868,14 @@ MolEditor CharmmPSF::getMolecule(int imol, const PropertyMap &map) const
         int idx2 = num_to_idx[bonds[bond][1]];
 
         // Add the bond to the connectivity object.
-        connectivity.connect(AtomNum(atoms[idx1].getNumber()),
-                             AtomNum(atoms[idx2].getNumber()));
+        connectivity.connect(AtomNum(atoms[idx1].getNumber()), AtomNum(atoms[idx2].getNumber()));
     }
 
     return mol.setProperty(map["atomtype"], types)
-              .setProperty(map["charge"], charges)
-              .setProperty(map["mass"], masses)
-              .setProperty(map["connectivity"], connectivity)
-              .commit();
+        .setProperty(map["charge"], charges)
+        .setProperty(map["mass"], masses)
+        .setProperty(map["connectivity"], connectivity)
+        .commit();
 }
 
 /** Internal function to break the parsed PSF record data into molecules. */
@@ -3926,7 +3887,7 @@ void CharmmPSF::findMolecules()
     // Create a hash of the bonded atoms.
     QMultiHash<int, int> bonded_atoms;
 
-    for (int i=0; i<nBonds(); ++i)
+    for (int i = 0; i < nBonds(); ++i)
     {
         bonded_atoms.insert(bonds[i][0], bonds[i][1]);
         bonded_atoms.insert(bonds[i][1], bonds[i][0]);
@@ -3944,7 +3905,7 @@ void CharmmPSF::findMolecules()
     // Create the hash between atom number and index.
     // Clear any existing hash first.
     num_to_idx.clear();
-    for(int i=0; i<nAtoms(); ++i)
+    for (int i = 0; i < nAtoms(); ++i)
         num_to_idx.insert(atoms[i].getNumber(), i);
 
     /*************************************************/
@@ -3952,7 +3913,7 @@ void CharmmPSF::findMolecules()
     /*************************************************/
 
     // Loop over all atoms by index.
-    for (int i = 0; i<nAtoms(); ++i)
+    for (int i = 0; i < nAtoms(); ++i)
     {
         // Get the atom number.
         int num = atoms[i].getNumber();
@@ -3980,7 +3941,7 @@ void CharmmPSF::findMolecules()
             for (auto &atom : mol_atoms)
             {
                 atom = num_to_idx[atom];
-                atoms[atom].setMolIndex(nmols-1);
+                atoms[atom].setMolIndex(nmols - 1);
             }
 
             // Add the sorted atom indices.
@@ -3999,7 +3960,7 @@ void CharmmPSF::findMolecules()
     mol_bonds.resize(num_mols);
 
     // Loop over all of the bonds.
-    for (int i=0; i<nBonds(); ++i)
+    for (int i = 0; i < nBonds(); ++i)
     {
         // Get the molecule index.
         const int molidx = atoms[num_to_idx[bonds[i][0]]].getMolIndex();
@@ -4012,10 +3973,13 @@ void CharmmPSF::findMolecules()
         else
         {
             throw SireError::program_bug(QObject::tr("The bonded atoms "
-                "are not in the same atom: [ AtomNum(%1), MolIdx(%2) ] "
-                "and [ AtomNum(%3), MolIdx(%4) ]")
-                .arg(bonds[i][0]).arg(atoms[num_to_idx[bonds[i][0]]].getMolIndex())
-                .arg(bonds[i][1]).arg(atoms[num_to_idx[bonds[i][1]]].getMolIndex()), CODELOC);
+                                                     "are not in the same atom: [ AtomNum(%1), MolIdx(%2) ] "
+                                                     "and [ AtomNum(%3), MolIdx(%4) ]")
+                                             .arg(bonds[i][0])
+                                             .arg(atoms[num_to_idx[bonds[i][0]]].getMolIndex())
+                                             .arg(bonds[i][1])
+                                             .arg(atoms[num_to_idx[bonds[i][1]]].getMolIndex()),
+                                         CODELOC);
         }
     }
 
@@ -4026,7 +3990,7 @@ void CharmmPSF::findMolecules()
     mol_angles.resize(num_mols);
 
     // Loop over all of the angles.
-    for (int i=0; i<nAngles(); ++i)
+    for (int i = 0; i < nAngles(); ++i)
     {
         // Get the molecule index.
         const int molidx = atoms[num_to_idx[angles[i][0]]].getMolIndex();
@@ -4038,11 +4002,15 @@ void CharmmPSF::findMolecules()
         }
         else
         {
-            throw SireError::program_bug(QObject::tr("The atoms involved in an "
-                "angle interaction are not in the same molecule: [ AtomNum(%1), MolIdx(%2) ] "
-                "and [ AtomNum(%3), MolIdx(%4) ]")
-                .arg(angles[i][0]).arg(atoms[num_to_idx[angles[i][0]]].getMolIndex())
-                .arg(angles[i][2]).arg(atoms[num_to_idx[angles[i][2]]].getMolIndex()), CODELOC);
+            throw SireError::program_bug(
+                QObject::tr("The atoms involved in an "
+                            "angle interaction are not in the same molecule: [ AtomNum(%1), MolIdx(%2) ] "
+                            "and [ AtomNum(%3), MolIdx(%4) ]")
+                    .arg(angles[i][0])
+                    .arg(atoms[num_to_idx[angles[i][0]]].getMolIndex())
+                    .arg(angles[i][2])
+                    .arg(atoms[num_to_idx[angles[i][2]]].getMolIndex()),
+                CODELOC);
         }
     }
 
@@ -4053,7 +4021,7 @@ void CharmmPSF::findMolecules()
     mol_dihedrals.resize(num_mols);
 
     // Loop over all of the dihedrals.
-    for (int i=0; i<nDihedrals(); ++i)
+    for (int i = 0; i < nDihedrals(); ++i)
     {
         // Get the molecule index.
         int molidx = atoms[num_to_idx[dihedrals[i][0]]].getMolIndex();
@@ -4065,11 +4033,15 @@ void CharmmPSF::findMolecules()
         }
         else
         {
-            throw SireError::program_bug(QObject::tr("The atoms involved in a "
-                "dihedral interaction are not in the same molecule: [ AtomNum(%1), MolIdx(%2) ] "
-                "and [ AtomNum(%3), MolIdx(%4) ]")
-                .arg(dihedrals[i][0]).arg(atoms[num_to_idx[dihedrals[i][0]]].getMolIndex())
-                .arg(dihedrals[i][2]).arg(atoms[num_to_idx[dihedrals[i][3]]].getMolIndex()), CODELOC);
+            throw SireError::program_bug(
+                QObject::tr("The atoms involved in a "
+                            "dihedral interaction are not in the same molecule: [ AtomNum(%1), MolIdx(%2) ] "
+                            "and [ AtomNum(%3), MolIdx(%4) ]")
+                    .arg(dihedrals[i][0])
+                    .arg(atoms[num_to_idx[dihedrals[i][0]]].getMolIndex())
+                    .arg(dihedrals[i][2])
+                    .arg(atoms[num_to_idx[dihedrals[i][3]]].getMolIndex()),
+                CODELOC);
         }
     }
 
@@ -4080,7 +4052,7 @@ void CharmmPSF::findMolecules()
     mol_impropers.resize(num_mols);
 
     // Loop over all of the impropers.
-    for (int i=0; i<nImpropers(); ++i)
+    for (int i = 0; i < nImpropers(); ++i)
     {
         // Get the molecule index.
         int molidx = atoms[num_to_idx[impropers[i][0]]].getMolIndex();
@@ -4092,11 +4064,15 @@ void CharmmPSF::findMolecules()
         }
         else
         {
-            throw SireError::program_bug(QObject::tr("The atoms involved in an "
-                "improper interaction are not in the same molecule: [ AtomNum(%1), MolIdx(%2) ] "
-                "and [ AtomNum(%3), MolIdx(%4) ]")
-                .arg(impropers[i][0]).arg(atoms[num_to_idx[impropers[i][0]]].getMolIndex())
-                .arg(impropers[i][2]).arg(atoms[num_to_idx[impropers[i][3]]].getMolIndex()), CODELOC);
+            throw SireError::program_bug(
+                QObject::tr("The atoms involved in an "
+                            "improper interaction are not in the same molecule: [ AtomNum(%1), MolIdx(%2) ] "
+                            "and [ AtomNum(%3), MolIdx(%4) ]")
+                    .arg(impropers[i][0])
+                    .arg(atoms[num_to_idx[impropers[i][0]]].getMolIndex())
+                    .arg(impropers[i][2])
+                    .arg(atoms[num_to_idx[impropers[i][3]]].getMolIndex()),
+                CODELOC);
         }
     }
 
@@ -4107,7 +4083,7 @@ void CharmmPSF::findMolecules()
     mol_nonbonded_exclusions.resize(num_mols);
 
     // Loop over all of the non-bonded exclusions.
-    for (int i=0; i<nNonBondedExclusions(); ++i)
+    for (int i = 0; i < nNonBondedExclusions(); ++i)
     {
         // Get the atom index.
         int atomidx = num_to_idx[nonbonded_exclusions[i][0]];
@@ -4129,7 +4105,7 @@ void CharmmPSF::findMolecules()
     mol_cross_terms.resize(num_mols);
 
     // Loop over all of the cross-terms.
-    for (int i=0; i<nCrossTerms(); ++i)
+    for (int i = 0; i < nCrossTerms(); ++i)
     {
         // Get the molecule index.
         int molidx = atoms[num_to_idx[cross_terms[i][0]]].getMolIndex();
@@ -4141,18 +4117,22 @@ void CharmmPSF::findMolecules()
         }
         else
         {
-            throw SireError::program_bug(QObject::tr("The atoms involved in a "
-                "cross term are not in the same molecule: [ AtomNum(%1), MolIdx(%2) ] "
-                "and [ AtomNum(%3), MolIdx(%4) ]")
-                .arg(cross_terms[i][0]).arg(atoms[num_to_idx[cross_terms[i][0]]].getMolIndex())
-                .arg(cross_terms[i][2]).arg(atoms[num_to_idx[cross_terms[i][3]]].getMolIndex()), CODELOC);
+            throw SireError::program_bug(
+                QObject::tr("The atoms involved in a "
+                            "cross term are not in the same molecule: [ AtomNum(%1), MolIdx(%2) ] "
+                            "and [ AtomNum(%3), MolIdx(%4) ]")
+                    .arg(cross_terms[i][0])
+                    .arg(atoms[num_to_idx[cross_terms[i][0]]].getMolIndex())
+                    .arg(cross_terms[i][2])
+                    .arg(atoms[num_to_idx[cross_terms[i][3]]].getMolIndex()),
+                CODELOC);
         }
     }
 }
 
 /** Helper function to recursively walk through bonded atoms in a molecule. */
 void CharmmPSF::findBondedAtoms(int atom_num, int mol_idx, const QMultiHash<int, int> &bonded_atoms,
-    QHash<int, int> &atom_to_mol, QSet<qint64> &atoms_in_mol) const
+                                QHash<int, int> &atom_to_mol, QSet<qint64> &atoms_in_mol) const
 {
     for (auto bonded_atom : bonded_atoms.values(atom_num))
     {
@@ -4171,7 +4151,7 @@ void CharmmPSF::findBondedAtoms(int atom_num, int mol_idx, const QMultiHash<int,
 
 /** Internal function used to grab the property, catching errors and signalling if
     the correct property has been found */
-template<class T>
+template <class T>
 T CharmmPSF::getProperty(const PropertyName &prop, const MoleculeData &moldata, bool *found)
 {
     if (moldata.hasProperty(prop))
@@ -4191,7 +4171,7 @@ T CharmmPSF::getProperty(const PropertyName &prop, const MoleculeData &moldata, 
 
 /** Construct PSF bond records and CHARMM parameters from the set of two-atom functions. */
 void CharmmPSF::getBondsFrom(const TwoAtomFunctions &funcs, const Molecule &sire_mol,
-    QVector<QVector<qint64> > &local_bonds, QSet<QString> &bond_params, const PropertyMap &map)
+                             QVector<QVector<qint64>> &local_bonds, QSet<QString> &bond_params, const PropertyMap &map)
 {
     // Get the molecule info object.
     const auto molinfo = sire_mol.info();
@@ -4204,10 +4184,10 @@ void CharmmPSF::getBondsFrom(const TwoAtomFunctions &funcs, const Molecule &sire
 
     // A multi-map between the start atom in a bond and the atom pair.
     // This allows us to reconstruct the correct bond order.
-    QMultiMap<int, QVector<qint64> > bond_map;
+    QMultiMap<int, QVector<qint64>> bond_map;
 
     // Create the bond map.
-    for (int i=0; i<num_bonds; ++i)
+    for (int i = 0; i < num_bonds; ++i)
     {
         // Get the potential.
         const auto potential = potentials.constData()[i];
@@ -4226,8 +4206,7 @@ void CharmmPSF::getBondsFrom(const TwoAtomFunctions &funcs, const Molecule &sire
 
         // If the atoms have an "atomtype" property then we can generate
         // CHARMM bond parameters.
-        if ((sire_mol.atom(idx0).hasProperty(map["atomtype"])) and
-            (sire_mol.atom(idx1).hasProperty(map["atomtype"])))
+        if ((sire_mol.atom(idx0).hasProperty(map["atomtype"])) and (sire_mol.atom(idx1).hasProperty(map["atomtype"])))
         {
             // Extract the atom types.
             QString type0 = sire_mol.atom(idx0).property<QString>(map["atomtype"]);
@@ -4237,8 +4216,7 @@ void CharmmPSF::getBondsFrom(const TwoAtomFunctions &funcs, const Molecule &sire
             QVector<QString> atom_types = {type0, type1};
 
             // Create the atom type part of the parameter string.
-            QString atom_string = QString("%1 %2")
-                .arg(type0, -4).arg(type1, -4);
+            QString atom_string = QString("%1 %2").arg(type0, -4).arg(type1, -4);
 
             try
             {
@@ -4257,9 +4235,11 @@ void CharmmPSF::getBondsFrom(const TwoAtomFunctions &funcs, const Molecule &sire
             }
             catch (...)
             {
-                throw SireError::incompatible_error(QObject::tr(
-                        "Cannot construct a CHARMM bond parameter K ( R - R0 )^2 from the "
-                        "expression %1").arg(potential.function().toString()), CODELOC );
+                throw SireError::incompatible_error(
+                    QObject::tr("Cannot construct a CHARMM bond parameter K ( R - R0 )^2 from the "
+                                "expression %1")
+                        .arg(potential.function().toString()),
+                    CODELOC);
             }
         }
 
@@ -4278,8 +4258,8 @@ void CharmmPSF::getBondsFrom(const TwoAtomFunctions &funcs, const Molecule &sire
 
 /** Construct PSF angle records and CHARMM parameters from the set of three-atom functions. */
 void CharmmPSF::getAnglesFrom(const ThreeAtomFunctions &funcs, const TwoAtomFunctions &ub_funcs,
-    const Molecule &sire_mol, QVector<QVector<qint64> > &local_angles,
-    QSet<QString> &angle_params, const PropertyMap &map)
+                              const Molecule &sire_mol, QVector<QVector<qint64>> &local_angles,
+                              QSet<QString> &angle_params, const PropertyMap &map)
 {
     // Get the molecule info object.
     const auto molinfo = sire_mol.info();
@@ -4298,10 +4278,10 @@ void CharmmPSF::getAnglesFrom(const ThreeAtomFunctions &funcs, const TwoAtomFunc
 
     // A multi-map between the start atom in an angle and the atom triplet.
     // This allows us to reconstruct the correct order for the PSF records.
-    QMultiMap<int, QVector<qint64> > angle_map;
+    QMultiMap<int, QVector<qint64>> angle_map;
 
     // Populate the angle map.
-    for (int i=0; i<num_angles; ++i)
+    for (int i = 0; i < num_angles; ++i)
     {
         // Get the potential.
         const auto potential = potentials.constData()[i];
@@ -4323,8 +4303,7 @@ void CharmmPSF::getAnglesFrom(const ThreeAtomFunctions &funcs, const TwoAtomFunc
         // If the atoms have an "atomtype" property then we can generate
         // CHARMM angle parameters.
         if ((sire_mol.atom(idx0).hasProperty(map["atomtype"])) and
-            (sire_mol.atom(idx1).hasProperty(map["atomtype"])) and
-            (sire_mol.atom(idx2).hasProperty(map["atomtype"])))
+            (sire_mol.atom(idx1).hasProperty(map["atomtype"])) and (sire_mol.atom(idx2).hasProperty(map["atomtype"])))
         {
             // Extract the atom types.
             QString type0 = sire_mol.atom(idx0).property<QString>(map["atomtype"]);
@@ -4335,8 +4314,7 @@ void CharmmPSF::getAnglesFrom(const ThreeAtomFunctions &funcs, const TwoAtomFunc
             QVector<QString> bond_types = {type0, type1, type2};
 
             // Create the atom type part of the parameter string.
-            QString atom_string = QString("%1 %2 %3")
-                .arg(type0, -4).arg(type1, -4).arg(type2, -4);
+            QString atom_string = QString("%1 %2 %3").arg(type0, -4).arg(type1, -4).arg(type2, -4);
 
             // Initialise the parameter string.
             QString param_string;
@@ -4358,13 +4336,15 @@ void CharmmPSF::getAnglesFrom(const ThreeAtomFunctions &funcs, const TwoAtomFunc
             }
             catch (...)
             {
-                throw SireError::incompatible_error(QObject::tr(
-                        "Cannot construct a CHARMM angle parameter K ( Theta - Theta0 )^2 from the "
-                        "expression %1").arg(potential.function().toString()), CODELOC );
+                throw SireError::incompatible_error(
+                    QObject::tr("Cannot construct a CHARMM angle parameter K ( Theta - Theta0 )^2 from the "
+                                "expression %1")
+                        .arg(potential.function().toString()),
+                    CODELOC);
             }
 
             // Now check whether there is an additional Urey-Bradley term for this angle.
-            for (int j=0; j<num_ubs; ++j)
+            for (int j = 0; j < num_ubs; ++j)
             {
                 // Get the potential.
                 const auto potential = ub_potentials.constData()[j];
@@ -4384,8 +4364,7 @@ void CharmmPSF::getAnglesFrom(const ThreeAtomFunctions &funcs, const TwoAtomFunc
 
                     // If the index and type of the first and third atoms match, then add
                     // Urey-Bradley terms to the angle parameter string.
-                    if ((ub_idx0  == idx0)  and (ub_idx1  == idx2) and
-                        (ub_type0 == type0) and (ub_type1 == type2))
+                    if ((ub_idx0 == idx0) and (ub_idx1 == idx2) and (ub_type0 == type0) and (ub_type1 == type2))
                     {
                         try
                         {
@@ -4403,9 +4382,11 @@ void CharmmPSF::getAnglesFrom(const ThreeAtomFunctions &funcs, const TwoAtomFunc
                         }
                         catch (...)
                         {
-                            throw SireError::incompatible_error(QObject::tr(
-                                    "Cannot construct a CHARMM Urey-Bradley parameter K ( S - S0 )^2 from the "
-                                    "expression %1").arg(potential.function().toString()), CODELOC );
+                            throw SireError::incompatible_error(
+                                QObject::tr("Cannot construct a CHARMM Urey-Bradley parameter K ( S - S0 )^2 from the "
+                                            "expression %1")
+                                    .arg(potential.function().toString()),
+                                CODELOC);
                         }
                     }
                 }
@@ -4430,7 +4411,8 @@ void CharmmPSF::getAnglesFrom(const ThreeAtomFunctions &funcs, const TwoAtomFunc
 
 /** Construct PSF dihedral records and CHARMM parameters from the set of four-atom functions. */
 void CharmmPSF::getDihedralsFrom(const FourAtomFunctions &funcs, const Molecule &sire_mol,
-    QVector<QVector<qint64> > &local_dihedrals, QSet<QString> &dihedral_params, const PropertyMap &map)
+                                 QVector<QVector<qint64>> &local_dihedrals, QSet<QString> &dihedral_params,
+                                 const PropertyMap &map)
 {
     // Get the molecule info object.
     const auto molinfo = sire_mol.info();
@@ -4443,10 +4425,10 @@ void CharmmPSF::getDihedralsFrom(const FourAtomFunctions &funcs, const Molecule 
 
     // A multi-map between the start atom in a dihedral function and the atom quartet.
     // This allows us to reconstruct the correct order for the PSF records.
-    QMultiMap<int, QVector<qint64> > dihedral_map;
+    QMultiMap<int, QVector<qint64>> dihedral_map;
 
     // Populate the function map.
-    for (int i=0; i<num_funcs; ++i)
+    for (int i = 0; i < num_funcs; ++i)
     {
         // Get the potential.
         const auto potential = potentials.constData()[i];
@@ -4471,8 +4453,7 @@ void CharmmPSF::getDihedralsFrom(const FourAtomFunctions &funcs, const Molecule 
         // CHARMM dihedral parameters.
         if ((sire_mol.atom(idx0).hasProperty(map["atomtype"])) and
             (sire_mol.atom(idx1).hasProperty(map["atomtype"])) and
-            (sire_mol.atom(idx2).hasProperty(map["atomtype"])) and
-            (sire_mol.atom(idx3).hasProperty(map["atomtype"])))
+            (sire_mol.atom(idx2).hasProperty(map["atomtype"])) and (sire_mol.atom(idx3).hasProperty(map["atomtype"])))
         {
             // Extract the atom types.
             QString type0 = sire_mol.atom(idx0).property<QString>(map["atomtype"]);
@@ -4484,9 +4465,7 @@ void CharmmPSF::getDihedralsFrom(const FourAtomFunctions &funcs, const Molecule 
             QVector<QString> atom_types = {type0, type1, type2, type3};
 
             // Create the atom type part of the parameter string.
-            QString atom_string = QString("%1 %2 %3 %4")
-                .arg(type0, -4).arg(type1, -4)
-                .arg(type2, -4).arg(type3, -4);
+            QString atom_string = QString("%1 %2 %3 %4").arg(type0, -4).arg(type1, -4).arg(type2, -4).arg(type3, -4);
 
             try
             {
@@ -4503,10 +4482,10 @@ void CharmmPSF::getDihedralsFrom(const FourAtomFunctions &funcs, const Molecule 
 
                     // Create the bond parameter string, converting the phase to degrees.
                     QString param_string(QString("%1 %2 %3 %4")
-                        .arg(atom_string)
-                        .arg(kb, 10, 'f', 4)
-                        .arg(per, 3)
-                        .arg(qRadiansToDegrees(phase), 10, 'f', 2));
+                                             .arg(atom_string)
+                                             .arg(kb, 10, 'f', 4)
+                                             .arg(per, 3)
+                                             .arg(qRadiansToDegrees(phase), 10, 'f', 2));
 
                     // Insert into the parameter set.
                     dihedral_params.insert(param_string);
@@ -4514,9 +4493,12 @@ void CharmmPSF::getDihedralsFrom(const FourAtomFunctions &funcs, const Molecule 
             }
             catch (...)
             {
-                throw SireError::incompatible_error(QObject::tr(
+                throw SireError::incompatible_error(
+                    QObject::tr(
                         "Cannot construct CHARMM dihedral parameter terms, K ( 1 + cos(n Phi - Phi0) ], from the "
-                        "expression %1").arg(potential.function().toString()), CODELOC );
+                        "expression %1")
+                        .arg(potential.function().toString()),
+                    CODELOC);
             }
         }
 
@@ -4535,7 +4517,8 @@ void CharmmPSF::getDihedralsFrom(const FourAtomFunctions &funcs, const Molecule 
 
 /** Construct PSF improper records and CHARMM parameters from the set of four-atom functions. */
 void CharmmPSF::getImpropersFrom(const FourAtomFunctions &funcs, const Molecule &sire_mol,
-    QVector<QVector<qint64> > &local_impropers, QSet<QString> &improper_params, const PropertyMap &map)
+                                 QVector<QVector<qint64>> &local_impropers, QSet<QString> &improper_params,
+                                 const PropertyMap &map)
 {
     // Get the molecule info object.
     const auto molinfo = sire_mol.info();
@@ -4551,10 +4534,10 @@ void CharmmPSF::getImpropersFrom(const FourAtomFunctions &funcs, const Molecule 
 
     // A multi-map between the start atom in an improper function and the atom quartet.
     // This allows us to reconstruct the correct order for the PSF records.
-    QMultiMap<int, QVector<qint64> > improper_map;
+    QMultiMap<int, QVector<qint64>> improper_map;
 
     // Populate the function map.
-    for (int i=0; i<num_funcs; ++i)
+    for (int i = 0; i < num_funcs; ++i)
     {
         // Resize the vector.
         local_impropers[i].resize(4);
@@ -4578,8 +4561,7 @@ void CharmmPSF::getImpropersFrom(const FourAtomFunctions &funcs, const Molecule 
         // CHARMM improper parameters.
         if ((sire_mol.atom(idx0).hasProperty(map["atomtype"])) and
             (sire_mol.atom(idx1).hasProperty(map["atomtype"])) and
-            (sire_mol.atom(idx2).hasProperty(map["atomtype"])) and
-            (sire_mol.atom(idx3).hasProperty(map["atomtype"])))
+            (sire_mol.atom(idx2).hasProperty(map["atomtype"])) and (sire_mol.atom(idx3).hasProperty(map["atomtype"])))
         {
             // Extract the atom types.
             QString type0 = sire_mol.atom(idx0).property<QString>(map["atomtype"]);
@@ -4591,9 +4573,7 @@ void CharmmPSF::getImpropersFrom(const FourAtomFunctions &funcs, const Molecule 
             QVector<QString> atom_types = {type0, type1, type2, type3};
 
             // Create the atom type part of the parameter string.
-            QString atom_string = QString("%1 %2 %3 %4")
-                .arg(type0, -4).arg(type1, -4)
-                .arg(type2, -4).arg(type3, -4);
+            QString atom_string = QString("%1 %2 %3 %4").arg(type0, -4).arg(type1, -4).arg(type2, -4).arg(type3, -4);
 
             try
             {
@@ -4607,17 +4587,19 @@ void CharmmPSF::getImpropersFrom(const FourAtomFunctions &funcs, const Molecule 
                 // Convert out of plane angle to degrees.
                 r0 = qRadiansToDegrees(r0);
 
-                QString param_string = QString("%1 %2 %3 %4")
-                    .arg(atom_string).arg(kb, 10, 'f', 3).arg(0, 10).arg(r0, 10, 'f', 4);
+                QString param_string =
+                    QString("%1 %2 %3 %4").arg(atom_string).arg(kb, 10, 'f', 3).arg(0, 10).arg(r0, 10, 'f', 4);
 
                 // Insert the string into the parameter set.
                 improper_params.insert(param_string);
             }
             catch (...)
             {
-                throw SireError::incompatible_error(QObject::tr(
-                        "Cannot construct a CHARMM improper parameter K ( Psi - Psi0 )^2 from the "
-                        "expression %1").arg(potential.function().toString()), CODELOC );
+                throw SireError::incompatible_error(
+                    QObject::tr("Cannot construct a CHARMM improper parameter K ( Psi - Psi0 )^2 from the "
+                                "expression %1")
+                        .arg(potential.function().toString()),
+                    CODELOC);
             }
         }
 
@@ -4650,11 +4632,10 @@ QString CharmmPSF::getNonBondedFrom(const SireMol::Atom &atom, const PropertyMap
 
         // Extract the Lennard-Jones terms.
         double epsilon = lj.epsilon();
-        double rmin = lj.sigma() * qPow(2.0, 1.0/6.0);
+        double rmin = lj.sigma() * qPow(2.0, 1.0 / 6.0);
 
         // Create the parameter string.
-        param_string = QString("%1 0.000000 %2 %3")
-            .arg(type, -6).arg(-epsilon, 10, 'f', 6).arg(rmin, 12, 'f', 6);
+        param_string = QString("%1 0.000000 %2 %3").arg(type, -6).arg(-epsilon, 10, 'f', 6).arg(rmin, 12, 'f', 6);
 
         // There are also modified 1-4 parameters for this atom type.
         if (atom.hasProperty(map["LJ_14"]))
@@ -4663,11 +4644,10 @@ QString CharmmPSF::getNonBondedFrom(const SireMol::Atom &atom, const PropertyMap
 
             // Extract the Lennard-Jones terms.
             epsilon = lj.epsilon();
-            rmin = lj.sigma() * qPow(2.0, 1.0/6.0);
+            rmin = lj.sigma() * qPow(2.0, 1.0 / 6.0);
 
             // Append the terms to the parameter string.
-            param_string.append(QString("  0.000000 %2 %3")
-                .arg(-epsilon, 10, 'f', 6).arg(rmin, 12, 'f', 6));
+            param_string.append(QString("  0.000000 %2 %3").arg(-epsilon, 10, 'f', 6).arg(rmin, 12, 'f', 6));
         }
     }
 

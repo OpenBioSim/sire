@@ -37,13 +37,13 @@ SIRE_BEGIN_HEADER
 namespace SireMM
 {
 
-typedef SireMol::AtomProperty<LJParameter> AtomLJs;
+    typedef SireMol::AtomProperty<LJParameter> AtomLJs;
 
 }
 
-Q_DECLARE_METATYPE( SireMM::AtomLJs );
+Q_DECLARE_METATYPE(SireMM::AtomLJs);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireMM::LJParameter, SireMM::AtomLJs )
+SIRE_EXPOSE_ATOM_PROPERTY(SireMM::LJParameter, SireMM::AtomLJs)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 namespace SireMol
@@ -55,4 +55,3 @@ namespace SireMol
 SIRE_END_HEADER
 
 #endif
-

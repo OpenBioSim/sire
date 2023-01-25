@@ -37,56 +37,57 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-/** This class provides a temporary directory that is created in the
-    constructor, and deleted in the destructor.
+    /** This class provides a temporary directory that is created in the
+        constructor, and deleted in the destructor.
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT TempDir
-{
-public:
-    TempDir();
-    TempDir(const QString &temp_root);
-
-    ~TempDir();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT TempDir
     {
-        return "SireBase::TempDir";
-    }
+    public:
+        TempDir();
+        TempDir(const QString &temp_root);
 
-    const char* what() const
-    {
-        return TempDir::typeName();
-    }
+        ~TempDir();
 
-    QString toString() const;
+        static const char *typeName()
+        {
+            return "SireBase::TempDir";
+        }
 
-    QString path() const;
+        const char *what() const
+        {
+            return TempDir::typeName();
+        }
 
-    void doNotDelete();
+        QString toString() const;
 
-private:
-    TempDir(const TempDir&)
-    {}
+        QString path() const;
 
-    TempDir& operator=(const TempDir&)
-    {
-        return *this;
-    }
+        void doNotDelete();
 
-    void createDirectory(const QString &temp_root);
+    private:
+        TempDir(const TempDir &)
+        {
+        }
 
-    /** The temporary directory */
-    QDir tmpdir;
+        TempDir &operator=(const TempDir &)
+        {
+            return *this;
+        }
 
-    /** Whether or not to delete the directory at exit */
-    bool do_not_delete;
-};
+        void createDirectory(const QString &temp_root);
 
-}
+        /** The temporary directory */
+        QDir tmpdir;
 
-SIRE_EXPOSE_CLASS( SireBase::TempDir )
+        /** Whether or not to delete the directory at exit */
+        bool do_not_delete;
+    };
+
+} // namespace SireBase
+
+SIRE_EXPOSE_CLASS(SireBase::TempDir)
 
 SIRE_END_HEADER
 

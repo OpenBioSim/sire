@@ -32,15 +32,15 @@
 
 #include "SireIO/amberformat.h"
 
-#include "SireMol/mgname.h"
-#include "SireMol/molidx.h"
-#include "SireMol/molecule.h"
 #include "SireMol/atomcoords.h"
-#include "SireMol/atomvelocities.h"
 #include "SireMol/atomforces.h"
-#include "SireMol/moleditor.h"
-#include "SireMol/trajectory.h"
+#include "SireMol/atomvelocities.h"
 #include "SireMol/core.h"
+#include "SireMol/mgname.h"
+#include "SireMol/molecule.h"
+#include "SireMol/moleditor.h"
+#include "SireMol/molidx.h"
+#include "SireMol/trajectory.h"
 
 #include "SireVol/periodicbox.h"
 #include "SireVol/triclinicbox.h"
@@ -48,12 +48,12 @@
 #include "SireUnits/dimensions.h"
 #include "SireUnits/units.h"
 
+#include "SireBase/booleanproperty.h"
+#include "SireBase/generalunitproperty.h"
+#include "SireBase/getinstalldir.h"
 #include "SireBase/parallel.h"
 #include "SireBase/stringproperty.h"
-#include "SireBase/generalunitproperty.h"
 #include "SireBase/timeproperty.h"
-#include "SireBase/booleanproperty.h"
-#include "SireBase/getinstalldir.h"
 #include "SireBase/unittest.h"
 
 #include "SireIO/errors.h"
@@ -62,10 +62,10 @@
 
 #include "tostring.h"
 
-#include <QFile>
-#include <QFileInfo>
 #include <QDataStream>
 #include <QDebug>
+#include <QFile>
+#include <QFileInfo>
 
 using namespace SireIO;
 using namespace SireIO::detail;
@@ -77,7 +77,6 @@ using namespace SireVol;
 using namespace SireUnits;
 using namespace SireUnits::Dimension;
 using namespace SireStream;
-
 
 //// Thanks to the MDAnalysis parser
 //// (https://github.com/MDAnalysis/mdanalysis/blob/develop/package/MDAnalysis/lib/formats/include/readdcd.h)
@@ -92,9 +91,7 @@ QDataStream &operator<<(QDataStream &ds, const DCD &dcd)
 
     SharedDataStream sds(ds);
 
-    sds << dcd.coords
-        << dcd.parse_warnings
-        << static_cast<const MoleculeParser&>(dcd);
+    sds << dcd.coords << dcd.parse_warnings << static_cast<const MoleculeParser &>(dcd);
 
     return ds;
 }
@@ -107,9 +104,7 @@ QDataStream &operator>>(QDataStream &ds, DCD &dcd)
     {
         SharedDataStream sds(ds);
 
-        sds >> dcd.coords
-            >> dcd.parse_warnings
-            >> static_cast<MoleculeParser&>(dcd);
+        sds >> dcd.coords >> dcd.parse_warnings >> static_cast<MoleculeParser &>(dcd);
 
         try
         {
@@ -117,7 +112,7 @@ QDataStream &operator>>(QDataStream &ds, DCD &dcd)
             FortranFile file(dcd.filename());
             dcd.dcd.readHeader(file);
         }
-        catch(SireError::exception &e)
+        catch (SireError::exception &e)
         {
             qDebug() << "WARNING: Failed to reload DCD file" << dcd.filename();
             qDebug() << e.what() << ":" << e.error();
@@ -130,11 +125,12 @@ QDataStream &operator>>(QDataStream &ds, DCD &dcd)
     return ds;
 }
 
-static Vector cubic_angs(90,90,90);
+static Vector cubic_angs(90, 90, 90);
 
 /** Constructor */
-DCD::DCD() : ConcreteProperty<DCD,MoleculeParser>()
-{}
+DCD::DCD() : ConcreteProperty<DCD, MoleculeParser>()
+{
+}
 
 /** Return the format name that is used to identify this file format within Sire */
 QString DCD::formatName() const
@@ -145,7 +141,7 @@ QString DCD::formatName() const
 /** Return the suffixes that DCD files will typically use */
 QStringList DCD::formatSuffix() const
 {
-    static const QStringList suffixes = { "dcd" };
+    static const QStringList suffixes = {"dcd"};
     return suffixes;
 }
 
@@ -163,28 +159,22 @@ QString DCD::formatDescription() const
 }
 
 SireIO::detail::DCDFile::DCDFile()
-               : timestep(0), istart(0),
-                 nsavc(0), nfixed(0), natoms(0),
-                 nframes(0), first_frame_line(0),
-                 CHARMM_FORMAT(false),
-                 HAS_EXTRA_BLOCK(false),
-                 HAS_FOUR_DIMS(false)
-{}
+    : timestep(0), istart(0), nsavc(0), nfixed(0), natoms(0), nframes(0), first_frame_line(0), CHARMM_FORMAT(false),
+      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false)
+{
+}
 
 SireIO::detail::DCDFile::DCDFile(const QString &filename)
-               : timestep(0), istart(0),
-                 nsavc(0), nfixed(0), natoms(0),
-                 nframes(0), first_frame_line(0),
-                 CHARMM_FORMAT(false),
-                 HAS_EXTRA_BLOCK(false),
-                 HAS_FOUR_DIMS(false)
+    : timestep(0), istart(0), nsavc(0), nfixed(0), natoms(0), nframes(0), first_frame_line(0), CHARMM_FORMAT(false),
+      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false)
 {
     FortranFile file(filename);
     this->readHeader(file);
 }
 
 SireIO::detail::DCDFile::~DCDFile()
-{}
+{
+}
 
 void SireIO::detail::DCDFile::readHeader(FortranFile &file)
 {
@@ -193,9 +183,10 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
     auto typ = line.readChar(4);
 
     if (typ != "CORD")
-        throw SireIO::parse_error(QObject::tr(
-            "This does not look like a DCD file, because it does "
-            "not start with 'CORD'. Starts with %1.").arg(typ), CODELOC);
+        throw SireIO::parse_error(QObject::tr("This does not look like a DCD file, because it does "
+                                              "not start with 'CORD'. Starts with %1.")
+                                      .arg(typ),
+                                  CODELOC);
 
     auto ints = line.readInt32(9);
 
@@ -230,7 +221,7 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
 
     int ntitle = line.readInt32(1)[0];
 
-    for (int i=0; i<ntitle; ++i)
+    for (int i = 0; i < ntitle; ++i)
     {
         QString t = line.readChar(32).simplified().replace(QChar('\0'), "");
 
@@ -283,7 +274,7 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
 
         first_frame = QVector<Vector>(natoms);
 
-        for (int i=0; i<natoms; ++i)
+        for (int i = 0; i < natoms; ++i)
         {
             first_frame[i] = Vector(x[i], y[i], z[i]);
         }
@@ -306,11 +297,12 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
     {
         if (file.nRecords() != first_frame_line + (num_lines_per_frame * nframes))
         {
-            throw SireIO::parse_error(QObject::tr(
-                "Wrong number of records in the DCD file. Expect to have %1 "
-                "for %2 frames, but actually have %3.")
-                    .arg(first_frame_line + (num_lines_per_frame*nframes))
-                    .arg(nframes).arg(file.nRecords()), CODELOC);
+            throw SireIO::parse_error(QObject::tr("Wrong number of records in the DCD file. Expect to have %1 "
+                                                  "for %2 frames, but actually have %3.")
+                                          .arg(first_frame_line + (num_lines_per_frame * nframes))
+                                          .arg(nframes)
+                                          .arg(file.nRecords()),
+                                      CODELOC);
         }
     }
     else
@@ -322,7 +314,7 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
 
 double SireIO::detail::DCDFile::getTimeAtFrame(int frame) const
 {
-    return (istart*timestep) + (frame*timestep);
+    return (istart * timestep) + (frame * timestep);
 }
 
 double SireIO::detail::DCDFile::getCurrentTime() const
@@ -348,7 +340,7 @@ void SireIO::detail::DCDFile::setSpace(const Space &s)
     spc = s;
 }
 
-const Space& SireIO::detail::DCDFile::getSpace() const
+const Space &SireIO::detail::DCDFile::getSpace() const
 {
     return *spc;
 }
@@ -357,9 +349,9 @@ SpacePtr SireIO::detail::DCDFile::readSpace(FortranFile &file, int frame) const
 {
     if (frame < 0 or frame >= nframes)
     {
-        throw SireIO::parse_error(QObject::tr(
-            "Trying to access an invalid frame (%1) from a DCD with %2 frames.")
-                .arg(frame).arg(nframes), CODELOC);
+        throw SireIO::parse_error(
+            QObject::tr("Trying to access an invalid frame (%1) from a DCD with %2 frames.").arg(frame).arg(nframes),
+            CODELOC);
     }
 
     // get the line number for this frame
@@ -372,7 +364,7 @@ SpacePtr SireIO::detail::DCDFile::readSpace(FortranFile &file, int frame) const
     {
         num_lines_per_frame += 1;
 
-        int linenum = first_frame_line + (frame*num_lines_per_frame);
+        int linenum = first_frame_line + (frame * num_lines_per_frame);
 
         auto line = file[linenum];
 
@@ -389,9 +381,9 @@ QVector<Vector> SireIO::detail::DCDFile::readCoordinates(FortranFile &file, int 
 {
     if (frame < 0 or frame >= nframes)
     {
-        throw SireIO::parse_error(QObject::tr(
-            "Trying to access an invalid frame (%1) from a DCD with %2 frames.")
-                .arg(frame).arg(nframes), CODELOC);
+        throw SireIO::parse_error(
+            QObject::tr("Trying to access an invalid frame (%1) from a DCD with %2 frames.").arg(frame).arg(nframes),
+            CODELOC);
     }
 
     // get the line number for this frame
@@ -407,21 +399,21 @@ QVector<Vector> SireIO::detail::DCDFile::readCoordinates(FortranFile &file, int 
         skip_unitcell = 1;
     }
 
-    int linenum = first_frame_line + (frame*num_lines_per_frame) + skip_unitcell;
+    int linenum = first_frame_line + (frame * num_lines_per_frame) + skip_unitcell;
 
     if (nfixed == 0)
     {
         // read in the x, y, and z data
         auto line = file[linenum];
         auto x = line.readFloat32(natoms);
-        line = file[linenum+1];
+        line = file[linenum + 1];
         auto y = line.readFloat32(natoms);
-        line = file[linenum+2];
+        line = file[linenum + 2];
         auto z = line.readFloat32(natoms);
 
         QVector<Vector> coords(natoms);
 
-        for (int i=0; i<natoms; ++i)
+        for (int i = 0; i < natoms; ++i)
         {
             coords[i] = Vector(x[i], y[i], z[i]);
         }
@@ -448,7 +440,7 @@ Frame SireIO::detail::DCDFile::readFrame(FortranFile &file, int frame) const
     auto space = this->readSpace(file, frame);
     auto coords = this->readCoordinates(file, frame);
 
-    return Frame(coords, space, getTimeAtFrame(frame)*picosecond);
+    return Frame(coords, space, getTimeAtFrame(frame) * picosecond);
 }
 
 QString SireIO::detail::DCDFile::getTitle() const
@@ -461,7 +453,7 @@ void SireIO::detail::DCDFile::setTitle(QString t)
     // need to split into blocks of 32 characters
     title.clear();
 
-    while(t.length() > 32)
+    while (t.length() > 32)
     {
         title.append(t.mid(0, 32));
         t.remove(0, 32);
@@ -509,28 +501,24 @@ void DCD::parse(const QString &filename, const PropertyMap &map)
 
     coords = dcd.readCoordinates(file, 0);
 
-    //need to convert unit cell...
+    // need to convert unit cell...
 
-    //set the score, and save the warnings
-    double score = 100.0 / (parse_warnings.count()+1);
+    // set the score, and save the warnings
+    double score = 100.0 / (parse_warnings.count() + 1);
     this->setScore(score);
 }
 
 /** Construct by parsing the passed file */
-DCD::DCD(const QString &fname, const PropertyMap &map)
-    : ConcreteProperty<DCD,MoleculeParser>(map)
+DCD::DCD(const QString &fname, const PropertyMap &map) : ConcreteProperty<DCD, MoleculeParser>(map)
 {
     MoleculeParser::setFilename(fname);
     this->parse(MoleculeParser::filename(), map);
 }
 
 /** Construct by parsing the data in the passed text lines */
-DCD::DCD(const QStringList &lines, const PropertyMap &map)
-    : ConcreteProperty<DCD,MoleculeParser>(lines, map)
+DCD::DCD(const QStringList &lines, const PropertyMap &map) : ConcreteProperty<DCD, MoleculeParser>(lines, map)
 {
-    throw SireIO::parse_error( QObject::tr(
-            "You cannot create a binary DCD file from a set of text lines!"),
-                CODELOC );
+    throw SireIO::parse_error(QObject::tr("You cannot create a binary DCD file from a set of text lines!"), CODELOC);
 }
 
 static QVector<Vector> getCoordinates(const Molecule &mol, const PropertyName &coords_property)
@@ -540,24 +528,24 @@ static QVector<Vector> getCoordinates(const Molecule &mol, const PropertyName &c
         return QVector<Vector>();
     }
 
-    QVector<Vector> coords( mol.nAtoms() );
+    QVector<Vector> coords(mol.nAtoms());
 
     const auto molcoords = mol.property(coords_property).asA<AtomCoords>();
 
     const auto molinfo = mol.info();
 
-    for (int i=0; i<mol.nAtoms(); ++i)
+    for (int i = 0; i < mol.nAtoms(); ++i)
     {
-        //coords are already in angstroms :-)
-        coords[i] = molcoords.at( molinfo.cgAtomIdx( AtomIdx(i) ) );
+        // coords are already in angstroms :-)
+        coords[i] = molcoords.at(molinfo.cgAtomIdx(AtomIdx(i)));
     }
 
     return coords;
 }
 
-static bool hasData(const QVector< QVector<Vector> > &array)
+static bool hasData(const QVector<QVector<Vector>> &array)
 {
-    for (int i=0; i<array.count(); ++i)
+    for (int i = 0; i < array.count(); ++i)
     {
         if (not array[i].isEmpty())
             return true;
@@ -567,42 +555,39 @@ static bool hasData(const QVector< QVector<Vector> > &array)
 }
 
 /** Construct by extracting the necessary data from the passed System */
-DCD::DCD(const System &system, const PropertyMap &map)
-    : ConcreteProperty<DCD,MoleculeParser>()
+DCD::DCD(const System &system, const PropertyMap &map) : ConcreteProperty<DCD, MoleculeParser>()
 {
-    //get the MolNums of each molecule in the System - this returns the
-    //numbers in MolIdx order
+    // get the MolNums of each molecule in the System - this returns the
+    // numbers in MolIdx order
     const QVector<MolNum> molnums = system.getMoleculeNumbers().toVector();
 
     if (molnums.isEmpty())
     {
-        //no molecules in the system
+        // no molecules in the system
         this->operator=(DCD());
         return;
     }
 
-    //get the coordinates (and velocities if available) for each molecule in the system
+    // get the coordinates (and velocities if available) for each molecule in the system
     {
-        QVector< QVector<Vector> > all_coords(molnums.count());
+        QVector<QVector<Vector>> all_coords(molnums.count());
 
         const auto coords_property = map["coordinates"];
 
         if (usesParallel())
         {
-            tbb::parallel_for( tbb::blocked_range<int>(0,molnums.count()),
-                               [&](const tbb::blocked_range<int> r)
-            {
-                for (int i=r.begin(); i<r.end(); ++i)
+            tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()), [&](const tbb::blocked_range<int> r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
                 {
                     const auto mol = system[molnums[i]].molecule();
 
                     all_coords[i] = ::getCoordinates(mol, coords_property);
-                }
-            });
+                } });
         }
         else
         {
-            for (int i=0; i<molnums.count(); ++i)
+            for (int i = 0; i < molnums.count(); ++i)
             {
                 const auto mol = system[molnums[i]].molecule();
                 all_coords[i] = ::getCoordinates(mol, coords_property);
@@ -617,7 +602,7 @@ DCD::DCD(const System &system, const PropertyMap &map)
         }
     }
 
-    //extract the space of the system
+    // extract the space of the system
     SpacePtr space;
 
     if (system.containsProperty(map["space"]))
@@ -625,12 +610,12 @@ DCD::DCD(const System &system, const PropertyMap &map)
         space = system.property(map["space"]).asA<Space>();
     }
 
-    //extract the current time for the system
+    // extract the current time for the system
     double current_time = 0;
 
     if (system.containsProperty(map["time"]))
     {
-        const Property &prop = system.property( map["time"] );
+        const Property &prop = system.property(map["time"]);
 
         Time time;
 
@@ -644,22 +629,23 @@ DCD::DCD(const System &system, const PropertyMap &map)
 
     dcd.setCurrentTime(current_time);
 
-    //extract the title for the system
+    // extract the title for the system
     dcd.setTitle(system.name().value());
 }
 
 /** Copy constructor */
 DCD::DCD(const DCD &other)
-    : ConcreteProperty<DCD,MoleculeParser>(other),
-      coords(other.coords), dcd(other.dcd),
+    : ConcreteProperty<DCD, MoleculeParser>(other), coords(other.coords), dcd(other.dcd),
       parse_warnings(other.parse_warnings)
-{}
+{
+}
 
 /** Destructor */
 DCD::~DCD()
-{}
+{
+}
 
-DCD& DCD::operator=(const DCD &other)
+DCD &DCD::operator=(const DCD &other)
 {
     if (this != &other)
     {
@@ -683,12 +669,12 @@ bool DCD::operator!=(const DCD &other) const
     return not DCD::operator==(other);
 }
 
-const char* DCD::typeName()
+const char *DCD::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<DCD>() );
+    return QMetaType::typeName(qMetaTypeId<DCD>());
 }
 
-const char* DCD::what() const
+const char *DCD::what() const
 {
     return DCD::typeName();
 }
@@ -702,7 +688,9 @@ QString DCD::toString() const
     else
     {
         return QObject::tr("DCD( title() = %1, nAtoms() = %2, nFrames() = %3 )")
-                .arg(title()).arg(nAtoms()).arg(nFrames());
+            .arg(title())
+            .arg(nAtoms())
+            .arg(nFrames());
     }
 }
 
@@ -718,19 +706,19 @@ void DCD::addToSystem(System &system, const PropertyMap &map) const
     if (coords.isEmpty())
         return;
 
-    //first, we are going to work with the group of all molecules, which should
-    //be called "all". We have to assume that the molecules are ordered in "all"
-    //in the same order as they are in this restart file, with the data
-    //in MolIdx/AtomIdx order (this should be the default for all parsers!)
+    // first, we are going to work with the group of all molecules, which should
+    // be called "all". We have to assume that the molecules are ordered in "all"
+    // in the same order as they are in this restart file, with the data
+    // in MolIdx/AtomIdx order (this should be the default for all parsers!)
     MoleculeGroup allmols = system[MGName("all")];
 
     const int nmols = allmols.nMolecules();
 
-    QVector<int> atom_pointers(nmols+1, -1);
+    QVector<int> atom_pointers(nmols + 1, -1);
 
     int natoms = 0;
 
-    for (int i=0; i<nmols; ++i)
+    for (int i = 0; i < nmols; ++i)
     {
         atom_pointers[i] = natoms;
         const int nats = allmols[MolIdx(i)].data().info().nAtoms();
@@ -740,12 +728,14 @@ void DCD::addToSystem(System &system, const PropertyMap &map) const
     atom_pointers[nmols] = natoms;
 
     if (natoms != this->nAtoms())
-        throw SireIO::parse_error( QObject::tr(
-                "Incompatibility between the files, as this DCD file contains data "
-                "for %1 atom(s), while the other file(s) have created a system with "
-                "%2 atom(s)").arg(this->nAtoms()).arg(natoms), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Incompatibility between the files, as this DCD file contains data "
+                                              "for %1 atom(s), while the other file(s) have created a system with "
+                                              "%2 atom(s)")
+                                      .arg(this->nAtoms())
+                                      .arg(natoms),
+                                  CODELOC);
 
-    //next, copy the coordinates and optionally the velocities into the molecules
+    // next, copy the coordinates and optionally the velocities into the molecules
     QVector<Molecule> mols(nmols);
     Molecule *mols_array = mols.data();
 
@@ -761,14 +751,14 @@ void DCD::addToSystem(System &system, const PropertyMap &map) const
 
         auto moleditor = mol.edit();
 
-        auto coords = QVector< QVector<Vector> >(molinfo.nCutGroups());
+        auto coords = QVector<QVector<Vector>>(molinfo.nCutGroups());
 
-        for (int j=0; j<molinfo.nCutGroups(); ++j)
+        for (int j = 0; j < molinfo.nCutGroups(); ++j)
         {
             coords[j] = QVector<Vector>(molinfo.nAtoms(CGIdx(j)));
         }
 
-        for (int j=0; j<mol.nAtoms(); ++j)
+        for (int j = 0; j < mol.nAtoms(); ++j)
         {
             auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(j));
 
@@ -785,24 +775,22 @@ void DCD::addToSystem(System &system, const PropertyMap &map) const
     {
         if (usesParallel())
         {
-            tbb::parallel_for( tbb::blocked_range<int>(0,nmols),
-                            [&](tbb::blocked_range<int> r)
-            {
-                for (int i=r.begin(); i<r.end(); ++i)
+            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
                 {
                     add_moldata(i);
-                }
-            });
+                } });
         }
         else
         {
-            for (int i=0; i<nmols; ++i)
+            for (int i = 0; i < nmols; ++i)
             {
                 add_moldata(i);
             }
         }
 
-        system.update( Molecules(mols) );
+        system.update(Molecules(mols));
     }
 
     PropertyName space_property = map["space"];
@@ -811,8 +799,8 @@ void DCD::addToSystem(System &system, const PropertyMap &map) const
         system.setProperty(space_property.source(), dcd.getSpace());
     }
 
-    //update the System fileformat property to record that it includes
-    //data from this file format
+    // update the System fileformat property to record that it includes
+    // data from this file format
     QString fileformat = this->formatName();
 
     PropertyName fileformat_property = map["fileformat"];
@@ -820,10 +808,11 @@ void DCD::addToSystem(System &system, const PropertyMap &map) const
     try
     {
         QString last_format = system.property(fileformat_property).asA<StringProperty>().value();
-        fileformat = QString("%1,%2").arg(last_format,fileformat);
+        fileformat = QString("%1,%2").arg(last_format, fileformat);
     }
-    catch(...)
-    {}
+    catch (...)
+    {
+    }
 
     if (fileformat_property.hasSource())
     {
@@ -834,7 +823,7 @@ void DCD::addToSystem(System &system, const PropertyMap &map) const
 
     if (time_property.hasSource())
     {
-        system.setProperty(time_property.source(), GeneralUnitProperty(dcd.getCurrentTime()*picosecond));
+        system.setProperty(time_property.source(), GeneralUnitProperty(dcd.getCurrentTime() * picosecond));
     }
 }
 
@@ -872,13 +861,12 @@ int DCD::nFrames() const
 /** Return the ith frame */
 Frame DCD::getFrame(int i) const
 {
-    //will eventually look to see if we should cache this?
+    // will eventually look to see if we should cache this?
     QString f = this->filename();
 
     if (f.isEmpty())
-        throw SireIO::parse_error(QObject::tr(
-            "Cannot get the frame as the DCD filename has not been specified."),
-                CODELOC);
+        throw SireIO::parse_error(QObject::tr("Cannot get the frame as the DCD filename has not been specified."),
+                                  CODELOC);
 
     FortranFile file(this->filename());
     return dcd.readFrame(file, i);
@@ -891,7 +879,7 @@ QVector<SireMaths::Vector> DCD::coordinates() const
 }
 
 /** Return the parsed space */
-const Space& DCD::space() const
+const Space &DCD::space() const
 {
     return dcd.getSpace();
 }
@@ -903,27 +891,24 @@ QStringList DCD::warnings() const
 }
 
 /** Return this parser constructed from the passed filename */
-MoleculeParserPtr DCD::construct(const QString &filename,
-                                 const PropertyMap &map) const
+MoleculeParserPtr DCD::construct(const QString &filename, const PropertyMap &map) const
 {
-    //don't construct from a pointer as it could leak
-    return MoleculeParserPtr( DCD(filename,map) );
+    // don't construct from a pointer as it could leak
+    return MoleculeParserPtr(DCD(filename, map));
 }
 
 /** Return this parser constructed from the passed set of lines */
-MoleculeParserPtr DCD::construct(const QStringList &lines,
-                                 const PropertyMap &map) const
+MoleculeParserPtr DCD::construct(const QStringList &lines, const PropertyMap &map) const
 {
-    //don't construct from a pointer as it could leak
-    return MoleculeParserPtr( DCD(lines,map) );
+    // don't construct from a pointer as it could leak
+    return MoleculeParserPtr(DCD(lines, map));
 }
 
 /** Return this parser constructed from the passed SireSystem::System */
-MoleculeParserPtr DCD::construct(const SireSystem::System &system,
-                                 const PropertyMap &map) const
+MoleculeParserPtr DCD::construct(const SireSystem::System &system, const PropertyMap &map) const
 {
-    //don't construct from a pointer as it could leak
-    return MoleculeParserPtr( DCD(system,map) );
+    // don't construct from a pointer as it could leak
+    return MoleculeParserPtr(DCD(system, map));
 }
 
 /** Write this DCD to a file called 'filename'. This will write out

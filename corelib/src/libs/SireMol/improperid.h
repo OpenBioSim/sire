@@ -39,162 +39,142 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ImproperID;
+    class ImproperID;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ImproperID&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ImproperID&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ImproperID &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ImproperID &);
 
 namespace SireMaths
 {
-class Vector;
-class Torsion;
-}
+    class Vector;
+    class Torsion;
+} // namespace SireMaths
 
 namespace SireMol
 {
 
-class MoleculeData;
-class MoleculeInfoData;
-class AtomIdx;
+    class MoleculeData;
+    class MoleculeInfoData;
+    class AtomIdx;
 
-using SireMaths::Vector;
-using SireMaths::Torsion;
+    using SireMaths::Torsion;
+    using SireMaths::Vector;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-using boost::tuple;
+    using boost::tuple;
 
-/** This class provides a generic ID for an
-    improper angle between four atoms. The improper
-    angle is the angle 1-2-3-4, which has the effect of measuring
-    the angle between the plane formed by the atoms 1,3,4 and the
-    plane formed by the atoms 2,3,4. This measures by how much
-    atom 1 lies out of the plane formed by the atoms 2,3,4.
+    /** This class provides a generic ID for an
+        improper angle between four atoms. The improper
+        angle is the angle 1-2-3-4, which has the effect of measuring
+        the angle between the plane formed by the atoms 1,3,4 and the
+        plane formed by the atoms 2,3,4. This measures by how much
+        atom 1 lies out of the plane formed by the atoms 2,3,4.
 
-            1
-            |
-            2
-          /   \
-        3       4
+                1
+                |
+                2
+              /   \
+            3       4
 
-    The internal move Monte Carlo move changes an improper
-    by splitting the molecule about the 1-2 bond, and then
-    rotating the atom 1 group, and the atom 2-3-4 group about
-    the vector 3-4, about point 2.
+        The internal move Monte Carlo move changes an improper
+        by splitting the molecule about the 1-2 bond, and then
+        rotating the atom 1 group, and the atom 2-3-4 group about
+        the vector 3-4, about point 2.
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ImproperID : public SireID::ID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ImproperID&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ImproperID&);
-
-public:
-    ImproperID();
-    ImproperID(const AtomID &atom0, const AtomID &atom1,
-               const AtomID &atom2, const AtomID &atom3);
-
-    ImproperID(const ImproperID &other);
-
-    ~ImproperID();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ImproperID : public SireID::ID
     {
-        return ImproperID::typeName();
-    }
 
-    ImproperID* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ImproperID &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ImproperID &);
 
-    uint hash() const;
+    public:
+        ImproperID();
+        ImproperID(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3);
 
-    QString toString() const;
+        ImproperID(const ImproperID &other);
 
-    bool isNull() const;
+        ~ImproperID();
 
-    ImproperID& operator=(const ImproperID &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return ImproperID::typeName();
+        }
 
-    bool operator==(const ImproperID &other) const;
-    bool operator!=(const ImproperID &other) const;
+        ImproperID *clone() const;
 
-    bool equivalent(const ImproperID &other) const;
+        uint hash() const;
 
-    const AtomID& operator[](int i) const;
+        QString toString() const;
 
-    tuple<AtomIdx,AtomIdx,AtomIdx,AtomIdx>
-    map(const MoleculeInfoData &molinfo) const;
+        bool isNull() const;
 
-    tuple<AtomIdx,AtomIdx,AtomIdx,AtomIdx>
-    map(const MoleculeInfoData &mol0info,
-        const MoleculeInfoData &mol1info,
-        const MoleculeInfoData &mol2info,
-        const MoleculeInfoData &mol3info) const;
+        ImproperID &operator=(const ImproperID &other);
 
-    Torsion torsion(const MoleculeData &moldata,
-                    const PropertyMap &map = PropertyMap()) const;
+        bool operator==(const SireID::ID &other) const;
 
-    Torsion torsion(const MoleculeData &mol0data,
-                    const MoleculeData &mol1data,
-                    const MoleculeData &mol2data,
-                    const MoleculeData &mol3data,
-                    const PropertyMap &map = PropertyMap()) const;
+        bool operator==(const ImproperID &other) const;
+        bool operator!=(const ImproperID &other) const;
 
-    Torsion torsion(const MoleculeData &mol0data,
-                    const PropertyMap &map0,
-                    const MoleculeData &mol1data,
-                    const PropertyMap &map1,
-                    const MoleculeData &mol2data,
-                    const PropertyMap &map2,
-                    const MoleculeData &mol3data,
-                    const PropertyMap &map3) const;
+        bool equivalent(const ImproperID &other) const;
 
-    SireUnits::Dimension::Angle size(const MoleculeData &moldata,
-                                     const PropertyMap &map = PropertyMap()) const;
+        const AtomID &operator[](int i) const;
 
-    SireUnits::Dimension::Angle size(const MoleculeData &mol0data,
-                                     const MoleculeData &mol1data,
-                                     const MoleculeData &mol2data,
-                                     const MoleculeData &mol3data,
-                                     const PropertyMap &map = PropertyMap()) const;
+        tuple<AtomIdx, AtomIdx, AtomIdx, AtomIdx> map(const MoleculeInfoData &molinfo) const;
 
-    SireUnits::Dimension::Angle size(const MoleculeData &mol0data,
-                                     const PropertyMap &map0,
-                                     const MoleculeData &mol1data,
-                                     const PropertyMap &map1,
-                                     const MoleculeData &mol2data,
-                                     const PropertyMap &map2,
-                                     const MoleculeData &mol3data,
-                                     const PropertyMap &map3) const;
+        tuple<AtomIdx, AtomIdx, AtomIdx, AtomIdx> map(const MoleculeInfoData &mol0info, const MoleculeInfoData &mol1info,
+                                                      const MoleculeInfoData &mol2info,
+                                                      const MoleculeInfoData &mol3info) const;
 
-    const AtomID& atom0() const;
-    const AtomID& atom1() const;
-    const AtomID& atom2() const;
-    const AtomID& atom3() const;
+        Torsion torsion(const MoleculeData &moldata, const PropertyMap &map = PropertyMap()) const;
 
-private:
-    /** The identifiers of the four atoms */
-    AtomIdentifier atm0,atm1,atm2,atm3;
-};
+        Torsion torsion(const MoleculeData &mol0data, const MoleculeData &mol1data, const MoleculeData &mol2data,
+                        const MoleculeData &mol3data, const PropertyMap &map = PropertyMap()) const;
+
+        Torsion torsion(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
+                        const PropertyMap &map1, const MoleculeData &mol2data, const PropertyMap &map2,
+                        const MoleculeData &mol3data, const PropertyMap &map3) const;
+
+        SireUnits::Dimension::Angle size(const MoleculeData &moldata, const PropertyMap &map = PropertyMap()) const;
+
+        SireUnits::Dimension::Angle size(const MoleculeData &mol0data, const MoleculeData &mol1data,
+                                         const MoleculeData &mol2data, const MoleculeData &mol3data,
+                                         const PropertyMap &map = PropertyMap()) const;
+
+        SireUnits::Dimension::Angle size(const MoleculeData &mol0data, const PropertyMap &map0,
+                                         const MoleculeData &mol1data, const PropertyMap &map1,
+                                         const MoleculeData &mol2data, const PropertyMap &map2,
+                                         const MoleculeData &mol3data, const PropertyMap &map3) const;
+
+        const AtomID &atom0() const;
+        const AtomID &atom1() const;
+        const AtomID &atom2() const;
+        const AtomID &atom3() const;
+
+    private:
+        /** The identifiers of the four atoms */
+        AtomIdentifier atm0, atm1, atm2, atm3;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-SIRE_ALWAYS_INLINE uint qHash(const ImproperID &improperid)
-{
-    return improperid.hash();
-}
+    SIRE_ALWAYS_INLINE uint qHash(const ImproperID &improperid)
+    {
+        return improperid.hash();
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::ImproperID);
 
-SIRE_EXPOSE_CLASS( SireMol::ImproperID )
+SIRE_EXPOSE_CLASS(SireMol::ImproperID)
 
 SIRE_END_HEADER
 

@@ -28,68 +28,68 @@
 #ifndef SIREMM_RESTRAINTCOMPONENT_H
 #define SIREMM_RESTRAINTCOMPONENT_H
 
-#include "SireFF/ffcomponent.h"
 #include "SireFF/ff.h"
+#include "SireFF/ffcomponent.h"
 
 namespace SireMM
 {
-class RestraintComponent;
+    class RestraintComponent;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::RestraintComponent&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::RestraintComponent&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::RestraintComponent &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::RestraintComponent &);
 
 namespace SireMM
 {
 
-using SireFF::FF;
-using SireFF::FFName;
+    using SireFF::FF;
+    using SireFF::FFName;
 
-typedef SireFF::ComponentEnergy<RestraintComponent> RestraintEnergy;
+    typedef SireFF::ComponentEnergy<RestraintComponent> RestraintEnergy;
 
-/** This class represents a restraint component of a forcefield */
-class SIREMM_EXPORT RestraintComponent : public SireFF::FFComponent
-{
-public:
-    RestraintComponent(const FFName &ffname = FFName());
-    RestraintComponent(const FFName &ffname, const QString &suffix);
-
-    RestraintComponent(const SireCAS::Symbol &symbol);
-
-    RestraintComponent(const RestraintComponent &other);
-
-    ~RestraintComponent();
-
-    static const char* typeName();
-
-    const char* what() const
+    /** This class represents a restraint component of a forcefield */
+    class SIREMM_EXPORT RestraintComponent : public SireFF::FFComponent
     {
-        return RestraintComponent::typeName();
-    }
+    public:
+        RestraintComponent(const FFName &ffname = FFName());
+        RestraintComponent(const FFName &ffname, const QString &suffix);
 
-    RestraintComponent* clone() const
-    {
-        return new RestraintComponent(*this);
-    }
+        RestraintComponent(const SireCAS::Symbol &symbol);
 
-    const RestraintComponent& total() const
-    {
-        return *this;
-    }
+        RestraintComponent(const RestraintComponent &other);
 
-    void setEnergy(FF &ff, const RestraintEnergy &nrg) const;
-    void changeEnergy(FF &ff, const RestraintEnergy &nrg) const;
+        ~RestraintComponent();
 
-    SireCAS::Symbols symbols() const
-    {
-        return *this;
-    }
-};
+        static const char *typeName();
 
-}
+        const char *what() const
+        {
+            return RestraintComponent::typeName();
+        }
 
-Q_DECLARE_METATYPE( SireMM::RestraintComponent )
+        RestraintComponent *clone() const
+        {
+            return new RestraintComponent(*this);
+        }
 
-SIRE_EXPOSE_CLASS( SireMM::RestraintComponent )
+        const RestraintComponent &total() const
+        {
+            return *this;
+        }
+
+        void setEnergy(FF &ff, const RestraintEnergy &nrg) const;
+        void changeEnergy(FF &ff, const RestraintEnergy &nrg) const;
+
+        SireCAS::Symbols symbols() const
+        {
+            return *this;
+        }
+    };
+
+} // namespace SireMM
+
+Q_DECLARE_METATYPE(SireMM::RestraintComponent)
+
+SIRE_EXPOSE_CLASS(SireMM::RestraintComponent)
 
 #endif

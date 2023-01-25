@@ -34,80 +34,80 @@
 
 namespace SireFF
 {
-class FFIdentifier;
+    class FFIdentifier;
 }
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::FFIdentifier&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::FFIdentifier&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::FFIdentifier &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::FFIdentifier &);
 
 namespace SireFF
 {
 
-/** This is a generic holder for any FFID class!
+    /** This is a generic holder for any FFID class!
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFIdentifier : public FFID
-{
-
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const FFIdentifier&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFIdentifier&);
-
-public:
-    FFIdentifier();
-    FFIdentifier(const FFID &ffid);
-    FFIdentifier(const FFIdentifier &other);
-
-    ~FFIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFIdentifier : public FFID
     {
-        return FFIdentifier::typeName();
+
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const FFIdentifier &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, FFIdentifier &);
+
+    public:
+        FFIdentifier();
+        FFIdentifier(const FFID &ffid);
+        FFIdentifier(const FFIdentifier &other);
+
+        ~FFIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return FFIdentifier::typeName();
+        }
+
+        FFIdentifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const FFID &base() const;
+
+        FFIdentifier &operator=(const FFIdentifier &other);
+        FFIdentifier &operator=(const FFID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const FFIdentifier &other) const;
+        bool operator!=(const FFIdentifier &other) const;
+
+        bool operator==(const FFID &other) const;
+        bool operator!=(const FFID &other) const;
+
+        QList<FFIdx> map(const ForceFields &ffields) const;
+
+    private:
+        /** Pointer to the FFID */
+        boost::shared_ptr<FFID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const FFIdentifier &ffid)
+    {
+        return ffid.hash();
     }
 
-    FFIdentifier* clone() const;
-
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const FFID& base() const;
-
-    FFIdentifier& operator=(const FFIdentifier &other);
-    FFIdentifier& operator=(const FFID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const FFIdentifier &other) const;
-    bool operator!=(const FFIdentifier &other) const;
-
-    bool operator==(const FFID &other) const;
-    bool operator!=(const FFID &other) const;
-
-    QList<FFIdx> map(const ForceFields &ffields) const;
-
-private:
-    /** Pointer to the FFID */
-    boost::shared_ptr<FFID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const FFIdentifier &ffid)
-{
-    return ffid.hash();
-}
-
-}
+} // namespace SireFF
 
 #include "ffidx.h"
 
-Q_DECLARE_METATYPE( SireID::Specify<SireFF::FFID> )
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireFF::FFID> )
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireFF::FFID> )
+Q_DECLARE_METATYPE(SireID::Specify<SireFF::FFID>)
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireFF::FFID>)
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireFF::FFID>)
 
 Q_DECLARE_METATYPE(SireFF::FFIdentifier);
 

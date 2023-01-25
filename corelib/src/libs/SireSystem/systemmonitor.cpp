@@ -27,8 +27,8 @@
 
 #include <QMutex>
 
-#include "systemmonitor.h"
 #include "system.h"
+#include "systemmonitor.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -41,16 +41,14 @@ using namespace SireStream;
 ///////// Implementation of SystemMonitor
 /////////
 
-static const RegisterMetaType<SystemMonitor> r_sysmon( MAGIC_ONLY,
-                                                       "SireSystem::SystemMonitor" );
+static const RegisterMetaType<SystemMonitor> r_sysmon(MAGIC_ONLY, "SireSystem::SystemMonitor");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const SystemMonitor &sysmon)
+QDataStream &operator<<(QDataStream &ds, const SystemMonitor &sysmon)
 {
     writeHeader(ds, r_sysmon, 1);
 
-    ds << static_cast<const Property&>(sysmon);
+    ds << static_cast<const Property &>(sysmon);
 
     return ds;
 }
@@ -62,7 +60,7 @@ QDataStream &operator>>(QDataStream &ds, SystemMonitor &sysmon)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(sysmon);
+        ds >> static_cast<Property &>(sysmon);
     }
     else
         throw version_error(v, "1", r_sysmon, CODELOC);
@@ -72,16 +70,18 @@ QDataStream &operator>>(QDataStream &ds, SystemMonitor &sysmon)
 
 /** Constructor */
 SystemMonitor::SystemMonitor() : Property()
-{}
+{
+}
 
 /** Copy constructor */
-SystemMonitor::SystemMonitor(const SystemMonitor &other)
-           : Property(other)
-{}
+SystemMonitor::SystemMonitor(const SystemMonitor &other) : Property(other)
+{
+}
 
 /** Destructor */
 SystemMonitor::~SystemMonitor()
-{}
+{
+}
 
 /////////
 ///////// Implementation of NullMonitor
@@ -90,12 +90,11 @@ SystemMonitor::~SystemMonitor()
 static const RegisterMetaType<NullMonitor> r_nullmonitor;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const NullMonitor &nullmonitor)
+QDataStream &operator<<(QDataStream &ds, const NullMonitor &nullmonitor)
 {
     writeHeader(ds, r_nullmonitor, 1);
 
-    ds << static_cast<const SystemMonitor&>(nullmonitor);
+    ds << static_cast<const SystemMonitor &>(nullmonitor);
 
     return ds;
 }
@@ -107,7 +106,7 @@ QDataStream &operator>>(QDataStream &ds, NullMonitor &nullmonitor)
 
     if (v == 1)
     {
-        ds >> static_cast<SystemMonitor&>(nullmonitor);
+        ds >> static_cast<SystemMonitor &>(nullmonitor);
     }
     else
         throw version_error(v, "1", r_nullmonitor, CODELOC);
@@ -116,20 +115,22 @@ QDataStream &operator>>(QDataStream &ds, NullMonitor &nullmonitor)
 }
 
 /** Constructor */
-NullMonitor::NullMonitor() : ConcreteProperty<NullMonitor,SystemMonitor>()
-{}
+NullMonitor::NullMonitor() : ConcreteProperty<NullMonitor, SystemMonitor>()
+{
+}
 
 /** Copy constructor */
-NullMonitor::NullMonitor(const NullMonitor &other)
-            : ConcreteProperty<NullMonitor,SystemMonitor>(other)
-{}
+NullMonitor::NullMonitor(const NullMonitor &other) : ConcreteProperty<NullMonitor, SystemMonitor>(other)
+{
+}
 
 /** Destructor */
 NullMonitor::~NullMonitor()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullMonitor& NullMonitor::operator=(const NullMonitor &other)
+NullMonitor &NullMonitor::operator=(const NullMonitor &other)
 {
     SystemMonitor::operator=(other);
     return *this;
@@ -155,14 +156,15 @@ void NullMonitor::monitor(System &system)
 
 /** There are no statistics to clear */
 void NullMonitor::clearStatistics()
-{}
+{
+}
 
-const NullMonitor& SystemMonitor::null()
+const NullMonitor &SystemMonitor::null()
 {
     return *(create_shared_null<NullMonitor>());
 }
 
-const char* NullMonitor::typeName()
+const char *NullMonitor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullMonitor>() );
+    return QMetaType::typeName(qMetaTypeId<NullMonitor>());
 }

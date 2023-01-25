@@ -38,91 +38,85 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class MolViewProperty;
+    class MolViewProperty;
 }
 
 namespace SireMol
 {
 
-class MoleculeInfoData;
-class MoleculeView;
-class AtomSelection;
-class AtomIdx;
-class AtomMatcher;
+    class MoleculeInfoData;
+    class MoleculeView;
+    class AtomSelection;
+    class AtomIdx;
+    class AtomMatcher;
 
-/** This is the base class of all properties that are specifically
-    attached to views of a molecule (e.g. AtomProperty, ResProperty,
-    SegProperty etc.)
+    /** This is the base class of all properties that are specifically
+        attached to views of a molecule (e.g. AtomProperty, ResProperty,
+        SegProperty etc.)
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MolViewProperty : public SireBase::Property
-{
-
-public:
-    MolViewProperty();
-
-    MolViewProperty(const MolViewProperty &other);
-
-    ~MolViewProperty();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MolViewProperty : public SireBase::Property
     {
-        return "SireMol::MolViewProperty";
-    }
 
-    virtual bool isCompatibleWith(const MoleculeInfoData &molinfo) const=0;
-    virtual bool isCompatibleWith(const MoleculeInfo &molinfo) const;
+    public:
+        MolViewProperty();
 
-    SireBase::PropertyPtr makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                             const AtomMatcher &atommatcher) const;
-    SireBase::PropertyPtr makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                             const QHash<AtomIdx,AtomIdx> &map) const;
+        MolViewProperty(const MolViewProperty &other);
 
-    SireBase::PropertyPtr makeCompatibleWith(const MoleculeInfoData &molinfo) const;
+        ~MolViewProperty();
 
-    SireBase::PropertyPtr makeCompatibleWith(const MoleculeView &mol) const;
-    SireBase::PropertyPtr makeCompatibleWith(const MoleculeView &mol,
-                                             const AtomMatcher &atommatcher) const;
-    SireBase::PropertyPtr makeCompatibleWith(const MoleculeView &mol,
-                                             const QHash<AtomIdx,AtomIdx> &map) const;
+        static const char *typeName()
+        {
+            return "SireMol::MolViewProperty";
+        }
 
-    void assertCompatibleWith(const MoleculeInfoData &molinfo) const;
-    void assertCompatibleWith(const MoleculeInfo &molinfo) const;
+        virtual bool isCompatibleWith(const MoleculeInfoData &molinfo) const = 0;
+        virtual bool isCompatibleWith(const MoleculeInfo &molinfo) const;
 
-protected:
-    virtual SireBase::PropertyPtr
-                    _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                            const AtomMatcher &atommatcher) const;
-    virtual SireBase::PropertyPtr
-                    _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                            const QHash<AtomIdx,AtomIdx> &map) const;
-};
+        SireBase::PropertyPtr makeCompatibleWith(const MoleculeInfoData &molinfo, const AtomMatcher &atommatcher) const;
+        SireBase::PropertyPtr makeCompatibleWith(const MoleculeInfoData &molinfo, const QHash<AtomIdx, AtomIdx> &map) const;
 
-/** This specifically is a property that pertains to an entire
-    molecule (e.g. a selection of atoms from that molecule)
+        SireBase::PropertyPtr makeCompatibleWith(const MoleculeInfoData &molinfo) const;
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MoleculeProperty : public MolViewProperty
-{
-public:
-    MoleculeProperty();
+        SireBase::PropertyPtr makeCompatibleWith(const MoleculeView &mol) const;
+        SireBase::PropertyPtr makeCompatibleWith(const MoleculeView &mol, const AtomMatcher &atommatcher) const;
+        SireBase::PropertyPtr makeCompatibleWith(const MoleculeView &mol, const QHash<AtomIdx, AtomIdx> &map) const;
 
-    MoleculeProperty(const MoleculeProperty &other);
+        void assertCompatibleWith(const MoleculeInfoData &molinfo) const;
+        void assertCompatibleWith(const MoleculeInfo &molinfo) const;
 
-    ~MoleculeProperty();
+    protected:
+        virtual SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                              const AtomMatcher &atommatcher) const;
+        virtual SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                              const QHash<AtomIdx, AtomIdx> &map) const;
+    };
 
-    static const char* typeName()
+    /** This specifically is a property that pertains to an entire
+        molecule (e.g. a selection of atoms from that molecule)
+
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MoleculeProperty : public MolViewProperty
     {
-        return "SireMol::MoleculeProperty";
-    }
-};
+    public:
+        MoleculeProperty();
 
-SIRE_EXPOSE_CLASS( SireMol::MolViewProperty )
-SIRE_EXPOSE_CLASS( SireMol::MoleculeProperty )
+        MoleculeProperty(const MoleculeProperty &other);
 
-}
+        ~MoleculeProperty();
+
+        static const char *typeName()
+        {
+            return "SireMol::MoleculeProperty";
+        }
+    };
+
+    SIRE_EXPOSE_CLASS(SireMol::MolViewProperty)
+    SIRE_EXPOSE_CLASS(SireMol::MoleculeProperty)
+
+} // namespace SireMol
 
 SIRE_END_HEADER
 

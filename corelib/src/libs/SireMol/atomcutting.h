@@ -34,46 +34,45 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class AtomCutting;
+    class AtomCutting;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AtomCutting&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AtomCutting&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomCutting &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomCutting &);
 
 namespace SireMol
 {
 
-/** This is a cutting function that divides up a molecule into
-    CutGroups based on atoms - each atom is placed into
-    a different CutGroup
+    /** This is a cutting function that divides up a molecule into
+        CutGroups based on atoms - each atom is placed into
+        a different CutGroup
 
-    @author Gaetano Calabro'
-*/
-class SIREMOL_EXPORT AtomCutting
-        : public SireBase::ConcreteProperty<AtomCutting,CuttingFunction>
-{
-public:
-    AtomCutting();
+        @author Gaetano Calabro'
+    */
+    class SIREMOL_EXPORT AtomCutting : public SireBase::ConcreteProperty<AtomCutting, CuttingFunction>
+    {
+    public:
+        AtomCutting();
 
-    AtomCutting(const AtomCutting &other);
+        AtomCutting(const AtomCutting &other);
 
-    ~AtomCutting();
+        ~AtomCutting();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    AtomCutting& operator=(const AtomCutting &other);
+        AtomCutting &operator=(const AtomCutting &other);
 
-    bool operator==(const AtomCutting &other) const;
-    bool operator!=(const AtomCutting &other) const;
+        bool operator==(const AtomCutting &other) const;
+        bool operator!=(const AtomCutting &other) const;
 
-    MolStructureEditor operator()(MolStructureEditor &moleditor) const;
-};
+        MolStructureEditor operator()(MolStructureEditor &moleditor) const;
+    };
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::AtomCutting );
+Q_DECLARE_METATYPE(SireMol::AtomCutting);
 
-SIRE_EXPOSE_CLASS( SireMol::AtomCutting )
+SIRE_EXPOSE_CLASS(SireMol::AtomCutting)
 
 SIRE_END_HEADER
 

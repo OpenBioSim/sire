@@ -39,14 +39,14 @@ SIRE_BEGIN_HEADER
 namespace SireMaths
 {
 
-class NMatrix;
-class NVector;
+    class NMatrix;
+    class NVector;
 
-std::pair<NVector,NMatrix> dsyev(const NMatrix &A, bool upper=true);
+    std::pair<NVector, NMatrix> dsyev(const NMatrix &A, bool upper = true);
 
-NVector dsyev_eigenvalues(const NMatrix &A, bool upper=true);
+    NVector dsyev_eigenvalues(const NMatrix &A, bool upper = true);
 
-}
+} // namespace SireMaths
 
 SIRE_END_HEADER
 

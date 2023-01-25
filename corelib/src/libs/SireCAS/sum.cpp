@@ -27,15 +27,16 @@
 
 #include <QMap>
 
-#include "sum.h"
-#include "expression.h"
-#include "symbols.h"
-#include "functions.h"
 #include "complexvalues.h"
-#include "values.h"
-#include "identities.h"
+#include "expression.h"
+#include "expressions.h"
+#include "functions.h"
 #include "i.h"
+#include "identities.h"
 #include "integrationconstant.h"
+#include "sum.h"
+#include "symbols.h"
+#include "values.h"
 
 #include "SireStream/datastream.h"
 
@@ -49,16 +50,14 @@ static const RegisterMetaType<Sum> r_sum;
 /** Return a hash for the Sum */
 uint Sum::hash() const
 {
-    return ( r_sum.magicID() << 16 ) | ( (posparts.count() << 8) & 0x0000FF00 )
-                                     | ( negparts.count() & 0x000000FF );
+    return (r_sum.magicID() << 16) | ((posparts.count() << 8) & 0x0000FF00) | (negparts.count() & 0x000000FF);
 }
 
 /** Serialise a Sum to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Sum &sum)
 {
-    writeHeader(ds, r_sum, 1) << sum.posparts.values()
-                              << sum.negparts.values() << sum.strtval
-                              << static_cast<const ExBase&>(sum);
+    writeHeader(ds, r_sum, 1) << sum.posparts.values() << sum.negparts.values() << sum.strtval
+                              << static_cast<const ExBase &>(sum);
     return ds;
 }
 
@@ -74,17 +73,16 @@ QDataStream &operator>>(QDataStream &ds, Sum &sum)
         sum.posparts.clear();
         sum.negparts.clear();
 
-        ds >> posparts >> negparts >> sum.strtval
-           >> static_cast<ExBase&>(sum);
+        ds >> posparts >> negparts >> sum.strtval >> static_cast<ExBase &>(sum);
 
         foreach (Expression ex, posparts)
         {
-            sum.posparts.insert( ex.base(), ex );
+            sum.posparts.insert(ex.base(), ex);
         }
 
         foreach (Expression ex, negparts)
         {
-            sum.negparts.insert( ex.base(), ex );
+            sum.negparts.insert(ex.base(), ex);
         }
     }
     else
@@ -95,7 +93,8 @@ QDataStream &operator>>(QDataStream &ds, Sum &sum)
 
 /** Construct an empty (zero) sum */
 Sum::Sum() : ExBase(), strtval(0)
-{}
+{
+}
 
 /** Construct the sum of two expressions */
 Sum::Sum(const Expression &ex0, const Expression &ex1) : ExBase(), strtval(0)
@@ -108,28 +107,27 @@ Sum::Sum(const Expression &ex0, const Expression &ex1) : ExBase(), strtval(0)
 Sum::Sum(const Expressions &expressions) : ExBase(), strtval(0)
 {
     int n = expressions.count();
-    for (int i=0; i<n; ++i)
+    for (int i = 0; i < n; ++i)
         this->add(expressions.at(i));
 }
 
 /** Copy constructor */
-Sum::Sum(const Sum &other)
-    : ExBase(), posparts(other.posparts), negparts(other.negparts),
-      strtval(other.strtval)
-{}
+Sum::Sum(const Sum &other) : ExBase(), posparts(other.posparts), negparts(other.negparts), strtval(other.strtval)
+{
+}
 
 /** Destructor */
 Sum::~Sum()
-{}
+{
+}
 
 /** Comparison operator */
 bool Sum::operator==(const ExBase &other) const
 {
-    const Sum *othersum = dynamic_cast<const Sum*>(&other);
+    const Sum *othersum = dynamic_cast<const Sum *>(&other);
 
-    return othersum != 0 and typeid(*this).name() == typeid(other).name() and
-               othersum->posparts == posparts and othersum->negparts == negparts and
-                   strtval == othersum->strtval;
+    return othersum != 0 and typeid(*this).name() == typeid(other).name() and othersum->posparts == posparts and
+           othersum->negparts == negparts and strtval == othersum->strtval;
 }
 
 /** Return a string representation of the sum */
@@ -142,26 +140,22 @@ QString Sum::toString() const
 
     int i = 0;
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
         if (i == 0)
             ret = it->toString();
         else
-            ret = QString("%1 + %2").arg(ret,it->toString());
+            ret = QString("%1 + %2").arg(ret, it->toString());
 
         ++i;
     }
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
         if (i == 0)
             ret = QString("-%1").arg(it->toString());
         else
-            ret = QString("%1 - %2").arg(ret,it->toString());
+            ret = QString("%1 - %2").arg(ret, it->toString());
 
         ++i;
     }
@@ -189,26 +183,22 @@ QString Sum::toOpenMMString() const
 
     int i = 0;
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
         if (i == 0)
             ret = it->toOpenMMString();
         else
-            ret = QString("%1 + %2").arg(ret,it->toOpenMMString());
+            ret = QString("%1 + %2").arg(ret, it->toOpenMMString());
 
         ++i;
     }
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
         if (i == 0)
             ret = QString("-%1").arg(it->toOpenMMString());
         else
-            ret = QString("%1 - %2").arg(ret,it->toOpenMMString());
+            ret = QString("%1 - %2").arg(ret, it->toOpenMMString());
 
         ++i;
     }
@@ -225,7 +215,6 @@ QString Sum::toOpenMMString() const
 
     return ret;
 }
-
 
 /** Remove the current version of 'ex', which will contain its current factor.
     Expression(0) will be returned if this expression is not in this Sum. */
@@ -247,40 +236,40 @@ void Sum::add(double fac, const ExpressionBase &ex)
 {
     if (ex.isA<IntegrationConstant>())
     {
-        //do not add these together - remove the current one...
+        // do not add these together - remove the current one...
         this->take(ex);
 
-        //add 1 IntegrationConstant to the sum
-        posparts.insert( ex, ex );
+        // add 1 IntegrationConstant to the sum
+        posparts.insert(ex, ex);
     }
     else
     {
-        //get any expression that is currently in this Sum with this base
+        // get any expression that is currently in this Sum with this base
         Expression current_ex = this->take(ex);
 
-        //get the current factor of this expression
+        // get the current factor of this expression
         double current_factor = current_ex.factor();
 
-        //calculate the new factor
+        // calculate the new factor
         double new_factor = current_factor + fac;
 
         if (new_factor > 0)
-            posparts.insert( ex, new_factor * ex );
+            posparts.insert(ex, new_factor * ex);
         else if (new_factor < 0)
-            negparts.insert( ex, -new_factor * ex );
+            negparts.insert(ex, -new_factor * ex);
     }
 }
 
 /** Add the expression 'ex' to this sum */
 void Sum::add(const Expression &ex)
 {
-    //no need to add zero onto a sum!
+    // no need to add zero onto a sum!
     if (ex.isZero())
         return;
 
     else if (ex.base().isA<I>())
     {
-        //this is a multiple of the complex number 'i'
+        // this is a multiple of the complex number 'i'
         add(ex.factor(), ex.base());
     }
     else if (ex.isConstant())
@@ -290,11 +279,11 @@ void Sum::add(const Expression &ex)
         strtval += exval.real();
 
         if (not exval.isReal())
-            this->add( exval.imag() * I() );
+            this->add(exval.imag() * I());
     }
     else if (ex.base().isA<Sum>())
     {
-        //add the elements of the sum individually
+        // add the elements of the sum individually
         const Sum &sum = ex.base().asA<Sum>();
 
         if (posparts.count() == 0 and negparts.count() == 0)
@@ -317,21 +306,19 @@ void Sum::add(const Expression &ex)
             }
         }
 
-        for (QHash<ExpressionBase,Expression>::const_iterator it = sum.posparts.begin();
-             it != sum.posparts.end();
+        for (QHash<ExpressionBase, Expression>::const_iterator it = sum.posparts.begin(); it != sum.posparts.end();
              ++it)
         {
-           this->add( ex.factor()*it->factor(), it->base() );
+            this->add(ex.factor() * it->factor(), it->base());
         }
 
-        for (QHash<ExpressionBase,Expression>::const_iterator it = sum.negparts.begin();
-             it != sum.negparts.end();
+        for (QHash<ExpressionBase, Expression>::const_iterator it = sum.negparts.begin(); it != sum.negparts.end();
              ++it)
         {
-            this->add( -(ex.factor()*it->factor()), it->base() );
+            this->add(-(ex.factor() * it->factor()), it->base());
         }
 
-        //add the start value to the sum
+        // add the start value to the sum
         strtval += ex.factor() * sum.strtval;
     }
     else
@@ -351,12 +338,12 @@ Expression Sum::reduce() const
     {
         if (negparts.count() == 0 and posparts.count() == 1)
         {
-            //sum contains only the positive part
+            // sum contains only the positive part
             return posparts.values()[0];
         }
         else if (posparts.count() == 0 and negparts.count() == 1)
         {
-            //sum contains only the negative part
+            // sum contains only the negative part
             return negparts.values()[0].negate();
         }
     }
@@ -370,20 +357,16 @@ Expression Sum::simplify(int options) const
     Sum ret;
     ret.strtval = strtval;
 
-    //simplify the positive parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    // simplify the positive parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
-        ret.add( it->simplify(options) );
+        ret.add(it->simplify(options));
     }
 
-    //now simplify the negative parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    // now simplify the negative parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
-        ret.add( -(it->simplify(options)) );
+        ret.add(-(it->simplify(options)));
     }
 
     return ret;
@@ -395,20 +378,16 @@ Expression Sum::conjugate() const
     Sum ret;
     ret.strtval = strtval;
 
-    //simplify the positive parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    // simplify the positive parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
-        ret.add( it->conjugate() );
+        ret.add(it->conjugate());
     }
 
-    //now simplify the negative parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    // now simplify the negative parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
-        ret.add( -(it->conjugate()) );
+        ret.add(-(it->conjugate()));
     }
 
     return ret;
@@ -420,16 +399,12 @@ double Sum::evaluate(const Values &values) const
 {
     double result = strtval;
 
-    for ( QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-          it != posparts.end();
-          ++it )
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
         result += it->evaluate(values);
     }
 
-    for ( QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-          it != negparts.end();
-          ++it )
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
         result -= it->evaluate(values);
     }
@@ -443,16 +418,12 @@ Complex Sum::evaluate(const ComplexValues &values) const
 {
     Complex result(strtval);
 
-    for ( QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-          it != posparts.end();
-          ++it )
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
         result += it->evaluate(values);
     }
 
-    for ( QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-          it != negparts.end();
-          ++it )
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
         result -= it->evaluate(values);
     }
@@ -465,20 +436,16 @@ Expression Sum::differentiate(const Symbol &symbol) const
 {
     Sum diff;
 
-    //add the differentials of all of the positive parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    // add the differentials of all of the positive parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
-        diff.add( it->differentiate(symbol) );
+        diff.add(it->differentiate(symbol));
     }
 
-    //now add the differentials of all of the negative parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    // now add the differentials of all of the negative parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
-        diff.add( -(it->differentiate(symbol)) );
+        diff.add(-(it->differentiate(symbol)));
     }
 
     return diff.reduce();
@@ -490,25 +457,21 @@ Expression Sum::integrate(const Symbol &symbol) const
 {
     Sum integ;
 
-    //add the integrals of all of the positive parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    // add the integrals of all of the positive parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
-        integ.add( it->integrate(symbol) );
+        integ.add(it->integrate(symbol));
     }
 
-    //now add the integrals of all of the negative parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    // now add the integrals of all of the negative parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
-        integ.add( -(it->integrate(symbol)) );
+        integ.add(-(it->integrate(symbol)));
     }
 
-    //add strtval * symbol
+    // add strtval * symbol
     if (not SireMaths::isZero(strtval))
-        integ.add( strtval * symbol );
+        integ.add(strtval * symbol);
 
     return integ.reduce();
 }
@@ -518,20 +481,16 @@ Expression Sum::series(const Symbol &symbol, int n) const
 {
     Sum s;
 
-    //add the expansions of all of the positive parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    // add the expansions of all of the positive parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
-        s.add( it->series(symbol,n) );
+        s.add(it->series(symbol, n));
     }
 
-    //now add the expansions of all of the negative parts...
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    // now add the expansions of all of the negative parts...
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
-        s.add( -(it->series(symbol,n)) );
+        s.add(-(it->series(symbol, n)));
     }
 
     s.strtval = strtval;
@@ -549,18 +508,14 @@ Expression Sum::substitute(const Identities &identities) const
         Sum subsum;
         subsum.strtval = strtval;
 
-        for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-             it != posparts.end();
-             ++it)
+        for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
         {
-            subsum.add( it->substitute(identities) );
+            subsum.add(it->substitute(identities));
         }
 
-        for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-             it != negparts.end();
-             ++it)
+        for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
         {
-            subsum.add( it->negate().substitute(identities) );
+            subsum.add(it->negate().substitute(identities));
         }
 
         return subsum.reduce();
@@ -570,17 +525,13 @@ Expression Sum::substitute(const Identities &identities) const
 /** Return whether or not this is constant */
 bool Sum::isConstant() const
 {
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
         if (not it->isConstant())
             return false;
     }
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
         if (not it->isConstant())
             return false;
@@ -592,17 +543,13 @@ bool Sum::isConstant() const
 /** Return whether or not this is a function of 'symbol' */
 bool Sum::isFunction(const Symbol &symbol) const
 {
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
         if (it->isFunction(symbol))
             return true;
     }
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
         if (it->isFunction(symbol))
             return true;
@@ -614,17 +561,13 @@ bool Sum::isFunction(const Symbol &symbol) const
 /** Return whether or not this function contains any complex parts */
 bool Sum::isComplex() const
 {
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
         if (it->isComplex())
             return true;
     }
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
         if (it->isComplex())
             return true;
@@ -638,18 +581,14 @@ Symbols Sum::symbols() const
 {
     Symbols syms;
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
-        syms.insert( it->symbols() );
+        syms.insert(it->symbols());
     }
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
-        syms.insert( it->symbols() );
+        syms.insert(it->symbols());
     }
 
     return syms;
@@ -660,18 +599,14 @@ Functions Sum::functions() const
 {
     Functions funcs;
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
-        funcs.insert( it->functions() );
+        funcs.insert(it->functions());
     }
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
-        funcs.insert( it->functions() );
+        funcs.insert(it->functions());
     }
 
     return funcs;
@@ -682,23 +617,19 @@ Expressions Sum::children() const
 {
     Expressions exps;
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = posparts.begin();
-         it != posparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.begin(); it != posparts.end(); ++it)
     {
-        exps.append( *it );
+        exps.append(*it);
     }
 
-    for (QHash<ExpressionBase,Expression>::const_iterator it = negparts.begin();
-         it != negparts.end();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.begin(); it != negparts.end(); ++it)
     {
-        exps.append( it->negate() );
+        exps.append(it->negate());
     }
 
     if (strtval != 0)
     {
-        exps.append( Expression(strtval) );
+        exps.append(Expression(strtval));
     }
 
     return exps;
@@ -707,16 +638,14 @@ Expressions Sum::children() const
 /** Return whether or not this is compound (needs brakets when printed) */
 bool Sum::isCompound() const
 {
-    return posparts.count() + negparts.count() >= ( 2 - (not SireMaths::isZero(strtval)) );
+    return posparts.count() + negparts.count() >= (2 - (not SireMaths::isZero(strtval)));
 }
 
 QList<Factor> Sum::expand(const Symbol &symbol) const
 {
     QHash<Expression, Expression> factors;
 
-    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.constBegin();
-         it != posparts.constEnd();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = posparts.constBegin(); it != posparts.constEnd(); ++it)
     {
         QList<Factor> facs = it->expand(symbol);
 
@@ -726,9 +655,7 @@ QList<Factor> Sum::expand(const Symbol &symbol) const
         }
     }
 
-    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.constBegin();
-         it != negparts.constEnd();
-         ++it)
+    for (QHash<ExpressionBase, Expression>::const_iterator it = negparts.constBegin(); it != negparts.constEnd(); ++it)
     {
         QList<Factor> facs = it->expand(symbol);
 
@@ -740,28 +667,25 @@ QList<Factor> Sum::expand(const Symbol &symbol) const
 
     QList<Factor> ret;
 
-    for (QHash<Expression,Expression>::const_iterator it = factors.constBegin();
-         it != factors.constEnd();
-         ++it)
+    for (QHash<Expression, Expression>::const_iterator it = factors.constBegin(); it != factors.constEnd(); ++it)
     {
-        ret.append( Factor( symbol, it.value(), it.key() ) );
+        ret.append(Factor(symbol, it.value(), it.key()));
     }
 
     if (strtval != 0)
     {
-        ret.append( Factor(symbol, strtval, 0) );
+        ret.append(Factor(symbol, strtval, 0));
     }
 
     return ret;
 }
 
-const char* Sum::typeName()
+const char *Sum::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Sum>() );
+    return QMetaType::typeName(qMetaTypeId<Sum>());
 }
 
-Sum* Sum::clone() const
+Sum *Sum::clone() const
 {
     return new Sum(*this);
 }
-

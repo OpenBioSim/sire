@@ -39,84 +39,82 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class Within;
+    class Within;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::Within&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::Within&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Within &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Within &);
 
 namespace SireMol
 {
 
-using SireMaths::Vector;
+    using SireMaths::Vector;
 
-/** This is an atom identifier that identifies atoms
-    based on how far they are from other atoms, or
-    from points in space
+    /** This is an atom identifier that identifies atoms
+        based on how far they are from other atoms, or
+        from points in space
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT Within : public AtomID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const Within&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, Within&);
-
-public:
-    Within();
-    Within(SireUnits::Dimension::Length distance,
-           const Vector &point);
-
-    Within(SireUnits::Dimension::Length distance,
-           const AtomID &atomid);
-
-    Within(const Within &other);
-
-    ~Within();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT Within : public AtomID
     {
-        return Within::typeName();
-    }
 
-    Within* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Within &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, Within &);
 
-    bool isNull() const;
+    public:
+        Within();
+        Within(SireUnits::Dimension::Length distance, const Vector &point);
 
-    uint hash() const;
+        Within(SireUnits::Dimension::Length distance, const AtomID &atomid);
 
-    QString toString() const;
+        Within(const Within &other);
 
-    Within& operator=(const Within &other);
+        ~Within();
 
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
+        static const char *typeName();
 
-    bool operator==(const Within &other) const;
-    bool operator!=(const Within &other) const;
+        const char *what() const
+        {
+            return Within::typeName();
+        }
 
-    QList<AtomIdx> map(const MolInfo &molinfo) const;
+        Within *clone() const;
 
-    QList<AtomIdx> map(const MoleculeView &molview, const PropertyMap &map) const;
+        bool isNull() const;
 
-private:
-    /** The atom against which distance will be calculated */
-    AtomIdentifier atomid;
+        uint hash() const;
 
-    /** The point in space against which distance will be calculated */
-    Vector point;
+        QString toString() const;
 
-    /** The distance itself */
-    SireUnits::Dimension::Length dist;
-};
+        Within &operator=(const Within &other);
 
-}
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
-Q_DECLARE_METATYPE( SireMol::Within )
+        bool operator==(const Within &other) const;
+        bool operator!=(const Within &other) const;
 
-SIRE_EXPOSE_CLASS( SireMol::Within )
+        QList<AtomIdx> map(const MolInfo &molinfo) const;
+
+        QList<AtomIdx> map(const MoleculeView &molview, const PropertyMap &map) const;
+
+    private:
+        /** The atom against which distance will be calculated */
+        AtomIdentifier atomid;
+
+        /** The point in space against which distance will be calculated */
+        Vector point;
+
+        /** The distance itself */
+        SireUnits::Dimension::Length dist;
+    };
+
+} // namespace SireMol
+
+Q_DECLARE_METATYPE(SireMol::Within)
+
+SIRE_EXPOSE_CLASS(SireMol::Within)
 
 SIRE_END_HEADER
 

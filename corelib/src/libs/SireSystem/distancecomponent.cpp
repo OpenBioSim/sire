@@ -51,15 +51,13 @@ using namespace SireStream;
 
 static const RegisterMetaType<DistanceComponent> r_distcomp;
 
-QDataStream &operator<<(QDataStream &ds,
-                                          const DistanceComponent &distcomp)
+QDataStream &operator<<(QDataStream &ds, const DistanceComponent &distcomp)
 {
     writeHeader(ds, r_distcomp, 1);
 
     SharedDataStream sds(ds);
 
-    sds << distcomp.p0 << distcomp.p1
-        << static_cast<const GeometryComponent&>(distcomp);
+    sds << distcomp.p0 << distcomp.p1 << static_cast<const GeometryComponent &>(distcomp);
 
     return ds;
 }
@@ -72,11 +70,9 @@ QDataStream &operator>>(QDataStream &ds, DistanceComponent &distcomp)
     {
         SharedDataStream sds(ds);
 
-        sds >> distcomp.p0 >> distcomp.p1
-            >> static_cast<GeometryComponent&>(distcomp);
+        sds >> distcomp.p0 >> distcomp.p1 >> static_cast<GeometryComponent &>(distcomp);
 
-        distcomp.intra_molecule_points = Point::areIntraMoleculePoints(
-                                                        distcomp.p0, distcomp.p1 );
+        distcomp.intra_molecule_points = Point::areIntraMoleculePoints(distcomp.p0, distcomp.p1);
     }
     else
         throw version_error(v, "1", r_distcomp, CODELOC);
@@ -86,60 +82,54 @@ QDataStream &operator>>(QDataStream &ds, DistanceComponent &distcomp)
 
 /** Null constructor */
 DistanceComponent::DistanceComponent()
-                  : ConcreteProperty<DistanceComponent,GeometryComponent>(),
-                    intra_molecule_points(true)
-{}
+    : ConcreteProperty<DistanceComponent, GeometryComponent>(), intra_molecule_points(true)
+{
+}
 
-Q_GLOBAL_STATIC_WITH_ARGS( Symbol, getRSymbol, ("r") );
+Q_GLOBAL_STATIC_WITH_ARGS(Symbol, getRSymbol, ("r"));
 
 /** Return the symbol that represents the distance between the
     two points ("r") */
-const Symbol& DistanceComponent::r()
+const Symbol &DistanceComponent::r()
 {
     return *(getRSymbol());
 }
 
 /** Construct to set the value of 'constrained_symbol' equal to the
     distance between the two points 'point0' and 'point1' */
-DistanceComponent::DistanceComponent(const Symbol &constrained_symbol,
-                                     const PointRef &point0, const PointRef &point1,
+DistanceComponent::DistanceComponent(const Symbol &constrained_symbol, const PointRef &point0, const PointRef &point1,
                                      const PropertyMap &map)
-       : ConcreteProperty<DistanceComponent,GeometryComponent>(constrained_symbol,
-                                                               DistanceComponent::r(),
-                                                               map),
-         p0(point0), p1(point1)
+    : ConcreteProperty<DistanceComponent, GeometryComponent>(constrained_symbol, DistanceComponent::r(), map),
+      p0(point0), p1(point1)
 {
-    intra_molecule_points = Point::areIntraMoleculePoints(p0,p1);
+    intra_molecule_points = Point::areIntraMoleculePoints(p0, p1);
 }
 
 /** Construct to set the value of 'constrained_symbol' equal to the
     expression based on the distance between the two points
     'point0' and 'point1' */
-DistanceComponent::DistanceComponent(const Symbol &constrained_symbol,
-                                     const PointRef &point0, const PointRef &point1,
-                                     const Expression &geometry_expression,
-                                     const PropertyMap &map)
-       : ConcreteProperty<DistanceComponent,GeometryComponent>(constrained_symbol,
-                                                               geometry_expression,
-                                                               map),
-         p0(point0), p1(point1)
+DistanceComponent::DistanceComponent(const Symbol &constrained_symbol, const PointRef &point0, const PointRef &point1,
+                                     const Expression &geometry_expression, const PropertyMap &map)
+    : ConcreteProperty<DistanceComponent, GeometryComponent>(constrained_symbol, geometry_expression, map), p0(point0),
+      p1(point1)
 {
-    intra_molecule_points = Point::areIntraMoleculePoints(p0,p1);
+    intra_molecule_points = Point::areIntraMoleculePoints(p0, p1);
 }
 
 /** Copy constructor */
 DistanceComponent::DistanceComponent(const DistanceComponent &other)
-                  : ConcreteProperty<DistanceComponent,GeometryComponent>(other),
-                    p0(other.p0), p1(other.p1),
-                    intra_molecule_points(other.intra_molecule_points)
-{}
+    : ConcreteProperty<DistanceComponent, GeometryComponent>(other), p0(other.p0), p1(other.p1),
+      intra_molecule_points(other.intra_molecule_points)
+{
+}
 
 /** Destructor */
 DistanceComponent::~DistanceComponent()
-{}
+{
+}
 
 /** Copy assignment operator */
-DistanceComponent& DistanceComponent::operator=(const DistanceComponent &other)
+DistanceComponent &DistanceComponent::operator=(const DistanceComponent &other)
 {
     if (this != &other)
     {
@@ -155,9 +145,7 @@ DistanceComponent& DistanceComponent::operator=(const DistanceComponent &other)
 /** Comparison operator */
 bool DistanceComponent::operator==(const DistanceComponent &other) const
 {
-    return this == &other or
-           (p0 == other.p0 and p1 == other.p1 and
-            GeometryComponent::operator==(other));
+    return this == &other or (p0 == other.p0 and p1 == other.p1 and GeometryComponent::operator==(other));
 }
 
 /** Comparison operator */
@@ -166,16 +154,16 @@ bool DistanceComponent::operator!=(const DistanceComponent &other) const
     return not DistanceComponent::operator==(other);
 }
 
-const char* DistanceComponent::typeName()
+const char *DistanceComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<DistanceComponent>() );
+    return QMetaType::typeName(qMetaTypeId<DistanceComponent>());
 }
 
 QString DistanceComponent::toString() const
 {
     return QObject::tr("DistanceComponent( %1, %3-%4, %2 )")
-                .arg(component().toString(), expression().toString() )
-                .arg(p0.read().toString(), p1.read().toString());
+        .arg(component().toString(), expression().toString())
+        .arg(p0.read().toString(), p1.read().toString());
 }
 
 /** Set the space used by the points and distance calculation */
@@ -192,7 +180,7 @@ void DistanceComponent::setSpace(const Space &new_space)
         p1.edit().setSpace(new_space);
         GeometryComponent::setSpace(new_space);
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -203,9 +191,9 @@ void DistanceComponent::setSpace(const Space &new_space)
 
     \throw SireError::invalid_index
 */
-const Point& DistanceComponent::point(int i) const
+const Point &DistanceComponent::point(int i) const
 {
-    i = Index(i).map( nPoints() );
+    i = Index(i).map(nPoints());
 
     if (i == 0)
         return p0.read();
@@ -214,13 +202,13 @@ const Point& DistanceComponent::point(int i) const
 }
 
 /** Return the first point between which the distance is calculated */
-const Point& DistanceComponent::point0() const
+const Point &DistanceComponent::point0() const
 {
     return p0.read();
 }
 
 /** Return the second point between which the distance is calculated */
-const Point& DistanceComponent::point1() const
+const Point &DistanceComponent::point1() const
 {
     return p1.read();
 }
@@ -243,8 +231,7 @@ bool DistanceComponent::wouldChange(const Delta &delta, quint32 last_subversion)
 {
     if (delta.hasMoleculeChangeSince(last_subversion))
     {
-        return delta.sinceChanged(p0.read(), last_subversion) or
-               delta.sinceChanged(p1.read(), last_subversion);
+        return delta.sinceChanged(p0.read(), last_subversion) or delta.sinceChanged(p1.read(), last_subversion);
     }
     else
         return false;
@@ -267,21 +254,19 @@ Values DistanceComponent::getValues(const System &system)
 
 static const RegisterMetaType<DoubleDistanceComponent> r_dist2comp;
 
-QDataStream &operator<<(QDataStream &ds,
-                                          const DoubleDistanceComponent &dist2comp)
+QDataStream &operator<<(QDataStream &ds, const DoubleDistanceComponent &dist2comp)
 {
     writeHeader(ds, r_dist2comp, 1);
 
     SharedDataStream sds(ds);
 
     sds << dist2comp.p0 << dist2comp.p1 << dist2comp.p2 << dist2comp.p3
-        << static_cast<const GeometryComponent&>(dist2comp);
+        << static_cast<const GeometryComponent &>(dist2comp);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                          DoubleDistanceComponent &dist2comp)
+QDataStream &operator>>(QDataStream &ds, DoubleDistanceComponent &dist2comp)
 {
     VersionID v = readHeader(ds, r_dist2comp);
 
@@ -289,15 +274,12 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> dist2comp.p0 >> dist2comp.p1 >> dist2comp.p2 >> dist2comp.p3
-            >> static_cast<GeometryComponent&>(dist2comp);
+        sds >> dist2comp.p0 >> dist2comp.p1 >> dist2comp.p2 >> dist2comp.p3 >>
+            static_cast<GeometryComponent &>(dist2comp);
 
-        dist2comp.intra_molecule_points01 = Point::areIntraMoleculePoints(
-                                                        dist2comp.p0, dist2comp.p1 );
+        dist2comp.intra_molecule_points01 = Point::areIntraMoleculePoints(dist2comp.p0, dist2comp.p1);
 
-        dist2comp.intra_molecule_points23 = Point::areIntraMoleculePoints(
-                                                        dist2comp.p2, dist2comp.p3 );
-
+        dist2comp.intra_molecule_points23 = Point::areIntraMoleculePoints(dist2comp.p2, dist2comp.p3);
     }
     else
         throw version_error(v, "1", r_dist2comp, CODELOC);
@@ -307,73 +289,69 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 DoubleDistanceComponent::DoubleDistanceComponent()
-                        : ConcreteProperty<DoubleDistanceComponent,GeometryComponent>(),
-                          intra_molecule_points01(true), intra_molecule_points23(true)
-{}
+    : ConcreteProperty<DoubleDistanceComponent, GeometryComponent>(), intra_molecule_points01(true),
+      intra_molecule_points23(true)
+{
+}
 
-Q_GLOBAL_STATIC_WITH_ARGS( Symbol, getR01Symbol, ("r01") );
-Q_GLOBAL_STATIC_WITH_ARGS( Symbol, getR23Symbol, ("r23") );
+Q_GLOBAL_STATIC_WITH_ARGS(Symbol, getR01Symbol, ("r01"));
+Q_GLOBAL_STATIC_WITH_ARGS(Symbol, getR23Symbol, ("r23"));
 
 /** Return the symbol that represents the distance between the
     points .point0() and .point1() ("r01") */
-const Symbol& DoubleDistanceComponent::r01()
+const Symbol &DoubleDistanceComponent::r01()
 {
     return *(getR01Symbol());
 }
 
 /** Return the symbol that represents the distance between the
     points .point2() and .point2() ("r23") */
-const Symbol& DoubleDistanceComponent::r23()
+const Symbol &DoubleDistanceComponent::r23()
 {
     return *(getR23Symbol());
 }
 
 /** Construct to set the value of 'constrained_symbol' equal to the
     distance between the two points 'point0' and 'point1' */
-DoubleDistanceComponent::DoubleDistanceComponent(const Symbol &constrained_symbol,
-                                      const PointRef &point0, const PointRef &point1,
-                                      const PointRef &point2, const PointRef &point3,
-                                      const PropertyMap &map)
-       : ConcreteProperty<DoubleDistanceComponent,GeometryComponent>(constrained_symbol,
-                        DoubleDistanceComponent::r01() + DoubleDistanceComponent::r23(),
-                        map),
-         p0(point0), p1(point1), p2(point2), p3(point3)
+DoubleDistanceComponent::DoubleDistanceComponent(const Symbol &constrained_symbol, const PointRef &point0,
+                                                 const PointRef &point1, const PointRef &point2, const PointRef &point3,
+                                                 const PropertyMap &map)
+    : ConcreteProperty<DoubleDistanceComponent, GeometryComponent>(
+          constrained_symbol, DoubleDistanceComponent::r01() + DoubleDistanceComponent::r23(), map),
+      p0(point0), p1(point1), p2(point2), p3(point3)
 {
-    intra_molecule_points01 = Point::areIntraMoleculePoints(p0,p1);
-    intra_molecule_points23 = Point::areIntraMoleculePoints(p2,p3);
+    intra_molecule_points01 = Point::areIntraMoleculePoints(p0, p1);
+    intra_molecule_points23 = Point::areIntraMoleculePoints(p2, p3);
 }
 
 /** Construct to set the value of 'constrained_symbol' equal to the
     expression based on the distance between the two points
     'point0' and 'point1' */
-DoubleDistanceComponent::DoubleDistanceComponent(const Symbol &constrained_symbol,
-                                     const PointRef &point0, const PointRef &point1,
-                                     const PointRef &point2, const PointRef &point3,
-                                     const Expression &geometry_expression,
-                                     const PropertyMap &map)
-       : ConcreteProperty<DoubleDistanceComponent,GeometryComponent>(constrained_symbol,
-                                                               geometry_expression, map),
-         p0(point0), p1(point1), p2(point2), p3(point3)
+DoubleDistanceComponent::DoubleDistanceComponent(const Symbol &constrained_symbol, const PointRef &point0,
+                                                 const PointRef &point1, const PointRef &point2, const PointRef &point3,
+                                                 const Expression &geometry_expression, const PropertyMap &map)
+    : ConcreteProperty<DoubleDistanceComponent, GeometryComponent>(constrained_symbol, geometry_expression, map),
+      p0(point0), p1(point1), p2(point2), p3(point3)
 {
-    intra_molecule_points01 = Point::areIntraMoleculePoints(p0,p1);
-    intra_molecule_points23 = Point::areIntraMoleculePoints(p2,p3);
+    intra_molecule_points01 = Point::areIntraMoleculePoints(p0, p1);
+    intra_molecule_points23 = Point::areIntraMoleculePoints(p2, p3);
 }
 
 /** Copy constructor */
 DoubleDistanceComponent::DoubleDistanceComponent(const DoubleDistanceComponent &other)
-                  : ConcreteProperty<DoubleDistanceComponent,GeometryComponent>(other),
-                    p0(other.p0), p1(other.p1), p2(other.p2), p3(other.p3),
-                    intra_molecule_points01(other.intra_molecule_points01),
-                    intra_molecule_points23(other.intra_molecule_points23)
-{}
+    : ConcreteProperty<DoubleDistanceComponent, GeometryComponent>(other), p0(other.p0), p1(other.p1), p2(other.p2),
+      p3(other.p3), intra_molecule_points01(other.intra_molecule_points01),
+      intra_molecule_points23(other.intra_molecule_points23)
+{
+}
 
 /** Destructor */
 DoubleDistanceComponent::~DoubleDistanceComponent()
-{}
+{
+}
 
 /** Copy assignment operator */
-DoubleDistanceComponent&
-DoubleDistanceComponent::operator=(const DoubleDistanceComponent &other)
+DoubleDistanceComponent &DoubleDistanceComponent::operator=(const DoubleDistanceComponent &other)
 {
     if (this != &other)
     {
@@ -392,10 +370,8 @@ DoubleDistanceComponent::operator=(const DoubleDistanceComponent &other)
 /** Comparison operator */
 bool DoubleDistanceComponent::operator==(const DoubleDistanceComponent &other) const
 {
-    return this == &other or
-           (p0 == other.p0 and p1 == other.p1 and
-            p2 == other.p2 and p3 == other.p3 and
-            GeometryComponent::operator==(other));
+    return this == &other or (p0 == other.p0 and p1 == other.p1 and p2 == other.p2 and p3 == other.p3 and
+                              GeometryComponent::operator==(other));
 }
 
 /** Comparison operator */
@@ -404,24 +380,23 @@ bool DoubleDistanceComponent::operator!=(const DoubleDistanceComponent &other) c
     return not DoubleDistanceComponent::operator==(other);
 }
 
-const char* DoubleDistanceComponent::typeName()
+const char *DoubleDistanceComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<DoubleDistanceComponent>() );
+    return QMetaType::typeName(qMetaTypeId<DoubleDistanceComponent>());
 }
 
 QString DoubleDistanceComponent::toString() const
 {
     return QObject::tr("DoubleDistanceComponent( %1, %3-%4 and %5-%6, %2 )")
-                .arg(component().toString(), expression().toString() )
-                .arg(p0.read().toString(), p1.read().toString())
-                .arg(p2.read().toString(), p3.read().toString());
+        .arg(component().toString(), expression().toString())
+        .arg(p0.read().toString(), p1.read().toString())
+        .arg(p2.read().toString(), p3.read().toString());
 }
 
 /** Set the space used by the points and distance calculation */
 void DoubleDistanceComponent::setSpace(const Space &new_space)
 {
-    if (space().equals(new_space) or
-        (intra_molecule_points01 and intra_molecule_points23) )
+    if (space().equals(new_space) or (intra_molecule_points01 and intra_molecule_points23))
     {
         return;
     }
@@ -436,7 +411,7 @@ void DoubleDistanceComponent::setSpace(const Space &new_space)
         p3.edit().setSpace(new_space);
         GeometryComponent::setSpace(new_space);
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -447,9 +422,9 @@ void DoubleDistanceComponent::setSpace(const Space &new_space)
 
     \throw SireError::invalid_index
 */
-const Point& DoubleDistanceComponent::point(int i) const
+const Point &DoubleDistanceComponent::point(int i) const
 {
-    i = Index(i).map( nPoints() );
+    i = Index(i).map(nPoints());
 
     switch (i)
     {
@@ -465,25 +440,25 @@ const Point& DoubleDistanceComponent::point(int i) const
 }
 
 /** Return the first point between which the first distance is calculated */
-const Point& DoubleDistanceComponent::point0() const
+const Point &DoubleDistanceComponent::point0() const
 {
     return p0.read();
 }
 
 /** Return the second point between which the first distance is calculated */
-const Point& DoubleDistanceComponent::point1() const
+const Point &DoubleDistanceComponent::point1() const
 {
     return p1.read();
 }
 
 /** Return the first point between which the second distance is calculated */
-const Point& DoubleDistanceComponent::point2() const
+const Point &DoubleDistanceComponent::point2() const
 {
     return p2.read();
 }
 
 /** Return the second point between which the second distance is calculated */
-const Point& DoubleDistanceComponent::point3() const
+const Point &DoubleDistanceComponent::point3() const
 {
     return p3.read();
 }
@@ -510,15 +485,12 @@ double DoubleDistanceComponent::getDistance23() const
         return space().calcDist(p2.read().point(), p3.read().point());
 }
 
-bool DoubleDistanceComponent::wouldChange(const Delta &delta,
-                                          quint32 last_subversion) const
+bool DoubleDistanceComponent::wouldChange(const Delta &delta, quint32 last_subversion) const
 {
     if (delta.hasMoleculeChangeSince(last_subversion))
     {
-        return delta.sinceChanged(p0.read(), last_subversion) or
-               delta.sinceChanged(p1.read(), last_subversion) or
-               delta.sinceChanged(p2.read(), last_subversion) or
-               delta.sinceChanged(p3.read(), last_subversion);
+        return delta.sinceChanged(p0.read(), last_subversion) or delta.sinceChanged(p1.read(), last_subversion) or
+               delta.sinceChanged(p2.read(), last_subversion) or delta.sinceChanged(p3.read(), last_subversion);
     }
     else
         return false;
@@ -540,8 +512,8 @@ Values DoubleDistanceComponent::getValues(const System &system)
 
     Values vals;
 
-    vals.set( r01(), getDistance01() );
-    vals.set( r23(), getDistance23() );
+    vals.set(r01(), getDistance01());
+    vals.set(r23(), getDistance23());
 
     return vals;
 }
@@ -552,22 +524,19 @@ Values DoubleDistanceComponent::getValues(const System &system)
 
 static const RegisterMetaType<TripleDistanceComponent> r_dist3comp;
 
-QDataStream &operator<<(QDataStream &ds,
-                                          const TripleDistanceComponent &dist3comp)
+QDataStream &operator<<(QDataStream &ds, const TripleDistanceComponent &dist3comp)
 {
     writeHeader(ds, r_dist3comp, 1);
 
     SharedDataStream sds(ds);
 
-    sds << dist3comp.p0 << dist3comp.p1 << dist3comp.p2 << dist3comp.p3
-        << dist3comp.p4 << dist3comp.p5
-        << static_cast<const GeometryComponent&>(dist3comp);
+    sds << dist3comp.p0 << dist3comp.p1 << dist3comp.p2 << dist3comp.p3 << dist3comp.p4 << dist3comp.p5
+        << static_cast<const GeometryComponent &>(dist3comp);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                          TripleDistanceComponent &dist3comp)
+QDataStream &operator>>(QDataStream &ds, TripleDistanceComponent &dist3comp)
 {
     VersionID v = readHeader(ds, r_dist3comp);
 
@@ -575,18 +544,14 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> dist3comp.p0 >> dist3comp.p1 >> dist3comp.p2 >> dist3comp.p3
-            >> dist3comp.p4 >> dist3comp.p5
-            >> static_cast<GeometryComponent&>(dist3comp);
+        sds >> dist3comp.p0 >> dist3comp.p1 >> dist3comp.p2 >> dist3comp.p3 >> dist3comp.p4 >> dist3comp.p5 >>
+            static_cast<GeometryComponent &>(dist3comp);
 
-        dist3comp.intra_molecule_points01 = Point::areIntraMoleculePoints(
-                                                        dist3comp.p0, dist3comp.p1 );
+        dist3comp.intra_molecule_points01 = Point::areIntraMoleculePoints(dist3comp.p0, dist3comp.p1);
 
-        dist3comp.intra_molecule_points23 = Point::areIntraMoleculePoints(
-                                                        dist3comp.p2, dist3comp.p3 );
+        dist3comp.intra_molecule_points23 = Point::areIntraMoleculePoints(dist3comp.p2, dist3comp.p3);
 
-        dist3comp.intra_molecule_points45 = Point::areIntraMoleculePoints(
-                                                        dist3comp.p4, dist3comp.p5 );
+        dist3comp.intra_molecule_points45 = Point::areIntraMoleculePoints(dist3comp.p4, dist3comp.p5);
     }
     else
         throw version_error(v, "1", r_dist3comp, CODELOC);
@@ -596,88 +561,78 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 TripleDistanceComponent::TripleDistanceComponent()
-                        : ConcreteProperty<TripleDistanceComponent,GeometryComponent>(),
-                          intra_molecule_points01(true), intra_molecule_points23(true),
-                          intra_molecule_points45(true)
-{}
+    : ConcreteProperty<TripleDistanceComponent, GeometryComponent>(), intra_molecule_points01(true),
+      intra_molecule_points23(true), intra_molecule_points45(true)
+{
+}
 
-Q_GLOBAL_STATIC_WITH_ARGS( Symbol, getR45Symbol, ("r45") );
+Q_GLOBAL_STATIC_WITH_ARGS(Symbol, getR45Symbol, ("r45"));
 
 /** Return the symbol that represents the distance between the
     points .point0() and .point1() ("r01") */
-const Symbol& TripleDistanceComponent::r01()
+const Symbol &TripleDistanceComponent::r01()
 {
     return *(getR01Symbol());
 }
 
 /** Return the symbol that represents the distance between the
     points .point2() and .point3() ("r23") */
-const Symbol& TripleDistanceComponent::r23()
+const Symbol &TripleDistanceComponent::r23()
 {
     return *(getR23Symbol());
 }
 
 /** Return the symbol that represents the distance between the
     points .point4() and .point5() ("r45") */
-const Symbol& TripleDistanceComponent::r45()
+const Symbol &TripleDistanceComponent::r45()
 {
     return *(getR45Symbol());
 }
 
 /** Construct to set the value of 'constrained_symbol' equal to the
     distance between the two points 'point0' and 'point1' */
-TripleDistanceComponent::TripleDistanceComponent(const Symbol &constrained_symbol,
-                                      const PointRef &point0, const PointRef &point1,
-                                      const PointRef &point2, const PointRef &point3,
-                                      const PointRef &point4, const PointRef &point5,
-                                      const PropertyMap &map)
-       : ConcreteProperty<TripleDistanceComponent,GeometryComponent>(constrained_symbol,
-                        TripleDistanceComponent::r01() + TripleDistanceComponent::r23(),
-                        map),
-         p0(point0), p1(point1), p2(point2), p3(point3),
-         p4(point4), p5(point5)
+TripleDistanceComponent::TripleDistanceComponent(const Symbol &constrained_symbol, const PointRef &point0,
+                                                 const PointRef &point1, const PointRef &point2, const PointRef &point3,
+                                                 const PointRef &point4, const PointRef &point5, const PropertyMap &map)
+    : ConcreteProperty<TripleDistanceComponent, GeometryComponent>(
+          constrained_symbol, TripleDistanceComponent::r01() + TripleDistanceComponent::r23(), map),
+      p0(point0), p1(point1), p2(point2), p3(point3), p4(point4), p5(point5)
 {
-    intra_molecule_points01 = Point::areIntraMoleculePoints(p0,p1);
-    intra_molecule_points23 = Point::areIntraMoleculePoints(p2,p3);
-    intra_molecule_points45 = Point::areIntraMoleculePoints(p4,p5);
+    intra_molecule_points01 = Point::areIntraMoleculePoints(p0, p1);
+    intra_molecule_points23 = Point::areIntraMoleculePoints(p2, p3);
+    intra_molecule_points45 = Point::areIntraMoleculePoints(p4, p5);
 }
 
 /** Construct to set the value of 'constrained_symbol' equal to the
     expression based on the distance between the two points
     'point0' and 'point1' */
-TripleDistanceComponent::TripleDistanceComponent(const Symbol &constrained_symbol,
-                                     const PointRef &point0, const PointRef &point1,
-                                     const PointRef &point2, const PointRef &point3,
-                                     const PointRef &point4, const PointRef &point5,
-                                     const Expression &geometry_expression,
-                                     const PropertyMap &map)
-       : ConcreteProperty<TripleDistanceComponent,GeometryComponent>(constrained_symbol,
-                                                               geometry_expression, map),
-         p0(point0), p1(point1), p2(point2), p3(point3),
-         p4(point4), p5(point5)
+TripleDistanceComponent::TripleDistanceComponent(const Symbol &constrained_symbol, const PointRef &point0,
+                                                 const PointRef &point1, const PointRef &point2, const PointRef &point3,
+                                                 const PointRef &point4, const PointRef &point5,
+                                                 const Expression &geometry_expression, const PropertyMap &map)
+    : ConcreteProperty<TripleDistanceComponent, GeometryComponent>(constrained_symbol, geometry_expression, map),
+      p0(point0), p1(point1), p2(point2), p3(point3), p4(point4), p5(point5)
 {
-    intra_molecule_points01 = Point::areIntraMoleculePoints(p0,p1);
-    intra_molecule_points23 = Point::areIntraMoleculePoints(p2,p3);
-    intra_molecule_points45 = Point::areIntraMoleculePoints(p4,p5);
+    intra_molecule_points01 = Point::areIntraMoleculePoints(p0, p1);
+    intra_molecule_points23 = Point::areIntraMoleculePoints(p2, p3);
+    intra_molecule_points45 = Point::areIntraMoleculePoints(p4, p5);
 }
 
 /** Copy constructor */
 TripleDistanceComponent::TripleDistanceComponent(const TripleDistanceComponent &other)
-                  : ConcreteProperty<TripleDistanceComponent,GeometryComponent>(other),
-                    p0(other.p0), p1(other.p1), p2(other.p2), p3(other.p3),
-                    p4(other.p4), p5(other.p5),
-                    intra_molecule_points01(other.intra_molecule_points01),
-                    intra_molecule_points23(other.intra_molecule_points23),
-                    intra_molecule_points45(other.intra_molecule_points45)
-{}
+    : ConcreteProperty<TripleDistanceComponent, GeometryComponent>(other), p0(other.p0), p1(other.p1), p2(other.p2),
+      p3(other.p3), p4(other.p4), p5(other.p5), intra_molecule_points01(other.intra_molecule_points01),
+      intra_molecule_points23(other.intra_molecule_points23), intra_molecule_points45(other.intra_molecule_points45)
+{
+}
 
 /** Destructor */
 TripleDistanceComponent::~TripleDistanceComponent()
-{}
+{
+}
 
 /** Copy assignment operator */
-TripleDistanceComponent&
-TripleDistanceComponent::operator=(const TripleDistanceComponent &other)
+TripleDistanceComponent &TripleDistanceComponent::operator=(const TripleDistanceComponent &other)
 {
     if (this != &other)
     {
@@ -699,11 +654,8 @@ TripleDistanceComponent::operator=(const TripleDistanceComponent &other)
 /** Comparison operator */
 bool TripleDistanceComponent::operator==(const TripleDistanceComponent &other) const
 {
-    return this == &other or
-           (p0 == other.p0 and p1 == other.p1 and
-            p2 == other.p2 and p3 == other.p3 and
-            p4 == other.p4 and p5 == other.p5 and
-            GeometryComponent::operator==(other));
+    return this == &other or (p0 == other.p0 and p1 == other.p1 and p2 == other.p2 and p3 == other.p3 and
+                              p4 == other.p4 and p5 == other.p5 and GeometryComponent::operator==(other));
 }
 
 /** Comparison operator */
@@ -712,25 +664,24 @@ bool TripleDistanceComponent::operator!=(const TripleDistanceComponent &other) c
     return not TripleDistanceComponent::operator==(other);
 }
 
-const char* TripleDistanceComponent::typeName()
+const char *TripleDistanceComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<TripleDistanceComponent>() );
+    return QMetaType::typeName(qMetaTypeId<TripleDistanceComponent>());
 }
 
 QString TripleDistanceComponent::toString() const
 {
     return QObject::tr("TripleDistanceComponent( %1, %3-%4, %5-%6 and %7-%8, %2 )")
-                .arg(component().toString(), expression().toString() )
-                .arg(p0.read().toString(), p1.read().toString())
-                .arg(p2.read().toString(), p3.read().toString())
-                .arg(p4.read().toString(), p5.read().toString());
+        .arg(component().toString(), expression().toString())
+        .arg(p0.read().toString(), p1.read().toString())
+        .arg(p2.read().toString(), p3.read().toString())
+        .arg(p4.read().toString(), p5.read().toString());
 }
 
 /** Set the space used by the points and distance calculation */
 void TripleDistanceComponent::setSpace(const Space &new_space)
 {
-    if (space().equals(new_space) or
-        (intra_molecule_points01 and intra_molecule_points23 and intra_molecule_points45))
+    if (space().equals(new_space) or (intra_molecule_points01 and intra_molecule_points23 and intra_molecule_points45))
     {
         return;
     }
@@ -747,7 +698,7 @@ void TripleDistanceComponent::setSpace(const Space &new_space)
         p5.edit().setSpace(new_space);
         GeometryComponent::setSpace(new_space);
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -758,9 +709,9 @@ void TripleDistanceComponent::setSpace(const Space &new_space)
 
     \throw SireError::invalid_index
 */
-const Point& TripleDistanceComponent::point(int i) const
+const Point &TripleDistanceComponent::point(int i) const
 {
-    i = Index(i).map( nPoints() );
+    i = Index(i).map(nPoints());
 
     switch (i)
     {
@@ -780,37 +731,37 @@ const Point& TripleDistanceComponent::point(int i) const
 }
 
 /** Return the first point between which the first distance is calculated */
-const Point& TripleDistanceComponent::point0() const
+const Point &TripleDistanceComponent::point0() const
 {
     return p0.read();
 }
 
 /** Return the second point between which the first distance is calculated */
-const Point& TripleDistanceComponent::point1() const
+const Point &TripleDistanceComponent::point1() const
 {
     return p1.read();
 }
 
 /** Return the first point between which the second distance is calculated */
-const Point& TripleDistanceComponent::point2() const
+const Point &TripleDistanceComponent::point2() const
 {
     return p2.read();
 }
 
 /** Return the second point between which the second distance is calculated */
-const Point& TripleDistanceComponent::point3() const
+const Point &TripleDistanceComponent::point3() const
 {
     return p3.read();
 }
 
 /** Return the first point between which the third distance is calculated */
-const Point& TripleDistanceComponent::point4() const
+const Point &TripleDistanceComponent::point4() const
 {
     return p4.read();
 }
 
 /** Return the second point between which the third distance is calculated */
-const Point& TripleDistanceComponent::point5() const
+const Point &TripleDistanceComponent::point5() const
 {
     return p5.read();
 }
@@ -845,15 +796,12 @@ double TripleDistanceComponent::getDistance45() const
         return space().calcDist(p4.read().point(), p5.read().point());
 }
 
-bool TripleDistanceComponent::wouldChange(const Delta &delta,
-                                          quint32 last_subversion) const
+bool TripleDistanceComponent::wouldChange(const Delta &delta, quint32 last_subversion) const
 {
     if (delta.hasMoleculeChangeSince(last_subversion))
     {
-        return delta.sinceChanged(p0.read(), last_subversion) or
-               delta.sinceChanged(p1.read(), last_subversion) or
-               delta.sinceChanged(p2.read(), last_subversion) or
-               delta.sinceChanged(p3.read(), last_subversion);
+        return delta.sinceChanged(p0.read(), last_subversion) or delta.sinceChanged(p1.read(), last_subversion) or
+               delta.sinceChanged(p2.read(), last_subversion) or delta.sinceChanged(p3.read(), last_subversion);
     }
     else
         return false;
@@ -881,9 +829,9 @@ Values TripleDistanceComponent::getValues(const System &system)
 
     Values vals;
 
-    vals.set( r01(), getDistance01() );
-    vals.set( r23(), getDistance23() );
-    vals.set( r45(), getDistance45() );
+    vals.set(r01(), getDistance01());
+    vals.set(r23(), getDistance23());
+    vals.set(r45(), getDistance45());
 
     return vals;
 }

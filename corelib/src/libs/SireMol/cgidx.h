@@ -36,86 +36,84 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class CGIdx;
+    class CGIdx;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::CGIdx&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::CGIdx&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::CGIdx &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::CGIdx &);
 
 namespace SireMol
 {
 
-class CGAtomIdx;
+    class CGAtomIdx;
 
-/** This is an ID object that is used to index CutGroups
+    /** This is an ID object that is used to index CutGroups
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT CGIdx
-       : public SireID::Index_T_<CGIdx>, public CGID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const CGIdx&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CGIdx&);
-
-public:
-    CGIdx();
-
-    explicit CGIdx(qint32 idx);
-
-    CGIdx(const CGIdx &other);
-
-    ~CGIdx();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT CGIdx : public SireID::Index_T_<CGIdx>, public CGID
     {
-        return SireID::Index_T_<CGIdx>::what();
-    }
 
-    CGIdx* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const CGIdx &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, CGIdx &);
 
-    static CGIdx null();
+    public:
+        CGIdx();
 
-    using CGID::operator+;
+        explicit CGIdx(qint32 idx);
 
-    CGAtomIdx operator+(const SireID::Index &other) const;
+        CGIdx(const CGIdx &other);
 
-    bool isNull() const;
+        ~CGIdx();
 
-    uint hash() const;
+        static const char *typeName();
 
-    QString toString() const;
+        const char *what() const
+        {
+            return SireID::Index_T_<CGIdx>::what();
+        }
 
-    CGIdx& operator=(const CGIdx &other);
+        CGIdx *clone() const;
 
-    bool operator==(const SireID::ID &other) const;
+        static CGIdx null();
 
-    using SireID::Index_T_<CGIdx>::operator=;
+        using CGID::operator+;
 
-    using SireID::Index_T_<CGIdx>::operator==;
-    using SireID::Index_T_<CGIdx>::operator!=;
+        CGAtomIdx operator+(const SireID::Index &other) const;
 
-    using SireID::Index_T_<CGIdx>::operator+=;
-    using SireID::Index_T_<CGIdx>::operator++;
-    using SireID::Index_T_<CGIdx>::operator-=;
-    using SireID::Index_T_<CGIdx>::operator--;
+        bool isNull() const;
 
-    using SireID::Index_T_<CGIdx>::map;
+        uint hash() const;
 
-    QList<CGIdx> map(const MolInfo &molinfo) const;
-};
+        QString toString() const;
 
-SIREMOL_EXPORT CGAtomIdx operator+(const SireID::Index &index, const CGIdx &cgidx);
+        CGIdx &operator=(const CGIdx &other);
 
-}
+        bool operator==(const SireID::ID &other) const;
+
+        using SireID::Index_T_<CGIdx>::operator=;
+
+        using SireID::Index_T_<CGIdx>::operator==;
+        using SireID::Index_T_<CGIdx>::operator!=;
+
+        using SireID::Index_T_<CGIdx>::operator+=;
+        using SireID::Index_T_<CGIdx>::operator++;
+        using SireID::Index_T_<CGIdx>::operator-=;
+        using SireID::Index_T_<CGIdx>::operator--;
+
+        using SireID::Index_T_<CGIdx>::map;
+
+        QList<CGIdx> map(const MolInfo &molinfo) const;
+    };
+
+    SIREMOL_EXPORT CGAtomIdx operator+(const SireID::Index &index, const CGIdx &cgidx);
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::CGIdx);
 
-SIRE_EXPOSE_CLASS( SireMol::CGIdx )
+SIRE_EXPOSE_CLASS(SireMol::CGIdx)
 
 SIRE_END_HEADER
 
 #endif
-

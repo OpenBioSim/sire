@@ -32,171 +32,162 @@
 
 #include "atomsin.hpp"
 
-#include "SireID/specify.hpp"
 #include "SireID/idandset.hpp"
 #include "SireID/idorset.hpp"
-#include "SireID/matchall.hpp"
 #include "SireID/invertmatch.hpp"
+#include "SireID/matchall.hpp"
+#include "SireID/specify.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
 
-using SireID::Specify;
-using SireID::IDAndSet;
-using SireID::IDOrSet;
+    using SireID::IDAndSet;
+    using SireID::IDOrSet;
+    using SireID::Specify;
 
-template<class T>
-class Selector;
+    template <class T>
+    class Selector;
 
-template<class GROUPID, class ATOMID>
-class GroupAtomID;
+    template <class GROUPID, class ATOMID>
+    class GroupAtomID;
 
-template<class G0, class G1>
-class GroupGroupID;
+    template <class G0, class G1>
+    class GroupGroupID;
 
-class MolInfo;
+    class MolInfo;
 
-class SegIdx;
-class SegIdentifier;
+    class SegIdx;
+    class SegIdentifier;
 
-class Segment;
+    class Segment;
 
-class Molecules;
-class MoleculeGroup;
-class MolGroupsBase;
-class MolNum;
+    class Molecules;
+    class MoleculeGroup;
+    class MolGroupsBase;
+    class MolNum;
 
-/** This is the base class of all identifiers that are used
-    to identify a Segment within a Molecule
+    /** This is the base class of all identifiers that are used
+        to identify a Segment within a Molecule
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT SegID : public SireID::ID
-{
-
-public:
-    typedef SegIdx Index;
-    typedef SegIdentifier Identifier;
-    typedef MolInfo SearchObject;
-
-    SegID();
-
-    SegID(const SegID &other);
-
-    virtual ~SegID();
-
-    Specify<SegID> operator[](qint64 i) const;
-    Specify<SegID> operator[](const SireBase::Range &range) const;
-    Specify<SegID> operator()(const SireBase::Range &range) const;
-    Specify<SegID> operator()(qint64 i) const;
-    Specify<SegID> operator()(qint64 start, qint64 end) const;
-    Specify<SegID> operator()(qint64 start, qint64 end, qint64 increment) const;
-
-    IDAndSet<SegID> operator+(const SegID &other) const;
-    GroupAtomID<SegID,AtomID> operator+(const AtomID &other) const;
-    GroupGroupID<SegID,CGID> operator+(const CGID &other) const;
-    GroupGroupID<SegID,ResID> operator+(const ResID &other) const;
-    GroupGroupID<SegID,ChainID> operator+(const ChainID &other) const;
-
-    IDAndSet<SegID> operator-(const SegID &other) const;
-    GroupAtomID<SegID,AtomID> operator-(const AtomID &other) const;
-    GroupGroupID<SegID,CGID> operator-(const CGID &other) const;
-    GroupGroupID<SegID,ResID> operator-(const ResID &other) const;
-    GroupGroupID<SegID,ChainID> operator-(const ChainID &other) const;
-
-    SireID::InvertMatch<SegID> operator-() const;
-
-    IDAndSet<SegID> operator&&(const SegID &other) const;
-    GroupAtomID<SegID,AtomID> operator&&(const AtomID &other) const;
-    GroupGroupID<SegID,CGID> operator&&(const CGID &other) const;
-    GroupGroupID<SegID,ResID> operator&&(const ResID &other) const;
-    GroupGroupID<SegID,ChainID> operator&&(const ChainID &other) const;
-
-    IDAndSet<SegID> operator&(const SegID &other) const;
-    GroupAtomID<SegID,AtomID> operator&(const AtomID &other) const;
-    GroupGroupID<SegID,CGID> operator&(const CGID &other) const;
-    GroupGroupID<SegID,ResID> operator&(const ResID &other) const;
-    GroupGroupID<SegID,ChainID> operator&(const ChainID &other) const;
-
-    IDOrSet<SegID> operator*(const SegID &other) const;
-    IDOrSet<SegID> operator||(const SegID &other) const;
-    IDOrSet<SegID> operator|(const SegID &other) const;
-
-    IDOrSet<AtomID> operator*(const AtomID &other) const;
-    IDOrSet<AtomID> operator||(const AtomID &other) const;
-    IDOrSet<AtomID> operator|(const AtomID &other) const;
-
-    SireID::InvertMatch<SegID> operator!() const;
-    SireID::InvertMatch<SegID> invert() const;
-    SireID::InvertMatch<SegID> inverse() const;
-
-    static SireID::MatchAll<SegID> any();
-
-    AtomsIn<SegID> atoms() const;
-    AtomsIn<SegID> atom(int i) const;
-    AtomsIn<SegID> atoms(int i, int j) const;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT SegID : public SireID::ID
     {
-        return "SireMol::SegID";
-    }
 
-    virtual SegID* clone() const=0;
+    public:
+        typedef SegIdx Index;
+        typedef SegIdentifier Identifier;
+        typedef MolInfo SearchObject;
 
-    static SegIdentifier fromString(const QString &id);
+        SegID();
 
-    /** Map this ID back to the indicies of the segments in the molecule,
-        using the passed MoleculeInfo to do the mapping */
-    virtual QList<SegIdx> map(const MolInfo &molinfo) const=0;
+        SegID(const SegID &other);
 
-    virtual QList<SegIdx> map(const MoleculeView &molview,
-                               const PropertyMap &map = PropertyMap()) const;
+        virtual ~SegID();
 
-    virtual Segment selectFrom(const MoleculeView &molview,
-                               const PropertyMap &map = PropertyMap()) const;
+        Specify<SegID> operator[](qint64 i) const;
+        Specify<SegID> operator[](const SireBase::Range &range) const;
+        Specify<SegID> operator()(const SireBase::Range &range) const;
+        Specify<SegID> operator()(qint64 i) const;
+        Specify<SegID> operator()(qint64 start, qint64 end) const;
+        Specify<SegID> operator()(qint64 start, qint64 end, qint64 increment) const;
 
-    virtual Selector<Segment> selectAllFrom(const MoleculeView &molview,
-                                         const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<SegID> operator+(const SegID &other) const;
+        GroupAtomID<SegID, AtomID> operator+(const AtomID &other) const;
+        GroupGroupID<SegID, CGID> operator+(const CGID &other) const;
+        GroupGroupID<SegID, ResID> operator+(const ResID &other) const;
+        GroupGroupID<SegID, ChainID> operator+(const ChainID &other) const;
 
-    virtual Segment selectFrom(const Molecules &molecules,
-                               const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<SegID> operator-(const SegID &other) const;
+        GroupAtomID<SegID, AtomID> operator-(const AtomID &other) const;
+        GroupGroupID<SegID, CGID> operator-(const CGID &other) const;
+        GroupGroupID<SegID, ResID> operator-(const ResID &other) const;
+        GroupGroupID<SegID, ChainID> operator-(const ChainID &other) const;
 
-    virtual QHash< MolNum,Selector<Segment> >
-                selectAllFrom(const Molecules &molecules,
-                              const PropertyMap &map = PropertyMap()) const;
+        SireID::InvertMatch<SegID> operator-() const;
 
-    virtual Segment selectFrom(const MoleculeGroup &molgroup,
-                               const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<SegID> operator&&(const SegID &other) const;
+        GroupAtomID<SegID, AtomID> operator&&(const AtomID &other) const;
+        GroupGroupID<SegID, CGID> operator&&(const CGID &other) const;
+        GroupGroupID<SegID, ResID> operator&&(const ResID &other) const;
+        GroupGroupID<SegID, ChainID> operator&&(const ChainID &other) const;
 
-    virtual QHash< MolNum,Selector<Segment> >
-                selectAllFrom(const MoleculeGroup &molgroup,
-                              const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<SegID> operator&(const SegID &other) const;
+        GroupAtomID<SegID, AtomID> operator&(const AtomID &other) const;
+        GroupGroupID<SegID, CGID> operator&(const CGID &other) const;
+        GroupGroupID<SegID, ResID> operator&(const ResID &other) const;
+        GroupGroupID<SegID, ChainID> operator&(const ChainID &other) const;
 
-    virtual Segment selectFrom(const MolGroupsBase &molgroups,
-                               const PropertyMap &map = PropertyMap()) const;
-    virtual QHash< MolNum,Selector<Segment> >
-                selectAllFrom(const MolGroupsBase &molgroups,
-                              const PropertyMap &map = PropertyMap()) const;
+        IDOrSet<SegID> operator*(const SegID &other) const;
+        IDOrSet<SegID> operator||(const SegID &other) const;
+        IDOrSet<SegID> operator|(const SegID &other) const;
 
-protected:
-    static QList<SegIdx> matchAll(const MolInfo &molinfo);
+        IDOrSet<AtomID> operator*(const AtomID &other) const;
+        IDOrSet<AtomID> operator||(const AtomID &other) const;
+        IDOrSet<AtomID> operator|(const AtomID &other) const;
 
-    void processMatches(QList<SegIdx> &matches, const MolInfo &molinfo) const;
-};
+        SireID::InvertMatch<SegID> operator!() const;
+        SireID::InvertMatch<SegID> invert() const;
+        SireID::InvertMatch<SegID> inverse() const;
 
-}
+        static SireID::MatchAll<SegID> any();
+
+        AtomsIn<SegID> atoms() const;
+        AtomsIn<SegID> atom(int i) const;
+        AtomsIn<SegID> atoms(int i, int j) const;
+
+        static const char *typeName()
+        {
+            return "SireMol::SegID";
+        }
+
+        virtual SegID *clone() const = 0;
+
+        static SegIdentifier fromString(const QString &id);
+
+        /** Map this ID back to the indicies of the segments in the molecule,
+            using the passed MoleculeInfo to do the mapping */
+        virtual QList<SegIdx> map(const MolInfo &molinfo) const = 0;
+
+        virtual QList<SegIdx> map(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+
+        virtual Segment selectFrom(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+
+        virtual Selector<Segment> selectAllFrom(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+
+        virtual Segment selectFrom(const Molecules &molecules, const PropertyMap &map = PropertyMap()) const;
+
+        virtual QHash<MolNum, Selector<Segment>> selectAllFrom(const Molecules &molecules,
+                                                               const PropertyMap &map = PropertyMap()) const;
+
+        virtual Segment selectFrom(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap()) const;
+
+        virtual QHash<MolNum, Selector<Segment>> selectAllFrom(const MoleculeGroup &molgroup,
+                                                               const PropertyMap &map = PropertyMap()) const;
+
+        virtual Segment selectFrom(const MolGroupsBase &molgroups, const PropertyMap &map = PropertyMap()) const;
+        virtual QHash<MolNum, Selector<Segment>> selectAllFrom(const MolGroupsBase &molgroups,
+                                                               const PropertyMap &map = PropertyMap()) const;
+
+    protected:
+        static QList<SegIdx> matchAll(const MolInfo &molinfo);
+
+        void processMatches(QList<SegIdx> &matches, const MolInfo &molinfo) const;
+    };
+
+} // namespace SireMol
 
 #include "segidentifier.h"
 
-SIRE_EXPOSE_CLASS( SireMol::SegID )
-SIRE_EXPOSE_ALIAS( SireID::Specify<SireMol::SegID>, SireMol::Specify_SegID_ )
-SIRE_EXPOSE_ALIAS( SireMol::AtomsIn<SireMol::SegID>, SireMol::AtomsIn_SegID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDAndSet<SireMol::SegID>, SireMol::IDAndSet_SegID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDOrSet<SireMol::SegID>, SireMol::IDOrSet_SegID_ )
-SIRE_EXPOSE_ALIAS( SireID::MatchAll<SireMol::SegID>, SireMol::MatchAll_SegID_ )
-SIRE_EXPOSE_ALIAS( SireID::InvertMatch<SireMol::SegID>, SireMol::InvertMatch_SegID_ )
+SIRE_EXPOSE_CLASS(SireMol::SegID)
+SIRE_EXPOSE_ALIAS(SireID::Specify<SireMol::SegID>, SireMol::Specify_SegID_)
+SIRE_EXPOSE_ALIAS(SireMol::AtomsIn<SireMol::SegID>, SireMol::AtomsIn_SegID_)
+SIRE_EXPOSE_ALIAS(SireID::IDAndSet<SireMol::SegID>, SireMol::IDAndSet_SegID_)
+SIRE_EXPOSE_ALIAS(SireID::IDOrSet<SireMol::SegID>, SireMol::IDOrSet_SegID_)
+SIRE_EXPOSE_ALIAS(SireID::MatchAll<SireMol::SegID>, SireMol::MatchAll_SegID_)
+SIRE_EXPOSE_ALIAS(SireID::InvertMatch<SireMol::SegID>, SireMol::InvertMatch_SegID_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireID::Specify<SireMol::SegID>;

@@ -28,9 +28,9 @@
 #include "closemols.h"
 #include "system.h"
 
+#include "SireMol/atomcoords.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleculedata.h"
-#include "SireMol/atomcoords.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -52,8 +52,7 @@ QDataStream &operator<<(QDataStream &ds, const CloseMols &closemols)
 
     SharedDataStream sds(ds);
 
-    sds << closemols.p << closemols.molgroup << closemols.spce
-        << closemols.nclosest << closemols.map;
+    sds << closemols.p << closemols.molgroup << closemols.spce << closemols.nclosest << closemols.map;
 
     return ds;
 }
@@ -90,9 +89,7 @@ void CloseMols::getNewFurthestMolNum()
     double cutoff_dist = 0;
     furthest_molnum = MolNum();
 
-    for (QHash<MolNum,double>::const_iterator it = close_mols.constBegin();
-         it != close_mols.constEnd();
-         ++it)
+    for (QHash<MolNum, double>::const_iterator it = close_mols.constBegin(); it != close_mols.constEnd(); ++it)
     {
         if (it.value() > cutoff_dist)
         {
@@ -110,13 +107,11 @@ void CloseMols::getNewFurthestMolNum()
 
 /** Internal function used to return whether or not the passed collection
     of molecules all belong to the close molecules of this CloseMols object */
-bool CloseMols::differentMolecules(const QHash<MolNum,double> &molecules) const
+bool CloseMols::differentMolecules(const QHash<MolNum, double> &molecules) const
 {
     if (molecules.count() == close_mols.count())
     {
-        for (QHash<MolNum,double>::const_iterator it = close_mols.constBegin();
-             it != close_mols.constEnd();
-             ++it)
+        for (QHash<MolNum, double>::const_iterator it = close_mols.constBegin(); it != close_mols.constEnd(); ++it)
         {
             if (not molecules.contains(it.key()))
             {
@@ -135,10 +130,10 @@ bool CloseMols::differentMolecules(const QHash<MolNum,double> &molecules) const
     changes the identity of the close molecules */
 bool CloseMols::recalculate()
 {
-    QHash<MolNum,double> old_close_mols = close_mols;
+    QHash<MolNum, double> old_close_mols = close_mols;
 
-    //clear the current list
-    close_mols = QHash<MolNum,double>();
+    // clear the current list
+    close_mols = QHash<MolNum, double>();
     furthest_molnum = MolNum();
     cutoff_dist2 = 0;
 
@@ -157,17 +152,13 @@ bool CloseMols::recalculate()
 
     if (nmols <= nclosest)
     {
-        //we are selecting all of the molecules
+        // we are selecting all of the molecules
         close_mols.reserve(nmols);
 
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd();
-             ++it)
+        for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
-            //just get the center of the whole molecule
-            const Vector &center = it->data().property(coords_property)
-                                             .asA<AtomCoords>()
-                                             .array().aaBox().center();
+            // just get the center of the whole molecule
+            const Vector &center = it->data().property(coords_property).asA<AtomCoords>().array().aaBox().center();
 
             const double dist = space.calcDist(point, center);
             close_mols.insert(it.key(), dist);
@@ -182,20 +173,16 @@ bool CloseMols::recalculate()
 
     quint32 nfound = 0;
 
-    for (Molecules::const_iterator it = molecules.constBegin();
-         it != molecules.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
     {
-        //just get the center of the whole molecule
-        const Vector &center = it->data().property(coords_property)
-                                         .asA<AtomCoords>()
-                                         .array().aaBox().center();
+        // just get the center of the whole molecule
+        const Vector &center = it->data().property(coords_property).asA<AtomCoords>().array().aaBox().center();
 
         const double dist2 = space.calcDist2(point, center);
 
         if (nfound < nclosest)
         {
-            //there is still space for this molecule
+            // there is still space for this molecule
             ++nfound;
 
             close_mols.insert(it.key(), std::sqrt(dist2));
@@ -212,12 +199,11 @@ bool CloseMols::recalculate()
         }
         else
         {
-            //there isn't space - is this molecule closer than one
-            //of the existing molecules?
-            if (dist2 < cutoff_dist2 or
-                (dist2 == cutoff_dist2 and it.key() < furthest_molnum))
+            // there isn't space - is this molecule closer than one
+            // of the existing molecules?
+            if (dist2 < cutoff_dist2 or (dist2 == cutoff_dist2 and it.key() < furthest_molnum))
             {
-                //it is - replace the current furthest molecule with this molecule
+                // it is - replace the current furthest molecule with this molecule
                 close_mols.remove(furthest_molnum);
                 close_mols.insert(it.key(), std::sqrt(dist2));
 
@@ -240,7 +226,7 @@ bool CloseMols::recalculate(MolNum changed_mol)
     Molecules::const_iterator it = molecules.constFind(changed_mol);
 
     if (it == molecules.constEnd())
-        //this molecule is not contained
+        // this molecule is not contained
         return false;
 
     const Vector &point = p.read().point();
@@ -248,32 +234,29 @@ bool CloseMols::recalculate(MolNum changed_mol)
 
     const PropertyName &coords_property = map["coordinates"];
 
-    //calculate the distance from the new molecule to the point
-    const Vector &center = it->data().property(coords_property)
-                                     .asA<AtomCoords>()
-                                     .array().aaBox().center();
+    // calculate the distance from the new molecule to the point
+    const Vector &center = it->data().property(coords_property).asA<AtomCoords>().array().aaBox().center();
 
     const double dist2 = space.calcDist2(point, center);
 
-    //is this already a close molecule?
+    // is this already a close molecule?
     if (close_mols.contains(changed_mol))
     {
-        if (dist2 > cutoff_dist2 or
-            (dist2 == cutoff_dist2 and changed_mol > furthest_molnum))
-            //the molecule has moved beyond the cutoff, so other
-            //molecules in the group may now be closer - we now need
-            //to rescan all molecules
+        if (dist2 > cutoff_dist2 or (dist2 == cutoff_dist2 and changed_mol > furthest_molnum))
+            // the molecule has moved beyond the cutoff, so other
+            // molecules in the group may now be closer - we now need
+            // to rescan all molecules
             return this->recalculate();
         else
         {
-            //the molecule has moved, but this cannot affect the order
+            // the molecule has moved, but this cannot affect the order
             //(as it hasn't gone past the cutoff)
             close_mols[changed_mol] = std::sqrt(dist2);
 
             if (dist2 == cutoff_dist2 or changed_mol == furthest_molnum)
             {
-                //the identity of the assigned molecule furthest from
-                //the point may have changed
+                // the identity of the assigned molecule furthest from
+                // the point may have changed
                 this->getNewFurthestMolNum();
             }
 
@@ -282,18 +265,17 @@ bool CloseMols::recalculate(MolNum changed_mol)
     }
     else
     {
-        //has this molecule replaced any of the existing close molecules?
-        if ( dist2 < cutoff_dist2 or
-             (dist2 == cutoff_dist2 and changed_mol < furthest_molnum) )
+        // has this molecule replaced any of the existing close molecules?
+        if (dist2 < cutoff_dist2 or (dist2 == cutoff_dist2 and changed_mol < furthest_molnum))
         {
-            //yes it has!
+            // yes it has!
             close_mols.remove(furthest_molnum);
             close_mols.insert(changed_mol, std::sqrt(dist2));
             this->getNewFurthestMolNum();
             return true;
         }
         else
-            //no, it hasn't!
+            // no, it hasn't!
             return false;
     }
 }
@@ -308,7 +290,7 @@ bool CloseMols::recalculate(const Molecules &changed_mols)
         return this->recalculate();
 
     else if (changed_mols.nMolecules() == 1)
-        return this->recalculate( changed_mols.constBegin().key() );
+        return this->recalculate(changed_mols.constBegin().key());
 
     const Vector &point = p.read().point();
     const Space &space = spce.read();
@@ -319,55 +301,54 @@ bool CloseMols::recalculate(const Molecules &changed_mols)
 
     bool changed_order = false;
 
-    QHash<MolNum,double> old_close_mols = close_mols;
+    QHash<MolNum, double> old_close_mols = close_mols;
 
-    for (Molecules::const_iterator it = changed_mols.constBegin();
-         it != changed_mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = changed_mols.constBegin(); it != changed_mols.constEnd(); ++it)
     {
         const MolNum changed_mol = it.key();
 
         if (not molecules.contains(changed_mol))
             continue;
 
-        //calculate the distance from the new molecule to the point
+        // calculate the distance from the new molecule to the point
         const Vector &center = molecules.constFind(changed_mol)
-                                        ->data().property(coords_property)
-                                                .asA<AtomCoords>()
-                                                .array().aaBox().center();
+                                   ->data()
+                                   .property(coords_property)
+                                   .asA<AtomCoords>()
+                                   .array()
+                                   .aaBox()
+                                   .center();
 
         const double dist2 = space.calcDist2(point, center);
 
-        //is this already a close molecule?
+        // is this already a close molecule?
         if (close_mols.contains(changed_mol))
         {
-            if (dist2 > cutoff_dist2 or
-                (dist2 == cutoff_dist2 and changed_mol > furthest_molnum))
-                //the molecule has moved beyond the cutoff, so other
-                //molecules in the group may now be closer - we now need
-                //to rescan all molecules
+            if (dist2 > cutoff_dist2 or (dist2 == cutoff_dist2 and changed_mol > furthest_molnum))
+                // the molecule has moved beyond the cutoff, so other
+                // molecules in the group may now be closer - we now need
+                // to rescan all molecules
                 return this->recalculate();
             else
             {
-                //the molecule has moved, but this cannot affect the order
+                // the molecule has moved, but this cannot affect the order
                 //(as it hasn't gone past the cutoff)
                 close_mols[changed_mol] = std::sqrt(dist2);
 
                 if (dist2 == cutoff_dist2 or changed_mol == furthest_molnum)
                 {
-                    //the identity of the assigned molecule furthest from
-                    //the point may have changed
+                    // the identity of the assigned molecule furthest from
+                    // the point may have changed
                     this->getNewFurthestMolNum();
                 }
             }
         }
         else
         {
-            //has this molecule replaced any of the existing close molecules?
-            if ( dist2 < cutoff_dist2 or
-                 (dist2 == cutoff_dist2 and changed_mol < furthest_molnum) )
+            // has this molecule replaced any of the existing close molecules?
+            if (dist2 < cutoff_dist2 or (dist2 == cutoff_dist2 and changed_mol < furthest_molnum))
             {
-                //yes it has!
+                // yes it has!
                 close_mols.remove(furthest_molnum);
                 close_mols.insert(changed_mol, std::sqrt(dist2));
                 this->getNewFurthestMolNum();
@@ -384,14 +365,13 @@ bool CloseMols::recalculate(const Molecules &changed_mols)
 
 /** Constructor */
 CloseMols::CloseMols() : nclosest(0), cutoff_dist2(0)
-{}
+{
+}
 
 /** Construct to find the 'nclosest' molecules from the molecule group
     'molgroup' to the point 'point' */
-CloseMols::CloseMols(const PointRef &point, const MoleculeGroup &mgroup,
-                     int nclose, const PropertyMap &propmap)
-          : p(point), molgroup(mgroup), nclosest(nclose),
-            map(propmap), cutoff_dist2(0)
+CloseMols::CloseMols(const PointRef &point, const MoleculeGroup &mgroup, int nclose, const PropertyMap &propmap)
+    : p(point), molgroup(mgroup), nclosest(nclose), map(propmap), cutoff_dist2(0)
 {
     if (nclose < 0)
         nclosest = 0;
@@ -406,10 +386,9 @@ CloseMols::CloseMols(const PointRef &point, const MoleculeGroup &mgroup,
 /** Construct to find the 'nclosest' molecules from the molecule group
     'molgroup' to the point 'point', using the space 'space' to calculate
     the distances between the molecules and the point */
-CloseMols::CloseMols(const PointRef &point, const MoleculeGroup &mgroup,
-                     const Space &space, int nclose, const PropertyMap &propmap)
-          : p(point), molgroup(mgroup), spce(space), nclosest(nclose),
-            map(propmap), cutoff_dist2(0)
+CloseMols::CloseMols(const PointRef &point, const MoleculeGroup &mgroup, const Space &space, int nclose,
+                     const PropertyMap &propmap)
+    : p(point), molgroup(mgroup), spce(space), nclosest(nclose), map(propmap), cutoff_dist2(0)
 {
     if (nclose < 0)
         nclosest = 0;
@@ -423,19 +402,18 @@ CloseMols::CloseMols(const PointRef &point, const MoleculeGroup &mgroup,
 
 /** Copy constructor */
 CloseMols::CloseMols(const CloseMols &other)
-          : p(other.p), molgroup(other.molgroup), spce(other.spce),
-            nclosest(other.nclosest), map(other.map),
-            close_mols(other.close_mols),
-            furthest_molnum(other.furthest_molnum),
-            cutoff_dist2(other.cutoff_dist2)
-{}
+    : p(other.p), molgroup(other.molgroup), spce(other.spce), nclosest(other.nclosest), map(other.map),
+      close_mols(other.close_mols), furthest_molnum(other.furthest_molnum), cutoff_dist2(other.cutoff_dist2)
+{
+}
 
 /** Destructor */
 CloseMols::~CloseMols()
-{}
+{
+}
 
 /** Copy assignment operator */
-CloseMols& CloseMols::operator=(const CloseMols &other)
+CloseMols &CloseMols::operator=(const CloseMols &other)
 {
     if (this != &other)
     {
@@ -455,10 +433,8 @@ CloseMols& CloseMols::operator=(const CloseMols &other)
 /** Comparison operator */
 bool CloseMols::operator==(const CloseMols &other) const
 {
-    return (this == &other) or
-           (p == other.p and molgroup == other.molgroup and
-            spce == other.spce and nclosest == other.nclosest and
-            map == other.map);
+    return (this == &other) or (p == other.p and molgroup == other.molgroup and spce == other.spce and
+                                nclosest == other.nclosest and map == other.map);
 }
 
 /** Comparison operator */
@@ -467,43 +443,43 @@ bool CloseMols::operator!=(const CloseMols &other) const
     return not this->operator==(other);
 }
 
-const char* CloseMols::typeName()
+const char *CloseMols::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CloseMols>() );
+    return QMetaType::typeName(qMetaTypeId<CloseMols>());
 }
 
-const char* CloseMols::what() const
+const char *CloseMols::what() const
 {
     return CloseMols::typeName();
 }
 
-CloseMols* CloseMols::clone() const
+CloseMols *CloseMols::clone() const
 {
     return new CloseMols(*this);
 }
 
 /** Return the point used to find the closest molecules */
-const Point& CloseMols::point() const
+const Point &CloseMols::point() const
 {
     return p.read();
 }
 
 /** Return the molecule group that contains the molecules */
-const MoleculeGroup& CloseMols::moleculeGroup() const
+const MoleculeGroup &CloseMols::moleculeGroup() const
 {
     return molgroup.read();
 }
 
 /** Return the space used to calculate the distances between the
     molecules and the point */
-const Space& CloseMols::space() const
+const Space &CloseMols::space() const
 {
     return spce.read();
 }
 
 /** Return the property map used to find the coordinates and
     space properties */
-const PropertyMap& CloseMols::propertyMap() const
+const PropertyMap &CloseMols::propertyMap() const
 {
     return map;
 }
@@ -516,7 +492,7 @@ int CloseMols::nClosest() const
 
 /** Return the set of close molecules, together with the
     distances from the molecule to the point */
-const QHash<MolNum,double>& CloseMols::closeMolecules() const
+const QHash<MolNum, double> &CloseMols::closeMolecules() const
 {
     return close_mols;
 }
@@ -527,9 +503,7 @@ const QHash<MolNum,double>& CloseMols::closeMolecules() const
     or not the space has changed (space_changed), and whether the
     major and/or minor version numbers of the molecule group
     has changed (molgroup_major_change and molgroup_minor_change) */
-void CloseMols::updateData(const System &system,
-                           bool &point_changed, bool &space_changed,
-                           bool &molgroup_major_changed,
+void CloseMols::updateData(const System &system, bool &point_changed, bool &space_changed, bool &molgroup_major_changed,
                            bool &molgroup_minor_changed)
 {
     point_changed = false;
@@ -540,8 +514,7 @@ void CloseMols::updateData(const System &system,
     if (p.read().usesMoleculesIn(system))
         point_changed = p.edit().update(system);
 
-    const Space &new_space = system.property( map["space"] )
-                                   .asA<Space>();
+    const Space &new_space = system.property(map["space"]).asA<Space>();
 
     if (not spce.read().equals(new_space))
     {
@@ -553,15 +526,13 @@ void CloseMols::updateData(const System &system,
     {
         const MoleculeGroup &newgroup = system[molgroup.read().number()];
 
-        molgroup_major_changed = newgroup.version().majorVersion() !=
-                                 molgroup.read().version().majorVersion();
+        molgroup_major_changed = newgroup.version().majorVersion() != molgroup.read().version().majorVersion();
 
         if (molgroup_major_changed)
             molgroup_minor_changed = true;
         else
         {
-            molgroup_minor_changed = newgroup.version().minorVersion() !=
-                                     molgroup.read().version().minorVersion();
+            molgroup_minor_changed = newgroup.version().minorVersion() != molgroup.read().version().minorVersion();
         }
 
         if (molgroup_major_changed or molgroup_minor_changed)
@@ -571,9 +542,9 @@ void CloseMols::updateData(const System &system,
     }
     else
     {
-        //ensure that the molecule group has the same version of molecules
-        //as in the passed system (so it is compatible with the molecules
-        //in the point)
+        // ensure that the molecule group has the same version of molecules
+        // as in the passed system (so it is compatible with the molecules
+        // in the point)
         QList<Molecule> changed_mols = molgroup.edit().update(system.molecules());
 
         molgroup_minor_changed = (not changed_mols.isEmpty());
@@ -591,16 +562,14 @@ bool CloseMols::update(const System &system)
         bool point_changed(false), space_changed(false);
         bool molgroup_major_changed(false), molgroup_minor_changed(false);
 
-        this->updateData(system, point_changed, space_changed,
-                         molgroup_major_changed, molgroup_minor_changed);
+        this->updateData(system, point_changed, space_changed, molgroup_major_changed, molgroup_minor_changed);
 
-        if (point_changed or space_changed or
-            molgroup_major_changed or molgroup_minor_changed)
+        if (point_changed or space_changed or molgroup_major_changed or molgroup_minor_changed)
         {
             return this->recalculate();
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -622,22 +591,21 @@ bool CloseMols::update(const System &system, MolNum changed_mol)
         bool point_changed(false), space_changed(false);
         bool molgroup_major_changed(false), molgroup_minor_changed(false);
 
-        this->updateData(system, point_changed, space_changed,
-                         molgroup_major_changed, molgroup_minor_changed);
+        this->updateData(system, point_changed, space_changed, molgroup_major_changed, molgroup_minor_changed);
 
         if (point_changed or space_changed or molgroup_major_changed)
         {
-            //more than just the molecule has changed!
+            // more than just the molecule has changed!
             return this->recalculate();
         }
         else if (molgroup_minor_changed)
         {
-            //we will trust the user that only the molecule with
-            //number 'changed_mol' has changed
+            // we will trust the user that only the molecule with
+            // number 'changed_mol' has changed
             return this->recalculate(changed_mol);
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -659,22 +627,21 @@ bool CloseMols::update(const System &system, const Molecules &changed_mols)
         bool point_changed(false), space_changed(false);
         bool molgroup_major_changed(false), molgroup_minor_changed(false);
 
-        this->updateData(system, point_changed, space_changed,
-                         molgroup_major_changed, molgroup_minor_changed);
+        this->updateData(system, point_changed, space_changed, molgroup_major_changed, molgroup_minor_changed);
 
         if (point_changed or space_changed or molgroup_major_changed)
         {
-            //more than just the molecules have changed!
+            // more than just the molecules have changed!
             return this->recalculate();
         }
         else if (molgroup_minor_changed)
         {
-            //we will trust the user that only the molecules in
+            // we will trust the user that only the molecules in
             //'changed_mols' have changed
             return this->recalculate(changed_mols);
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;

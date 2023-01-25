@@ -31,11 +31,11 @@ namespace Sire
 {
     namespace detail
     {
-        const QHash< QString, QSet<QString> > branchClasses();
-        const QHash< QString, QSet<QString> > leafClasses();
+        const QHash<QString, QSet<QString>> branchClasses();
+        const QHash<QString, QSet<QString>> leafClasses();
         const QSet<QString> rootlessClasses();
-    }
-}
+    } // namespace detail
+} // namespace Sire
 
 namespace SireStream
 {
@@ -43,8 +43,7 @@ namespace SireStream
         the base 'base' */
     bool isLeafOf(const char *base, const QString &type_name)
     {
-        QHash< QString, QSet<QString> >::const_iterator
-                    it = Sire::detail::leafClasses().constFind( QLatin1String(base) );
+        QHash<QString, QSet<QString>>::const_iterator it = Sire::detail::leafClasses().constFind(QLatin1String(base));
 
         if (it != Sire::detail::leafClasses().constEnd())
         {
@@ -58,8 +57,7 @@ namespace SireStream
         the base 'base' */
     bool isBranchOf(const char *base, const QString &type_name)
     {
-        QHash< QString, QSet<QString> >::const_iterator
-                    it = Sire::detail::branchClasses().constFind( QLatin1String(base) );
+        QHash<QString, QSet<QString>>::const_iterator it = Sire::detail::branchClasses().constFind(QLatin1String(base));
 
         if (it != Sire::detail::branchClasses().constEnd())
         {
@@ -67,7 +65,6 @@ namespace SireStream
         }
         else
             return false;
-
     }
 
     /** Return whether the class 'type_name' is registered to be derived
@@ -88,24 +85,20 @@ namespace SireStream
         with the metatype system */
     bool isRegistered(const QString &type_name)
     {
-        if ( Sire::detail::rootlessClasses().contains(type_name) )
+        if (Sire::detail::rootlessClasses().contains(type_name))
             return true;
 
         else
         {
-            for (QHash< QString,QSet<QString> >::const_iterator
-                        it = Sire::detail::leafClasses().constBegin();
-                 it != Sire::detail::leafClasses().constEnd();
-                 ++it)
+            for (QHash<QString, QSet<QString>>::const_iterator it = Sire::detail::leafClasses().constBegin();
+                 it != Sire::detail::leafClasses().constEnd(); ++it)
             {
                 if (it.value().contains(type_name))
                     return true;
             }
 
-            for (QHash< QString,QSet<QString> >::const_iterator
-                        it = Sire::detail::branchClasses().constBegin();
-                 it != Sire::detail::branchClasses().constEnd();
-                 ++it)
+            for (QHash<QString, QSet<QString>>::const_iterator it = Sire::detail::branchClasses().constBegin();
+                 it != Sire::detail::branchClasses().constEnd(); ++it)
             {
                 if (it.value().contains(type_name))
                     return true;
@@ -126,19 +119,15 @@ namespace SireStream
         }
         else
         {
-            for (QHash< QString,QSet<QString> >::const_iterator
-                        it = Sire::detail::leafClasses().constBegin();
-                 it != Sire::detail::leafClasses().constEnd();
-                 ++it)
+            for (QHash<QString, QSet<QString>>::const_iterator it = Sire::detail::leafClasses().constBegin();
+                 it != Sire::detail::leafClasses().constEnd(); ++it)
             {
                 if (it.value().contains(type_name))
                     return it.key();
             }
 
-            for (QHash< QString,QSet<QString> >::const_iterator
-                        it = Sire::detail::branchClasses().constBegin();
-                 it != Sire::detail::branchClasses().constEnd();
-                 ++it)
+            for (QHash<QString, QSet<QString>>::const_iterator it = Sire::detail::branchClasses().constBegin();
+                 it != Sire::detail::branchClasses().constEnd(); ++it)
             {
                 if (it.value().contains(type_name))
                     return it.key();
@@ -151,13 +140,13 @@ namespace SireStream
     /** Return all of the leaf classes of root class 'base' */
     QSet<QString> leafClassesOf(const char *base)
     {
-        return Sire::detail::leafClasses().value( QLatin1String(base) );
+        return Sire::detail::leafClasses().value(QLatin1String(base));
     }
 
     /** Return all of the branch classes of root class 'base' */
     QSet<QString> branchClassesOf(const char *base)
     {
-        return Sire::detail::branchClasses().value( QLatin1String(base) );
+        return Sire::detail::branchClasses().value(QLatin1String(base));
     }
 
     /** Return all of the classes registered as derived from root class 'base' */
@@ -177,22 +166,18 @@ namespace SireStream
     {
         QSet<QString> classes = rootlessClasses();
 
-        for (QHash< QString,QSet<QString> >::const_iterator
-                    it = Sire::detail::leafClasses().constBegin();
-             it != Sire::detail::leafClasses().constEnd();
-             ++it)
+        for (QHash<QString, QSet<QString>>::const_iterator it = Sire::detail::leafClasses().constBegin();
+             it != Sire::detail::leafClasses().constEnd(); ++it)
         {
             classes.unite(it.value());
         }
 
-        for (QHash< QString,QSet<QString> >::const_iterator
-                    it = Sire::detail::branchClasses().constBegin();
-             it != Sire::detail::branchClasses().constEnd();
-             ++it)
+        for (QHash<QString, QSet<QString>>::const_iterator it = Sire::detail::branchClasses().constBegin();
+             it != Sire::detail::branchClasses().constEnd(); ++it)
         {
             classes.unite(it.value());
         }
 
         return classes;
     }
-}
+} // namespace SireStream

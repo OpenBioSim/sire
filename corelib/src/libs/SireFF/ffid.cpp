@@ -43,13 +43,16 @@ using namespace SireStream;
 ///////
 
 FFID::FFID() : SireID::ID()
-{}
+{
+}
 
 FFID::FFID(const FFID &other) : SireID::ID(other)
-{}
+{
+}
 
 FFID::~FFID()
-{}
+{
+}
 
 Specify<FFID> FFID::operator[](int i) const
 {
@@ -96,14 +99,13 @@ IDOrSet<FFID> FFID::operator|(const FFID &other) const
     return this->operator*(other);
 }
 
-QList<FFIdx> FFID::processMatches(QList<FFIdx> &ffidxs,
-                                  const ForceFields &ffields) const
+QList<FFIdx> FFID::processMatches(QList<FFIdx> &ffidxs, const ForceFields &ffields) const
 {
     if (ffidxs.isEmpty())
-        throw SireFF::missing_forcefield( QObject::tr(
-            "No forcefield in the passed forcefields object matches the ID "
-            "\"%1\".")
-                .arg(this->toString()), CODELOC );
+        throw SireFF::missing_forcefield(QObject::tr("No forcefield in the passed forcefields object matches the ID "
+                                                     "\"%1\".")
+                                             .arg(this->toString()),
+                                         CODELOC);
 
     std::sort(ffidxs.begin(), ffidxs.end());
 
@@ -121,7 +123,7 @@ QDataStream &operator<<(QDataStream &ds, const FFIdx &ffidx)
 {
     writeHeader(ds, r_ffidx, 1);
 
-    ds << static_cast<const SireID::Index_T_<FFIdx>&>(ffidx);
+    ds << static_cast<const SireID::Index_T_<FFIdx> &>(ffidx);
 
     return ds;
 }
@@ -133,25 +135,29 @@ QDataStream &operator>>(QDataStream &ds, FFIdx &ffidx)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Index_T_<FFIdx>&>(ffidx);
+        ds >> static_cast<SireID::Index_T_<FFIdx> &>(ffidx);
     }
     else
-        throw version_error( v, "1", r_ffidx, CODELOC );
+        throw version_error(v, "1", r_ffidx, CODELOC);
 
     return ds;
 }
 
 FFIdx::FFIdx() : SireID::Index_T_<FFIdx>(), FFID()
-{}
+{
+}
 
 FFIdx::FFIdx(qint32 idx) : SireID::Index_T_<FFIdx>(idx), FFID()
-{}
+{
+}
 
 FFIdx::FFIdx(const FFIdx &other) : SireID::Index_T_<FFIdx>(other), FFID(other)
-{}
+{
+}
 
 FFIdx::~FFIdx()
-{}
+{
+}
 
 FFIdx FFIdx::null()
 {
@@ -173,7 +179,7 @@ QString FFIdx::toString() const
     return QString("FFIdx(%1)").arg(_idx);
 }
 
-FFIdx& FFIdx::operator=(const FFIdx &other)
+FFIdx &FFIdx::operator=(const FFIdx &other)
 {
     SireID::IndexBase::operator=(other);
     FFID::operator=(other);
@@ -185,9 +191,9 @@ bool FFIdx::operator==(const SireID::ID &other) const
     return SireID::ID::compare<FFIdx>(*this, other);
 }
 
-const char* FFIdx::typeName()
+const char *FFIdx::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<FFIdx>() );
+    return QMetaType::typeName(qMetaTypeId<FFIdx>());
 }
 
 ///////
@@ -201,7 +207,7 @@ QDataStream &operator<<(QDataStream &ds, const FFName &ffname)
 {
     writeHeader(ds, r_ffname, 1);
 
-    ds << static_cast<const SireID::Name&>(ffname);
+    ds << static_cast<const SireID::Name &>(ffname);
 
     return ds;
 }
@@ -213,29 +219,34 @@ QDataStream &operator>>(QDataStream &ds, FFName &ffname)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Name&>(ffname);
+        ds >> static_cast<SireID::Name &>(ffname);
     }
     else
-        throw version_error( v, "1", r_ffname, CODELOC );
+        throw version_error(v, "1", r_ffname, CODELOC);
 
     return ds;
 }
 
 FFName::FFName() : SireID::Name(), FFID()
-{}
+{
+}
 
 FFName::FFName(const QString &name) : SireID::Name(name), FFID()
-{}
+{
+}
 
 FFName::FFName(const QString &name, SireID::CaseSensitivity case_sensitivity)
-       : SireID::Name(name, case_sensitivity), FFID()
-{}
+    : SireID::Name(name, case_sensitivity), FFID()
+{
+}
 
 FFName::FFName(const FFName &other) : SireID::Name(other), FFID(other)
-{}
+{
+}
 
 FFName::~FFName()
-{}
+{
+}
 
 bool FFName::isNull() const
 {
@@ -252,7 +263,7 @@ QString FFName::toString() const
     return QString("FFName('%1')").arg(_name);
 }
 
-FFName& FFName::operator=(const FFName &other)
+FFName &FFName::operator=(const FFName &other)
 {
     SireID::Name::operator=(other);
     FFID::operator=(other);
@@ -274,9 +285,9 @@ bool FFName::operator!=(const FFName &other) const
     return SireID::Name::operator!=(other);
 }
 
-const char* FFName::typeName()
+const char *FFName::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<FFName>() );
+    return QMetaType::typeName(qMetaTypeId<FFName>());
 }
 
 ///////
@@ -287,20 +298,18 @@ namespace SireID
     template class Specify<FFID>;
     template class IDAndSet<FFID>;
     template class IDOrSet<FFID>;
-}
+} // namespace SireID
 
-static const RegisterMetaType< Specify<FFID> > r_specify_ffid;
-static const RegisterMetaType< IDAndSet<FFID> > r_idandset_ffid;
-static const RegisterMetaType< IDOrSet<FFID> > r_idorset_ffid;
+static const RegisterMetaType<Specify<FFID>> r_specify_ffid;
+static const RegisterMetaType<IDAndSet<FFID>> r_idandset_ffid;
+static const RegisterMetaType<IDOrSet<FFID>> r_idorset_ffid;
 
-FFIdx* FFIdx::clone() const
+FFIdx *FFIdx::clone() const
 {
     return new FFIdx(*this);
 }
 
-
-FFName* FFName::clone() const
+FFName *FFName::clone() const
 {
     return new FFName(*this);
 }
-

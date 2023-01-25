@@ -35,388 +35,344 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-template<class T>
-class Vector3D;
+    template <class T>
+    class Vector3D;
 }
 
-template<class T>
-QDataStream& operator<<(QDataStream&, const SireMaths::Vector3D<T>&);
+template <class T>
+QDataStream &operator<<(QDataStream &, const SireMaths::Vector3D<T> &);
 
-template<class T>
-QDataStream& operator>>(QDataStream&, SireMaths::Vector3D<T>&);
+template <class T>
+QDataStream &operator>>(QDataStream &, SireMaths::Vector3D<T> &);
 
 namespace SireMaths
 {
 
-/** This is a simple small class that holds 3D value
-    (e.g. 3D velocity, 3D forces)
+    /** This is a simple small class that holds 3D value
+        (e.g. 3D velocity, 3D forces)
 
-    @author Christopher Woods
-*/
-template<class T>
-class Vector3D
-{
+        @author Christopher Woods
+    */
+    template <class T>
+    class Vector3D
+    {
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<<>(QDataStream&, const Vector3D<T>&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>><>(QDataStream&, Vector3D<T>&);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<< <>(QDataStream &, const Vector3D<T> &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>><>(QDataStream &, Vector3D<T> &);
 
-public:
-    typedef T value_type;
+    public:
+        typedef T value_type;
 
-    Vector3D();
-    Vector3D(const T &val);
-    Vector3D(const T &x, const T &y, const T &z);
-    Vector3D(const Vector &v);
+        Vector3D();
+        Vector3D(const T &val);
+        Vector3D(const T &x, const T &y, const T &z);
+        Vector3D(const Vector &v);
 
-    Vector3D(const Vector3D<T> &other);
+        Vector3D(const Vector3D<T> &other);
 
-    ~Vector3D();
+        ~Vector3D();
 
-    Vector3D<T>& operator=(const Vector3D<T> &other);
+        Vector3D<T> &operator=(const Vector3D<T> &other);
 
-    bool operator==(const Vector3D<T> &other) const;
-    bool operator!=(const Vector3D<T> &other) const;
+        bool operator==(const Vector3D<T> &other) const;
+        bool operator!=(const Vector3D<T> &other) const;
 
-    const T& operator[](int i) const;
+        const T &operator[](int i) const;
 
-    Vector3D<T>* clone() const;
+        Vector3D<T> *clone() const;
 
-    Vector3D<T>& operator+=(const Vector3D<T> &other);
-    Vector3D<T>& operator-=(const Vector3D<T> &other);
+        Vector3D<T> &operator+=(const Vector3D<T> &other);
+        Vector3D<T> &operator-=(const Vector3D<T> &other);
 
-    Vector3D<T>& operator*=(double scale);
-    Vector3D<T>& operator/=(double scale);
+        Vector3D<T> &operator*=(double scale);
+        Vector3D<T> &operator/=(double scale);
 
-    Vector3D<T> operator-() const;
-    Vector3D<T> operator+(const Vector3D<T> &other) const;
-    Vector3D<T> operator-(const Vector3D<T> &other) const;
-    Vector3D<T> operator*(double scale) const;
-    Vector3D<T> operator/(double scale) const;
+        Vector3D<T> operator-() const;
+        Vector3D<T> operator+(const Vector3D<T> &other) const;
+        Vector3D<T> operator-(const Vector3D<T> &other) const;
+        Vector3D<T> operator*(double scale) const;
+        Vector3D<T> operator/(double scale) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    const T& x() const;
-    const T& y() const;
-    const T& z() const;
+        const T &x() const;
+        const T &y() const;
+        const T &z() const;
 
-    void set(int i, const T &value);
+        void set(int i, const T &value);
 
-    int count() const;
+        int count() const;
 
-    const T& at(int i) const;
+        const T &at(int i) const;
 
-    Vector value() const;
+        Vector value() const;
 
-    QString toString() const;
+        QString toString() const;
 
-private:
-    /** The three values */
-    T sc[3];
-};
+    private:
+        /** The three values */
+        T sc[3];
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Constructor - this default-constructs the values */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>::Vector3D()
-{}
+    /** Constructor - this default-constructs the values */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T>::Vector3D()
+    {
+    }
 
-/** Construct, initialising to 'val' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>::Vector3D(const T &val)
-{
-    sc[0] = val;
-    sc[1] = val;
-    sc[2] = val;
-}
+    /** Construct, initialising to 'val' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T>::Vector3D(const T &val)
+    {
+        sc[0] = val;
+        sc[1] = val;
+        sc[2] = val;
+    }
 
-/** Construct from the passed values */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>::Vector3D(const T &x, const T &y, const T &z)
-{
-    sc[0] = x;
-    sc[1] = y;
-    sc[2] = z;
-}
+    /** Construct from the passed values */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T>::Vector3D(const T &x, const T &y, const T &z)
+    {
+        sc[0] = x;
+        sc[1] = y;
+        sc[2] = z;
+    }
 
-/** Construct from the passed vector - this assumes that
-    the vector is already in internal units */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>::Vector3D(const Vector &v)
-{
-    sc[0] = T(v.x());
-    sc[1] = T(v.y());
-    sc[2] = T(v.z());
-}
+    /** Construct from the passed vector - this assumes that
+        the vector is already in internal units */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T>::Vector3D(const Vector &v)
+    {
+        sc[0] = T(v.x());
+        sc[1] = T(v.y());
+        sc[2] = T(v.z());
+    }
 
-/** Copy constructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>::Vector3D(const Vector3D<T> &other)
-{
-    sc[0] = other.sc[0];
-    sc[1] = other.sc[1];
-    sc[2] = other.sc[2];
-}
-
-/** Destructor */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>::~Vector3D()
-{}
-
-/** Copy assignment operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>& Vector3D<T>::operator=(const Vector3D<T> &other)
-{
-    if (this != &other)
+    /** Copy constructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T>::Vector3D(const Vector3D<T> &other)
     {
         sc[0] = other.sc[0];
         sc[1] = other.sc[1];
         sc[2] = other.sc[2];
     }
 
-    return *this;
-}
+    /** Destructor */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T>::~Vector3D()
+    {
+    }
 
-/** Comparison operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool Vector3D<T>::operator==(const Vector3D<T> &other) const
-{
-    return (this == &other) or
-           (sc[0] == other.sc[0] and sc[1] == other.sc[1] and sc[2] == other.sc[2]);
-}
+    /** Copy assignment operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> &Vector3D<T>::operator=(const Vector3D<T> &other)
+    {
+        if (this != &other)
+        {
+            sc[0] = other.sc[0];
+            sc[1] = other.sc[1];
+            sc[2] = other.sc[2];
+        }
 
-/** Comparison operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool Vector3D<T>::operator!=(const Vector3D<T> &other) const
-{
-    return (this != &other) and
-           (sc[0] != other.sc[0] or sc[1] != other.sc[1] or sc[2] != other.sc[2]);
-}
+        return *this;
+    }
 
-/** Return the ith component */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& Vector3D<T>::operator[](int i) const
-{
-    return sc[ i % 3 ];
-}
+    /** Comparison operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool Vector3D<T>::operator==(const Vector3D<T> &other) const
+    {
+        return (this == &other) or (sc[0] == other.sc[0] and sc[1] == other.sc[1] and sc[2] == other.sc[2]);
+    }
 
-/** Return a clone of this vector */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>* Vector3D<T>::clone() const
-{
-    return new Vector3D<T>(*this);
-}
+    /** Comparison operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool Vector3D<T>::operator!=(const Vector3D<T> &other) const
+    {
+        return (this != &other) and (sc[0] != other.sc[0] or sc[1] != other.sc[1] or sc[2] != other.sc[2]);
+    }
 
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const char* Vector3D<T>::typeName()
-{
-    return QMetaType::typeName( qMetaTypeId< Vector3D<T> >() );
-}
+    /** Return the ith component */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &Vector3D<T>::operator[](int i) const
+    {
+        return sc[i % 3];
+    }
 
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const char* Vector3D<T>::what() const
-{
-    return Vector3D<T>::typeName();
-}
+    /** Return a clone of this vector */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> *Vector3D<T>::clone() const
+    {
+        return new Vector3D<T>(*this);
+    }
 
-/** Return the x component */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& Vector3D<T>::x() const
-{
-    return sc[0];
-}
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const char *Vector3D<T>::typeName()
+    {
+        return QMetaType::typeName(qMetaTypeId<Vector3D<T>>());
+    }
 
-/** Return the y component */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& Vector3D<T>::y() const
-{
-    return sc[1];
-}
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const char *Vector3D<T>::what() const
+    {
+        return Vector3D<T>::typeName();
+    }
 
-/** Return the z component */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& Vector3D<T>::z() const
-{
-    return sc[2];
-}
+    /** Return the x component */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &Vector3D<T>::x() const
+    {
+        return sc[0];
+    }
 
-/** Return this vector in internal units */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector Vector3D<T>::value() const
-{
-    return Vector( sc[0].value(), sc[1].value(), sc[2].value() );
-}
+    /** Return the y component */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &Vector3D<T>::y() const
+    {
+        return sc[1];
+    }
 
-/** Set the ith component equal to 'value' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-void Vector3D<T>::set(int i, const T &value)
-{
-    sc[ i % 3 ] = value;
-}
+    /** Return the z component */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &Vector3D<T>::z() const
+    {
+        return sc[2];
+    }
 
-/** Return the number of components */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-int Vector3D<T>::count() const
-{
-    return 3;
-}
+    /** Return this vector in internal units */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector Vector3D<T>::value() const
+    {
+        return Vector(sc[0].value(), sc[1].value(), sc[2].value());
+    }
 
-/** Return the ith component */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-const T& Vector3D<T>::at(int i) const
-{
-    return sc[ i % 3 ];
-}
+    /** Set the ith component equal to 'value' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void Vector3D<T>::set(int i, const T &value)
+    {
+        sc[i % 3] = value;
+    }
 
-/** Return a string representation of this Vector3D */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QString Vector3D<T>::toString() const
-{
-    return QString( "( %1, %2, %3 )" )
-                .arg( Sire::toString(sc[0]),
-                      Sire::toString(sc[1]),
-                      Sire::toString(sc[2]) );
-}
+    /** Return the number of components */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE int Vector3D<T>::count() const
+    {
+        return 3;
+    }
 
-/** Addition operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>& Vector3D<T>::operator+=(const Vector3D<T> &other)
-{
-    sc[0] += other.sc[0];
-    sc[1] += other.sc[1];
-    sc[2] += other.sc[2];
-    return *this;
-}
+    /** Return the ith component */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const T &Vector3D<T>::at(int i) const
+    {
+        return sc[i % 3];
+    }
 
-/** Subtraction operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>& Vector3D<T>::operator-=(const Vector3D<T> &other)
-{
-    sc[0] -= other.sc[0];
-    sc[1] -= other.sc[1];
-    sc[2] -= other.sc[2];
-    return *this;
-}
+    /** Return a string representation of this Vector3D */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QString Vector3D<T>::toString() const
+    {
+        return QString("( %1, %2, %3 )").arg(Sire::toString(sc[0]), Sire::toString(sc[1]), Sire::toString(sc[2]));
+    }
 
-/** Multiplication operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>& Vector3D<T>::operator*=(double scale)
-{
-    sc[0] *= scale;
-    sc[1] *= scale;
-    sc[2] *= scale;
-    return *this;
-}
+    /** Addition operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> &Vector3D<T>::operator+=(const Vector3D<T> &other)
+    {
+        sc[0] += other.sc[0];
+        sc[1] += other.sc[1];
+        sc[2] += other.sc[2];
+        return *this;
+    }
 
-/** Division operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T>& Vector3D<T>::operator/=(double scale)
-{
-    sc[0] /= scale;
-    sc[1] /= scale;
-    sc[2] /= scale;
-    return *this;
-}
+    /** Subtraction operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> &Vector3D<T>::operator-=(const Vector3D<T> &other)
+    {
+        sc[0] -= other.sc[0];
+        sc[1] -= other.sc[1];
+        sc[2] -= other.sc[2];
+        return *this;
+    }
 
-/** Negation operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T> Vector3D<T>::operator-() const
-{
-    return Vector3D<T>(-sc[0], -sc[1], -sc[2]);
-}
+    /** Multiplication operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> &Vector3D<T>::operator*=(double scale)
+    {
+        sc[0] *= scale;
+        sc[1] *= scale;
+        sc[2] *= scale;
+        return *this;
+    }
 
-/** Addition operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T> Vector3D<T>::operator+(const Vector3D<T> &other) const
-{
-    return Vector3D<T>(sc[0]+other.sc[0],
-                       sc[1]+other.sc[1],
-                       sc[2]+other.sc[2]);
-}
+    /** Division operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> &Vector3D<T>::operator/=(double scale)
+    {
+        sc[0] /= scale;
+        sc[1] /= scale;
+        sc[2] /= scale;
+        return *this;
+    }
 
-/** Subtraction operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T> Vector3D<T>::operator-(const Vector3D<T> &other) const
-{
-    return Vector3D<T>(sc[0]-other.sc[0],
-                       sc[1]-other.sc[1],
-                       sc[2]-other.sc[2]);
-}
+    /** Negation operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> Vector3D<T>::operator-() const
+    {
+        return Vector3D<T>(-sc[0], -sc[1], -sc[2]);
+    }
 
-/** Multiplication operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T> Vector3D<T>::operator*(double scale) const
-{
-    return Vector3D<T>(scale*sc[0],
-                       scale*sc[1],
-                       scale*sc[2]);
-}
+    /** Addition operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> Vector3D<T>::operator+(const Vector3D<T> &other) const
+    {
+        return Vector3D<T>(sc[0] + other.sc[0], sc[1] + other.sc[1], sc[2] + other.sc[2]);
+    }
 
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T> operator*(double scale, const Vector3D<T> &v)
-{
-    return v * scale;
-}
+    /** Subtraction operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> Vector3D<T>::operator-(const Vector3D<T> &other) const
+    {
+        return Vector3D<T>(sc[0] - other.sc[0], sc[1] - other.sc[1], sc[2] - other.sc[2]);
+    }
 
-/** Division operator */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-Vector3D<T> Vector3D<T>::operator/(double scale) const
-{
-    return Vector3D<T>(sc[0]/scale,
-                       sc[1]/scale,
-                       sc[2]/scale);
-}
+    /** Multiplication operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> Vector3D<T>::operator*(double scale) const
+    {
+        return Vector3D<T>(scale * sc[0], scale * sc[1], scale * sc[2]);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> operator*(double scale, const Vector3D<T> &v)
+    {
+        return v * scale;
+    }
+
+    /** Division operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Vector3D<T> Vector3D<T>::operator/(double scale) const
+    {
+        return Vector3D<T>(sc[0] / scale, sc[1] / scale, sc[2] / scale);
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMaths
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator<<(QDataStream &ds, const SireMaths::Vector3D<T> &vec)
+template <class T>
+SIRE_OUTOFLINE_TEMPLATE QDataStream &operator<<(QDataStream &ds, const SireMaths::Vector3D<T> &vec)
 {
     ds << vec.sc[0] << vec.sc[1] << vec.sc[2];
     return ds;
 }
 
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QDataStream& operator>>(QDataStream &ds, SireMaths::Vector3D<T> &vec)
+template <class T>
+SIRE_OUTOFLINE_TEMPLATE QDataStream &operator>>(QDataStream &ds, SireMaths::Vector3D<T> &vec)
 {
     ds >> vec.sc[0] >> vec.sc[1] >> vec.sc[2];
     return ds;

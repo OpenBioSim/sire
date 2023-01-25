@@ -37,102 +37,102 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class Sum;
+    class Sum;
 }
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Sum&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Sum&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Sum &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Sum &);
 
 namespace SireCAS
 {
 
-class Product;
+    class Product;
 
-/**
-This class holds a collection of expressions that are to be added (or subtracted) from one another
+    /**
+    This class holds a collection of expressions that are to be added (or subtracted) from one another
 
-@author Christopher Woods
-*/
-class SIRECAS_EXPORT Sum : public ExBase
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Sum&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Sum&);
-
-public:
-    Sum();
-    Sum(const Expression &ex0, const Expression &ex1);
-    Sum(const Expressions &expressions);
-
-    Sum(const Sum &other);
-
-    ~Sum();
-
-    Expression differentiate(const Symbol &symbol) const;
-    Expression integrate(const Symbol &symbol) const;
-
-    Expression series(const Symbol &symbol, int n) const;
-
-    Expression simplify(int options=0) const;
-
-    Expression conjugate() const;
-
-    bool isFunction(const Symbol&) const;
-    bool isConstant() const;
-    bool isComplex() const;
-    bool isCompound() const;
-
-    bool operator==(const ExBase &other) const;
-    uint hash() const;
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIRECAS_EXPORT Sum : public ExBase
     {
-        return Sum::typeName();
-    }
 
-    QString toString() const;
-    QString toOpenMMString() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Sum &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Sum &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        Sum();
+        Sum(const Expression &ex0, const Expression &ex1);
+        Sum(const Expressions &expressions);
 
-    Expression substitute(const Identities &identities) const;
+        Sum(const Sum &other);
 
-    Symbols symbols() const;
-    Functions functions() const;
-    Expressions children() const;
+        ~Sum();
 
-    Expression reduce() const;
+        Expression differentiate(const Symbol &symbol) const;
+        Expression integrate(const Symbol &symbol) const;
 
-    Sum* clone() const;
+        Expression series(const Symbol &symbol, int n) const;
 
-    QList<Factor> expand(const Symbol &symbol) const;
+        Expression simplify(int options = 0) const;
 
-private:
-    friend class Product;
+        Expression conjugate() const;
 
-    void add(const Expression &ex);
+        bool isFunction(const Symbol &) const;
+        bool isConstant() const;
+        bool isComplex() const;
+        bool isCompound() const;
 
-    Expression take(const ExpressionBase &ex);
-    void add(double fac, const ExpressionBase &ex);
+        bool operator==(const ExBase &other) const;
+        uint hash() const;
 
-    /** The positive parts of the sum */
-    QHash<ExpressionBase, Expression> posparts;
+        static const char *typeName();
 
-    /** The negative parts of the sum */
-    QHash<ExpressionBase, Expression> negparts;
+        const char *what() const
+        {
+            return Sum::typeName();
+        }
 
-    /** The start value of the sum */
-    double strtval;
-};
+        QString toString() const;
+        QString toOpenMMString() const;
 
-}
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+        Expression substitute(const Identities &identities) const;
+
+        Symbols symbols() const;
+        Functions functions() const;
+        Expressions children() const;
+
+        Expression reduce() const;
+
+        Sum *clone() const;
+
+        QList<Factor> expand(const Symbol &symbol) const;
+
+    private:
+        friend class Product;
+
+        void add(const Expression &ex);
+
+        Expression take(const ExpressionBase &ex);
+        void add(double fac, const ExpressionBase &ex);
+
+        /** The positive parts of the sum */
+        QHash<ExpressionBase, Expression> posparts;
+
+        /** The negative parts of the sum */
+        QHash<ExpressionBase, Expression> negparts;
+
+        /** The start value of the sum */
+        double strtval;
+    };
+
+} // namespace SireCAS
 
 Q_DECLARE_METATYPE(SireCAS::Sum)
 
-SIRE_EXPOSE_CLASS( SireCAS::Sum )
+SIRE_EXPOSE_CLASS(SireCAS::Sum)
 
 SIRE_END_HEADER
 

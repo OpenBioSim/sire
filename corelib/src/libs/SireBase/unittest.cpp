@@ -34,14 +34,15 @@
 
 using namespace SireBase;
 
-typedef QList< boost::shared_ptr<UnitTest> > TestRegistry;
+typedef QList<boost::shared_ptr<UnitTest>> TestRegistry;
 
-Q_GLOBAL_STATIC( TestRegistry, getTestRegistry );
-Q_GLOBAL_STATIC( QMutex, getTestMutex );
+Q_GLOBAL_STATIC(TestRegistry, getTestRegistry);
+Q_GLOBAL_STATIC(QMutex, getTestMutex);
 
 /** Null constructor */
 UnitTest::UnitTest() : test_function(0), run_time(0)
-{}
+{
+}
 
 /** Construct a test called 'name' that will call the passed function.
     The test function must have the signature
@@ -54,25 +55,27 @@ UnitTest::UnitTest() : test_function(0), run_time(0)
     an exception
 */
 UnitTest::UnitTest(const QString &name, void (*test_func)(bool))
-         : test_name(name), test_function(test_func), run_time(0)
+    : test_name(name), test_function(test_func), run_time(0)
 {
-    //register this test with the global list
+    // register this test with the global list
     if (test_func != 0)
     {
-        QMutexLocker lkr( getTestMutex() );
-        getTestRegistry()->append( boost::shared_ptr<UnitTest>(new UnitTest(*this)) );
+        QMutexLocker lkr(getTestMutex());
+        getTestRegistry()->append(boost::shared_ptr<UnitTest>(new UnitTest(*this)));
     }
 }
 
 /** Copy constructor */
 UnitTest::UnitTest(const UnitTest &other)
-         : test_name(other.test_name), test_function(other.test_function),
-           error_string(other.error_string), run_time(other.run_time)
-{}
+    : test_name(other.test_name), test_function(other.test_function), error_string(other.error_string),
+      run_time(other.run_time)
+{
+}
 
 /** Destructor */
 UnitTest::~UnitTest()
-{}
+{
+}
 
 /** Return the name of the test */
 QString UnitTest::name() const
@@ -80,7 +83,7 @@ QString UnitTest::name() const
     return test_name;
 }
 
-static QTextStream cerr( stderr, QIODevice::WriteOnly | QIODevice::Unbuffered );
+static QTextStream cerr(stderr, QIODevice::WriteOnly | QIODevice::Unbuffered);
 
 /** Run this test a total of 'nrepeats' times, printing out information
     if 'verbose' is true */
@@ -95,7 +98,7 @@ bool UnitTest::run(int nrepeats, bool verbose)
     {
         QElapsedTimer t;
         t.start();
-        for (int i=0; i<nrepeats; ++i)
+        for (int i = 0; i < nrepeats; ++i)
         {
             (*test_function)(verbose);
             cerr << ".";
@@ -107,15 +110,15 @@ bool UnitTest::run(int nrepeats, bool verbose)
         error_string = QString();
         return true;
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         error_string = e.toString();
     }
-    catch(const std::exception &e)
+    catch (const std::exception &e)
     {
         error_string = QObject::tr("std::exception( %1 )").arg(e.what());
     }
-    catch(...)
+    catch (...)
     {
         error_string = QObject::tr("An unknown error occured!");
     }
@@ -151,9 +154,9 @@ quint64 UnitTest::runTime()
 }
 
 /** Return all of the tests that have been registered */
-QList< boost::shared_ptr<UnitTest> > UnitTest::tests()
+QList<boost::shared_ptr<UnitTest>> UnitTest::tests()
 {
-    QMutexLocker lkr( getTestMutex() );
+    QMutexLocker lkr(getTestMutex());
     return *(getTestRegistry());
 }
 
@@ -161,7 +164,7 @@ QList< boost::shared_ptr<UnitTest> > UnitTest::tests()
     screen and returning the number of tests that failed */
 int UnitTest::runAll(bool verbose)
 {
-    QMutexLocker lkr( getTestMutex() );
+    QMutexLocker lkr(getTestMutex());
 
     cerr << QObject::tr("\n== Running Unit Tests ==\n\n");
     cerr.flush();
@@ -170,7 +173,7 @@ int UnitTest::runAll(bool verbose)
     const int n = getTestRegistry()->count();
     int nfailed = 0;
 
-    foreach( boost::shared_ptr<UnitTest> test, *(getTestRegistry()) )
+    foreach (boost::shared_ptr<UnitTest> test, *(getTestRegistry()))
     {
         cerr << QObject::tr("(%1/%2) %3 ").arg(i).arg(n).arg(test->name());
         cerr.flush();
@@ -178,16 +181,16 @@ int UnitTest::runAll(bool verbose)
 
         if (passed and not verbose)
         {
-            //if the test was really quick, then run it several times to try different inputs
+            // if the test was really quick, then run it several times to try different inputs
             if (test->runTime() < 500000000)
             {
-                passed = test->run( qMin( int(500000000 / test->runTime()), 10 ), verbose );
+                passed = test->run(qMin(int(500000000 / test->runTime()), 10), verbose);
             }
         }
 
         if (passed)
         {
-            cerr << QObject::tr("(passed - took %1 ms)\n").arg( 0.000001 * test->runTime() );
+            cerr << QObject::tr("(passed - took %1 ms)\n").arg(0.000001 * test->runTime());
             cerr.flush();
         }
         else
@@ -204,12 +207,11 @@ int UnitTest::runAll(bool verbose)
     {
         cerr << QObject::tr("\n\nA number of tests (%1) failed!!!\n").arg(nfailed);
 
-        foreach( boost::shared_ptr<UnitTest> test, *(getTestRegistry()) )
+        foreach (boost::shared_ptr<UnitTest> test, *(getTestRegistry()))
         {
             if (test->wasError())
             {
-                cerr << QObject::tr("\n== FAILED TEST | %1 ==\n%2\n")
-                            .arg(test->name()).arg(test->errorString());
+                cerr << QObject::tr("\n== FAILED TEST | %1 ==\n%2\n").arg(test->name()).arg(test->errorString());
             }
         }
 

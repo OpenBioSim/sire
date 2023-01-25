@@ -30,16 +30,16 @@
 
 #include <QUuid>
 
-#include "SireBase/property.h"
-#include "SireBase/properties.h"
 #include "SireBase/majorminorversion.h"
+#include "SireBase/properties.h"
+#include "SireBase/property.h"
 
 #include "SireCAS/symbol.h"
 
-#include "SireMol/moleculegroup.h"
-#include "SireMol/atomvelocities.h"
 #include "SireMol/atomforces.h"
 #include "SireMol/atommasses.h"
+#include "SireMol/atomvelocities.h"
+#include "SireMol/moleculegroup.h"
 
 #include "SireFF/forcetable.h"
 
@@ -51,281 +51,277 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class IntegratorWorkspace;
-class NullIntegratorWorkspace;
-class AtomicVelocityWorkspace;
-}
+    class IntegratorWorkspace;
+    class NullIntegratorWorkspace;
+    class AtomicVelocityWorkspace;
+} // namespace SireMove
 
-QDataStream& operator<<(QDataStream&, const SireMove::IntegratorWorkspace&);
-QDataStream& operator>>(QDataStream&, SireMove::IntegratorWorkspace&);
+QDataStream &operator<<(QDataStream &, const SireMove::IntegratorWorkspace &);
+QDataStream &operator>>(QDataStream &, SireMove::IntegratorWorkspace &);
 
-QDataStream& operator<<(QDataStream&, const SireMove::NullIntegratorWorkspace&);
-QDataStream& operator>>(QDataStream&, SireMove::NullIntegratorWorkspace&);
+QDataStream &operator<<(QDataStream &, const SireMove::NullIntegratorWorkspace &);
+QDataStream &operator>>(QDataStream &, SireMove::NullIntegratorWorkspace &);
 
-QDataStream& operator<<(QDataStream&, const SireMove::AtomicVelocityWorkspace&);
-QDataStream& operator>>(QDataStream&, SireMove::AtomicVelocityWorkspace&);
+QDataStream &operator<<(QDataStream &, const SireMove::AtomicVelocityWorkspace &);
+QDataStream &operator>>(QDataStream &, SireMove::AtomicVelocityWorkspace &);
 
 namespace SireMol
 {
-class MoleculeView;
+    class MoleculeView;
 }
 
 namespace SireMove
 {
 
-class VelocityGenerator;
+    class VelocityGenerator;
 
-using SireMol::MoleculeView;
-using SireMol::MoleculeGroup;
-using SireMol::MolGroupPtr;
-using SireMol::MGNum;
-using SireMol::MolNum;
-using SireMol::MolID;
-using SireMol::AtomForces;
-using SireMol::AtomMasses;
-using SireMol::AtomVelocities;
-using SireMol::Velocity3D;
-using SireMol::Molecules;
+    using SireMol::AtomForces;
+    using SireMol::AtomMasses;
+    using SireMol::AtomVelocities;
+    using SireMol::MGNum;
+    using SireMol::MoleculeGroup;
+    using SireMol::Molecules;
+    using SireMol::MoleculeView;
+    using SireMol::MolGroupPtr;
+    using SireMol::MolID;
+    using SireMol::MolNum;
+    using SireMol::Velocity3D;
 
-using SireSystem::System;
+    using SireSystem::System;
 
-using SireFF::ForceTable;
+    using SireFF::ForceTable;
 
-using SireMaths::Vector;
+    using SireMaths::Vector;
 
-using SireCAS::Symbol;
+    using SireCAS::Symbol;
 
-using SireBase::PropertyMap;
-using SireBase::PropertyName;
+    using SireBase::PropertyMap;
+    using SireBase::PropertyName;
 
-/** This is the base class of the workspaces which are used to
-    hold the intermediate values used when integrating the
-    dynamics of a system
+    /** This is the base class of the workspaces which are used to
+        hold the intermediate values used when integrating the
+        dynamics of a system
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT IntegratorWorkspace : public SireBase::Property
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const IntegratorWorkspace&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, IntegratorWorkspace&);
-
-public:
-    IntegratorWorkspace(const PropertyMap &map = PropertyMap());
-    IntegratorWorkspace(const MoleculeGroup &molgroup,
-                        const PropertyMap &map = PropertyMap());
-
-    IntegratorWorkspace(const IntegratorWorkspace &other);
-
-    virtual ~IntegratorWorkspace();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT IntegratorWorkspace : public SireBase::Property
     {
-        return "SireBase::IntegratorWorkspace";
-    }
 
-    virtual IntegratorWorkspace* clone() const=0;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const IntegratorWorkspace &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, IntegratorWorkspace &);
 
-    const MoleculeGroup& moleculeGroup() const;
+    public:
+        IntegratorWorkspace(const PropertyMap &map = PropertyMap());
+        IntegratorWorkspace(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    const ForceTable& forceTable() const;
+        IntegratorWorkspace(const IntegratorWorkspace &other);
 
-    virtual bool setSystem(const System &system);
+        virtual ~IntegratorWorkspace();
 
-    const System& system() const;
+        static const char *typeName()
+        {
+            return "SireBase::IntegratorWorkspace";
+        }
 
-    System& nonConstsystem();
+        virtual IntegratorWorkspace *clone() const = 0;
 
-    const PropertyMap& propertyMap() const;
+        const MoleculeGroup &moleculeGroup() const;
 
-    virtual void setPropertyMap(const PropertyMap &map);
+        const ForceTable &forceTable() const;
 
-    virtual void setGenerator(const RanGenerator &generator);
+        virtual bool setSystem(const System &system);
 
-    virtual void setCoordinatesProperty(const PropertyName &source);
-    virtual void setSpaceProperty(const PropertyName &source);
-    virtual void setVelocitiesProperty(const PropertyName &source);
-    virtual void setMassesProperty(const PropertyName &source);
-    virtual void setElementsProperty(const PropertyName &source);
+        const System &system() const;
 
-    virtual void setVelocityGeneratorProperty(const PropertyName &source);
+        System &nonConstsystem();
 
-    PropertyName coordinatesProperty() const;
-    PropertyName spaceProperty() const;
-    PropertyName velocitiesProperty() const;
-    PropertyName massesProperty() const;
-    PropertyName elementsProperty() const;
-    PropertyName velocityGeneratorProperty() const;
+        const PropertyMap &propertyMap() const;
 
-    virtual bool calculateForces(const Symbol &nrg_component);
+        virtual void setPropertyMap(const PropertyMap &map);
 
-    bool forcesNeedCalculating(const Symbol &nrg_component) const;
+        virtual void setGenerator(const RanGenerator &generator);
 
-    void mustNowRecalculateFromScratch();
+        virtual void setCoordinatesProperty(const PropertyName &source);
+        virtual void setSpaceProperty(const PropertyName &source);
+        virtual void setVelocitiesProperty(const PropertyName &source);
+        virtual void setMassesProperty(const PropertyName &source);
+        virtual void setElementsProperty(const PropertyName &source);
 
-    void collectStatistics();
+        virtual void setVelocityGeneratorProperty(const PropertyName &source);
 
-    virtual void regenerateVelocities(const VelocityGenerator &generator)=0;
+        PropertyName coordinatesProperty() const;
+        PropertyName spaceProperty() const;
+        PropertyName velocitiesProperty() const;
+        PropertyName massesProperty() const;
+        PropertyName elementsProperty() const;
+        PropertyName velocityGeneratorProperty() const;
 
-    virtual SireUnits::Dimension::MolarEnergy kineticEnergy() const=0;
-    virtual SireUnits::Dimension::MolarEnergy
-                            kineticEnergy(MolNum molnum) const=0;
-    virtual SireUnits::Dimension::MolarEnergy
-                            kineticEnergy(const MoleculeView &molview) const=0;
+        virtual bool calculateForces(const Symbol &nrg_component);
 
-    static const NullIntegratorWorkspace& null();
+        bool forcesNeedCalculating(const Symbol &nrg_component) const;
 
-protected:
-    IntegratorWorkspace& operator=(const IntegratorWorkspace &other);
+        void mustNowRecalculateFromScratch();
 
-    bool operator==(const IntegratorWorkspace &other) const;
-    bool operator!=(const IntegratorWorkspace &other) const;
+        void collectStatistics();
 
-    virtual void changedProperty(const QString &property);
+        virtual void regenerateVelocities(const VelocityGenerator &generator) = 0;
 
-    void pvt_update(const Molecules &changed_mols);
+        virtual SireUnits::Dimension::MolarEnergy kineticEnergy() const = 0;
+        virtual SireUnits::Dimension::MolarEnergy kineticEnergy(MolNum molnum) const = 0;
+        virtual SireUnits::Dimension::MolarEnergy kineticEnergy(const MoleculeView &molview) const = 0;
 
-private:
-    /** The system being integrated */
-    System sys;
+        static const NullIntegratorWorkspace &null();
 
-    /** The molecule group containing the molecules being integrated */
-    MolGroupPtr molgroup;
+    protected:
+        IntegratorWorkspace &operator=(const IntegratorWorkspace &other);
 
-    /** The current forces acting on the molecules */
-    ForceTable molforces;
+        bool operator==(const IntegratorWorkspace &other) const;
+        bool operator!=(const IntegratorWorkspace &other) const;
 
-    /** The energy component used when we last got the forces */
-    SireCAS::Symbol last_nrg_component;
+        virtual void changedProperty(const QString &property);
 
-    /** The property map used to find the sources of required properties */
-    PropertyMap map;
+        void pvt_update(const Molecules &changed_mols);
 
-    /** Whether or not the forces need to be recalculated */
-    bool need_new_forces;
-};
+    private:
+        /** The system being integrated */
+        System sys;
 
-/** This is the null integrator workspace */
-class SIREMOVE_EXPORT NullIntegratorWorkspace
-        : public SireBase::ConcreteProperty<NullIntegratorWorkspace,IntegratorWorkspace>
-{
+        /** The molecule group containing the molecules being integrated */
+        MolGroupPtr molgroup;
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const NullIntegratorWorkspace&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullIntegratorWorkspace&);
+        /** The current forces acting on the molecules */
+        ForceTable molforces;
 
-public:
-    NullIntegratorWorkspace();
-    NullIntegratorWorkspace(const NullIntegratorWorkspace &other);
+        /** The energy component used when we last got the forces */
+        SireCAS::Symbol last_nrg_component;
 
-    ~NullIntegratorWorkspace();
+        /** The property map used to find the sources of required properties */
+        PropertyMap map;
 
-    NullIntegratorWorkspace& operator=(const NullIntegratorWorkspace &other);
+        /** Whether or not the forces need to be recalculated */
+        bool need_new_forces;
+    };
 
-    bool operator==(const NullIntegratorWorkspace &other) const;
-    bool operator!=(const NullIntegratorWorkspace &other) const;
+    /** This is the null integrator workspace */
+    class SIREMOVE_EXPORT NullIntegratorWorkspace
+        : public SireBase::ConcreteProperty<NullIntegratorWorkspace, IntegratorWorkspace>
+    {
 
-    static const char* typeName();
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const NullIntegratorWorkspace &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, NullIntegratorWorkspace &);
 
-    void regenerateVelocities(const VelocityGenerator &generator);
+    public:
+        NullIntegratorWorkspace();
+        NullIntegratorWorkspace(const NullIntegratorWorkspace &other);
 
-    SireUnits::Dimension::MolarEnergy kineticEnergy() const;
-    SireUnits::Dimension::MolarEnergy kineticEnergy(MolNum molnum) const;
-    SireUnits::Dimension::MolarEnergy kineticEnergy(const MoleculeView &molview) const;
-};
+        ~NullIntegratorWorkspace();
 
-/** This class provides a workspace for integrators that make use
-    of atomic forces and velocities
+        NullIntegratorWorkspace &operator=(const NullIntegratorWorkspace &other);
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT AtomicVelocityWorkspace
-       : public SireBase::ConcreteProperty<AtomicVelocityWorkspace,IntegratorWorkspace>
-{
+        bool operator==(const NullIntegratorWorkspace &other) const;
+        bool operator!=(const NullIntegratorWorkspace &other) const;
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomicVelocityWorkspace&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, AtomicVelocityWorkspace&);
+        static const char *typeName();
 
-public:
-    AtomicVelocityWorkspace(const PropertyMap &map = PropertyMap());
-    AtomicVelocityWorkspace(const MoleculeGroup &molgroup,
-                            const PropertyMap &map = PropertyMap());
+        void regenerateVelocities(const VelocityGenerator &generator);
 
-    AtomicVelocityWorkspace(const AtomicVelocityWorkspace &other);
+        SireUnits::Dimension::MolarEnergy kineticEnergy() const;
+        SireUnits::Dimension::MolarEnergy kineticEnergy(MolNum molnum) const;
+        SireUnits::Dimension::MolarEnergy kineticEnergy(const MoleculeView &molview) const;
+    };
 
-    ~AtomicVelocityWorkspace();
+    /** This class provides a workspace for integrators that make use
+        of atomic forces and velocities
 
-    AtomicVelocityWorkspace& operator=(const AtomicVelocityWorkspace &other);
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT AtomicVelocityWorkspace
+        : public SireBase::ConcreteProperty<AtomicVelocityWorkspace, IntegratorWorkspace>
+    {
 
-    bool operator==(const AtomicVelocityWorkspace &other) const;
-    bool operator!=(const AtomicVelocityWorkspace &other) const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomicVelocityWorkspace &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, AtomicVelocityWorkspace &);
 
-    static const char* typeName();
+    public:
+        AtomicVelocityWorkspace(const PropertyMap &map = PropertyMap());
+        AtomicVelocityWorkspace(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    SireUnits::Dimension::MolarEnergy kineticEnergy() const;
-    SireUnits::Dimension::MolarEnergy kineticEnergy(MolNum molnum) const;
-    SireUnits::Dimension::MolarEnergy kineticEnergy(const MoleculeView &molview) const;
+        AtomicVelocityWorkspace(const AtomicVelocityWorkspace &other);
 
-    int nMolecules() const;
+        ~AtomicVelocityWorkspace();
 
-    int nAtoms(int i) const;
+        AtomicVelocityWorkspace &operator=(const AtomicVelocityWorkspace &other);
 
-    Vector* coordsArray(int i);
-    Vector* momentaArray(int i);
+        bool operator==(const AtomicVelocityWorkspace &other) const;
+        bool operator!=(const AtomicVelocityWorkspace &other) const;
 
-    const Vector* coordsArray(int i) const;
-    const Vector* forceArray(int i) const;
-    const Vector* momentaArray(int i) const;
+        static const char *typeName();
 
-    const double* massArray(int i) const;
+        SireUnits::Dimension::MolarEnergy kineticEnergy() const;
+        SireUnits::Dimension::MolarEnergy kineticEnergy(MolNum molnum) const;
+        SireUnits::Dimension::MolarEnergy kineticEnergy(const MoleculeView &molview) const;
 
-    const Vector* constCoordsArray(int i) const;
-    const Vector* constForceArray(int i) const;
-    const Vector* constMomentaArray(int i) const;
+        int nMolecules() const;
 
-    const double* constMassArray(int i) const;
+        int nAtoms(int i) const;
 
-    bool calculateForces(const Symbol &nrg_component);
+        Vector *coordsArray(int i);
+        Vector *momentaArray(int i);
 
-    bool setSystem(const System &system);
+        const Vector *coordsArray(int i) const;
+        const Vector *forceArray(int i) const;
+        const Vector *momentaArray(int i) const;
 
-    void regenerateVelocities(const VelocityGenerator &generator);
+        const double *massArray(int i) const;
 
-    void commitCoordinates();
-    void commitVelocities();
+        const Vector *constCoordsArray(int i) const;
+        const Vector *constForceArray(int i) const;
+        const Vector *constMomentaArray(int i) const;
 
-    void commitCoordinatesAndVelocities();
+        const double *constMassArray(int i) const;
 
-    void commitBufferedCoordinatesAndVelocities(  QVector < QVector< QVector < Vector > > > &buffered_coords);
+        bool calculateForces(const Symbol &nrg_component);
 
-protected:
-    void changedProperty(const QString &property);
+        bool setSystem(const System &system);
 
-private:
-    void rebuildFromScratch();
+        void regenerateVelocities(const VelocityGenerator &generator);
 
-    /** All of the atomic coordinates */
-    QVector< QVector<Vector> > atom_coords;
+        void commitCoordinates();
+        void commitVelocities();
 
-    /** All of the atomic momenta */
-    QVector< QVector<Vector> > atom_momenta;
+        void commitCoordinatesAndVelocities();
 
-    /** All of the forces for molecules that are not
-        fully selected */
-    QVector< QVector<Vector> > atom_forces;
+        void commitBufferedCoordinatesAndVelocities(QVector<QVector<QVector<Vector>>> &buffered_coords);
 
-    /** All of the atom masses */
-    QVector< QVector<double> > atom_masses;
+    protected:
+        void changedProperty(const QString &property);
 
-    /** The generator used to get the initial velocities */
-    VelGenPtr vel_generator;
-};
+    private:
+        void rebuildFromScratch();
 
-typedef SireBase::PropPtr<IntegratorWorkspace> IntegratorWorkspacePtr;
+        /** All of the atomic coordinates */
+        QVector<QVector<Vector>> atom_coords;
 
-}
+        /** All of the atomic momenta */
+        QVector<QVector<Vector>> atom_momenta;
 
-Q_DECLARE_METATYPE( SireMove::NullIntegratorWorkspace )
-Q_DECLARE_METATYPE( SireMove::AtomicVelocityWorkspace )
+        /** All of the forces for molecules that are not
+            fully selected */
+        QVector<QVector<Vector>> atom_forces;
+
+        /** All of the atom masses */
+        QVector<QVector<double>> atom_masses;
+
+        /** The generator used to get the initial velocities */
+        VelGenPtr vel_generator;
+    };
+
+    typedef SireBase::PropPtr<IntegratorWorkspace> IntegratorWorkspacePtr;
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::NullIntegratorWorkspace)
+Q_DECLARE_METATYPE(SireMove::AtomicVelocityWorkspace)
 
 SIRE_END_HEADER
 

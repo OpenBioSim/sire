@@ -29,16 +29,16 @@
 
 #include "SireBase/majorminorversion.h"
 
-#include "SireMol/moleculegroup.h"
 #include "SireMol/molecule.h"
-#include "SireMol/viewsofmol.h"
+#include "SireMol/moleculegroup.h"
 #include "SireMol/partialmolecule.h"
+#include "SireMol/viewsofmol.h"
 
 #include "SireError/errors.h"
 
 #include <QDebug>
-#include <QVarLengthArray>
 #include <QThreadStorage>
+#include <QVarLengthArray>
 
 using namespace SireMol;
 
@@ -51,22 +51,21 @@ namespace SireMol
         public:
             MolGroupWorkspaceData()
             {
-                //qDebug() << "MolGroupWorkspaceData::MolGroupWorkspaceData()" << quintptr(this);
+                // qDebug() << "MolGroupWorkspaceData::MolGroupWorkspaceData()" << quintptr(this);
             }
 
-            MolGroupWorkspaceData(const MolGroupWorkspaceData &other)
-                    : ver(other.ver), mols(other.mols), views(other.views)
+            MolGroupWorkspaceData(const MolGroupWorkspaceData &other) : ver(other.ver), mols(other.mols), views(other.views)
             {
-                //qDebug() << "MolGroupWorkspaceData::MolGroupWorkspaceData(copy)"
-                //         << quintptr(this) << quintptr(&other);
+                // qDebug() << "MolGroupWorkspaceData::MolGroupWorkspaceData(copy)"
+                //          << quintptr(this) << quintptr(&other);
             }
 
             ~MolGroupWorkspaceData()
             {
-                //qDebug() << "MolGroupWorkspaceData::~MolGroupWorkspaceData()" << quintptr(this);
+                // qDebug() << "MolGroupWorkspaceData::~MolGroupWorkspaceData()" << quintptr(this);
             }
 
-            MolGroupWorkspaceData& operator=(const MolGroupWorkspaceData &other)
+            MolGroupWorkspaceData &operator=(const MolGroupWorkspaceData &other)
             {
                 ver = other.ver;
                 mols = other.mols;
@@ -83,7 +82,7 @@ namespace SireMol
 
             bool contains(const MolNum &molnum) const
             {
-                for (int i=0; i<mols.count(); ++i)
+                for (int i = 0; i < mols.count(); ++i)
                 {
                     if (mols.constData()[i].read().number() == molnum)
                         return true;
@@ -97,7 +96,7 @@ namespace SireMol
                 return mols.isEmpty() and ver.majorVersion() == 0 and ver.minorVersion() == 0;
             }
 
-            const SharedDataPointer<MoleculeData>* data() const
+            const SharedDataPointer<MoleculeData> *data() const
             {
                 return mols.data();
             }
@@ -112,9 +111,9 @@ namespace SireMol
                 mols.push_back(molecule.data());
             }
 
-            const ViewsOfMol& getUpdated(const ViewsOfMol &oldmol)
+            const ViewsOfMol &getUpdated(const ViewsOfMol &oldmol)
             {
-                for (int i=0; i<mols.count(); ++i)
+                for (int i = 0; i < mols.count(); ++i)
                 {
                     const MoleculeData &newmol = mols.constData()[i].read();
 
@@ -123,12 +122,12 @@ namespace SireMol
                         ViewsOfMol mol(oldmol);
                         mol.update(newmol);
                         views.push_back(mol);
-                        //qDebug() << "RETURNING UPDATED";
+                        // qDebug() << "RETURNING UPDATED";
                         return views.last();
                     }
                 }
 
-                //qDebug() << "RETURNING ORIGINAL?";
+                // qDebug() << "RETURNING ORIGINAL?";
                 return oldmol;
             }
 
@@ -137,7 +136,7 @@ namespace SireMol
                 ver = version;
             }
 
-            const MajorMinorVersion& version() const
+            const MajorMinorVersion &version() const
             {
                 return ver;
             }
@@ -156,16 +155,15 @@ namespace SireMol
 
         private:
             MajorMinorVersion ver;
-            QVarLengthArray<SireBase::SharedDataPointer<MoleculeData>,10> mols;
-            QVarLengthArray<ViewsOfMol,10> views;
+            QVarLengthArray<SireBase::SharedDataPointer<MoleculeData>, 10> mols;
+            QVarLengthArray<ViewsOfMol, 10> views;
         };
-    }
-}
+    } // namespace detail
+} // namespace SireMol
 
-typedef QVarLengthArray<boost::shared_ptr<SireMol::detail::MolGroupWorkspaceData>,32>
-                                                                        MolGroupWorkspaceCache;
+typedef QVarLengthArray<boost::shared_ptr<SireMol::detail::MolGroupWorkspaceData>, 32> MolGroupWorkspaceCache;
 
-static QThreadStorage<MolGroupWorkspaceCache*> cache;
+static QThreadStorage<MolGroupWorkspaceCache *> cache;
 
 /** Call this to return the memory allocated in this object back to the memory pool */
 void MolGroupWorkspace::returnToMemoryPool()
@@ -181,13 +179,13 @@ void MolGroupWorkspace::returnToMemoryPool()
 
     if (not cache.hasLocalData())
     {
-        cache.setLocalData( new MolGroupWorkspaceCache() );
+        cache.setLocalData(new MolGroupWorkspaceCache());
     }
 
     if (cache.localData()->count() < 32)
     {
         d->clear();
-        //qDebug() << "PUSHED" << quintptr(d.get()) << "INTO THE POOL";
+        // qDebug() << "PUSHED" << quintptr(d.get()) << "INTO THE POOL";
         cache.localData()->push_back(d);
     }
     else
@@ -211,14 +209,14 @@ void MolGroupWorkspace::createFromMemoryPool()
             {
                 d = cache.localData()->back();
                 cache.localData()->pop_back();
-                //qDebug() << "TAKEN" << quintptr(d.get()) << "FROM THE POOL" << d->isEmpty();
+                // qDebug() << "TAKEN" << quintptr(d.get()) << "FROM THE POOL" << d->isEmpty();
                 return;
             }
         }
 
-        //no available value in the pool
-        //qDebug() << "CREATING AS NOT AVAILABLE IN THE POOL";
-        d.reset( new SireMol::detail::MolGroupWorkspaceData() );
+        // no available value in the pool
+        // qDebug() << "CREATING AS NOT AVAILABLE IN THE POOL";
+        d.reset(new SireMol::detail::MolGroupWorkspaceData());
     }
 }
 
@@ -239,7 +237,8 @@ void MolGroupWorkspace::detach()
 
 /** Constructor */
 MolGroupWorkspace::MolGroupWorkspace()
-{}
+{
+}
 
 /** Copy constructor */
 MolGroupWorkspace::MolGroupWorkspace(const MolGroupWorkspace &other)
@@ -257,7 +256,7 @@ MolGroupWorkspace::~MolGroupWorkspace()
 }
 
 /** Copy assignment operator */
-MolGroupWorkspace& MolGroupWorkspace::operator=(const MolGroupWorkspace &other)
+MolGroupWorkspace &MolGroupWorkspace::operator=(const MolGroupWorkspace &other)
 {
     if (d.get() != other.d.get())
     {
@@ -271,8 +270,7 @@ MolGroupWorkspace& MolGroupWorkspace::operator=(const MolGroupWorkspace &other)
 /** Comparison operator */
 bool MolGroupWorkspace::operator==(const MolGroupWorkspace &other) const
 {
-    return (this->isEmpty() and other.isEmpty()) or
-           d.get() == other.d.get();
+    return (this->isEmpty() and other.isEmpty()) or d.get() == other.d.get();
 }
 
 /** Comparison operator */
@@ -312,9 +310,9 @@ int MolGroupWorkspace::size() const
 Molecule MolGroupWorkspace::operator[](int i) const
 {
     if (i < 0 or i >= this->count())
-        throw SireError::invalid_index( QObject::tr(
-                "Cannot return the Molecule at index %1 as the number of molecules is %2.")
-                    .arg(i).arg(count()), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("Cannot return the Molecule at index %1 as the number of molecules is %2.").arg(i).arg(count()),
+            CODELOC);
 
     return Molecule(d->data()[i].read());
 }
@@ -338,7 +336,7 @@ Molecule MolGroupWorkspace::getitem(int i) const
 }
 
 /** Return a raw pointer to the array for the molecules in the workspace */
-const SireBase::SharedDataPointer<MoleculeData>* MolGroupWorkspace::data() const
+const SireBase::SharedDataPointer<MoleculeData> *MolGroupWorkspace::data() const
 {
     if (d.get())
         return d->data();
@@ -347,7 +345,7 @@ const SireBase::SharedDataPointer<MoleculeData>* MolGroupWorkspace::data() const
 }
 
 /** Return a raw pointer to the array for the molecules in the workspace */
-const SireBase::SharedDataPointer<MoleculeData>* MolGroupWorkspace::constData() const
+const SireBase::SharedDataPointer<MoleculeData> *MolGroupWorkspace::constData() const
 {
     return data();
 }
@@ -366,16 +364,16 @@ void MolGroupWorkspace::push(const MoleculeData &molecule)
 }
 
 /** Return the updated view of the passed molecule */
-const ViewsOfMol& MolGroupWorkspace::getUpdated(const ViewsOfMol &oldmol) const
+const ViewsOfMol &MolGroupWorkspace::getUpdated(const ViewsOfMol &oldmol) const
 {
-    //qDebug() << "MolGroupWorkspace::getUpdated(" << oldmol.number().value() << ")";
+    // qDebug() << "MolGroupWorkspace::getUpdated(" << oldmol.number().value() << ")";
 
     if (d.get())
     {
         if (d->contains(oldmol.number()))
         {
-            //qDebug() << "DOING SOME WORK";
-            MolGroupWorkspace *nonconst_this = const_cast<MolGroupWorkspace*>(this);
+            // qDebug() << "DOING SOME WORK";
+            MolGroupWorkspace *nonconst_this = const_cast<MolGroupWorkspace *>(this);
             nonconst_this->detach();
             return nonconst_this->d->getUpdated(oldmol);
         }
@@ -391,7 +389,7 @@ PartialMolecule MolGroupWorkspace::getUpdated(const PartialMolecule &oldmol) con
     {
         if (d->contains(oldmol.number()))
         {
-            for (int i=0; i<d->count(); ++i)
+            for (int i = 0; i < d->count(); ++i)
             {
                 const MoleculeData &mol = data()[i].read();
 

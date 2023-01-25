@@ -31,8 +31,8 @@
 #include "residuecutting.h"
 
 #include "molecule.h"
-#include "mover.hpp"
 #include "moleditor.h"
+#include "mover.hpp"
 #include "selector.hpp"
 
 #include "SireStream/datastream.h"
@@ -46,15 +46,14 @@ using namespace SireStream;
 ////////////// Implementation of CuttingFunction
 //////////////
 
-static const RegisterMetaType<CuttingFunction> r_cutfunc( MAGIC_ONLY,
-                                                          "SireMol::CuttingFunction" );
+static const RegisterMetaType<CuttingFunction> r_cutfunc(MAGIC_ONLY, "SireMol::CuttingFunction");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const CuttingFunction &cutfunc)
 {
     writeHeader(ds, r_cutfunc, 1);
 
-    ds << static_cast<const Property&>(cutfunc);
+    ds << static_cast<const Property &>(cutfunc);
 
     return ds;
 }
@@ -66,39 +65,40 @@ QDataStream &operator>>(QDataStream &ds, CuttingFunction &cutfunc)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(cutfunc);
+        ds >> static_cast<Property &>(cutfunc);
     }
     else
-        throw version_error( v, "1", r_cutfunc, CODELOC );
+        throw version_error(v, "1", r_cutfunc, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
-CuttingFunction::CuttingFunction()
-                : Property()
-{}
+CuttingFunction::CuttingFunction() : Property()
+{
+}
 
 /** Copy constructor */
-CuttingFunction::CuttingFunction(const CuttingFunction &other)
-                : Property(other)
-{}
+CuttingFunction::CuttingFunction(const CuttingFunction &other) : Property(other)
+{
+}
 
 /** Destructor */
 CuttingFunction::~CuttingFunction()
-{}
+{
+}
 
 /** Apply this function to a molecule */
 Molecule CuttingFunction::operator()(const Molecule &molecule) const
 {
-    MolStructureEditor moleditor( molecule );
+    MolStructureEditor moleditor(molecule);
 
     moleditor = this->operator()(moleditor);
 
     return moleditor.commit();
 }
 
-const ResidueCutting& CuttingFunction::null()
+const ResidueCutting &CuttingFunction::null()
 {
     return *(create_shared_null<ResidueCutting>());
 }

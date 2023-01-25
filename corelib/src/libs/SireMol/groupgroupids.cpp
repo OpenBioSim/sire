@@ -37,16 +37,16 @@ using namespace SireMol;
 
 namespace SireMol
 {
-    template class GroupGroupID<SegID,ResID>;
-    template class GroupGroupID<SegID,ChainID>;
-    template class GroupGroupID<SegID,CGID>;
+    template class GroupGroupID<SegID, ResID>;
+    template class GroupGroupID<SegID, ChainID>;
+    template class GroupGroupID<SegID, CGID>;
 
-    template class GroupGroupID<CGID,ResID>;
-    template class GroupGroupID<CGID,ChainID>;
-}
+    template class GroupGroupID<CGID, ResID>;
+    template class GroupGroupID<CGID, ChainID>;
+} // namespace SireMol
 
-static const RegisterMetaType< GroupGroupID<SegID,ResID> > r_segresid;
-static const RegisterMetaType< GroupGroupID<SegID,ChainID> > r_segchainid;
-static const RegisterMetaType< GroupGroupID<SegID,CGID> > r_segcgid;
-static const RegisterMetaType< GroupGroupID<CGID,ResID> > r_cgresid;
-static const RegisterMetaType< GroupGroupID<CGID,ChainID> > r_cgchainid;
+static const RegisterMetaType<GroupGroupID<SegID, ResID>> r_segresid;
+static const RegisterMetaType<GroupGroupID<SegID, ChainID>> r_segchainid;
+static const RegisterMetaType<GroupGroupID<SegID, CGID>> r_segcgid;
+static const RegisterMetaType<GroupGroupID<CGID, ResID>> r_cgresid;
+static const RegisterMetaType<GroupGroupID<CGID, ChainID>> r_cgchainid;

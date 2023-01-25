@@ -36,110 +36,108 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class Sphere;
+    class Sphere;
 }
 
 class QDataStream;
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Sphere&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Sphere&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Sphere &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Sphere &);
 
 namespace SireMaths
 {
 
-/**
-This class is a mathematical representation of a sphere.
+    /**
+    This class is a mathematical representation of a sphere.
 
-@author Christopher Woods
-*/
-class SIREMATHS_EXPORT Sphere
-{
-
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Sphere&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Sphere&);
-
-public:
-    Sphere();
-    Sphere(const double &radius);
-    Sphere(const Vector &position, const double &radius);
-    Sphere(const Sphere &other);
-
-    ~Sphere();
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Sphere
     {
-        return Sphere::typeName();
-    }
 
-    bool operator==(const Sphere &other) const;
-    bool operator!=(const Sphere &other) const;
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Sphere &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Sphere &);
 
-    QString toString() const;
+    public:
+        Sphere();
+        Sphere(const double &radius);
+        Sphere(const Vector &position, const double &radius);
+        Sphere(const Sphere &other);
 
-    const Vector& position() const;
-    const Vector& center() const;
-    double radius() const;
+        ~Sphere();
 
-    Sphere translate(const Vector &delta) const;
+        static const char *typeName();
 
-    double volume() const;
-    double surfaceArea() const;
+        const char *what() const
+        {
+            return Sphere::typeName();
+        }
 
-    void setPosition(const Vector &position);
-    void setCenter(const Vector &center);
-    void setRadius(double radius);
+        bool operator==(const Sphere &other) const;
+        bool operator!=(const Sphere &other) const;
 
-    bool intersects(const Sphere &other) const;
+        QString toString() const;
 
-    bool contains(const Vector &point) const;
-    bool contains(const Sphere &other) const;
+        const Vector &position() const;
+        const Vector &center() const;
+        double radius() const;
 
-    double intersectionVolume(const Sphere &other) const;
-    double intersectionVolume(const Sphere &other0, const Sphere &other1) const;
+        Sphere translate(const Vector &delta) const;
 
-    static double combinedVolume(const QVector<Sphere> &spheres);
+        double volume() const;
+        double surfaceArea() const;
 
-    static double combinedVolumeMC(const QVector<Sphere> &spheres,
-                                   qint64 nsamples=-1);
+        void setPosition(const Vector &position);
+        void setCenter(const Vector &center);
+        void setRadius(double radius);
 
-private:
+        bool intersects(const Sphere &other) const;
 
-    /** The location of the center of the sphere */
-    Vector _center;
+        bool contains(const Vector &point) const;
+        bool contains(const Sphere &other) const;
 
-    /** The radius of the sphere */
-    double _radius;
-};
+        double intersectionVolume(const Sphere &other) const;
+        double intersectionVolume(const Sphere &other0, const Sphere &other1) const;
+
+        static double combinedVolume(const QVector<Sphere> &spheres);
+
+        static double combinedVolumeMC(const QVector<Sphere> &spheres, qint64 nsamples = -1);
+
+    private:
+        /** The location of the center of the sphere */
+        Vector _center;
+
+        /** The radius of the sphere */
+        double _radius;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the position of the center of the sphere */
-SIRE_ALWAYS_INLINE const Vector& Sphere::position() const
-{
-    return _center;
-}
+    /** Return the position of the center of the sphere */
+    SIRE_ALWAYS_INLINE const Vector &Sphere::position() const
+    {
+        return _center;
+    }
 
-/** Return the position of the center of the sphere */
-SIRE_ALWAYS_INLINE const Vector& Sphere::center() const
-{
-    return _center;
-}
+    /** Return the position of the center of the sphere */
+    SIRE_ALWAYS_INLINE const Vector &Sphere::center() const
+    {
+        return _center;
+    }
 
-/** Return the radius of the sphere */
-SIRE_ALWAYS_INLINE double Sphere::radius() const
-{
-    return _radius;
-}
+    /** Return the radius of the sphere */
+    SIRE_ALWAYS_INLINE double Sphere::radius() const
+    {
+        return _radius;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::Sphere)
 Q_DECLARE_TYPEINFO(SireMaths::Sphere, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMaths::Sphere )
+SIRE_EXPOSE_CLASS(SireMaths::Sphere)
 
 SIRE_END_HEADER
 

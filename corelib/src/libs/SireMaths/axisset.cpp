@@ -61,21 +61,23 @@ QDataStream &operator>>(QDataStream &ds, AxisSet &ax)
 /** Construct an empty AxisSet. This represents the standard cartesian axes, centered
     on the origin */
 AxisSet::AxisSet() : mat(), invmat(), orgn()
-{}
+{
+}
 
 /** Construct an AxisSet using matrix 'matrx', and origin 'orign' */
-AxisSet::AxisSet(const Matrix &matrx, Vector vec)
-        : mat(matrx), invmat(mat.inverse()), orgn(vec)
-{}
+AxisSet::AxisSet(const Matrix &matrx, Vector vec) : mat(matrx), invmat(mat.inverse()), orgn(vec)
+{
+}
 
 /** Copy constructor */
-AxisSet::AxisSet(const AxisSet &other)
-        : mat(other.mat), invmat(other.invmat), orgn(other.orgn)
-{}
+AxisSet::AxisSet(const AxisSet &other) : mat(other.mat), invmat(other.invmat), orgn(other.orgn)
+{
+}
 
 /** Destructor */
 AxisSet::~AxisSet()
-{}
+{
+}
 
 /** Convert a vector from the cartesian frame to this coordinate frame */
 Vector AxisSet::fromIdentity(const Vector &vec) const
@@ -86,7 +88,7 @@ Vector AxisSet::fromIdentity(const Vector &vec) const
 /** Convert a vector from the cartesian frame with origin 'delta' to this coordinate frame */
 Vector AxisSet::fromIdentity(const Vector &vec, const Vector &delta) const
 {
-    return delta + this->fromIdentity(vec-delta);
+    return delta + this->fromIdentity(vec - delta);
 }
 
 /** Convert the array of vectors from the cartesian frame to this coordinate frame */
@@ -94,7 +96,7 @@ QVector<Vector> AxisSet::fromIdentity(const QVector<Vector> &vecs) const
 {
     QVector<Vector> newvecs(vecs);
 
-    for (int i=0; i<vecs.count(); ++i)
+    for (int i = 0; i < vecs.count(); ++i)
     {
         newvecs[i] = this->fromIdentity(vecs[i]);
     }
@@ -108,9 +110,9 @@ QVector<Vector> AxisSet::fromIdentity(const QVector<Vector> &vecs, const Vector 
 {
     QVector<Vector> newvecs(vecs);
 
-    for (int i=0; i<vecs.count(); ++i)
+    for (int i = 0; i < vecs.count(); ++i)
     {
-        newvecs[i] = this->fromIdentity(vecs[i],delta);
+        newvecs[i] = this->fromIdentity(vecs[i], delta);
     }
 
     return newvecs;
@@ -125,22 +127,22 @@ Vector AxisSet::toIdentity(const Vector &vec) const
 /** Convert a vector from the frame 'frame' to this coordinate frame */
 Vector AxisSet::fromFrame(const AxisSet &frame, const Vector &vec) const
 {
-    return ( mat *  (frame.invmat * (vec - frame.orgn)) ) + orgn;
+    return (mat * (frame.invmat * (vec - frame.orgn))) + orgn;
 }
 
 /** Convert a vector to the frame 'frame' from this coordinate frame */
 Vector AxisSet::toFrame(const AxisSet &frame, const Vector &vec) const
 {
-    return ( frame.mat * (invmat * (vec - orgn)) ) + frame.orgn;
+    return (frame.mat * (invmat * (vec - orgn))) + frame.orgn;
 }
 
 /** Return a string representation of the AxisSet */
 QString AxisSet::toString() const
 {
-    return QObject::tr("AxisSet{ origin() = %1,matrix=\n%2 }").arg(orgn.toString(),mat.toString());
+    return QObject::tr("AxisSet{ origin() = %1,matrix=\n%2 }").arg(orgn.toString(), mat.toString());
 }
 
-const char* AxisSet::typeName()
+const char *AxisSet::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AxisSet>() );
+    return QMetaType::typeName(qMetaTypeId<AxisSet>());
 }

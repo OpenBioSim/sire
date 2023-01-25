@@ -36,95 +36,94 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class DihedralComponent;
+    class DihedralComponent;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::DihedralComponent&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::DihedralComponent&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::DihedralComponent &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::DihedralComponent &);
 
-namespace SireMaths{ class Torsion; }
+namespace SireMaths
+{
+    class Torsion;
+}
 
 namespace SireSystem
 {
 
-/** This is a constraint that constrains a symbol to equal the
-    value of an expression that involves a dihedral between four
-    points or atoms
+    /** This is a constraint that constrains a symbol to equal the
+        value of an expression that involves a dihedral between four
+        points or atoms
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT DihedralComponent
-         : public SireBase::ConcreteProperty<DihedralComponent,GeometryComponent>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT DihedralComponent : public SireBase::ConcreteProperty<DihedralComponent, GeometryComponent>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const DihedralComponent&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, DihedralComponent&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const DihedralComponent &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, DihedralComponent &);
 
-public:
-    DihedralComponent();
-    DihedralComponent(const SireCAS::Symbol &constrained_symbol,
-                      const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                      const SireFF::PointRef &point2, const SireFF::PointRef &point3,
-                      const PropertyMap &map = PropertyMap());
-    DihedralComponent(const SireCAS::Symbol &constrained_symbol,
-                      const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                      const SireFF::PointRef &point2, const SireFF::PointRef &point3,
-                      const SireCAS::Expression &geometry_expression,
-                      const PropertyMap &map = PropertyMap());
+    public:
+        DihedralComponent();
+        DihedralComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                          const SireFF::PointRef &point1, const SireFF::PointRef &point2, const SireFF::PointRef &point3,
+                          const PropertyMap &map = PropertyMap());
+        DihedralComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                          const SireFF::PointRef &point1, const SireFF::PointRef &point2, const SireFF::PointRef &point3,
+                          const SireCAS::Expression &geometry_expression, const PropertyMap &map = PropertyMap());
 
-    DihedralComponent(const DihedralComponent &other);
+        DihedralComponent(const DihedralComponent &other);
 
-    ~DihedralComponent();
+        ~DihedralComponent();
 
-    DihedralComponent& operator=(const DihedralComponent &other);
+        DihedralComponent &operator=(const DihedralComponent &other);
 
-    bool operator==(const DihedralComponent &other) const;
-    bool operator!=(const DihedralComponent &other) const;
+        bool operator==(const DihedralComponent &other) const;
+        bool operator!=(const DihedralComponent &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    const SireFF::Point& point(int i) const;
+        const SireFF::Point &point(int i) const;
 
-    const SireFF::Point& point0() const;
-    const SireFF::Point& point1() const;
-    const SireFF::Point& point2() const;
-    const SireFF::Point& point3() const;
+        const SireFF::Point &point0() const;
+        const SireFF::Point &point1() const;
+        const SireFF::Point &point2() const;
+        const SireFF::Point &point3() const;
 
-    int nPoints() const;
+        int nPoints() const;
 
-    static const SireCAS::Symbol& phi();
+        static const SireCAS::Symbol &phi();
 
-    static const SireCAS::Symbol& theta012();
-    static const SireCAS::Symbol& theta123();
+        static const SireCAS::Symbol &theta012();
+        static const SireCAS::Symbol &theta123();
 
-    static const SireCAS::Symbol& r01();
-    static const SireCAS::Symbol& r12();
-    static const SireCAS::Symbol& r23();
-    static const SireCAS::Symbol& r03();
+        static const SireCAS::Symbol &r01();
+        static const SireCAS::Symbol &r12();
+        static const SireCAS::Symbol &r23();
+        static const SireCAS::Symbol &r03();
 
-protected:
-    bool wouldChange(const Delta &delta, quint32 last_subversion) const;
-    SireCAS::Values getValues(const System &system);
+    protected:
+        bool wouldChange(const Delta &delta, quint32 last_subversion) const;
+        SireCAS::Values getValues(const System &system);
 
-    void setSpace(const SireVol::Space &space);
+        void setSpace(const SireVol::Space &space);
 
-private:
-    SireMaths::Torsion getTorsion() const;
+    private:
+        SireMaths::Torsion getTorsion() const;
 
-    /** The four points between which the dihedral is calculated */
-    SireFF::PointPtr p0, p1, p2, p3;
+        /** The four points between which the dihedral is calculated */
+        SireFF::PointPtr p0, p1, p2, p3;
 
-    /** Whether or not the points are within the same molecule */
-    bool intra_molecule_points;
-};
+        /** Whether or not the points are within the same molecule */
+        bool intra_molecule_points;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::DihedralComponent )
+Q_DECLARE_METATYPE(SireSystem::DihedralComponent)
 
-SIRE_EXPOSE_CLASS( SireSystem::DihedralComponent )
+SIRE_EXPOSE_CLASS(SireSystem::DihedralComponent)
 
 SIRE_END_HEADER
 

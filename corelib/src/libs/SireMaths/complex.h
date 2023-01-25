@@ -88,239 +88,235 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class Complex;
+    class Complex;
 }
 
 class QDataStream;
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Complex&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Complex&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Complex &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Complex &);
 
 namespace SireMaths
 {
 
-class Rational;
+    class Rational;
 
-/**
-This class represents a complex number to the same precision as 'double'.
-This is merely a thin wrapper around the gsl_complex struct, and the
-gsl_complex functions.
+    /**
+    This class represents a complex number to the same precision as 'double'.
+    This is merely a thin wrapper around the gsl_complex struct, and the
+    gsl_complex functions.
 
-(indeed, this is publically derived from gsl_complex, so you can use
-this class whereever you would normally use a gsl_complex)
+    (indeed, this is publically derived from gsl_complex, so you can use
+    this class whereever you would normally use a gsl_complex)
 
-@author Christopher Woods
-*/
-class SIREMATHS_EXPORT Complex : public gsl_complex
-{
-public:
-
-    Complex(double r=0.0, double i=0.0);
-    Complex(const gsl_complex &complex);
-
-    template<typename T>
-    Complex(const std::complex<T> &stdcomplex);
-
-    Complex(const Complex &other);
-
-    ~Complex();
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Complex : public gsl_complex
     {
-        return Complex::typeName();
-    }
+    public:
+        Complex(double r = 0.0, double i = 0.0);
+        Complex(const gsl_complex &complex);
 
-    double real() const;
-    double imag() const;
+        template <typename T>
+        Complex(const std::complex<T> &stdcomplex);
 
-    template<typename T>
-    operator std::complex<T>() const;
+        Complex(const Complex &other);
 
-    bool isReal() const;
-    bool isPurelyComplex() const;
+        ~Complex();
 
-    bool isZero() const;
+        static const char *typeName();
 
-    QString toString() const;
+        const char *what() const
+        {
+            return Complex::typeName();
+        }
 
-    static Complex rect(double x, double y);
-    static Complex polar(double r, double theta);
+        double real() const;
+        double imag() const;
 
-    void setRectangular(double x, double y);
-    void setPolar(double r, double theta);
+        template <typename T>
+        operator std::complex<T>() const;
 
-    void setReal(double x);
-    void setImag(double y);
+        bool isReal() const;
+        bool isPurelyComplex() const;
 
-    bool operator==(const Complex &other) const;
-    bool operator!=(const Complex &other) const;
+        bool isZero() const;
 
-    template<typename T>
-    bool operator==(const std::complex<T> &stdcomplex) const;
+        QString toString() const;
 
-    template<typename T>
-    bool operator!=(const std::complex<T> &stdcomplex) const;
+        static Complex rect(double x, double y);
+        static Complex polar(double r, double theta);
 
-    Complex& operator=(const Complex &other);
+        void setRectangular(double x, double y);
+        void setPolar(double r, double theta);
 
-    template<typename T>
-    Complex& operator=(const std::complex<T> &stdcomplex);
+        void setReal(double x);
+        void setImag(double y);
 
-    Complex& operator+=(const Complex &other);
-    Complex& operator-=(const Complex &other);
-    Complex& operator*=(const Complex &other);
-    Complex& operator/=(const Complex &other);
+        bool operator==(const Complex &other) const;
+        bool operator!=(const Complex &other) const;
 
-    Complex operator-() const;
+        template <typename T>
+        bool operator==(const std::complex<T> &stdcomplex) const;
 
+        template <typename T>
+        bool operator!=(const std::complex<T> &stdcomplex) const;
 
-    bool operator==(double r) const;
-    bool operator!=(double r) const;
+        Complex &operator=(const Complex &other);
 
-    Complex& operator=(double r);
+        template <typename T>
+        Complex &operator=(const std::complex<T> &stdcomplex);
 
-    Complex& operator+=(double r);
-    Complex& operator-=(double r);
-    Complex& operator*=(double r);
-    Complex& operator/=(double r);
+        Complex &operator+=(const Complex &other);
+        Complex &operator-=(const Complex &other);
+        Complex &operator*=(const Complex &other);
+        Complex &operator/=(const Complex &other);
 
-    double arg() const;
-    double abs() const;
-    double abs2() const;
+        Complex operator-() const;
 
-    double logAbs() const;
+        bool operator==(double r) const;
+        bool operator!=(double r) const;
 
-    Complex conjugate() const;
+        Complex &operator=(double r);
 
-    Complex inverse() const;
+        Complex &operator+=(double r);
+        Complex &operator-=(double r);
+        Complex &operator*=(double r);
+        Complex &operator/=(double r);
 
-    Complex negative() const;
-};
+        double arg() const;
+        double abs() const;
+        double abs2() const;
 
-SIREMATHS_EXPORT Complex operator+(const Complex &z0, const Complex &z1);
-SIREMATHS_EXPORT Complex operator-(const Complex &z0, const Complex &z1);
-SIREMATHS_EXPORT Complex operator*(const Complex &z0, const Complex &z1);
-SIREMATHS_EXPORT Complex operator/(const Complex &z0, const Complex &z1);
-SIREMATHS_EXPORT Complex operator+(const Complex &z, double x);
-SIREMATHS_EXPORT Complex operator-(const Complex &z, double x);
-SIREMATHS_EXPORT Complex operator*(const Complex &z, double x);
-SIREMATHS_EXPORT Complex operator/(const Complex &z, double x);
-SIREMATHS_EXPORT Complex operator+(double x, const Complex &z);
-SIREMATHS_EXPORT Complex operator-(double x, const Complex &z);
-SIREMATHS_EXPORT Complex operator*(double x, const Complex &z);
-SIREMATHS_EXPORT Complex operator/(double x, const Complex &z);
-SIREMATHS_EXPORT Complex sqrt(const Complex &z);
-SIREMATHS_EXPORT Complex sqrt_real(double x);
-SIREMATHS_EXPORT Complex pow(const Complex &z, const Complex &a);
-SIREMATHS_EXPORT Complex pow(const Complex &z, double x);
-SIREMATHS_EXPORT Complex pow(const Complex &z, int n);
-SIREMATHS_EXPORT Complex pow(const Complex &z, const Rational &r);
-SIREMATHS_EXPORT Complex pow(double x, const Complex &z);
-SIREMATHS_EXPORT Complex exp(const Complex &z);
-SIREMATHS_EXPORT Complex log(const Complex &z);
-SIREMATHS_EXPORT Complex log10(const Complex &z);
-SIREMATHS_EXPORT Complex log_b(const Complex &z, const Complex &b);
-SIREMATHS_EXPORT Complex sin(const Complex &z);
-SIREMATHS_EXPORT Complex cos(const Complex &z);
-SIREMATHS_EXPORT Complex tan(const Complex &z);
-SIREMATHS_EXPORT Complex sec(const Complex &z);
-SIREMATHS_EXPORT Complex csc(const Complex &z);
-SIREMATHS_EXPORT Complex cot(const Complex &z);
-SIREMATHS_EXPORT Complex arcsin(const Complex &z);
-SIREMATHS_EXPORT Complex arcsin_real(double z);
-SIREMATHS_EXPORT Complex arccos(const Complex &z);
-SIREMATHS_EXPORT Complex arccos_real(double z);
-SIREMATHS_EXPORT Complex arctan(const Complex &z);
-SIREMATHS_EXPORT Complex arcsec(const Complex &z);
-SIREMATHS_EXPORT Complex arcsec_real(double z);
-SIREMATHS_EXPORT Complex arccsc(const Complex &z);
-SIREMATHS_EXPORT Complex arccsc_real(double z);
-SIREMATHS_EXPORT Complex arccot(const Complex &z);
-SIREMATHS_EXPORT Complex sinh(const Complex &z);
-SIREMATHS_EXPORT Complex cosh(const Complex &z);
-SIREMATHS_EXPORT Complex tanh(const Complex &z);
-SIREMATHS_EXPORT Complex sech(const Complex &z);
-SIREMATHS_EXPORT Complex csch(const Complex &z);
-SIREMATHS_EXPORT Complex coth(const Complex &z);
-SIREMATHS_EXPORT Complex arcsinh(const Complex &z);
-SIREMATHS_EXPORT Complex arccosh(const Complex &z);
-SIREMATHS_EXPORT Complex arccosh_real(double z);
-SIREMATHS_EXPORT Complex arctanh(const Complex &z);
-SIREMATHS_EXPORT Complex arctanh_real(double z);
-SIREMATHS_EXPORT Complex arcsech(const Complex &z);
-SIREMATHS_EXPORT Complex arccsch(const Complex &z);
-SIREMATHS_EXPORT Complex arccoth(const Complex &z);
+        double logAbs() const;
+
+        Complex conjugate() const;
+
+        Complex inverse() const;
+
+        Complex negative() const;
+    };
+
+    SIREMATHS_EXPORT Complex operator+(const Complex &z0, const Complex &z1);
+    SIREMATHS_EXPORT Complex operator-(const Complex &z0, const Complex &z1);
+    SIREMATHS_EXPORT Complex operator*(const Complex &z0, const Complex &z1);
+    SIREMATHS_EXPORT Complex operator/(const Complex &z0, const Complex &z1);
+    SIREMATHS_EXPORT Complex operator+(const Complex &z, double x);
+    SIREMATHS_EXPORT Complex operator-(const Complex &z, double x);
+    SIREMATHS_EXPORT Complex operator*(const Complex &z, double x);
+    SIREMATHS_EXPORT Complex operator/(const Complex &z, double x);
+    SIREMATHS_EXPORT Complex operator+(double x, const Complex &z);
+    SIREMATHS_EXPORT Complex operator-(double x, const Complex &z);
+    SIREMATHS_EXPORT Complex operator*(double x, const Complex &z);
+    SIREMATHS_EXPORT Complex operator/(double x, const Complex &z);
+    SIREMATHS_EXPORT Complex sqrt(const Complex &z);
+    SIREMATHS_EXPORT Complex sqrt_real(double x);
+    SIREMATHS_EXPORT Complex pow(const Complex &z, const Complex &a);
+    SIREMATHS_EXPORT Complex pow(const Complex &z, double x);
+    SIREMATHS_EXPORT Complex pow(const Complex &z, int n);
+    SIREMATHS_EXPORT Complex pow(const Complex &z, const Rational &r);
+    SIREMATHS_EXPORT Complex pow(double x, const Complex &z);
+    SIREMATHS_EXPORT Complex exp(const Complex &z);
+    SIREMATHS_EXPORT Complex log(const Complex &z);
+    SIREMATHS_EXPORT Complex log10(const Complex &z);
+    SIREMATHS_EXPORT Complex log_b(const Complex &z, const Complex &b);
+    SIREMATHS_EXPORT Complex sin(const Complex &z);
+    SIREMATHS_EXPORT Complex cos(const Complex &z);
+    SIREMATHS_EXPORT Complex tan(const Complex &z);
+    SIREMATHS_EXPORT Complex sec(const Complex &z);
+    SIREMATHS_EXPORT Complex csc(const Complex &z);
+    SIREMATHS_EXPORT Complex cot(const Complex &z);
+    SIREMATHS_EXPORT Complex arcsin(const Complex &z);
+    SIREMATHS_EXPORT Complex arcsin_real(double z);
+    SIREMATHS_EXPORT Complex arccos(const Complex &z);
+    SIREMATHS_EXPORT Complex arccos_real(double z);
+    SIREMATHS_EXPORT Complex arctan(const Complex &z);
+    SIREMATHS_EXPORT Complex arcsec(const Complex &z);
+    SIREMATHS_EXPORT Complex arcsec_real(double z);
+    SIREMATHS_EXPORT Complex arccsc(const Complex &z);
+    SIREMATHS_EXPORT Complex arccsc_real(double z);
+    SIREMATHS_EXPORT Complex arccot(const Complex &z);
+    SIREMATHS_EXPORT Complex sinh(const Complex &z);
+    SIREMATHS_EXPORT Complex cosh(const Complex &z);
+    SIREMATHS_EXPORT Complex tanh(const Complex &z);
+    SIREMATHS_EXPORT Complex sech(const Complex &z);
+    SIREMATHS_EXPORT Complex csch(const Complex &z);
+    SIREMATHS_EXPORT Complex coth(const Complex &z);
+    SIREMATHS_EXPORT Complex arcsinh(const Complex &z);
+    SIREMATHS_EXPORT Complex arccosh(const Complex &z);
+    SIREMATHS_EXPORT Complex arccosh_real(double z);
+    SIREMATHS_EXPORT Complex arctanh(const Complex &z);
+    SIREMATHS_EXPORT Complex arctanh_real(double z);
+    SIREMATHS_EXPORT Complex arcsech(const Complex &z);
+    SIREMATHS_EXPORT Complex arccsch(const Complex &z);
+    SIREMATHS_EXPORT Complex arccoth(const Complex &z);
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Construct from a std::complex */
-template<typename T>
-Complex::Complex(const std::complex<T> &stdcomplex)
-        : gsl_complex( gsl_complex_rect(stdcomplex.real(),stdcomplex.imag()) )
-{}
+    /** Construct from a std::complex */
+    template <typename T>
+    Complex::Complex(const std::complex<T> &stdcomplex)
+        : gsl_complex(gsl_complex_rect(stdcomplex.real(), stdcomplex.imag()))
+    {
+    }
 
-/** Assignment from a std::complex */
-template<typename T>
-Complex& Complex::operator=(const std::complex<T> &stdcomplex)
-{
-    setReal( stdcomplex.real() );
-    setImag( stdcomplex.imag() );
-    return *this;
-}
+    /** Assignment from a std::complex */
+    template <typename T>
+    Complex &Complex::operator=(const std::complex<T> &stdcomplex)
+    {
+        setReal(stdcomplex.real());
+        setImag(stdcomplex.imag());
+        return *this;
+    }
 
-/** Implicit conversion to a std::complex */
-template<typename T>
-Complex::operator std::complex<T>() const
-{
-    return std::complex<T>(real(),imag());
-}
+    /** Implicit conversion to a std::complex */
+    template <typename T>
+    Complex::operator std::complex<T>() const
+    {
+        return std::complex<T>(real(), imag());
+    }
 
-/** Comparison to std::complex */
-template<typename T>
-bool Complex::operator==(const std::complex<T> &stdcomplex) const
-{
-    return SireMaths::areEqual(real(), stdcomplex.real()) and
-           SireMaths::areEqual(imag(), stdcomplex.imag());
-}
+    /** Comparison to std::complex */
+    template <typename T>
+    bool Complex::operator==(const std::complex<T> &stdcomplex) const
+    {
+        return SireMaths::areEqual(real(), stdcomplex.real()) and SireMaths::areEqual(imag(), stdcomplex.imag());
+    }
 
-/** Comparison to std::complex */
-template<typename T>
-bool Complex::operator!=(const std::complex<T> &stdcomplex) const
-{
-    return not operator==(stdcomplex);
-}
+    /** Comparison to std::complex */
+    template <typename T>
+    bool Complex::operator!=(const std::complex<T> &stdcomplex) const
+    {
+        return not operator==(stdcomplex);
+    }
 
-/** Comparison with std::complex */
-template<typename T>
-SIRE_INLINE_TEMPLATE
-bool operator==(const std::complex<T> &stdcomplex, const Complex &complex)
-{
-    return complex == stdcomplex;
-}
+    /** Comparison with std::complex */
+    template <typename T>
+    SIRE_INLINE_TEMPLATE bool operator==(const std::complex<T> &stdcomplex, const Complex &complex)
+    {
+        return complex == stdcomplex;
+    }
 
-/** Comparison with std::complex */
-template<typename T>
-SIRE_INLINE_TEMPLATE
-bool operator!=(const std::complex<T> &stdcomplex, const Complex &complex)
-{
-    return complex != stdcomplex;
-}
+    /** Comparison with std::complex */
+    template <typename T>
+    SIRE_INLINE_TEMPLATE bool operator!=(const std::complex<T> &stdcomplex, const Complex &complex)
+    {
+        return complex != stdcomplex;
+    }
 
-/** This is the std sqrt function. This helps resolve namespace issues... */
-SIRE_ALWAYS_INLINE double sqrt(double x)
-{
-    return std::sqrt(x);
-}
+    /** This is the std sqrt function. This helps resolve namespace issues... */
+    SIRE_ALWAYS_INLINE double sqrt(double x)
+    {
+        return std::sqrt(x);
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::Complex)
 Q_DECLARE_TYPEINFO(SireMaths::Complex, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMaths::Complex )
+SIRE_EXPOSE_CLASS(SireMaths::Complex)
 
 SIRE_END_HEADER
 

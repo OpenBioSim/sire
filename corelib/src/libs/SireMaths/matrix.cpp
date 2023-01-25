@@ -25,27 +25,27 @@
   *
 \*********************************************/
 
-#include <QString>
-#include <boost/scoped_array.hpp>
 #include "matrix.h"
-#include "vector.h"
 #include "maths.h"
 #include "nmatrix.h"
 #include "nvector.h"
+#include "vector.h"
+#include <QString>
+#include <boost/scoped_array.hpp>
 
-#include "SireMaths/errors.h"
 #include "SireError/errors.h"
+#include "SireMaths/errors.h"
 
 #include "SireStream/datastream.h"
 
 #include "third_party/eig3/eig3.h" // CONDITIONAL_INCLUDE
 
+#include <gsl/gsl_blas.h>
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>
-#include <gsl/gsl_blas.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 
 #include <QDebug>
 
@@ -61,7 +61,7 @@ QDataStream &operator<<(QDataStream &ds, const Matrix &matrix)
 {
     writeHeader(ds, r_matrix, 1);
 
-    for (int i=0; i<9; ++i)
+    for (int i = 0; i < 9; ++i)
     {
         ds << matrix.array[i];
     }
@@ -76,7 +76,7 @@ QDataStream &operator>>(QDataStream &ds, Matrix &matrix)
 
     if (v == 1)
     {
-        for (int i=0; i<9; ++i)
+        for (int i = 0; i < 9; ++i)
         {
             ds >> matrix.array[i];
         }
@@ -90,7 +90,7 @@ QDataStream &operator>>(QDataStream &ds, Matrix &matrix)
 /** Construct a default Matrix (identity matrix) */
 Matrix::Matrix()
 {
-    for (int i=0; i<8; ++i)
+    for (int i = 0; i < 8; ++i)
     {
         array[i] = 0;
     }
@@ -104,7 +104,7 @@ Matrix::Matrix()
     and whose off-diagonal elements equal zero */
 Matrix::Matrix(double diagonal_value)
 {
-    for (int i=0; i<8; ++i)
+    for (int i = 0; i < 8; ++i)
     {
         array[i] = 0;
     }
@@ -116,9 +116,7 @@ Matrix::Matrix(double diagonal_value)
 
 /** Construct a Matrix. Elements listed as row 1, then
     row 2, then row 3. */
-Matrix::Matrix(double xx, double xy, double xz,
-               double yx, double yy, double yz,
-               double zx, double zy, double zz)
+Matrix::Matrix(double xx, double xy, double xz, double yx, double yy, double yz, double zx, double zy, double zz)
 {
     array[0] = xx;
     array[1] = xy;
@@ -137,22 +135,30 @@ Matrix::Matrix(double xx, double xy, double xz,
 Matrix::Matrix(const NMatrix &m)
 {
     if (m.nRows() != 3 or m.nColumns() != 3)
-        throw SireError::incompatible_error( QObject::tr(
-                "You cannot construct a 3x3 matrix from an NMatrix of dimension "
-                "%1x%2.")
-                    .arg(m.nRows()).arg(m.nColumns()), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("You cannot construct a 3x3 matrix from an NMatrix of dimension "
+                        "%1x%2.")
+                .arg(m.nRows())
+                .arg(m.nColumns()),
+            CODELOC);
 
     const double *d = m.constData();
 
     if (m.isTransposed())
     {
-        array[0] = d[0]; array[3] = d[1]; array[6] = d[2];
-        array[1] = d[3]; array[4] = d[4]; array[7] = d[5];
-        array[2] = d[6]; array[5] = d[7]; array[8] = d[8];
+        array[0] = d[0];
+        array[3] = d[1];
+        array[6] = d[2];
+        array[1] = d[3];
+        array[4] = d[4];
+        array[7] = d[5];
+        array[2] = d[6];
+        array[5] = d[7];
+        array[8] = d[8];
     }
     else
     {
-        for (int i=0; i<9; ++i)
+        for (int i = 0; i < 9; ++i)
             array[i] = d[i];
     }
 }
@@ -161,19 +167,21 @@ Matrix::Matrix(const NMatrix &m)
 Matrix::Matrix(const gsl_matrix *m)
 {
     if (m->size1 > 3 or m->size2 > 3)
-        throw SireError::incompatible_error( QObject::tr(
-                    "SireMaths::Matrix is a 3x3 matrix class and cannot be initialised "
-                    "from a gsl_matrix of size %1x%2.")
-                        .arg(m->size1).arg(m->size2), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("SireMaths::Matrix is a 3x3 matrix class and cannot be initialised "
+                        "from a gsl_matrix of size %1x%2.")
+                .arg(m->size1)
+                .arg(m->size2),
+            CODELOC);
 
-    for (int i=0; i<9; ++i)
+    for (int i = 0; i < 9; ++i)
         array[i] = 0;
 
-    for (int i=0; i<m->size1; ++i)
+    for (int i = 0; i < m->size1; ++i)
     {
-        for (int j=0; j<m->size2; ++j)
+        for (int j = 0; j < m->size2; ++j)
         {
-            this->operator()(i,j) = gsl_matrix_get(m,i,j);
+            this->operator()(i, j) = gsl_matrix_get(m, i, j);
         }
     }
 }
@@ -181,33 +189,34 @@ Matrix::Matrix(const gsl_matrix *m)
 /** Copy constructor */
 Matrix::Matrix(const Matrix &m)
 {
-    memcpy(this->data(), m.constData(), 9*sizeof(double));
+    memcpy(this->data(), m.constData(), 9 * sizeof(double));
 }
 
 /** Construct a matrix from three vectors - each vector is a row */
 Matrix::Matrix(const Vector &r1, const Vector &r2, const Vector &r3)
 {
-    memcpy(this->data(), r1.constData(), 3*sizeof(double));
-    memcpy(this->data()+3, r2.constData(), 3*sizeof(double));
-    memcpy(this->data()+6, r3.constData(), 3*sizeof(double));
+    memcpy(this->data(), r1.constData(), 3 * sizeof(double));
+    memcpy(this->data() + 3, r2.constData(), 3 * sizeof(double));
+    memcpy(this->data() + 6, r3.constData(), 3 * sizeof(double));
 }
 
 /** Construct a matrix from a tuple of three vectors - each
     vector is a row */
-Matrix::Matrix(const tuple<Vector,Vector,Vector> &rows)
+Matrix::Matrix(const tuple<Vector, Vector, Vector> &rows)
 {
     const Vector &r1 = rows.get<0>();
     const Vector &r2 = rows.get<1>();
     const Vector &r3 = rows.get<2>();
 
-    memcpy(this->data(), r1.constData(), 3*sizeof(double));
-    memcpy(this->data()+3, r2.constData(), 3*sizeof(double));
-    memcpy(this->data()+6, r3.constData(), 3*sizeof(double));
+    memcpy(this->data(), r1.constData(), 3 * sizeof(double));
+    memcpy(this->data() + 3, r2.constData(), 3 * sizeof(double));
+    memcpy(this->data() + 6, r3.constData(), 3 * sizeof(double));
 }
 
 /** Destructor */
 Matrix::~Matrix()
-{}
+{
+}
 
 /** Return the offset into the array of the value at index [i,j]
 
@@ -216,45 +225,43 @@ Matrix::~Matrix()
 int Matrix::checkedOffset(int i, int j) const
 {
     if (i < 0 or i > 2 or j < 0 or j > 2)
-        throw SireError::invalid_index( QObject::tr(
-                "Invalid index for 3x3 matrix - [%1,%2]")
-                    .arg(i).arg(j), CODELOC );
+        throw SireError::invalid_index(QObject::tr("Invalid index for 3x3 matrix - [%1,%2]").arg(i).arg(j), CODELOC);
 
-    return offset(i,j);
+    return offset(i, j);
 }
 
 /** Return the value at index [i,j]
 
     \throw SireError::invalid_index
 */
-const double& Matrix::operator()(int i, int j) const
+const double &Matrix::operator()(int i, int j) const
 {
-    return array[ checkedOffset(i,j) ];
+    return array[checkedOffset(i, j)];
 }
 
 /** Return the value at index [i,j]
 
     \throw SireError::invalid_index
 */
-double& Matrix::operator()(int i, int j)
+double &Matrix::operator()(int i, int j)
 {
-    return array[ checkedOffset(i,j) ];
+    return array[checkedOffset(i, j)];
 }
 
 /** Return a raw pointer to the data of this matrix */
-double* Matrix::data()
-{
-    return array;
-}
-
-/** Return a raw pointer to the data of this matrix */
-const double* Matrix::data() const
+double *Matrix::data()
 {
     return array;
 }
 
 /** Return a raw pointer to the data of this matrix */
-const double* Matrix::constData() const
+const double *Matrix::data() const
+{
+    return array;
+}
+
+/** Return a raw pointer to the data of this matrix */
+const double *Matrix::constData() const
 {
     return array;
 }
@@ -262,7 +269,7 @@ const double* Matrix::constData() const
 /** Return the element at index i,j */
 double Matrix::at(int i, int j) const
 {
-    return this->operator()(i,j);
+    return this->operator()(i, j);
 }
 
 /** Return the determinant of the matrix */
@@ -274,82 +281,88 @@ double Matrix::determinant() const
 
     // det = (aei+bfg+cdh)-(ceg+bdi+afh)
 
-    const double a = array[offset(0,0)];
-    const double b = array[offset(0,1)];
-    const double c = array[offset(0,2)];
+    const double a = array[offset(0, 0)];
+    const double b = array[offset(0, 1)];
+    const double c = array[offset(0, 2)];
 
-    const double d = array[offset(1,0)];
-    const double e = array[offset(1,1)];
-    const double f = array[offset(1,2)];
+    const double d = array[offset(1, 0)];
+    const double e = array[offset(1, 1)];
+    const double f = array[offset(1, 2)];
 
-    const double g = array[offset(2,0)];
-    const double h = array[offset(2,1)];
-    const double i = array[offset(2,2)];
+    const double g = array[offset(2, 0)];
+    const double h = array[offset(2, 1)];
+    const double i = array[offset(2, 2)];
 
-    return (a*e*i + b*f*g + c*d*h) - (c*e*g + b*d*i + a*f*h);
+    return (a * e * i + b * f * g + c * d * h) - (c * e * g + b * d * i + a * f * h);
 }
 
 /** Return a QString representation of the matrix */
 QString Matrix::toString() const
 {
     return QObject::tr("/ %1, %2, %3 \\\n| %4, %5, %6 |\n\\ %7, %8, %9 /")
-                  .arg(xx()).arg(xy()).arg(xz())
-                  .arg(yx()).arg(yy()).arg(yz())
-                  .arg(zx()).arg(zy()).arg(zz());
+        .arg(xx())
+        .arg(xy())
+        .arg(xz())
+        .arg(yx())
+        .arg(yy())
+        .arg(yz())
+        .arg(zx())
+        .arg(zy())
+        .arg(zz());
 }
 
 /** Return the trace of the matrix */
 Vector Matrix::trace() const
 {
-    return Vector(xx(),yy(),zz());
+    return Vector(xx(), yy(), zz());
 }
 
 /** Return each column */
 Vector Matrix::column0() const
 {
-    return Vector(xx(),yx(),zx());
+    return Vector(xx(), yx(), zx());
 }
 
 /** Return each column */
 Vector Matrix::column1() const
 {
-    return Vector(xy(),yy(),zy());
+    return Vector(xy(), yy(), zy());
 }
 
 /** Return each column */
 Vector Matrix::column2() const
 {
-    return Vector(xz(),yz(),zz());
+    return Vector(xz(), yz(), zz());
 }
 
 /** Return each row */
 Vector Matrix::row0() const
 {
-    return Vector(xx(),xy(),xz());
+    return Vector(xx(), xy(), xz());
 }
 
 /** Return each row */
 Vector Matrix::row1() const
 {
-    return Vector(yx(),yy(),yz());
+    return Vector(yx(), yy(), yz());
 }
 
 /** Return each row */
 Vector Matrix::row2() const
 {
-    return Vector(zx(),zy(),zz());
+    return Vector(zx(), zy(), zz());
 }
 
 /** Return the transpose of the matrix */
 Matrix Matrix::transpose() const
 {
-    return Matrix(xx(),yx(),zx(),xy(),yy(),zy(),xz(),yz(),zz());
+    return Matrix(xx(), yx(), zx(), xy(), yy(), zy(), xz(), yz(), zz());
 }
 
 /** Set the matrix to identity */
 void Matrix::setToIdentity()
 {
-    for (int i=1; i<8; ++i)
+    for (int i = 1; i < 8; ++i)
     {
         array[i] = 0;
     }
@@ -362,26 +375,24 @@ void Matrix::setToIdentity()
 /** Return whether or not this matrix is equal to the identity matrix */
 bool Matrix::isIdentity() const
 {
-    return xx() == 1 and yy() == 1 and zz() == 1 and
-           xy() == 0 and xz() == 0 and yx() == 0 and
-           yz() == 0 and zx() == 0 and zy() == 0;
-
+    return xx() == 1 and yy() == 1 and zz() == 1 and xy() == 0 and xz() == 0 and yx() == 0 and yz() == 0 and
+           zx() == 0 and zy() == 0;
 }
 
 /** Copy assignment operator */
-Matrix& Matrix::operator=(const Matrix &other)
+Matrix &Matrix::operator=(const Matrix &other)
 {
     if (this != &other)
     {
-        memcpy(array, other.array, 9*sizeof(double));
+        memcpy(array, other.array, 9 * sizeof(double));
     }
 
     return *this;
 }
 
-bool Matrix::operator==(const Matrix& m) const
+bool Matrix::operator==(const Matrix &m) const
 {
-    for (int i=0; i<9; ++i)
+    for (int i = 0; i < 9; ++i)
     {
         if (array[i] != m.array[i])
             return false;
@@ -390,7 +401,7 @@ bool Matrix::operator==(const Matrix& m) const
     return true;
 }
 
-bool Matrix::operator!=(const Matrix& m) const
+bool Matrix::operator!=(const Matrix &m) const
 {
     return not this->operator==(m);
 }
@@ -404,10 +415,10 @@ Matrix Matrix::identity()
 /** Return the null matrix */
 Matrix Matrix::zero()
 {
-    return Matrix(0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0);
+    return Matrix(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 }
 
-Matrix& Matrix::operator*=(const Matrix &m)
+Matrix &Matrix::operator*=(const Matrix &m)
 {
     //  xx xy xz    0 1 2
     //  yx yy yz    3 4 5
@@ -416,17 +427,17 @@ Matrix& Matrix::operator*=(const Matrix &m)
     const double *a = array;
     const double *o = m.array;
 
-    const double sxx = a[0]*o[0] + a[1]*o[3] + a[2]*o[6];
-    const double sxy = a[0]*o[1] + a[1]*o[4] + a[2]*o[7];
-    const double sxz = a[0]*o[2] + a[1]*o[5] + a[2]*o[8];
+    const double sxx = a[0] * o[0] + a[1] * o[3] + a[2] * o[6];
+    const double sxy = a[0] * o[1] + a[1] * o[4] + a[2] * o[7];
+    const double sxz = a[0] * o[2] + a[1] * o[5] + a[2] * o[8];
 
-    const double syx = a[3]*o[0] + a[4]*o[3] + a[5]*o[6];
-    const double syy = a[3]*o[1] + a[4]*o[4] + a[5]*o[7];
-    const double syz = a[3]*o[2] + a[4]*o[5] + a[5]*o[8];
+    const double syx = a[3] * o[0] + a[4] * o[3] + a[5] * o[6];
+    const double syy = a[3] * o[1] + a[4] * o[4] + a[5] * o[7];
+    const double syz = a[3] * o[2] + a[4] * o[5] + a[5] * o[8];
 
-    const double szx = a[6]*o[0] + a[7]*o[3] + a[8]*o[6];
-    const double szy = a[6]*o[1] + a[7]*o[4] + a[8]*o[7];
-    const double szz = a[6]*o[2] + a[7]*o[5] + a[8]*o[8];
+    const double szx = a[6] * o[0] + a[7] * o[3] + a[8] * o[6];
+    const double szy = a[6] * o[1] + a[7] * o[4] + a[8] * o[7];
+    const double szz = a[6] * o[2] + a[7] * o[5] + a[8] * o[8];
 
     array[0] = sxx;
     array[1] = sxy;
@@ -451,9 +462,9 @@ const Matrix SireMaths::operator*(const Matrix &m1, const Matrix &m2)
     return ret;
 }
 
-Matrix& Matrix::operator+=(const Matrix &m)
+Matrix &Matrix::operator+=(const Matrix &m)
 {
-    for (int i=0; i<9; ++i)
+    for (int i = 0; i < 9; ++i)
     {
         array[i] += m.array[i];
     }
@@ -461,9 +472,9 @@ Matrix& Matrix::operator+=(const Matrix &m)
     return *this;
 }
 
-Matrix& Matrix::operator-=(const Matrix &m)
+Matrix &Matrix::operator-=(const Matrix &m)
 {
-    for (int i=0; i<9; ++i)
+    for (int i = 0; i < 9; ++i)
     {
         array[i] -= m.array[i];
     }
@@ -471,9 +482,9 @@ Matrix& Matrix::operator-=(const Matrix &m)
     return *this;
 }
 
-Matrix& Matrix::operator*=(double c)
+Matrix &Matrix::operator*=(double c)
 {
-    for (int i=0; i<9; ++i)
+    for (int i = 0; i < 9; ++i)
     {
         array[i] *= c;
     }
@@ -481,13 +492,12 @@ Matrix& Matrix::operator*=(double c)
     return *this;
 }
 
-Matrix& Matrix::operator/=(double c)
+Matrix &Matrix::operator/=(double c)
 {
     if (isZero(c))
-        throw SireMaths::math_error(QObject::tr(
-                            "Cannot divide a matrix by 0"),CODELOC);
+        throw SireMaths::math_error(QObject::tr("Cannot divide a matrix by 0"), CODELOC);
 
-    return this->operator*=( 1 / c );
+    return this->operator*=(1 / c);
 }
 
 const Matrix SireMaths::operator+(const Matrix &m1, const Matrix &m2)
@@ -523,33 +533,32 @@ const Matrix SireMaths::operator*(double c, const Matrix &m)
     matrix cannot be inverted. */
 Matrix Matrix::inverse() const
 {
-    //calculate the determinant of the matrix
+    // calculate the determinant of the matrix
     double det = this->determinant();
 
-    //if the determinant is zero then this matrix cannot be inverted
+    // if the determinant is zero then this matrix cannot be inverted
     if (isZero(det))
     {
-        throw SireMaths::math_error(QObject::tr(
-                    "Matrix '%1' cannot be inverted!").arg(toString()),CODELOC);
+        throw SireMaths::math_error(QObject::tr("Matrix '%1' cannot be inverted!").arg(toString()), CODELOC);
     }
 
-    //take the inverse of the determinant
+    // take the inverse of the determinant
     det = double(1.0) / det;
 
-    //form the elements of the inverse matrix
+    // form the elements of the inverse matrix
     Matrix inv;
 
-    inv.array[0] = det * (yy()*zz() - zy()*yz());
-    inv.array[1] = det * (xz()*zy() - zz()*xy());
-    inv.array[2] = det * (xy()*yz() - yy()*xz());
+    inv.array[0] = det * (yy() * zz() - zy() * yz());
+    inv.array[1] = det * (xz() * zy() - zz() * xy());
+    inv.array[2] = det * (xy() * yz() - yy() * xz());
 
-    inv.array[3] = det * (zx()*yz() - yx()*zz());
-    inv.array[4] = det * (xx()*zz() - zx()*xz());
-    inv.array[5] = det * (xz()*yx() - yz()*xx());
+    inv.array[3] = det * (zx() * yz() - yx() * zz());
+    inv.array[4] = det * (xx() * zz() - zx() * xz());
+    inv.array[5] = det * (xz() * yx() - yz() * xx());
 
-    inv.array[6] = det * (yx()*zy() - zx()*yy());
-    inv.array[7] = det * (xy()*zx() - xx()*zy());
-    inv.array[8] = det * (xx()*yy() - yx()*xy());
+    inv.array[6] = det * (yx() * zy() - zx() * yy());
+    inv.array[7] = det * (xy() * zx() - xx() * zy());
+    inv.array[8] = det * (xx() * yy() - yx() * xy());
 
     return inv;
 }
@@ -557,7 +566,7 @@ Matrix Matrix::inverse() const
 /** Return whether or not this is a symmetric matrix */
 bool Matrix::isSymmetric() const
 {
-    return ( zx() == xz() and yx() == xy() and yz() == zy() );
+    return (zx() == xz() and yx() == xy() and yz() == zy());
 }
 
 /** Ensure that this matrix is symmetric - this is done by copying the upper-right
@@ -589,41 +598,41 @@ Matrix convertGSLMatrix(gsl_matrix *mat)
     the lowest. */
 Matrix Matrix::getPrincipalAxes() const
 {
-    //assume that this matrix is symmetrical - we will thus
-    //only look at the values in the upper-right diagonal
+    // assume that this matrix is symmetrical - we will thus
+    // only look at the values in the upper-right diagonal
 
-    //now use the GNU Scientific Library to solve the eigenvalue
-    //problem for this matrix
+    // now use the GNU Scientific Library to solve the eigenvalue
+    // problem for this matrix
     double new_array[9];
-    memcpy(new_array, array, 9*sizeof(double));
+    memcpy(new_array, array, 9 * sizeof(double));
 
-    gsl_matrix_view m = gsl_matrix_view_array(new_array,3,3);
+    gsl_matrix_view m = gsl_matrix_view_array(new_array, 3, 3);
 
-    //allocate space for the resulting eigenvectors and eigenvalues
+    // allocate space for the resulting eigenvectors and eigenvalues
     gsl_vector *eig_val = gsl_vector_alloc(3);
-    gsl_matrix *eig_vec = gsl_matrix_alloc(3,3);
+    gsl_matrix *eig_vec = gsl_matrix_alloc(3, 3);
 
-    //now allocate some workspace for the calculation...
+    // now allocate some workspace for the calculation...
     gsl_eigen_symmv_workspace *w = gsl_eigen_symmv_alloc(3);
 
-    //perform the calculation
+    // perform the calculation
     gsl_eigen_symmv(&m.matrix, eig_val, eig_vec, w);
 
-    //free the space used by the calculation
+    // free the space used by the calculation
     gsl_eigen_symmv_free(w);
 
-    //now sort the eigenvectors from the smallest eigenvalue to
-    //the largest
-    gsl_eigen_symmv_sort (eig_val, eig_vec, GSL_EIGEN_SORT_ABS_ASC);
+    // now sort the eigenvectors from the smallest eigenvalue to
+    // the largest
+    gsl_eigen_symmv_sort(eig_val, eig_vec, GSL_EIGEN_SORT_ABS_ASC);
 
-    //now copy the results back into a new Matrix
+    // now copy the results back into a new Matrix
     Matrix ret = convertGSLMatrix(eig_vec);
 
-    //free up the memory used by the GSL data...
+    // free up the memory used by the GSL data...
     gsl_vector_free(eig_val);
     gsl_matrix_free(eig_vec);
 
-    //finally, return the matrix of principal components
+    // finally, return the matrix of principal components
     return ret;
 }
 
@@ -632,9 +641,9 @@ Matrix Matrix::getPrincipalAxes() const
     This calculates the decomposition of this matrix
     into U S V^T, returning U, S and V in the tuple
 */
-boost::tuple<Matrix,Matrix,Matrix> Matrix::singleValueDecomposition() const
+boost::tuple<Matrix, Matrix, Matrix> Matrix::singleValueDecomposition() const
 {
-    //use GSL
+    // use GSL
     gsl_matrix *A = 0;
     gsl_matrix *W = 0;
     gsl_vector *S = 0;
@@ -646,18 +655,18 @@ boost::tuple<Matrix,Matrix,Matrix> Matrix::singleValueDecomposition() const
         // can segmentation fault when trying to handle errors internally.
         gsl_set_error_handler_off();
 
-        //copy this matrix into A
+        // copy this matrix into A
         A = gsl_matrix_alloc(3, 3);
 
-        for (int i=0; i<3; ++i)
+        for (int i = 0; i < 3; ++i)
         {
-            for (int j=0; j<3; ++j)
+            for (int j = 0; j < 3; ++j)
             {
-                gsl_matrix_set( A, i, j, array[offset(i,j)] );
+                gsl_matrix_set(A, i, j, array[offset(i, j)]);
             }
         }
 
-        //create space to hold the matrices for single value decomposition
+        // create space to hold the matrices for single value decomposition
         S = gsl_vector_alloc(3);
         W = gsl_matrix_alloc(3, 3);
 
@@ -665,31 +674,29 @@ boost::tuple<Matrix,Matrix,Matrix> Matrix::singleValueDecomposition() const
         int ok = gsl_linalg_SV_decomp_jacobi(A, W, S);
 
         if (ok != 0)
-            throw SireMaths::domain_error( QObject::tr(
-                    "Could not calculate the single value decomposition of %1.")
-                        .arg(this->toString()), CODELOC );
+            throw SireMaths::domain_error(
+                QObject::tr("Could not calculate the single value decomposition of %1.").arg(this->toString()),
+                CODELOC);
 
-        //copy out the results...
+        // copy out the results...
         Matrix a(A);
         Matrix w = Matrix(W).transpose();
-        Matrix s( gsl_vector_get(S,0), 0, 0,
-                  0, gsl_vector_get(S,1), 0,
-                  0, 0, gsl_vector_get(S,2) );
+        Matrix s(gsl_vector_get(S, 0), 0, 0, 0, gsl_vector_get(S, 1), 0, 0, 0, gsl_vector_get(S, 2));
 
         gsl_matrix_free(A);
         gsl_vector_free(S);
         gsl_matrix_free(W);
 
-        return boost::tuple<Matrix,Matrix,Matrix>(a,s,w);
+        return boost::tuple<Matrix, Matrix, Matrix>(a, s, w);
     }
-    catch(...)
+    catch (...)
     {
         gsl_matrix_free(A);
         gsl_vector_free(S);
         gsl_matrix_free(W);
         throw;
 
-        return boost::tuple<Matrix,Matrix,Matrix>();
+        return boost::tuple<Matrix, Matrix, Matrix>();
     }
 }
 
@@ -698,17 +705,17 @@ boost::tuple<Matrix,Matrix,Matrix> Matrix::singleValueDecomposition() const
     This calculates the decomposition of this matrix
     into U S V^T, returning U, S and V in the tuple
 */
-boost::tuple<Matrix,Matrix,Matrix> Matrix::svd() const
+boost::tuple<Matrix, Matrix, Matrix> Matrix::svd() const
 {
     return this->singleValueDecomposition();
 }
 
 /** Return the eigenvectors and eigenvalues of this matrix */
-boost::tuple<Vector,Matrix> Matrix::diagonalise() const
+boost::tuple<Vector, Matrix> Matrix::diagonalise() const
 {
     if (this->isSymmetric())
     {
-        //we can use the quick eig3 code
+        // we can use the quick eig3 code
         double A[3][3], V[3][3], d[3];
 
         A[0][0] = array[0];
@@ -723,18 +730,16 @@ boost::tuple<Vector,Matrix> Matrix::diagonalise() const
 
         eigen_decomposition(A, V, d);
 
-        return boost::tuple<Vector,Matrix>(
-                    Vector(d[0], d[1], d[2]),
-                    Matrix(V[0][0], V[1][0], V[2][0],
-                           V[0][1], V[1][1], V[2][1],
-                           V[0][2], V[1][2], V[2][2]) );
+        return boost::tuple<Vector, Matrix>(
+            Vector(d[0], d[1], d[2]),
+            Matrix(V[0][0], V[1][0], V[2][0], V[0][1], V[1][1], V[2][1], V[0][2], V[1][2], V[2][2]));
     }
     else
     {
-        //we need to use BLAS - via NMatrix
-        std::pair<NVector,NMatrix> eigs = NMatrix(*this).diagonalise();
+        // we need to use BLAS - via NMatrix
+        std::pair<NVector, NMatrix> eigs = NMatrix(*this).diagonalise();
 
-        return boost::tuple<Vector,Matrix>( Vector(eigs.first), Matrix(eigs.second) );
+        return boost::tuple<Vector, Matrix>(Vector(eigs.first), Matrix(eigs.second));
     }
 }
 
@@ -754,11 +759,11 @@ Matrix Matrix::covariance(const QVector<Vector> &p, const QVector<Vector> &q, in
 
     try
     {
-        //convert the two vectors of points into GSL matrices
+        // convert the two vectors of points into GSL matrices
         P = gsl_matrix_alloc(n, 3);
         Q = gsl_matrix_alloc(n, 3);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             gsl_matrix_set(P, i, 0, p[i].x());
             gsl_matrix_set(P, i, 1, p[i].y());
@@ -769,23 +774,22 @@ Matrix Matrix::covariance(const QVector<Vector> &p, const QVector<Vector> &q, in
             gsl_matrix_set(Q, i, 2, q[i].z());
         }
 
-        //create space to hold the covariance matrix
+        // create space to hold the covariance matrix
         C = gsl_matrix_alloc(3, 3);
 
-        for (int i=0; i<3; ++i)
+        for (int i = 0; i < 3; ++i)
         {
-            for (int j=0; j<3; ++j)
+            for (int j = 0; j < 3; ++j)
             {
                 gsl_matrix_set(C, i, j, 0);
             }
         }
 
-        //compute the covariance matrix P^T Q
+        // compute the covariance matrix P^T Q
         int ok = gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, P, Q, 0.0, C);
 
         if (ok != 0)
-            throw SireMaths::domain_error( QObject::tr(
-                    "Something went wrong with the dgemm in covariance!"), CODELOC );
+            throw SireMaths::domain_error(QObject::tr("Something went wrong with the dgemm in covariance!"), CODELOC);
 
         Matrix c(C);
 
@@ -795,7 +799,7 @@ Matrix Matrix::covariance(const QVector<Vector> &p, const QVector<Vector> &q, in
 
         return c;
     }
-    catch(...)
+    catch (...)
     {
         gsl_matrix_free(P);
         gsl_matrix_free(Q);
@@ -805,7 +809,7 @@ Matrix Matrix::covariance(const QVector<Vector> &p, const QVector<Vector> &q, in
     }
 }
 
-const char* Matrix::typeName()
+const char *Matrix::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Matrix>() );
+    return QMetaType::typeName(qMetaTypeId<Matrix>());
 }

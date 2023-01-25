@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "minmax.h"
-#include "identities.h"
-#include "expression.h"
 #include "complexvalues.h"
+#include "expression.h"
+#include "identities.h"
 
 #include "SireMaths/errors.h"
 
@@ -46,7 +46,7 @@ static const RegisterMetaType<Min> r_min;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Min &min)
 {
-    writeHeader(ds, r_min, 1) << static_cast<const DoubleFunc&>(min);
+    writeHeader(ds, r_min, 1) << static_cast<const DoubleFunc &>(min);
 
     return ds;
 }
@@ -58,7 +58,7 @@ QDataStream &operator>>(QDataStream &ds, Min &min)
 
     if (v == 1)
     {
-        ds >> static_cast<DoubleFunc&>(min);
+        ds >> static_cast<DoubleFunc &>(min);
     }
     else
         throw version_error(v, "1", r_min, CODELOC);
@@ -68,34 +68,37 @@ QDataStream &operator>>(QDataStream &ds, Min &min)
 
 /** Constructor */
 Min::Min() : DoubleFunc()
-{}
+{
+}
 
 /** Construct min(x(), y()) */
-Min::Min(const Expression &x, const Expression &y) : DoubleFunc(x,y)
-{}
+Min::Min(const Expression &x, const Expression &y) : DoubleFunc(x, y)
+{
+}
 
 /** Copy constructor */
 Min::Min(const Min &other) : DoubleFunc(other)
-{}
+{
+}
 
 /** Destructor */
 Min::~Min()
-{}
+{
+}
 
 /** Comparison operator */
 bool Min::operator==(const ExBase &other) const
 {
-    const Min *other_min = dynamic_cast<const Min*>(&other);
+    const Min *other_min = dynamic_cast<const Min *>(&other);
 
-    return other_min != 0 and typeid(other).name() == typeid(*this).name()
-                 and this->x() == other_min->x()
-                 and this->y() == other_min->y();
+    return other_min != 0 and typeid(other).name() == typeid(*this).name() and this->x() == other_min->x() and
+           this->y() == other_min->y();
 }
 
 /** Evaluate this function */
 double Min::evaluate(const Values &values) const
 {
-    return qMin( x().evaluate(values), y().evaluate(values) );
+    return qMin(x().evaluate(values), y().evaluate(values));
 }
 
 /** Complex evaluation */
@@ -108,25 +111,25 @@ Complex Min::evaluate(const ComplexValues &values) const
         return xval;
 
     else if (xval.isReal() and yval.isReal())
-        return Complex( qMin(xval.real(),yval.real()), 0 );
+        return Complex(qMin(xval.real(), yval.real()), 0);
 
     else
-        throw SireMaths::domain_error( QObject::tr(
-            "It is not possible to order the two complex numbers %1 and %2. "
-            "It is thus not possible to find the minimum of %3.")
-                .arg(xval.toString(), yval.toString(), this->toString()), CODELOC );
+        throw SireMaths::domain_error(QObject::tr("It is not possible to order the two complex numbers %1 and %2. "
+                                                  "It is thus not possible to find the minimum of %3.")
+                                          .arg(xval.toString(), yval.toString(), this->toString()),
+                                      CODELOC);
 
-    return Complex(0,0);
+    return Complex(0, 0);
 }
 
 /** Return this as a function of x and y */
 Expression Min::functionOf(const Expression &ex, const Expression &ey) const
 {
-     if (ex == x() and ey == y())
-     {
+    if (ex == x() and ey == y())
+    {
         return Expression(*this);
-     }
-     else
+    }
+    else
         return Expression(Min(ex, ey));
 }
 
@@ -136,9 +139,9 @@ uint Min::magic() const
     return r_min.magicID();
 }
 
-const char* Min::typeName()
+const char *Min::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Min>() );
+    return QMetaType::typeName(qMetaTypeId<Min>());
 }
 
 ////////
@@ -150,7 +153,7 @@ static const RegisterMetaType<Max> r_max;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Max &max)
 {
-    writeHeader(ds, r_max, 1) << static_cast<const DoubleFunc&>(max);
+    writeHeader(ds, r_max, 1) << static_cast<const DoubleFunc &>(max);
 
     return ds;
 }
@@ -162,7 +165,7 @@ QDataStream &operator>>(QDataStream &ds, Max &max)
 
     if (v == 1)
     {
-        ds >> static_cast<DoubleFunc&>(max);
+        ds >> static_cast<DoubleFunc &>(max);
     }
     else
         throw version_error(v, "1", r_max, CODELOC);
@@ -172,34 +175,37 @@ QDataStream &operator>>(QDataStream &ds, Max &max)
 
 /** Constructor */
 Max::Max() : DoubleFunc()
-{}
+{
+}
 
 /** Construct min(x(), y()) */
-Max::Max(const Expression &x, const Expression &y) : DoubleFunc(x,y)
-{}
+Max::Max(const Expression &x, const Expression &y) : DoubleFunc(x, y)
+{
+}
 
 /** Copy constructor */
 Max::Max(const Max &other) : DoubleFunc(other)
-{}
+{
+}
 
 /** Destructor */
 Max::~Max()
-{}
+{
+}
 
 /** Comparison operator */
 bool Max::operator==(const ExBase &other) const
 {
-    const Max *other_max = dynamic_cast<const Max*>(&other);
+    const Max *other_max = dynamic_cast<const Max *>(&other);
 
-    return other_max != 0 and typeid(other).name() == typeid(*this).name()
-                 and this->x() == other_max->x()
-                 and this->y() == other_max->y();
+    return other_max != 0 and typeid(other).name() == typeid(*this).name() and this->x() == other_max->x() and
+           this->y() == other_max->y();
 }
 
 /** Evaluate this function */
 double Max::evaluate(const Values &values) const
 {
-    return qMax( x().evaluate(values), y().evaluate(values) );
+    return qMax(x().evaluate(values), y().evaluate(values));
 }
 
 /** Complex evaluation */
@@ -212,25 +218,25 @@ Complex Max::evaluate(const ComplexValues &values) const
         return xval;
 
     else if (xval.isReal() and yval.isReal())
-        return Complex( qMax(xval.real(),yval.real()), 0 );
+        return Complex(qMax(xval.real(), yval.real()), 0);
 
     else
-        throw SireMaths::domain_error( QObject::tr(
-            "It is not possible to order the two complex numbers %1 and %2. "
-            "It is thus not possible to find the minimum of %3.")
-                .arg(xval.toString(), yval.toString(), this->toString()), CODELOC );
+        throw SireMaths::domain_error(QObject::tr("It is not possible to order the two complex numbers %1 and %2. "
+                                                  "It is thus not possible to find the minimum of %3.")
+                                          .arg(xval.toString(), yval.toString(), this->toString()),
+                                      CODELOC);
 
-    return Complex(0,0);
+    return Complex(0, 0);
 }
 
 /** Return this as a function of x and y */
 Expression Max::functionOf(const Expression &ex, const Expression &ey) const
 {
-     if (ex == x() and ey == y())
-     {
+    if (ex == x() and ey == y())
+    {
         return Expression(*this);
-     }
-     else
+    }
+    else
         return Expression(Max(ex, ey));
 }
 
@@ -240,19 +246,17 @@ uint Max::magic() const
     return r_max.magicID();
 }
 
-const char* Max::typeName()
+const char *Max::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Max>() );
+    return QMetaType::typeName(qMetaTypeId<Max>());
 }
 
-Max* Max::clone() const
+Max *Max::clone() const
 {
     return new Max(*this);
 }
 
-
-Min* Min::clone() const
+Min *Min::clone() const
 {
     return new Min(*this);
 }
-

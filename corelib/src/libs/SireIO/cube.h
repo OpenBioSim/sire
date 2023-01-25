@@ -29,8 +29,8 @@
 #define SIREIO_CUBE_H
 
 #include "SireFF/potentialtable.h"
-#include "SireMol/moleculegroups.h"
 #include "SireMol/moleculegroup.h"
+#include "SireMol/moleculegroups.h"
 
 #include "SireUnits/dimensions.h"
 
@@ -39,46 +39,45 @@ SIRE_BEGIN_HEADER
 namespace SireIO
 {
 
-using SireBase::PropertyMap;
-using SireFF::PotentialTable;
-using SireMol::MolGroupsBase;
-using SireMol::MoleculeGroup;
+    using SireBase::PropertyMap;
+    using SireFF::PotentialTable;
+    using SireMol::MoleculeGroup;
+    using SireMol::MolGroupsBase;
 
-/** This class is used to write a PotentialTable as a
-    Gaussian cube file
+    /** This class is used to write a PotentialTable as a
+        Gaussian cube file
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT Cube
-{
-public:
-    Cube();
-    Cube(SireUnits::Dimension::MolarEnergy cutoff);
-    Cube(const Cube &other);
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT Cube
+    {
+    public:
+        Cube();
+        Cube(SireUnits::Dimension::MolarEnergy cutoff);
+        Cube(const Cube &other);
 
-    ~Cube();
+        ~Cube();
 
-    Cube& operator=(const Cube &other);
+        Cube &operator=(const Cube &other);
 
-    bool operator==(const Cube &other) const;
-    bool operator!=(const Cube &other) const;
+        bool operator==(const Cube &other) const;
+        bool operator!=(const Cube &other) const;
 
-    void write(const PotentialTable &table,
-               const QString &filename, const PropertyMap &map = PropertyMap()) const;
+        void write(const PotentialTable &table, const QString &filename, const PropertyMap &map = PropertyMap()) const;
 
-    void write(const PotentialTable &table, const MoleculeGroup &molgroup,
-               const QString &filename, const PropertyMap &map = PropertyMap()) const;
+        void write(const PotentialTable &table, const MoleculeGroup &molgroup, const QString &filename,
+                   const PropertyMap &map = PropertyMap()) const;
 
-    void write(const PotentialTable &table, const MolGroupsBase &molecules,
-               const QString &filename, const PropertyMap &map = PropertyMap()) const;
+        void write(const PotentialTable &table, const MolGroupsBase &molecules, const QString &filename,
+                   const PropertyMap &map = PropertyMap()) const;
 
-private:
-    double cutoff;
-};
+    private:
+        double cutoff;
+    };
 
-}
+} // namespace SireIO
 
-SIRE_EXPOSE_CLASS( SireIO::Cube )
+SIRE_EXPOSE_CLASS(SireIO::Cube)
 
 SIRE_END_HEADER
 

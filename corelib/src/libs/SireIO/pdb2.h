@@ -37,282 +37,273 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class PDBAtom;
-class PDB2;
-}
+    class PDBAtom;
+    class PDB2;
+} // namespace SireIO
 
 namespace SireMol
 {
-class Atom;
-class MolEditor;
-class MoleculeInfoData;
-}
+    class Atom;
+    class MolEditor;
+    class MoleculeInfoData;
+} // namespace SireMol
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::PDBAtom&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::PDBAtom&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::PDBAtom &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::PDBAtom &);
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::PDB2&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::PDB2&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::PDB2 &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::PDB2 &);
 
 namespace SireIO
 {
 
-/** This class provides functionality for reading/writing
-    Protein Data Bank (PDB) ATOM records.
+    /** This class provides functionality for reading/writing
+        Protein Data Bank (PDB) ATOM records.
 
-    @author Lester Hedges
-*/
-class SIREIO_EXPORT PDBAtom
-{
+        @author Lester Hedges
+    */
+    class SIREIO_EXPORT PDBAtom
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const PDBAtom&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, PDBAtom&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const PDBAtom &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, PDBAtom &);
 
-public:
-    /** Default constructor. */
-    PDBAtom();
+    public:
+        /** Default constructor. */
+        PDBAtom();
 
-    /** Constructor. */
-    PDBAtom(const QString &line, QStringList &errors);
+        /** Constructor. */
+        PDBAtom(const QString &line, QStringList &errors);
 
-    /** Constructor. */
-    PDBAtom(const SireMol::Atom &atom, bool is_ter,
-        const PropertyMap &map, QStringList &errors);
+        /** Constructor. */
+        PDBAtom(const SireMol::Atom &atom, bool is_ter, const PropertyMap &map, QStringList &errors);
 
-    /** Generate a PDB record from the atom data. */
-    QString toPDBRecord() const;
+        /** Generate a PDB record from the atom data. */
+        QString toPDBRecord() const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    /** Convert the atom name to PDB format. */
-    QString toPDBName() const;
+        /** Convert the atom name to PDB format. */
+        QString toPDBName() const;
 
-    /** Set the terminal atom flag. */
-    void setTerminal(bool is_ter);
+        /** Set the terminal atom flag. */
+        void setTerminal(bool is_ter);
 
-    /** Get the atom serial number. */
-    qint64 getNumber() const;
+        /** Get the atom serial number. */
+        qint64 getNumber() const;
 
-    /** Set the atom serial number. */
-    void setSerial(int serial);
+        /** Set the atom serial number. */
+        void setSerial(int serial);
 
-    /** Get the atom name. */
-    QString getName() const;
+        /** Get the atom name. */
+        QString getName() const;
 
-    /** Get the residue name. */
-    QString getResName() const;
+        /** Get the residue name. */
+        QString getResName() const;
 
-    /** Get the chain id. */
-    QChar getChainID() const;
+        /** Get the chain id. */
+        QChar getChainID() const;
 
-    /** Set the chain id. */
-    void setChainID(QChar id);
+        /** Set the chain id. */
+        void setChainID(QChar id);
 
-    /** Get the residue sequence number. */
-    qint64 getResNum() const;
+        /** Get the residue sequence number. */
+        qint64 getResNum() const;
 
-    /** Set the residue sequence number. */
-    void setResNum(int num);
+        /** Set the residue sequence number. */
+        void setResNum(int num);
 
-    /** Get the residue index. */
-    qint64 getResIdx() const;
+        /** Get the residue index. */
+        qint64 getResIdx() const;
 
-    /** Set the residue index. */
-    void setResIdx(int idx);
+        /** Set the residue index. */
+        void setResIdx(int idx);
 
-    /** Get the alternate location indicator. */
-    QChar getAltLoc() const;
+        /** Get the alternate location indicator. */
+        QChar getAltLoc() const;
 
-    /** Get the residue insertion code. */
-    QChar getInsertCode() const;
+        /** Get the residue insertion code. */
+        QChar getInsertCode() const;
 
-    /** Get the atom coordinates. */
-    SireMaths::Vector getCoord() const;
+        /** Get the atom coordinates. */
+        SireMaths::Vector getCoord() const;
 
-    /** Get the occupancy. */
-    double getOccupancy() const;
+        /** Get the occupancy. */
+        double getOccupancy() const;
 
-    /** Get the atom temperature factor. */
-    double getTemperature() const;
+        /** Get the atom temperature factor. */
+        double getTemperature() const;
 
-    /** Set the atom temperature factor. */
-    void setTemperature(double temperature);
+        /** Set the atom temperature factor. */
+        void setTemperature(double temperature);
 
-    /** Get the element symbol. */
-    QString getElement() const;
+        /** Get the element symbol. */
+        QString getElement() const;
 
-    /** Get the charge on the atom. */
-    qint64 getCharge() const;
+        /** Get the charge on the atom. */
+        qint64 getCharge() const;
 
-    /** Whether this is a HETATM. */
-    bool isHet() const;
+        /** Whether this is a HETATM. */
+        bool isHet() const;
 
-    /** Whether this is a terminal atom. */
-    bool isTer() const;
+        /** Whether this is a terminal atom. */
+        bool isTer() const;
 
-private:
-    /** The original PDB record used to instantiate the atom. */
-    QString record;
+    private:
+        /** The original PDB record used to instantiate the atom. */
+        QString record;
 
-    /** Serial number. */
-    qint64 serial;
+        /** Serial number. */
+        qint64 serial;
 
-    /** Name. */
-    QString name;
+        /** Name. */
+        QString name;
 
-    /** Alternate location indicator. */
-    QChar alt_loc;
+        /** Alternate location indicator. */
+        QChar alt_loc;
 
-    /** Residue name. */
-    QString res_name;
+        /** Residue name. */
+        QString res_name;
 
-    /** Chain ID. */
-    QChar chain_id;
+        /** Chain ID. */
+        QChar chain_id;
 
-    /** Residue sequence number. */
-    qint64 res_num;
+        /** Residue sequence number. */
+        qint64 res_num;
 
-    /** Residue index. */
-    qint64 res_idx;
+        /** Residue index. */
+        qint64 res_idx;
 
-    /** Residue insertion code. */
-    QChar insert_code;
+        /** Residue insertion code. */
+        QChar insert_code;
 
-    /** Coordinates. */
-    SireMaths::Vector coord;
+        /** Coordinates. */
+        SireMaths::Vector coord;
 
-    /** Occupancy. */
-    double occupancy;
+        /** Occupancy. */
+        double occupancy;
 
-    /** Temperature factor. */
-    double temperature;
+        /** Temperature factor. */
+        double temperature;
 
-    /** Element symbol. */
-    QString element;
+        /** Element symbol. */
+        QString element;
 
-    /** Charge on the atom. */
-    qint64 charge;
+        /** Charge on the atom. */
+        qint64 charge;
 
-    /** Whether the atom is recorded as a HETAM entry. */
-    bool is_het;
+        /** Whether the atom is recorded as a HETAM entry. */
+        bool is_het;
 
-    /** Whether this is the last atom in a chain. */
-    bool is_ter;
-};
+        /** Whether this is the last atom in a chain. */
+        bool is_ter;
+    };
 
-/** This class holds a parser for reading and writing
-    Protein Data Bank (PDB) files
+    /** This class holds a parser for reading and writing
+        Protein Data Bank (PDB) files
 
-    @author Lester Hedges
-*/
-class SIREIO_EXPORT PDB2 : public SireBase::ConcreteProperty<PDB2,MoleculeParser>
-{
+        @author Lester Hedges
+    */
+    class SIREIO_EXPORT PDB2 : public SireBase::ConcreteProperty<PDB2, MoleculeParser>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const PDB2&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, PDB2&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const PDB2 &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, PDB2 &);
 
-public:
-    PDB2();
-    PDB2(const QString &filename,
-         const PropertyMap &map = PropertyMap());
+    public:
+        PDB2();
+        PDB2(const QString &filename, const PropertyMap &map = PropertyMap());
 
-    PDB2(const QStringList &lines,
-         const PropertyMap &map = PropertyMap());
-    PDB2(const SireSystem::System &system,
-         const PropertyMap &map = PropertyMap());
+        PDB2(const QStringList &lines, const PropertyMap &map = PropertyMap());
+        PDB2(const SireSystem::System &system, const PropertyMap &map = PropertyMap());
 
-    PDB2(const PDB2 &other);
+        PDB2(const PDB2 &other);
 
-    ~PDB2();
+        ~PDB2();
 
-    PDB2& operator=(const PDB2 &other);
+        PDB2 &operator=(const PDB2 &other);
 
-    bool operator==(const PDB2 &other) const;
-    bool operator!=(const PDB2 &other) const;
+        bool operator==(const PDB2 &other) const;
+        bool operator!=(const PDB2 &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    MoleculeParserPtr construct(const QString &filename,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QString &filename, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const QStringList &lines,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const SireSystem::System &system,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const SireSystem::System &system, const PropertyMap &map) const;
 
-    QString toString() const;
-    QVector<QString> toLines(bool is_velocity = false) const;
+        QString toString() const;
+        QVector<QString> toLines(bool is_velocity = false) const;
 
-    bool writeVelocityFile(const QString &filename) const;
+        bool writeVelocityFile(const QString &filename) const;
 
-    QString formatName() const;
-    QString formatDescription() const;
-    QStringList formatSuffix() const;
+        QString formatName() const;
+        QString formatDescription() const;
+        QStringList formatSuffix() const;
 
-    bool isTopology() const;
-    bool isFrame() const;
+        bool isTopology() const;
+        bool isFrame() const;
 
-    int nFrames() const;
-    SireMol::Frame getFrame(int i) const;
+        int nFrames() const;
+        SireMol::Frame getFrame(int i) const;
 
-    int nMolecules() const;
-    int nAtoms() const;
-    int nResidues() const;
-    int nResidues(int i) const;
-    int nChains() const;
-    int nChains(int i) const;
-    int nAtoms(int i) const;
+        int nMolecules() const;
+        int nAtoms() const;
+        int nResidues() const;
+        int nResidues(int i) const;
+        int nChains() const;
+        int nChains(int i) const;
+        int nAtoms(int i) const;
 
-protected:
-    SireSystem::System startSystem(const PropertyMap &map) const;
-    void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
+    protected:
+        SireSystem::System startSystem(const PropertyMap &map) const;
+        void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
 
-private:
-    void assertSane() const;
-    void parseLines(const PropertyMap &map);
+    private:
+        void assertSane() const;
+        void parseLines(const PropertyMap &map);
 
-    void parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> &atom_lines,
-        QStringList &errors, const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        void parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> &atom_lines, QStringList &errors,
+                           const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SireMol::Molecule updateMolecule(const SireMol::Molecule &sire_mol, QVector<bool> &used_atoms,
-        const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SireMol::Molecule updateMolecule(const SireMol::Molecule &sire_mol, QVector<bool> &used_atoms,
+                                         const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
-    void findAtom(const SireMol::Atom &sire_atom, int &mol_idx,
-        int &atom_idx, QVector<bool> &used_atoms) const;
+        void findAtom(const SireMol::Atom &sire_atom, int &mol_idx, int &atom_idx, QVector<bool> &used_atoms) const;
 
-    SireMol::MolStructureEditor getMolStructure(int imol,
-        const SireBase::PropertyName &cutting) const;
+        SireMol::MolStructureEditor getMolStructure(int imol, const SireBase::PropertyName &cutting) const;
 
-    SireMol::MolEditor getMolecule(int imol, const PropertyMap &map = PropertyMap()) const;
+        SireMol::MolEditor getMolecule(int imol, const PropertyMap &map = PropertyMap()) const;
 
-    bool isModel() const;
-    bool isModel(const SireSystem::System &system) const;
+        bool isModel() const;
+        bool isModel(const SireSystem::System &system) const;
 
-    /** Atom record data for each molecule. */
-    QVector<QVector<PDBAtom> > atoms;
+        /** Atom record data for each molecule. */
+        QVector<QVector<PDBAtom>> atoms;
 
-    /** Mapping between chain identifiers and residue index for each molecule. */
-    QVector<QMultiMap<QChar, qint64> > chains;
+        /** Mapping between chain identifiers and residue index for each molecule. */
+        QVector<QMultiMap<QChar, qint64>> chains;
 
-    /** Mapping between residue and atom indices for each molecule. */
-    QVector<QMultiMap<qint64, qint64> > residues;
+        /** Mapping between residue and atom indices for each molecule. */
+        QVector<QMultiMap<qint64, qint64>> residues;
 
-    /** Additional atom velocity data. */
-    QVector<SireMol::Velocity3D> velocities;
+        /** Additional atom velocity data. */
+        QVector<SireMol::Velocity3D> velocities;
 
-    /** Any warnings that were raised when reading the file. */
-    QStringList parse_warnings;
-};
+        /** Any warnings that were raised when reading the file. */
+        QStringList parse_warnings;
+    };
 
-}
+} // namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::PDBAtom )
-Q_DECLARE_METATYPE( SireIO::PDB2 )
+Q_DECLARE_METATYPE(SireIO::PDBAtom)
+Q_DECLARE_METATYPE(SireIO::PDB2)
 
-SIRE_EXPOSE_CLASS( SireIO::PDB2 )
+SIRE_EXPOSE_CLASS(SireIO::PDB2)
 
 SIRE_END_HEADER
 

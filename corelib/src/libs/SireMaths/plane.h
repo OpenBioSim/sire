@@ -36,112 +36,110 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class Plane;
+    class Plane;
 }
 
 class QDataStream;
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Plane&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Plane&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Plane &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Plane &);
 
 namespace SireMaths
 {
 
-/** This class represents an infinite plane, represented by a normal vector
-    perpendicular to the plane, and the distance from the origin
-    along that normal vector.
+    /** This class represents an infinite plane, represented by a normal vector
+        perpendicular to the plane, and the distance from the origin
+        along that normal vector.
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT Plane
-{
-
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Plane&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Plane&);
-
-public:
-    Plane();
-    Plane(const Vector &normal, const double &distance);
-    Plane(const double &a, const double &b, const double &c, const double &d);
-    Plane(const Vector &normal, const Vector &contains_point);
-    Plane(const Plane &other);
-    ~Plane();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Plane
     {
-        return Plane::typeName();
-    }
 
-    const Vector& normal() const;
-    const double& distanceFromOrigin() const;
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Plane &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Plane &);
 
-    double a() const;
-    double b() const;
-    double c() const;
-    double d() const;
+    public:
+        Plane();
+        Plane(const Vector &normal, const double &distance);
+        Plane(const double &a, const double &b, const double &c, const double &d);
+        Plane(const Vector &normal, const Vector &contains_point);
+        Plane(const Plane &other);
+        ~Plane();
 
-    double distance(const Vector &point) const;
+        static const char *typeName();
 
-private:
+        const char *what() const
+        {
+            return Plane::typeName();
+        }
 
-    Vector norm;
-    double dist;
+        const Vector &normal() const;
+        const double &distanceFromOrigin() const;
 
-};
+        double a() const;
+        double b() const;
+        double c() const;
+        double d() const;
+
+        double distance(const Vector &point) const;
+
+    private:
+        Vector norm;
+        double dist;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the (normalised) normal vector to the plane */
-SIRE_ALWAYS_INLINE const Vector& Plane::normal() const
-{
-    return norm;
-}
+    /** Return the (normalised) normal vector to the plane */
+    SIRE_ALWAYS_INLINE const Vector &Plane::normal() const
+    {
+        return norm;
+    }
 
-/** Return the distance of the plane from the origin along the normal vector */
-SIRE_ALWAYS_INLINE const double& Plane::distanceFromOrigin() const
-{
-    return dist;
-}
+    /** Return the distance of the plane from the origin along the normal vector */
+    SIRE_ALWAYS_INLINE const double &Plane::distanceFromOrigin() const
+    {
+        return dist;
+    }
 
-/** Return the 'a' component of the plane equation "ax + by + cz + d = 0" */
-SIRE_ALWAYS_INLINE double Plane::a() const
-{
-    return norm.x();
-}
+    /** Return the 'a' component of the plane equation "ax + by + cz + d = 0" */
+    SIRE_ALWAYS_INLINE double Plane::a() const
+    {
+        return norm.x();
+    }
 
-/** Return the 'b' component of the plane equation "ax + by + cz + d = 0" */
-SIRE_ALWAYS_INLINE double Plane::b() const
-{
-    return norm.y();
-}
+    /** Return the 'b' component of the plane equation "ax + by + cz + d = 0" */
+    SIRE_ALWAYS_INLINE double Plane::b() const
+    {
+        return norm.y();
+    }
 
-/** Return the 'c' component of the plane equation "ax + by + cz + d = 0" */
-SIRE_ALWAYS_INLINE double Plane::c() const
-{
-    return norm.z();
-}
+    /** Return the 'c' component of the plane equation "ax + by + cz + d = 0" */
+    SIRE_ALWAYS_INLINE double Plane::c() const
+    {
+        return norm.z();
+    }
 
-/** Return the 'd' component of the plane equation "ax + by + cz + d = 0" */
-SIRE_ALWAYS_INLINE double Plane::d() const
-{
-    return dist;
-}
+    /** Return the 'd' component of the plane equation "ax + by + cz + d = 0" */
+    SIRE_ALWAYS_INLINE double Plane::d() const
+    {
+        return dist;
+    }
 
-/** Return the shortest (signed) distance from the plane to the point 'point' */
-SIRE_ALWAYS_INLINE double Plane::distance(const Vector &point) const
-{
-    return Vector::dot(norm, point) + dist;
-}
+    /** Return the shortest (signed) distance from the plane to the point 'point' */
+    SIRE_ALWAYS_INLINE double Plane::distance(const Vector &point) const
+    {
+        return Vector::dot(norm, point) + dist;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::Plane)
 Q_DECLARE_TYPEINFO(SireMaths::Plane, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMaths::Plane )
+SIRE_EXPOSE_CLASS(SireMaths::Plane)
 
 SIRE_END_HEADER
 

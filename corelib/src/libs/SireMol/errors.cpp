@@ -29,109 +29,109 @@
 
 using namespace SireMol;
 
-const char* missing_atom::typeName()
+const char *missing_atom::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_atom>() );
+    return QMetaType::typeName(qMetaTypeId<missing_atom>());
 }
 
-const char* duplicate_atom::typeName()
+const char *duplicate_atom::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<duplicate_atom>() );
+    return QMetaType::typeName(qMetaTypeId<duplicate_atom>());
 }
 
-const char* missing_residue::typeName()
+const char *missing_residue::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_residue>() );
+    return QMetaType::typeName(qMetaTypeId<missing_residue>());
 }
 
-const char* duplicate_residue::typeName()
+const char *duplicate_residue::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<duplicate_residue>() );
+    return QMetaType::typeName(qMetaTypeId<duplicate_residue>());
 }
 
-const char* missing_cutgroup::typeName()
+const char *missing_cutgroup::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_cutgroup>() );
+    return QMetaType::typeName(qMetaTypeId<missing_cutgroup>());
 }
 
-const char* duplicate_cutgroup::typeName()
+const char *duplicate_cutgroup::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<duplicate_cutgroup>() );
+    return QMetaType::typeName(qMetaTypeId<duplicate_cutgroup>());
 }
 
-const char* missing_chain::typeName()
+const char *missing_chain::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_chain>() );
+    return QMetaType::typeName(qMetaTypeId<missing_chain>());
 }
 
-const char* duplicate_chain::typeName()
+const char *duplicate_chain::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<duplicate_chain>() );
+    return QMetaType::typeName(qMetaTypeId<duplicate_chain>());
 }
 
-const char* missing_segment::typeName()
+const char *missing_segment::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_segment>() );
+    return QMetaType::typeName(qMetaTypeId<missing_segment>());
 }
 
-const char* duplicate_segment::typeName()
+const char *duplicate_segment::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<duplicate_segment>() );
+    return QMetaType::typeName(qMetaTypeId<duplicate_segment>());
 }
 
-const char* missing_group::typeName()
+const char *missing_group::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_group>() );
+    return QMetaType::typeName(qMetaTypeId<missing_group>());
 }
 
-const char* duplicate_group::typeName()
+const char *duplicate_group::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<duplicate_group>() );
+    return QMetaType::typeName(qMetaTypeId<duplicate_group>());
 }
 
-const char* missing_molecule::typeName()
+const char *missing_molecule::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_molecule>() );
+    return QMetaType::typeName(qMetaTypeId<missing_molecule>());
 }
 
-const char* duplicate_molecule::typeName()
+const char *duplicate_molecule::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<duplicate_molecule>() );
+    return QMetaType::typeName(qMetaTypeId<duplicate_molecule>());
 }
 
-const char* template_error::typeName()
+const char *template_error::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<template_error>() );
+    return QMetaType::typeName(qMetaTypeId<template_error>());
 }
 
-const char* anchor_error::typeName()
+const char *anchor_error::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<anchor_error>() );
+    return QMetaType::typeName(qMetaTypeId<anchor_error>());
 }
 
-const char* ring_error::typeName()
+const char *ring_error::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ring_error>() );
+    return QMetaType::typeName(qMetaTypeId<ring_error>());
 }
 
-const char* incompatible_molecule::typeName()
+const char *incompatible_molecule::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<incompatible_molecule>() );
+    return QMetaType::typeName(qMetaTypeId<incompatible_molecule>());
 }
 
-const char* missing_bond::typeName()
+const char *missing_bond::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_bond>() );
+    return QMetaType::typeName(qMetaTypeId<missing_bond>());
 }
 
-const char* missing_angle::typeName()
+const char *missing_angle::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_angle>() );
+    return QMetaType::typeName(qMetaTypeId<missing_angle>());
 }
 
-const char* missing_dihedral::typeName()
+const char *missing_dihedral::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_dihedral>() );
+    return QMetaType::typeName(qMetaTypeId<missing_dihedral>());
 }
 
 static const RegisterMetaType<missing_atom> r_matom;

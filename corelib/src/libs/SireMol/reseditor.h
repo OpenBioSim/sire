@@ -30,322 +30,314 @@
 #ifndef SIREMOL_RESEDITOR_H
 #define SIREMOL_RESEDITOR_H
 
-#include "structureeditor.h"
 #include "residue.h"
+#include "structureeditor.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ResEditor;
-class ResStructureEditor;
-}
+    class ResEditor;
+    class ResStructureEditor;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ResEditor&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ResEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ResEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ResEditor &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ResStructureEditor&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ResStructureEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ResStructureEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ResStructureEditor &);
 
 namespace SireMol
 {
 
-class MolStructureEditor;
-class SegStructureEditor;
-class ChainStructureEditor;
-class ResStructureEditor;
-class CGStructureEditor;
-class AtomStructureEditor;
+    class MolStructureEditor;
+    class SegStructureEditor;
+    class ChainStructureEditor;
+    class ResStructureEditor;
+    class CGStructureEditor;
+    class AtomStructureEditor;
 
-class MolEditor;
-class SegEditor;
-class ChainEditor;
-class ResEditor;
-class CGEditor;
-class AtomEditor;
+    class MolEditor;
+    class SegEditor;
+    class ChainEditor;
+    class ResEditor;
+    class CGEditor;
+    class AtomEditor;
 
-class CGIdx;
-class CGID;
-class ResIdx;
-class ResID;
+    class CGIdx;
+    class CGID;
+    class ResIdx;
+    class ResID;
 
-class ResEditor;
-typedef Editor<ResEditor, Residue> ResEditorBase;
+    class ResEditor;
+    typedef Editor<ResEditor, Residue> ResEditorBase;
 
-/** This class is used to edit the non-structural parts of a residue
+    /** This class is used to edit the non-structural parts of a residue
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ResEditor
-        : public SireBase::ConcreteProperty< ResEditor,Editor<ResEditor,Residue> >
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ResEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ResEditor&);
-
-public:
-    ResEditor();
-
-    ResEditor(const Residue &residue);
-
-    ResEditor(const ResEditor &other);
-
-    ~ResEditor();
-
-    ResEditor& operator=(const Residue &residue);
-    ResEditor& operator=(const ResEditor &other);
-
-    static const char* typeName();
-
-    QString toString() const;
-
-    ResEditor& rename(const ResName &name);
-    ResEditor& renumber(ResNum number);
-
-    ResStructureEditor reindex(ResIdx index) const;
-
-    MolStructureEditor remove() const;
-
-    ResStructureEditor reparent(const ChainID &chainid) const;
-
-    AtomStructureEditor add(const AtomName &atomname) const;
-    AtomStructureEditor add(AtomNum atomnum) const;
-
-    ResStructureEditor remove(const AtomID &atomid) const;
-
-    ResStructureEditor remove(int i) const;
-
-    ResStructureEditor transfer(const AtomID &atomid, const ResID &resid) const;
-    ResStructureEditor transfer(int i, const ResID &resid) const;
-
-    ResStructureEditor transferAll(const ResID &resid) const;
-
-    Residue commit() const;
-};
-
-/** This is the class used to edit a residue's structure
-
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ResStructureEditor : public StructureEditor
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ResStructureEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ResStructureEditor&);
-
-public:
-    ResStructureEditor();
-    ResStructureEditor(const Residue &residue);
-    ResStructureEditor(const StructureEditor &data, ResIdx residx);
-
-    ResStructureEditor(const ResStructureEditor &other);
-
-    ~ResStructureEditor();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ResEditor : public SireBase::ConcreteProperty<ResEditor, Editor<ResEditor, Residue>>
     {
-        return ResStructureEditor::typeName();
-    }
 
-    ResStructureEditor* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ResEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ResEditor &);
 
-    ResStructureEditor& operator=(const Residue &residue);
-    ResStructureEditor& operator=(const ResStructureEditor &other);
+    public:
+        ResEditor();
 
-    QString toString() const;
+        ResEditor(const Residue &residue);
 
-    bool selectedAll() const;
+        ResEditor(const ResEditor &other);
 
-    const ResName& name() const;
-    ResNum number() const;
-    ResIdx index() const;
+        ~ResEditor();
 
-    int nAtoms() const;
+        ResEditor &operator=(const Residue &residue);
+        ResEditor &operator=(const ResEditor &other);
 
-    ChainStructureEditor chain();
-    MolStructureEditor molecule();
+        static const char *typeName();
 
-    AtomStructureEditor atom(int i);
-    AtomStructureEditor atom(const AtomID &atomid);
+        QString toString() const;
 
-    AtomStructureEditor select(int i);
-    AtomStructureEditor select(const AtomID &atomid);
+        ResEditor &rename(const ResName &name);
+        ResEditor &renumber(ResNum number);
 
-    ResStructureEditor& rename(const ResName &name);
-    ResStructureEditor& renumber(ResNum number);
+        ResStructureEditor reindex(ResIdx index) const;
 
-    ResStructureEditor& reindex(ResIdx index);
+        MolStructureEditor remove() const;
 
-    MolStructureEditor remove();
+        ResStructureEditor reparent(const ChainID &chainid) const;
 
-    ResStructureEditor& reparent(const ChainID &chainid);
+        AtomStructureEditor add(const AtomName &atomname) const;
+        AtomStructureEditor add(AtomNum atomnum) const;
 
-    AtomStructureEditor add(const AtomName &atomname);
-    AtomStructureEditor add(AtomNum atomnum);
+        ResStructureEditor remove(const AtomID &atomid) const;
 
-    ResStructureEditor& remove(const AtomID &atomid);
+        ResStructureEditor remove(int i) const;
 
-    ResStructureEditor& remove(int i);
+        ResStructureEditor transfer(const AtomID &atomid, const ResID &resid) const;
+        ResStructureEditor transfer(int i, const ResID &resid) const;
 
-    ResStructureEditor& transfer(const AtomID &atomid, const ResID &resid);
-    ResStructureEditor& transfer(int i, const ResID &resid);
+        ResStructureEditor transferAll(const ResID &resid) const;
 
-    ResStructureEditor& transferAll(const ResID &resid);
+        Residue commit() const;
+    };
 
-    template<class T>
-    T property(const QString &key) const;
+    /** This is the class used to edit a residue's structure
 
-    template<class T>
-    T metadata(const QString &metakey) const;
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ResStructureEditor : public StructureEditor
+    {
 
-    template<class T>
-    T metadata(const QString &key, const QString &metakey) const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ResStructureEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ResStructureEditor &);
 
-    template<class T>
-    ResStructureEditor& setProperty(const QString &key, const T &value);
+    public:
+        ResStructureEditor();
+        ResStructureEditor(const Residue &residue);
+        ResStructureEditor(const StructureEditor &data, ResIdx residx);
 
-    template<class T>
-    ResStructureEditor& setMetadata(const QString &metakey, const T &value);
+        ResStructureEditor(const ResStructureEditor &other);
 
-    template<class T>
-    ResStructureEditor& setMetadata(const QString &key, const QString &metakey,
-                                    const T &value);
+        ~ResStructureEditor();
 
-    Residue commit() const;
+        static const char *typeName();
 
-    operator Residue() const;
+        const char *what() const
+        {
+            return ResStructureEditor::typeName();
+        }
 
-private:
-    /** The unique ID number of this residue in this editor */
-    quint32 uid;
-};
+        ResStructureEditor *clone() const;
+
+        ResStructureEditor &operator=(const Residue &residue);
+        ResStructureEditor &operator=(const ResStructureEditor &other);
+
+        QString toString() const;
+
+        bool selectedAll() const;
+
+        const ResName &name() const;
+        ResNum number() const;
+        ResIdx index() const;
+
+        int nAtoms() const;
+
+        ChainStructureEditor chain();
+        MolStructureEditor molecule();
+
+        AtomStructureEditor atom(int i);
+        AtomStructureEditor atom(const AtomID &atomid);
+
+        AtomStructureEditor select(int i);
+        AtomStructureEditor select(const AtomID &atomid);
+
+        ResStructureEditor &rename(const ResName &name);
+        ResStructureEditor &renumber(ResNum number);
+
+        ResStructureEditor &reindex(ResIdx index);
+
+        MolStructureEditor remove();
+
+        ResStructureEditor &reparent(const ChainID &chainid);
+
+        AtomStructureEditor add(const AtomName &atomname);
+        AtomStructureEditor add(AtomNum atomnum);
+
+        ResStructureEditor &remove(const AtomID &atomid);
+
+        ResStructureEditor &remove(int i);
+
+        ResStructureEditor &transfer(const AtomID &atomid, const ResID &resid);
+        ResStructureEditor &transfer(int i, const ResID &resid);
+
+        ResStructureEditor &transferAll(const ResID &resid);
+
+        template <class T>
+        T property(const QString &key) const;
+
+        template <class T>
+        T metadata(const QString &metakey) const;
+
+        template <class T>
+        T metadata(const QString &key, const QString &metakey) const;
+
+        template <class T>
+        ResStructureEditor &setProperty(const QString &key, const T &value);
+
+        template <class T>
+        ResStructureEditor &setMetadata(const QString &metakey, const T &value);
+
+        template <class T>
+        ResStructureEditor &setMetadata(const QString &key, const QString &metakey, const T &value);
+
+        Residue commit() const;
+
+        operator Residue() const;
+
+    private:
+        /** The unique ID number of this residue in this editor */
+        quint32 uid;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the value for this residue of the property at key 'key'.
-    Note that this property *must* be of type ResProperty<T> for
-    this to work!
+    /** Return the value for this residue of the property at key 'key'.
+        Note that this property *must* be of type ResProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T ResStructureEditor::property(const QString &key) const
-{
-    const QVariant &value = this->getResProperty(uid, key);
-    return this->_pvt_getProperty<T>(key, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T ResStructureEditor::property(const QString &key) const
+    {
+        const QVariant &value = this->getResProperty(uid, key);
+        return this->_pvt_getProperty<T>(key, value);
+    }
 
-/** Return the value for this residue of the metadata at metakey 'metakey'.
-    Note that this property *must* be of type ResProperty<T> for
-    this to work!
+    /** Return the value for this residue of the metadata at metakey 'metakey'.
+        Note that this property *must* be of type ResProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T ResStructureEditor::metadata(const QString &metakey) const
-{
-    const QVariant &value = this->getResMetadata(uid, metakey);
-    return this->_pvt_getMetadata<T>(metakey, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T ResStructureEditor::metadata(const QString &metakey) const
+    {
+        const QVariant &value = this->getResMetadata(uid, metakey);
+        return this->_pvt_getMetadata<T>(metakey, value);
+    }
 
-/** Return the value for this residue of the metadata at metakey 'metakey'
-    for the property at key 'key'.
+    /** Return the value for this residue of the metadata at metakey 'metakey'
+        for the property at key 'key'.
 
-    Note that this property *must* be of type ResProperty<T> for
-    this to work!
+        Note that this property *must* be of type ResProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T ResStructureEditor::metadata(const QString &key,
-                               const QString &metakey) const
-{
-    const QVariant &value = this->getResMetadata(uid, key, metakey);
-    return this->_pvt_getMetadata<T>(key, metakey, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T ResStructureEditor::metadata(const QString &key, const QString &metakey) const
+    {
+        const QVariant &value = this->getResMetadata(uid, key, metakey);
+        return this->_pvt_getMetadata<T>(key, metakey, value);
+    }
 
-/** Set the property at key 'key' to have the value 'value' for this residue.
-    Note that an exception will be thrown if an existing property for
-    this key is not of type ResProperty<T>
+    /** Set the property at key 'key' to have the value 'value' for this residue.
+        Note that an exception will be thrown if an existing property for
+        this key is not of type ResProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-ResStructureEditor& ResStructureEditor::setProperty(const QString &key,
-                                                    const T &value)
-{
-    this->assertValidResidue(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    ResStructureEditor &ResStructureEditor::setProperty(const QString &key, const T &value)
+    {
+        this->assertValidResidue(uid);
 
-    //create space for this property
-    this->_pvt_createSpaceForProperty< ResProperty<T> >(key);
+        // create space for this property
+        this->_pvt_createSpaceForProperty<ResProperty<T>>(key);
 
-    //now set the value of the property
-    this->_pvt_setResProperty(uid, key, QVariant::fromValue<T>(value));
+        // now set the value of the property
+        this->_pvt_setResProperty(uid, key, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Set the metadata at metakey 'metakey' to have the value 'value' for
-    this residue. Note that an exception will be thrown if an existing
-    property for this metakey is not of type ResProperty<T>
+    /** Set the metadata at metakey 'metakey' to have the value 'value' for
+        this residue. Note that an exception will be thrown if an existing
+        property for this metakey is not of type ResProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-ResStructureEditor& ResStructureEditor::setMetadata(const QString &metakey,
-                                                    const T &value)
-{
-    this->assertValidResidue(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    ResStructureEditor &ResStructureEditor::setMetadata(const QString &metakey, const T &value)
+    {
+        this->assertValidResidue(uid);
 
-    //create space for this metadata
-    this->_pvt_createSpaceForMetadata< ResProperty<T> >(metakey);
+        // create space for this metadata
+        this->_pvt_createSpaceForMetadata<ResProperty<T>>(metakey);
 
-    //now set the value of this metadata
-    this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
+        // now set the value of this metadata
+        this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Set the metadata at metakey 'metakey' for the property at
-    key 'key' to have the value 'value' for
-    this residue. Note that an exception will be thrown if an existing
-    property for this metakey is not of type ResProperty<T>
+    /** Set the metadata at metakey 'metakey' for the property at
+        key 'key' to have the value 'value' for
+        this residue. Note that an exception will be thrown if an existing
+        property for this metakey is not of type ResProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-ResStructureEditor& ResStructureEditor::setMetadata(const QString &key,
-                                                    const QString &metakey,
-                                                    const T &value)
-{
-    this->assertValidResidue(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    ResStructureEditor &ResStructureEditor::setMetadata(const QString &key, const QString &metakey, const T &value)
+    {
+        this->assertValidResidue(uid);
 
-    //create space for this metadata
-    this->_pvt_createSpaceForMetadata< ResProperty<T> >(key, metakey);
+        // create space for this metadata
+        this->_pvt_createSpaceForMetadata<ResProperty<T>>(key, metakey);
 
-    //now set the value of this metadata
-    this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
+        // now set the value of this metadata
+        this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::ResEditor );
-Q_DECLARE_METATYPE( SireMol::ResStructureEditor );
+Q_DECLARE_METATYPE(SireMol::ResEditor);
+Q_DECLARE_METATYPE(SireMol::ResStructureEditor);
 
-SIRE_EXPOSE_CLASS( SireMol::ResEditor )
-SIRE_EXPOSE_CLASS( SireMol::ResStructureEditor )
+SIRE_EXPOSE_CLASS(SireMol::ResEditor)
+SIRE_EXPOSE_CLASS(SireMol::ResStructureEditor)
 
-SIRE_EXPOSE_ALIAS( (SireMol::Editor<SireMol::ResEditor, SireMol::Residue>),
-                    SireMol::ResEditorBase )
+SIRE_EXPOSE_ALIAS((SireMol::Editor<SireMol::ResEditor, SireMol::Residue>), SireMol::ResEditorBase)
 
 SIRE_END_HEADER
 

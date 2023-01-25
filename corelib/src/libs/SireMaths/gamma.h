@@ -33,27 +33,30 @@
 SIRE_BEGIN_HEADER
 
 #if defined(_MSC_VER) && defined(_Maths_free_functions_hpp__pyplusplus_wrapper)
-double gamma(double x) { return tgamma(x); }
+double gamma(double x)
+{
+    return tgamma(x);
+}
 #endif
 
 namespace SireMaths
 {
 
-SIREMATHS_EXPORT double Gamma(double alpha);
-SIREMATHS_EXPORT double gamma(double alpha);
+    SIREMATHS_EXPORT double Gamma(double alpha);
+    SIREMATHS_EXPORT double gamma(double alpha);
 
-SIREMATHS_EXPORT double Gamma(double alpha, double x);
-SIREMATHS_EXPORT double gamma(double alpha, double x);
+    SIREMATHS_EXPORT double Gamma(double alpha, double x);
+    SIREMATHS_EXPORT double gamma(double alpha, double x);
 
-SIREMATHS_EXPORT double incomplete_gamma_lower(double alpha, double x);
-SIREMATHS_EXPORT double incomplete_gamma_higher(double alpha, double x);
+    SIREMATHS_EXPORT double incomplete_gamma_lower(double alpha, double x);
+    SIREMATHS_EXPORT double incomplete_gamma_higher(double alpha, double x);
 
-}
+} // namespace SireMaths
 
-SIRE_EXPOSE_FUNCTION( SireMaths::Gamma )
-SIRE_EXPOSE_FUNCTION( SireMaths::gamma )
-SIRE_EXPOSE_FUNCTION( SireMaths::incomplete_gamma_lower )
-SIRE_EXPOSE_FUNCTION( SireMaths::incomplete_gamma_higher )
+SIRE_EXPOSE_FUNCTION(SireMaths::Gamma)
+SIRE_EXPOSE_FUNCTION(SireMaths::gamma)
+SIRE_EXPOSE_FUNCTION(SireMaths::incomplete_gamma_lower)
+SIRE_EXPOSE_FUNCTION(SireMaths::incomplete_gamma_higher)
 
 SIRE_END_HEADER
 

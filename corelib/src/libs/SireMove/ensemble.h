@@ -36,198 +36,196 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class Ensemble;
+    class Ensemble;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream &ds, const SireMove::Ensemble&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream &ds, SireMove::Ensemble&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &ds, const SireMove::Ensemble &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &ds, SireMove::Ensemble &);
 
 namespace SireMove
 {
 
-namespace detail
-{
-
-template<class T>
-class CharArray
-{
-public:
-    CharArray()
+    namespace detail
     {
-        for (unsigned int i=0; i<sizeof(T); ++i)
+
+        template <class T>
+        class CharArray
         {
-            array()[i] = 0;
-        }
-    }
+        public:
+            CharArray()
+            {
+                for (unsigned int i = 0; i < sizeof(T); ++i)
+                {
+                    array()[i] = 0;
+                }
+            }
 
-    CharArray(const CharArray &other) : data(other.data)
-    {}
+            CharArray(const CharArray &other) : data(other.data)
+            {
+            }
 
-    ~CharArray()
-    {}
+            ~CharArray()
+            {
+            }
 
-    CharArray<T>& operator=(const CharArray<T> &other)
+            CharArray<T> &operator=(const CharArray<T> &other)
+            {
+                data = other.data;
+                return *this;
+            }
+
+            bool operator==(const CharArray<T> &other) const
+            {
+                return data == other.data;
+            }
+
+            bool operator!=(const CharArray<T> &other) const
+            {
+                return data != other.data;
+            }
+
+            static int count()
+            {
+                return sizeof(T);
+            }
+
+            quint8 &operator[](int i)
+            {
+                return this->array()[i];
+            }
+
+            const quint8 &operator[](int i) const
+            {
+                return this->array()[i];
+            }
+
+            operator T() const
+            {
+                return data;
+            }
+
+        private:
+            quint8 *array()
+            {
+                return (quint8 *)(&data);
+            }
+
+            const quint8 *array() const
+            {
+                return (const quint8 *)(&data);
+            }
+
+            T data;
+        };
+
+    } // namespace detail
+
+    /** This class describes the ensemble that will be created by
+        a collection of moves (e.g. will the moves sample at constant
+        volume or temperature?)
+
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT Ensemble : public SireBase::ConcreteProperty<Ensemble, SireBase::Property>
     {
-        data = other.data;
-        return *this;
-    }
 
-    bool operator==(const CharArray<T> &other) const
-    {
-        return data == other.data;
-    }
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const Ensemble &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, Ensemble &);
 
-    bool operator!=(const CharArray<T> &other) const
-    {
-        return data != other.data;
-    }
+    public:
+        Ensemble();
 
-    static int count()
-    {
-        return sizeof(T);
-    }
+        Ensemble(const Ensemble &other);
 
-    quint8& operator[](int i)
-    {
-        return this->array()[i];
-    }
+        ~Ensemble();
 
-    const quint8& operator[](int i) const
-    {
-        return this->array()[i];
-    }
+        Ensemble &operator=(const Ensemble &other);
 
-    operator T() const
-    {
-        return data;
-    }
+        static const char *typeName();
 
-private:
-    quint8* array()
-    {
-        return (quint8*)( &data );
-    }
+        Ensemble *clone() const;
 
-    const quint8* array() const
-    {
-        return (const quint8*)( &data );
-    }
+        bool operator==(const Ensemble &other) const;
+        bool operator!=(const Ensemble &other) const;
 
-    T data;
-};
+        bool isConstantEnergy() const;
+        bool isConstantTemperature() const;
+        bool isConstantVolume() const;
+        bool isConstantPressure() const;
 
-}
+        bool isConstantNParticles() const;
+        bool isConstantFugacity() const;
+        bool isConstantChemicalPotential() const;
 
-/** This class describes the ensemble that will be created by
-    a collection of moves (e.g. will the moves sample at constant
-    volume or temperature?)
+        bool isNVE() const;
+        bool isNVT() const;
+        bool isNPT() const;
+        bool isMuVT() const;
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT Ensemble
-           : public SireBase::ConcreteProperty<Ensemble,SireBase::Property>
-{
+        bool isMicroCanonical() const;
+        bool isCanonical() const;
+        bool isIsothermalIsobaric() const;
+        bool isGrandCanonical() const;
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const Ensemble&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Ensemble&);
+        QString toString() const;
 
-public:
-    Ensemble();
+        QString name() const;
+        QString shortHand() const;
 
-    Ensemble(const Ensemble &other);
+        SireUnits::Dimension::Temperature temperature() const;
+        SireUnits::Dimension::Pressure pressure() const;
+        SireUnits::Dimension::Pressure fugacity() const;
+        SireUnits::Dimension::MolarEnergy chemicalPotential() const;
 
-    ~Ensemble();
+        Ensemble merge(const Ensemble &other) const;
 
-    Ensemble& operator=(const Ensemble &other);
+        static Ensemble merge(const Ensemble &e0, const Ensemble &e1);
 
-    static const char* typeName();
+        static Ensemble NVE();
 
-    Ensemble* clone() const;
+        static Ensemble NVT(const SireUnits::Dimension::Temperature &temperature);
 
-    bool operator==(const Ensemble &other) const;
-    bool operator!=(const Ensemble &other) const;
+        static Ensemble NPT(const SireUnits::Dimension::Temperature &temperature,
+                            const SireUnits::Dimension::Pressure &pressure);
 
-    bool isConstantEnergy() const;
-    bool isConstantTemperature() const;
-    bool isConstantVolume() const;
-    bool isConstantPressure() const;
+        static Ensemble MuVT(const SireUnits::Dimension::Temperature &temperature,
+                             const SireUnits::Dimension::Pressure &fugacity);
 
-    bool isConstantNParticles() const;
-    bool isConstantFugacity() const;
-    bool isConstantChemicalPotential() const;
+        static Ensemble MuVT(const SireUnits::Dimension::Temperature &temperature,
+                             const SireUnits::Dimension::MolarEnergy &chemical_potential);
 
-    bool isNVE() const;
-    bool isNVT() const;
-    bool isNPT() const;
-    bool isMuVT() const;
+        static Ensemble microcanonical();
 
-    bool isMicroCanonical() const;
-    bool isCanonical() const;
-    bool isIsothermalIsobaric() const;
-    bool isGrandCanonical() const;
+        static Ensemble canonical(const SireUnits::Dimension::Temperature &temperature);
 
-    QString toString() const;
+        static Ensemble isothermalIsobaric(const SireUnits::Dimension::Temperature &temperature,
+                                           const SireUnits::Dimension::Pressure &pressure);
 
-    QString name() const;
-    QString shortHand() const;
+        static Ensemble grandCanonical(const SireUnits::Dimension::Temperature &temperature,
+                                       const SireUnits::Dimension::Pressure &fugacity);
 
-    SireUnits::Dimension::Temperature temperature() const;
-    SireUnits::Dimension::Pressure pressure() const;
-    SireUnits::Dimension::Pressure fugacity() const;
-    SireUnits::Dimension::MolarEnergy chemicalPotential() const;
+        static Ensemble grandCanonical(const SireUnits::Dimension::Temperature &temperature,
+                                       const SireUnits::Dimension::MolarEnergy &chemical_potential);
 
-    Ensemble merge(const Ensemble &other) const;
+    private:
+        /** The fixed temperature of the ensemble (if any) */
+        SireUnits::Dimension::Temperature ensemble_temperature;
 
-    static Ensemble merge(const Ensemble &e0, const Ensemble &e1);
+        /** The fixed pressure (if any) */
+        SireUnits::Dimension::Pressure ensemble_pressure;
 
-    static Ensemble NVE();
+        /** The fixed fugacity (if any) */
+        SireUnits::Dimension::Pressure ensemble_fugacity;
 
-    static Ensemble NVT(const SireUnits::Dimension::Temperature &temperature);
+        /** The state of the ensemble */
+        detail::CharArray<quint32> ensemble_state;
+    };
 
-    static Ensemble NPT(const SireUnits::Dimension::Temperature &temperature,
-                        const SireUnits::Dimension::Pressure &pressure);
+} // namespace SireMove
 
-    static Ensemble MuVT(const SireUnits::Dimension::Temperature &temperature,
-                         const SireUnits::Dimension::Pressure &fugacity);
+Q_DECLARE_METATYPE(SireMove::Ensemble)
 
-    static Ensemble MuVT(const SireUnits::Dimension::Temperature &temperature,
-                         const SireUnits::Dimension::MolarEnergy &chemical_potential);
-
-    static Ensemble microcanonical();
-
-    static Ensemble canonical(const SireUnits::Dimension::Temperature &temperature);
-
-    static Ensemble isothermalIsobaric(
-                              const SireUnits::Dimension::Temperature &temperature,
-                              const SireUnits::Dimension::Pressure &pressure);
-
-    static Ensemble grandCanonical(
-                              const SireUnits::Dimension::Temperature &temperature,
-                              const SireUnits::Dimension::Pressure &fugacity);
-
-    static Ensemble grandCanonical(
-                            const SireUnits::Dimension::Temperature &temperature,
-                            const SireUnits::Dimension::MolarEnergy &chemical_potential);
-
-private:
-    /** The fixed temperature of the ensemble (if any) */
-    SireUnits::Dimension::Temperature ensemble_temperature;
-
-    /** The fixed pressure (if any) */
-    SireUnits::Dimension::Pressure ensemble_pressure;
-
-    /** The fixed fugacity (if any) */
-    SireUnits::Dimension::Pressure ensemble_fugacity;
-
-    /** The state of the ensemble */
-    detail::CharArray<quint32> ensemble_state;
-};
-
-}
-
-Q_DECLARE_METATYPE( SireMove::Ensemble )
-
-SIRE_EXPOSE_CLASS( SireMove::Ensemble )
+SIRE_EXPOSE_CLASS(SireMove::Ensemble)
 
 SIRE_END_HEADER
 

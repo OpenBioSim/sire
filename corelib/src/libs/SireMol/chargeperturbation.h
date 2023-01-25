@@ -34,60 +34,58 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ChargePerturbation;
+    class ChargePerturbation;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ChargePerturbation&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ChargePerturbation&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ChargePerturbation &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ChargePerturbation &);
 
 namespace SireMol
 {
 
-/** This perturbation is used to scale charges from one value
-    to another as a function of lambda
+    /** This perturbation is used to scale charges from one value
+        to another as a function of lambda
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ChargePerturbation
-         : public SireBase::ConcreteProperty<ChargePerturbation,Perturbation>
-{
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ChargePerturbation : public SireBase::ConcreteProperty<ChargePerturbation, Perturbation>
+    {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ChargePerturbation&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ChargePerturbation&);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ChargePerturbation &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ChargePerturbation &);
 
-public:
-    ChargePerturbation();
-    ChargePerturbation(const PropertyMap &map);
+    public:
+        ChargePerturbation();
+        ChargePerturbation(const PropertyMap &map);
 
-    ChargePerturbation(const Expression &mapping_function,
-                       const PropertyMap &map = PropertyMap());
+        ChargePerturbation(const Expression &mapping_function, const PropertyMap &map = PropertyMap());
 
-    ChargePerturbation(const ChargePerturbation &other);
+        ChargePerturbation(const ChargePerturbation &other);
 
-    ~ChargePerturbation();
+        ~ChargePerturbation();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    ChargePerturbation& operator=(const ChargePerturbation &other);
+        ChargePerturbation &operator=(const ChargePerturbation &other);
 
-    bool operator==(const ChargePerturbation &other) const;
-    bool operator!=(const ChargePerturbation &other) const;
+        bool operator==(const ChargePerturbation &other) const;
+        bool operator!=(const ChargePerturbation &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    QSet<QString> requiredProperties() const;
+        QSet<QString> requiredProperties() const;
 
-    bool wouldChange(const Molecule &molecule, const Values &values) const;
+        bool wouldChange(const Molecule &molecule, const Values &values) const;
 
-protected:
-    void perturbMolecule(MolEditor &molecule, const Values &values) const;
-};
+    protected:
+        void perturbMolecule(MolEditor &molecule, const Values &values) const;
+    };
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::ChargePerturbation )
+Q_DECLARE_METATYPE(SireMol::ChargePerturbation)
 
-SIRE_EXPOSE_CLASS( SireMol::ChargePerturbation )
+SIRE_EXPOSE_CLASS(SireMol::ChargePerturbation)
 
 SIRE_END_HEADER
 

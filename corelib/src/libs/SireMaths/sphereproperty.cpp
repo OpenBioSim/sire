@@ -34,22 +34,22 @@ namespace SireMaths
 {
     PropertyPtr SIREMATHS_EXPORT wrap(const Sphere &sphere)
     {
-        return PropertyPtr( SphereProperty(sphere) );
+        return PropertyPtr(SphereProperty(sphere));
     }
 
     PropertyPtr SIREMATHS_EXPORT wrap(const QVector<Sphere> &sphere)
     {
-        return PropertyPtr( SphereArrayProperty(sphere) );
+        return PropertyPtr(SphereArrayProperty(sphere));
     }
 
     PropertyPtr SIREMATHS_EXPORT wrap(const QList<Sphere> &sphere)
     {
-        return PropertyPtr( SphereArrayProperty(sphere) );
+        return PropertyPtr(SphereArrayProperty(sphere));
     }
-}
+} // namespace SireMaths
 
 namespace SireBase
 {
     template class PODProperty<SireMaths::Sphere>;
     template class PODArrayProperty<SireMaths::Sphere>;
-}
+} // namespace SireBase

@@ -34,9 +34,9 @@
 #include "SireMol/mover.hpp"
 #include "SireMol/selector.hpp"
 
+#include "SireCAS/expression.h"
 #include "SireCAS/symbol.h"
 #include "SireCAS/values.h"
-#include "SireCAS/expression.h"
 
 #include "SireBase/errors.h"
 #include "SireMol/errors.h"
@@ -58,20 +58,20 @@ using namespace SireUnits;
 
 static const RegisterMetaType<Angle> r_angle;
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream &ds, const Angle &angle)
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const Angle &angle)
 {
     writeHeader(ds, r_angle, 1);
-    ds << angle.ang << static_cast<const MoleculeView&>(angle);
+    ds << angle.ang << static_cast<const MoleculeView &>(angle);
     return ds;
 }
 
-SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, Angle &angle)
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, Angle &angle)
 {
     auto v = readHeader(ds, r_angle);
 
     if (v == 1)
     {
-        ds >> angle.ang >> static_cast<MoleculeView&>(angle);
+        ds >> angle.ang >> static_cast<MoleculeView &>(angle);
     }
     else
         throw SireStream::version_error(v, "1", r_angle, CODELOC);
@@ -80,52 +80,41 @@ SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, Angle &angle)
 }
 
 Angle::Angle() : ConcreteProperty<Angle, MoleculeView>()
-{}
+{
+}
 
-
-Angle::Angle(const Atom &atom0, const Atom &atom1, const Atom &atom2)
-     : ConcreteProperty<Angle, MoleculeView>()
+Angle::Angle(const Atom &atom0, const Atom &atom1, const Atom &atom2) : ConcreteProperty<Angle, MoleculeView>()
 {
     if ((not atom0.isSameMolecule(atom1)) or (not atom0.isSameMolecule(atom2)))
     {
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create a Angle from three atoms in the same molecule. "
-            "%1-%2-%3 are from different molecules (%4-%5-%6)")
-                .arg(atom0.toString()).arg(atom1.toString())
+        throw SireError::incompatible_error(
+            QObject::tr("You can only create a Angle from three atoms in the same molecule. "
+                        "%1-%2-%3 are from different molecules (%4-%5-%6)")
+                .arg(atom0.toString())
+                .arg(atom1.toString())
                 .arg(atom2.toString())
                 .arg(atom0.molecule().toString())
                 .arg(atom1.molecule().toString())
-                .arg(atom2.molecule().toString()), CODELOC);
+                .arg(atom2.molecule().toString()),
+            CODELOC);
     }
 
-    this->operator=(Angle(atom0.data(),
-                          AngleID(atom0.index(),
-                                  atom1.index(),
-                                  atom2.index())));
+    this->operator=(Angle(atom0.data(), AngleID(atom0.index(), atom1.index(), atom2.index())));
 }
 
-Angle::Angle(const MoleculeView &molview,
-             const AtomID &atom0, const AtomID &atom1,
-             const AtomID &atom2)
-     : ConcreteProperty<Angle, MoleculeView>()
+Angle::Angle(const MoleculeView &molview, const AtomID &atom0, const AtomID &atom1, const AtomID &atom2)
+    : ConcreteProperty<Angle, MoleculeView>()
 {
-    this->operator=(Angle(molview.atom(atom0),
-                          molview.atom(atom1),
-                          molview.atom(atom2)));
+    this->operator=(Angle(molview.atom(atom0), molview.atom(atom1), molview.atom(atom2)));
 }
 
-Angle::Angle(const MoleculeData &moldata,
-             const AtomID &atm0, const AtomID &atm1,
-             const AtomID &atm2)
-     : ConcreteProperty<Angle, MoleculeView>()
+Angle::Angle(const MoleculeData &moldata, const AtomID &atm0, const AtomID &atm1, const AtomID &atm2)
+    : ConcreteProperty<Angle, MoleculeView>()
 {
-    this->operator=(Angle(Atom(moldata, atm0),
-                          Atom(moldata, atm1),
-                          Atom(moldata, atm2)));
+    this->operator=(Angle(Atom(moldata, atm0), Atom(moldata, atm1), Atom(moldata, atm2)));
 }
 
-Angle::Angle(const MoleculeData &moldata, const AngleID &angle)
-      : ConcreteProperty<Angle, MoleculeView>(moldata)
+Angle::Angle(const MoleculeData &moldata, const AngleID &angle) : ConcreteProperty<Angle, MoleculeView>(moldata)
 {
     auto atomidx0 = moldata.info().atomIdx(angle.atom0());
     auto atomidx1 = moldata.info().atomIdx(angle.atom1());
@@ -135,33 +124,33 @@ Angle::Angle(const MoleculeData &moldata, const AngleID &angle)
     {
         qSwap(atomidx0, atomidx2);
     }
-    else if ((atomidx0 == atomidx1) or
-             (atomidx1 == atomidx2))
+    else if ((atomidx0 == atomidx1) or (atomidx1 == atomidx2))
     {
         // note that atomidx0 == atomidx2 in a ring
-        throw SireMol::duplicate_atom(QObject::tr(
-            "You cannot make a Angle out of identical atoms. %1-%2-%3")
-                .arg(atomidx0.toString())
-                .arg(atomidx1.toString())
-                .arg(atomidx2.toString()), CODELOC);
+        throw SireMol::duplicate_atom(QObject::tr("You cannot make a Angle out of identical atoms. %1-%2-%3")
+                                          .arg(atomidx0.toString())
+                                          .arg(atomidx1.toString())
+                                          .arg(atomidx2.toString()),
+                                      CODELOC);
     }
 
     ang = AngleID(atomidx0, atomidx1, atomidx2);
 }
 
-Angle::Angle(const Angle &other)
-     : ConcreteProperty<Angle, MoleculeView>(other), ang(other.ang)
-{}
+Angle::Angle(const Angle &other) : ConcreteProperty<Angle, MoleculeView>(other), ang(other.ang)
+{
+}
 
 Angle::~Angle()
-{}
+{
+}
 
-const char* Angle::typeName()
+const char *Angle::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<Angle>());
 }
 
-Angle& Angle::operator=(const Angle &other)
+Angle &Angle::operator=(const Angle &other)
 {
     if (this != &other)
     {
@@ -197,9 +186,12 @@ QString Angle::toString() const
     auto a2 = this->atom2();
 
     return QObject::tr("Angle( %1:%2 <= %3:%4 => %5:%6 )")
-            .arg(a0.name()).arg(a0.number())
-            .arg(a1.name()).arg(a1.number())
-            .arg(a2.name()).arg(a2.number());
+        .arg(a0.name())
+        .arg(a0.number())
+        .arg(a1.name())
+        .arg(a1.number())
+        .arg(a2.name())
+        .arg(a2.number());
 }
 
 Atom Angle::atom0() const
@@ -272,7 +264,7 @@ bool Angle::hasConnectivity() const
     return this->data().hasProperty("connectivity");
 }
 
-const Connectivity& Angle::getConnectivity() const
+const Connectivity &Angle::getConnectivity() const
 {
     return this->data().property("connectivity").asA<Connectivity>();
 }
@@ -292,8 +284,7 @@ bool Angle::hasMetadata(const PropertyName &key) const
     return false;
 }
 
-bool Angle::hasMetadata(const PropertyName &key,
-                        const PropertyName &metakey) const
+bool Angle::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return false;
 }
@@ -328,7 +319,7 @@ Properties Angle::properties() const
     return Properties();
 }
 
-const Property& Angle::property(const PropertyName &key) const
+const Property &Angle::property(const PropertyName &key) const
 {
     if (this->hasConnectivity())
     {
@@ -338,16 +329,13 @@ const Property& Angle::property(const PropertyName &key) const
     if (key.hasValue())
         return key.value();
 
-    throw SireBase::missing_property(QObject::tr(
-        "Angle %1 has no property at key %2.")
-            .arg(this->toString()).arg(key.source()),
-                CODELOC);
+    throw SireBase::missing_property(
+        QObject::tr("Angle %1 has no property at key %2.").arg(this->toString()).arg(key.source()), CODELOC);
 
     return key.value();
 }
 
-const Property& Angle::property(const PropertyName &key,
-                                const Property &default_value) const
+const Property &Angle::property(const PropertyName &key, const Property &default_value) const
 {
     if (this->hasConnectivity())
     {
@@ -392,8 +380,9 @@ Expression Angle::potential(const PropertyMap &map) const
         auto funcs = this->data().property(map["angle"]).asA<ThreeAtomFunctions>();
         return funcs.potential(ang);
     }
-    catch(const SireError::exception&)
-    {}
+    catch (const SireError::exception &)
+    {
+    }
 
     return Expression();
 }
@@ -409,7 +398,7 @@ SireUnits::Dimension::GeneralUnit Angle::energy(const PropertyMap &map) const
     auto s = this->size(map);
 
     SireUnits::Dimension::GeneralUnit value;
-    Values vals(Symbol("theta")==s.to(radians));
+    Values vals(Symbol("theta") == s.to(radians));
     value.setComponent("angle", pot.evaluate(vals) * kcal_per_mol);
     return value;
 }

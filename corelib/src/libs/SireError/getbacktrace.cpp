@@ -27,132 +27,94 @@
 
 #include "getbacktrace.h"
 
-#include <QObject>
-#include <QString>
-#include <QRegExp>
 #include <QDebug>
+#include <QObject>
+#include <QRegExp>
+#include <QString>
 
 #ifdef __INTEL_COMPILER
-  // This causes a segfault when using intel's compiler. Probably
-  // just an incompatibility or my bug
-  #undef _HAVE_EXECINFO_H_
+// This causes a segfault when using intel's compiler. Probably
+// just an incompatibility or my bug
+#undef _HAVE_EXECINFO_H_
 #endif
 
 #ifdef _HAVE_EXECINFO_H_
-  #include <execinfo.h>
-  #include <cxxabi.h>
+#include <cxxabi.h>
+#include <execinfo.h>
 #endif
 
 namespace SireError
 {
 
-/** Obtain a backtrace and return as a QStringList.
-    This is not well-optimised, requires compilation with "-rdynamic" on linux
-    and doesn't do a great job of demangling the symbol names. It is sufficient
-    though to work out call trace. */
-QStringList getBackTrace()
-{
-    //now get the backtrace of the code at this point
-    //(we can only do this if we have 'execinfo.h'
+    /** Obtain a backtrace and return as a QStringList.
+        This is not well-optimised, requires compilation with "-rdynamic" on linux
+        and doesn't do a great job of demangling the symbol names. It is sufficient
+        though to work out call trace. */
+    QStringList getBackTrace()
+    {
+        // now get the backtrace of the code at this point
+        //(we can only do this if we have 'execinfo.h'
 #ifdef _HAVE_EXECINFO_H_
 
-    //create a void* array to hold the function addresses. We will only go at most 128 deep
-    void *func_addresses[128];
-    int nfuncs = backtrace(func_addresses, 128);
+        // create a void* array to hold the function addresses. We will only go at most 128 deep
+        void *func_addresses[128];
+        int nfuncs = backtrace(func_addresses, 128);
 
-    //now get the function names associated with these symbols. This should work for elf
-    //binaries, though additional linker options may need to have been called
-    //(e.g. -rdynamic for GNU ld. See the glibc documentation for 'backtrace')
-    char **symbols = backtrace_symbols(func_addresses, nfuncs);
+        // now get the function names associated with these symbols. This should work for elf
+        // binaries, though additional linker options may need to have been called
+        //(e.g. -rdynamic for GNU ld. See the glibc documentation for 'backtrace')
+        char **symbols = backtrace_symbols(func_addresses, nfuncs);
 
-    //save all of the function names onto the QStringList....
-    //(note that none of this will work if we have run out of memory)
-    QStringList ret;
+        // save all of the function names onto the QStringList....
+        //(note that none of this will work if we have run out of memory)
+        QStringList ret;
 
-    if (nfuncs == 1)
-    {
-        //we have probably been compiled with -fomit-frame-pointer, so this
-        //has only been able to get the backtrace back to the current function
-        ret.append( QObject::tr("This is an incomplete backtrace as it looks "
-                    "like this code was compiled without a frame pointer\n"
-                    "(e.g. using -fomit-frame-pointer)") );
-    }
-
-    //need to extract the symbol from the output of 'backtrace_symbols'
-
-    //a typical output from backtrace_symbols will look like;
-    //a.out(_ZNK1A12getBackTraceEv+0x12) [0x804ad36]
-
-    // This needs to be split into;
-    //  (1) The program or library containing the symbol (a.out)
-    //  (2) The symbol itself (_ZNK1A12getBackTraceEv)
-    //  (3) The offset? +0x12
-    //  (4) The symbol address ([0x804ad36])
-
-    // This is achieved by the following regexp
-    //              (unit )  (symbol)   (offset)          (address)
-    QRegExp regexp("([^(]+)\\(([^)^+]+)(\\+[^)]+)\\)\\s(\\[[^]]+\\])");
-
-    //However, on OS X the output looks something like this;
-    //2 libSireBase.0.dylib 0x00da01a5 _ZNK8SireBase10PropertiesixERKNS_12PropertyNameE + 595
-    //
-    // Word 2 is the library, word 3 is the symbol address, word 4 is the symbol
-    // itself and word 6 is the offset(?)
-
-    for (int i=0; i<nfuncs; i++)
-    {
-        if (regexp.indexIn(symbols[i]) != -1)
+        if (nfuncs == 1)
         {
-            //get the library or app that contains this symbol
-            QString unit = regexp.cap(1);
-            //get the symbol
-            QString symbol = regexp.cap(2);
-            //get the offset
-            QString offset = regexp.cap(3);
-            //get the address
-            QString address = regexp.cap(4);
-
-            //now try and demangle the symbol
-            int stat;
-            char *demangled =
-                    abi::__cxa_demangle(qPrintable(symbol),0,0,&stat);
-
-            if (demangled)
-            {
-                symbol = demangled;
-                delete demangled;
-            }
-
-
-            //put this all together
-            ret.append( QString("(%1) %2 (%3 +%4)\n  -- %5\n")
-                                .arg(QString::number(i), 3)
-                                .arg(unit).arg(address,offset)
-                                .arg(symbol) );
+            // we have probably been compiled with -fomit-frame-pointer, so this
+            // has only been able to get the backtrace back to the current function
+            ret.append(QObject::tr("This is an incomplete backtrace as it looks "
+                                   "like this code was compiled without a frame pointer\n"
+                                   "(e.g. using -fomit-frame-pointer)"));
         }
-        else
+
+        // need to extract the symbol from the output of 'backtrace_symbols'
+
+        // a typical output from backtrace_symbols will look like;
+        // a.out(_ZNK1A12getBackTraceEv+0x12) [0x804ad36]
+
+        // This needs to be split into;
+        //  (1) The program or library containing the symbol (a.out)
+        //  (2) The symbol itself (_ZNK1A12getBackTraceEv)
+        //  (3) The offset? +0x12
+        //  (4) The symbol address ([0x804ad36])
+
+        // This is achieved by the following regexp
+        //              (unit )  (symbol)   (offset)          (address)
+        QRegExp regexp("([^(]+)\\(([^)^+]+)(\\+[^)]+)\\)\\s(\\[[^]]+\\])");
+
+        // However, on OS X the output looks something like this;
+        // 2 libSireBase.0.dylib 0x00da01a5 _ZNK8SireBase10PropertiesixERKNS_12PropertyNameE + 595
+        //
+        //  Word 2 is the library, word 3 is the symbol address, word 4 is the symbol
+        //  itself and word 6 is the offset(?)
+
+        for (int i = 0; i < nfuncs; i++)
         {
-            //split line into words
-            QStringList words = QString(symbols[i])
-                                    .split(" ", Qt::SkipEmptyParts);
-
-            if (words.count() == 6 and words[4] == "+")
+            if (regexp.indexIn(symbols[i]) != -1)
             {
-                //this is probably an OS X line...
+                // get the library or app that contains this symbol
+                QString unit = regexp.cap(1);
+                // get the symbol
+                QString symbol = regexp.cap(2);
+                // get the offset
+                QString offset = regexp.cap(3);
+                // get the address
+                QString address = regexp.cap(4);
 
-                //get the library or app that contains this symbol
-                QString unit = words[1];
-                //get the symbol
-                QString symbol = words[3];
-                //get the offset
-                QString offset = words[5];
-                //get the address
-                QString address = words[2];
-
-                //now try and demangle the symbol
+                // now try and demangle the symbol
                 int stat;
-                char *demangled =
-                        abi::__cxa_demangle(qPrintable(symbol),0,0,&stat);
+                char *demangled = abi::__cxa_demangle(qPrintable(symbol), 0, 0, &stat);
 
                 if (demangled)
                 {
@@ -160,34 +122,67 @@ QStringList getBackTrace()
                     delete demangled;
                 }
 
-                //put this all together
-                ret.append( QString("(%1) %2 (%3 +%4)\n  -- %5\n")
-                                    .arg(QString::number(i), 3)
-                                    .arg(unit).arg(address,offset)
-                                    .arg(symbol) );
+                // put this all together
+                ret.append(QString("(%1) %2 (%3 +%4)\n  -- %5\n")
+                               .arg(QString::number(i), 3)
+                               .arg(unit)
+                               .arg(address, offset)
+                               .arg(symbol));
             }
             else
-                //I don't recognise this string - just add the raw
-                //string to the backtrace
-                ret.append(symbols[i]);
+            {
+                // split line into words
+                QStringList words = QString(symbols[i]).split(" ", Qt::SkipEmptyParts);
+
+                if (words.count() == 6 and words[4] == "+")
+                {
+                    // this is probably an OS X line...
+
+                    // get the library or app that contains this symbol
+                    QString unit = words[1];
+                    // get the symbol
+                    QString symbol = words[3];
+                    // get the offset
+                    QString offset = words[5];
+                    // get the address
+                    QString address = words[2];
+
+                    // now try and demangle the symbol
+                    int stat;
+                    char *demangled = abi::__cxa_demangle(qPrintable(symbol), 0, 0, &stat);
+
+                    if (demangled)
+                    {
+                        symbol = demangled;
+                        delete demangled;
+                    }
+
+                    // put this all together
+                    ret.append(QString("(%1) %2 (%3 +%4)\n  -- %5\n")
+                                   .arg(QString::number(i), 3)
+                                   .arg(unit)
+                                   .arg(address, offset)
+                                   .arg(symbol));
+                }
+                else
+                    // I don't recognise this string - just add the raw
+                    // string to the backtrace
+                    ret.append(symbols[i]);
+            }
         }
-    }
 
-    //we now need to release the memory of the symbols array. Since it was allocated using
-    //malloc, we must release it using 'free'
-    free(symbols);
+        // we now need to release the memory of the symbols array. Since it was allocated using
+        // malloc, we must release it using 'free'
+        free(symbols);
 
-    return ret;
+        return ret;
 
 #else
-    return QStringList( QObject::tr(
-                "Backtrace is not available on this system. Backtrace is "
-                "available on Linux, Mac OS X (>=10.5) and any other system "
-                "that provides the backtrace_symbols() API found in "
-                "execinfo.h")
-                      );
+        return QStringList(QObject::tr("Backtrace is not available on this system. Backtrace is "
+                                       "available on Linux, Mac OS X (>=10.5) and any other system "
+                                       "that provides the backtrace_symbols() API found in "
+                                       "execinfo.h"));
 #endif
+    }
 
-}
-
-}
+} // namespace SireError

@@ -37,24 +37,22 @@ SIRE_BEGIN_HEADER
 namespace SireMaths
 {
 
-typedef SireBase::PODProperty<Sphere> SphereProperty;
-typedef SireBase::PODArrayProperty<Sphere> SphereArrayProperty;
+    typedef SireBase::PODProperty<Sphere> SphereProperty;
+    typedef SireBase::PODArrayProperty<Sphere> SphereArrayProperty;
 
-SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const Sphere &sphere);
-SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const QVector<Sphere> &spheres);
-SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const QList<Sphere> &spheres);
+    SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const Sphere &sphere);
+    SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const QVector<Sphere> &spheres);
+    SIREMATHS_EXPORT SireBase::PropertyPtr wrap(const QList<Sphere> &spheres);
 
-}
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::SphereProperty);
 Q_DECLARE_METATYPE(SireMaths::SphereArrayProperty);
 
 SIRE_EXPOSE_FUNCTION(SireMaths::wrap)
 
-SIRE_EXPOSE_ALIAS(SireBase::PODProperty<SireMaths::Sphere>,
-                  SireMaths::SphereProperty);
-SIRE_EXPOSE_ALIAS(SireBase::PODArrayProperty<SireMaths::Sphere>,
-                  SireMaths::SphereArrayProperty);
+SIRE_EXPOSE_ALIAS(SireBase::PODProperty<SireMaths::Sphere>, SireMaths::SphereProperty);
+SIRE_EXPOSE_ALIAS(SireBase::PODArrayProperty<SireMaths::Sphere>, SireMaths::SphereArrayProperty);
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireBase::PODProperty<SireMaths::Sphere>;

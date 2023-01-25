@@ -41,12 +41,12 @@ namespace SireMM
 
 namespace SireFF
 {
-    template class Inter2BFF< CLJPotentialInterface<InterCLJPotential> >;
-    template class Inter2B3DFF< CLJPotentialInterface<InterCLJPotential> >;
+    template class Inter2BFF<CLJPotentialInterface<InterCLJPotential>>;
+    template class Inter2B3DFF<CLJPotentialInterface<InterCLJPotential>>;
 
-    template class Inter2B2GFF< CLJPotentialInterface<InterCLJPotential> >;
-    template class Inter2B2G3DFF< CLJPotentialInterface<InterCLJPotential> >;
-}
+    template class Inter2B2GFF<CLJPotentialInterface<InterCLJPotential>>;
+    template class Inter2B2G3DFF<CLJPotentialInterface<InterCLJPotential>>;
+} // namespace SireFF
 
 static const RegisterMetaType<InterCLJFF> r_intercljff;
 static const RegisterMetaType<InterGroupCLJFF> r_intergroupcljff;

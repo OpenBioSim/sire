@@ -37,4 +37,3 @@
 #include "chainresid.h"
 
 #endif
-

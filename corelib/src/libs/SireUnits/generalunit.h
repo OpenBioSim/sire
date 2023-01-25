@@ -1,8 +1,8 @@
 #ifndef SIREUNITS_GENERALUNIT_H
 #define SIREUNITS_GENERALUNIT_H
 
-#include <QString>
 #include <QHash>
+#include <QString>
 
 #include "SireUnits/dimensions.h"
 
@@ -14,7 +14,7 @@ namespace SireUnits
     {
         class GeneralUnit;
     }
-}
+} // namespace SireUnits
 
 SIREUNITS_EXPORT QDataStream &operator<<(QDataStream &, const SireUnits::Dimension::GeneralUnit &);
 SIREUNITS_EXPORT QDataStream &operator>>(QDataStream &, SireUnits::Dimension::GeneralUnit &);
@@ -47,8 +47,7 @@ namespace SireUnits
 
             explicit GeneralUnit(double value);
 
-            template <int M, int L, int T,
-                      int C, int t, int Q, int A>
+            template <int M, int L, int T, int C, int t, int Q, int A>
             explicit GeneralUnit(const PhysUnit<M, L, T, C, t, Q, A> &unit) : Unit(unit)
             {
                 Mass = M;
@@ -166,35 +165,26 @@ namespace SireUnits
 
             GeneralUnit getComponent(const QString &component) const;
 
-            void setComponent(const QString &component,
-                              const GeneralUnit &value);
+            void setComponent(const QString &component, const GeneralUnit &value);
 
-            void addComponent(const QString &component,
-                              const GeneralUnit &value);
+            void addComponent(const QString &component, const GeneralUnit &value);
 
-            void subtractComponent(const QString &component,
-                                   const GeneralUnit &value);
+            void subtractComponent(const QString &component, const GeneralUnit &value);
 
-            template <int M, int L, int T,
-                      int C, int t, int Q, int A>
-            void setComponent(const QString &component,
-                              const PhysUnit<M, L, T, C, t, Q, A> &value)
+            template <int M, int L, int T, int C, int t, int Q, int A>
+            void setComponent(const QString &component, const PhysUnit<M, L, T, C, t, Q, A> &value)
             {
                 this->setComponent(component, GeneralUnit(value));
             }
 
-            template <int M, int L, int T,
-                      int C, int t, int Q, int A>
-            void addComponent(const QString &component,
-                              const PhysUnit<M, L, T, C, t, Q, A> &value)
+            template <int M, int L, int T, int C, int t, int Q, int A>
+            void addComponent(const QString &component, const PhysUnit<M, L, T, C, t, Q, A> &value)
             {
                 this->addComponent(component, GeneralUnit(value));
             }
 
-            template <int M, int L, int T,
-                      int C, int t, int Q, int A>
-            void subtractComponent(const QString &component,
-                                   const PhysUnit<M, L, T, C, t, Q, A> &value)
+            template <int M, int L, int T, int C, int t, int Q, int A>
+            void subtractComponent(const QString &component, const PhysUnit<M, L, T, C, t, Q, A> &value)
             {
                 this->subtractComponent(component, GeneralUnit(value));
             }
@@ -212,13 +202,9 @@ namespace SireUnits
         template <class T>
         inline bool GeneralUnit::isUnit() const
         {
-            return this->MASS() == T::MASS() and
-                   this->LENGTH() == T::LENGTH() and
-                   this->TIME() == T::TIME() and
-                   this->CHARGE() == T::CHARGE() and
-                   this->TEMPERATURE() == T::TEMPERATURE() and
-                   this->QUANTITY() == T::QUANTITY() and
-                   this->ANGLE() == T::ANGLE();
+            return this->MASS() == T::MASS() and this->LENGTH() == T::LENGTH() and this->TIME() == T::TIME() and
+                   this->CHARGE() == T::CHARGE() and this->TEMPERATURE() == T::TEMPERATURE() and
+                   this->QUANTITY() == T::QUANTITY() and this->ANGLE() == T::ANGLE();
         }
 
         template <class T>
@@ -248,21 +234,16 @@ namespace SireUnits
             return unit.invert() * val;
         }
 
-        template <int M, int L, int T,
-                  int C, int t, int Q, int A>
-        SIRE_OUTOFLINE_TEMPLATE
-            PhysUnit<M, L, T, C, t, Q, A> &
-            PhysUnit<M, L, T, C, t, Q, A>::operator=(const GeneralUnit &other)
+        template <int M, int L, int T, int C, int t, int Q, int A>
+        SIRE_OUTOFLINE_TEMPLATE PhysUnit<M, L, T, C, t, Q, A> &PhysUnit<M, L, T, C, t, Q, A>::operator=(
+            const GeneralUnit &other)
         {
             this->operator=(other.toUnit<PhysUnit<M, L, T, C, t, Q, A>>());
             return *this;
         }
 
-        template <int M, int L, int T,
-                  int C, int t, int Q, int A>
-        SIRE_OUTOFLINE_TEMPLATE
-        PhysUnit<M, L, T, C, t, Q, A>::PhysUnit(const GeneralUnit &other)
-            : Unit(0)
+        template <int M, int L, int T, int C, int t, int Q, int A>
+        SIRE_OUTOFLINE_TEMPLATE PhysUnit<M, L, T, C, t, Q, A>::PhysUnit(const GeneralUnit &other) : Unit(0)
         {
             this->operator=(other);
         }
@@ -271,7 +252,7 @@ namespace SireUnits
 
     } // end of namespace Dimension
 
-}
+} // namespace SireUnits
 
 Q_DECLARE_METATYPE(SireUnits::Dimension::GeneralUnit);
 

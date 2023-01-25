@@ -28,73 +28,69 @@
 #ifndef SIREMOVE_VELOCITYVERLET_H
 #define SIREMOVE_VELOCITYVERLET_H
 
-#include "integrator.h"
 #include "SireUnits/temperature.h"
+#include "integrator.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class VelocityVerlet;
+    class VelocityVerlet;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::VelocityVerlet&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::VelocityVerlet&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::VelocityVerlet &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::VelocityVerlet &);
 
 namespace SireMove
 {
 
-/** This class implements an atomistic velocity verlet dynamics integrator
+    /** This class implements an atomistic velocity verlet dynamics integrator
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT VelocityVerlet
-          : public SireBase::ConcreteProperty<VelocityVerlet,Integrator>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT VelocityVerlet : public SireBase::ConcreteProperty<VelocityVerlet, Integrator>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const VelocityVerlet&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, VelocityVerlet&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const VelocityVerlet &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, VelocityVerlet &);
 
-public:
-    VelocityVerlet(bool frequent_save_velocities = false);
+    public:
+        VelocityVerlet(bool frequent_save_velocities = false);
 
-    VelocityVerlet(const VelocityVerlet &other);
+        VelocityVerlet(const VelocityVerlet &other);
 
-    ~VelocityVerlet();
+        ~VelocityVerlet();
 
-    VelocityVerlet& operator=(const VelocityVerlet &other);
+        VelocityVerlet &operator=(const VelocityVerlet &other);
 
-    bool operator==(const VelocityVerlet &other) const;
-    bool operator!=(const VelocityVerlet &other) const;
+        bool operator==(const VelocityVerlet &other) const;
+        bool operator!=(const VelocityVerlet &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    Ensemble ensemble() const;
+        Ensemble ensemble() const;
 
-    bool isTimeReversible() const;
+        bool isTimeReversible() const;
 
-    void integrate(IntegratorWorkspace &workspace,
-                   const Symbol &nrg_component,
-                   SireUnits::Dimension::Time timestep,
-                   int nmoves, bool record_stats);
+        void integrate(IntegratorWorkspace &workspace, const Symbol &nrg_component, SireUnits::Dimension::Time timestep,
+                       int nmoves, bool record_stats);
 
-    IntegratorWorkspacePtr createWorkspace(const PropertyMap &map = PropertyMap()) const;
-    IntegratorWorkspacePtr createWorkspace(const MoleculeGroup &molgroup,
-                                           const PropertyMap &map = PropertyMap()) const;
+        IntegratorWorkspacePtr createWorkspace(const PropertyMap &map = PropertyMap()) const;
+        IntegratorWorkspacePtr createWorkspace(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap()) const;
 
-private:
-    /** Whether or not to save the velocities after every step,
-        or to save them at the end of all of the steps */
-    bool frequent_save_velocities;
-};
+    private:
+        /** Whether or not to save the velocities after every step,
+            or to save them at the end of all of the steps */
+        bool frequent_save_velocities;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::VelocityVerlet )
+Q_DECLARE_METATYPE(SireMove::VelocityVerlet)
 
-SIRE_EXPOSE_CLASS( SireMove::VelocityVerlet )
+SIRE_EXPOSE_CLASS(SireMove::VelocityVerlet)
 
 SIRE_END_HEADER
 

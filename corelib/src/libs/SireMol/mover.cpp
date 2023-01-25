@@ -30,21 +30,21 @@
 #include "connectivity.h"
 #include "weightfunction.h"
 
+#include "angleid.h"
 #include "atommatcher.h"
 #include "atommatchers.h"
 #include "bondid.h"
-#include "angleid.h"
 #include "dihedralid.h"
 #include "improperid.h"
 
 #include "tostring.h"
 
 #include "SireMaths/align.h"
-#include "SireMaths/quaternion.h"
-#include "SireMaths/matrix.h"
 #include "SireMaths/axisset.h"
-#include "SireMaths/vectorproperty.h"
+#include "SireMaths/matrix.h"
+#include "SireMaths/quaternion.h"
 #include "SireMaths/rotate.h"
+#include "SireMaths/vectorproperty.h"
 
 #include "SireVol/coordgroup.h"
 #include "SireVol/space.h"
@@ -64,21 +64,18 @@ namespace SireMol
 {
     /** Return the AxisSet needed to move 'view1' so that it is aligned against
         the atoms in 'view0' */
-    Transform getAlignment(const MoleculeView &view0, const PropertyMap &map0,
-                                          const MoleculeView &view1, const PropertyMap &map1,
-                                          const AtomMatcher &matcher, bool fit)
+    Transform getAlignment(const MoleculeView &view0, const PropertyMap &map0, const MoleculeView &view1,
+                           const PropertyMap &map1, const AtomMatcher &matcher, bool fit)
     {
-        const AtomCoords &coords0 = view0.data().property( map0["coordinates"] )
-                                                .asA<AtomCoords>();
+        const AtomCoords &coords0 = view0.data().property(map0["coordinates"]).asA<AtomCoords>();
 
-        const AtomCoords &coords1 = view1.data().property( map1["coordinates"] )
-                                                .asA<AtomCoords>();
+        const AtomCoords &coords1 = view1.data().property(map1["coordinates"]).asA<AtomCoords>();
 
-        QHash<AtomIdx,AtomIdx> map = matcher.match(view0, map0, view1, map1);
+        QHash<AtomIdx, AtomIdx> map = matcher.match(view0, map0, view1, map1);
 
         if (map.isEmpty())
         {
-            //there are no matching atoms - we can't do anything
+            // there are no matching atoms - we can't do anything
             qDebug() << "No matching atoms!";
             return Transform();
         }
@@ -87,12 +84,10 @@ namespace SireMol
 
         int n = 0;
 
-        for (QHash<AtomIdx,AtomIdx>::const_iterator it = map.constBegin();
-             it != map.constEnd();
-             ++it)
+        for (QHash<AtomIdx, AtomIdx>::const_iterator it = map.constBegin(); it != map.constEnd(); ++it)
         {
-            p[n] = coords0.at( view0.data().info().cgAtomIdx(it.key()) );
-            q[n] = coords1.at( view1.data().info().cgAtomIdx(it.value()) );
+            p[n] = coords0.at(view0.data().info().cgAtomIdx(it.key()));
+            q[n] = coords1.at(view1.data().info().cgAtomIdx(it.value()));
 
             /*qDebug() << n << view0.data().info().name(it.key()).toString() << "=="
                           << view1.data().info().name(it.value()).toString();
@@ -108,43 +103,37 @@ namespace SireMol
 
     /** Return the AxisSet needed to move 'view1' so that it is aligned against
         the atoms in 'view0' */
-    Transform getAlignment(const MoleculeView &view0,
-                                          const MoleculeView &view1, bool fit)
+    Transform getAlignment(const MoleculeView &view0, const MoleculeView &view1, bool fit)
     {
-        return getAlignment(view0, PropertyMap(), view1, PropertyMap(),
-                            AtomIdxMatcher(), fit);
+        return getAlignment(view0, PropertyMap(), view1, PropertyMap(), AtomIdxMatcher(), fit);
     }
 
     /** Return the AxisSet needed to move 'view1' so that it is aligned against
         the atoms in 'view0' */
-    Transform getAlignment(const MoleculeView &view0, const MoleculeView &view1,
-                                          const PropertyMap &map, bool fit)
+    Transform getAlignment(const MoleculeView &view0, const MoleculeView &view1, const PropertyMap &map, bool fit)
     {
         return getAlignment(view0, map, view1, map, AtomIdxMatcher(), fit);
     }
 
     /** Return the AxisSet needed to move 'view1' so that it is aligned against
         the atoms in 'view0' */
-    Transform getAlignment(const MoleculeView &view0, const PropertyMap &map0,
-                                          const MoleculeView &view1, const PropertyMap &map1,
-                                          bool fit)
+    Transform getAlignment(const MoleculeView &view0, const PropertyMap &map0, const MoleculeView &view1,
+                           const PropertyMap &map1, bool fit)
     {
         return getAlignment(view0, map0, view1, map1, AtomIdxMatcher(), fit);
     }
 
     /** Return the AxisSet needed to move 'view1' so that it is aligned against
         the atoms in 'view0' */
-    Transform getAlignment(const MoleculeView &view0, const MoleculeView &view1,
-                                          const AtomMatcher &matcher, bool fit)
+    Transform getAlignment(const MoleculeView &view0, const MoleculeView &view1, const AtomMatcher &matcher, bool fit)
     {
         return getAlignment(view0, PropertyMap(), view1, PropertyMap(), matcher, fit);
     }
 
     /** Return the AxisSet needed to move 'view1' so that it is aligned against
         the atoms in 'view0' */
-    Transform getAlignment(const MoleculeView &view0, const MoleculeView &view1,
-                                          const AtomMatcher &matcher,
-                                          const PropertyMap &map, bool fit)
+    Transform getAlignment(const MoleculeView &view0, const MoleculeView &view1, const AtomMatcher &matcher,
+                           const PropertyMap &map, bool fit)
     {
         return getAlignment(view0, map, view1, map, matcher, fit);
     }
@@ -153,24 +142,26 @@ namespace SireMol
 
 /** Constructor */
 MoverBase::MoverBase()
-{}
+{
+}
 
 /** Construct a MoverBase that moves the specified atoms */
-MoverBase::MoverBase(const AtomSelection &selected_atoms)
-          : movable_atoms(selected_atoms)
-{}
+MoverBase::MoverBase(const AtomSelection &selected_atoms) : movable_atoms(selected_atoms)
+{
+}
 
 /** Copy constructor */
-MoverBase::MoverBase(const MoverBase &other)
-          : movable_atoms(other.movable_atoms)
-{}
+MoverBase::MoverBase(const MoverBase &other) : movable_atoms(other.movable_atoms)
+{
+}
 
 /** Destructor */
 MoverBase::~MoverBase()
-{}
+{
+}
 
 /** Copy assignment operator */
-MoverBase& MoverBase::operator=(const MoverBase &other)
+MoverBase &MoverBase::operator=(const MoverBase &other)
 {
     movable_atoms = other.movable_atoms;
     return *this;
@@ -185,9 +176,7 @@ void MoverBase::setMovableAtoms(const AtomSelection &selection)
 /** Translate the selected atoms from 'coords' by 'delta'.
     This function assumes that 'selected_atoms' is compatible
     with 'coords' */
-void MoverBase::translate(AtomCoords &coords,
-                          const AtomSelection &selected_atoms,
-                          const Vector &delta)
+void MoverBase::translate(AtomCoords &coords, const AtomSelection &selected_atoms, const Vector &delta)
 {
     if (delta.isZero() or selected_atoms.selectedNone())
         return;
@@ -196,13 +185,13 @@ void MoverBase::translate(AtomCoords &coords,
 
     if (selected_atoms.selectedAll())
     {
-        //we are moving everything!
+        // we are moving everything!
         coords.translate(delta);
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        //we are moving all of the CutGroups
-        for (CGIdx i(0); i<ncg; ++i)
+        // we are moving all of the CutGroups
+        for (CGIdx i(0); i < ncg; ++i)
         {
             if (selected_atoms.selectedAll(i))
             {
@@ -225,7 +214,7 @@ void MoverBase::translate(AtomCoords &coords,
     }
     else
     {
-        //we are moving only some CutGroups
+        // we are moving only some CutGroups
         QList<CGIdx> cg_to_move = selected_atoms.selectedCutGroups();
 
         foreach (CGIdx i, cg_to_move)
@@ -254,9 +243,7 @@ void MoverBase::translate(AtomCoords &coords,
 /** Rotate the coordinates (in 'coords') of the specified selected
     atoms using the rotation matrix 'rotmat' about the point 'point'.
     This function assumes that coords and selected_atoms are compatible */
-void MoverBase::rotate(AtomCoords &coords,
-                       const AtomSelection &selected_atoms,
-                       const Matrix &rotmat,
+void MoverBase::rotate(AtomCoords &coords, const AtomSelection &selected_atoms, const Matrix &rotmat,
                        const Vector &point)
 {
     if (selected_atoms.selectedNone())
@@ -266,17 +253,17 @@ void MoverBase::rotate(AtomCoords &coords,
 
     if (selected_atoms.selectedAll())
     {
-        //we are rotating everything
-        coords.rotate(rotmat,point);
+        // we are rotating everything
+        coords.rotate(rotmat, point);
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        //we are rotating every CutGroup
-        for (CGIdx i(0); i<ncg; ++i)
+        // we are rotating every CutGroup
+        for (CGIdx i(0); i < ncg; ++i)
         {
             if (selected_atoms.selectedAll(i))
             {
-                coords.rotate(i, rotmat,point);
+                coords.rotate(i, rotmat, point);
             }
             else
             {
@@ -322,9 +309,8 @@ void MoverBase::rotate(AtomCoords &coords,
 /** Rotate the coordinates (in 'coords') of the specified selected
     atoms using the quaternion 'quat' about the point 'point'.
     This function assumes that coords and selected_atoms are compatible */
-void MoverBase::rotate(AtomCoords &coords,
-                       const AtomSelection &selected_atoms,
-                       const Quaternion &quat, const Vector &point)
+void MoverBase::rotate(AtomCoords &coords, const AtomSelection &selected_atoms, const Quaternion &quat,
+                       const Vector &point)
 {
     MoverBase::rotate(coords, selected_atoms, quat.toMatrix(), point);
 }
@@ -332,9 +318,7 @@ void MoverBase::rotate(AtomCoords &coords,
 /** Transform the coordinates (in 'coords') of the specified selected
     atoms using the transformation 't'.
     This function assumes that coords and selected_atoms are compatible */
-void MoverBase::transform(AtomCoords &coords,
-                          const AtomSelection &selected_atoms,
-                          const Transform &t)
+void MoverBase::transform(AtomCoords &coords, const AtomSelection &selected_atoms, const Transform &t)
 {
     if (selected_atoms.selectedNone() or t.isZero())
         return;
@@ -343,13 +327,13 @@ void MoverBase::transform(AtomCoords &coords,
 
     if (selected_atoms.selectedAll())
     {
-        //we are rotating everything
+        // we are rotating everything
         coords.transform(t);
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        //we are rotating every CutGroup
-        for (CGIdx i(0); i<ncg; ++i)
+        // we are rotating every CutGroup
+        for (CGIdx i(0); i < ncg; ++i)
         {
             if (selected_atoms.selectedAll(i))
             {
@@ -400,9 +384,7 @@ void MoverBase::transform(AtomCoords &coords,
 
     This function assumes that coords and selected_atoms are compatible!
 */
-void MoverBase::mapInto(AtomCoords &coords,
-                        const AtomSelection &selected_atoms,
-                        const AxisSet &axes)
+void MoverBase::mapInto(AtomCoords &coords, const AtomSelection &selected_atoms, const AxisSet &axes)
 {
     if (selected_atoms.selectedNone())
         return;
@@ -415,7 +397,7 @@ void MoverBase::mapInto(AtomCoords &coords,
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        for (CGIdx i(0); i<ncg; ++i)
+        for (CGIdx i(0); i < ncg; ++i)
         {
             if (selected_atoms.selectedAll(i))
             {
@@ -468,9 +450,7 @@ void MoverBase::mapInto(AtomCoords &coords,
 
     This function assumes that coords and selected_atoms are compatible!
 */
-void MoverBase::changeFrame(AtomCoords &coords,
-                            const AtomSelection &selected_atoms,
-                            const AxisSet &from_frame,
+void MoverBase::changeFrame(AtomCoords &coords, const AtomSelection &selected_atoms, const AxisSet &from_frame,
                             const AxisSet &to_frame)
 {
     if (selected_atoms.selectedNone())
@@ -480,12 +460,12 @@ void MoverBase::changeFrame(AtomCoords &coords,
 
     if (selected_atoms.selectedAll())
     {
-        //we are moving everything
+        // we are moving everything
         coords.changeFrame(from_frame, to_frame);
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        for (CGIdx i(0); i<ncg; ++i)
+        for (CGIdx i(0); i < ncg; ++i)
         {
             if (selected_atoms.selectedAll(i))
             {
@@ -540,36 +520,34 @@ void MoverBase::changeFrame(AtomCoords &coords,
 
     \throw SireBase::missing_property
 */
-void MoverBase::translate(MoleculeData &moldata,
-                          const AtomSelection &selected_atoms,
-                          const Vector &delta,
+void MoverBase::translate(MoleculeData &moldata, const AtomSelection &selected_atoms, const Vector &delta,
                           const PropertyMap &map)
 {
     if (delta.isZero())
         return;
 
-    //which property contains the coordinates?
+    // which property contains the coordinates?
     PropertyName coord_property = map["coordinates"];
 
-    //get the current coordinates
+    // get the current coordinates
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //translate the coordinates of the selected atoms
+    // translate the coordinates of the selected atoms
     MoverBase::translate(coords, selected_atoms, delta);
 
-    //set the new property
+    // set the new property
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 
-    //if we have translated all atoms, then update the center point
-    //of the molecule, if one has been set
+    // if we have translated all atoms, then update the center point
+    // of the molecule, if one has been set
     if (selected_atoms.selectedAll())
     {
         PropertyName center_property = map["center"];
         if (center_property.hasSource() and moldata.hasProperty(center_property))
         {
             Vector center = moldata.property(center_property).asA<VectorProperty>();
-            moldata.setProperty(center_property.source(), VectorProperty( center + delta ));
+            moldata.setProperty(center_property.source(), VectorProperty(center + delta));
         }
     }
 }
@@ -585,27 +563,24 @@ void MoverBase::translate(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::rotate(MoleculeData &moldata,
-                       const AtomSelection &selected_atoms,
-                       const Matrix &rotmat,
-                       const Vector &point,
-                       const PropertyMap &map)
+void MoverBase::rotate(MoleculeData &moldata, const AtomSelection &selected_atoms, const Matrix &rotmat,
+                       const Vector &point, const PropertyMap &map)
 {
-    //get the name of the property that contains the coordinates
+    // get the name of the property that contains the coordinates
     PropertyName coord_property = map["coordinates"];
 
-    //get the coordinates to be rotated
+    // get the coordinates to be rotated
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //rotate the coordinates
+    // rotate the coordinates
     MoverBase::rotate(coords, selected_atoms, rotmat, point);
 
-    //set the new property
+    // set the new property
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 
-    //if we have rotated all atoms, then update the center point
-    //of the molecule, if one has been set
+    // if we have rotated all atoms, then update the center point
+    // of the molecule, if one has been set
     if (selected_atoms.selectedAll())
     {
         PropertyName center_property = map["center"];
@@ -614,8 +589,7 @@ void MoverBase::rotate(MoleculeData &moldata,
             Vector center = moldata.property(center_property).asA<VectorProperty>();
 
             if (center != point)
-                moldata.setProperty(center_property.source(),
-                                    VectorProperty(SireMaths::rotate(center, rotmat, point)));
+                moldata.setProperty(center_property.source(), VectorProperty(SireMaths::rotate(center, rotmat, point)));
         }
     }
 }
@@ -630,25 +604,24 @@ void MoverBase::rotate(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::transform(MoleculeData &moldata,
-                          const AtomSelection &selected_atoms,
-                          const Transform &t, const PropertyMap &map)
+void MoverBase::transform(MoleculeData &moldata, const AtomSelection &selected_atoms, const Transform &t,
+                          const PropertyMap &map)
 {
-    //get the name of the property that contains the coordinates
+    // get the name of the property that contains the coordinates
     PropertyName coord_property = map["coordinates"];
 
-    //get the coordinates to be rotated
+    // get the coordinates to be rotated
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //transform the coordinates
+    // transform the coordinates
     MoverBase::transform(coords, selected_atoms, t);
 
-    //set the new property
+    // set the new property
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 
-    //if we have rotated all atoms, then update the center point
-    //of the molecule, if one has been set
+    // if we have rotated all atoms, then update the center point
+    // of the molecule, if one has been set
     if (selected_atoms.selectedAll())
     {
         PropertyName center_property = map["center"];
@@ -656,8 +629,7 @@ void MoverBase::transform(MoleculeData &moldata,
         {
             Vector center = moldata.property(center_property).asA<VectorProperty>();
 
-            moldata.setProperty(center_property.source(),
-                                VectorProperty(t.apply(center)));
+            moldata.setProperty(center_property.source(), VectorProperty(t.apply(center)));
         }
     }
 }
@@ -669,34 +641,31 @@ void MoverBase::transform(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::mapInto(MoleculeData &moldata,
-                        const AtomSelection &selected_atoms,
-                        const AxisSet &axes,
+void MoverBase::mapInto(MoleculeData &moldata, const AtomSelection &selected_atoms, const AxisSet &axes,
                         const PropertyMap &map)
 {
-    //get the name of the property that holds the coordinates
+    // get the name of the property that holds the coordinates
     PropertyName coord_property = map["coordinates"];
 
-    //get the coordinates to be mapped
+    // get the coordinates to be mapped
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //map the coordinates
+    // map the coordinates
     MoverBase::mapInto(coords, selected_atoms, axes);
 
-    //save the new coordinates
+    // save the new coordinates
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 
-    //if we have mapped all atoms, then update the center point
-    //of the molecule, if one has been set
+    // if we have mapped all atoms, then update the center point
+    // of the molecule, if one has been set
     if (selected_atoms.selectedAll())
     {
         PropertyName center_property = map["center"];
         if (center_property.hasSource() and moldata.hasProperty(center_property))
         {
             Vector center = moldata.property(center_property).asA<VectorProperty>();
-            moldata.setProperty(center_property.source(),
-                                VectorProperty(axes.fromIdentity(center)));
+            moldata.setProperty(center_property.source(), VectorProperty(axes.fromIdentity(center)));
         }
     }
 }
@@ -708,35 +677,31 @@ void MoverBase::mapInto(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::changeFrame(MoleculeData &moldata,
-                            const AtomSelection &selected_atoms,
-                            const AxisSet &from_frame,
-                            const AxisSet &to_frame,
-                            const PropertyMap &map)
+void MoverBase::changeFrame(MoleculeData &moldata, const AtomSelection &selected_atoms, const AxisSet &from_frame,
+                            const AxisSet &to_frame, const PropertyMap &map)
 {
-    //get the name of the property that holds the coordinates
+    // get the name of the property that holds the coordinates
     PropertyName coord_property = map["coordinates"];
 
-    //get the coordinates to be mapped
+    // get the coordinates to be mapped
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //map the coordinates
+    // map the coordinates
     MoverBase::changeFrame(coords, selected_atoms, from_frame, to_frame);
 
-    //save the new coordinates
+    // save the new coordinates
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 
-    //if we changed the frame of all atoms, then update the center point
-    //of the molecule, if one has been set
+    // if we changed the frame of all atoms, then update the center point
+    // of the molecule, if one has been set
     if (selected_atoms.selectedAll())
     {
         PropertyName center_property = map["center"];
         if (center_property.hasSource() and moldata.hasProperty(center_property))
         {
             Vector center = moldata.property(center_property).asA<VectorProperty>();
-            moldata.setProperty(center_property.source(),
-                                VectorProperty(from_frame.toFrame(to_frame,center)));
+            moldata.setProperty(center_property.source(), VectorProperty(from_frame.toFrame(to_frame, center)));
         }
     }
 }
@@ -746,9 +711,7 @@ void MoverBase::changeFrame(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::mapInto(MoleculeData &moldata,
-                        const AxisSet &axes,
-                        const PropertyMap &map) const
+void MoverBase::mapInto(MoleculeData &moldata, const AxisSet &axes, const PropertyMap &map) const
 {
     MoverBase::mapInto(moldata, movable_atoms, axes, map);
 }
@@ -759,13 +722,10 @@ void MoverBase::mapInto(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::changeFrame(MoleculeData &moldata,
-                            const AxisSet &from_frame,
-                            const AxisSet &to_frame,
+void MoverBase::changeFrame(MoleculeData &moldata, const AxisSet &from_frame, const AxisSet &to_frame,
                             const PropertyMap &map) const
 {
-    MoverBase::changeFrame(moldata, movable_atoms, from_frame,
-                           to_frame, map);
+    MoverBase::changeFrame(moldata, movable_atoms, from_frame, to_frame, map);
 }
 
 /** Translate atoms we are allowed to move from the molecule whose
@@ -774,9 +734,7 @@ void MoverBase::changeFrame(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::translate(MoleculeData &moldata,
-                          const Vector &delta,
-                          const PropertyMap &map) const
+void MoverBase::translate(MoleculeData &moldata, const Vector &delta, const PropertyMap &map) const
 {
     MoverBase::translate(moldata, movable_atoms, delta, map);
 }
@@ -787,13 +745,9 @@ void MoverBase::translate(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::rotate(MoleculeData &moldata,
-                       const Quaternion &quat,
-                       const Vector &point,
-                       const PropertyMap &map) const
+void MoverBase::rotate(MoleculeData &moldata, const Quaternion &quat, const Vector &point, const PropertyMap &map) const
 {
-    MoverBase::rotate(moldata, movable_atoms, quat.toMatrix(),
-                      point, map);
+    MoverBase::rotate(moldata, movable_atoms, quat.toMatrix(), point, map);
 }
 
 /** Rotate the atoms we are allowed to move from the molecule whose
@@ -802,13 +756,9 @@ void MoverBase::rotate(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::rotate(MoleculeData &moldata,
-                       const Matrix &rotmat,
-                       const Vector &point,
-                       const PropertyMap &map) const
+void MoverBase::rotate(MoleculeData &moldata, const Matrix &rotmat, const Vector &point, const PropertyMap &map) const
 {
-    MoverBase::rotate(moldata, movable_atoms, rotmat,
-                      point, map);
+    MoverBase::rotate(moldata, movable_atoms, rotmat, point, map);
 }
 
 /** Transform the atoms we are allowed to move from the molecule whose
@@ -817,17 +767,14 @@ void MoverBase::rotate(MoleculeData &moldata,
 
     \throw SireBase::missing_property
 */
-void MoverBase::transform(MoleculeData &moldata,
-                          const Transform &t,
-                          const PropertyMap &map) const
+void MoverBase::transform(MoleculeData &moldata, const Transform &t, const PropertyMap &map) const
 {
     MoverBase::transform(moldata, movable_atoms, t, map);
 }
 
 /** Apply anchors to the groups - this clears a group if it
     contains an anchor atom */
-static void applyAnchors(const AtomSelection &anchors,
-                         tuple<AtomSelection,AtomSelection> &groups)
+static void applyAnchors(const AtomSelection &anchors, tuple<AtomSelection, AtomSelection> &groups)
 {
     if (groups.get<0>().intersects(anchors))
     {
@@ -840,8 +787,7 @@ static void applyAnchors(const AtomSelection &anchors,
     }
 }
 
-static const AtomSelection& getAnchors(const MoleculeData &moldata,
-                                       const PropertyMap &map)
+static const AtomSelection &getAnchors(const MoleculeData &moldata, const PropertyMap &map)
 {
     return moldata.property(map["anchors"]).asA<AtomSelection>();
 }
@@ -868,35 +814,32 @@ static const AtomSelection& getAnchors(const MoleculeData &moldata,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::change(MoleculeData &moldata, const BondID &bond,
-                       SireUnits::Dimension::Length delta,
+void MoverBase::change(MoleculeData &moldata, const BondID &bond, SireUnits::Dimension::Length delta,
                        const PropertyMap &map) const
 {
     if (delta == 0)
         return;
 
-    //get the indicies of the two atoms of the bond
-    tuple<AtomIdx,AtomIdx> atomidxs = bond.map(moldata.info());
+    // get the indicies of the two atoms of the bond
+    tuple<AtomIdx, AtomIdx> atomidxs = bond.map(moldata.info());
 
     AtomIdx atom0 = atomidxs.get<0>();
     AtomIdx atom1 = atomidxs.get<1>();
 
-    //get the connectivity property that is used to split
-    //the molecule into two parts
-    const Connectivity &connectivity =
-            moldata.property(map["connectivity"]).asA<Connectivity>();
+    // get the connectivity property that is used to split
+    // the molecule into two parts
+    const Connectivity &connectivity = moldata.property(map["connectivity"]).asA<Connectivity>();
 
-    //split the molecule into the two parts that are
-    //going to move - the two groups are only able to
-    //contain the atoms that are in 'movable_atoms'
-    tuple<AtomSelection,AtomSelection> groups =
-                        connectivity.split(atom0, atom1, movable_atoms);
+    // split the molecule into the two parts that are
+    // going to move - the two groups are only able to
+    // contain the atoms that are in 'movable_atoms'
+    tuple<AtomSelection, AtomSelection> groups = connectivity.split(atom0, atom1, movable_atoms);
 
-    //see if there are any anchors that must be applied to
-    //the section of molecule
+    // see if there are any anchors that must be applied to
+    // the section of molecule
     if (map.specified("anchors"))
     {
-        applyAnchors( getAnchors(moldata, map), groups );
+        applyAnchors(getAnchors(moldata, map), groups);
     }
 
     const AtomSelection &group0 = groups.get<0>();
@@ -908,17 +851,17 @@ void MoverBase::change(MoleculeData &moldata, const BondID &bond,
     {
         if (map.specified("anchors"))
         {
-            throw SireMol::anchor_error( QObject::tr(
-                "Splitting the molecule into two about %1 has resulted "
-                "in two groups that are both anchored (anchors = %2)")
-                    .arg(bond.toString(),
-                         Sire::toString( getAnchors(moldata, map).selectedAtoms()) ),
-                             CODELOC );
+            throw SireMol::anchor_error(
+                QObject::tr("Splitting the molecule into two about %1 has resulted "
+                            "in two groups that are both anchored (anchors = %2)")
+                    .arg(bond.toString(), Sire::toString(getAnchors(moldata, map).selectedAtoms())),
+                CODELOC);
         }
 
-        throw SireError::program_bug( QObject::tr(
-            "Splitting the molecule about %1 has resulted "
-            "in two empty groups!").arg(bond.toString()), CODELOC );
+        throw SireError::program_bug(QObject::tr("Splitting the molecule about %1 has resulted "
+                                                 "in two empty groups!")
+                                         .arg(bond.toString()),
+                                     CODELOC);
     }
     else if (group0.isEmpty())
     {
@@ -932,38 +875,36 @@ void MoverBase::change(MoleculeData &moldata, const BondID &bond,
     }
     else
     {
-        //get the weighting function that is used to weight the two
-        //sides of the move
+        // get the weighting function that is used to weight the two
+        // sides of the move
         const WeightFunction &weightfunc =
-            moldata.property(map["weight function"],
-                             WeightFunction::null()).asA<WeightFunction>();
+            moldata.property(map["weight function"], WeightFunction::null()).asA<WeightFunction>();
 
         weight0 = 1 - weightfunc(moldata, group0, group1, map);
         weight1 = 1 - weightfunc(moldata, group1, group0, map);
     }
 
-    //now get property containing the coordinates of the atoms
+    // now get property containing the coordinates of the atoms
     PropertyName coord_property = map["coordinates"];
 
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //use these coordinates to calculate the unit vector that
-    //points along the bond
-    Vector unit_vec = (coords[moldata.info().cgAtomIdx(atom1)] -
-                       coords[moldata.info().cgAtomIdx(atom0)]).normalise();
+    // use these coordinates to calculate the unit vector that
+    // points along the bond
+    Vector unit_vec = (coords[moldata.info().cgAtomIdx(atom1)] - coords[moldata.info().cgAtomIdx(atom0)]).normalise();
 
-    //scale the vector by 'delta'
+    // scale the vector by 'delta'
     unit_vec *= delta;
 
-    //now translate the groups along this vector by their weighted
-    //amount of delta
+    // now translate the groups along this vector by their weighted
+    // amount of delta
     if (weight0 != 0)
         MoverBase::translate(coords, group0, -weight0 * unit_vec);
 
     if (weight1 != 0)
         MoverBase::translate(coords, group1, weight1 * unit_vec);
 
-    //save the new coordinates
+    // save the new coordinates
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 }
@@ -993,35 +934,30 @@ void MoverBase::change(MoleculeData &moldata, const BondID &bond,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::change(MoleculeData &moldata, const AngleID &angle,
-                       SireUnits::Dimension::Angle delta,
+void MoverBase::change(MoleculeData &moldata, const AngleID &angle, SireUnits::Dimension::Angle delta,
                        const PropertyMap &map) const
 {
     if (delta == 0)
         return;
 
-    //get the indicies of the atoms in the angle
-    tuple<AtomIdx,AtomIdx,AtomIdx> atomidxs = angle.map(moldata.info());
+    // get the indicies of the atoms in the angle
+    tuple<AtomIdx, AtomIdx, AtomIdx> atomidxs = angle.map(moldata.info());
 
     AtomIdx atom0 = atomidxs.get<0>();
     AtomIdx atom1 = atomidxs.get<1>();
     AtomIdx atom2 = atomidxs.get<2>();
 
-    //get the connectivity that is used to split the
-    //molecule into two parts
-    const Connectivity &connectivity =
-            moldata.property(map["connectivity"]).asA<Connectivity>();
+    // get the connectivity that is used to split the
+    // molecule into two parts
+    const Connectivity &connectivity = moldata.property(map["connectivity"]).asA<Connectivity>();
 
-    //split the molecule into the two moving parts
-    tuple<AtomSelection,AtomSelection> groups =
-                          connectivity.split(atom0, atom1, atom2,
-                                             movable_atoms);
+    // split the molecule into the two moving parts
+    tuple<AtomSelection, AtomSelection> groups = connectivity.split(atom0, atom1, atom2, movable_atoms);
 
-    //see if there are any anchors that hold part of the
-    //molecule stationary
+    // see if there are any anchors that hold part of the
+    // molecule stationary
     if (map.specified("anchors"))
-        applyAnchors( getAnchors(moldata, map), groups );
-
+        applyAnchors(getAnchors(moldata, map), groups);
 
     const AtomSelection &group0 = groups.get<0>();
     const AtomSelection &group1 = groups.get<1>();
@@ -1032,17 +968,17 @@ void MoverBase::change(MoleculeData &moldata, const AngleID &angle,
     {
         if (map.specified("anchors"))
         {
-            throw SireMol::anchor_error( QObject::tr(
-                "Splitting the molecule into two about %1 has resulted "
-                "in two groups that are both anchored (anchors = %2)")
-                    .arg(angle.toString(),
-                         Sire::toString( getAnchors(moldata, map).selectedAtoms()) ),
-                             CODELOC );
+            throw SireMol::anchor_error(
+                QObject::tr("Splitting the molecule into two about %1 has resulted "
+                            "in two groups that are both anchored (anchors = %2)")
+                    .arg(angle.toString(), Sire::toString(getAnchors(moldata, map).selectedAtoms())),
+                CODELOC);
         }
 
-        throw SireError::program_bug( QObject::tr(
-            "Splitting the molecule about the %1 has resulted "
-            "in two empty groups!").arg(angle.toString()), CODELOC );
+        throw SireError::program_bug(QObject::tr("Splitting the molecule about the %1 has resulted "
+                                                 "in two empty groups!")
+                                         .arg(angle.toString()),
+                                     CODELOC);
     }
     else if (group0.isEmpty())
     {
@@ -1056,40 +992,37 @@ void MoverBase::change(MoleculeData &moldata, const AngleID &angle,
     }
     else
     {
-        //get the weighting function that is used to weight the
-        //two sides of the move
+        // get the weighting function that is used to weight the
+        // two sides of the move
         const WeightFunction &weightfunc =
-                moldata.property(map["weight function"],
-                                 WeightFunction::null()).asA<WeightFunction>();
+            moldata.property(map["weight function"], WeightFunction::null()).asA<WeightFunction>();
 
         weight0 = 1 - weightfunc(moldata, group0, group1, map);
         weight1 = 1 - weightfunc(moldata, group1, group0, map);
     }
 
-    //get the coordinates that are to be changed
+    // get the coordinates that are to be changed
     PropertyName coord_property = map["coordinates"];
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //get the coordinates of the three atoms that comprise the angle
+    // get the coordinates of the three atoms that comprise the angle
     const Vector &coords0 = coords[moldata.info().cgAtomIdx(atom0)];
     const Vector &coords1 = coords[moldata.info().cgAtomIdx(atom1)];
     const Vector &coords2 = coords[moldata.info().cgAtomIdx(atom2)];
 
-    //get the vector perpendicular to the angle
-    // This function contains lots of checks to ensure that a parallel
-    // vector is always returned, even for co-linear or co-located atoms
-    Vector perp = Vector::cross( coords2-coords0, coords1-coords0 );
+    // get the vector perpendicular to the angle
+    //  This function contains lots of checks to ensure that a parallel
+    //  vector is always returned, even for co-linear or co-located atoms
+    Vector perp = Vector::cross(coords2 - coords0, coords1 - coords0);
 
-    //rotate the two groups
+    // rotate the two groups
     if (weight0 != 0)
-        MoverBase::rotate(coords, group0,
-                          Quaternion(-weight0*delta, perp), coords1);
+        MoverBase::rotate(coords, group0, Quaternion(-weight0 * delta, perp), coords1);
 
     if (weight1 != 0)
-        MoverBase::rotate(coords, group1,
-                          Quaternion(weight1*delta, perp), coords1);
+        MoverBase::rotate(coords, group1, Quaternion(weight1 * delta, perp), coords1);
 
-    //save the new coordinates
+    // save the new coordinates
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 }
@@ -1118,34 +1051,29 @@ void MoverBase::change(MoleculeData &moldata, const AngleID &angle,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::change(MoleculeData &moldata, const DihedralID &dihedral,
-                       SireUnits::Dimension::Angle delta,
+void MoverBase::change(MoleculeData &moldata, const DihedralID &dihedral, SireUnits::Dimension::Angle delta,
                        const PropertyMap &map) const
 {
     if (delta == 0)
         return;
 
-    //get the indicies of the atoms that comprise this dihedral
-    tuple<AtomIdx,AtomIdx,AtomIdx,AtomIdx> atomidxs =
-                                               dihedral.map(moldata.info());
+    // get the indicies of the atoms that comprise this dihedral
+    tuple<AtomIdx, AtomIdx, AtomIdx, AtomIdx> atomidxs = dihedral.map(moldata.info());
 
     AtomIdx atom0 = atomidxs.get<0>();
     AtomIdx atom1 = atomidxs.get<1>();
     AtomIdx atom2 = atomidxs.get<2>();
     AtomIdx atom3 = atomidxs.get<3>();
 
-    //now get the connectivity of the molecule
-    const Connectivity &connectivity =
-              moldata.property(map["connectivity"]).asA<Connectivity>();
+    // now get the connectivity of the molecule
+    const Connectivity &connectivity = moldata.property(map["connectivity"]).asA<Connectivity>();
 
-    tuple<AtomSelection,AtomSelection> groups =
-                        connectivity.split(atom0, atom1,
-                                           atom2, atom3, movable_atoms);
+    tuple<AtomSelection, AtomSelection> groups = connectivity.split(atom0, atom1, atom2, atom3, movable_atoms);
 
-    //see if there are any anchors that hold part of the
-    //molecule stationary
+    // see if there are any anchors that hold part of the
+    // molecule stationary
     if (map.specified("anchors"))
-        applyAnchors( getAnchors(moldata, map), groups );
+        applyAnchors(getAnchors(moldata, map), groups);
 
     const AtomSelection &group0 = groups.get<0>();
     const AtomSelection &group1 = groups.get<1>();
@@ -1156,17 +1084,17 @@ void MoverBase::change(MoleculeData &moldata, const DihedralID &dihedral,
     {
         if (map.specified("anchors"))
         {
-            throw SireMol::anchor_error( QObject::tr(
-                "Splitting the molecule into two about %1 has resulted "
-                "in two groups that are both anchored (anchors = %2)")
-                    .arg(dihedral.toString(),
-                         Sire::toString( getAnchors(moldata, map).selectedAtoms()) ),
-                             CODELOC );
+            throw SireMol::anchor_error(
+                QObject::tr("Splitting the molecule into two about %1 has resulted "
+                            "in two groups that are both anchored (anchors = %2)")
+                    .arg(dihedral.toString(), Sire::toString(getAnchors(moldata, map).selectedAtoms())),
+                CODELOC);
         }
 
-        throw SireError::program_bug( QObject::tr(
-            "Splitting the molecule about the %1 has resulted "
-            "in two empty groups!").arg(dihedral.toString()), CODELOC );
+        throw SireError::program_bug(QObject::tr("Splitting the molecule about the %1 has resulted "
+                                                 "in two empty groups!")
+                                         .arg(dihedral.toString()),
+                                     CODELOC);
     }
     else if (group0.isEmpty())
     {
@@ -1181,33 +1109,30 @@ void MoverBase::change(MoleculeData &moldata, const DihedralID &dihedral,
     else
     {
         const WeightFunction &weightfunc =
-                      moldata.property(map["weight function"],
-                                       WeightFunction::null()).asA<WeightFunction>();
+            moldata.property(map["weight function"], WeightFunction::null()).asA<WeightFunction>();
 
         weight0 = 1 - weightfunc(moldata, group0, group1, map);
         weight1 = 1 - weightfunc(moldata, group1, group0, map);
     }
 
-    //get the coordinates to be moved
+    // get the coordinates to be moved
     PropertyName coord_property = map["coordinates"];
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //get the coordinates of the central two atoms of the dihedral
+    // get the coordinates of the central two atoms of the dihedral
     const Vector &coords1 = coords[moldata.info().cgAtomIdx(atom1)];
     const Vector &coords2 = coords[moldata.info().cgAtomIdx(atom2)];
 
-    //get the vector about which the two parts of the molecule
-    //are rotated
+    // get the vector about which the two parts of the molecule
+    // are rotated
     Vector dihvec = coords2 - coords1;
 
-    //now rotate the two parts of the molecule
+    // now rotate the two parts of the molecule
     if (weight0 != 0)
-        MoverBase::rotate(coords, group0,
-                          Quaternion(-weight0*delta, dihvec), coords1);
+        MoverBase::rotate(coords, group0, Quaternion(-weight0 * delta, dihvec), coords1);
 
     if (weight1 != 0)
-        MoverBase::rotate(coords, group1,
-                          Quaternion(weight1*delta, dihvec), coords2);
+        MoverBase::rotate(coords, group1, Quaternion(weight1 * delta, dihvec), coords2);
 
     // See if there are dihedrals whose rotation should be synchronized to this dihedral
     // (improper torsions)
@@ -1215,7 +1140,7 @@ void MoverBase::change(MoleculeData &moldata, const DihedralID &dihedral,
     // For each dihedral, find the atom that must be rotated and with which point/axis/weight
     // Call MoverBase::rotate accordingly
 
-    //save the new coordinates
+    // save the new coordinates
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 }
@@ -1240,30 +1165,27 @@ void MoverBase::change(MoleculeData &moldata, const DihedralID &dihedral,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::change(MoleculeData &moldata, const BondID &bond,
-                       SireUnits::Dimension::Angle delta,
+void MoverBase::change(MoleculeData &moldata, const BondID &bond, SireUnits::Dimension::Angle delta,
                        const PropertyMap &map) const
 {
     if (delta == 0)
         return;
 
-    //get the indicies of the atoms that comprise this dihedral
-    tuple<AtomIdx,AtomIdx> atomidxs = bond.map(moldata.info());
+    // get the indicies of the atoms that comprise this dihedral
+    tuple<AtomIdx, AtomIdx> atomidxs = bond.map(moldata.info());
 
     AtomIdx atom0 = atomidxs.get<0>();
     AtomIdx atom1 = atomidxs.get<1>();
 
-    //now get the connectivity of the molecule
-    const Connectivity &connectivity =
-              moldata.property(map["connectivity"]).asA<Connectivity>();
+    // now get the connectivity of the molecule
+    const Connectivity &connectivity = moldata.property(map["connectivity"]).asA<Connectivity>();
 
-    tuple<AtomSelection,AtomSelection> groups =
-                            connectivity.split(atom0, atom1, movable_atoms);
+    tuple<AtomSelection, AtomSelection> groups = connectivity.split(atom0, atom1, movable_atoms);
 
-    //see if there are any anchors that hold part of the
-    //molecule stationary
+    // see if there are any anchors that hold part of the
+    // molecule stationary
     if (map.specified("anchors"))
-        applyAnchors( getAnchors(moldata, map), groups );
+        applyAnchors(getAnchors(moldata, map), groups);
 
     const AtomSelection &group0 = groups.get<0>();
     const AtomSelection &group1 = groups.get<1>();
@@ -1274,17 +1196,17 @@ void MoverBase::change(MoleculeData &moldata, const BondID &bond,
     {
         if (map.specified("anchors"))
         {
-            throw SireMol::anchor_error( QObject::tr(
-                "Splitting the molecule into two about %1 has resulted "
-                "in two groups that are both anchored (anchors = %2)")
-                    .arg(bond.toString(),
-                         Sire::toString( getAnchors(moldata, map).selectedAtoms()) ),
-                             CODELOC );
+            throw SireMol::anchor_error(
+                QObject::tr("Splitting the molecule into two about %1 has resulted "
+                            "in two groups that are both anchored (anchors = %2)")
+                    .arg(bond.toString(), Sire::toString(getAnchors(moldata, map).selectedAtoms())),
+                CODELOC);
         }
 
-        throw SireError::program_bug( QObject::tr(
-            "Splitting the molecule about the %1 has resulted "
-            "in two empty groups!").arg(bond.toString()), CODELOC );
+        throw SireError::program_bug(QObject::tr("Splitting the molecule about the %1 has resulted "
+                                                 "in two empty groups!")
+                                         .arg(bond.toString()),
+                                     CODELOC);
     }
     else if (group0.isEmpty())
     {
@@ -1299,35 +1221,32 @@ void MoverBase::change(MoleculeData &moldata, const BondID &bond,
     else
     {
         const WeightFunction &weightfunc =
-                     moldata.property(map["weight function"],
-                                      WeightFunction::null()).asA<WeightFunction>();
+            moldata.property(map["weight function"], WeightFunction::null()).asA<WeightFunction>();
 
         weight0 = 1 - weightfunc(moldata, group0, group1, map);
         weight1 = 1 - weightfunc(moldata, group1, group0, map);
     }
 
-    //get the coordinates to be moved
+    // get the coordinates to be moved
     PropertyName coord_property = map["coordinates"];
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //get the coordinates of the central two atoms of the dihedral
+    // get the coordinates of the central two atoms of the dihedral
     const Vector &coords0 = coords[moldata.info().cgAtomIdx(atom0)];
     const Vector &coords1 = coords[moldata.info().cgAtomIdx(atom1)];
 
-    //get the vector about which the two parts of the molecule
-    //are rotated
+    // get the vector about which the two parts of the molecule
+    // are rotated
     Vector dihvec = coords1 - coords0;
 
-    //now rotate the two parts of the molecule
+    // now rotate the two parts of the molecule
     if (weight0 != 0)
-        MoverBase::rotate(coords, group0,
-                          Quaternion(-weight0*delta, dihvec), coords0);
+        MoverBase::rotate(coords, group0, Quaternion(-weight0 * delta, dihvec), coords0);
 
     if (weight1 != 0)
-        MoverBase::rotate(coords, group1,
-                          Quaternion(weight1*delta, dihvec), coords1);
+        MoverBase::rotate(coords, group1, Quaternion(weight1 * delta, dihvec), coords1);
 
-    //save the new coordinates
+    // save the new coordinates
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 }
@@ -1357,33 +1276,29 @@ void MoverBase::change(MoleculeData &moldata, const BondID &bond,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::change(MoleculeData &moldata, const ImproperID &improper,
-                       SireUnits::Dimension::Angle delta,
+void MoverBase::change(MoleculeData &moldata, const ImproperID &improper, SireUnits::Dimension::Angle delta,
                        const PropertyMap &map) const
 {
     if (delta == 0)
         return;
 
-    //get the indicies of the atoms that comprise this dihedral
-    tuple<AtomIdx,AtomIdx,AtomIdx,AtomIdx> atomidxs =
-                                               improper.map(moldata.info());
+    // get the indicies of the atoms that comprise this dihedral
+    tuple<AtomIdx, AtomIdx, AtomIdx, AtomIdx> atomidxs = improper.map(moldata.info());
 
     AtomIdx atom0 = atomidxs.get<0>();
     AtomIdx atom1 = atomidxs.get<1>();
     AtomIdx atom2 = atomidxs.get<2>();
     AtomIdx atom3 = atomidxs.get<3>();
 
-    //now get the connectivity of the molecule
-    const Connectivity &connectivity =
-            moldata.property(map["connectivity"]).asA<Connectivity>();
+    // now get the connectivity of the molecule
+    const Connectivity &connectivity = moldata.property(map["connectivity"]).asA<Connectivity>();
 
-    tuple<AtomSelection,AtomSelection> groups =
-                      connectivity.split(atom0, atom1, movable_atoms);
+    tuple<AtomSelection, AtomSelection> groups = connectivity.split(atom0, atom1, movable_atoms);
 
-    //see if there are any anchors that hold part of the
-    //molecule stationary
+    // see if there are any anchors that hold part of the
+    // molecule stationary
     if (map.specified("anchors"))
-        applyAnchors( getAnchors(moldata, map), groups );
+        applyAnchors(getAnchors(moldata, map), groups);
 
     const AtomSelection &group0 = groups.get<0>();
     const AtomSelection &group1 = groups.get<1>();
@@ -1394,21 +1309,21 @@ void MoverBase::change(MoleculeData &moldata, const ImproperID &improper,
     {
         if (map.specified("anchors"))
         {
-            throw SireMol::anchor_error( QObject::tr(
-                "Splitting the molecule into two about %1 has resulted "
-                "in two groups that are both anchored (anchors = %2)")
-                    .arg(improper.toString(),
-                         Sire::toString( getAnchors(moldata, map).selectedAtoms()) ),
-                             CODELOC );
+            throw SireMol::anchor_error(
+                QObject::tr("Splitting the molecule into two about %1 has resulted "
+                            "in two groups that are both anchored (anchors = %2)")
+                    .arg(improper.toString(), Sire::toString(getAnchors(moldata, map).selectedAtoms())),
+                CODELOC);
         }
 
-        throw SireError::program_bug( QObject::tr(
-            "Splitting the molecule about the %1 has resulted "
-            "in two empty groups!").arg(improper.toString()), CODELOC );
+        throw SireError::program_bug(QObject::tr("Splitting the molecule about the %1 has resulted "
+                                                 "in two empty groups!")
+                                         .arg(improper.toString()),
+                                     CODELOC);
     }
     else if (group0.isEmpty())
     {
-        BOOST_ASSERT( not group1.isEmpty() );
+        BOOST_ASSERT(not group1.isEmpty());
         weight0 = 0;
         weight1 = 1;
     }
@@ -1420,35 +1335,32 @@ void MoverBase::change(MoleculeData &moldata, const ImproperID &improper,
     else
     {
         const WeightFunction &weightfunc =
-                   moldata.property(map["weight function"],
-                                    WeightFunction::null()).asA<WeightFunction>();
+            moldata.property(map["weight function"], WeightFunction::null()).asA<WeightFunction>();
 
         weight0 = 1 - weightfunc(moldata, group0, group1, map);
         weight1 = 1 - weightfunc(moldata, group1, group0, map);
     }
 
-    //get the coordinates to be moved
+    // get the coordinates to be moved
     PropertyName coord_property = map["coordinates"];
     AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
 
-    //get the coordinates of the last three atoms of the improper
+    // get the coordinates of the last three atoms of the improper
     const Vector &coords1 = coords[moldata.info().cgAtomIdx(atom1)];
     const Vector &coords2 = coords[moldata.info().cgAtomIdx(atom2)];
     const Vector &coords3 = coords[moldata.info().cgAtomIdx(atom3)];
 
-    //get the vector from atom2 to atom3
+    // get the vector from atom2 to atom3
     Vector impvec = coords3 - coords2;
 
-    //now rotate the two parts of the molecule
+    // now rotate the two parts of the molecule
     if (weight0 != 0)
-        MoverBase::rotate(coords, group0,
-                          Quaternion(-weight0*delta, impvec), coords1);
+        MoverBase::rotate(coords, group0, Quaternion(-weight0 * delta, impvec), coords1);
 
     if (weight1 != 0)
-        MoverBase::rotate(coords, group1,
-                          Quaternion(weight1*delta, impvec), coords1);
+        MoverBase::rotate(coords, group1, Quaternion(weight1 * delta, impvec), coords1);
 
-    //save the new coordinates
+    // save the new coordinates
     if (coord_property.hasSource())
         moldata.setProperty(coord_property.source(), coords);
 }
@@ -1475,11 +1387,10 @@ void MoverBase::change(MoleculeData &moldata, const ImproperID &improper,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::set(MoleculeData &moldata, const BondID &bond,
-                    SireUnits::Dimension::Length value,
+void MoverBase::set(MoleculeData &moldata, const BondID &bond, SireUnits::Dimension::Length value,
                     const PropertyMap &map) const
 {
-    SireUnits::Dimension::Length current_value( bond.size(moldata,map) );
+    SireUnits::Dimension::Length current_value(bond.size(moldata, map));
     this->change(moldata, bond, value - current_value, map);
 }
 
@@ -1508,8 +1419,7 @@ void MoverBase::set(MoleculeData &moldata, const BondID &bond,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::set(MoleculeData &moldata, const AngleID &angle,
-                    SireUnits::Dimension::Angle value,
+void MoverBase::set(MoleculeData &moldata, const AngleID &angle, SireUnits::Dimension::Angle value,
                     const PropertyMap &map) const
 {
     SireUnits::Dimension::Angle current_value = angle.size(moldata, map);
@@ -1541,8 +1451,7 @@ void MoverBase::set(MoleculeData &moldata, const AngleID &angle,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::set(MoleculeData &moldata, const DihedralID &dihedral,
-                    SireUnits::Dimension::Angle value,
+void MoverBase::set(MoleculeData &moldata, const DihedralID &dihedral, SireUnits::Dimension::Angle value,
                     const PropertyMap &map) const
 {
     SireUnits::Dimension::Angle current_value = dihedral.size(moldata, map);
@@ -1574,14 +1483,12 @@ void MoverBase::set(MoleculeData &moldata, const DihedralID &dihedral,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::setAll(MoleculeData &moldata, const DihedralID &dihedral,
-                       SireUnits::Dimension::Angle value,
+void MoverBase::setAll(MoleculeData &moldata, const DihedralID &dihedral, SireUnits::Dimension::Angle value,
                        const PropertyMap &map) const
 {
     SireUnits::Dimension::Angle current_value = dihedral.size(moldata, map);
 
-    this->change(moldata, BondID(dihedral.atom1(), dihedral.atom2()),
-                 value - current_value, map);
+    this->change(moldata, BondID(dihedral.atom1(), dihedral.atom2()), value - current_value, map);
 }
 
 /** Set the size of the improper identified by 'improper' to 'value',
@@ -1609,8 +1516,7 @@ void MoverBase::setAll(MoleculeData &moldata, const DihedralID &dihedral,
     \throw SireMol::anchor_error
     \throw SireMol::ring_error
 */
-void MoverBase::set(MoleculeData &moldata, const ImproperID &improper,
-                    SireUnits::Dimension::Angle value,
+void MoverBase::set(MoleculeData &moldata, const ImproperID &improper, SireUnits::Dimension::Angle value,
                     const PropertyMap &map) const
 {
     SireUnits::Dimension::Angle current_value = improper.size(moldata, map);

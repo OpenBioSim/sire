@@ -40,11 +40,9 @@ using namespace SireCAS;
 using namespace SireVol;
 using namespace SireStream;
 
-static const RegisterMetaType<GeometryComponent> r_geomcomp( MAGIC_ONLY,
-                                                      GeometryComponent::typeName() );
+static const RegisterMetaType<GeometryComponent> r_geomcomp(MAGIC_ONLY, GeometryComponent::typeName());
 
-QDataStream &operator<<(QDataStream &ds,
-                                          const GeometryComponent &geomcomp)
+QDataStream &operator<<(QDataStream &ds, const GeometryComponent &geomcomp)
 {
     writeHeader(ds, r_geomcomp, 1);
 
@@ -53,9 +51,8 @@ QDataStream &operator<<(QDataStream &ds,
     PropertyMap map;
     map["space"] = geomcomp.space_property;
 
-    sds << geomcomp.constrained_symbol << geomcomp.geometry_expression
-        << map
-        << static_cast<const Constraint&>(geomcomp);
+    sds << geomcomp.constrained_symbol << geomcomp.geometry_expression << map
+        << static_cast<const Constraint &>(geomcomp);
 
     return ds;
 }
@@ -72,8 +69,8 @@ QDataStream &operator>>(QDataStream &ds, GeometryComponent &geomcomp)
 
         PropertyMap map;
 
-        sds >> geomcomp.constrained_symbol >> geomcomp.geometry_expression
-            >> map >> static_cast<Constraint&>(geomcomp);
+        sds >> geomcomp.constrained_symbol >> geomcomp.geometry_expression >> map >>
+            static_cast<Constraint &>(geomcomp);
 
         geomcomp.expected_value = 0;
         geomcomp.current_values = Values();
@@ -88,33 +85,32 @@ QDataStream &operator>>(QDataStream &ds, GeometryComponent &geomcomp)
 
 /** Null constructor */
 GeometryComponent::GeometryComponent(const PropertyMap &map)
-                  : Constraint(), expected_value(0), space_property( map["space"] )
-{}
+    : Constraint(), expected_value(0), space_property(map["space"])
+{
+}
 
 /** Internal constructor */
-GeometryComponent::GeometryComponent(const Symbol &symbol, const Expression &expression,
-                                     const PropertyMap &map)
-                  : Constraint(), constrained_symbol(symbol),
-                    expected_value(0), geometry_expression(expression),
-                    space_property( map["space"] )
-{}
+GeometryComponent::GeometryComponent(const Symbol &symbol, const Expression &expression, const PropertyMap &map)
+    : Constraint(), constrained_symbol(symbol), expected_value(0), geometry_expression(expression),
+      space_property(map["space"])
+{
+}
 
 /** Copy constructor */
 GeometryComponent::GeometryComponent(const GeometryComponent &other)
-                  : Constraint(other),
-                    constrained_symbol(other.constrained_symbol),
-                    expected_value(other.expected_value),
-                    current_values(other.current_values),
-                    geometry_expression(other.geometry_expression),
-                    space_property(other.space_property), spce(other.spce)
-{}
+    : Constraint(other), constrained_symbol(other.constrained_symbol), expected_value(other.expected_value),
+      current_values(other.current_values), geometry_expression(other.geometry_expression),
+      space_property(other.space_property), spce(other.spce)
+{
+}
 
 /** Destructor */
 GeometryComponent::~GeometryComponent()
-{}
+{
+}
 
 /** Copy assignment operator */
-GeometryComponent& GeometryComponent::operator=(const GeometryComponent &other)
+GeometryComponent &GeometryComponent::operator=(const GeometryComponent &other)
 {
     if (this != &other)
     {
@@ -134,10 +130,8 @@ GeometryComponent& GeometryComponent::operator=(const GeometryComponent &other)
 bool GeometryComponent::operator==(const GeometryComponent &other) const
 {
     return this == &other or
-           (Constraint::operator==(other) and
-            constrained_symbol == other.constrained_symbol and
-            geometry_expression == other.geometry_expression and
-            space_property == other.space_property);
+           (Constraint::operator==(other) and constrained_symbol == other.constrained_symbol and
+            geometry_expression == other.geometry_expression and space_property == other.space_property);
 }
 
 /** Comparison operator */
@@ -146,20 +140,20 @@ bool GeometryComponent::operator!=(const GeometryComponent &other) const
     return not GeometryComponent::operator==(other);
 }
 
-const char* GeometryComponent::typeName()
+const char *GeometryComponent::typeName()
 {
     return "SireSystem::GeometryComponent";
 }
 
 /** Return the symbol representing the constrained component */
-const Symbol& GeometryComponent::component() const
+const Symbol &GeometryComponent::component() const
 {
     return constrained_symbol;
 }
 
 /** Return the expression used to calculate the constrained value
     from the geometry */
-const Expression& GeometryComponent::expression() const
+const Expression &GeometryComponent::expression() const
 {
     return geometry_expression;
 }
@@ -170,7 +164,7 @@ void GeometryComponent::setSpace(const Space &space)
     spce = space;
 }
 
-const Space& GeometryComponent::space() const
+const Space &GeometryComponent::space() const
 {
     return spce.read();
 }
@@ -181,27 +175,25 @@ void GeometryComponent::setSystem(const System &system)
         return;
 
     if (system.containsProperty(space_property))
-        this->setSpace( system.property(space_property).asA<Space>() );
+        this->setSpace(system.property(space_property).asA<Space>());
     else
-        this->setSpace( Cartesian() );
+        this->setSpace(Cartesian());
 
     Values vals = this->getValues(system);
     expected_value = geometry_expression(vals);
 
     if (system.hasConstantComponent(constrained_symbol))
     {
-        Constraint::setSatisfied( system, system.constant(constrained_symbol) ==
-                                                                     expected_value );
+        Constraint::setSatisfied(system, system.constant(constrained_symbol) == expected_value);
     }
     else
-        Constraint::setSatisfied( system, false );
+        Constraint::setSatisfied(system, false);
 }
 
 bool GeometryComponent::mayChange(const Delta &delta, quint32 last_subversion) const
 {
     return delta.sinceChanged(space_property, last_subversion) or
-           delta.sinceChanged(constrained_symbol, last_subversion) or
-           this->wouldChange(delta, last_subversion);
+           delta.sinceChanged(constrained_symbol, last_subversion) or this->wouldChange(delta, last_subversion);
 }
 
 bool GeometryComponent::fullApply(Delta &delta)
@@ -220,20 +212,20 @@ bool GeometryComponent::fullApply(Delta &delta)
 
 bool GeometryComponent::deltaApply(Delta &delta, quint32 last_subversion)
 {
-    if ( delta.sinceChanged(space_property, last_subversion) )
+    if (delta.sinceChanged(space_property, last_subversion))
     {
         return this->fullApply(delta);
     }
     else if (this->wouldChange(delta, last_subversion))
     {
-        Values vals = this->getValues( delta.deltaSystem() );
+        Values vals = this->getValues(delta.deltaSystem());
         expected_value = geometry_expression(vals);
 
-        return delta.update( constrained_symbol, expected_value );
+        return delta.update(constrained_symbol, expected_value);
     }
-    else if ( delta.sinceChanged(constrained_symbol, last_subversion) )
+    else if (delta.sinceChanged(constrained_symbol, last_subversion))
     {
-        return delta.update( constrained_symbol, expected_value );
+        return delta.update(constrained_symbol, expected_value);
     }
     else
         return false;

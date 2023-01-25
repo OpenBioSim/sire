@@ -27,8 +27,8 @@
 
 #include "filetrajectory.h"
 
-#include <QMutex>
 #include <QHash>
+#include <QMutex>
 
 #include "SireBase/centralcache.h"
 
@@ -42,7 +42,7 @@ using namespace SireStream;
 
 static const RegisterMetaType<FileTrajectory> r_traj;
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream &ds, const FileTrajectory &file)
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &ds, const FileTrajectory &file)
 {
     writeHeader(ds, r_traj, 1);
 
@@ -58,7 +58,7 @@ SIREIO_EXPORT QDataStream& operator<<(QDataStream &ds, const FileTrajectory &fil
     return ds;
 }
 
-SIREIO_EXPORT QDataStream& operator>>(QDataStream &ds, FileTrajectory &file)
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &ds, FileTrajectory &file)
 {
     VersionID v = readHeader(ds, r_traj);
 
@@ -79,7 +79,7 @@ SIREIO_EXPORT QDataStream& operator>>(QDataStream &ds, FileTrajectory &file)
         {
             file.parser = MoleculeParser::parse(filename);
         }
-        catch(const SireError::exception &e)
+        catch (const SireError::exception &e)
         {
             qDebug() << "Cannot load the trajectory as something went wrong loading the file!";
             qDebug() << e.what() << e.error();
@@ -99,37 +99,39 @@ SIREIO_EXPORT QDataStream& operator>>(QDataStream &ds, FileTrajectory &file)
 }
 
 FileTrajectory::FileTrajectory() : TrajectoryData()
-{}
+{
+}
 
-FileTrajectory::FileTrajectory(const MoleculeParser &p)
-               : TrajectoryData(), parser(p)
-{}
+FileTrajectory::FileTrajectory(const MoleculeParser &p) : TrajectoryData(), parser(p)
+{
+}
 
-FileTrajectory::FileTrajectory(const FileTrajectory &other)
-               : TrajectoryData(other), parser(other.parser)
-{}
+FileTrajectory::FileTrajectory(const FileTrajectory &other) : TrajectoryData(other), parser(other.parser)
+{
+}
 
 FileTrajectory::~FileTrajectory()
-{}
+{
+}
 
-const char* FileTrajectory::what() const
+const char *FileTrajectory::what() const
 {
     return FileTrajectory::typeName();
 }
 
-const char* FileTrajectory::typeName()
+const char *FileTrajectory::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<FileTrajectory>());
 }
 
-FileTrajectory* FileTrajectory::clone() const
+FileTrajectory *FileTrajectory::clone() const
 {
     return new FileTrajectory(*this);
 }
 
 bool FileTrajectory::_equals(const TrajectoryData &other) const
 {
-    const FileTrajectory *ptr = dynamic_cast<const FileTrajectory*>(&other);
+    const FileTrajectory *ptr = dynamic_cast<const FileTrajectory *>(&other);
 
     if (ptr)
     {
@@ -176,8 +178,7 @@ Frame FileTrajectory::getFrame(int i) const
 {
     i = SireID::Index(i).map(this->nFrames());
 
-    auto cached_data = CentralCache::get(QString("FileTrajectory::%1::%2")
-                            .arg(qint64(this)).arg(i));
+    auto cached_data = CentralCache::get(QString("FileTrajectory::%1::%2").arg(qint64(this)).arg(i));
 
     QMutexLocker lkr(cached_data->mutex());
 
@@ -187,8 +188,9 @@ Frame FileTrajectory::getFrame(int i) const
         {
             return cached_data->data().value<Frame>();
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     // something went wrong - read the frame again

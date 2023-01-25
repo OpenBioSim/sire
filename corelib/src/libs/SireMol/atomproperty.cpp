@@ -33,11 +33,11 @@
 #include "atomcharges.h"
 #include "atomelements.h"
 #include "atomenergies.h"
-#include "atommasses.h"
 #include "atomforces.h"
-#include "atomvelocities.h"
+#include "atommasses.h"
 #include "atompolarisabilities.h"
 #include "atomradii.h"
+#include "atomvelocities.h"
 
 #include "SireBase/propertylist.h"
 
@@ -50,8 +50,7 @@ using namespace SireBase;
 /////// Implementation of AtomProp
 ///////
 
-static const RegisterMetaType<AtomProp> r_atomprop(MAGIC_ONLY,
-                                                   "SireMol::AtomProp");
+static const RegisterMetaType<AtomProp> r_atomprop(MAGIC_ONLY, "SireMol::AtomProp");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const AtomProp &atomprop)
@@ -66,28 +65,34 @@ QDataStream &operator>>(QDataStream &ds, AtomProp &atomprop)
 }
 
 AtomProp::AtomProp() : MolViewProperty()
-{}
+{
+}
 
 AtomProp::AtomProp(const AtomProp &other) : MolViewProperty(other)
-{}
+{
+}
 
 AtomProp::~AtomProp()
-{}
+{
+}
 
 void AtomProp::throwIncorrectNumberOfAtoms(int nats, int ntotal) const
 {
-    throw SireError::incompatible_error( QObject::tr(
-        "This is incompatible as the number of atoms is %1, but the "
-        "number of properties is %2.")
-            .arg(ntotal).arg(nats), CODELOC );
+    throw SireError::incompatible_error(QObject::tr("This is incompatible as the number of atoms is %1, but the "
+                                                    "number of properties is %2.")
+                                            .arg(ntotal)
+                                            .arg(nats),
+                                        CODELOC);
 }
 
 void AtomProp::throwIncorrectNumberOfSelectedAtoms(int nats, int nselected) const
 {
-    throw SireError::incompatible_error( QObject::tr(
-        "This is incompatible as the number of selected atoms is %1, but the "
-        "number of properties is %2.")
-            .arg(nselected).arg(nats), CODELOC );
+    throw SireError::incompatible_error(
+        QObject::tr("This is incompatible as the number of selected atoms is %1, but the "
+                    "number of properties is %2.")
+            .arg(nselected)
+            .arg(nats),
+        CODELOC);
 }
 
 ////////
@@ -106,7 +111,7 @@ namespace SireBase
     template class PackedArray2D<SireUnits::Dimension::Volume>;
     template class PackedArray2D<SireUnits::Dimension::Length>;
     template class PackedArray2D<SireBase::PropertyPtr>;
-}
+} // namespace SireBase
 
 namespace SireMol
 {
@@ -130,7 +135,7 @@ namespace SireMol
     template class AtomProperty<SireUnits::Dimension::Length>;
 
     template class AtomProperty<SireBase::PropertyPtr>;
-}
+} // namespace SireMol
 
 static const RegisterMetaType<AtomStringProperty> r_atomstring;
 static const RegisterMetaType<AtomIntProperty> r_atomint;

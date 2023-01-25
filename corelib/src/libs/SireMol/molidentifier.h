@@ -32,84 +32,84 @@
 
 #include "atomsin.hpp"
 
-#include "SireID/specify.hpp"
 #include "SireID/idandset.hpp"
 #include "SireID/idorset.hpp"
+#include "SireID/specify.hpp"
 
 #include <boost/shared_ptr.hpp>
 
 namespace SireMol
 {
-class MolIdentifier;
+    class MolIdentifier;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MolIdentifier&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MolIdentifier&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MolIdentifier &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MolIdentifier &);
 
 namespace SireMol
 {
 
-/** This is a generic holder for any MolID class!
+    /** This is a generic holder for any MolID class!
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MolIdentifier : public MolID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MolIdentifier&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MolIdentifier&);
-
-public:
-    MolIdentifier();
-    MolIdentifier(const MolID &atomid);
-    MolIdentifier(const MolIdentifier &other);
-
-    ~MolIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MolIdentifier : public MolID
     {
-        return MolIdentifier::typeName();
+
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MolIdentifier &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MolIdentifier &);
+
+    public:
+        MolIdentifier();
+        MolIdentifier(const MolID &atomid);
+        MolIdentifier(const MolIdentifier &other);
+
+        ~MolIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return MolIdentifier::typeName();
+        }
+
+        MolIdentifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const MolID &base() const;
+
+        MolIdentifier &operator=(const MolIdentifier &other);
+        MolIdentifier &operator=(const MolID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const MolIdentifier &other) const;
+        bool operator!=(const MolIdentifier &other) const;
+
+        bool operator==(const MolID &other) const;
+        bool operator!=(const MolID &other) const;
+
+        QList<MolNum> map(const Molecules &molecules) const;
+        QList<MolNum> map(const MoleculeGroup &molgroup) const;
+        QList<MolNum> map(const MolGroupsBase &molgroups) const;
+
+    private:
+        /** Pointer to the MolID */
+        boost::shared_ptr<MolID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const MolIdentifier &molid)
+    {
+        return molid.hash();
     }
 
-    MolIdentifier* clone() const;
-
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const MolID& base() const;
-
-    MolIdentifier& operator=(const MolIdentifier &other);
-    MolIdentifier& operator=(const MolID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const MolIdentifier &other) const;
-    bool operator!=(const MolIdentifier &other) const;
-
-    bool operator==(const MolID &other) const;
-    bool operator!=(const MolID &other) const;
-
-    QList<MolNum> map(const Molecules &molecules) const;
-    QList<MolNum> map(const MoleculeGroup &molgroup) const;
-    QList<MolNum> map(const MolGroupsBase &molgroups) const;
-
-private:
-    /** Pointer to the MolID */
-    boost::shared_ptr<MolID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const MolIdentifier &molid)
-{
-    return molid.hash();
-}
-
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::MolIdentifier);
 

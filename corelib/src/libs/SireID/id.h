@@ -32,108 +32,108 @@
 
 #include <typeinfo>
 
-#include <QString>
 #include <QMetaType>
+#include <QString>
 
 SIRE_BEGIN_HEADER
 
 namespace SireID
 {
-class ID;
+    class ID;
 }
 
 namespace SireID
 {
 
-/** This is the base class of all ID objects. An ID object
-    is an object that is used to identify another object.
+    /** This is the base class of all ID objects. An ID object
+        is an object that is used to identify another object.
 
-    @author Christopher Woods
-*/
-class SIREID_EXPORT ID
-{
-public:
-    typedef ID ROOT;
-
-    ID();
-    ID(const ID&);
-
-    virtual ~ID();
-
-    static const char* typeName()
-    {
-        return "SireID::ID";
-    }
-
-    /** Return a clone of this ID object. You are responsible
-        for managing the returned object. */
-    virtual ID* clone() const=0;
-
-    /** Return the type name of this ID object. */
-    virtual const char* what() const=0;
-
-    /** Return a hash for this ID object - this allows
-        this object to be used as a key in a dictionary */
-    virtual uint hash() const=0;
-
-    /** Return a string representation of this ID */
-    virtual QString toString() const=0;
-
-    /** Return whether or not this ID is null */
-    virtual bool isNull() const=0;
-
-    /** Comparison operator */
-    virtual bool operator==(const ID &other) const=0;
-
-    /** Comparison operator */
-    virtual bool operator!=(const ID &other) const
-    {
-        return not this->operator==(other);
-    }
-
-    /** Use this function in your comparison operators, e.g.
-
-        <code>
-        bool Foo::operator==(const ID &other) const
-        {
-            return ID::compare(*this, other);
-        }
-        </code>
+        @author Christopher Woods
     */
-    template<class T>
-    static bool compare(const T &obj, const ID &other)
+    class SIREID_EXPORT ID
     {
-        if ( typeid(obj).name() == typeid(other).name() )
+    public:
+        typedef ID ROOT;
+
+        ID();
+        ID(const ID &);
+
+        virtual ~ID();
+
+        static const char *typeName()
         {
-            const T *other_t = dynamic_cast<const T*>(&other);
-            return (other_t != 0) and (obj == *other_t);
+            return "SireID::ID";
         }
-        else
-            return false;
-    }
 
-    template<class T>
-    bool isA() const
-    {
-        return dynamic_cast<const T*>(this) != 0;
-    }
+        /** Return a clone of this ID object. You are responsible
+            for managing the returned object. */
+        virtual ID *clone() const = 0;
 
-    template<class T>
-    const T& asA() const
-    {
-        return dynamic_cast<const T&>(*this);
-    }
+        /** Return the type name of this ID object. */
+        virtual const char *what() const = 0;
 
-protected:
-    ID& operator=(const ID&)
-    {
-        return *this;
-    }
-};
+        /** Return a hash for this ID object - this allows
+            this object to be used as a key in a dictionary */
+        virtual uint hash() const = 0;
 
-}
+        /** Return a string representation of this ID */
+        virtual QString toString() const = 0;
 
-SIRE_EXPOSE_CLASS( SireID::ID )
+        /** Return whether or not this ID is null */
+        virtual bool isNull() const = 0;
+
+        /** Comparison operator */
+        virtual bool operator==(const ID &other) const = 0;
+
+        /** Comparison operator */
+        virtual bool operator!=(const ID &other) const
+        {
+            return not this->operator==(other);
+        }
+
+        /** Use this function in your comparison operators, e.g.
+
+            <code>
+            bool Foo::operator==(const ID &other) const
+            {
+                return ID::compare(*this, other);
+            }
+            </code>
+        */
+        template <class T>
+        static bool compare(const T &obj, const ID &other)
+        {
+            if (typeid(obj).name() == typeid(other).name())
+            {
+                const T *other_t = dynamic_cast<const T *>(&other);
+                return (other_t != 0) and (obj == *other_t);
+            }
+            else
+                return false;
+        }
+
+        template <class T>
+        bool isA() const
+        {
+            return dynamic_cast<const T *>(this) != 0;
+        }
+
+        template <class T>
+        const T &asA() const
+        {
+            return dynamic_cast<const T &>(*this);
+        }
+
+    protected:
+        ID &operator=(const ID &)
+        {
+            return *this;
+        }
+    };
+
+} // namespace SireID
+
+SIRE_EXPOSE_CLASS(SireID::ID)
 
 SIRE_END_HEADER
 

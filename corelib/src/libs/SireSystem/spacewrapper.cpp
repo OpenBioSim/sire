@@ -26,8 +26,8 @@
 \*********************************************/
 
 #include "spacewrapper.h"
-#include "system.h"
 #include "delta.h"
+#include "system.h"
 
 #include "SireMol/molecule.h"
 #include "SireMol/molecules.h"
@@ -47,16 +47,14 @@ using namespace SireStream;
 static const RegisterMetaType<SpaceWrapper> r_spacewrapper;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const SpaceWrapper &spacewrapper)
+QDataStream &operator<<(QDataStream &ds, const SpaceWrapper &spacewrapper)
 {
     writeHeader(ds, r_spacewrapper, 1);
 
     SharedDataStream sds(ds);
 
-    sds << spacewrapper.wrap_point << spacewrapper.molgroup
-        << spacewrapper.map
-        << static_cast<const MoleculeConstraint&>(spacewrapper);
+    sds << spacewrapper.wrap_point << spacewrapper.molgroup << spacewrapper.map
+        << static_cast<const MoleculeConstraint &>(spacewrapper);
 
     return ds;
 }
@@ -72,9 +70,8 @@ QDataStream &operator>>(QDataStream &ds, SpaceWrapper &spacewrapper)
 
         spacewrapper = SpaceWrapper();
 
-        sds >> spacewrapper.wrap_point >> spacewrapper.molgroup
-            >> spacewrapper.map
-            >> static_cast<MoleculeConstraint&>(spacewrapper);
+        sds >> spacewrapper.wrap_point >> spacewrapper.molgroup >> spacewrapper.map >>
+            static_cast<MoleculeConstraint &>(spacewrapper);
 
         spacewrapper.space_property = spacewrapper.map["space"];
         spacewrapper.coords_property = spacewrapper.map["coordinates"];
@@ -86,36 +83,34 @@ QDataStream &operator>>(QDataStream &ds, SpaceWrapper &spacewrapper)
 }
 
 /** Constructor */
-SpaceWrapper::SpaceWrapper() : ConcreteProperty<SpaceWrapper,MoleculeConstraint>()
-{}
+SpaceWrapper::SpaceWrapper() : ConcreteProperty<SpaceWrapper, MoleculeConstraint>()
+{
+}
 
 /** Construct to wrap all of the molecules in the group 'molgroup'
     into the same periodic box as the point 'point' using the
     supplied property map to find the space and coordinate properties */
-SpaceWrapper::SpaceWrapper(const PointRef &point,
-                           const MoleculeGroup &wrap_group,
-                           const PropertyMap &wrap_map)
-             : ConcreteProperty<SpaceWrapper,MoleculeConstraint>(),
-               wrap_point(point), molgroup(wrap_group), map(wrap_map),
-               space_property(wrap_map["space"]),
-               coords_property(wrap_map["coordinates"])
-{}
+SpaceWrapper::SpaceWrapper(const PointRef &point, const MoleculeGroup &wrap_group, const PropertyMap &wrap_map)
+    : ConcreteProperty<SpaceWrapper, MoleculeConstraint>(), wrap_point(point), molgroup(wrap_group), map(wrap_map),
+      space_property(wrap_map["space"]), coords_property(wrap_map["coordinates"])
+{
+}
 
 /** Copy constructor */
 SpaceWrapper::SpaceWrapper(const SpaceWrapper &other)
-             : ConcreteProperty<SpaceWrapper,MoleculeConstraint>(other),
-               wrap_point(other.wrap_point), molgroup(other.molgroup),
-               map(other.map), space_property(other.space_property),
-               coords_property(other.coords_property),
-               spce(other.spce), changed_mols(other.changed_mols)
-{}
+    : ConcreteProperty<SpaceWrapper, MoleculeConstraint>(other), wrap_point(other.wrap_point), molgroup(other.molgroup),
+      map(other.map), space_property(other.space_property), coords_property(other.coords_property), spce(other.spce),
+      changed_mols(other.changed_mols)
+{
+}
 
 /** Destructor */
 SpaceWrapper::~SpaceWrapper()
-{}
+{
+}
 
 /** Copy assignment operator */
-SpaceWrapper& SpaceWrapper::operator=(const SpaceWrapper &other)
+SpaceWrapper &SpaceWrapper::operator=(const SpaceWrapper &other)
 {
     if (this != &other)
     {
@@ -135,11 +130,8 @@ SpaceWrapper& SpaceWrapper::operator=(const SpaceWrapper &other)
 /** Comparison operator */
 bool SpaceWrapper::operator==(const SpaceWrapper &other) const
 {
-    return (this == &other) or
-           (wrap_point == other.wrap_point and
-            map == other.map and
-            molgroup == other.molgroup and
-            MoleculeConstraint::operator==(other));
+    return (this == &other) or (wrap_point == other.wrap_point and map == other.map and molgroup == other.molgroup and
+                                MoleculeConstraint::operator==(other));
 }
 
 /** Comparison operator */
@@ -148,28 +140,28 @@ bool SpaceWrapper::operator!=(const SpaceWrapper &other) const
     return not this->operator==(other);
 }
 
-const char* SpaceWrapper::typeName()
+const char *SpaceWrapper::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SpaceWrapper>() );
+    return QMetaType::typeName(qMetaTypeId<SpaceWrapper>());
 }
 
 /** Return the point that defines the center of the periodic box
     (the molecules will be wrapped so that they are in the same
     box as this point) */
-const Point& SpaceWrapper::point() const
+const Point &SpaceWrapper::point() const
 {
     return wrap_point.read();
 }
 
 /** Return the molecule group containing the molecules being wrapped */
-const MoleculeGroup& SpaceWrapper::moleculeGroup() const
+const MoleculeGroup &SpaceWrapper::moleculeGroup() const
 {
     return molgroup.read();
 }
 
 /** Return the property map used to find the coordinates and
     space properties */
-const PropertyMap& SpaceWrapper::propertyMap() const
+const PropertyMap &SpaceWrapper::propertyMap() const
 {
     return map;
 }
@@ -200,18 +192,17 @@ void SpaceWrapper::setSystem(const System &system)
         const Property &new_space = system.property(space_property);
 
         if (not new_space.isA<Space>())
-            throw SireError::incompatible_error( QObject::tr(
-                    "You cannot use a SpaceWrapper constraint with a "
-                    "system property (%1) that is not derived from "
-                    "Space (%2).")
-                        .arg(space_property.toString())
-                        .arg(new_space.toString()), CODELOC );
+            throw SireError::incompatible_error(QObject::tr("You cannot use a SpaceWrapper constraint with a "
+                                                            "system property (%1) that is not derived from "
+                                                            "Space (%2).")
+                                                    .arg(space_property.toString())
+                                                    .arg(new_space.toString()),
+                                                CODELOC);
 
         spce = new_space.asA<Space>();
     }
 
-    if (molgroup.isNull() or molgroup.read().isEmpty() or
-        spce.isNull() or (not spce.read().isPeriodic()))
+    if (molgroup.isNull() or molgroup.read().isEmpty() or spce.isNull() or (not spce.read().isPeriodic()))
     {
         Constraint::setSatisfied(system, true);
         return;
@@ -225,26 +216,20 @@ void SpaceWrapper::setSystem(const System &system)
 
     changed_mols = Molecules();
 
-    for (Molecules::const_iterator it = molecules.constBegin();
-         it != molecules.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
     {
         Molecule molecule = it->molecule();
 
-        const AtomCoords &coords = molecule.property(coords_property)
-                                           .asA<AtomCoords>();
+        const AtomCoords &coords = molecule.property(coords_property).asA<AtomCoords>();
 
-        //translate the molecule as a single entity (we don't want
-        //molecules splitting over two sides of the box)
-        CoordGroupArray new_coords = space.getMinimumImage(coords.array(),
-                                                           center_point, true);
+        // translate the molecule as a single entity (we don't want
+        // molecules splitting over two sides of the box)
+        CoordGroupArray new_coords = space.getMinimumImage(coords.array(), center_point, true);
 
         if (new_coords.constData() != coords.constData())
         {
-            //the molecule has moved
-            molecule = molecule.edit().setProperty(coords_property,
-                                                   AtomCoords(new_coords))
-                                      .commit();
+            // the molecule has moved
+            molecule = molecule.edit().setProperty(coords_property, AtomCoords(new_coords)).commit();
 
             changed_mols.add(molecule);
         }
@@ -271,12 +256,12 @@ bool SpaceWrapper::mayChange(const Delta &delta, quint32 last_subversion) const
             const Property &new_space = delta.deltaSystem().property(space_property);
 
             if (not new_space.isA<Space>())
-                throw SireError::incompatible_error( QObject::tr(
-                        "You cannot use a SpaceWrapper constraint with a "
-                        "system property (%1) that is not derived from "
-                        "Space (%2).")
-                            .arg(space_property.toString())
-                            .arg(new_space.toString()), CODELOC );
+                throw SireError::incompatible_error(QObject::tr("You cannot use a SpaceWrapper constraint with a "
+                                                                "system property (%1) that is not derived from "
+                                                                "Space (%2).")
+                                                        .arg(space_property.toString())
+                                                        .arg(new_space.toString()),
+                                                    CODELOC);
 
             if (spce.isNull())
                 return true;
@@ -332,12 +317,12 @@ bool SpaceWrapper::deltaApply(Delta &delta, quint32 last_subversion)
                     return this->fullApply(delta);
             }
             else
-                throw SireError::incompatible_error( QObject::tr(
-                        "You cannot use a SpaceWrapper constraint with a "
-                        "system property (%1) that is not derived from "
-                        "Space (%2).")
-                            .arg(space_property.toString())
-                            .arg(new_space.toString()), CODELOC );
+                throw SireError::incompatible_error(QObject::tr("You cannot use a SpaceWrapper constraint with a "
+                                                                "system property (%1) that is not derived from "
+                                                                "Space (%2).")
+                                                        .arg(space_property.toString())
+                                                        .arg(new_space.toString()),
+                                                    CODELOC);
         }
         else if (not spce.isNull())
         {
@@ -358,9 +343,7 @@ bool SpaceWrapper::deltaApply(Delta &delta, quint32 last_subversion)
 
     if (delta.hasMoleculeChangeSince(last_subversion))
     {
-        QList<MolNum> changed_molnums = delta.changedMoleculesSince(
-                                                    molgroup.read().molecules(),
-                                                    last_subversion);
+        QList<MolNum> changed_molnums = delta.changedMoleculesSince(molgroup.read().molecules(), last_subversion);
 
         if (not changed_molnums.isEmpty())
         {
@@ -369,8 +352,8 @@ bool SpaceWrapper::deltaApply(Delta &delta, quint32 last_subversion)
             else
                 molgroup.edit().update(system.molecules());
 
-            //some of the molecules have changed - see if they need
-            //further changes to maintain the constraint
+            // some of the molecules have changed - see if they need
+            // further changes to maintain the constraint
             const Molecules &molecules = molgroup.read().molecules();
 
             changed_mols = Molecules();
@@ -379,20 +362,16 @@ bool SpaceWrapper::deltaApply(Delta &delta, quint32 last_subversion)
             {
                 Molecule molecule = molecules[molnum].molecule();
 
-                const AtomCoords &coords = molecule.property(coords_property)
-                                                   .asA<AtomCoords>();
+                const AtomCoords &coords = molecule.property(coords_property).asA<AtomCoords>();
 
-                //translate the molecule as a single entity (we don't want
-                //molecules splitting over two sides of the box)
-                CoordGroupArray new_coords = space.getMinimumImage(coords.array(),
-                                                                   center_point, true);
+                // translate the molecule as a single entity (we don't want
+                // molecules splitting over two sides of the box)
+                CoordGroupArray new_coords = space.getMinimumImage(coords.array(), center_point, true);
 
                 if (new_coords.constData() != coords.constData())
                 {
-                    //the molecule has moved
-                    molecule = molecule.edit().setProperty(coords_property,
-                                                           AtomCoords(new_coords))
-                                              .commit();
+                    // the molecule has moved
+                    molecule = molecule.edit().setProperty(coords_property, AtomCoords(new_coords)).commit();
 
                     changed_mols.add(molecule);
                 }

@@ -37,26 +37,24 @@ SIRE_BEGIN_HEADER
 namespace SireMaths
 {
 
-class NMatrix;
+    class NMatrix;
 
-SIREMATHS_EXPORT QVector<int> solve_linear_assignment( const NMatrix &costs,
-                                      bool check_result = false );
+    SIREMATHS_EXPORT QVector<int> solve_linear_assignment(const NMatrix &costs, bool check_result = false);
 
-SIREMATHS_EXPORT QVector<int> brute_force_linear_assignment( const NMatrix &costs );
+    SIREMATHS_EXPORT QVector<int> brute_force_linear_assignment(const NMatrix &costs);
 
-SIREMATHS_EXPORT double calculate_total_cost( const NMatrix &costs,
-                             const QVector<int> &rows_to_columns );
+    SIREMATHS_EXPORT double calculate_total_cost(const NMatrix &costs, const QVector<int> &rows_to_columns);
 
-SIREMATHS_EXPORT double get_lowest_total_cost( const NMatrix &costs );
+    SIREMATHS_EXPORT double get_lowest_total_cost(const NMatrix &costs);
 
-}
+} // namespace SireMaths
 
-SIRE_EXPOSE_FUNCTION( SireMaths::solve_linear_assignment )
+SIRE_EXPOSE_FUNCTION(SireMaths::solve_linear_assignment)
 
-SIRE_EXPOSE_FUNCTION( SireMaths::calculate_total_cost )
-SIRE_EXPOSE_FUNCTION( SireMaths::get_lowest_total_cost )
+SIRE_EXPOSE_FUNCTION(SireMaths::calculate_total_cost)
+SIRE_EXPOSE_FUNCTION(SireMaths::get_lowest_total_cost)
 
-SIRE_EXPOSE_FUNCTION( SireMaths::brute_force_linear_assignment )
+SIRE_EXPOSE_FUNCTION(SireMaths::brute_force_linear_assignment)
 
 SIRE_END_HEADER
 

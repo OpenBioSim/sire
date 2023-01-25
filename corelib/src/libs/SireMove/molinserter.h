@@ -40,208 +40,199 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class MolInserter;
-class NullInserter;
+    class MolInserter;
+    class NullInserter;
 
-class UniformInserter;
-}
+    class UniformInserter;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::MolInserter&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::MolInserter&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::MolInserter &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::MolInserter &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::NullInserter&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::NullInserter&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::NullInserter &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::NullInserter &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::UniformInserter&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::UniformInserter&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::UniformInserter &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::UniformInserter &);
 
 namespace SireMol
 {
-class Molecule;
-class PartialMolecule;
-}
+    class Molecule;
+    class PartialMolecule;
+} // namespace SireMol
 
 namespace SireVol
 {
-class Space;
+    class Space;
 }
 
 namespace SireSystem
 {
-class System;
+    class System;
 }
 
 namespace SireMove
 {
 
-using SireMaths::RanGenerator;
-using SireMol::MGIDsAndMaps;
+    using SireMaths::RanGenerator;
+    using SireMol::MGIDsAndMaps;
 
-using SireMol::Molecule;
-using SireMol::PartialMolecule;
-using SireVol::Space;
+    using SireMol::Molecule;
+    using SireMol::PartialMolecule;
+    using SireVol::Space;
 
-using SireSystem::System;
+    using SireSystem::System;
 
-/** This is the base class of all molecule inserters. These are
-    manipulator classes that are used to insert (add) molecules
-    to a system or molecule group(s) during a running simulation.
-    e.g. This is useful for Grand Canonial or Gibbs Ensemble simulations.
+    /** This is the base class of all molecule inserters. These are
+        manipulator classes that are used to insert (add) molecules
+        to a system or molecule group(s) during a running simulation.
+        e.g. This is useful for Grand Canonial or Gibbs Ensemble simulations.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT MolInserter : public SireBase::Property
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT MolInserter : public SireBase::Property
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const MolInserter&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, MolInserter&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const MolInserter &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, MolInserter &);
 
-public:
-    MolInserter();
-    MolInserter(const MolInserter &other);
+    public:
+        MolInserter();
+        MolInserter(const MolInserter &other);
 
-    virtual ~MolInserter();
+        virtual ~MolInserter();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual MolInserter* clone() const=0;
+        virtual MolInserter *clone() const = 0;
 
-    virtual void setGenerator(const RanGenerator &generator);
-    virtual void setGroups(const MGIDsAndMaps &mgids);
+        virtual void setGenerator(const RanGenerator &generator);
+        virtual void setGroups(const MGIDsAndMaps &mgids);
 
-    const RanGenerator& generator() const;
-    const MGIDsAndMaps& groups() const;
+        const RanGenerator &generator() const;
+        const MGIDsAndMaps &groups() const;
 
-    /** Insert the entire molecule 'molecule' into the system 'system'
-        using the space 'space', using the information about which
-        groups to add the molecule to (and which properties to use)
-        which are contained in this inserter). This returns the
-        probability of where the molecule was inserted (normalised
-        so that a probability of 1 is returned if the molecule
-        was added at a uniformly random orientation and position) */
-    virtual double insert(const Molecule &molecule,
-                          System &system, const Space &space)=0;
+        /** Insert the entire molecule 'molecule' into the system 'system'
+            using the space 'space', using the information about which
+            groups to add the molecule to (and which properties to use)
+            which are contained in this inserter). This returns the
+            probability of where the molecule was inserted (normalised
+            so that a probability of 1 is returned if the molecule
+            was added at a uniformly random orientation and position) */
+        virtual double insert(const Molecule &molecule, System &system, const Space &space) = 0;
 
-    /** Insert the partial molecule 'molecule' into the system 'system'
-        using the space 'space', using the information about which
-        groups to add the molecule to (and which properties to use)
-        which are contained in this inserter). This returns the
-        probability of where the molecule was inserted (normalised
-        so that a probability of 1 is returned if the molecule
-        was added at a uniformly random orientation and position) */
-    virtual double insert(const PartialMolecule &molecule,
-                          System &system, const Space &space)=0;
+        /** Insert the partial molecule 'molecule' into the system 'system'
+            using the space 'space', using the information about which
+            groups to add the molecule to (and which properties to use)
+            which are contained in this inserter). This returns the
+            probability of where the molecule was inserted (normalised
+            so that a probability of 1 is returned if the molecule
+            was added at a uniformly random orientation and position) */
+        virtual double insert(const PartialMolecule &molecule, System &system, const Space &space) = 0;
 
-    static const NullInserter& null();
+        static const NullInserter &null();
 
-protected:
-    MolInserter& operator=(const MolInserter &other);
+    protected:
+        MolInserter &operator=(const MolInserter &other);
 
-    bool operator==(const MolInserter &other) const;
-    bool operator!=(const MolInserter &other) const;
+        bool operator==(const MolInserter &other) const;
+        bool operator!=(const MolInserter &other) const;
 
-    void rebuildCoordsProperties();
+        void rebuildCoordsProperties();
 
-    const QStringList& coordsProperties() const;
+        const QStringList &coordsProperties() const;
 
-private:
-    /** The random number generator used to randomly position
-        (and/or orientate) the molecule when it is inserted */
-    RanGenerator rangen;
+    private:
+        /** The random number generator used to randomly position
+            (and/or orientate) the molecule when it is inserted */
+        RanGenerator rangen;
 
-    /** The identities of which groups the molecule should be added
-        to, together with the property maps to use for each group
-        to find the correct properties */
-    MGIDsAndMaps mgids;
+        /** The identities of which groups the molecule should be added
+            to, together with the property maps to use for each group
+            to find the correct properties */
+        MGIDsAndMaps mgids;
 
-    /** The list of all coordinates properties */
-    QStringList coords_properties;
-};
+        /** The list of all coordinates properties */
+        QStringList coords_properties;
+    };
 
-/** This is the null inserter - this doesn't insert anything
-    into anything
+    /** This is the null inserter - this doesn't insert anything
+        into anything
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT NullInserter
-            : public SireBase::ConcreteProperty<NullInserter,MolInserter>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT NullInserter : public SireBase::ConcreteProperty<NullInserter, MolInserter>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const NullInserter&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullInserter&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const NullInserter &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, NullInserter &);
 
-public:
-    NullInserter();
-    NullInserter(const NullInserter &other);
+    public:
+        NullInserter();
+        NullInserter(const NullInserter &other);
 
-    ~NullInserter();
+        ~NullInserter();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    NullInserter& operator=(const NullInserter &other);
+        NullInserter &operator=(const NullInserter &other);
 
-    bool operator==(const NullInserter &other) const;
-    bool operator!=(const NullInserter &other) const;
+        bool operator==(const NullInserter &other) const;
+        bool operator!=(const NullInserter &other) const;
 
-    double insert(const Molecule &molecule, System &system,
-                  const Space &space);
+        double insert(const Molecule &molecule, System &system, const Space &space);
 
-    double insert(const PartialMolecule &molecule, System &system,
-                  const Space &space);
-};
+        double insert(const PartialMolecule &molecule, System &system, const Space &space);
+    };
 
-/** This inserter inserts a molecule to a random point in space, using
-    a random orientation, chosen uniformly at random
+    /** This inserter inserts a molecule to a random point in space, using
+        a random orientation, chosen uniformly at random
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT UniformInserter
-            : public SireBase::ConcreteProperty<UniformInserter,MolInserter>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT UniformInserter : public SireBase::ConcreteProperty<UniformInserter, MolInserter>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const UniformInserter&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, UniformInserter&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const UniformInserter &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, UniformInserter &);
 
-public:
-    UniformInserter();
+    public:
+        UniformInserter();
 
-    UniformInserter(const MGIDsAndMaps &mgids);
+        UniformInserter(const MGIDsAndMaps &mgids);
 
-    UniformInserter(const UniformInserter &other);
+        UniformInserter(const UniformInserter &other);
 
-    ~UniformInserter();
+        ~UniformInserter();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    UniformInserter& operator=(const UniformInserter &other);
+        UniformInserter &operator=(const UniformInserter &other);
 
-    bool operator==(const UniformInserter &other) const;
-    bool operator!=(const UniformInserter &other) const;
+        bool operator==(const UniformInserter &other) const;
+        bool operator!=(const UniformInserter &other) const;
 
-    double insert(const Molecule &molecule, System &system,
-                  const Space &space);
+        double insert(const Molecule &molecule, System &system, const Space &space);
 
-    double insert(const PartialMolecule &molecule, System &system,
-                  const Space &space);
+        double insert(const PartialMolecule &molecule, System &system, const Space &space);
 
-private:
-    template<class T>
-    void uniform_insert(const T &molecule, System &system,
-                        const Space &space) const;
-};
+    private:
+        template <class T>
+        void uniform_insert(const T &molecule, System &system, const Space &space) const;
+    };
 
-typedef SireBase::PropPtr<MolInserter> MolInserterPtr;
+    typedef SireBase::PropPtr<MolInserter> MolInserterPtr;
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::NullInserter )
-Q_DECLARE_METATYPE( SireMove::UniformInserter )
+Q_DECLARE_METATYPE(SireMove::NullInserter)
+Q_DECLARE_METATYPE(SireMove::UniformInserter)
 
-SIRE_EXPOSE_CLASS( SireMove::MolInserter )
-SIRE_EXPOSE_CLASS( SireMove::NullInserter )
-SIRE_EXPOSE_CLASS( SireMove::UniformInserter )
+SIRE_EXPOSE_CLASS(SireMove::MolInserter)
+SIRE_EXPOSE_CLASS(SireMove::NullInserter)
+SIRE_EXPOSE_CLASS(SireMove::UniformInserter)
 
-SIRE_EXPOSE_PROPERTY( SireMove::MolInserterPtr, SireMove::MolInserter )
+SIRE_EXPOSE_PROPERTY(SireMove::MolInserterPtr, SireMove::MolInserter)
 
 SIRE_END_HEADER
 

@@ -35,38 +35,41 @@ SIRE_BEGIN_HEADER
 namespace SireError
 {
 
-/** This exception is thrown whenever there is an error with a
-    version number
+    /** This exception is thrown whenever there is an error with a
+        version number
 
-    @author Christopher Woods
-*/
-class version_error : public exception
-{
-public:
-    version_error() : exception()
-    {}
-
-    version_error(QString err, QString place = QString())
-                  : exception(err,place)
-    {}
-
-    version_error(const version_error &other) : exception(other)
-    {}
-
-    ~version_error() throw()
-    {}
-
-    static const char* typeName();
-
-    const char* what() const throw();
-
-    void throwSelf() const
+        @author Christopher Woods
+    */
+    class version_error : public exception
     {
-        throw version_error(*this);
-    }
-};
+    public:
+        version_error() : exception()
+        {
+        }
 
-}
+        version_error(QString err, QString place = QString()) : exception(err, place)
+        {
+        }
+
+        version_error(const version_error &other) : exception(other)
+        {
+        }
+
+        ~version_error() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw();
+
+        void throwSelf() const
+        {
+            throw version_error(*this);
+        }
+    };
+
+} // namespace SireError
 
 Q_DECLARE_METATYPE(SireError::version_error)
 

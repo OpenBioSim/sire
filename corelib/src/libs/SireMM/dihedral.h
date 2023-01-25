@@ -28,14 +28,14 @@
 #ifndef SIREMM_DIHEDRAL_H
 #define SIREMM_DIHEDRAL_H
 
+#include "SireMol/angleid.h"
 #include "SireMol/atom.h"
 #include "SireMol/bondid.h"
-#include "SireMol/angleid.h"
-#include "SireMol/dihedralid.h"
-#include "SireMol/improperid.h"
 #include "SireMol/connectivity.h"
-#include "SireMol/mover.hpp"
+#include "SireMol/dihedralid.h"
 #include "SireMol/evaluator.h"
+#include "SireMol/improperid.h"
+#include "SireMol/mover.hpp"
 
 #include "SireUnits/dimensions.h"
 #include "SireUnits/generalunit.h"
@@ -44,128 +44,121 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class Dihedral;
+    class Dihedral;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::Dihedral&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::Dihedral&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::Dihedral &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::Dihedral &);
 
 namespace SireCAS
 {
-class Expression;
+    class Expression;
 }
 
 namespace SireMM
 {
 
-class SelectorDihedral;
+    class SelectorDihedral;
 
-/** This class provides a molecule view to a dihedral */
-class SIREMM_EXPORT Dihedral
-    : public SireBase::ConcreteProperty<Dihedral, SireMol::MoleculeView>
-{
-
-friend QDataStream& ::operator<<(QDataStream&, const Dihedral&);
-friend QDataStream& ::operator>>(QDataStream&, Dihedral&);
-
-public:
-    Dihedral();
-    Dihedral(const SireMol::Atom &atom0, const SireMol::Atom &atom1,
-             const SireMol::Atom &atom2, const SireMol::Atom &atom3);
-    Dihedral(const SireMol::MoleculeView &molview,
-             const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-             const SireMol::AtomID &atom2, const SireMol::AtomID &atom3);
-    Dihedral(const SireMol::MoleculeData &moldata,
-             const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-             const SireMol::AtomID &atom2, const SireMol::AtomID &atom3);
-    Dihedral(const SireMol::MoleculeData &moldata,
-             const SireMol::DihedralID &dihedral);
-
-    Dihedral(const Dihedral &other);
-    virtual ~Dihedral();
-
-    static const char* typeName();
-
-    virtual const char* what() const
+    /** This class provides a molecule view to a dihedral */
+    class SIREMM_EXPORT Dihedral : public SireBase::ConcreteProperty<Dihedral, SireMol::MoleculeView>
     {
-        return Dihedral::typeName();
-    }
 
-    virtual Dihedral* clone() const
-    {
-        return new Dihedral(*this);
-    }
+        friend QDataStream & ::operator<<(QDataStream &, const Dihedral &);
+        friend QDataStream & ::operator>>(QDataStream &, Dihedral &);
 
-    Dihedral& operator=(const Dihedral &other);
+    public:
+        Dihedral();
+        Dihedral(const SireMol::Atom &atom0, const SireMol::Atom &atom1, const SireMol::Atom &atom2,
+                 const SireMol::Atom &atom3);
+        Dihedral(const SireMol::MoleculeView &molview, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                 const SireMol::AtomID &atom2, const SireMol::AtomID &atom3);
+        Dihedral(const SireMol::MoleculeData &moldata, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                 const SireMol::AtomID &atom2, const SireMol::AtomID &atom3);
+        Dihedral(const SireMol::MoleculeData &moldata, const SireMol::DihedralID &dihedral);
 
-    bool operator==(const Dihedral &other) const;
-    bool operator!=(const Dihedral &other) const;
+        Dihedral(const Dihedral &other);
+        virtual ~Dihedral();
 
-    SireMol::MolViewPtr toSelector() const;
+        static const char *typeName();
 
-    QString toString() const;
+        virtual const char *what() const
+        {
+            return Dihedral::typeName();
+        }
 
-    SireMol::Atom atom0() const;
-    SireMol::Atom atom1() const;
-    SireMol::Atom atom2() const;
-    SireMol::Atom atom3() const;
+        virtual Dihedral *clone() const
+        {
+            return new Dihedral(*this);
+        }
 
-    SireMol::DihedralID ID() const;
+        Dihedral &operator=(const Dihedral &other);
 
-    bool isEmpty() const;
-    bool selectedAll() const;
+        bool operator==(const Dihedral &other) const;
+        bool operator!=(const Dihedral &other) const;
 
-    SelectorDihedral selector() const;
-    SelectorDihedral invert() const;
+        SireMol::MolViewPtr toSelector() const;
 
-    SireMol::AtomSelection selection() const;
+        QString toString() const;
 
-    bool hasProperty(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key,
-                     const SireBase::PropertyName &metakey) const;
+        SireMol::Atom atom0() const;
+        SireMol::Atom atom1() const;
+        SireMol::Atom atom2() const;
+        SireMol::Atom atom3() const;
 
-    QStringList propertyKeys() const;
-    QStringList metadataKeys() const;
-    QStringList metadataKeys(const SireBase::PropertyName &key) const;
+        SireMol::DihedralID ID() const;
 
-    SireBase::Properties properties() const;
+        bool isEmpty() const;
+        bool selectedAll() const;
 
-    SireMol::Evaluator evaluate() const;
-    SireMol::Mover<Dihedral> move() const;
+        SelectorDihedral selector() const;
+        SelectorDihedral invert() const;
 
-    const Property& property(const SireBase::PropertyName &key) const;
-    const Property& property(const SireBase::PropertyName &key,
-                             const Property &default_value) const;
+        SireMol::AtomSelection selection() const;
 
-    SireUnits::Dimension::Angle size() const;
-    SireUnits::Dimension::Angle size(const SireBase::PropertyMap &map) const;
+        bool hasProperty(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey) const;
 
-    SireUnits::Dimension::Angle measure() const;
-    SireUnits::Dimension::Angle measure(const SireBase::PropertyMap &map) const;
+        QStringList propertyKeys() const;
+        QStringList metadataKeys() const;
+        QStringList metadataKeys(const SireBase::PropertyName &key) const;
 
-    SireCAS::Expression potential() const;
-    SireCAS::Expression potential(const SireBase::PropertyMap &map) const;
+        SireBase::Properties properties() const;
 
-    SireUnits::Dimension::GeneralUnit energy() const;
-    SireUnits::Dimension::GeneralUnit energy(
-                            const SireBase::PropertyMap &map) const;
+        SireMol::Evaluator evaluate() const;
+        SireMol::Mover<Dihedral> move() const;
 
-protected:
-    bool hasConnectivity() const;
-    const SireMol::Connectivity& getConnectivity() const;
+        const Property &property(const SireBase::PropertyName &key) const;
+        const Property &property(const SireBase::PropertyName &key, const Property &default_value) const;
 
-    /** The ID of the dihedral (holding AtomIdx IDs) */
-    SireMol::DihedralID dih;
-};
+        SireUnits::Dimension::Angle size() const;
+        SireUnits::Dimension::Angle size(const SireBase::PropertyMap &map) const;
 
-}
+        SireUnits::Dimension::Angle measure() const;
+        SireUnits::Dimension::Angle measure(const SireBase::PropertyMap &map) const;
 
-Q_DECLARE_METATYPE( SireMM::Dihedral )
+        SireCAS::Expression potential() const;
+        SireCAS::Expression potential(const SireBase::PropertyMap &map) const;
+
+        SireUnits::Dimension::GeneralUnit energy() const;
+        SireUnits::Dimension::GeneralUnit energy(const SireBase::PropertyMap &map) const;
+
+    protected:
+        bool hasConnectivity() const;
+        const SireMol::Connectivity &getConnectivity() const;
+
+        /** The ID of the dihedral (holding AtomIdx IDs) */
+        SireMol::DihedralID dih;
+    };
+
+} // namespace SireMM
+
+Q_DECLARE_METATYPE(SireMM::Dihedral)
 Q_DECLARE_METATYPE(SireMol::Mover<SireMM::Dihedral>);
 
-SIRE_EXPOSE_CLASS( SireMM::Dihedral )
-SIRE_EXPOSE_ALIAS( SireMol::Mover<SireMM::Dihedral>, SireMol::Mover_Dihedral_ )
+SIRE_EXPOSE_CLASS(SireMM::Dihedral)
+SIRE_EXPOSE_ALIAS(SireMol::Mover<SireMM::Dihedral>, SireMol::Mover_Dihedral_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 
@@ -176,7 +169,7 @@ namespace SireMol
     template class SireMol::Mover<SireMM::Dihedral>;
 }
 
-#endif //SIRE_INSTANTIATE_TEMPLATES
+#endif // SIRE_INSTANTIATE_TEMPLATES
 
 SIRE_END_HEADER
 

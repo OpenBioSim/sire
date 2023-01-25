@@ -15,43 +15,43 @@ namespace SireBase
 {
     PropertyPtr SIREBASE_EXPORT wrap(const GeneralUnit &unit)
     {
-        return PropertyPtr( GeneralUnitProperty(unit) );
+        return PropertyPtr(GeneralUnitProperty(unit));
     }
 
     PropertyPtr SIREBASE_EXPORT wrap(const QVector<GeneralUnit> &units)
     {
-        return PropertyPtr( GeneralUnitArrayProperty(units) );
+        return PropertyPtr(GeneralUnitArrayProperty(units));
     }
 
     PropertyPtr SIREBASE_EXPORT wrap(const QList<GeneralUnit> &units)
     {
-        return PropertyPtr( GeneralUnitArrayProperty(units) );
+        return PropertyPtr(GeneralUnitArrayProperty(units));
     }
-}
+} // namespace SireBase
 
 static const RegisterMetaType<GeneralUnitProperty> r_genprop;
 static const RegisterMetaType<GeneralUnitArrayProperty> r_genarrayprop;
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream &ds, const SireBase::GeneralUnitProperty &p)
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &ds, const SireBase::GeneralUnitProperty &p)
 {
     writeHeader(ds, r_genprop, 1);
-    ds << static_cast<const GeneralUnit&>(p);
+    ds << static_cast<const GeneralUnit &>(p);
     return ds;
 }
 
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream &ds, SireBase::GeneralUnitProperty &p)
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &ds, SireBase::GeneralUnitProperty &p)
 {
     VersionID v = readHeader(ds, r_genprop);
 
     if (v == 1)
-        ds >> static_cast<GeneralUnit&>(p);
+        ds >> static_cast<GeneralUnit &>(p);
     else
         throw version_error(v, "1", r_genprop, CODELOC);
 
     return ds;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream &ds, const SireBase::GeneralUnitArrayProperty &p)
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &ds, const SireBase::GeneralUnitArrayProperty &p)
 {
     writeHeader(ds, r_genarrayprop, 1);
 
@@ -61,7 +61,7 @@ SIREBASE_EXPORT QDataStream& operator<<(QDataStream &ds, const SireBase::General
     return ds;
 }
 
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream &ds, SireBase::GeneralUnitArrayProperty &p)
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &ds, SireBase::GeneralUnitArrayProperty &p)
 {
     VersionID v = readHeader(ds, r_genarrayprop);
 
@@ -79,30 +79,30 @@ SIREBASE_EXPORT QDataStream& operator>>(QDataStream &ds, SireBase::GeneralUnitAr
     return ds;
 }
 
-GeneralUnitProperty::GeneralUnitProperty()
-                    : ConcreteProperty<GeneralUnitProperty, Property>(),
-                      GeneralUnit()
-{}
+GeneralUnitProperty::GeneralUnitProperty() : ConcreteProperty<GeneralUnitProperty, Property>(), GeneralUnit()
+{
+}
 
 GeneralUnitProperty::GeneralUnitProperty(const SireUnits::Dimension::GeneralUnit &unit)
-                    : ConcreteProperty<GeneralUnitProperty, Property>(),
-                      GeneralUnit(unit)
-{}
+    : ConcreteProperty<GeneralUnitProperty, Property>(), GeneralUnit(unit)
+{
+}
 
 GeneralUnitProperty::GeneralUnitProperty(const GeneralUnitProperty &other)
-                    : ConcreteProperty<GeneralUnitProperty, Property>(other),
-                      GeneralUnit(static_cast<const GeneralUnit&>(other))
-{}
+    : ConcreteProperty<GeneralUnitProperty, Property>(other), GeneralUnit(static_cast<const GeneralUnit &>(other))
+{
+}
 
 GeneralUnitProperty::~GeneralUnitProperty()
-{}
+{
+}
 
-const char* GeneralUnitProperty::typeName()
+const char *GeneralUnitProperty::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<GeneralUnitProperty>());
 }
 
-const char* GeneralUnitProperty::what() const
+const char *GeneralUnitProperty::what() const
 {
     return GeneralUnitProperty::typeName();
 }
@@ -112,27 +112,26 @@ QString GeneralUnitProperty::toString() const
     return GeneralUnit::toString();
 }
 
-GeneralUnitProperty* GeneralUnitProperty::clone() const
+GeneralUnitProperty *GeneralUnitProperty::clone() const
 {
     return new GeneralUnitProperty(*this);
 }
 
-GeneralUnitProperty& GeneralUnitProperty::operator=(const GeneralUnitProperty &other)
+GeneralUnitProperty &GeneralUnitProperty::operator=(const GeneralUnitProperty &other)
 {
-    GeneralUnit::operator=(static_cast<const GeneralUnit&>(other));
+    GeneralUnit::operator=(static_cast<const GeneralUnit &>(other));
     return *this;
 }
 
 bool GeneralUnitProperty::operator==(const GeneralUnitProperty &other) const
 {
-    return GeneralUnit::operator==(static_cast<const GeneralUnit&>(other));
+    return GeneralUnit::operator==(static_cast<const GeneralUnit &>(other));
 }
 
 bool GeneralUnitProperty::operator!=(const GeneralUnitProperty &other) const
 {
-    return GeneralUnit::operator!=(static_cast<const GeneralUnit&>(other));
+    return GeneralUnit::operator!=(static_cast<const GeneralUnit &>(other));
 }
-
 
 bool GeneralUnitProperty::isAString() const
 {
@@ -167,9 +166,9 @@ QString GeneralUnitProperty::asAString() const
 double GeneralUnitProperty::asADouble() const
 {
     if (not this->isDimensionless())
-        throw SireError::invalid_cast( QObject::tr(
-            "You cannot convert a quantity with units (%1) to a unitless number.")
-                .arg(this->toString()), CODELOC);
+        throw SireError::invalid_cast(
+            QObject::tr("You cannot convert a quantity with units (%1) to a unitless number.").arg(this->toString()),
+            CODELOC);
 
     return this->value();
 }
@@ -190,30 +189,35 @@ SireUnits::Dimension::GeneralUnit GeneralUnitProperty::asAUnit() const
 }
 
 GeneralUnitArrayProperty::GeneralUnitArrayProperty()
-                         : ConcreteProperty<GeneralUnitArrayProperty, ArrayProperty<GeneralUnit>>()
-{}
+    : ConcreteProperty<GeneralUnitArrayProperty, ArrayProperty<GeneralUnit>>()
+{
+}
 
 GeneralUnitArrayProperty::GeneralUnitArrayProperty(const QVector<SireUnits::Dimension::GeneralUnit> &units)
-                         : ConcreteProperty<GeneralUnitArrayProperty, ArrayProperty<GeneralUnit>>(units)
-{}
+    : ConcreteProperty<GeneralUnitArrayProperty, ArrayProperty<GeneralUnit>>(units)
+{
+}
 
 GeneralUnitArrayProperty::GeneralUnitArrayProperty(const QList<SireUnits::Dimension::GeneralUnit> &units)
-                         : ConcreteProperty<GeneralUnitArrayProperty, ArrayProperty<GeneralUnit>>(units)
-{}
+    : ConcreteProperty<GeneralUnitArrayProperty, ArrayProperty<GeneralUnit>>(units)
+{
+}
 
 GeneralUnitArrayProperty::GeneralUnitArrayProperty(const GeneralUnitArrayProperty &other)
-                         : ConcreteProperty<GeneralUnitArrayProperty, ArrayProperty<GeneralUnit>>(other)
-{}
+    : ConcreteProperty<GeneralUnitArrayProperty, ArrayProperty<GeneralUnit>>(other)
+{
+}
 
 GeneralUnitArrayProperty::~GeneralUnitArrayProperty()
-{}
+{
+}
 
-const char* GeneralUnitArrayProperty::typeName()
+const char *GeneralUnitArrayProperty::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<GeneralUnitArrayProperty>());
 }
 
-const char* GeneralUnitArrayProperty::what() const
+const char *GeneralUnitArrayProperty::what() const
 {
     return GeneralUnitArrayProperty::typeName();
 }
@@ -223,12 +227,12 @@ QString GeneralUnitArrayProperty::toString() const
     return ArrayProperty<GeneralUnit>::toString();
 }
 
-GeneralUnitArrayProperty* GeneralUnitArrayProperty::clone() const
+GeneralUnitArrayProperty *GeneralUnitArrayProperty::clone() const
 {
     return new GeneralUnitArrayProperty(*this);
 }
 
-GeneralUnitArrayProperty& GeneralUnitArrayProperty::operator=(const GeneralUnitArrayProperty &other)
+GeneralUnitArrayProperty &GeneralUnitArrayProperty::operator=(const GeneralUnitArrayProperty &other)
 {
     ArrayProperty<GeneralUnit>::operator=(other);
     return *this;

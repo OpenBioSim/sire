@@ -32,10 +32,10 @@
 #include "mover.hpp"
 #include "selector.hpp"
 
+#include "atom.h"
+#include "cutgroup.h"
 #include "molecule.h"
 #include "residue.h"
-#include "cutgroup.h"
-#include "atom.h"
 
 #include "atomeditor.h"
 #include "cgeditor.h"
@@ -51,12 +51,11 @@ using namespace SireStream;
 static const RegisterMetaType<AtomCutting> r_rescut;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AtomCutting &rescut)
+QDataStream &operator<<(QDataStream &ds, const AtomCutting &rescut)
 {
     writeHeader(ds, r_rescut, 1);
 
-    ds << static_cast<const CuttingFunction&>(rescut);
+    ds << static_cast<const CuttingFunction &>(rescut);
 
     return ds;
 }
@@ -68,7 +67,7 @@ QDataStream &operator>>(QDataStream &ds, AtomCutting &rescut)
 
     if (v == 1)
     {
-        ds >> static_cast<CuttingFunction&>(rescut);
+        ds >> static_cast<CuttingFunction &>(rescut);
     }
     else
         throw version_error(v, "1", r_rescut, CODELOC);
@@ -77,33 +76,34 @@ QDataStream &operator>>(QDataStream &ds, AtomCutting &rescut)
 }
 
 /** Constructor */
-AtomCutting::AtomCutting()
-               : ConcreteProperty<AtomCutting,CuttingFunction>()
-{}
+AtomCutting::AtomCutting() : ConcreteProperty<AtomCutting, CuttingFunction>()
+{
+}
 
 /** Copy constructor */
-AtomCutting::AtomCutting(const AtomCutting &other)
-               : ConcreteProperty<AtomCutting,CuttingFunction>(other)
-{}
+AtomCutting::AtomCutting(const AtomCutting &other) : ConcreteProperty<AtomCutting, CuttingFunction>(other)
+{
+}
 
 /** Destructor */
 AtomCutting::~AtomCutting()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomCutting& AtomCutting::operator=(const AtomCutting&)
+AtomCutting &AtomCutting::operator=(const AtomCutting &)
 {
     return *this;
 }
 
 /** Comparison operator */
-bool AtomCutting::operator==(const AtomCutting&) const
+bool AtomCutting::operator==(const AtomCutting &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool AtomCutting::operator!=(const AtomCutting&) const
+bool AtomCutting::operator!=(const AtomCutting &) const
 {
     return false;
 }
@@ -111,37 +111,35 @@ bool AtomCutting::operator!=(const AtomCutting&) const
 /** Apply this function - this creates one CutGroup per atom */
 MolStructureEditor AtomCutting::operator()(MolStructureEditor &moleditor) const
 {
-    //remove the existing CutGroups
+    // remove the existing CutGroups
     moleditor.removeAllCutGroups();
 
-    //now create one CutGroup for each atom, giving it the same
-    //number as the atom index
+    // now create one CutGroup for each atom, giving it the same
+    // number as the atom index
 
-    int k=0;
+    int k = 0;
 
-    for (ResIdx i(0); i<moleditor.nResidues(); ++i)
+    for (ResIdx i(0); i < moleditor.nResidues(); ++i)
     {
         ResStructureEditor reseditor = moleditor.residue(i);
 
-        for (int j=0; j<reseditor.nAtoms(); ++j)
+        for (int j = 0; j < reseditor.nAtoms(); ++j)
         {
 
-	  moleditor.add( CGName(QString::number(k)) );
+            moleditor.add(CGName(QString::number(k)));
 
-	  reseditor.atom(j).reparent( CGIdx(k) );
+            reseditor.atom(j).reparent(CGIdx(k));
 
-	  k++;
+            k++;
         }
 
-        //k=reseditor.nAtoms() + 1;
-
-
-     }
+        // k=reseditor.nAtoms() + 1;
+    }
 
     return moleditor;
 }
 
-const char* AtomCutting::typeName()
+const char *AtomCutting::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomCutting>() );
+    return QMetaType::typeName(qMetaTypeId<AtomCutting>());
 }

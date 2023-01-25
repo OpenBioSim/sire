@@ -25,17 +25,17 @@
   *
 \*********************************************/
 
-#include <QString>
 #include <QFile>
 #include <QRegExp>
+#include <QString>
 #include <QStringList>
 #include <QTextStream>
 
 #include "tinker.h"
 
+#include "SireMol/element.h"
 #include "SireMol/moleculegroup.h"
 #include "SireMol/molecules.h"
-#include "SireMol/element.h"
 
 #include "SireMaths/vector.h"
 
@@ -56,11 +56,13 @@ using namespace SireStream;
 
 /** Constructor */
 TinkerParameters::TinkerParameters() : IOParametersBase()
-{}
+{
+}
 
 /** Destructor */
 TinkerParameters::~TinkerParameters()
-{}
+{
+}
 
 /////////////
 ///////////// Implementation of everything needed to get the
@@ -107,21 +109,25 @@ public:
 };
 
 TinkerXYZAtom::TinkerXYZAtom()
-{}
+{
+}
 
 TinkerXYZAtom::~TinkerXYZAtom()
-{}
+{
+}
 
 TinkerXYZAtom TinkerXYZAtom::readFromLine(const QString &line, int linenum)
 {
     QStringList words = line.split(" ", Qt::SkipEmptyParts);
 
     if (words.count() < 6)
-        throw SireIO::parse_error( QObject::tr(
-                "Line %1 does not look like a valid Tinker XYZ line. A Tinker "
-                "XYZ line should have at least 6 space separated words, but the "
-                "number of space separated words on this line is just %2.\n%3")
-                    .arg(linenum).arg(words.count()).arg(line), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Line %1 does not look like a valid Tinker XYZ line. A Tinker "
+                                              "XYZ line should have at least 6 space separated words, but the "
+                                              "number of space separated words on this line is just %2.\n%3")
+                                      .arg(linenum)
+                                      .arg(words.count())
+                                      .arg(line),
+                                  CODELOC);
 
     TinkerXYZAtom atom;
 
@@ -132,62 +138,75 @@ TinkerXYZAtom TinkerXYZAtom::readFromLine(const QString &line, int linenum)
     atom.atomnum = words[0].toInt(&ok);
 
     if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-                "Line %1 does not look like a valid Tinker XYZ line. The first "
-                "space separated word in the line should be an integer, but "
-                "the first word (%2) does not look like an integer.\n%3")
-                    .arg(linenum).arg(words[0]).arg(line), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Line %1 does not look like a valid Tinker XYZ line. The first "
+                                              "space separated word in the line should be an integer, but "
+                                              "the first word (%2) does not look like an integer.\n%3")
+                                      .arg(linenum)
+                                      .arg(words[0])
+                                      .arg(line),
+                                  CODELOC);
 
     atom.atomname = words[1];
 
     atom.x = words[2].toDouble(&ok);
 
     if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-                "Line %1 does not look like a valid Tinker XYZ line. The third "
-                "space separated word in the line should be the X coordinate, but "
-                "the third word (%2) does not look like a number.\n%3")
-                    .arg(linenum).arg(words[2]).arg(line), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Line %1 does not look like a valid Tinker XYZ line. The third "
+                                              "space separated word in the line should be the X coordinate, but "
+                                              "the third word (%2) does not look like a number.\n%3")
+                                      .arg(linenum)
+                                      .arg(words[2])
+                                      .arg(line),
+                                  CODELOC);
 
     atom.y = words[3].toDouble(&ok);
 
     if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-                "Line %1 does not look like a valid Tinker XYZ line. The fourth "
-                "space separated word in the line should be the Y coordinate, but "
-                "the fourth word (%2) does not look like a number.\n%3")
-                    .arg(linenum).arg(words[3]).arg(line), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Line %1 does not look like a valid Tinker XYZ line. The fourth "
+                                              "space separated word in the line should be the Y coordinate, but "
+                                              "the fourth word (%2) does not look like a number.\n%3")
+                                      .arg(linenum)
+                                      .arg(words[3])
+                                      .arg(line),
+                                  CODELOC);
 
     atom.z = words[4].toDouble(&ok);
 
     if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-                "Line %1 does not look like a valid Tinker XYZ line. The fifth "
-                "space separated word in the line should be the Z coordinate, but "
-                "the fifth word (%2) does not look like a number.\n%3")
-                    .arg(linenum).arg(words[4]).arg(line), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Line %1 does not look like a valid Tinker XYZ line. The fifth "
+                                              "space separated word in the line should be the Z coordinate, but "
+                                              "the fifth word (%2) does not look like a number.\n%3")
+                                      .arg(linenum)
+                                      .arg(words[4])
+                                      .arg(line),
+                                  CODELOC);
 
-    //now read in the parameter number
+    // now read in the parameter number
     atom.param = words[5].toInt(&ok);
 
     if (not ok)
-        throw SireIO::parse_error( QObject::tr(
-                "Line %1 does not look like a valid Tinker XYZ line. The sixth "
-                "space separated word in the line should be the parameter number, "
-                "but the size word (%2) does look like an integer.\n%3")
-                    .arg(linenum).arg(words[5]).arg(line), CODELOC );
+        throw SireIO::parse_error(QObject::tr("Line %1 does not look like a valid Tinker XYZ line. The sixth "
+                                              "space separated word in the line should be the parameter number, "
+                                              "but the size word (%2) does look like an integer.\n%3")
+                                      .arg(linenum)
+                                      .arg(words[5])
+                                      .arg(line),
+                                  CODELOC);
 
-    //now read in the connectivity
-    for (int i=6; i<words.count(); ++i)
+    // now read in the connectivity
+    for (int i = 6; i < words.count(); ++i)
     {
-        atom.bonded_to.append( words[i].toInt(&ok) );
+        atom.bonded_to.append(words[i].toInt(&ok));
 
         if (not ok)
-            throw SireIO::parse_error( QObject::tr(
-                    "Line %1 does not look like a valid Tinker XYZ line. The last "
-                    "space separated words in the line should be integers giving the "
-                    "connectivity of the molecule. Word %2 (%3) is not an integer.\n%4")
-                        .arg(linenum).arg(i).arg(words[i]).arg(line), CODELOC );
+            throw SireIO::parse_error(QObject::tr("Line %1 does not look like a valid Tinker XYZ line. The last "
+                                                  "space separated words in the line should be integers giving the "
+                                                  "connectivity of the molecule. Word %2 (%3) is not an integer.\n%4")
+                                          .arg(linenum)
+                                          .arg(i)
+                                          .arg(words[i])
+                                          .arg(line),
+                                      CODELOC);
     }
 
     return atom;
@@ -199,8 +218,8 @@ QString TinkerXYZAtom::writeToLine() const
 
     QTextStream ts(&line);
 
-    ts.setRealNumberNotation( QTextStream::FixedNotation );
-    ts.setRealNumberPrecision( 6 );
+    ts.setRealNumberNotation(QTextStream::FixedNotation);
+    ts.setRealNumberPrecision(6);
 
     ts.setFieldWidth(6);
     ts << atomnum;
@@ -269,10 +288,12 @@ public:
 };
 
 TinkerXYZMolecule::TinkerXYZMolecule()
-{}
+{
+}
 
 TinkerXYZMolecule::~TinkerXYZMolecule()
-{}
+{
+}
 
 void TinkerXYZMolecule::add(const TinkerXYZAtom &atom)
 {
@@ -374,7 +395,7 @@ QDataStream &operator<<(QDataStream &ds, const Tinker &tinker)
     SharedDataStream sds(ds);
 
     sds //<<
-        << static_cast<const IOBase&>(tinker);
+        << static_cast<const IOBase &>(tinker);
 
     return ds;
 }
@@ -389,7 +410,7 @@ QDataStream &operator>>(QDataStream &ds, Tinker &tinker)
         SharedDataStream sds(ds);
 
         sds //>>
-            >> static_cast<IOBase&>(tinker);
+            >> static_cast<IOBase &>(tinker);
     }
     else
         throw version_error(v, "1", r_tinker, CODELOC);
@@ -398,24 +419,27 @@ QDataStream &operator>>(QDataStream &ds, Tinker &tinker)
 }
 
 /** Constructor */
-Tinker::Tinker() : ConcreteProperty<Tinker,IOBase>()
-{}
+Tinker::Tinker() : ConcreteProperty<Tinker, IOBase>()
+{
+}
 
 /** Copy constructor */
-Tinker::Tinker(const Tinker &other) : ConcreteProperty<Tinker,IOBase>(other)
-{}
+Tinker::Tinker(const Tinker &other) : ConcreteProperty<Tinker, IOBase>(other)
+{
+}
 
 /** Destructor */
 Tinker::~Tinker()
-{}
-
-const char* Tinker::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Tinker>() );
+}
+
+const char *Tinker::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<Tinker>());
 }
 
 /** Copy assignment operator */
-Tinker& Tinker::operator=(const Tinker &other)
+Tinker &Tinker::operator=(const Tinker &other)
 {
     IOBase::operator=(other);
     return *this;
@@ -433,10 +457,10 @@ bool Tinker::operator!=(const Tinker &other) const
     return not Tinker::operator==(other);
 }
 
-Q_GLOBAL_STATIC( TinkerParameters, tinkerParameters )
+Q_GLOBAL_STATIC(TinkerParameters, tinkerParameters)
 
 /** Return the default parameters used by this IO object */
-const TinkerParameters& Tinker::parameters()
+const TinkerParameters &Tinker::parameters()
 {
     return *(tinkerParameters());
 }
@@ -450,9 +474,9 @@ void Tinker::loadParameters(const QString &prmfile)
     if (not f.open(QIODevice::ReadOnly))
         throw SireError::file_error(f, CODELOC);
 
-    //QRegExp objects to match the parts of the file we are interested in
+    // QRegExp objects to match the parts of the file we are interested in
 
-    //atom      1     1    HA      "Nonpolar Hydrogen"         1      1.008     1
+    // atom      1     1    HA      "Nonpolar Hydrogen"         1      1.008     1
     QRegExp atom_regexp("atom\\s+(\\d+)\\s+(\\d+)\\s+(\\w+)\\s+"
                         "\"([\\w\\s\\d]+)\"\\s+(\\d+)\\s+([\\d\\.]+)\\s+(\\d+)");
 
@@ -469,45 +493,43 @@ void Tinker::loadParameters(const QString &prmfile)
         if (line.isEmpty() or line.startsWith("#"))
             continue;
 
-        //if (TinkerAtomParam::matches(line))
+        // if (TinkerAtomParam::matches(line))
         //{
-        //    TinkerAtomParam = TinkerAtomParam::readFromLine(line, linenum);
-       // }
+        //     TinkerAtomParam = TinkerAtomParam::readFromLine(line, linenum);
+        // }
     }
 }
 
 /** Read the molecule group from 'data', using the parameters in 'map' */
 MoleculeGroup Tinker::readMols(const QByteArray &data, const PropertyMap &map) const
 {
-    //connect a text stream to this bytearray so that we can read it as text
+    // connect a text stream to this bytearray so that we can read it as text
     QTextStream ts(data, QIODevice::ReadOnly | QIODevice::Text);
 
     int linenum = -1;
 
     QList<TinkerXYZMolecule> mols;
 
-    //read all of the molecules from the file - place them into
-    //the intermediate format 'mols'
+    // read all of the molecules from the file - place them into
+    // the intermediate format 'mols'
     while (not ts.atEnd())
     {
         ++linenum;
 
-        //read a line from the file
+        // read a line from the file
         QString line = ts.readLine().simplified();
 
         if (line.isEmpty())
             continue;
 
-        //if this is not the header line, then read the atoms
+        // if this is not the header line, then read the atoms
         if (linenum > 0)
         {
             TinkerXYZAtom atom = TinkerXYZAtom::readFromLine(line, linenum);
 
             bool added_atom = false;
 
-            for (QList<TinkerXYZMolecule>::iterator it = mols.begin();
-                 it != mols.end();
-                 ++it)
+            for (QList<TinkerXYZMolecule>::iterator it = mols.begin(); it != mols.end(); ++it)
             {
                 if (it->contains(atom))
                 {
@@ -526,8 +548,8 @@ MoleculeGroup Tinker::readMols(const QByteArray &data, const PropertyMap &map) c
         }
     }
 
-    //now run through each molecule and create a SireMol::Molecule object
-    //to hold it
+    // now run through each molecule and create a SireMol::Molecule object
+    // to hold it
     /*MoleculeGroup molgroup;
 
     foreach (TinkerXYZMolecule mol, mols)

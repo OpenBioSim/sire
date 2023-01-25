@@ -26,8 +26,8 @@
 \*********************************************/
 
 #ifdef SIRE_USE_MPI
-#include <mpi.h>             // CONDITIONAL_INCLUDE
-#include "mpi/mpicluster.h"  // CONDITIONAL_INCLUDE
+#include "mpi/mpicluster.h" // CONDITIONAL_INCLUDE
+#include <mpi.h>            // CONDITIONAL_INCLUDE
 #endif
 
 #include <QHash>
@@ -36,8 +36,8 @@
 
 #include <QElapsedTimer>
 
-#include "cluster.h"
 #include "backend.h"
+#include "cluster.h"
 #include "frontend.h"
 #include "nodes.h"
 
@@ -45,13 +45,12 @@
 #include "SireError/printerror.h"
 
 #ifdef Q_OS_WIN
-   #include <windows.h>    // CONDITIONAL_INCLUDE
+#include <windows.h> // CONDITIONAL_INCLUDE
 #else
-   #ifdef Q_OS_UNIX
-       #include <unistd.h>  // CONDITIONAL_INCLUDE
-   #endif
+#ifdef Q_OS_UNIX
+#include <unistd.h> // CONDITIONAL_INCLUDE
 #endif
-
+#endif
 
 #include <QDebug>
 
@@ -76,7 +75,7 @@ public:
 
     /** The registry of all backends that are local to this
         address space */
-    QHash<QUuid,Backend> local_backends;
+    QHash<QUuid, Backend> local_backends;
 };
 
 using namespace SireCluster::detail;
@@ -85,29 +84,29 @@ using namespace SireCluster::detail;
     (only worth it if we have more than one MPI process!) */
 static bool usingMPI()
 {
-    #ifdef SIRE_USE_MPI
-        if (not ::MPI::Is_initialized())
-        {
-            int argc = 0;
-            char **argv = 0;
-            ::MPI::Init(argc,argv);
-        }
+#ifdef SIRE_USE_MPI
+    if (not ::MPI::Is_initialized())
+    {
+        int argc = 0;
+        char **argv = 0;
+        ::MPI::Init(argc, argv);
+    }
 
-        return ::MPI::COMM_WORLD.Get_size() > 1;
-    #else
-        return false;
-    #endif
+    return ::MPI::COMM_WORLD.Get_size() > 1;
+#else
+    return false;
+#endif
 }
 
-Q_GLOBAL_STATIC( QMutex, globalMutex );
-Q_GLOBAL_STATIC( QMutex, execMutex );
+Q_GLOBAL_STATIC(QMutex, globalMutex);
+Q_GLOBAL_STATIC(QMutex, execMutex);
 
 static ClusterPvt *global_cluster(0);
 static bool global_cluster_is_running = false;
 
-ClusterPvt* globalCluster()
+ClusterPvt *globalCluster()
 {
-    QMutexLocker lkr( globalMutex() );
+    QMutexLocker lkr(globalMutex());
 
     if (global_cluster == 0)
     {
@@ -119,19 +118,19 @@ ClusterPvt* globalCluster()
         global_cluster_is_running = true;
         execMutex()->unlock();
 
-        #ifdef SIRE_USE_MPI
-            if (::usingMPI())
-                SireCluster::MPI::MPICluster::start();
-        #endif
+#ifdef SIRE_USE_MPI
+        if (::usingMPI())
+            SireCluster::MPI::MPICluster::start();
+#endif
 
-        //create a new backend
+        // create a new backend
         Backend::create();
 
-        #ifdef SIRE_USE_MPI
-            //now wait until we have all got here
-            if (::usingMPI())
-                SireCluster::MPI::MPICluster::sync();
-        #endif
+#ifdef SIRE_USE_MPI
+        // now wait until we have all got here
+        if (::usingMPI())
+            SireCluster::MPI::MPICluster::sync();
+#endif
     }
 
     return global_cluster;
@@ -139,7 +138,8 @@ ClusterPvt* globalCluster()
 
 /** Constructor for the global cluster */
 ClusterPvt::ClusterPvt()
-{}
+{
+}
 
 /** Destructor */
 ClusterPvt::~ClusterPvt()
@@ -155,8 +155,8 @@ void Cluster::start(int ppn)
 
     if (ppn > 1)
     {
-        //add extra threads to this process
-        for (int i=1; i<ppn; ++i)
+        // add extra threads to this process
+        for (int i = 1; i < ppn; ++i)
         {
             Backend::create();
         }
@@ -166,17 +166,17 @@ void Cluster::start(int ppn)
 /** Return whether or not the cluster is running */
 bool Cluster::isRunning()
 {
-    QMutexLocker lkr( execMutex() );
+    QMutexLocker lkr(execMutex());
     return global_cluster_is_running;
 }
 
 /** Wait for the global cluster to stop running */
 void Cluster::wait()
 {
-    QMutexLocker lkr( execMutex() );
+    QMutexLocker lkr(execMutex());
 
     if (global_cluster_is_running)
-        globalCluster()->execwaiter.wait( execMutex() );
+        globalCluster()->execwaiter.wait(execMutex());
 }
 
 /** Return whether or not this cluster supports MPI
@@ -191,28 +191,28 @@ bool Cluster::supportsMPI()
     rank of this process in the MPI group, or it is 0 */
 int Cluster::getRank()
 {
-    #ifdef SIRE_USE_MPI
-        if (::usingMPI())
-            return SireCluster::MPI::MPICluster::getRank();
-        else
-            return 0;
-    #else
+#ifdef SIRE_USE_MPI
+    if (::usingMPI())
+        return SireCluster::MPI::MPICluster::getRank();
+    else
         return 0;
-    #endif
+#else
+    return 0;
+#endif
 }
 
 /** Return the number of processes - this is either the
     size of the MPI group, or it is 1 */
 int Cluster::getCount()
 {
-    #ifdef SIRE_USE_MPI
-        if (::usingMPI())
-            return SireCluster::MPI::MPICluster::getCount();
-        else
-            return 1;
-    #else
+#ifdef SIRE_USE_MPI
+    if (::usingMPI())
+        return SireCluster::MPI::MPICluster::getCount();
+    else
         return 1;
-    #endif
+#else
+    return 1;
+#endif
 }
 
 /** Register the backend 'backend' with the cluster */
@@ -221,20 +221,20 @@ void Cluster::registerBackend(const Backend &backend)
     if (backend.isNull())
         return;
 
-    QMutexLocker lkr( &(globalCluster()->datamutex) );
+    QMutexLocker lkr(&(globalCluster()->datamutex));
 
     if (not globalCluster()->local_backends.contains(backend.UID()))
     {
-        globalCluster()->local_backends.insert( backend.UID(), backend );
+        globalCluster()->local_backends.insert(backend.UID(), backend);
 
-        #ifdef SIRE_USE_MPI
-            //now inform the MPI connected nodes that a backend with this
-            //UID is available on this node
-            if (::usingMPI())
-            {
-                SireCluster::MPI::MPICluster::registerBackend(backend);
-            }
-        #endif
+#ifdef SIRE_USE_MPI
+        // now inform the MPI connected nodes that a backend with this
+        // UID is available on this node
+        if (::usingMPI())
+        {
+            SireCluster::MPI::MPICluster::registerBackend(backend);
+        }
+#endif
     }
 }
 
@@ -266,32 +266,30 @@ QList<Frontend> Cluster::localBackends()
 */
 Frontend Cluster::_pvt_getFrontend()
 {
-    QMutexLocker lkr( &(globalCluster()->datamutex ) );
+    QMutexLocker lkr(&(globalCluster()->datamutex));
 
-    //first loop through the local backends to see if any
-    //of them are available
-    for (QHash<QUuid,Backend>::const_iterator
-                    it = globalCluster()->local_backends.constBegin();
-         it != globalCluster()->local_backends.constEnd();
-         ++it)
+    // first loop through the local backends to see if any
+    // of them are available
+    for (QHash<QUuid, Backend>::const_iterator it = globalCluster()->local_backends.constBegin();
+         it != globalCluster()->local_backends.constEnd(); ++it)
     {
-        Frontend frontend = Frontend::tryAcquire( it.value() );
+        Frontend frontend = Frontend::tryAcquire(it.value());
 
         if (not frontend.isNull())
-            //we successfully grabbed this backend
+            // we successfully grabbed this backend
             return frontend;
     }
 
-    //ok, there were no locally available frontends
+    // ok, there were no locally available frontends
     lkr.unlock();
 
-    #ifdef SIRE_USE_MPI
-         if (::usingMPI())
-            //see if there are any available remote backends
-            return SireCluster::MPI::MPICluster::getFrontend();
-    #endif
+#ifdef SIRE_USE_MPI
+    if (::usingMPI())
+        // see if there are any available remote backends
+        return SireCluster::MPI::MPICluster::getFrontend();
+#endif
 
-    //nothing could be found - return a null frontend
+    // nothing could be found - return a null frontend
     return Frontend();
 }
 
@@ -303,22 +301,20 @@ Frontend Cluster::_pvt_getFrontend()
 */
 QList<Frontend> Cluster::_pvt_getFrontends(int n)
 {
-    QMutexLocker lkr( &(globalCluster()->datamutex ) );
+    QMutexLocker lkr(&(globalCluster()->datamutex));
 
     QList<Frontend> frontends;
 
-    //first loop through the local backends to see if any
-    //of them are available
-    for (QHash<QUuid,Backend>::const_iterator
-                    it = globalCluster()->local_backends.constBegin();
-         it != globalCluster()->local_backends.constEnd();
-         ++it)
+    // first loop through the local backends to see if any
+    // of them are available
+    for (QHash<QUuid, Backend>::const_iterator it = globalCluster()->local_backends.constBegin();
+         it != globalCluster()->local_backends.constEnd(); ++it)
     {
-        Frontend frontend = Frontend::tryAcquire( it.value() );
+        Frontend frontend = Frontend::tryAcquire(it.value());
 
         if (not frontend.isNull())
         {
-            //we successfully grabbed this backend
+            // we successfully grabbed this backend
             frontends.append(frontend);
             --n;
             if (n == 0)
@@ -326,21 +322,21 @@ QList<Frontend> Cluster::_pvt_getFrontends(int n)
         }
     }
 
-    //ok, there were no locally available frontends
+    // ok, there were no locally available frontends
     lkr.unlock();
 
-    #ifdef SIRE_USE_MPI
-         if (::usingMPI())
-         {
-            //see if there are any available remote backends
-            QList<Frontend> mpifrontends = SireCluster::MPI::MPICluster::getFrontends(n);
+#ifdef SIRE_USE_MPI
+    if (::usingMPI())
+    {
+        // see if there are any available remote backends
+        QList<Frontend> mpifrontends = SireCluster::MPI::MPICluster::getFrontends(n);
 
-            if (not mpifrontends.isEmpty())
-                frontends += mpifrontends;
-         }
-    #endif
+        if (not mpifrontends.isEmpty())
+            frontends += mpifrontends;
+    }
+#endif
 
-    //return all the frontends that have been found
+    // return all the frontends that have been found
     return frontends;
 }
 
@@ -354,29 +350,28 @@ QList<Frontend> Cluster::_pvt_getFrontends(int n)
 Frontend Cluster::_pvt_getFrontend(const QUuid &uid)
 {
     if (uid.isNull())
-        throw SireError::unavailable_resource( QObject::tr(
-            "There is no front end for the null backend!"), CODELOC );
+        throw SireError::unavailable_resource(QObject::tr("There is no front end for the null backend!"), CODELOC);
 
-    QMutexLocker lkr( &(globalCluster()->datamutex) );
+    QMutexLocker lkr(&(globalCluster()->datamutex));
 
     if (globalCluster()->local_backends.contains(uid))
     {
-        //return a local frontend for this local backend
-        return Frontend::tryAcquire( globalCluster()->local_backends.value(uid) );
+        // return a local frontend for this local backend
+        return Frontend::tryAcquire(globalCluster()->local_backends.value(uid));
     }
     else
     {
         lkr.unlock();
 
-        #ifdef SIRE_USE_MPI
-            if (::usingMPI())
-                //see if this node exists on any of the MPI nodes...
-                return SireCluster::MPI::MPICluster::getFrontend(uid);
-            else
-                return Frontend();
-        #else
+#ifdef SIRE_USE_MPI
+        if (::usingMPI())
+            // see if this node exists on any of the MPI nodes...
+            return SireCluster::MPI::MPICluster::getFrontend(uid);
+        else
             return Frontend();
-        #endif
+#else
+        return Frontend();
+#endif
     }
 }
 
@@ -394,11 +389,11 @@ Frontend Cluster::_pvt_getFrontend(const QUuid &uid)
 */
 Frontend Cluster::getFrontend(int timeout)
 {
-    //ensure that the global cluster has been created
+    // ensure that the global cluster has been created
     globalCluster();
 
     if (Cluster::UIDs().isEmpty())
-        //there are no frontends in the cluster!
+        // there are no frontends in the cluster!
         return Frontend();
 
     if (timeout < 0)
@@ -406,21 +401,21 @@ Frontend Cluster::getFrontend(int timeout)
         while (true)
         {
             if (not Cluster::isRunning())
-                //oh dear - the cluster has stopped
+                // oh dear - the cluster has stopped
                 return Frontend();
 
             Frontend frontend = Cluster::_pvt_getFrontend();
 
             if (not frontend.isNull())
-                //we've found a frontend
+                // we've found a frontend
                 return frontend;
 
-            //wait a second
-            #ifdef Q_OS_WIN
-                Sleep(1);
-            #else
-                sleep(1);
-            #endif
+// wait a second
+#ifdef Q_OS_WIN
+            Sleep(1);
+#else
+            sleep(1);
+#endif
         }
     }
     else
@@ -431,24 +426,25 @@ Frontend Cluster::getFrontend(int timeout)
         while (t.elapsed() < timeout)
         {
             if (not Cluster::isRunning())
-                //oh dear - the cluster has stopped
+                // oh dear - the cluster has stopped
                 return Frontend();
 
             Frontend frontend = Cluster::_pvt_getFrontend();
 
             if (not frontend.isNull())
-                //we've found a frontend
+                // we've found a frontend
                 return frontend;
 
-            //only try once a second
+            // only try once a second
             if (t.elapsed() + 1000 > timeout)
-                return Frontend();;
+                return Frontend();
+            ;
 
-            #ifdef Q_OS_WIN
-                Sleep(1);
-            #else
-                sleep(1);
-            #endif
+#ifdef Q_OS_WIN
+            Sleep(1);
+#else
+            sleep(1);
+#endif
         }
     }
 
@@ -469,19 +465,19 @@ Frontend Cluster::getFrontend(int timeout)
 */
 QList<Frontend> Cluster::getFrontends(int n, int timeout)
 {
-    //ensure that the global cluster has been created
+    // ensure that the global cluster has been created
     globalCluster();
 
     QList<Frontend> frontends;
 
-    n = qMin( n, Cluster::UIDs().count() );
+    n = qMin(n, Cluster::UIDs().count());
 
     if (timeout < 0)
     {
         while (frontends.count() < n)
         {
             if (not Cluster::isRunning())
-                //oh dear - the cluster has stopped
+                // oh dear - the cluster has stopped
                 return frontends;
 
             int nremaining = n - frontends.count();
@@ -489,17 +485,17 @@ QList<Frontend> Cluster::getFrontends(int n, int timeout)
             QList<Frontend> active_frontends = Cluster::_pvt_getFrontends(nremaining);
 
             if (not active_frontends.isEmpty())
-                //we've found a frontend
+                // we've found a frontend
                 frontends += active_frontends;
 
             if (frontends.count() < n)
             {
-                //wait a second
-                #ifdef Q_OS_WIN
-                    Sleep(1);
-                #else
-                    sleep(1);
-                #endif
+// wait a second
+#ifdef Q_OS_WIN
+                Sleep(1);
+#else
+                sleep(1);
+#endif
             }
         }
     }
@@ -511,7 +507,7 @@ QList<Frontend> Cluster::getFrontends(int n, int timeout)
         while (frontends.count() < n and t.elapsed() < timeout)
         {
             if (not Cluster::isRunning())
-                //oh dear - the cluster has stopped
+                // oh dear - the cluster has stopped
                 return frontends;
 
             int nremaining = n - frontends.count();
@@ -519,20 +515,20 @@ QList<Frontend> Cluster::getFrontends(int n, int timeout)
             QList<Frontend> active_frontends = Cluster::_pvt_getFrontends(nremaining);
 
             if (not active_frontends.isEmpty())
-                //we've found a frontend
+                // we've found a frontend
                 return frontends += active_frontends;
 
-            //only try once a second
+            // only try once a second
             if (t.elapsed() + 1000 > timeout)
                 return frontends;
 
             if (frontends.count() < n)
             {
-                #ifdef Q_OS_WIN
-                    Sleep(1);
-                #else
-                    sleep(1);
-                #endif
+#ifdef Q_OS_WIN
+                Sleep(1);
+#else
+                sleep(1);
+#endif
             }
         }
     }
@@ -554,7 +550,7 @@ QList<Frontend> Cluster::getFrontends(int n, int timeout)
 */
 Frontend Cluster::getFrontend(const QUuid &uid, int timeout)
 {
-    //ensure that the global cluster has been created
+    // ensure that the global cluster has been created
     globalCluster();
 
     if (timeout < 0)
@@ -562,21 +558,21 @@ Frontend Cluster::getFrontend(const QUuid &uid, int timeout)
         while (true)
         {
             if (not Cluster::isRunning())
-                //oh dear - the cluster has stopped
+                // oh dear - the cluster has stopped
                 return Frontend();
 
             Frontend frontend = Cluster::_pvt_getFrontend(uid);
 
             if (not frontend.isNull())
-                //we've found a frontend
+                // we've found a frontend
                 return frontend;
 
-            //wait a second
-            #ifdef Q_OS_WIN
-                Sleep(1);
-            #else
-                sleep(1);
-            #endif
+// wait a second
+#ifdef Q_OS_WIN
+            Sleep(1);
+#else
+            sleep(1);
+#endif
         }
     }
     else
@@ -587,24 +583,25 @@ Frontend Cluster::getFrontend(const QUuid &uid, int timeout)
         while (t.elapsed() < timeout)
         {
             if (not Cluster::isRunning())
-                //oh dear - the cluster has stopped
+                // oh dear - the cluster has stopped
                 return Frontend();
 
             Frontend frontend = Cluster::_pvt_getFrontend(uid);
 
             if (not frontend.isNull())
-                //we've found a frontend
+                // we've found a frontend
                 return frontend;
 
-            //only try once a second
+            // only try once a second
             if (t.elapsed() + 1000 > timeout)
-                return Frontend();;
+                return Frontend();
+            ;
 
-            #ifdef Q_OS_WIN
-                Sleep(1);
-            #else
-                sleep(1);
-            #endif
+#ifdef Q_OS_WIN
+            Sleep(1);
+#else
+            sleep(1);
+#endif
         }
     }
 
@@ -619,11 +616,11 @@ Frontend Cluster::getFrontend(const QUuid &uid, int timeout)
 */
 Frontend Cluster::getFrontend()
 {
-    //ensure that the global cluster has been created
+    // ensure that the global cluster has been created
     globalCluster();
 
     if (not Cluster::isRunning())
-        //oh dear - the cluster has stopped
+        // oh dear - the cluster has stopped
         return Frontend();
 
     return Cluster::_pvt_getFrontend();
@@ -637,11 +634,11 @@ Frontend Cluster::getFrontend()
 */
 QList<Frontend> Cluster::getFrontends(int n)
 {
-    //ensure that the global cluster has been created
+    // ensure that the global cluster has been created
     globalCluster();
 
     if (not Cluster::isRunning())
-        //oh dear - the cluster has stopped
+        // oh dear - the cluster has stopped
         return QList<Frontend>();
 
     return Cluster::_pvt_getFrontends(n);
@@ -656,11 +653,11 @@ QList<Frontend> Cluster::getFrontends(int n)
 */
 Frontend Cluster::getFrontend(const QUuid &uid)
 {
-    //ensure that the global cluster has been created
+    // ensure that the global cluster has been created
     globalCluster();
 
     if (not Cluster::isRunning())
-        //oh dear - the cluster has stopped
+        // oh dear - the cluster has stopped
         return Frontend();
 
     return Cluster::_pvt_getFrontend(uid);
@@ -672,7 +669,7 @@ Frontend Cluster::getFrontend(const QUuid &uid)
     immediately, returning an empty Nodes object */
 Nodes Cluster::getNode()
 {
-    //get the first available frontend
+    // get the first available frontend
     Frontend frontend = Cluster::getFrontend();
 
     if (frontend.isNull())
@@ -691,7 +688,7 @@ Nodes Cluster::getNode()
 */
 Nodes Cluster::getNode(int timeout)
 {
-    //get the first available frontend
+    // get the first available frontend
     Frontend frontend = Cluster::getFrontend(timeout);
 
     if (frontend.isNull())
@@ -763,7 +760,7 @@ Nodes Cluster::getNodes(int nnodes, int timeout)
 
     if (timeout < 0)
     {
-        //keep going for-ages
+        // keep going for-ages
         while (frontends.count() < nnodes)
         {
             int nremaining = nnodes - frontends.count();
@@ -785,8 +782,7 @@ Nodes Cluster::getNodes(int nnodes, int timeout)
         {
             int nremaining = nnodes - frontends.count();
 
-            QList<Frontend> active_frontends = Cluster::getFrontends(nremaining,
-                                                                     remaining_time);
+            QList<Frontend> active_frontends = Cluster::getFrontends(nremaining, remaining_time);
 
             if (not active_frontends.isEmpty())
                 frontends += active_frontends;
@@ -810,11 +806,11 @@ Nodes Cluster::getNodes(int nnodes, int timeout)
 */
 Nodes Cluster::getNodes(const QList<QUuid> &uids, int timeout)
 {
-    QHash<QUuid,Frontend> frontends;
+    QHash<QUuid, Frontend> frontends;
 
     if (timeout < 0)
     {
-        foreach( QUuid uid, uids )
+        foreach (QUuid uid, uids)
         {
             if (frontends.contains(uid))
                 continue;
@@ -836,7 +832,7 @@ Nodes Cluster::getNodes(const QList<QUuid> &uids, int timeout)
 
         while (remaining_time > 0 and (not got_them_all))
         {
-            foreach ( QUuid uid, uids )
+            foreach (QUuid uid, uids)
             {
                 if (remaining_time <= 0)
                     break;
@@ -844,8 +840,8 @@ Nodes Cluster::getNodes(const QList<QUuid> &uids, int timeout)
                 if (frontends.contains(uid))
                     continue;
 
-                //only try to get the node for 1/8th of the time
-                Frontend frontend = Cluster::getFrontend(uid, 1 + (remaining_time/8));
+                // only try to get the node for 1/8th of the time
+                Frontend frontend = Cluster::getFrontend(uid, 1 + (remaining_time / 8));
 
                 if (not frontend.isNull())
                     frontends.insert(uid, frontend);
@@ -859,7 +855,7 @@ Nodes Cluster::getNodes(const QList<QUuid> &uids, int timeout)
         return Nodes();
 
     else
-        return Nodes( frontends.values() );
+        return Nodes(frontends.values());
 }
 
 /** Return a Nodes object that contains as many of the nodes with
@@ -884,14 +880,14 @@ Nodes Cluster::getNodes(const QList<QUuid> &uids)
         return Nodes();
 
     else
-        return Nodes( frontends );
+        return Nodes(frontends);
 }
 
 /** Try to get hold of all of the nodes that are available on this
     cluster */
 Nodes Cluster::getAllNodes()
 {
-    //how many nodes are available?
+    // how many nodes are available?
     int nnodes = Cluster::UIDs().count();
 
     return Cluster::getNodes(nnodes);
@@ -901,7 +897,7 @@ Nodes Cluster::getAllNodes()
     cluster (within the specified timeout) */
 Nodes Cluster::getAllNodes(int timeout)
 {
-    //how many nodes are available?
+    // how many nodes are available?
     int nnodes = Cluster::UIDs().count();
 
     return Cluster::getNodes(nnodes, timeout);
@@ -911,7 +907,7 @@ Nodes Cluster::getAllNodes(int timeout)
     (the nodes that exist in this address space) */
 QList<QUuid> Cluster::localUIDs()
 {
-    QMutexLocker lkr( &(globalCluster()->datamutex) );
+    QMutexLocker lkr(&(globalCluster()->datamutex));
 
     return globalCluster()->local_backends.keys();
 }
@@ -920,7 +916,7 @@ QList<QUuid> Cluster::localUIDs()
     is local to this process */
 bool Cluster::isLocal(const QUuid &uid)
 {
-    QMutexLocker lkr( &(globalCluster()->datamutex) );
+    QMutexLocker lkr(&(globalCluster()->datamutex));
 
     return globalCluster()->local_backends.contains(uid);
 }
@@ -929,14 +925,14 @@ bool Cluster::isLocal(const QUuid &uid)
     in this entire cluster */
 QList<QUuid> Cluster::UIDs()
 {
-    #ifdef SIRE_USE_MPI
-        if (::usingMPI())
-            return SireCluster::MPI::MPICluster::UIDs();
-        else
-            return Cluster::localUIDs();
-    #else
+#ifdef SIRE_USE_MPI
+    if (::usingMPI())
+        return SireCluster::MPI::MPICluster::UIDs();
+    else
         return Cluster::localUIDs();
-    #endif
+#else
+    return Cluster::localUIDs();
+#endif
 }
 
 /** Shutdown this cluster */
@@ -944,7 +940,7 @@ void Cluster::shutdown()
 {
     /////check to see if we are still running
     {
-        QMutexLocker lkr( execMutex() );
+        QMutexLocker lkr(execMutex());
 
         if (not global_cluster_is_running)
             return;
@@ -952,23 +948,22 @@ void Cluster::shutdown()
         global_cluster_is_running = false;
     }
 
-    #ifdef SIRE_USE_MPI
-        if (::usingMPI())
-            //shutdown MPI - this stops the backends from
-            //receiving any more work from remote nodes
-            SireCluster::MPI::MPICluster::shutdown();
-    #endif
+#ifdef SIRE_USE_MPI
+    if (::usingMPI())
+        // shutdown MPI - this stops the backends from
+        // receiving any more work from remote nodes
+        SireCluster::MPI::MPICluster::shutdown();
+#endif
 
-    QMutexLocker lkr( &(globalCluster()->datamutex) );
+    QMutexLocker lkr(&(globalCluster()->datamutex));
 
-    //shutdown all of the backends
-    for (QHash<QUuid,Backend>::iterator it = globalCluster()->local_backends.begin();
-         it != globalCluster()->local_backends.end();
-         ++it)
+    // shutdown all of the backends
+    for (QHash<QUuid, Backend>::iterator it = globalCluster()->local_backends.begin();
+         it != globalCluster()->local_backends.end(); ++it)
     {
         it.value().shutdown();
     }
 
-    //wake all threads waiting for the cluster to be shutdown
+    // wake all threads waiting for the cluster to be shutdown
     globalCluster()->execwaiter.wakeAll();
 }

@@ -35,12 +35,10 @@
 using namespace SireBase;
 using namespace SireStream;
 
-static const RegisterMetaType<TrigArray2DBase> r_array2d( MAGIC_ONLY, NO_ROOT,
-                                                          "SireBase::TrigArray2D<T>" );
+static const RegisterMetaType<TrigArray2DBase> r_array2d(MAGIC_ONLY, NO_ROOT, "SireBase::TrigArray2D<T>");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const TrigArray2DBase &array2d)
+QDataStream &operator<<(QDataStream &ds, const TrigArray2DBase &array2d)
 {
     writeHeader(ds, r_array2d, 1);
     ds << array2d.dim;
@@ -49,8 +47,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                        TrigArray2DBase &array2d)
+QDataStream &operator>>(QDataStream &ds, TrigArray2DBase &array2d)
 {
     VersionID v = readHeader(ds, r_array2d);
 
@@ -66,27 +63,28 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 TrigArray2DBase::TrigArray2DBase() : dim(0)
-{}
+{
+}
 
 /** Construct with the specified dimension [dim,dim] */
-TrigArray2DBase::TrigArray2DBase(int dimension)
-            : dim(dimension)
+TrigArray2DBase::TrigArray2DBase(int dimension) : dim(dimension)
 {
     if (dimension < 0)
         dim = 0;
 }
 
 /** Copy constructor */
-TrigArray2DBase::TrigArray2DBase(const TrigArray2DBase &other)
-                : dim(other.dim)
-{}
+TrigArray2DBase::TrigArray2DBase(const TrigArray2DBase &other) : dim(other.dim)
+{
+}
 
 /** Destructor */
 TrigArray2DBase::~TrigArray2DBase()
-{}
+{
+}
 
 /** Copy assignment operator */
-TrigArray2DBase& TrigArray2DBase::operator=(const TrigArray2DBase &other)
+TrigArray2DBase &TrigArray2DBase::operator=(const TrigArray2DBase &other)
 {
     dim = other.dim;
     return *this;
@@ -107,8 +105,11 @@ bool TrigArray2DBase::operator!=(const TrigArray2DBase &other) const
 /** Throw an invalid index exception */
 void TrigArray2DBase::throwInvalidIndex(int i, int j) const
 {
-    throw SireError::invalid_index( QObject::tr(
-        "Index (%1,%2) is not valid for this matrix. The "
-        "number of rows is %3, and number of columns is %4.")
-            .arg(i).arg(j).arg(dim).arg(dim), CODELOC );
+    throw SireError::invalid_index(QObject::tr("Index (%1,%2) is not valid for this matrix. The "
+                                               "number of rows is %3, and number of columns is %4.")
+                                       .arg(i)
+                                       .arg(j)
+                                       .arg(dim)
+                                       .arg(dim),
+                                   CODELOC);
 }

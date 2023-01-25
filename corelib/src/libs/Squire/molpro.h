@@ -29,212 +29,193 @@
 #define SQUIRE_MOLPRO_H
 
 #include <QHash>
-#include <QString>
 #include <QProcess>
+#include <QString>
 
-#include "qmprogram.h"
 #include "latticecharges.h"
+#include "qmprogram.h"
 
 SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class Molpro;
+    class Molpro;
 }
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::Molpro&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::Molpro&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::Molpro &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::Molpro &);
 
 class QFile;
 
 namespace SireBase
 {
-class TempDir;
+    class TempDir;
 }
 
 namespace Squire
 {
 
-/** This is a wrapper that allows Molpro to be used to calculate
-    QM and QM/MM energies
+    /** This is a wrapper that allows Molpro to be used to calculate
+        QM and QM/MM energies
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT Molpro : public SireBase::ConcreteProperty<Molpro,QMProgram>
-{
-
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const Molpro&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, Molpro&);
-
-public:
-    Molpro();
-    Molpro(const QString &molpro);
-
-    Molpro(const Molpro &other);
-
-    ~Molpro();
-
-    static const char* typeName();
-
-    Molpro& operator=(const Molpro &other);
-
-    bool operator==(const Molpro &other) const;
-    bool operator!=(const Molpro &other) const;
-
-    QString toString() const;
-
-    void setExecutable(const QString &molpro_exe);
-    void setEnvironment(const QString &variable, const QString &value);
-
-    void setMemoryRequirement(int nbytes);
-
-    int memoryRequirement() const;
-
-    void setLatticeInBohrRadii(bool on);
-
-    bool latticeInBohrRadii() const;
-
-    void setMaximumRunTime(int max_runtime);
-
-    int maximumRunTime() const;
-
-    QString executable() const;
-
-    const QHash<QString,QString>& environment() const;
-
-    QString environment(const QString &variable) const;
-
-    void setBasisSet(const QString &basis_set);
-
-    const QString& basisSet() const;
-
-    void setMethod(const QString &method);
-
-    const QString& method() const;
-
-    void setTotalCharge(int charge);
-    int totalCharge() const;
-
-    void setEnergyTemplate(const QString &energy_template);
-
-    const QString& energyTemplate() const;
-
-    void setForceTemplate(const QString &force_template);
-
-    const QString& forceTemplate() const;
-
-    bool supportsLatticeCharges() const
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT Molpro : public SireBase::ConcreteProperty<Molpro, QMProgram>
     {
-        return true;
-    }
 
-protected:
-    double calculateEnergy(const QMPotential::Molecules &molecules,
-                           int ntries = 5) const;
-    double calculateEnergy(const QMPotential::Molecules &molecules,
-                           const LatticeCharges &lattice_charges,
-                           int ntries = 5) const;
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const Molpro &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, Molpro &);
 
-    QHash<QString,double> calculatePotential(const QString &cmdfile,
-                                            int ntries=5) const;
+    public:
+        Molpro();
+        Molpro(const QString &molpro);
 
-    void calculatePotential(const QMPotential::Molecules &molecules,
-                            PotentialTable &pottable,
-                            const SireFF::Probe &probe,
-                            double scale_potential=1,
-                            int ntries=5) const;
+        Molpro(const Molpro &other);
 
-    QVector<SireUnits::Dimension::MolarEnergy>
-                    calculatePotential(const QMPotential::Molecules &molecules,
-                                       const LatticeCharges &lattice_charges,
-                                       PotentialTable &pottable,
-                                       const SireFF::Probe &probe,
-                                       double scale_potential=1,
-                                       int ntries=5) const;
+        ~Molpro();
 
-    QString energyCommandFile(const QMPotential::Molecules &molecules) const;
-    QString energyCommandFile(const QMPotential::Molecules &molecules,
-                              const LatticeCharges &lattice_charges) const;
+        static const char *typeName();
 
-    QString forceCommandFile(const QMPotential::Molecules &molecules,
-                             const ForceTable &forcetable) const;
-    QString forceCommandFile(const QMPotential::Molecules &molecules,
-                             const LatticeCharges &lattice_charges,
-                             const ForceTable &forcetable) const;
+        Molpro &operator=(const Molpro &other);
 
-    QString fieldCommandFile(const QMPotential::Molecules &molecules,
-                             const FieldTable &fieldtable,
-                             const SireFF::Probe &probe) const;
-    QString fieldCommandFile(const QMPotential::Molecules &molecules,
-                             const LatticeCharges &lattice_charges,
-                             const FieldTable &fieldtable,
-                             const SireFF::Probe &probe) const;
+        bool operator==(const Molpro &other) const;
+        bool operator!=(const Molpro &other) const;
 
-    QString potentialCommandFile(const QMPotential::Molecules &molecules,
-                                 const PotentialTable &pottable,
+        QString toString() const;
+
+        void setExecutable(const QString &molpro_exe);
+        void setEnvironment(const QString &variable, const QString &value);
+
+        void setMemoryRequirement(int nbytes);
+
+        int memoryRequirement() const;
+
+        void setLatticeInBohrRadii(bool on);
+
+        bool latticeInBohrRadii() const;
+
+        void setMaximumRunTime(int max_runtime);
+
+        int maximumRunTime() const;
+
+        QString executable() const;
+
+        const QHash<QString, QString> &environment() const;
+
+        QString environment(const QString &variable) const;
+
+        void setBasisSet(const QString &basis_set);
+
+        const QString &basisSet() const;
+
+        void setMethod(const QString &method);
+
+        const QString &method() const;
+
+        void setTotalCharge(int charge);
+        int totalCharge() const;
+
+        void setEnergyTemplate(const QString &energy_template);
+
+        const QString &energyTemplate() const;
+
+        void setForceTemplate(const QString &force_template);
+
+        const QString &forceTemplate() const;
+
+        bool supportsLatticeCharges() const
+        {
+            return true;
+        }
+
+    protected:
+        double calculateEnergy(const QMPotential::Molecules &molecules, int ntries = 5) const;
+        double calculateEnergy(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges,
+                               int ntries = 5) const;
+
+        QHash<QString, double> calculatePotential(const QString &cmdfile, int ntries = 5) const;
+
+        void calculatePotential(const QMPotential::Molecules &molecules, PotentialTable &pottable,
+                                const SireFF::Probe &probe, double scale_potential = 1, int ntries = 5) const;
+
+        QVector<SireUnits::Dimension::MolarEnergy> calculatePotential(const QMPotential::Molecules &molecules,
+                                                                      const LatticeCharges &lattice_charges,
+                                                                      PotentialTable &pottable, const SireFF::Probe &probe,
+                                                                      double scale_potential = 1, int ntries = 5) const;
+
+        QString energyCommandFile(const QMPotential::Molecules &molecules) const;
+        QString energyCommandFile(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges) const;
+
+        QString forceCommandFile(const QMPotential::Molecules &molecules, const ForceTable &forcetable) const;
+        QString forceCommandFile(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges,
+                                 const ForceTable &forcetable) const;
+
+        QString fieldCommandFile(const QMPotential::Molecules &molecules, const FieldTable &fieldtable,
                                  const SireFF::Probe &probe) const;
-    QString potentialCommandFile(const QMPotential::Molecules &molecules,
-                                 const LatticeCharges &lattice_charges,
-                                 const PotentialTable &pottable,
-                                 const SireFF::Probe &probe) const;
+        QString fieldCommandFile(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges,
+                                 const FieldTable &fieldtable, const SireFF::Probe &probe) const;
 
-private:
-    QString createCommandFile(QString cmd_template,
-                        const QMPotential::Molecules &molecules,
-                        const LatticeCharges &lattice_charges = LatticeCharges()) const;
+        QString potentialCommandFile(const QMPotential::Molecules &molecules, const PotentialTable &pottable,
+                                     const SireFF::Probe &probe) const;
+        QString potentialCommandFile(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges,
+                                     const PotentialTable &pottable, const SireFF::Probe &probe) const;
 
-    QString writeShellFile(const SireBase::TempDir &tempdir) const;
+    private:
+        QString createCommandFile(QString cmd_template, const QMPotential::Molecules &molecules,
+                                  const LatticeCharges &lattice_charges = LatticeCharges()) const;
 
-    double extractEnergy(QFile &molpro_output) const;
+        QString writeShellFile(const SireBase::TempDir &tempdir) const;
 
-    QHash<QString,double> extractPotentials(QFile &molpro_output) const;
+        double extractEnergy(QFile &molpro_output) const;
 
-    double calculateEnergy(const QString &cmd_file, int ntries) const;
+        QHash<QString, double> extractPotentials(QFile &molpro_output) const;
 
-    /** The environmental variables to hold when running Molpro */
-    QHash<QString,QString> env_variables;
+        double calculateEnergy(const QString &cmd_file, int ntries) const;
 
-    /** The full path to the molpro executable to run (including
-        any necessary command line arguments) */
-    QString molpro_exe;
+        /** The environmental variables to hold when running Molpro */
+        QHash<QString, QString> env_variables;
 
-    /** The basis set to use during this calculation */
-    QString basis_set;
+        /** The full path to the molpro executable to run (including
+            any necessary command line arguments) */
+        QString molpro_exe;
 
-    /** The QM method to use to calculate the energy */
-    QString qm_method;
+        /** The basis set to use during this calculation */
+        QString basis_set;
 
-    /** The template command file used for the energy calculations.
-        The basis set, QM method and atom coordinates are substituted
-        into this template */
-    QString energy_template;
+        /** The QM method to use to calculate the energy */
+        QString qm_method;
 
-    /** The template command file used for the force calculations.
-        The basis set, QM method and atom coordinates are substituted
-        into this template */
-    QString force_template;
+        /** The template command file used for the energy calculations.
+            The basis set, QM method and atom coordinates are substituted
+            into this template */
+        QString energy_template;
 
-    /** The total charge of the system */
-    qint32 total_charge;
+        /** The template command file used for the force calculations.
+            The basis set, QM method and atom coordinates are substituted
+            into this template */
+        QString force_template;
 
-    /** The amount of memory (in bytes) to reserve for the
-        QM calculation */
-    quint32 memory_requirement;
+        /** The total charge of the system */
+        qint32 total_charge;
 
-    /** The maximum amount of time to wait for a molpro
-        job to complete (15 minutes) in milliseconds */
-    quint32 max_molpro_runtime;
+        /** The amount of memory (in bytes) to reserve for the
+            QM calculation */
+        quint32 memory_requirement;
 
-    /** Whether or not the units of lattice charges in a molpro
-        input file are in bohr radii (otherwise in angstroms) */
-    bool lattice_in_bohr_radii;
-};
+        /** The maximum amount of time to wait for a molpro
+            job to complete (15 minutes) in milliseconds */
+        quint32 max_molpro_runtime;
 
-}
+        /** Whether or not the units of lattice charges in a molpro
+            input file are in bohr radii (otherwise in angstroms) */
+        bool lattice_in_bohr_radii;
+    };
 
-Q_DECLARE_METATYPE( Squire::Molpro )
+} // namespace Squire
 
-SIRE_EXPOSE_CLASS( Squire::Molpro )
+Q_DECLARE_METATYPE(Squire::Molpro)
+
+SIRE_EXPOSE_CLASS(Squire::Molpro)
 
 SIRE_END_HEADER
 

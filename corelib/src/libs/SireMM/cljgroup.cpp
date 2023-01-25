@@ -47,9 +47,8 @@ QDataStream &operator<<(QDataStream &ds, const CLJGroup &group)
 
     SharedDataStream sds(ds);
 
-    sds << group.cljexts << group.cljboxes
-        << group.cljworkspace << group.changed_mols
-        << group.props << qint32(group.id_source) << qint32(group.extract_source);
+    sds << group.cljexts << group.cljboxes << group.cljworkspace << group.changed_mols << group.props
+        << qint32(group.id_source) << qint32(group.extract_source);
 
     return ds;
 }
@@ -65,9 +64,8 @@ QDataStream &operator>>(QDataStream &ds, CLJGroup &group)
         qint32 id_source;
         qint32 extract_source;
 
-        sds >> group.cljexts >> group.cljboxes
-            >> group.cljworkspace >> group.changed_mols
-            >> group.props >> id_source >> extract_source;
+        sds >> group.cljexts >> group.cljboxes >> group.cljworkspace >> group.changed_mols >> group.props >>
+            id_source >> extract_source;
 
         group.id_source = CLJAtoms::ID_SOURCE(id_source);
         group.extract_source = CLJExtractor::EXTRACT_SOURCE(extract_source);
@@ -79,9 +77,8 @@ QDataStream &operator>>(QDataStream &ds, CLJGroup &group)
         qint32 id_source;
         bool split_by_residue;
 
-        sds >> group.cljexts >> group.cljboxes
-            >> group.cljworkspace >> group.changed_mols
-            >> group.props >> id_source >> split_by_residue;
+        sds >> group.cljexts >> group.cljboxes >> group.cljworkspace >> group.changed_mols >> group.props >>
+            id_source >> split_by_residue;
 
         group.id_source = CLJAtoms::ID_SOURCE(id_source);
 
@@ -101,8 +98,7 @@ QDataStream &operator>>(QDataStream &ds, CLJGroup &group)
 }
 
 /** Null constructor */
-CLJGroup::CLJGroup()
-         : id_source(CLJAtoms::USE_MOLNUM), extract_source(CLJExtractor::EXTRACT_BY_CUTGROUP)
+CLJGroup::CLJGroup() : id_source(CLJAtoms::USE_MOLNUM), extract_source(CLJExtractor::EXTRACT_BY_CUTGROUP)
 {
     cljworkspace.mustRecalculateFromScratch(cljboxes);
 }
@@ -110,15 +106,13 @@ CLJGroup::CLJGroup()
 /** Construct, suppling the name of the molecule group and the source of the
     CLJAtoms ID_SOURCE property (e.g. USE_MOLNUM for intermolecular forcefields or
     USE_ATOMNUM for intramolecular forcefields) */
-CLJGroup::CLJGroup(CLJAtoms::ID_SOURCE ids)
-         : id_source(ids), extract_source(CLJExtractor::EXTRACT_BY_CUTGROUP)
+CLJGroup::CLJGroup(CLJAtoms::ID_SOURCE ids) : id_source(ids), extract_source(CLJExtractor::EXTRACT_BY_CUTGROUP)
 {
     cljworkspace.mustRecalculateFromScratch(cljboxes);
 }
 
 /** Construct specifying how the atoms will be extracted from the molecule */
-CLJGroup::CLJGroup(CLJExtractor::EXTRACT_SOURCE ext)
-         : id_source(CLJAtoms::USE_MOLNUM), extract_source(ext)
+CLJGroup::CLJGroup(CLJExtractor::EXTRACT_SOURCE ext) : id_source(CLJAtoms::USE_MOLNUM), extract_source(ext)
 {
     cljworkspace.mustRecalculateFromScratch(cljboxes);
 }
@@ -128,26 +122,26 @@ CLJGroup::CLJGroup(CLJExtractor::EXTRACT_SOURCE ext)
     USE_ATOMNUM for intramolecular forcefields), and also specifying if we are going
     to split molecules by cutgroup, residue or molecule, (normally best to
     extract by cutgroup unless you know that all molecules are going to be small) */
-CLJGroup::CLJGroup(CLJAtoms::ID_SOURCE ids, CLJExtractor::EXTRACT_SOURCE ext)
-         : id_source(ids), extract_source(ext)
+CLJGroup::CLJGroup(CLJAtoms::ID_SOURCE ids, CLJExtractor::EXTRACT_SOURCE ext) : id_source(ids), extract_source(ext)
 {
     cljworkspace.mustRecalculateFromScratch(cljboxes);
 }
 
 /** Copy constructor */
 CLJGroup::CLJGroup(const CLJGroup &other)
-         : cljexts(other.cljexts), cljboxes(other.cljboxes),
-           cljworkspace(other.cljworkspace), changed_mols(other.changed_mols),
-           props(other.props), id_source(other.id_source),
-           extract_source(other.extract_source)
-{}
+    : cljexts(other.cljexts), cljboxes(other.cljboxes), cljworkspace(other.cljworkspace),
+      changed_mols(other.changed_mols), props(other.props), id_source(other.id_source),
+      extract_source(other.extract_source)
+{
+}
 
 /** Destructor */
 CLJGroup::~CLJGroup()
-{}
+{
+}
 
 /** Copy assignment operator */
-CLJGroup& CLJGroup::operator=(const CLJGroup &other)
+CLJGroup &CLJGroup::operator=(const CLJGroup &other)
 {
     if (this != &other)
     {
@@ -167,10 +161,9 @@ CLJGroup& CLJGroup::operator=(const CLJGroup &other)
 bool CLJGroup::operator==(const CLJGroup &other) const
 {
     return (this == &other) or
-           (cljexts == other.cljexts and
-            cljboxes == other.cljboxes and cljworkspace == other.cljworkspace and
-            changed_mols == other.changed_mols and props == other.props and
-            id_source == other.id_source and extract_source == other.extract_source);
+           (cljexts == other.cljexts and cljboxes == other.cljboxes and cljworkspace == other.cljworkspace and
+            changed_mols == other.changed_mols and props == other.props and id_source == other.id_source and
+            extract_source == other.extract_source);
 }
 
 /** Comparison operator */
@@ -179,20 +172,19 @@ bool CLJGroup::operator!=(const CLJGroup &other) const
     return not operator==(other);
 }
 
-const char* CLJGroup::typeName()
+const char *CLJGroup::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CLJGroup>() );
+    return QMetaType::typeName(qMetaTypeId<CLJGroup>());
 }
 
-const char* CLJGroup::what() const
+const char *CLJGroup::what() const
 {
     return CLJGroup::typeName();
 }
 
 QString CLJGroup::toString() const
 {
-    return QObject::tr("CLJGroup( needsAccepting() == %1 )")
-                .arg(needsAccepting());
+    return QObject::tr("CLJGroup( needsAccepting() == %1 )").arg(needsAccepting());
 }
 
 /** Return the current version of all of the molecules in this group */
@@ -200,18 +192,17 @@ Molecules CLJGroup::molecules() const
 {
     Molecules mols;
 
-    for (QHash<MolNum,CLJExtractor>::const_iterator it = changed_mols.constBegin();
-         it != changed_mols.constEnd(); ++it)
+    for (QHash<MolNum, CLJExtractor>::const_iterator it = changed_mols.constBegin(); it != changed_mols.constEnd();
+         ++it)
     {
-        mols.add( it.value().newMolecule() );
+        mols.add(it.value().newMolecule());
     }
 
-    for (ChunkedHash<MolNum,CLJExtractor>::const_iterator it = cljexts.constBegin();
-         it != cljexts.constEnd(); ++it)
+    for (ChunkedHash<MolNum, CLJExtractor>::const_iterator it = cljexts.constBegin(); it != cljexts.constEnd(); ++it)
     {
         if (not mols.contains(it.key()))
         {
-            mols.add( it.value().newMolecule() );
+            mols.add(it.value().newMolecule());
         }
     }
 
@@ -249,17 +240,18 @@ void CLJGroup::add(const MoleculeView &molview, const PropertyMap &map)
 
     if (cljexts.contains(molnum) or changed_mols.contains(molnum))
     {
-        //we already contain this molecule - we should check that there is no
-        //change in property map
-        if (props.value(molnum,PropertyMap()) != map)
+        // we already contain this molecule - we should check that there is no
+        // change in property map
+        if (props.value(molnum, PropertyMap()) != map)
         {
-            throw SireError::incompatible_error( QObject::tr(
-                    "Cannot add the molecule %1 because the passed PropertyMap (%2) "
-                    "is not the same as that used the last time the molecule was "
-                    "added (%3)")
-                        .arg(molview.toString())
-                        .arg(map.toString())
-                        .arg(props.value(molnum,PropertyMap()).toString()), CODELOC );
+            throw SireError::incompatible_error(
+                QObject::tr("Cannot add the molecule %1 because the passed PropertyMap (%2) "
+                            "is not the same as that used the last time the molecule was "
+                            "added (%3)")
+                    .arg(molview.toString())
+                    .arg(map.toString())
+                    .arg(props.value(molnum, PropertyMap()).toString()),
+                CODELOC);
         }
     }
     else if (map != PropertyMap())
@@ -310,14 +302,12 @@ void CLJGroup::add(const Molecules &molecules, const PropertyMap &map)
 
     try
     {
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd();
-             ++it)
+        for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
             this->add(it.value(), map);
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_group);
         throw;
@@ -341,19 +331,18 @@ void CLJGroup::update(const MoleculeView &molview)
         {
             const CLJExtractor &ext = cljexts.constBegin().value();
 
-            if (ext.extractingByMolecule() or
-                (ext.extractingByResidue() and molview.data().info().nResidues() == 1) or
+            if (ext.extractingByMolecule() or (ext.extractingByResidue() and molview.data().info().nResidues() == 1) or
                 (ext.extractingByCutGroup() and molview.data().info().nCutGroups() == 1))
             {
-                //there is only a single CLJAtoms group in this object, so we may
-                //as well rebuild it all from scratch
+                // there is only a single CLJAtoms group in this object, so we may
+                // as well rebuild it all from scratch
                 this->mustRecalculateFromScratch();
                 cljexts[molnum].update(molview, cljboxes, cljworkspace);
                 return;
             }
         }
 
-        //we must update this molecule
+        // we must update this molecule
         if (changed_mols.contains(molnum))
         {
             changed_mols[molnum].update(molview, cljboxes, cljworkspace);
@@ -371,11 +360,11 @@ void CLJGroup::update(const MoleculeView &molview)
 
                 if (changed.hasChangedAtoms())
                 {
-                    changed_mols.insert(molnum,changed);
+                    changed_mols.insert(molnum, changed);
                 }
                 else
                 {
-                    //this change hasn't actually affected the atoms
+                    // this change hasn't actually affected the atoms
                     changed.commit(cljboxes, cljworkspace);
                     cljexts[molnum] = changed;
                 }
@@ -392,13 +381,12 @@ void CLJGroup::update(const Molecules &molecules)
 
     try
     {
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd(); ++it)
+        for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
             this->update(it.value());
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_group);
         throw;
@@ -456,13 +444,12 @@ void CLJGroup::remove(const Molecules &molecules)
 
     try
     {
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd(); ++it)
+        for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
             this->remove(it.value());
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_group);
         throw;
@@ -520,7 +507,7 @@ int CLJGroup::nChangedMolecules() const
 {
     if (recalculatingFromScratch())
     {
-        //assume that everything has changed
+        // assume that everything has changed
         return cljexts.count();
     }
     else
@@ -541,10 +528,10 @@ Molecules CLJGroup::changedMolecules() const
     {
         Molecules mols;
 
-        for (QHash<MolNum,CLJExtractor>::const_iterator it = changed_mols.constBegin();
-             it != changed_mols.constEnd(); ++it)
+        for (QHash<MolNum, CLJExtractor>::const_iterator it = changed_mols.constBegin(); it != changed_mols.constEnd();
+             ++it)
         {
-            mols.add( it.value().newMolecule() );
+            mols.add(it.value().newMolecule());
         }
 
         return mols;
@@ -559,8 +546,8 @@ bool CLJGroup::needsAccepting() const
 
     else
     {
-        for (ChunkedHash<MolNum,CLJExtractor>::const_iterator it = cljexts.constBegin();
-             it != cljexts.constEnd(); ++it)
+        for (ChunkedHash<MolNum, CLJExtractor>::const_iterator it = cljexts.constBegin(); it != cljexts.constEnd();
+             ++it)
         {
             if (it.value().needsCommitting())
                 return true;
@@ -579,11 +566,9 @@ void CLJGroup::accept()
 
     if (cljworkspace.recalculatingFromScratch())
     {
-        //this adds any molecules to the box that have not yet been
-        //added to the box
-        for (ChunkedHash<MolNum,CLJExtractor>::iterator it = cljexts.begin();
-             it != cljexts.end();
-             ++it)
+        // this adds any molecules to the box that have not yet been
+        // added to the box
+        for (ChunkedHash<MolNum, CLJExtractor>::iterator it = cljexts.begin(); it != cljexts.end(); ++it)
         {
             it.value().commit(cljboxes, cljworkspace);
 
@@ -596,8 +581,7 @@ void CLJGroup::accept()
     }
     else if (not changed_mols.isEmpty())
     {
-        for (QHash<MolNum,CLJExtractor>::iterator it = changed_mols.begin();
-             it != changed_mols.end(); ++it)
+        for (QHash<MolNum, CLJExtractor>::iterator it = changed_mols.begin(); it != changed_mols.end(); ++it)
         {
             it.value().commit(cljboxes, cljworkspace);
             cljexts[it.key()] = it.value();
@@ -658,10 +642,10 @@ bool CLJGroup::isSingleIDChange() const
 /** Return a tuple of (changedAtoms(),oldAtoms(),newAtoms()). This is
     needed if more than a single ID group has changed and thus we
     need to calculate the change in interaction within changedAtoms */
-tuple<CLJAtoms,CLJAtoms,CLJAtoms> CLJGroup::mergeChanges() const
+tuple<CLJAtoms, CLJAtoms, CLJAtoms> CLJGroup::mergeChanges() const
 {
     if (cljworkspace.recalculatingFromScratch())
-        return tuple<CLJAtoms,CLJAtoms,CLJAtoms>();
+        return tuple<CLJAtoms, CLJAtoms, CLJAtoms>();
     else
         return cljworkspace.merge();
 }
@@ -720,23 +704,20 @@ void CLJGroup::mustReallyRecalculateFromScratch()
 
     Molecules mols;
 
-    for (ChunkedHash<MolNum,CLJExtractor>::const_iterator it = cljexts.constBegin();
-         it != cljexts.constEnd(); ++it)
+    for (ChunkedHash<MolNum, CLJExtractor>::const_iterator it = cljexts.constBegin(); it != cljexts.constEnd(); ++it)
     {
-        mols.add( it.value().newMolecule() );
+        mols.add(it.value().newMolecule());
     }
 
     cljexts.clear();
 
-    for (MoleculeGroup::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (MoleculeGroup::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
-        CLJExtractor cljmol( it.value(), id_source, extract_source,
-                             props.value(it.key(),PropertyMap()) );
+        CLJExtractor cljmol(it.value(), id_source, extract_source, props.value(it.key(), PropertyMap()));
 
-        cljmol.commit(cljboxes, cljworkspace);;
+        cljmol.commit(cljboxes, cljworkspace);
+        ;
 
-        cljexts.insert( it.key(), cljmol );
+        cljexts.insert(it.key(), cljmol);
     }
 }

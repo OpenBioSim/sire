@@ -39,93 +39,92 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class RepExMove2;
+    class RepExMove2;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::RepExMove2&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::RepExMove2&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::RepExMove2 &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::RepExMove2 &);
 
 namespace SireMove
 {
 
-class Replicas;
-class Replica;
+    class Replicas;
+    class Replica;
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-/** This class is used to perform replica exchange moves on a collection
-    of Replicas. Each move involves running a block of sampling
-    on each of the replicas, and then performing replice exchange swaps
-    and tests between pairs.
+    /** This class is used to perform replica exchange moves on a collection
+        of Replicas. Each move involves running a block of sampling
+        on each of the replicas, and then performing replice exchange swaps
+        and tests between pairs.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT RepExMove2
-        : public SireBase::ConcreteProperty<RepExMove2,SupraMove>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT RepExMove2 : public SireBase::ConcreteProperty<RepExMove2, SupraMove>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const RepExMove2&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, RepExMove2&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const RepExMove2 &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, RepExMove2 &);
 
-public:
-    RepExMove2();
+    public:
+        RepExMove2();
 
-    RepExMove2(const RepExMove2 &other);
+        RepExMove2(const RepExMove2 &other);
 
-    ~RepExMove2();
+        ~RepExMove2();
 
-    RepExMove2& operator=(const RepExMove2 &other);
+        RepExMove2 &operator=(const RepExMove2 &other);
 
-    bool operator==(const RepExMove2 &other) const;
-    bool operator!=(const RepExMove2 &other) const;
+        bool operator==(const RepExMove2 &other) const;
+        bool operator!=(const RepExMove2 &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    int nAttempted() const;
-    int nAccepted() const;
-    int nRejected() const;
+        int nAttempted() const;
+        int nAccepted() const;
+        int nRejected() const;
 
-    double acceptanceRatio() const;
+        double acceptanceRatio() const;
 
-    void clearStatistics();
+        void clearStatistics();
 
-    void setSwapMonitors(bool swap_monitors);
+        void setSwapMonitors(bool swap_monitors);
 
-    bool swapMovesDisabled() const;
-    void setDisableSwaps(bool disable);
+        bool swapMovesDisabled() const;
+        void setDisableSwaps(bool disable);
 
-    QString toString() const;
+        QString toString() const;
 
-    void setGenerator(const RanGenerator &generator);
-    const RanGenerator& generator() const;
+        void setGenerator(const RanGenerator &generator);
+        const RanGenerator &generator() const;
 
-    void move(SupraSystem &system, int nmoves, bool record_stats);
+        void move(SupraSystem &system, int nmoves, bool record_stats);
 
-private:
-    void performMove(Replicas &replicas, bool record_stats);
+    private:
+        void performMove(Replicas &replicas, bool record_stats);
 
-    /** The random number generator used to accept or reject the moves */
-    RanGenerator rangenerator;
+        /** The random number generator used to accept or reject the moves */
+        RanGenerator rangenerator;
 
-    /** The number of times a replica exchange move has been accepted */
-    quint32 naccept;
+        /** The number of times a replica exchange move has been accepted */
+        quint32 naccept;
 
-    /** The number of times a replica exchange move has been rejected */
-    quint32 nreject;
+        /** The number of times a replica exchange move has been rejected */
+        quint32 nreject;
 
-    /** Whether or not to swap the system monitors when we swap replicas
-         - by default we leave the monitors with the systems */
-    bool swap_monitors;
+        /** Whether or not to swap the system monitors when we swap replicas
+             - by default we leave the monitors with the systems */
+        bool swap_monitors;
 
-    /** Whether or not to disable RETI tests. This is useful when you want
-        to just use this to RUN TI on a lot of replicas in parallel */
-    bool disable_swaps;
-};
+        /** Whether or not to disable RETI tests. This is useful when you want
+            to just use this to RUN TI on a lot of replicas in parallel */
+        bool disable_swaps;
+    };
 
 } // end of namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::RepExMove2 )
+Q_DECLARE_METATYPE(SireMove::RepExMove2)
 
-SIRE_EXPOSE_CLASS( SireMove::RepExMove2 )
+SIRE_EXPOSE_CLASS(SireMove::RepExMove2)
 
 #endif

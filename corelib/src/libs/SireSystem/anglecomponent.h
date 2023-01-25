@@ -36,93 +36,92 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class AngleComponent;
+    class AngleComponent;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::AngleComponent&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::AngleComponent&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::AngleComponent &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::AngleComponent &);
 
-namespace SireMaths{ class Triangle; }
+namespace SireMaths
+{
+    class Triangle;
+}
 
 namespace SireSystem
 {
 
-/** This is a constraint that constrains a symbol to equal the
-    value of an expression that involves an angle between three points
-    or atoms
+    /** This is a constraint that constrains a symbol to equal the
+        value of an expression that involves an angle between three points
+        or atoms
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT AngleComponent
-         : public SireBase::ConcreteProperty<AngleComponent,GeometryComponent>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT AngleComponent : public SireBase::ConcreteProperty<AngleComponent, GeometryComponent>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const AngleComponent&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, AngleComponent&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const AngleComponent &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, AngleComponent &);
 
-public:
-    AngleComponent();
-    AngleComponent(const SireCAS::Symbol &constrained_symbol,
-                   const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                   const SireFF::PointRef &point2,
-                   const PropertyMap &map = PropertyMap());
-    AngleComponent(const SireCAS::Symbol &constrained_symbol,
-                   const SireFF::PointRef &point0, const SireFF::PointRef &point1,
-                   const SireFF::PointRef &point2,
-                   const SireCAS::Expression &geometry_expression,
-                   const PropertyMap &map = PropertyMap());
+    public:
+        AngleComponent();
+        AngleComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                       const SireFF::PointRef &point1, const SireFF::PointRef &point2,
+                       const PropertyMap &map = PropertyMap());
+        AngleComponent(const SireCAS::Symbol &constrained_symbol, const SireFF::PointRef &point0,
+                       const SireFF::PointRef &point1, const SireFF::PointRef &point2,
+                       const SireCAS::Expression &geometry_expression, const PropertyMap &map = PropertyMap());
 
-    AngleComponent(const AngleComponent &other);
+        AngleComponent(const AngleComponent &other);
 
-    ~AngleComponent();
+        ~AngleComponent();
 
-    AngleComponent& operator=(const AngleComponent &other);
+        AngleComponent &operator=(const AngleComponent &other);
 
-    bool operator==(const AngleComponent &other) const;
-    bool operator!=(const AngleComponent &other) const;
+        bool operator==(const AngleComponent &other) const;
+        bool operator!=(const AngleComponent &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    const SireFF::Point& point(int i) const;
+        const SireFF::Point &point(int i) const;
 
-    const SireFF::Point& point0() const;
-    const SireFF::Point& point1() const;
-    const SireFF::Point& point2() const;
+        const SireFF::Point &point0() const;
+        const SireFF::Point &point1() const;
+        const SireFF::Point &point2() const;
 
-    int nPoints() const;
+        int nPoints() const;
 
-    static const SireCAS::Symbol& theta();
-    static const SireCAS::Symbol& theta102();
-    static const SireCAS::Symbol& theta012();
-    static const SireCAS::Symbol& theta021();
+        static const SireCAS::Symbol &theta();
+        static const SireCAS::Symbol &theta102();
+        static const SireCAS::Symbol &theta012();
+        static const SireCAS::Symbol &theta021();
 
-    static const SireCAS::Symbol& r01();
-    static const SireCAS::Symbol& r02();
-    static const SireCAS::Symbol& r12();
+        static const SireCAS::Symbol &r01();
+        static const SireCAS::Symbol &r02();
+        static const SireCAS::Symbol &r12();
 
-protected:
-    bool wouldChange(const Delta &delta, quint32 last_subversion) const;
-    SireCAS::Values getValues(const System &system);
+    protected:
+        bool wouldChange(const Delta &delta, quint32 last_subversion) const;
+        SireCAS::Values getValues(const System &system);
 
-    void setSpace(const SireVol::Space &space);
+        void setSpace(const SireVol::Space &space);
 
-private:
-    SireMaths::Triangle getTriangle() const;
+    private:
+        SireMaths::Triangle getTriangle() const;
 
-    /** The three points between which the angle is calculated */
-    SireFF::PointPtr p0, p1, p2;
+        /** The three points between which the angle is calculated */
+        SireFF::PointPtr p0, p1, p2;
 
-    /** Whether or not the points are within the same molecule */
-    bool intra_molecule_points;
-};
+        /** Whether or not the points are within the same molecule */
+        bool intra_molecule_points;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::AngleComponent )
+Q_DECLARE_METATYPE(SireSystem::AngleComponent)
 
-SIRE_EXPOSE_CLASS( SireSystem::AngleComponent )
+SIRE_EXPOSE_CLASS(SireSystem::AngleComponent)
 
 SIRE_END_HEADER
 

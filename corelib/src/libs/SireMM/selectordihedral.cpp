@@ -38,8 +38,8 @@
 
 #include "SireID/index.h"
 
-#include "SireBase/slice.h"
 #include "SireBase/errors.h"
+#include "SireBase/slice.h"
 
 #include "SireUnits/units.h"
 
@@ -61,22 +61,22 @@ using namespace SireUnits;
 
 static const RegisterMetaType<SelectorDihedral> r_sdihedral;
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream &ds, const SelectorDihedral &sdihedral)
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const SelectorDihedral &sdihedral)
 {
     writeHeader(ds, r_sdihedral, 1);
     SharedDataStream sds(ds);
-    sds << sdihedral.dihs << static_cast<const MoleculeView&>(sdihedral);
+    sds << sdihedral.dihs << static_cast<const MoleculeView &>(sdihedral);
     return ds;
 }
 
-SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, SelectorDihedral &sdihedral)
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, SelectorDihedral &sdihedral)
 {
     auto v = readHeader(ds, r_sdihedral);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> sdihedral.dihs >> static_cast<MoleculeView&>(sdihedral);
+        sds >> sdihedral.dihs >> static_cast<MoleculeView &>(sdihedral);
     }
     else
         throw SireStream::version_error(v, "1", r_sdihedral, CODELOC);
@@ -85,10 +85,11 @@ SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, SelectorDihedral &sdihedr
 }
 
 SelectorDihedral::SelectorDihedral() : ConcreteProperty<SelectorDihedral, MoleculeView>()
-{}
+{
+}
 
 SelectorDihedral::SelectorDihedral(const Dihedral &dihedral)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(dihedral)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(dihedral)
 {
     if (not dihedral.isEmpty())
     {
@@ -103,8 +104,7 @@ SelectorDihedral::SelectorDihedral(const Dihedral &dihedral)
             qSwap(atom1, atom2);
         }
 
-        if (atom0 == atom1 or atom0 == atom2 or atom0 == atom3 or
-            atom1 == atom2 or atom1 == atom3 or atom2 == atom3)
+        if (atom0 == atom1 or atom0 == atom2 or atom0 == atom3 or atom1 == atom2 or atom1 == atom3 or atom2 == atom3)
         {
             // cannot add Dihedrals to the same atom
             this->operator=(SelectorDihedral());
@@ -116,9 +116,8 @@ SelectorDihedral::SelectorDihedral(const Dihedral &dihedral)
     }
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
-                                   const SireBase::PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
+SelectorDihedral::SelectorDihedral(const MoleculeView &mol, const SireBase::PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
 {
     if (mol.data().hasProperty(map["connectivity"]))
     {
@@ -136,9 +135,7 @@ SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
 
             for (const auto &dihedral : dihedrals)
             {
-                if (s.selected(dihedral.atom0()) and
-                    s.selected(dihedral.atom1()) and
-                    s.selected(dihedral.atom2()) and
+                if (s.selected(dihedral.atom0()) and s.selected(dihedral.atom1()) and s.selected(dihedral.atom2()) and
                     s.selected(dihedral.atom3()))
                 {
                     dihs.append(dihedral);
@@ -148,33 +145,27 @@ SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
     }
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeData &moldata,
-                                   const SireBase::PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>()
+SelectorDihedral::SelectorDihedral(const MoleculeData &moldata, const SireBase::PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>()
 {
     this->operator=(SelectorDihedral(Molecule(moldata), map));
 }
 
-inline
-QSet<IDQuad> _to_int_set(const QList<DihedralID> &vals,
-                         const MoleculeInfoData &molinfo)
+inline QSet<IDQuad> _to_int_set(const QList<DihedralID> &vals, const MoleculeInfoData &molinfo)
 {
     QSet<IDQuad> s;
     s.reserve(vals.count());
 
     for (const auto &val : vals)
     {
-        s.insert(IDQuad(molinfo.atomIdx(val[0]).value(),
-                        molinfo.atomIdx(val[1]).value(),
-                        molinfo.atomIdx(val[2]).value(),
-                        molinfo.atomIdx(val[3]).value()));
+        s.insert(IDQuad(molinfo.atomIdx(val[0]).value(), molinfo.atomIdx(val[1]).value(),
+                        molinfo.atomIdx(val[2]).value(), molinfo.atomIdx(val[3]).value()));
     }
 
     return s;
 }
 
-inline
-QList<DihedralID> _from_int_set(const QSet<IDQuad> &vals)
+inline QList<DihedralID> _from_int_set(const QSet<IDQuad> &vals)
 {
     QVector<IDQuad> v;
     v.reserve(vals.count());
@@ -191,17 +182,13 @@ QList<DihedralID> _from_int_set(const QSet<IDQuad> &vals)
 
     for (const auto &val : v)
     {
-        l.append(DihedralID(AtomIdx(val.atom0),
-                            AtomIdx(val.atom1),
-                            AtomIdx(val.atom2),
-                            AtomIdx(val.atom3)));
+        l.append(DihedralID(AtomIdx(val.atom0), AtomIdx(val.atom1), AtomIdx(val.atom2), AtomIdx(val.atom3)));
     }
 
     return l;
 }
 
-inline
-QList<AtomIdx> _filter(const QList<AtomIdx> &atoms, const AtomSelection &selection)
+inline QList<AtomIdx> _filter(const QList<AtomIdx> &atoms, const AtomSelection &selection)
 {
     QList<AtomIdx> ret;
     ret.reserve(atoms.count());
@@ -217,10 +204,7 @@ QList<AtomIdx> _filter(const QList<AtomIdx> &atoms, const AtomSelection &selecti
     return ret;
 }
 
-inline
-QSet<IDQuad> _filter(const QSet<IDQuad> &dihedrals,
-                     const QVector<quint32> &atoms,
-                     int position)
+inline QSet<IDQuad> _filter(const QSet<IDQuad> &dihedrals, const QVector<quint32> &atoms, int position)
 {
     QSet<IDQuad> result;
 
@@ -243,8 +227,7 @@ QSet<IDQuad> _filter(const QSet<IDQuad> &dihedrals,
     return result;
 }
 
-inline
-QVector<quint32> _to_int(const Selector<Atom> &atoms)
+inline QVector<quint32> _to_int(const Selector<Atom> &atoms)
 {
     QVector<quint32> ret;
 
@@ -252,7 +235,7 @@ QVector<quint32> _to_int(const Selector<Atom> &atoms)
 
     ret.reserve(n);
 
-    for (int i=0; i<n; ++i)
+    for (int i = 0; i < n; ++i)
     {
         ret.append(atoms.index(i));
     }
@@ -260,8 +243,7 @@ QVector<quint32> _to_int(const Selector<Atom> &atoms)
     return ret;
 }
 
-inline
-QVector<quint32> _to_int(const QList<AtomIdx> &atoms)
+inline QVector<quint32> _to_int(const QList<AtomIdx> &atoms)
 {
     QVector<quint32> ret;
     ret.reserve(atoms.count());
@@ -274,10 +256,8 @@ QVector<quint32> _to_int(const QList<AtomIdx> &atoms)
     return ret;
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
-                                   const DihedralID &dihedral,
-                                   const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
+SelectorDihedral::SelectorDihedral(const MoleculeView &mol, const DihedralID &dihedral, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
 {
     auto atoms0 = mol.data().info().map(dihedral.atom0());
     auto atoms1 = mol.data().info().map(dihedral.atom1());
@@ -318,10 +298,9 @@ SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
     }
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
-                                   const QList<DihedralID> &dihedrals,
+SelectorDihedral::SelectorDihedral(const MoleculeView &mol, const QList<DihedralID> &dihedrals,
                                    const SireBase::PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
 {
     if (dihedrals.count() == 1)
     {
@@ -379,9 +358,8 @@ SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
     }
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
-                                   const AtomID &atom, const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
+SelectorDihedral::SelectorDihedral(const MoleculeView &mol, const AtomID &atom, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
 {
     auto atoms = mol.data().info().map(atom);
 
@@ -404,15 +382,13 @@ SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
         auto dihedrals2 = _filter(dihedrals, int_atoms, 2);
         auto dihedrals3 = _filter(dihedrals, int_atoms, 3);
 
-        dihs = _from_int_set(dihedrals0 + dihedrals1 +
-                             dihedrals2 + dihedrals3);
+        dihs = _from_int_set(dihedrals0 + dihedrals1 + dihedrals2 + dihedrals3);
     }
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
-                                   const AtomID &atom0, const AtomID &atom1,
+SelectorDihedral::SelectorDihedral(const MoleculeView &mol, const AtomID &atom0, const AtomID &atom1,
                                    const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
 {
     auto atoms0 = mol.data().info().map(atom0);
     auto atoms1 = mol.data().info().map(atom1);
@@ -451,15 +427,13 @@ SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
         auto dihedrals10 = _filter(dihedrals, int_atoms0, 1);
         dihedrals10 = _filter(dihedrals, int_atoms1, 0);
 
-        dihs = _from_int_set(dihedrals01 + dihedrals12 + dihedrals23 +
-                             dihedrals32 + dihedrals21 + dihedrals10);
+        dihs = _from_int_set(dihedrals01 + dihedrals12 + dihedrals23 + dihedrals32 + dihedrals21 + dihedrals10);
     }
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
-                                   const AtomID &atom0, const AtomID &atom1,
+SelectorDihedral::SelectorDihedral(const MoleculeView &mol, const AtomID &atom0, const AtomID &atom1,
                                    const AtomID &atom2, const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(mol)
 {
     auto atoms0 = mol.data().info().map(atom0);
     auto atoms1 = mol.data().info().map(atom1);
@@ -499,59 +473,46 @@ SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
         dihedrals210 = _filter(dihedrals210, int_atoms1, 1);
         dihedrals210 = _filter(dihedrals210, int_atoms2, 0);
 
-        dihs = _from_int_set(dihedrals012 + dihedrals123 +
-                             dihedrals321 + dihedrals210);
+        dihs = _from_int_set(dihedrals012 + dihedrals123 + dihedrals321 + dihedrals210);
     }
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeView &mol,
-                                   const AtomID &atom0, const AtomID &atom1,
-                                   const AtomID &atom2, const AtomID &atom3,
-                                   const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>()
+SelectorDihedral::SelectorDihedral(const MoleculeView &mol, const AtomID &atom0, const AtomID &atom1,
+                                   const AtomID &atom2, const AtomID &atom3, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>()
 {
-    this->operator=(SelectorDihedral(mol,
-                                     DihedralID(atom0, atom1, atom2, atom3),
-                                     map));
+    this->operator=(SelectorDihedral(mol, DihedralID(atom0, atom1, atom2, atom3), map));
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeData &mol,
-                                   const AtomID &atom, const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>()
+SelectorDihedral::SelectorDihedral(const MoleculeData &mol, const AtomID &atom, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>()
 {
     this->operator=(SelectorDihedral(Molecule(mol), atom, map));
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeData &mol,
-                                   const AtomID &atom0, const AtomID &atom1,
+SelectorDihedral::SelectorDihedral(const MoleculeData &mol, const AtomID &atom0, const AtomID &atom1,
                                    const PropertyMap &map)
-             : ConcreteProperty<SelectorDihedral, MoleculeView>()
+    : ConcreteProperty<SelectorDihedral, MoleculeView>()
 {
     this->operator=(SelectorDihedral(Molecule(mol), atom0, atom1, map));
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeData &mol,
-                                   const AtomID &atom0, const AtomID &atom1,
-                                   const AtomID &atom2,
-                                   const PropertyMap &map)
-             : ConcreteProperty<SelectorDihedral, MoleculeView>()
+SelectorDihedral::SelectorDihedral(const MoleculeData &mol, const AtomID &atom0, const AtomID &atom1,
+                                   const AtomID &atom2, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>()
 {
     this->operator=(SelectorDihedral(Molecule(mol), atom0, atom1, atom2, map));
 }
 
-SelectorDihedral::SelectorDihedral(const MoleculeData &mol,
-                                   const AtomID &atom0, const AtomID &atom1,
-                                   const AtomID &atom2, const AtomID &atom3,
-                                   const PropertyMap &map)
-             : ConcreteProperty<SelectorDihedral, MoleculeView>()
+SelectorDihedral::SelectorDihedral(const MoleculeData &mol, const AtomID &atom0, const AtomID &atom1,
+                                   const AtomID &atom2, const AtomID &atom3, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>()
 {
-    this->operator=(SelectorDihedral(Molecule(mol), atom0, atom1,
-                                     atom2, atom3, map));
+    this->operator=(SelectorDihedral(Molecule(mol), atom0, atom1, atom2, atom3, map));
 }
 
-SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms,
-                                   const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(atoms)
+SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(atoms)
 {
     if (this->data().hasProperty(map["connectivity"]))
     {
@@ -566,23 +527,22 @@ SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms,
         auto dihedrals2 = _filter(dihedrals, int_atoms, 2);
         auto dihedrals3 = _filter(dihedrals, int_atoms, 3);
 
-        dihs = _from_int_set(dihedrals0 + dihedrals1 +
-                             dihedrals2 + dihedrals3);
+        dihs = _from_int_set(dihedrals0 + dihedrals1 + dihedrals2 + dihedrals3);
     }
 }
 
-SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms0,
-                                   const Selector<Atom> &atoms1,
-                                   const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(atoms0)
+SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms0, const Selector<Atom> &atoms1, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(atoms0)
 {
     if (not atoms0.isSameMolecule(atoms1))
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create a dihedral from atoms in the same molecule. "
-            "%1 and %2 are from different molecules (%3 and %4)")
-                .arg(atoms0.toString()).arg(atoms1.toString())
+        throw SireError::incompatible_error(
+            QObject::tr("You can only create a dihedral from atoms in the same molecule. "
+                        "%1 and %2 are from different molecules (%3 and %4)")
+                .arg(atoms0.toString())
+                .arg(atoms1.toString())
                 .arg(atoms0.molecule().toString())
-                .arg(atoms1.molecule().toString()), CODELOC);
+                .arg(atoms1.molecule().toString()),
+            CODELOC);
 
     if (this->data().hasProperty(map["connectivity"]))
     {
@@ -611,27 +571,25 @@ SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms0,
         auto dihedrals10 = _filter(dihedrals, int_atoms0, 1);
         dihedrals10 = _filter(dihedrals10, int_atoms1, 0);
 
-        dihs = _from_int_set(dihedrals01 + dihedrals12 + dihedrals23 +
-                             dihedrals32 + dihedrals21 + dihedrals10);
+        dihs = _from_int_set(dihedrals01 + dihedrals12 + dihedrals23 + dihedrals32 + dihedrals21 + dihedrals10);
     }
 }
 
-SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms0,
-                                   const Selector<Atom> &atoms1,
-                                   const Selector<Atom> &atoms2,
-                                   const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(atoms0)
+SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms0, const Selector<Atom> &atoms1,
+                                   const Selector<Atom> &atoms2, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(atoms0)
 {
-    if (not (atoms0.isSameMolecule(atoms1) and
-             atoms0.isSameMolecule(atoms2)))
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create a dihedral from atoms in the same molecule. "
-            "%1, %2 and %3 are from different molecules (%4, %5 and %6)")
-                .arg(atoms0.toString()).arg(atoms1.toString())
+    if (not(atoms0.isSameMolecule(atoms1) and atoms0.isSameMolecule(atoms2)))
+        throw SireError::incompatible_error(
+            QObject::tr("You can only create a dihedral from atoms in the same molecule. "
+                        "%1, %2 and %3 are from different molecules (%4, %5 and %6)")
+                .arg(atoms0.toString())
+                .arg(atoms1.toString())
                 .arg(atoms2.toString())
                 .arg(atoms0.molecule().toString())
                 .arg(atoms1.molecule().toString())
-                .arg(atoms2.molecule().toString()), CODELOC);
+                .arg(atoms2.molecule().toString()),
+            CODELOC);
 
     if (this->data().hasProperty(map["connectivity"]))
     {
@@ -659,30 +617,27 @@ SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms0,
         dihedrals210 = _filter(dihedrals210, int_atoms1, 1);
         dihedrals210 = _filter(dihedrals210, int_atoms2, 0);
 
-        dihs = _from_int_set(dihedrals012 + dihedrals123 +
-                             dihedrals321 + dihedrals210);
+        dihs = _from_int_set(dihedrals012 + dihedrals123 + dihedrals321 + dihedrals210);
     }
 }
 
-SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms0,
-                                   const Selector<Atom> &atoms1,
-                                   const Selector<Atom> &atoms2,
-                                   const Selector<Atom> &atoms3,
-                                   const PropertyMap &map)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(atoms0)
+SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms0, const Selector<Atom> &atoms1,
+                                   const Selector<Atom> &atoms2, const Selector<Atom> &atoms3, const PropertyMap &map)
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(atoms0)
 {
-    if (not (atoms0.isSameMolecule(atoms1) and
-             atoms0.isSameMolecule(atoms2) and
-             atoms0.isSameMolecule(atoms3)))
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create a dihedral from atoms in the same molecule. "
-            "%1, %2, %3 and %4 are from different molecules (%5, %6, %7 and %8)")
-                .arg(atoms0.toString()).arg(atoms1.toString())
-                .arg(atoms2.toString()).arg(atoms3.toString())
+    if (not(atoms0.isSameMolecule(atoms1) and atoms0.isSameMolecule(atoms2) and atoms0.isSameMolecule(atoms3)))
+        throw SireError::incompatible_error(
+            QObject::tr("You can only create a dihedral from atoms in the same molecule. "
+                        "%1, %2, %3 and %4 are from different molecules (%5, %6, %7 and %8)")
+                .arg(atoms0.toString())
+                .arg(atoms1.toString())
+                .arg(atoms2.toString())
+                .arg(atoms3.toString())
                 .arg(atoms0.molecule().toString())
                 .arg(atoms1.molecule().toString())
                 .arg(atoms2.molecule().toString())
-                .arg(atoms3.molecule().toString()), CODELOC);
+                .arg(atoms3.molecule().toString()),
+            CODELOC);
 
     if (this->data().hasProperty(map["connectivity"]))
     {
@@ -710,19 +665,20 @@ SelectorDihedral::SelectorDihedral(const Selector<Atom> &atoms0,
 }
 
 SelectorDihedral::SelectorDihedral(const SelectorDihedral &other)
-                 : ConcreteProperty<SelectorDihedral, MoleculeView>(other),
-                   dihs(other.dihs)
-{}
+    : ConcreteProperty<SelectorDihedral, MoleculeView>(other), dihs(other.dihs)
+{
+}
 
 SelectorDihedral::~SelectorDihedral()
-{}
+{
+}
 
-const char* SelectorDihedral::typeName()
+const char *SelectorDihedral::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<SelectorDihedral>());
 }
 
-SelectorDihedral& SelectorDihedral::operator=(const SelectorDihedral &other)
+SelectorDihedral &SelectorDihedral::operator=(const SelectorDihedral &other)
 {
     if (this != &other)
     {
@@ -769,31 +725,27 @@ QString SelectorDihedral::toString() const
 
     if (this->count() <= 10)
     {
-        for (int i=0; i<this->count(); ++i)
+        for (int i = 0; i < this->count(); ++i)
         {
-            parts.append(QObject::tr("%1: %2").arg(i)
-                            .arg(this->operator()(i).toString()));
+            parts.append(QObject::tr("%1: %2").arg(i).arg(this->operator()(i).toString()));
         }
     }
     else
     {
-        for (int i=0; i<5; ++i)
+        for (int i = 0; i < 5; ++i)
         {
-            parts.append(QObject::tr("%1: %2").arg(i)
-                            .arg(this->operator()(i).toString()));
+            parts.append(QObject::tr("%1: %2").arg(i).arg(this->operator()(i).toString()));
         }
 
         parts.append("...");
 
-        for (int i=this->count()-5; i<this->count(); ++i)
+        for (int i = this->count() - 5; i < this->count(); ++i)
         {
-            parts.append(QObject::tr("%1: %2").arg(i)
-                            .arg(this->operator()(i).toString()));
+            parts.append(QObject::tr("%1: %2").arg(i).arg(this->operator()(i).toString()));
         }
     }
 
-    return QObject::tr("SelectorDihedral( size=%1\n%2\n)")
-                .arg(this->count()).arg(parts.join("\n"));
+    return QObject::tr("SelectorDihedral( size=%1\n%2\n)").arg(this->count()).arg(parts.join("\n"));
 }
 
 SelectorDihedral SelectorDihedral::add(const Dihedral &dihedral) const
@@ -808,12 +760,11 @@ SelectorDihedral SelectorDihedral::add(const Dihedral &dihedral) const
 
     if (dihedral.data().number() != this->data().number())
     {
-        throw SireError::incompatible_error(QObject::tr(
-            "You cannot add Dihedrals from a different molecule (%1) to "
-            "a set of Dihedrals from molecule %2.")
-                .arg(dihedral.data().number())
-                .arg(this->data().number()),
-                    CODELOC);
+        throw SireError::incompatible_error(QObject::tr("You cannot add Dihedrals from a different molecule (%1) to "
+                                                        "a set of Dihedrals from molecule %2.")
+                                                .arg(dihedral.data().number())
+                                                .arg(this->data().number()),
+                                            CODELOC);
     }
 
     auto atom0 = this->data().info().atomIdx(dihedral.ID().atom0());
@@ -827,8 +778,7 @@ SelectorDihedral SelectorDihedral::add(const Dihedral &dihedral) const
         qSwap(atom1, atom2);
     }
 
-    if (atom0 == atom1 or atom0 == atom2 or atom0 == atom3 or
-        atom1 == atom2 or atom1 == atom3 or atom2 == atom3)
+    if (atom0 == atom1 or atom0 == atom2 or atom0 == atom3 or atom1 == atom2 or atom1 == atom3 or atom2 == atom3)
         // cannot add Dihedrals to the same atom
         return *this;
 
@@ -901,14 +851,14 @@ SelectorDihedral SelectorDihedral::operator()(int i, int j) const
 
     if (i <= j)
     {
-        for ( ; i<=j; ++i)
+        for (; i <= j; ++i)
         {
             ret.dihs.append(this->dihs.at(i));
         }
     }
     else
     {
-        for ( ; i >= j; --i)
+        for (; i >= j; --i)
         {
             ret.dihs.append(this->dihs.at(i));
         }
@@ -1081,7 +1031,7 @@ AtomSelection SelectorDihedral::selection() const
 
 bool SelectorDihedral::hasProperty(const PropertyName &key) const
 {
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         if (this->operator()(i).hasProperty(key))
             return true;
@@ -1095,8 +1045,7 @@ bool SelectorDihedral::hasMetadata(const PropertyName &key) const
     return false;
 }
 
-bool SelectorDihedral::hasMetadata(const PropertyName &key,
-                                   const PropertyName &metakey) const
+bool SelectorDihedral::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return false;
 }
@@ -1105,7 +1054,7 @@ QStringList SelectorDihedral::propertyKeys() const
 {
     QSet<QString> keys;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         for (const auto &k : this->operator()(i).propertyKeys())
         {
@@ -1113,7 +1062,7 @@ QStringList SelectorDihedral::propertyKeys() const
         }
     }
 
-    //QStringList ret(keys.constBegin(), keys.constEnd());
+    // QStringList ret(keys.constBegin(), keys.constEnd());
     QStringList ret = keys.values();
 
     return ret;
@@ -1133,7 +1082,7 @@ QList<Properties> SelectorDihedral::properties() const
 {
     QList<Properties> props;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         props.append(this->operator()(i).properties());
     }
@@ -1157,33 +1106,32 @@ QList<PropertyPtr> SelectorDihedral::property(const PropertyName &key) const
 
     QList<PropertyPtr> props;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         try
         {
             props.append(this->operator()(i).property(key));
             has_prop = true;
         }
-        catch(SireError::exception&)
+        catch (SireError::exception &)
         {
             props.append(NullProperty());
         }
     }
 
     if (not has_prop)
-        throw SireBase::missing_property(QObject::tr(
-            "None of the dihedrals in this container have a property called %1.")
-                .arg(key.source()), CODELOC);
+        throw SireBase::missing_property(
+            QObject::tr("None of the dihedrals in this container have a property called %1.").arg(key.source()),
+            CODELOC);
 
     return props;
 }
 
-QList<PropertyPtr> SelectorDihedral::property(const PropertyName &key,
-                                              const Property &default_value) const
+QList<PropertyPtr> SelectorDihedral::property(const PropertyName &key, const Property &default_value) const
 {
     QList<PropertyPtr> props;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         props.append(this->operator()(i).property(key, default_value));
     }
@@ -1195,7 +1143,7 @@ QList<SireUnits::Dimension::Angle> SelectorDihedral::sizes(const PropertyMap &ma
 {
     QList<SireUnits::Dimension::Angle> s;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         s.append(this->operator()(i).size(map));
     }
@@ -1227,7 +1175,7 @@ QList<Expression> SelectorDihedral::potentials(const PropertyMap &map) const
 {
     QList<Expression> p;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         p.append(this->operator()(i).potential(map));
     }
@@ -1244,7 +1192,7 @@ QList<SireUnits::Dimension::GeneralUnit> SelectorDihedral::energies(const Proper
 {
     QList<SireUnits::Dimension::GeneralUnit> nrgs;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         nrgs.append(this->operator()(i).energy(map));
     }
@@ -1261,7 +1209,7 @@ SireUnits::Dimension::GeneralUnit SelectorDihedral::energy(const PropertyMap &ma
 {
     SireUnits::Dimension::GeneralUnit nrg(0);
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         nrg += this->operator()(i).energy(map);
     }

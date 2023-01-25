@@ -34,331 +34,330 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class Cosh;
-class Sinh;
-class Tanh;
-class Csch;
-class Sech;
-class Coth;
-}
+    class Cosh;
+    class Sinh;
+    class Tanh;
+    class Csch;
+    class Sech;
+    class Coth;
+} // namespace SireCAS
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Cosh&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Cosh&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Cosh &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Cosh &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Sinh&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Sinh&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Sinh &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Sinh &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Tanh&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Tanh&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Tanh &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Tanh &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Csch&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Csch&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Csch &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Csch &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Sech&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Sech&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Sech &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Sech &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Coth&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Coth&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Coth &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Coth &);
 
 namespace SireCAS
 {
 
-/** Hyperbolic cosine */
-class SIRECAS_EXPORT Cosh : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Cosh&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Cosh&);
-
-public:
-    Cosh();
-    Cosh(const Expression &ex);
-
-    Cosh(const Cosh &other);
-
-    ~Cosh();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
+    /** Hyperbolic cosine */
+    class SIRECAS_EXPORT Cosh : public SingleFunc
     {
-        return Cosh::typeName();
-    }
 
-    Cosh* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Cosh &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Cosh &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        Cosh();
+        Cosh(const Expression &ex);
 
-protected:
-    Expression functionOf(const Expression &arg) const
+        Cosh(const Cosh &other);
+
+        ~Cosh();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Cosh::typeName();
+        }
+
+        Cosh *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Cosh(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "cosh";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Hyperbolic sine */
+    class SIRECAS_EXPORT Sinh : public SingleFunc
     {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Cosh(arg));
-    }
 
-    QString stringRep() const
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Sinh &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Sinh &);
+
+    public:
+        Sinh();
+        Sinh(const Expression &ex);
+
+        Sinh(const Sinh &other);
+
+        ~Sinh();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Sinh::typeName();
+        }
+
+        Sinh *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Sinh(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "sinh";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Hyperbolic tangent */
+    class SIRECAS_EXPORT Tanh : public SingleFunc
     {
-        return "cosh";
-    }
 
-    uint magic() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Tanh &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Tanh &);
 
-    Expression diff() const;
-    Expression integ() const;
+    public:
+        Tanh();
+        Tanh(const Expression &ex);
 
-};
+        Tanh(const Tanh &other);
 
-/** Hyperbolic sine */
-class SIRECAS_EXPORT Sinh : public SingleFunc
-{
+        ~Tanh();
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Sinh&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Sinh&);
+        bool operator==(const ExBase &other) const;
 
-public:
-    Sinh();
-    Sinh(const Expression &ex);
+        static const char *typeName();
 
-    Sinh(const Sinh &other);
+        const char *what() const
+        {
+            return Tanh::typeName();
+        }
 
-    ~Sinh();
+        Tanh *clone() const;
 
-    bool operator==(const ExBase &other) const;
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
 
-    static const char* typeName();
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Tanh(arg));
+        }
 
-    const char* what() const
+        QString stringRep() const
+        {
+            return "tanh";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Hyperbolic secant */
+    class SIRECAS_EXPORT Sech : public SingleFunc
     {
-        return Sinh::typeName();
-    }
 
-    Sinh* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Sech &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Sech &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        Sech();
+        Sech(const Expression &ex);
 
-protected:
-    Expression functionOf(const Expression &arg) const
+        Sech(const Sech &other);
+
+        ~Sech();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Sech::typeName();
+        }
+
+        Sech *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Sech(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "sech";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Hyperbolic cosecant */
+    class SIRECAS_EXPORT Csch : public SingleFunc
     {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Sinh(arg));
-    }
 
-    QString stringRep() const
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Csch &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Csch &);
+
+    public:
+        Csch();
+        Csch(const Expression &ex);
+
+        Csch(const Csch &other);
+
+        ~Csch();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Csch::typeName();
+        }
+
+        Csch *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Csch(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "csch";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Hyperbolic cotangent */
+    class SIRECAS_EXPORT Coth : public SingleFunc
     {
-        return "sinh";
-    }
 
-    uint magic() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Coth &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Coth &);
 
-    Expression diff() const;
-    Expression integ() const;
-};
+    public:
+        Coth();
+        Coth(const Expression &ex);
 
-/** Hyperbolic tangent */
-class SIRECAS_EXPORT Tanh : public SingleFunc
-{
+        Coth(const Coth &other);
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Tanh&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Tanh&);
+        ~Coth();
 
-public:
-    Tanh();
-    Tanh(const Expression &ex);
+        bool operator==(const ExBase &other) const;
 
-    Tanh(const Tanh &other);
+        static const char *typeName();
 
-    ~Tanh();
+        const char *what() const
+        {
+            return Coth::typeName();
+        }
 
-    bool operator==(const ExBase &other) const;
+        Coth *clone() const;
 
-    static const char* typeName();
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
 
-    const char* what() const
-    {
-        return Tanh::typeName();
-    }
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Coth(arg));
+        }
 
-    Tanh* clone() const;
+        QString stringRep() const
+        {
+            return "coth";
+        }
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+        uint magic() const;
 
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Tanh(arg));
-    }
+        Expression diff() const;
+        Expression integ() const;
+    };
 
-    QString stringRep() const
-    {
-        return "tanh";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-/** Hyperbolic secant */
-class SIRECAS_EXPORT Sech : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Sech&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Sech&);
-
-public:
-    Sech();
-    Sech(const Expression &ex);
-
-    Sech(const Sech &other);
-
-    ~Sech();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return Sech::typeName();
-    }
-
-    Sech* clone() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Sech(arg));
-    }
-
-    QString stringRep() const
-    {
-        return "sech";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-/** Hyperbolic cosecant */
-class SIRECAS_EXPORT Csch : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Csch&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Csch&);
-
-public:
-    Csch();
-    Csch(const Expression &ex);
-
-    Csch(const Csch &other);
-
-    ~Csch();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return Csch::typeName();
-    }
-
-    Csch* clone() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Csch(arg));
-    }
-
-    QString stringRep() const
-    {
-        return "csch";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-/** Hyperbolic cotangent */
-class SIRECAS_EXPORT Coth : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Coth&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Coth&);
-
-public:
-    Coth();
-    Coth(const Expression &ex);
-
-    Coth(const Coth &other);
-
-    ~Coth();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return Coth::typeName();
-    }
-
-    Coth* clone() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Coth(arg));
-    }
-
-    QString stringRep() const
-    {
-        return "coth";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-}
+} // namespace SireCAS
 
 Q_DECLARE_METATYPE(SireCAS::Cosh)
 Q_DECLARE_METATYPE(SireCAS::Sinh)
@@ -367,12 +366,12 @@ Q_DECLARE_METATYPE(SireCAS::Csch)
 Q_DECLARE_METATYPE(SireCAS::Sech)
 Q_DECLARE_METATYPE(SireCAS::Coth)
 
-SIRE_EXPOSE_CLASS( SireCAS::Cosh )
-SIRE_EXPOSE_CLASS( SireCAS::Sinh )
-SIRE_EXPOSE_CLASS( SireCAS::Tanh )
-SIRE_EXPOSE_CLASS( SireCAS::Csch )
-SIRE_EXPOSE_CLASS( SireCAS::Sech )
-SIRE_EXPOSE_CLASS( SireCAS::Coth )
+SIRE_EXPOSE_CLASS(SireCAS::Cosh)
+SIRE_EXPOSE_CLASS(SireCAS::Sinh)
+SIRE_EXPOSE_CLASS(SireCAS::Tanh)
+SIRE_EXPOSE_CLASS(SireCAS::Csch)
+SIRE_EXPOSE_CLASS(SireCAS::Sech)
+SIRE_EXPOSE_CLASS(SireCAS::Coth)
 
 SIRE_END_HEADER
 

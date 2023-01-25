@@ -26,11 +26,11 @@
 \*********************************************/
 
 #include "propertylist.h"
-#include "stringproperty.h"
-#include "numberproperty.h"
 #include "arrayproperty.hpp"
-#include "variantproperty.h"
 #include "booleanproperty.h"
+#include "numberproperty.h"
+#include "stringproperty.h"
+#include "variantproperty.h"
 
 #include "SireError/errors.h"
 
@@ -60,13 +60,12 @@ namespace SireBase
                 idx = count + i;
 
             if (idx < 0 or idx >= count)
-                throw SireError::invalid_index( QObject::tr(
-                        "Cannot access element %1. The number of elements is %2.")
-                            .arg(i).arg(count), CODELOC );
+                throw SireError::invalid_index(
+                    QObject::tr("Cannot access element %1. The number of elements is %2.").arg(i).arg(count), CODELOC);
 
             return idx;
         }
-    }
+    } // namespace detail
 
     PropertyPtr wrap(const Property &value)
     {
@@ -123,7 +122,7 @@ namespace SireBase
         QVector<qint64> ivals;
         ivals.reserve(values.count());
 
-        foreach(int value, values)
+        foreach (int value, values)
         {
             ivals.append(value);
         }
@@ -141,7 +140,7 @@ namespace SireBase
         QVector<qint64> ivals;
         ivals.reserve(values.count());
 
-        foreach(int value, values)
+        foreach (int value, values)
         {
             ivals.append(value);
         }
@@ -172,7 +171,7 @@ namespace SireBase
     PropertyPtr wrap(const QVariant &value)
     {
         qDebug() << "WRAP" << value.toString();
-        //qDebug() << value.canConvert<SireBase::Property>();
+        // qDebug() << value.canConvert<SireBase::Property>();
         return PropertyPtr(VariantProperty(value));
     }
 
@@ -219,7 +218,7 @@ namespace SireBase
             return vals;
         }
     }
-}
+} // namespace SireBase
 
 ////////
 //////// Implementation of PropertyList
@@ -251,80 +250,75 @@ QDataStream &operator>>(QDataStream &ds, PropertyList &list)
 }
 
 /** Constructor */
-PropertyList::PropertyList() : ConcreteProperty<PropertyList,Property>()
-{}
+PropertyList::PropertyList() : ConcreteProperty<PropertyList, Property>()
+{
+}
 
 /** Construct from the passed list */
-PropertyList::PropertyList(const QList<double> &numbers)
-             : ConcreteProperty<PropertyList,Property>()
+PropertyList::PropertyList(const QList<double> &numbers) : ConcreteProperty<PropertyList, Property>()
 {
     for (auto val : numbers)
     {
-        l.append( NumberProperty(val) );
+        l.append(NumberProperty(val));
     }
 }
 
-
 /** Construct from the passed list */
-PropertyList::PropertyList(const QStringList &strings)
-             : ConcreteProperty<PropertyList,Property>()
+PropertyList::PropertyList(const QStringList &strings) : ConcreteProperty<PropertyList, Property>()
 {
     for (auto string : strings)
     {
-        l.append( StringProperty(string) );
+        l.append(StringProperty(string));
     }
 }
 
 /** Construct from the passed list */
-PropertyList::PropertyList(const DoubleArrayProperty &array)
-             : ConcreteProperty<PropertyList,Property>()
+PropertyList::PropertyList(const DoubleArrayProperty &array) : ConcreteProperty<PropertyList, Property>()
 {
     for (auto val : array.toVector())
     {
-        l.append( NumberProperty(val) );
+        l.append(NumberProperty(val));
     }
 }
 
 /** Construct from the passed list */
-PropertyList::PropertyList(const IntegerArrayProperty &array)
-             : ConcreteProperty<PropertyList,Property>()
+PropertyList::PropertyList(const IntegerArrayProperty &array) : ConcreteProperty<PropertyList, Property>()
 {
     for (auto val : array.toVector())
     {
-        l.append( NumberProperty(val) );
+        l.append(NumberProperty(val));
     }
 }
 
 /** Construct from the passed list */
-PropertyList::PropertyList(const StringArrayProperty &array)
-             : ConcreteProperty<PropertyList,Property>()
+PropertyList::PropertyList(const StringArrayProperty &array) : ConcreteProperty<PropertyList, Property>()
 {
     for (auto val : array.toVector())
     {
-        l.append( StringProperty(val) );
+        l.append(StringProperty(val));
     }
 }
 
 /** Construct from the passed list */
-PropertyList::PropertyList(const QList<PropertyPtr> &props)
-             : ConcreteProperty<PropertyList,Property>(), l(props)
-{}
+PropertyList::PropertyList(const QList<PropertyPtr> &props) : ConcreteProperty<PropertyList, Property>(), l(props)
+{
+}
 
 /** Construct to hold the passed single value */
-PropertyList::PropertyList(const Property &other)
-             : ConcreteProperty<PropertyList,Property>()
+PropertyList::PropertyList(const Property &other) : ConcreteProperty<PropertyList, Property>()
 {
     l.append(other);
 }
 
 /** Copy constructor */
-PropertyList::PropertyList(const PropertyList &other)
-             : ConcreteProperty<PropertyList,Property>(other), l(other.l)
-{}
+PropertyList::PropertyList(const PropertyList &other) : ConcreteProperty<PropertyList, Property>(other), l(other.l)
+{
+}
 
 /** Destructor */
 PropertyList::~PropertyList()
-{}
+{
+}
 
 QString PropertyList::toString() const
 {
@@ -337,7 +331,7 @@ QList<PropertyPtr> PropertyList::array() const
 }
 
 /** Copy assignment operator */
-PropertyList& PropertyList::operator=(const PropertyList &other)
+PropertyList &PropertyList::operator=(const PropertyList &other)
 {
     l = other.l;
     return *this;
@@ -358,18 +352,18 @@ bool PropertyList::operator!=(const PropertyList &other) const
 /** Addition operator */
 PropertyList PropertyList::operator+(const PropertyList &other) const
 {
-    return PropertyList( l + other.l );
+    return PropertyList(l + other.l);
 }
 
 /** Add the passed list onto this list */
-PropertyList& PropertyList::operator+=(const Property &other)
+PropertyList &PropertyList::operator+=(const Property &other)
 {
     l += PropertyPtr(other);
     return *this;
 }
 
 /** Access the 'ith' property */
-const Property& PropertyList::operator[](int i) const
+const Property &PropertyList::operator[](int i) const
 {
     int idx = i;
 
@@ -377,16 +371,18 @@ const Property& PropertyList::operator[](int i) const
         idx = l.count() + i;
 
     if (idx < 0 or idx >= l.count())
-        throw SireError::invalid_index( QObject::tr(
-                    "Cannot access element at index %1. Number of elements in list equals %2.")
-                        .arg(i).arg(l.count()), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("Cannot access element at index %1. Number of elements in list equals %2.")
+                .arg(i)
+                .arg(l.count()),
+            CODELOC);
 
     return l.at(idx).read();
 }
 
-const char* PropertyList::typeName()
+const char *PropertyList::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<PropertyList>() );
+    return QMetaType::typeName(qMetaTypeId<PropertyList>());
 }
 
 /** Return the number of elements in the list */
@@ -404,7 +400,7 @@ int PropertyList::size() const
 /** Add the passed property onto the end of this list */
 void PropertyList::append(const Property &property)
 {
-    l.append( PropertyPtr(property) );
+    l.append(PropertyPtr(property));
 }
 
 /** Append the list of properties onto the end of this list */
@@ -415,7 +411,7 @@ void PropertyList::append(const QList<PropertyPtr> &props)
 }
 
 /** Return the element at index i */
-const Property& PropertyList::at(int i) const
+const Property &PropertyList::at(int i) const
 {
     return this->operator[](i);
 }
@@ -448,7 +444,7 @@ void PropertyList::insert(int i, const Property &value)
     length is -1 then the whole rest of the list is returned */
 PropertyList PropertyList::mid(int pos, int length) const
 {
-    return PropertyList(l.mid(pos,length));
+    return PropertyList(l.mid(pos, length));
 }
 
 /** Move an element of the list from index 'from' to index 'to' */
@@ -496,9 +492,11 @@ void PropertyList::removeAt(int i)
         idx = l.count() + i;
 
     if (idx < 0 or idx >= l.count())
-        throw SireError::invalid_index( QObject::tr(
-                    "Cannot remove element at index %1. Number of elements in list equals %2.")
-                        .arg(i).arg(l.count()), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("Cannot remove element at index %1. Number of elements in list equals %2.")
+                .arg(i)
+                .arg(l.count()),
+            CODELOC);
 
     l.removeAt(idx);
 }
@@ -524,9 +522,11 @@ void PropertyList::replace(int i, const Property &value)
         idx = l.count() + i;
 
     if (idx < 0 or idx >= l.count())
-        throw SireError::invalid_index( QObject::tr(
-                    "Cannot replace element at index %1. Number of elements in list equals %2.")
-                        .arg(i).arg(l.count()), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("Cannot replace element at index %1. Number of elements in list equals %2.")
+                .arg(i)
+                .arg(l.count()),
+            CODELOC);
 
     l.replace(idx, value);
 }
@@ -553,15 +553,18 @@ void PropertyList::swap(int i, int j)
         idx_j = l.count() + j;
 
     if (idx_i < 0 or idx_j < 0 or idx_i >= l.count() or idx_j >= l.count())
-        throw SireError::invalid_index( QObject::tr(
-                    "Cannot swap elements %1 and %2. Number of elements in list equals %3.")
-                        .arg(i).arg(j).arg(l.count()), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("Cannot swap elements %1 and %2. Number of elements in list equals %3.")
+                .arg(i)
+                .arg(j)
+                .arg(l.count()),
+            CODELOC);
 
-    #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-        l.swap(idx_i, idx_j);
-    #else
-        l.swapItemsAt(idx_i, idx_j);
-    #endif
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    l.swap(idx_i, idx_j);
+#else
+    l.swapItemsAt(idx_i, idx_j);
+#endif
 }
 
 /** Take the element at index 'i' */
@@ -573,9 +576,9 @@ PropertyPtr PropertyList::takeAt(int i)
         idx = l.count() + i;
 
     if (idx < 0 or idx >= l.count())
-        throw SireError::invalid_index( QObject::tr(
-                    "Cannot take element at index %1. Number of elements in list equals %2.")
-                        .arg(i).arg(l.count()), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("Cannot take element at index %1. Number of elements in list equals %2.").arg(i).arg(l.count()),
+            CODELOC);
 
     return l.takeAt(idx);
 }
@@ -666,8 +669,7 @@ bool PropertyList::isABoolean() const
 QString PropertyList::asAString() const
 {
     if (l.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert %s to a string").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot convert %s to a string").arg(this->toString()), CODELOC);
 
     return l.at(0).read().asAString();
 }
@@ -675,8 +677,7 @@ QString PropertyList::asAString() const
 double PropertyList::asADouble() const
 {
     if (l.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert %s to a double").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot convert %s to a double").arg(this->toString()), CODELOC);
 
     return l.at(0).read().asADouble();
 }
@@ -684,8 +685,7 @@ double PropertyList::asADouble() const
 int PropertyList::asAnInteger() const
 {
     if (l.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert %s to an integer").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot convert %s to an integer").arg(this->toString()), CODELOC);
 
     return l.at(0).read().asAnInteger();
 }
@@ -693,9 +693,7 @@ int PropertyList::asAnInteger() const
 bool PropertyList::asABoolean() const
 {
     if (l.count() != 1)
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot convert %s to a boolean").arg(this->toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot convert %s to a boolean").arg(this->toString()), CODELOC);
 
     return l.at(0).read().asABoolean();
 }
-

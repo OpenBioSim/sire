@@ -35,21 +35,21 @@
 #include "atom.h"
 #include "selector.hpp"
 
-#include "mover.hpp"
 #include "editor.hpp"
+#include "mover.hpp"
 
 #include "molinfo.h"
 
-#include "partialmolecule.h"
-#include "segment.h"
-#include "chain.h"
-#include "residue.h"
-#include "cutgroup.h"
 #include "atom.h"
+#include "chain.h"
+#include "cutgroup.h"
+#include "partialmolecule.h"
+#include "residue.h"
+#include "segment.h"
 
-#include "molecules.h"
 #include "moleculegroup.h"
 #include "moleculegroups.h"
+#include "molecules.h"
 
 #include "SireMol/errors.h"
 
@@ -60,15 +60,18 @@ using namespace SireID;
 
 /** Constructor */
 ChainID::ChainID() : ID()
-{}
+{
+}
 
 /** Copy constructor */
 ChainID::ChainID(const ChainID &other) : ID(other)
-{}
+{
+}
 
 /** Destructor */
 ChainID::~ChainID()
-{}
+{
+}
 
 /** Return an AtomID constructed from the passed string */
 ChainIdentifier ChainID::fromString(const QString &id)
@@ -113,55 +116,55 @@ ChainResID ChainID::operator&(const ResID &other) const
 }
 
 /** Combine with another ID object */
-GroupAtomID<ChainID,AtomID> ChainID::operator+(const AtomID &other) const
+GroupAtomID<ChainID, AtomID> ChainID::operator+(const AtomID &other) const
 {
-    return GroupAtomID<ChainID,AtomID>(*this, other);
+    return GroupAtomID<ChainID, AtomID>(*this, other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupAtomID<ChainID,AtomID> ChainID::operator&&(const AtomID &other) const
+GroupAtomID<ChainID, AtomID> ChainID::operator&&(const AtomID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupAtomID<ChainID,AtomID> ChainID::operator&(const AtomID &other) const
-{
-    return this->operator+(other);
-}
-
-/** Combine with another ID object */
-GroupGroupID<SegID,ChainID> ChainID::operator+(const SegID &other) const
-{
-    return GroupGroupID<SegID,ChainID>(other, *this);
-}
-
-/** Syntactic sugar for operator+ */
-GroupGroupID<SegID,ChainID> ChainID::operator&&(const SegID &other) const
-{
-    return this->operator+(other);
-}
-
-/** Syntactic sugar for operator+ */
-GroupGroupID<SegID,ChainID> ChainID::operator&(const SegID &other) const
+GroupAtomID<ChainID, AtomID> ChainID::operator&(const AtomID &other) const
 {
     return this->operator+(other);
 }
 
 /** Combine with another ID object */
-GroupGroupID<CGID,ChainID> ChainID::operator+(const CGID &other) const
+GroupGroupID<SegID, ChainID> ChainID::operator+(const SegID &other) const
 {
-    return GroupGroupID<CGID,ChainID>(other, *this);
+    return GroupGroupID<SegID, ChainID>(other, *this);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<CGID,ChainID> ChainID::operator&&(const CGID &other) const
+GroupGroupID<SegID, ChainID> ChainID::operator&&(const SegID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<CGID,ChainID> ChainID::operator&(const CGID &other) const
+GroupGroupID<SegID, ChainID> ChainID::operator&(const SegID &other) const
+{
+    return this->operator+(other);
+}
+
+/** Combine with another ID object */
+GroupGroupID<CGID, ChainID> ChainID::operator+(const CGID &other) const
+{
+    return GroupGroupID<CGID, ChainID>(other, *this);
+}
+
+/** Syntactic sugar for operator+ */
+GroupGroupID<CGID, ChainID> ChainID::operator&&(const CGID &other) const
+{
+    return this->operator+(other);
+}
+
+/** Syntactic sugar for operator+ */
+GroupGroupID<CGID, ChainID> ChainID::operator&(const CGID &other) const
 {
     return this->operator+(other);
 }
@@ -251,19 +254,19 @@ ChainResID ChainID::operator-(const ResID &other) const
 }
 
 /** Return this and not other */
-GroupAtomID<ChainID,AtomID> ChainID::operator-(const AtomID &other) const
+GroupAtomID<ChainID, AtomID> ChainID::operator-(const AtomID &other) const
 {
     return this->operator+(other.inverse());
 }
 
 /** Return this and not other */
-GroupGroupID<SegID,ChainID> ChainID::operator-(const SegID &other) const
+GroupGroupID<SegID, ChainID> ChainID::operator-(const SegID &other) const
 {
     return this->operator+(other.inverse());
 }
 
 /** Return this and not other */
-GroupGroupID<CGID,ChainID> ChainID::operator-(const CGID &other) const
+GroupGroupID<CGID, ChainID> ChainID::operator-(const CGID &other) const
 {
     return this->operator+(other.inverse());
 }
@@ -358,12 +361,12 @@ Specify<ChainID> ChainID::operator()(qint64 start, qint64 end, qint64 increment)
     return Specify<ChainID>(*this, start, end, increment);
 }
 
-void ChainID::processMatches(QList<ChainIdx> &matches, const MolInfo&) const
+void ChainID::processMatches(QList<ChainIdx> &matches, const MolInfo &) const
 {
     if (matches.isEmpty())
-        throw SireMol::missing_chain( QObject::tr(
-            "There are no chains that match the ID \"%1\" in the passed molecule.")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_chain(
+            QObject::tr("There are no chains that match the ID \"%1\" in the passed molecule.").arg(this->toString()),
+            CODELOC);
 
     std::sort(matches.begin(), matches.end());
 }
@@ -373,9 +376,9 @@ void ChainID::processMatches(QList<ChainIdx> &matches, const MolInfo&) const
     \throw SireMol::missing_chain
     \throw SireError::invalid_index
 */
-QList<ChainIdx> ChainID::map(const MoleculeView &molview, const PropertyMap&) const
+QList<ChainIdx> ChainID::map(const MoleculeView &molview, const PropertyMap &) const
 {
-    QList<ChainIdx> chainidxs = this->map( molview.data().info() );
+    QList<ChainIdx> chainidxs = this->map(molview.data().info());
 
     if (molview.selectedAll())
         return chainidxs;
@@ -394,9 +397,9 @@ QList<ChainIdx> ChainID::map(const MoleculeView &molview, const PropertyMap&) co
         }
 
         if (chainidxs.isEmpty())
-            throw SireMol::missing_chain( QObject::tr(
-                    "No chains matching %1 can be found in the passed molecule.")
-                        .arg(this->toString()), CODELOC );
+            throw SireMol::missing_chain(
+                QObject::tr("No chains matching %1 can be found in the passed molecule.").arg(this->toString()),
+                CODELOC);
 
         return chainidxs;
     }
@@ -413,10 +416,10 @@ Chain ChainID::selectFrom(const MoleculeView &molview, const PropertyMap &map) c
     QList<ChainIdx> chainidxs = this->map(molview, map);
 
     if (chainidxs.count() > 1)
-        throw SireMol::duplicate_chain( QObject::tr(
-                "More than one chain matches the ID %1 (chains %2).")
-                    .arg(this->toString()).arg(Sire::toString(chainidxs)),
-                        CODELOC );
+        throw SireMol::duplicate_chain(QObject::tr("More than one chain matches the ID %1 (chains %2).")
+                                           .arg(this->toString())
+                                           .arg(Sire::toString(chainidxs)),
+                                       CODELOC);
 
     return Chain(molview.data(), chainidxs.at(0));
 }
@@ -427,8 +430,7 @@ Chain ChainID::selectFrom(const MoleculeView &molview, const PropertyMap &map) c
     \throw SireError::invalid_index
     \throw SireMol::duplicate_chain
 */
-Selector<Chain> ChainID::selectAllFrom(const MoleculeView &molview,
-                                     const PropertyMap &map) const
+Selector<Chain> ChainID::selectAllFrom(const MoleculeView &molview, const PropertyMap &map) const
 {
     QList<ChainIdx> chainidxs = this->map(molview, map);
 
@@ -440,30 +442,28 @@ Selector<Chain> ChainID::selectAllFrom(const MoleculeView &molview,
 
     \throw SireMol::missing_chain
 */
-QHash< MolNum,Selector<Chain> >
-ChainID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
+QHash<MolNum, Selector<Chain>> ChainID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<Chain> > selected_chains;
+    QHash<MolNum, Selector<Chain>> selected_chains;
 
-    //loop over all molecules...
-    for (Molecules::const_iterator it = molecules.constBegin();
-         it != molecules.constEnd();
-         ++it)
+    // loop over all molecules...
+    for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
     {
         try
         {
-            //try to find this chain in this molecule
-            selected_chains.insert( it.key(), this->selectAllFrom(*it,map) );
+            // try to find this chain in this molecule
+            selected_chains.insert(it.key(), this->selectAllFrom(*it, map));
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (selected_chains.isEmpty())
-        throw SireMol::missing_chain( QObject::tr(
-            "There was no chain matching the ID \"%1\" in "
-            "the set of molecules.")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_chain(QObject::tr("There was no chain matching the ID \"%1\" in "
+                                                 "the set of molecules.")
+                                         .arg(this->toString()),
+                                     CODELOC);
 
     return selected_chains;
 }
@@ -476,24 +476,24 @@ ChainID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 */
 Chain ChainID::selectFrom(const Molecules &molecules, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<Chain> > mols = this->selectAllFrom(molecules, map);
+    QHash<MolNum, Selector<Chain>> mols = this->selectAllFrom(molecules, map);
 
     if (mols.count() > 1)
-        throw SireMol::duplicate_chain( QObject::tr(
-            "More than one molecule contains an chain that "
-            "matches this ID (%1). These molecules have numbers %2.")
-                .arg(this->toString()).arg(Sire::toString(mols.keys())),
-                    CODELOC );
+        throw SireMol::duplicate_chain(QObject::tr("More than one molecule contains an chain that "
+                                                   "matches this ID (%1). These molecules have numbers %2.")
+                                           .arg(this->toString())
+                                           .arg(Sire::toString(mols.keys())),
+                                       CODELOC);
 
     const Selector<Chain> &chains = *(mols.constBegin());
 
     if (chains.count() > 1)
-        throw SireMol::duplicate_chain( QObject::tr(
-            "While only one molecule (MolNum == %1) "
-            "contains an chain that matches this ID (%2), it contains "
-            "more than one chain that matches.")
-                .arg(chains.data().number()).arg(this->toString()),
-                    CODELOC );
+        throw SireMol::duplicate_chain(QObject::tr("While only one molecule (MolNum == %1) "
+                                                   "contains an chain that matches this ID (%2), it contains "
+                                                   "more than one chain that matches.")
+                                           .arg(chains.data().number())
+                                           .arg(this->toString()),
+                                       CODELOC);
 
     return chains(0);
 }
@@ -504,8 +504,7 @@ Chain ChainID::selectFrom(const Molecules &molecules, const PropertyMap &map) co
     \throw SireMol::missing_chain
     \throw SireMol::duplicate_chain
 */
-Chain ChainID::selectFrom(const MoleculeGroup &molgroup,
-                        const PropertyMap &map) const
+Chain ChainID::selectFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     return this->selectFrom(molgroup.molecules(), map);
 }
@@ -515,9 +514,7 @@ Chain ChainID::selectFrom(const MoleculeGroup &molgroup,
 
     \throw SireMol::missing_chain
 */
-QHash< MolNum,Selector<Chain> >
-ChainID::selectAllFrom(const MoleculeGroup &molgroup,
-                      const PropertyMap &map) const
+QHash<MolNum, Selector<Chain>> ChainID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     return this->selectAllFrom(molgroup.molecules(), map);
 }
@@ -528,8 +525,7 @@ ChainID::selectAllFrom(const MoleculeGroup &molgroup,
     \throw SireMol::missing_chain
     \throw SireMol::duplicate_chain
 */
-Chain ChainID::selectFrom(const MolGroupsBase &molgroups,
-                        const PropertyMap &map) const
+Chain ChainID::selectFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     return this->selectFrom(molgroups.molecules(), map);
 }
@@ -539,29 +535,27 @@ Chain ChainID::selectFrom(const MolGroupsBase &molgroups,
 
     \throw SireMol::missing_chain
 */
-QHash< MolNum,Selector<Chain> >
-ChainID::selectAllFrom(const MolGroupsBase &molgroups,
-                      const PropertyMap &map) const
+QHash<MolNum, Selector<Chain>> ChainID::selectAllFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     return this->selectAllFrom(molgroups.molecules(), map);
 }
 
-//fully instantiate template classes
+// fully instantiate template classes
 namespace SireID
 {
     template class Specify<ChainID>;
     template class IDAndSet<ChainID>;
     template class IDOrSet<ChainID>;
-}
+} // namespace SireID
 
 namespace SireMol
 {
     template class AtomsIn<ChainID>;
     template class ResIn<ChainID>;
-}
+} // namespace SireMol
 
-static const RegisterMetaType< Specify<ChainID> > r_specify_chainid;
-static const RegisterMetaType< AtomsIn<ChainID> > r_atomsin_chainid;
-static const RegisterMetaType< ResIn<ChainID> > r_resin_chainid;
-static const RegisterMetaType< IDAndSet<ChainID> > r_idandset_chainid;
-static const RegisterMetaType< IDOrSet<ChainID> > r_idorset_chainid;
+static const RegisterMetaType<Specify<ChainID>> r_specify_chainid;
+static const RegisterMetaType<AtomsIn<ChainID>> r_atomsin_chainid;
+static const RegisterMetaType<ResIn<ChainID>> r_resin_chainid;
+static const RegisterMetaType<IDAndSet<ChainID>> r_idandset_chainid;
+static const RegisterMetaType<IDOrSet<ChainID>> r_idorset_chainid;

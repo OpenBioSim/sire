@@ -52,23 +52,20 @@ using namespace SireUnits::Dimension;
 static const RegisterMetaType<MolecularDynamics> r_moldyn;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                        const MolecularDynamics &moldyn)
+QDataStream &operator<<(QDataStream &ds, const MolecularDynamics &moldyn)
 {
     writeHeader(ds, r_moldyn, 1);
 
     SharedDataStream sds(ds);
 
-    sds << moldyn.intgrator << moldyn.wspace << moldyn.timestep << moldyn.num_moves
-        << moldyn.total_time
+    sds << moldyn.intgrator << moldyn.wspace << moldyn.timestep << moldyn.num_moves << moldyn.total_time
         << static_cast<const Dynamics &>(moldyn);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                        MolecularDynamics &moldyn)
+QDataStream &operator>>(QDataStream &ds, MolecularDynamics &moldyn)
 {
     VersionID v = readHeader(ds, r_moldyn);
 
@@ -76,7 +73,8 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> moldyn.intgrator >> moldyn.wspace >> moldyn.timestep >> moldyn.num_moves >> moldyn.total_time >> static_cast<Dynamics &>(moldyn);
+        sds >> moldyn.intgrator >> moldyn.wspace >> moldyn.timestep >> moldyn.num_moves >> moldyn.total_time >>
+            static_cast<Dynamics &>(moldyn);
     }
     else
         throw version_error(v, "1", r_moldyn, CODELOC);
@@ -86,21 +84,16 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 MolecularDynamics::MolecularDynamics(const PropertyMap &map)
-    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
-      intgrator(Integrator::null()),
-      wspace(IntegratorWorkspace::null()),
-      timestep(1 * femtosecond),
-      num_moves(0), total_time(0)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map), intgrator(Integrator::null()),
+      wspace(IntegratorWorkspace::null()), timestep(1 * femtosecond), num_moves(0), total_time(0)
 {
     Dynamics::setEnsemble(Ensemble::NVE());
 }
 
 /** Construct to perform moves on the molecules in the group 'molgroup'. This
     defaults to an all-atom velocity-verlet integrator */
-MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
-                                     const PropertyMap &map)
-    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
-      intgrator(VelocityVerlet()), timestep(1 * femtosecond),
+MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup, const PropertyMap &map)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map), intgrator(VelocityVerlet()), timestep(1 * femtosecond),
       num_moves(0), total_time(0)
 {
     wspace = intgrator.read().createWorkspace(moleculegroup, map);
@@ -109,12 +102,10 @@ MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
 
 /** Construct a move for the passed molecule group, integrated
     using the supplied integrator */
-MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
-                                     const Integrator &integrator,
+MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup, const Integrator &integrator,
                                      const PropertyMap &map)
-    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
-      intgrator(integrator), timestep(1 * femtosecond), num_moves(0),
-      total_time(0)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map), intgrator(integrator), timestep(1 * femtosecond),
+      num_moves(0), total_time(0)
 {
     wspace = intgrator.read().createWorkspace(moleculegroup, map);
     Dynamics::setEnsemble(intgrator.read().ensemble());
@@ -122,10 +113,8 @@ MolecularDynamics::MolecularDynamics(const MoleculeGroup &moleculegroup,
 
 /** Construct a move for the passed molecule group, integrated with
     the passed timestep */
-MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup,
-                                     Time t, const PropertyMap &map)
-    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
-      intgrator(VelocityVerlet()), timestep(t), num_moves(0),
+MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup, Time t, const PropertyMap &map)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map), intgrator(VelocityVerlet()), timestep(t), num_moves(0),
       total_time(0)
 {
     wspace = intgrator.read().createWorkspace(molgroup, map);
@@ -134,11 +123,9 @@ MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup,
 
 /** Construct a move for the passed molecule group, integrated
     using the passed integrator using the passed timestep */
-MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup,
-                                     const Integrator &integrator,
-                                     Time t, const PropertyMap &map)
-    : ConcreteProperty<MolecularDynamics, Dynamics>(map),
-      intgrator(integrator), timestep(t), num_moves(0),
+MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup, const Integrator &integrator, Time t,
+                                     const PropertyMap &map)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(map), intgrator(integrator), timestep(t), num_moves(0),
       total_time(0)
 {
     wspace = intgrator.read().createWorkspace(molgroup, map);
@@ -147,10 +134,8 @@ MolecularDynamics::MolecularDynamics(const MoleculeGroup &molgroup,
 
 /** Copy constructor */
 MolecularDynamics::MolecularDynamics(const MolecularDynamics &other)
-    : ConcreteProperty<MolecularDynamics, Dynamics>(other),
-      intgrator(other.intgrator), wspace(other.wspace),
-      timestep(other.timestep), num_moves(other.num_moves),
-      total_time(other.total_time)
+    : ConcreteProperty<MolecularDynamics, Dynamics>(other), intgrator(other.intgrator), wspace(other.wspace),
+      timestep(other.timestep), num_moves(other.num_moves), total_time(other.total_time)
 {
 }
 
@@ -179,12 +164,8 @@ MolecularDynamics &MolecularDynamics::operator=(const MolecularDynamics &other)
 /** Comparison operator */
 bool MolecularDynamics::operator==(const MolecularDynamics &other) const
 {
-    return intgrator == other.intgrator and
-           wspace == other.wspace and
-           timestep == other.timestep and
-           num_moves == other.num_moves and
-           total_time == other.total_time and
-           Dynamics::operator==(other);
+    return intgrator == other.intgrator and wspace == other.wspace and timestep == other.timestep and
+           num_moves == other.num_moves and total_time == other.total_time and Dynamics::operator==(other);
 }
 
 /** Comparison operator */
@@ -237,8 +218,7 @@ void MolecularDynamics::setMoleculeGroup(const MoleculeGroup &new_molgroup)
 }
 
 /** Set the molecule group containing the molecules to be moved */
-void MolecularDynamics::setMoleculeGroup(const MoleculeGroup &new_molgroup,
-                                         const PropertyMap &map)
+void MolecularDynamics::setMoleculeGroup(const MoleculeGroup &new_molgroup, const PropertyMap &map)
 {
     if (new_molgroup.number() != this->moleculeGroup().number())
     {
@@ -393,8 +373,7 @@ void MolecularDynamics::setGenerator(const RanGenerator &generator)
 }
 
 /** Regenerate all of the velocities using the passed velocity generator */
-void MolecularDynamics::regenerateVelocities(const System &system,
-                                             const VelocityGenerator &generator)
+void MolecularDynamics::regenerateVelocities(const System &system, const VelocityGenerator &generator)
 {
     wspace.edit().setSystem(system);
     wspace.edit().regenerateVelocities(generator);
@@ -421,8 +400,7 @@ void MolecularDynamics::move(System &system, int nmoves, bool record_stats)
     {
         wspace.edit().setSystem(system);
 
-        intgrator.edit().integrate(wspace.edit(), this->energyComponent(),
-                                   timestep, nmoves, record_stats);
+        intgrator.edit().integrate(wspace.edit(), this->energyComponent(), timestep, nmoves, record_stats);
 
         system = wspace.read().system();
 

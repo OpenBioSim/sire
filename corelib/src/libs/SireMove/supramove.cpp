@@ -40,16 +40,14 @@ using namespace SireStream;
 ///////////// Implementation of SupraMove
 /////////////
 
-static const RegisterMetaType<SupraMove> r_supramove(MAGIC_ONLY,
-                                                "SireMove::SupraMove");
+static const RegisterMetaType<SupraMove> r_supramove(MAGIC_ONLY, "SireMove::SupraMove");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const SupraMove &supramove)
 {
     writeHeader(ds, r_supramove, 1);
 
-    ds << supramove.nmoves
-       << static_cast<const Property&>(supramove);
+    ds << supramove.nmoves << static_cast<const Property &>(supramove);
 
     return ds;
 }
@@ -61,8 +59,7 @@ QDataStream &operator>>(QDataStream &ds, SupraMove &supramove)
 
     if (v == 1)
     {
-        ds >> supramove.nmoves
-           >> static_cast<Property&>(supramove);
+        ds >> supramove.nmoves >> static_cast<Property &>(supramove);
     }
     else
         throw version_error(v, "1", r_supramove, CODELOC);
@@ -72,19 +69,21 @@ QDataStream &operator>>(QDataStream &ds, SupraMove &supramove)
 
 /** Constructor */
 SupraMove::SupraMove() : Property(), nmoves(0)
-{}
+{
+}
 
 /** Copy constructor */
-SupraMove::SupraMove(const SupraMove &other)
-          : Property(other), nmoves(other.nmoves)
-{}
+SupraMove::SupraMove(const SupraMove &other) : Property(other), nmoves(other.nmoves)
+{
+}
 
 /** Destructor */
 SupraMove::~SupraMove()
-{}
+{
+}
 
 /** Copy assignment operator */
-SupraMove& SupraMove::operator=(const SupraMove &other)
+SupraMove &SupraMove::operator=(const SupraMove &other)
 {
     nmoves = other.nmoves;
     return *this;
@@ -121,10 +120,10 @@ void SupraMove::incrementNMoves(int nmore)
         nmoves += nmore;
 }
 
-Q_GLOBAL_STATIC( NullSupraMove, nullSupraMove )
+Q_GLOBAL_STATIC(NullSupraMove, nullSupraMove)
 
 /** Return the global null move */
-const NullSupraMove& SupraMove::null()
+const NullSupraMove &SupraMove::null()
 {
     return *(nullSupraMove());
 }
@@ -136,25 +135,23 @@ const NullSupraMove& SupraMove::null()
 static const RegisterMetaType<NullSupraMove> r_nullsupramove;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const NullSupraMove &nullsupramove)
+QDataStream &operator<<(QDataStream &ds, const NullSupraMove &nullsupramove)
 {
     writeHeader(ds, r_nullsupramove, 1);
 
-    ds << static_cast<const SupraMove&>(nullsupramove);
+    ds << static_cast<const SupraMove &>(nullsupramove);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                        NullSupraMove &nullsupramove)
+QDataStream &operator>>(QDataStream &ds, NullSupraMove &nullsupramove)
 {
     VersionID v = readHeader(ds, r_nullsupramove);
 
     if (v == 1)
     {
-        ds >> static_cast<SupraMove&>(nullsupramove);
+        ds >> static_cast<SupraMove &>(nullsupramove);
     }
     else
         throw version_error(v, "1", r_nullsupramove, CODELOC);
@@ -163,20 +160,22 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Constructor */
-NullSupraMove::NullSupraMove() : ConcreteProperty<NullSupraMove,SupraMove>()
-{}
+NullSupraMove::NullSupraMove() : ConcreteProperty<NullSupraMove, SupraMove>()
+{
+}
 
 /** Copy constructor */
-NullSupraMove::NullSupraMove(const NullSupraMove &other)
-              : ConcreteProperty<NullSupraMove,SupraMove>(other)
-{}
+NullSupraMove::NullSupraMove(const NullSupraMove &other) : ConcreteProperty<NullSupraMove, SupraMove>(other)
+{
+}
 
 /** Destructor */
 NullSupraMove::~NullSupraMove()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullSupraMove& NullSupraMove::operator=(const NullSupraMove &other)
+NullSupraMove &NullSupraMove::operator=(const NullSupraMove &other)
 {
     SupraMove::operator=(other);
     return *this;
@@ -201,10 +200,11 @@ QString NullSupraMove::toString() const
 }
 
 /** Perform the null move - this does nothing! */
-void NullSupraMove::move(SupraSystem&, int, bool)
-{}
-
-const char* NullSupraMove::typeName()
+void NullSupraMove::move(SupraSystem &, int, bool)
 {
-    return QMetaType::typeName( qMetaTypeId<NullSupraMove>() );
+}
+
+const char *NullSupraMove::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullSupraMove>());
 }

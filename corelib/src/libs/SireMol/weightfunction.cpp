@@ -28,13 +28,13 @@
 #include "weightfunction.h"
 
 #include "atomselection.h"
+#include "evaluator.h"
 #include "moleculedata.h"
 #include "moleculeview.h"
 #include "partialmolecule.h"
-#include "evaluator.h"
 
-#include "mover.hpp"
 #include "editor.hpp"
+#include "mover.hpp"
 
 #include "core.h"
 
@@ -49,29 +49,26 @@ using namespace SireStream;
 ////////// Implementation of WeightFunction
 //////////
 
-static const RegisterMetaType<WeightFunction> r_weightfunc(MAGIC_ONLY,
-                                                       "SireMol::WeightFunction");
+static const RegisterMetaType<WeightFunction> r_weightfunc(MAGIC_ONLY, "SireMol::WeightFunction");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                    const SireMol::WeightFunction &weightfunc)
+QDataStream &operator<<(QDataStream &ds, const SireMol::WeightFunction &weightfunc)
 {
     writeHeader(ds, r_weightfunc, 1);
 
-    ds << static_cast<const Property&>(weightfunc);
+    ds << static_cast<const Property &>(weightfunc);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                    WeightFunction &weightfunc)
+QDataStream &operator>>(QDataStream &ds, WeightFunction &weightfunc)
 {
     VersionID v = readHeader(ds, r_weightfunc);
 
     if (v == 1)
     {
-        ds >> static_cast<WeightFunction&>(weightfunc);
+        ds >> static_cast<WeightFunction &>(weightfunc);
     }
     else
         throw version_error(v, "1", r_weightfunc, CODELOC);
@@ -81,16 +78,18 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 WeightFunction::WeightFunction() : Property()
-{}
+{
+}
 
 /** Copy constructor */
-WeightFunction::WeightFunction(const WeightFunction &other)
-               : Property(other)
-{}
+WeightFunction::WeightFunction(const WeightFunction &other) : Property(other)
+{
+}
 
 /** Destructror */
 WeightFunction::~WeightFunction()
-{}
+{
+}
 
 //////////
 ////////// Implementation of AbsFromNumber
@@ -99,25 +98,23 @@ WeightFunction::~WeightFunction()
 static const RegisterMetaType<AbsFromNumber> r_absfromnum;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                    const AbsFromNumber &absfromnum)
+QDataStream &operator<<(QDataStream &ds, const AbsFromNumber &absfromnum)
 {
     writeHeader(ds, r_absfromnum, 1);
 
-    ds << static_cast<const Property&>(absfromnum);
+    ds << static_cast<const Property &>(absfromnum);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                    AbsFromNumber &absfromnum)
+QDataStream &operator>>(QDataStream &ds, AbsFromNumber &absfromnum)
 {
     VersionID v = readHeader(ds, r_absfromnum);
 
     if (v == 1)
     {
-        ds >> static_cast<AbsFromNumber&>(absfromnum);
+        ds >> static_cast<AbsFromNumber &>(absfromnum);
     }
     else
         throw version_error(v, "1", r_absfromnum, CODELOC);
@@ -125,18 +122,19 @@ QDataStream &operator>>(QDataStream &ds,
     return ds;
 }
 
-AbsFromNumber::AbsFromNumber()
-              : ConcreteProperty<AbsFromNumber,WeightFunction>()
-{}
+AbsFromNumber::AbsFromNumber() : ConcreteProperty<AbsFromNumber, WeightFunction>()
+{
+}
 
-AbsFromNumber::AbsFromNumber(const AbsFromNumber &other)
-              : ConcreteProperty<AbsFromNumber,WeightFunction>(other)
-{}
+AbsFromNumber::AbsFromNumber(const AbsFromNumber &other) : ConcreteProperty<AbsFromNumber, WeightFunction>(other)
+{
+}
 
 AbsFromNumber::~AbsFromNumber()
-{}
+{
+}
 
-AbsFromNumber* AbsFromNumber::clone() const
+AbsFromNumber *AbsFromNumber::clone() const
 {
     return new AbsFromNumber(*this);
 }
@@ -151,10 +149,8 @@ SIRE_ALWAYS_INLINE double AbsFromNumber::weight(int nats0, int nats1) const
         return 0.5;
 }
 
-double AbsFromNumber::operator()(const MoleculeData &moldata,
-                                 const AtomSelection &group0,
-                                 const AtomSelection &group1,
-                                 const PropertyMap&) const
+double AbsFromNumber::operator()(const MoleculeData &moldata, const AtomSelection &group0, const AtomSelection &group1,
+                                 const PropertyMap &) const
 {
     group0.assertCompatibleWith(moldata);
     group1.assertCompatibleWith(moldata);
@@ -162,23 +158,20 @@ double AbsFromNumber::operator()(const MoleculeData &moldata,
     return weight(group0.nSelected(), group1.nSelected());
 }
 
-double AbsFromNumber::operator()(const MoleculeView &view0,
-                                 const PropertyMap&,
-                                 const MoleculeView &view1,
-                                 const PropertyMap&) const
+double AbsFromNumber::operator()(const MoleculeView &view0, const PropertyMap &, const MoleculeView &view1,
+                                 const PropertyMap &) const
 {
-    return weight(view0.selection().nSelected(),
-                  view1.selection().nSelected());
+    return weight(view0.selection().nSelected(), view1.selection().nSelected());
 }
 
-const AbsFromNumber& WeightFunction::null()
+const AbsFromNumber &WeightFunction::null()
 {
     return *(create_shared_null<AbsFromNumber>());
 }
 
-const char* AbsFromNumber::typeName()
+const char *AbsFromNumber::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AbsFromNumber>() );
+    return QMetaType::typeName(qMetaTypeId<AbsFromNumber>());
 }
 
 //////////
@@ -188,25 +181,23 @@ const char* AbsFromNumber::typeName()
 static const RegisterMetaType<RelFromNumber> r_relfromnum;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                    const RelFromNumber &relfromnum)
+QDataStream &operator<<(QDataStream &ds, const RelFromNumber &relfromnum)
 {
     writeHeader(ds, r_relfromnum, 1);
 
-    ds << static_cast<const Property&>(relfromnum);
+    ds << static_cast<const Property &>(relfromnum);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                    RelFromNumber &relfromnum)
+QDataStream &operator>>(QDataStream &ds, RelFromNumber &relfromnum)
 {
     VersionID v = readHeader(ds, r_relfromnum);
 
     if (v == 1)
     {
-        ds >> static_cast<RelFromNumber&>(relfromnum);
+        ds >> static_cast<RelFromNumber &>(relfromnum);
     }
     else
         throw version_error(v, "1", r_relfromnum, CODELOC);
@@ -214,16 +205,17 @@ QDataStream &operator>>(QDataStream &ds,
     return ds;
 }
 
-RelFromNumber::RelFromNumber()
-              : ConcreteProperty<RelFromNumber,WeightFunction>()
-{}
+RelFromNumber::RelFromNumber() : ConcreteProperty<RelFromNumber, WeightFunction>()
+{
+}
 
-RelFromNumber::RelFromNumber(const RelFromNumber &other)
-              : ConcreteProperty<RelFromNumber,WeightFunction>(other)
-{}
+RelFromNumber::RelFromNumber(const RelFromNumber &other) : ConcreteProperty<RelFromNumber, WeightFunction>(other)
+{
+}
 
 RelFromNumber::~RelFromNumber()
-{}
+{
+}
 
 SIRE_ALWAYS_INLINE double RelFromNumber::weight(int nats0, int nats1) const
 {
@@ -235,10 +227,8 @@ SIRE_ALWAYS_INLINE double RelFromNumber::weight(int nats0, int nats1) const
         return 0.5;
 }
 
-double RelFromNumber::operator()(const MoleculeData &moldata,
-                                 const AtomSelection &group0,
-                                 const AtomSelection &group1,
-                                 const PropertyMap&) const
+double RelFromNumber::operator()(const MoleculeData &moldata, const AtomSelection &group0, const AtomSelection &group1,
+                                 const PropertyMap &) const
 {
     group0.assertCompatibleWith(moldata);
     group1.assertCompatibleWith(moldata);
@@ -246,18 +236,15 @@ double RelFromNumber::operator()(const MoleculeData &moldata,
     return weight(group0.nSelected(), group1.nSelected());
 }
 
-double RelFromNumber::operator()(const MoleculeView &view0,
-                                 const PropertyMap&,
-                                 const MoleculeView &view1,
-                                 const PropertyMap&) const
+double RelFromNumber::operator()(const MoleculeView &view0, const PropertyMap &, const MoleculeView &view1,
+                                 const PropertyMap &) const
 {
-    return weight(view0.selection().nSelected(),
-                  view1.selection().nSelected());
+    return weight(view0.selection().nSelected(), view1.selection().nSelected());
 }
 
-const char* RelFromNumber::typeName()
+const char *RelFromNumber::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<RelFromNumber>() );
+    return QMetaType::typeName(qMetaTypeId<RelFromNumber>());
 }
 
 //////////
@@ -267,25 +254,23 @@ const char* RelFromNumber::typeName()
 static const RegisterMetaType<AbsFromMass> r_absfrommass;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                    const AbsFromMass &absfrommass)
+QDataStream &operator<<(QDataStream &ds, const AbsFromMass &absfrommass)
 {
     writeHeader(ds, r_absfrommass, 1);
 
-    ds << static_cast<const Property&>(absfrommass);
+    ds << static_cast<const Property &>(absfrommass);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                    AbsFromMass &absfrommass)
+QDataStream &operator>>(QDataStream &ds, AbsFromMass &absfrommass)
 {
     VersionID v = readHeader(ds, r_absfrommass);
 
     if (v == 1)
     {
-        ds >> static_cast<AbsFromMass&>(absfrommass);
+        ds >> static_cast<AbsFromMass &>(absfrommass);
     }
     else
         throw version_error(v, "1", r_absfrommass, CODELOC);
@@ -293,16 +278,17 @@ QDataStream &operator>>(QDataStream &ds,
     return ds;
 }
 
-AbsFromMass::AbsFromMass()
-              : ConcreteProperty<AbsFromMass,WeightFunction>()
-{}
+AbsFromMass::AbsFromMass() : ConcreteProperty<AbsFromMass, WeightFunction>()
+{
+}
 
-AbsFromMass::AbsFromMass(const AbsFromMass &other)
-              : ConcreteProperty<AbsFromMass,WeightFunction>(other)
-{}
+AbsFromMass::AbsFromMass(const AbsFromMass &other) : ConcreteProperty<AbsFromMass, WeightFunction>(other)
+{
+}
 
 AbsFromMass::~AbsFromMass()
-{}
+{
+}
 
 SIRE_ALWAYS_INLINE double AbsFromMass::weight(double mass0, double mass1) const
 {
@@ -314,27 +300,22 @@ SIRE_ALWAYS_INLINE double AbsFromMass::weight(double mass0, double mass1) const
         return 0.5;
 }
 
-double AbsFromMass::operator()(const MoleculeData &moldata,
-                               const AtomSelection &group0,
-                               const AtomSelection &group1,
+double AbsFromMass::operator()(const MoleculeData &moldata, const AtomSelection &group0, const AtomSelection &group1,
                                const PropertyMap &map) const
 {
-    return weight( PartialMolecule(moldata,group0).evaluate().mass(map),
-                   PartialMolecule(moldata,group1).evaluate().mass(map) );
+    return weight(PartialMolecule(moldata, group0).evaluate().mass(map),
+                  PartialMolecule(moldata, group1).evaluate().mass(map));
 }
 
-double AbsFromMass::operator()(const MoleculeView &view0,
-                               const PropertyMap &map0,
-                               const MoleculeView &view1,
+double AbsFromMass::operator()(const MoleculeView &view0, const PropertyMap &map0, const MoleculeView &view1,
                                const PropertyMap &map1) const
 {
-    return weight( PartialMolecule(view0).evaluate().mass(map0),
-                   PartialMolecule(view1).evaluate().mass(map1) );
+    return weight(PartialMolecule(view0).evaluate().mass(map0), PartialMolecule(view1).evaluate().mass(map1));
 }
 
-const char* AbsFromMass::typeName()
+const char *AbsFromMass::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AbsFromMass>() );
+    return QMetaType::typeName(qMetaTypeId<AbsFromMass>());
 }
 
 //////////
@@ -344,25 +325,23 @@ const char* AbsFromMass::typeName()
 static const RegisterMetaType<RelFromMass> r_relfrommass;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                    const RelFromMass &relfrommass)
+QDataStream &operator<<(QDataStream &ds, const RelFromMass &relfrommass)
 {
     writeHeader(ds, r_relfrommass, 1);
 
-    ds << static_cast<const Property&>(relfrommass);
+    ds << static_cast<const Property &>(relfrommass);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                    RelFromMass &relfrommass)
+QDataStream &operator>>(QDataStream &ds, RelFromMass &relfrommass)
 {
     VersionID v = readHeader(ds, r_relfrommass);
 
     if (v == 1)
     {
-        ds >> static_cast<RelFromMass&>(relfrommass);
+        ds >> static_cast<RelFromMass &>(relfrommass);
     }
     else
         throw version_error(v, "1", r_relfrommass, CODELOC);
@@ -370,16 +349,17 @@ QDataStream &operator>>(QDataStream &ds,
     return ds;
 }
 
-RelFromMass::RelFromMass()
-              : ConcreteProperty<RelFromMass,WeightFunction>()
-{}
+RelFromMass::RelFromMass() : ConcreteProperty<RelFromMass, WeightFunction>()
+{
+}
 
-RelFromMass::RelFromMass(const RelFromMass &other)
-              : ConcreteProperty<RelFromMass,WeightFunction>(other)
-{}
+RelFromMass::RelFromMass(const RelFromMass &other) : ConcreteProperty<RelFromMass, WeightFunction>(other)
+{
+}
 
 RelFromMass::~RelFromMass()
-{}
+{
+}
 
 SIRE_ALWAYS_INLINE double RelFromMass::weight(double mass0, double mass1) const
 {
@@ -391,25 +371,20 @@ SIRE_ALWAYS_INLINE double RelFromMass::weight(double mass0, double mass1) const
         return 0.5;
 }
 
-double RelFromMass::operator()(const MoleculeData &moldata,
-                               const AtomSelection &group0,
-                               const AtomSelection &group1,
+double RelFromMass::operator()(const MoleculeData &moldata, const AtomSelection &group0, const AtomSelection &group1,
                                const PropertyMap &map) const
 {
-    return weight( PartialMolecule(moldata,group0).evaluate().mass(map),
-                   PartialMolecule(moldata,group1).evaluate().mass(map) );
+    return weight(PartialMolecule(moldata, group0).evaluate().mass(map),
+                  PartialMolecule(moldata, group1).evaluate().mass(map));
 }
 
-double RelFromMass::operator()(const MoleculeView &view0,
-                               const PropertyMap &map0,
-                               const MoleculeView &view1,
+double RelFromMass::operator()(const MoleculeView &view0, const PropertyMap &map0, const MoleculeView &view1,
                                const PropertyMap &map1) const
 {
-    return weight( PartialMolecule(view0).evaluate().mass(map0),
-                   PartialMolecule(view1).evaluate().mass(map1) );
+    return weight(PartialMolecule(view0).evaluate().mass(map0), PartialMolecule(view1).evaluate().mass(map1));
 }
 
-const char* RelFromMass::typeName()
+const char *RelFromMass::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<RelFromMass>() );
+    return QMetaType::typeName(qMetaTypeId<RelFromMass>());
 }

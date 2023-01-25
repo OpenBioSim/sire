@@ -28,8 +28,8 @@
 #ifndef SIREMOVE_SIMSTORE_H
 #define SIREMOVE_SIMSTORE_H
 
-#include <QMutex>
 #include <QByteArray>
+#include <QMutex>
 #include <QTemporaryFile>
 
 #include <boost/shared_ptr.hpp>
@@ -41,109 +41,114 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class SimStore;
+    class SimStore;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SimStore&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SimStore&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SimStore &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SimStore &);
 
 namespace SireMove
 {
 
-using SireSystem::System;
+    using SireSystem::System;
 
-/** This is a simple class that provides a place to store the primary
-    information for a simulation, namely the system being simulated and
-    the moves to be applied to the system. This information can be stored
-    directly, for rapid access, or it can be all compressed down into
-    a binary array, so to save memory or diskspace.
+    /** This is a simple class that provides a place to store the primary
+        information for a simulation, namely the system being simulated and
+        the moves to be applied to the system. This information can be stored
+        directly, for rapid access, or it can be all compressed down into
+        a binary array, so to save memory or diskspace.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SimStore
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SimStore&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SimStore&);
-
-public:
-    SimStore();
-    SimStore(const System &system, const Moves &moves, bool compress=false);
-
-    SimStore(const SimStore &other);
-
-    ~SimStore();
-
-    SimStore& operator=(const SimStore &other);
-
-    bool operator==(const SimStore &other) const;
-    bool operator!=(const SimStore &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SimStore
     {
-        return SimStore::typeName();
-    }
 
-    SimStore* clone() const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SimStore &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SimStore &);
 
-    void setSystem(const System &system);
-    void setMoves(const Moves &moves);
+    public:
+        SimStore();
+        SimStore(const System &system, const Moves &moves, bool compress = false);
 
-    void setSystemAndMoves(const System &system, const Moves &moves);
+        SimStore(const SimStore &other);
 
-    void pack();
-    void unpack();
+        ~SimStore();
 
-    bool isPacked() const;
+        SimStore &operator=(const SimStore &other);
 
-    void packToDisk();
-    void packToDisk(const QString &tempdir);
+        bool operator==(const SimStore &other) const;
+        bool operator!=(const SimStore &other) const;
 
-    bool isPackedToDisk() const;
+        static const char *typeName();
 
-    void packToMemory();
-    bool isPackedToMemory() const;
+        const char *what() const
+        {
+            return SimStore::typeName();
+        }
 
-    const System& system() const;
-    const Moves& moves() const;
+        SimStore *clone() const;
 
-private:
-    void _pvt_moveFromDiskToMemory();
+        void setSystem(const System &system);
+        void setMoves(const Moves &moves);
 
-    enum PackedState{ NOT_PACKED = 0, TO_MEMORY = 1, TO_DISK = 2 };
+        void setSystemAndMoves(const System &system, const Moves &moves);
 
-    /** The simulation system */
-    System sim_system;
+        void pack();
+        void unpack();
 
-    /** The moves to be applied to the system */
-    MovesPtr sim_moves;
+        bool isPacked() const;
 
-    /** A binary representation of the system and moves */
-    QByteArray compressed_data;
+        void packToDisk();
+        void packToDisk(const QString &tempdir);
 
-    /** The path to the directory that will hold the store
-        if it is packed to disk */
-    QString packed_dir;
+        bool isPackedToDisk() const;
 
-    /** The temporary file used to hold the SimStore when it
-        is packed to disk */
-    boost::shared_ptr<QTemporaryFile> packed_file;
+        void packToMemory();
+        bool isPackedToMemory() const;
 
-    /** The name of the temporary file */
-    QString packed_filename;
+        const System &system() const;
+        const Moves &moves() const;
 
-    /** The last packed state for this store (this will be restored
-        using the "pack" function) */
-    PackedState last_packing_state;
-};
+    private:
+        void _pvt_moveFromDiskToMemory();
 
-}
+        enum PackedState
+        {
+            NOT_PACKED = 0,
+            TO_MEMORY = 1,
+            TO_DISK = 2
+        };
 
-Q_DECLARE_METATYPE( SireMove::SimStore )
+        /** The simulation system */
+        System sim_system;
 
-SIRE_EXPOSE_CLASS( SireMove::SimStore )
+        /** The moves to be applied to the system */
+        MovesPtr sim_moves;
+
+        /** A binary representation of the system and moves */
+        QByteArray compressed_data;
+
+        /** The path to the directory that will hold the store
+            if it is packed to disk */
+        QString packed_dir;
+
+        /** The temporary file used to hold the SimStore when it
+            is packed to disk */
+        boost::shared_ptr<QTemporaryFile> packed_file;
+
+        /** The name of the temporary file */
+        QString packed_filename;
+
+        /** The last packed state for this store (this will be restored
+            using the "pack" function) */
+        PackedState last_packing_state;
+    };
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::SimStore)
+
+SIRE_EXPOSE_CLASS(SireMove::SimStore)
 
 SIRE_END_HEADER
 

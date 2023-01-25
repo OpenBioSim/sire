@@ -34,11 +34,9 @@ QSet<QString> Functions::functionNames() const
 {
     QSet<QString> funcnames;
 
-    for (Functions::const_iterator it = this->begin();
-         it != this->end();
-         ++it)
+    for (Functions::const_iterator it = this->begin(); it != this->end(); ++it)
     {
-        funcnames.insert( it->name() );
+        funcnames.insert(it->name());
     }
 
     return funcnames;

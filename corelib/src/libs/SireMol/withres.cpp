@@ -57,28 +57,30 @@ QDataStream &operator>>(QDataStream &ds, ChainsWithRes &chainid)
         ds >> chainid.resid;
     }
     else
-        throw version_error( v, "1", r_chainid, CODELOC );
+        throw version_error(v, "1", r_chainid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 ChainsWithRes::ChainsWithRes() : ChainID()
-{}
+{
+}
 
 /** Construct from the passed residue ID */
-ChainsWithRes::ChainsWithRes(const ResID &id)
-               : ChainID(), resid(id)
-{}
+ChainsWithRes::ChainsWithRes(const ResID &id) : ChainID(), resid(id)
+{
+}
 
 /** Copy constructor */
-ChainsWithRes::ChainsWithRes(const ChainsWithRes &other)
-               : ChainID(other), resid(other.resid)
-{}
+ChainsWithRes::ChainsWithRes(const ChainsWithRes &other) : ChainID(other), resid(other.resid)
+{
+}
 
 /** Destructor */
 ChainsWithRes::~ChainsWithRes()
-{}
+{
+}
 
 /** Is this selection null? */
 bool ChainsWithRes::isNull() const
@@ -99,13 +101,13 @@ QString ChainsWithRes::toString() const
 }
 
 /** Return the residue ID */
-const ResID& ChainsWithRes::resID() const
+const ResID &ChainsWithRes::resID() const
 {
     return resid.base();
 }
 
 /** Copy assignment operator */
-ChainsWithRes& ChainsWithRes::operator=(const ChainsWithRes &other)
+ChainsWithRes &ChainsWithRes::operator=(const ChainsWithRes &other)
 {
     resid = other.resid;
     return *this;
@@ -151,27 +153,28 @@ QList<ChainIdx> ChainsWithRes::map(const MolInfo &molinfo) const
                 chainids.insert(chainidx);
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (chainidxs.isEmpty())
-        throw SireMol::missing_chain( QObject::tr(
-                "There are no chains that contain residues that match "
-                "the residue ID \"%1\".")
-                    .arg(resid.toString()), CODELOC );
+        throw SireMol::missing_chain(QObject::tr("There are no chains that contain residues that match "
+                                                 "the residue ID \"%1\".")
+                                         .arg(resid.toString()),
+                                     CODELOC);
 
     std::sort(chainidxs.begin(), chainidxs.end());
 
     return chainidxs;
 }
 
-const char* ChainsWithRes::typeName()
+const char *ChainsWithRes::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ChainsWithRes>() );
+    return QMetaType::typeName(qMetaTypeId<ChainsWithRes>());
 }
 
-ChainsWithRes* ChainsWithRes::clone() const
+ChainsWithRes *ChainsWithRes::clone() const
 {
     return new ChainsWithRes(*this);
 }

@@ -41,13 +41,16 @@ using namespace SireStream;
 ///////
 
 SysID::SysID() : SireID::ID()
-{}
+{
+}
 
 SysID::SysID(const SysID &other) : SireID::ID(other)
-{}
+{
+}
 
 SysID::~SysID()
-{}
+{
+}
 
 Specify<SysID> SysID::operator[](int i) const
 {
@@ -94,13 +97,11 @@ IDOrSet<SysID> SysID::operator|(const SysID &other) const
     return this->operator*(other);
 }
 
-QList<SysIdx> SysID::processMatches(QList<SysIdx> &matches,
-                                    const Systems &systems) const
+QList<SysIdx> SysID::processMatches(QList<SysIdx> &matches, const Systems &systems) const
 {
     if (matches.isEmpty())
-        throw SireSystem::missing_system( QObject::tr(
-            "There are no systems that match the ID \"%1\".")
-                .arg(this->toString()), CODELOC );
+        throw SireSystem::missing_system(
+            QObject::tr("There are no systems that match the ID \"%1\".").arg(this->toString()), CODELOC);
 
     std::sort(matches.begin(), matches.end());
 
@@ -116,7 +117,7 @@ QList<SysIdx> Systems::getSystems() const
     return QList<SysIdx>();
 }
 
-QList<SysIdx> Systems::map(const SysID&) const
+QList<SysIdx> Systems::map(const SysID &) const
 {
     return QList<SysIdx>();
 }
@@ -132,7 +133,7 @@ QDataStream &operator<<(QDataStream &ds, const SysIdx &sysidx)
 {
     writeHeader(ds, r_sysidx, 1);
 
-    ds << static_cast<const SireID::Index_T_<SysIdx>&>(sysidx);
+    ds << static_cast<const SireID::Index_T_<SysIdx> &>(sysidx);
 
     return ds;
 }
@@ -144,25 +145,29 @@ QDataStream &operator>>(QDataStream &ds, SysIdx &sysidx)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Index_T_<SysIdx>&>(sysidx);
+        ds >> static_cast<SireID::Index_T_<SysIdx> &>(sysidx);
     }
     else
-        throw version_error( v, "1", r_sysidx, CODELOC );
+        throw version_error(v, "1", r_sysidx, CODELOC);
 
     return ds;
 }
 
 SysIdx::SysIdx() : SireID::Index_T_<SysIdx>(), SysID()
-{}
+{
+}
 
 SysIdx::SysIdx(qint32 idx) : SireID::Index_T_<SysIdx>(idx), SysID()
-{}
+{
+}
 
 SysIdx::SysIdx(const SysIdx &other) : SireID::Index_T_<SysIdx>(other), SysID(other)
-{}
+{
+}
 
 SysIdx::~SysIdx()
-{}
+{
+}
 
 SysIdx SysIdx::null()
 {
@@ -184,7 +189,7 @@ QString SysIdx::toString() const
     return QString("SysIdx(%1)").arg(_idx);
 }
 
-SysIdx& SysIdx::operator=(const SysIdx &other)
+SysIdx &SysIdx::operator=(const SysIdx &other)
 {
     SireID::IndexBase::operator=(other);
     SysID::operator=(other);
@@ -201,9 +206,9 @@ QList<SysIdx> SysIdx::map(const Systems &systems) const
     return systems.map(*this);
 }
 
-const char* SysIdx::typeName()
+const char *SysIdx::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SysIdx>() );
+    return QMetaType::typeName(qMetaTypeId<SysIdx>());
 }
 
 ///////
@@ -217,7 +222,7 @@ QDataStream &operator<<(QDataStream &ds, const SysName &sysname)
 {
     writeHeader(ds, r_sysname, 1);
 
-    ds << static_cast<const SireID::Name&>(sysname);
+    ds << static_cast<const SireID::Name &>(sysname);
 
     return ds;
 }
@@ -229,25 +234,29 @@ QDataStream &operator>>(QDataStream &ds, SysName &sysname)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Name&>(sysname);
+        ds >> static_cast<SireID::Name &>(sysname);
     }
     else
-        throw version_error( v, "1", r_sysname, CODELOC );
+        throw version_error(v, "1", r_sysname, CODELOC);
 
     return ds;
 }
 
 SysName::SysName() : SireID::Name(), SysID()
-{}
+{
+}
 
 SysName::SysName(const QString &name) : SireID::Name(name), SysID()
-{}
+{
+}
 
 SysName::SysName(const SysName &other) : SireID::Name(other), SysID(other)
-{}
+{
+}
 
 SysName::~SysName()
-{}
+{
+}
 
 bool SysName::isNull() const
 {
@@ -264,7 +273,7 @@ QString SysName::toString() const
     return QString("SysName('%1')").arg(_name);
 }
 
-SysName& SysName::operator=(const SysName &other)
+SysName &SysName::operator=(const SysName &other)
 {
     SireID::Name::operator=(other);
     SysID::operator=(other);
@@ -291,9 +300,9 @@ QList<SysIdx> SysName::map(const Systems &systems) const
     return systems.map(*this);
 }
 
-const char* SysName::typeName()
+const char *SysName::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SysName>() );
+    return QMetaType::typeName(qMetaTypeId<SysName>());
 }
 
 ///////
@@ -304,20 +313,18 @@ namespace SireID
     template class Specify<SysID>;
     template class IDAndSet<SysID>;
     template class IDOrSet<SysID>;
-}
+} // namespace SireID
 
-static const RegisterMetaType< Specify<SysID> > r_specify_sysid;
-static const RegisterMetaType< IDAndSet<SysID> > r_idandset_sysid;
-static const RegisterMetaType< IDOrSet<SysID> > r_idorset_sysid;
+static const RegisterMetaType<Specify<SysID>> r_specify_sysid;
+static const RegisterMetaType<IDAndSet<SysID>> r_idandset_sysid;
+static const RegisterMetaType<IDOrSet<SysID>> r_idorset_sysid;
 
-SysIdx* SysIdx::clone() const
+SysIdx *SysIdx::clone() const
 {
     return new SysIdx(*this);
 }
 
-
-SysName* SysName::clone() const
+SysName *SysName::clone() const
 {
     return new SysName(*this);
 }
-

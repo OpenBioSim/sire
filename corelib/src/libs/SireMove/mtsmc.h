@@ -37,120 +37,113 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class MTSMC;
+    class MTSMC;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::MTSMC&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::MTSMC&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::MTSMC &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::MTSMC &);
 
 namespace SireMove
 {
 
-using SireSystem::Constraint;
-using SireSystem::Constraints;
+    using SireSystem::Constraint;
+    using SireSystem::Constraints;
 
-/** This is a multiple-time-step Monte Carlo moves. This uses
-    the Metropolis-Hamilton acceptance test to perform
-    'nfast' Monte Carlo moves on a fast Hamiltonian,
-    and then testing whether the resulting configuration
-    is suitable for inclusion in the ensemble generated
-    using a slow Hamiltonian.
+    /** This is a multiple-time-step Monte Carlo moves. This uses
+        the Metropolis-Hamilton acceptance test to perform
+        'nfast' Monte Carlo moves on a fast Hamiltonian,
+        and then testing whether the resulting configuration
+        is suitable for inclusion in the ensemble generated
+        using a slow Hamiltonian.
 
-    For an application of this method to enhance sampling
-    in QM/MM simulations, see Woods, Manby and Mulholland,
-    J. Chem. Phys. 2008.
+        For an application of this method to enhance sampling
+        in QM/MM simulations, see Woods, Manby and Mulholland,
+        J. Chem. Phys. 2008.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT MTSMC
-            : public SireBase::ConcreteProperty<MTSMC,MonteCarlo>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT MTSMC : public SireBase::ConcreteProperty<MTSMC, MonteCarlo>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const MTSMC&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, MTSMC&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const MTSMC &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, MTSMC &);
 
-public:
-    MTSMC(const PropertyMap &map = PropertyMap());
+    public:
+        MTSMC(const PropertyMap &map = PropertyMap());
 
-    MTSMC(const Moves &fastmoves, const PropertyMap &map = PropertyMap());
-    MTSMC(const Moves &fastmoves, int nfastmoves,
-          const PropertyMap &map = PropertyMap());
+        MTSMC(const Moves &fastmoves, const PropertyMap &map = PropertyMap());
+        MTSMC(const Moves &fastmoves, int nfastmoves, const PropertyMap &map = PropertyMap());
 
-    MTSMC(const Moves &fastmoves, const Symbol &fastcomponent,
-          const PropertyMap &map = PropertyMap());
-    MTSMC(const Moves &fastmoves, const Symbol &fastcomponent,
-          int nfastmoves, const PropertyMap &map = PropertyMap());
+        MTSMC(const Moves &fastmoves, const Symbol &fastcomponent, const PropertyMap &map = PropertyMap());
+        MTSMC(const Moves &fastmoves, const Symbol &fastcomponent, int nfastmoves, const PropertyMap &map = PropertyMap());
 
-    MTSMC(const Moves &fastmoves, const Constraints &slow_constraints,
-          const PropertyMap &map = PropertyMap());
-    MTSMC(const Moves &fastmoves, const Constraints &slow_constraints,
-          int nfastmoves, const PropertyMap &map = PropertyMap());
+        MTSMC(const Moves &fastmoves, const Constraints &slow_constraints, const PropertyMap &map = PropertyMap());
+        MTSMC(const Moves &fastmoves, const Constraints &slow_constraints, int nfastmoves,
+              const PropertyMap &map = PropertyMap());
 
-    MTSMC(const Moves &fastmoves, const Symbol &fastcomponent,
-          const Constraints &slow_constraints,
-          const PropertyMap &map = PropertyMap());
-    MTSMC(const Moves &fastmoves, const Symbol &fastcomponent,
-          const Constraints &slow_constraints, int nfastmoves,
-          const PropertyMap &map = PropertyMap());
+        MTSMC(const Moves &fastmoves, const Symbol &fastcomponent, const Constraints &slow_constraints,
+              const PropertyMap &map = PropertyMap());
+        MTSMC(const Moves &fastmoves, const Symbol &fastcomponent, const Constraints &slow_constraints, int nfastmoves,
+              const PropertyMap &map = PropertyMap());
 
-    MTSMC(const MTSMC &other);
+        MTSMC(const MTSMC &other);
 
-    ~MTSMC();
+        ~MTSMC();
 
-    MTSMC& operator=(const MTSMC &other);
+        MTSMC &operator=(const MTSMC &other);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    bool operator==(const MTSMC &other) const;
-    bool operator!=(const MTSMC &other) const;
+        bool operator==(const MTSMC &other) const;
+        bool operator!=(const MTSMC &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    void setFastMoves(const Moves &fastmoves);
-    void setNFastMoves(int nfast);
+        void setFastMoves(const Moves &fastmoves);
+        void setNFastMoves(int nfast);
 
-    void setFastEnergyComponent(const Symbol &component);
-    void setSlowEnergyComponent(const Symbol &component);
+        void setFastEnergyComponent(const Symbol &component);
+        void setSlowEnergyComponent(const Symbol &component);
 
-    void addSlowConstraint(const Constraint &constraint);
-    void setSlowConstraints(const Constraints &constraints);
+        void addSlowConstraint(const Constraint &constraint);
+        void setSlowConstraints(const Constraints &constraints);
 
-    void removeSlowConstraints();
+        void removeSlowConstraints();
 
-    const Constraints& slowConstraints() const;
+        const Constraints &slowConstraints() const;
 
-    const Moves& fastMoves() const;
-    int nFastMoves() const;
+        const Moves &fastMoves() const;
+        int nFastMoves() const;
 
-    const Symbol& fastEnergyComponent() const;
-    const Symbol& slowEnergyComponent() const;
+        const Symbol &fastEnergyComponent() const;
+        const Symbol &slowEnergyComponent() const;
 
-    void clearStatistics();
+        void clearStatistics();
 
-    void setGenerator(const RanGenerator &rangenerator);
+        void setGenerator(const RanGenerator &rangenerator);
 
-    void move(System &system, int nmoves, bool record_stats=true);
+        void move(System &system, int nmoves, bool record_stats = true);
 
-private:
-    /** The collection of fast moves that will be applied to the system */
-    MovesPtr fastmoves;
+    private:
+        /** The collection of fast moves that will be applied to the system */
+        MovesPtr fastmoves;
 
-    /** The constraints that are applied to the system after each
-        block of fast moves */
-    Constraints slow_constraints;
+        /** The constraints that are applied to the system after each
+            block of fast moves */
+        Constraints slow_constraints;
 
-    /** The energy component on which the fast moves will operate */
-    Symbol fastcomponent;
+        /** The energy component on which the fast moves will operate */
+        Symbol fastcomponent;
 
-    /** The number of fast moves to apply per slow move */
-    quint32 nfastmoves;
-};
+        /** The number of fast moves to apply per slow move */
+        quint32 nfastmoves;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::MTSMC )
+Q_DECLARE_METATYPE(SireMove::MTSMC)
 
-SIRE_EXPOSE_CLASS( SireMove::MTSMC )
+SIRE_EXPOSE_CLASS(SireMove::MTSMC)
 
 SIRE_END_HEADER
 

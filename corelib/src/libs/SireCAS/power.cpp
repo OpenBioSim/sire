@@ -26,17 +26,17 @@
 \*********************************************/
 
 #include "power.h"
-#include "exp.h"
-#include "powerconstant.h"
-#include "values.h"
 #include "complexvalues.h"
+#include "exp.h"
 #include "identities.h"
 #include "integrationconstant.h"
+#include "powerconstant.h"
+#include "values.h"
 
 #include "SireMaths/complex.h"
 
-#include "SireError/errors.h"
 #include "SireCAS/errors.h"
+#include "SireError/errors.h"
 
 #include "SireStream/datastream.h"
 
@@ -49,13 +49,12 @@ using namespace SireCAS;
 //////////// Implementation of PowerFunction
 ////////////
 
-static const RegisterMetaType<PowerFunction> r_powerfunc(MAGIC_ONLY,
-                                                         "SireCAS::PowerFunction");
+static const RegisterMetaType<PowerFunction> r_powerfunc(MAGIC_ONLY, "SireCAS::PowerFunction");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const PowerFunction &powerfunc)
 {
-    writeHeader(ds, r_powerfunc, 1) << static_cast<const ExBase&>(powerfunc);
+    writeHeader(ds, r_powerfunc, 1) << static_cast<const ExBase &>(powerfunc);
 
     return ds;
 }
@@ -67,7 +66,7 @@ QDataStream &operator>>(QDataStream &ds, PowerFunction &powerfunc)
 
     if (v == 1)
     {
-        ds >> static_cast<ExBase&>(powerfunc);
+        ds >> static_cast<ExBase &>(powerfunc);
     }
     else
         throw version_error(v, "1", r_powerfunc, CODELOC);
@@ -96,26 +95,26 @@ QString PowerFunction::toString() const
             {
                 double realpwr = pwrval.real();
 
-                if ( SireMaths::areEqual(realpwr,1.0) )
+                if (SireMaths::areEqual(realpwr, 1.0))
                     return ex.toString();
                 else if (ex.isCompound())
                     return QString("[%1]^%2").arg(ex.toString()).arg(realpwr);
                 else
                     return QString("%1^%2").arg(ex.toString()).arg(realpwr);
             }
-            else if ( SireMaths::isZero(pwrval.real()) )
+            else if (SireMaths::isZero(pwrval.real()))
             {
-                if ( ex.isCompound() )
-                    return QString("[%1]^%2").arg(ex.toString(),pwrval.toString());
+                if (ex.isCompound())
+                    return QString("[%1]^%2").arg(ex.toString(), pwrval.toString());
                 else
-                    return QString("%1^%2").arg(ex.toString(),pwrval.toString());
+                    return QString("%1^%2").arg(ex.toString(), pwrval.toString());
             }
             else
             {
-                if ( ex.isCompound() )
-                    return QString("[%1]^[%2]").arg(ex.toString(),pwrval.toString());
+                if (ex.isCompound())
+                    return QString("[%1]^[%2]").arg(ex.toString(), pwrval.toString());
                 else
-                    return QString("%1^[%2]").arg(ex.toString(),pwrval.toString());
+                    return QString("%1^[%2]").arg(ex.toString(), pwrval.toString());
             }
         }
         else
@@ -135,8 +134,6 @@ QString PowerFunction::toString() const
         }
     }
 }
-
-
 
 /** Return a string representation of this power in the OpenMM syntax */
 QString PowerFunction::toOpenMMString() const
@@ -159,26 +156,26 @@ QString PowerFunction::toOpenMMString() const
             {
                 double realpwr = pwrval.real();
 
-                if ( SireMaths::areEqual(realpwr,1.0) )
+                if (SireMaths::areEqual(realpwr, 1.0))
                     return ex.toOpenMMString();
                 else if (ex.isCompound())
                     return QString("(%1)^%2").arg(ex.toOpenMMString()).arg(realpwr);
                 else
                     return QString("%1^%2").arg(ex.toOpenMMString()).arg(realpwr);
             }
-            else if ( SireMaths::isZero(pwrval.real()) )
+            else if (SireMaths::isZero(pwrval.real()))
             {
-                if ( ex.isCompound() )
-                    return QString("(%1)^%2").arg(ex.toOpenMMString(),pwrval.toString());
+                if (ex.isCompound())
+                    return QString("(%1)^%2").arg(ex.toOpenMMString(), pwrval.toString());
                 else
-                    return QString("%1^%2").arg(ex.toOpenMMString(),pwrval.toString());
+                    return QString("%1^%2").arg(ex.toOpenMMString(), pwrval.toString());
             }
             else
             {
-                if ( ex.isCompound() )
-                    return QString("(%1)^(%2)").arg(ex.toOpenMMString(),pwrval.toString());
+                if (ex.isCompound())
+                    return QString("(%1)^(%2)").arg(ex.toOpenMMString(), pwrval.toString());
                 else
-                    return QString("%1^(%2)").arg(ex.toOpenMMString(),pwrval.toString());
+                    return QString("%1^(%2)").arg(ex.toOpenMMString(), pwrval.toString());
             }
         }
         else
@@ -199,12 +196,10 @@ QString PowerFunction::toOpenMMString() const
     }
 }
 
-
-
 /** Return this expression with the supplied substitutions */
 Expression PowerFunction::substitute(const Identities &identities) const
 {
-    return Power( core().substitute(identities), power().substitute(identities) ).reduce();
+    return Power(core().substitute(identities), power().substitute(identities)).reduce();
 }
 
 /** Return the differential of this expression with respect to 'symbol' */
@@ -213,10 +208,10 @@ Expression PowerFunction::differentiate(const Symbol &symbol) const
     Expression ex = core();
     Expression pwr = power();
 
-    //f(x)^0 == 1, do d f(x)^0 / dx = 0
+    // f(x)^0 == 1, do d f(x)^0 / dx = 0
     if (pwr.isZero())
         return Expression(0);
-    //is the power a function of this symbol?
+    // is the power a function of this symbol?
     else if (pwr.isFunction(symbol))
     {
         // d (a^x) / dx = a^x ln(a)
@@ -226,7 +221,7 @@ Expression PowerFunction::differentiate(const Symbol &symbol) const
             // use identity;
             // f(x)^g(x) = exp( g(x) * ln(f(x)) )
 
-            return Exp( pwr * Ln(ex) ).differentiate(symbol);
+            return Exp(pwr * Ln(ex)).differentiate(symbol);
         }
         else
             // d a^(f(x)) / dx = a^(f(x)) ln(a) * d f(x) / dx
@@ -234,14 +229,14 @@ Expression PowerFunction::differentiate(const Symbol &symbol) const
     }
     else
     {
-        //differentiate the base
+        // differentiate the base
         Expression diff = ex.differentiate(symbol);
 
         if (diff.isZero())
             return Expression(0);
 
-        //constant power, so d (x^n) / dx = n x^(n-1)
-        return diff * pwr * ex.pow( pwr - 1 );
+        // constant power, so d (x^n) / dx = n x^(n-1)
+        return diff * pwr * ex.pow(pwr - 1);
     }
 }
 
@@ -256,22 +251,22 @@ Expression PowerFunction::integrate(const Symbol &symbol) const
 
     if (cre_is_func and not pwr_is_func)
     {
-        //power of form f(x)^n,  integral is 1/(f'(x)*(n+1)) * f(x)^n+1
+        // power of form f(x)^n,  integral is 1/(f'(x)*(n+1)) * f(x)^n+1
         Expression newpower = pwr + 1;
-        return Power(cre,newpower).reduce() / (newpower * cre.diff(symbol));
+        return Power(cre, newpower).reduce() / (newpower * cre.diff(symbol));
     }
     else if (pwr_is_func and not cre_is_func)
     {
-        //what is integral of n^f(x)?
+        // what is integral of n^f(x)?
         return ExBase::integrate(symbol);
     }
     else if (cre_is_func and pwr_is_func)
     {
-        //what is the integral of f(x)^g(x)?
+        // what is the integral of f(x)^g(x)?
         return ExBase::integrate(symbol);
     }
     else
-        //this expression is constant with respect to symbol
+        // this expression is constant with respect to symbol
         return *this * symbol;
 }
 
@@ -309,20 +304,19 @@ Expression PowerFunction::reduce() const
 
         if (ex.factor() == 1)
         {
-            //this is a power of a power. We can combine the powers together
-            return Power( powerfunc.core(), pwr * powerfunc.power() ).reduce();
+            // this is a power of a power. We can combine the powers together
+            return Power(powerfunc.core(), pwr * powerfunc.power()).reduce();
         }
         else
         {
-            //this is ex.factor()^pwr * (power of a power)
-            return PowerConstant(ex.factor(),pwr).reduce() *
-                   Power(powerfunc.core(), pwr * powerfunc.power() ).reduce();
+            // this is ex.factor()^pwr * (power of a power)
+            return PowerConstant(ex.factor(), pwr).reduce() * Power(powerfunc.core(), pwr * powerfunc.power()).reduce();
         }
     }
     else if (ex.base().isA<IntegrationConstant>())
     {
         if (pwr.isConstant())
-            //IntegrationConstant ^ const_power  =  IntegrationConstant
+            // IntegrationConstant ^ const_power  =  IntegrationConstant
             return ex.base();
         else
             return *this;
@@ -334,12 +328,12 @@ Expression PowerFunction::reduce() const
 
         if (core_is_constant and power_is_constant)
         {
-            //this is a constant
-            return Expression( this->evaluate(ComplexValues()) );
+            // this is a constant
+            return Expression(this->evaluate(ComplexValues()));
         }
         else if (power_is_constant)
         {
-            //get the power as an irrational number
+            // get the power as an irrational number
             Complex pwrval = pwr.evaluate(ComplexValues());
 
             if (pwrval.isZero())
@@ -353,7 +347,7 @@ Expression PowerFunction::reduce() const
             else
             {
                 double realpower = pwrval.real();
-                if (SireMaths::areEqual(realpower,1.0))
+                if (SireMaths::areEqual(realpower, 1.0))
                 {
                     return ex;
                 }
@@ -380,9 +374,9 @@ Expression PowerFunction::reduce() const
                 double realval = val.real();
 
                 if (SireMaths::areEqual(realval, SireMaths::e))
-                    return Expression( Exp(pwr) );
+                    return Expression(Exp(pwr));
                 else
-                    return Expression( PowerConstant(realval, pwr) );
+                    return Expression(PowerConstant(realval, pwr));
             }
             else
                 return *this;
@@ -401,23 +395,21 @@ static QList<Factor> multiply(const QList<Factor> &f0s, const QList<Factor> &f1s
     else if (f1s.isEmpty())
         return f0s;
 
-    QHash<Expression,Expression> factors;
+    QHash<Expression, Expression> factors;
 
     foreach (const Factor &f0, f0s)
     {
         foreach (const Factor &f1, f1s)
         {
-            factors[ f0.power() + f1.power() ] += (f0.factor() * f1.factor());
+            factors[f0.power() + f1.power()] += (f0.factor() * f1.factor());
         }
     }
 
     QList<Factor> ret;
 
-    for (QHash<Expression,Expression>::const_iterator it = factors.constBegin();
-         it != factors.constEnd();
-         ++it)
+    for (QHash<Expression, Expression>::const_iterator it = factors.constBegin(); it != factors.constEnd(); ++it)
     {
-        ret.append( Factor( f0s.at(0).symbol(), it.value(), it.key() ) );
+        ret.append(Factor(f0s.at(0).symbol(), it.value(), it.key()));
     }
 
     return ret;
@@ -429,44 +421,43 @@ QList<Factor> PowerFunction::expand(const Symbol &symbol) const
 
     if (not this->isFunction(symbol))
     {
-        ret.append( Factor(symbol, *this, 0) );
+        ret.append(Factor(symbol, *this, 0));
         return ret;
     }
 
-    //get the core
+    // get the core
     Expression ex = core();
 
-    //expand the core in powers of this symbol
+    // expand the core in powers of this symbol
     QList<Factor> core_factors = ex.expand(symbol);
 
-    //get the power...
+    // get the power...
     Expression pwr = power();
 
-    //we cannot expand if the power is a function of the symbol
+    // we cannot expand if the power is a function of the symbol
     if (pwr.isFunction(symbol))
-        throw SireCAS::rearrangement_error( QObject::tr(
-            "The expression %1 cannot be rearranged in terms of powers of %2 "
-            "as this power is itself a function of %2.")
-                .arg(this->toString(), symbol.toString()), CODELOC );
+        throw SireCAS::rearrangement_error(
+            QObject::tr("The expression %1 cannot be rearranged in terms of powers of %2 "
+                        "as this power is itself a function of %2.")
+                .arg(this->toString(), symbol.toString()),
+            CODELOC);
 
-    //if there is only a single power of the symbol, then it doesn't
-    //matter what the power is
+    // if there is only a single power of the symbol, then it doesn't
+    // matter what the power is
     if (core_factors.count() == 1)
     {
-        core_factors[0] = Factor( core_factors[0].symbol(),
-                                  core_factors[0].factor(),
-                                  pwr * core_factors[0].power() );
+        core_factors[0] = Factor(core_factors[0].symbol(), core_factors[0].factor(), pwr * core_factors[0].power());
 
         return core_factors;
     }
 
-    //we can only expand if the power is a constant integer...
+    // we can only expand if the power is a constant integer...
     Complex pwrval = pwr.evaluate(ComplexValues());
 
     if (pwrval.isZero())
     {
-        //this expression is just equal to 1
-        ret.append( Factor(symbol,1,0) );
+        // this expression is just equal to 1
+        ret.append(Factor(symbol, 1, 0));
         return ret;
     }
     else if (pwrval.isReal() and SireMaths::isInteger(pwrval.real()))
@@ -478,20 +469,20 @@ QList<Factor> PowerFunction::expand(const Symbol &symbol) const
         else if (int_power == 0)
         {
             QList<Factor> ret;
-            ret.append( Factor(symbol,1,0) );
+            ret.append(Factor(symbol, 1, 0));
             return ret;
         }
         else if (int_power < 0)
         {
             if (core_factors.count() > 1)
-                throw SireCAS::rearrangement_error( QObject::tr(
-                    "The expression %1 cannot be rearranged in terms of powers of %2 "
-                    "because multiple powers of %2 are raised to a negative power.")
-                        .arg(this->toString(), symbol.toString()), CODELOC );
+                throw SireCAS::rearrangement_error(
+                    QObject::tr("The expression %1 cannot be rearranged in terms of powers of %2 "
+                                "because multiple powers of %2 are raised to a negative power.")
+                        .arg(this->toString(), symbol.toString()),
+                    CODELOC);
 
-            core_factors[0] = Factor(  core_factors[0].symbol(),
-                                       core_factors[0].factor(),
-                                       int_power * core_factors[0].power() );
+            core_factors[0] =
+                Factor(core_factors[0].symbol(), core_factors[0].factor(), int_power * core_factors[0].power());
 
             return core_factors;
         }
@@ -499,7 +490,7 @@ QList<Factor> PowerFunction::expand(const Symbol &symbol) const
         {
             QList<Factor> ret = core_factors;
 
-            for (int i=1; i<int_power; ++i)
+            for (int i = 1; i < int_power; ++i)
             {
                 ret = ::multiply(ret, core_factors);
             }
@@ -508,11 +499,12 @@ QList<Factor> PowerFunction::expand(const Symbol &symbol) const
         }
     }
     else
-        throw SireCAS::rearrangement_error( QObject::tr(
-            "The expression %1 cannot be rearranged in terms of powers of %2 "
-            "because it involves a non-integer power of a compound expression "
-            "involving %2.")
-                .arg(this->toString(), symbol.toString()), CODELOC );
+        throw SireCAS::rearrangement_error(
+            QObject::tr("The expression %1 cannot be rearranged in terms of powers of %2 "
+                        "because it involves a non-integer power of a compound expression "
+                        "involving %2.")
+                .arg(this->toString(), symbol.toString()),
+            CODELOC);
 
     return ret;
 }
@@ -526,8 +518,7 @@ static const RegisterMetaType<Power> r_power;
 /** Serialise a Power to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Power &power)
 {
-    writeHeader(ds, r_power, 1)
-          << power.ex << power.pwr << static_cast<const PowerFunction&>(power);
+    writeHeader(ds, r_power, 1) << power.ex << power.pwr << static_cast<const PowerFunction &>(power);
 
     return ds;
 }
@@ -539,7 +530,7 @@ QDataStream &operator>>(QDataStream &ds, Power &power)
 
     if (v == 1)
     {
-        ds >> power.ex >> power.pwr >> static_cast<PowerFunction&>(power);
+        ds >> power.ex >> power.pwr >> static_cast<PowerFunction &>(power);
     }
     else
         throw version_error(v, "1", r_power, CODELOC);
@@ -549,36 +540,37 @@ QDataStream &operator>>(QDataStream &ds, Power &power)
 
 /** Construct a null power */
 Power::Power() : PowerFunction()
-{}
+{
+}
 
 /** Construct a power that represents core^power */
-Power::Power(const Expression &core, const Expression &power)
-      : PowerFunction(), ex(core), pwr(power)
-{}
+Power::Power(const Expression &core, const Expression &power) : PowerFunction(), ex(core), pwr(power)
+{
+}
 
 /** Copy constructor */
-Power::Power(const Power &other)
-      : PowerFunction(), ex(other.ex), pwr(other.pwr)
-{}
+Power::Power(const Power &other) : PowerFunction(), ex(other.ex), pwr(other.pwr)
+{
+}
 
 /** Destructor */
 Power::~Power()
-{}
+{
+}
 
 /** Comparison operator */
 bool Power::operator==(const ExBase &other) const
 {
-    const Power *other_power = dynamic_cast<const Power*>(&other);
+    const Power *other_power = dynamic_cast<const Power *>(&other);
 
-    return other_power != 0 and typeid(other).name() == typeid(*this).name()
-               and ex == other_power->ex and pwr == other_power->pwr;
+    return other_power != 0 and typeid(other).name() == typeid(*this).name() and ex == other_power->ex and
+           pwr == other_power->pwr;
 }
 
 /** Return a hash for this power */
 uint Power::hash() const
 {
-    return ( r_power.magicID() << 16 ) | ( ex.hash() & 0x0000FF00 )
-                | ( pwr.hash() & 0x000000FF );
+    return (r_power.magicID() << 16) | (ex.hash() & 0x0000FF00) | (pwr.hash() & 0x000000FF);
 }
 
 /** Evaluate this power - this could be dodgy for negative bases with
@@ -616,13 +608,12 @@ Complex Power::evaluate(const ComplexValues &values) const
     }
 }
 
-const char* Power::typeName()
+const char *Power::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Power>() );
+    return QMetaType::typeName(qMetaTypeId<Power>());
 }
 
-Power* Power::clone() const
+Power *Power::clone() const
 {
     return new Power(*this);
 }
-

@@ -28,29 +28,29 @@
 #ifndef SIREMATHS_ALIGN_H
 #define SIREMATHS_ALIGN_H
 
-#include "SireMaths/vector.h"
+#include "SireMaths/axisset.h"
 #include "SireMaths/matrix.h"
 #include "SireMaths/quaternion.h"
-#include "SireMaths/axisset.h"
+#include "SireMaths/vector.h"
 
-#include <QVector>
 #include <QList>
+#include <QVector>
 
 SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class Transform;
+    class Transform;
 }
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Transform&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Transform&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Transform &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Transform &);
 
 namespace SireMaths
 {
-    SIREMATHS_EXPORT Vector getCentroid(const QVector<Vector> &p, int n=-1);
+    SIREMATHS_EXPORT Vector getCentroid(const QVector<Vector> &p, int n = -1);
 
-    SIREMATHS_EXPORT double getRMSD(const QVector<Vector> &p, const QVector<Vector> &q, int n=-1);
+    SIREMATHS_EXPORT double getRMSD(const QVector<Vector> &p, const QVector<Vector> &q, int n = -1);
 
     /** This class holds everything needed to apply a transformation on a set
         of points. This holds the amount by which to translate the points, together
@@ -61,8 +61,8 @@ namespace SireMaths
     class SIREMATHS_EXPORT Transform
     {
 
-    friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Transform&);
-    friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Transform&);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Transform &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Transform &);
 
     public:
         Transform();
@@ -78,13 +78,13 @@ namespace SireMaths
 
         ~Transform();
 
-        Transform& operator=(const Transform &other);
+        Transform &operator=(const Transform &other);
 
         bool operator==(const Transform &other) const;
         bool operator!=(const Transform &other) const;
 
-        static const char* typeName();
-        const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
         QString toString() const;
 
@@ -97,7 +97,7 @@ namespace SireMaths
         Vector apply(const Vector &point) const;
         QVector<Vector> apply(const QVector<Vector> &points) const;
 
-        Vector* apply(Vector *coords, int sz) const;
+        Vector *apply(Vector *coords, int sz) const;
 
         Vector translationDelta() const;
 
@@ -117,31 +117,25 @@ namespace SireMaths
         Quaternion rotmat;
     };
 
-    SIREMATHS_EXPORT Transform kabaschFit(const QVector<Vector> &p,
-                         const QVector<Vector> &q);
+    SIREMATHS_EXPORT Transform kabaschFit(const QVector<Vector> &p, const QVector<Vector> &q);
 
-    SIREMATHS_EXPORT Matrix kabasch(const QVector<Vector> &p,
-                   const QVector<Vector> &q);
+    SIREMATHS_EXPORT Matrix kabasch(const QVector<Vector> &p, const QVector<Vector> &q);
 
-    SIREMATHS_EXPORT Transform getAlignment(const QVector<Vector> &p,
-                           const QVector<Vector> &q,
-                           bool fit=true);
+    SIREMATHS_EXPORT Transform getAlignment(const QVector<Vector> &p, const QVector<Vector> &q, bool fit = true);
 
-    SIREMATHS_EXPORT QVector<Vector> align(const QVector<Vector> &p,
-                          const QVector<Vector> &q,
-                          bool fit=true);
-}
+    SIREMATHS_EXPORT QVector<Vector> align(const QVector<Vector> &p, const QVector<Vector> &q, bool fit = true);
+} // namespace SireMaths
 
-Q_DECLARE_METATYPE( SireMaths::Transform )
+Q_DECLARE_METATYPE(SireMaths::Transform)
 
-SIRE_EXPOSE_CLASS( SireMaths::Transform )
+SIRE_EXPOSE_CLASS(SireMaths::Transform)
 
-SIRE_EXPOSE_FUNCTION( SireMaths::getCentroid )
-SIRE_EXPOSE_FUNCTION( SireMaths::getRMSD )
-SIRE_EXPOSE_FUNCTION( SireMaths::kabasch )
-SIRE_EXPOSE_FUNCTION( SireMaths::kabaschFit )
-SIRE_EXPOSE_FUNCTION( SireMaths::getAlignment )
-SIRE_EXPOSE_FUNCTION( SireMaths::align )
+SIRE_EXPOSE_FUNCTION(SireMaths::getCentroid)
+SIRE_EXPOSE_FUNCTION(SireMaths::getRMSD)
+SIRE_EXPOSE_FUNCTION(SireMaths::kabasch)
+SIRE_EXPOSE_FUNCTION(SireMaths::kabaschFit)
+SIRE_EXPOSE_FUNCTION(SireMaths::getAlignment)
+SIRE_EXPOSE_FUNCTION(SireMaths::align)
 
 SIRE_END_HEADER
 

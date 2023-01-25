@@ -30,317 +30,309 @@
 #ifndef SIREMOL_ATOMEDITOR_H
 #define SIREMOL_ATOMEDITOR_H
 
-#include "structureeditor.h"
 #include "atom.h"
+#include "structureeditor.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class AtomEditor;
-class AtomStructureEditor;
-}
+    class AtomEditor;
+    class AtomStructureEditor;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream &operator<<(QDataStream&, const SireMol::AtomEditor&);
-SIREMOL_EXPORT QDataStream &operator>>(QDataStream&, SireMol::AtomEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomEditor &);
 
-SIREMOL_EXPORT QDataStream &operator<<(QDataStream&, const SireMol::AtomStructureEditor&);
-SIREMOL_EXPORT QDataStream &operator>>(QDataStream&, SireMol::AtomStructureEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomStructureEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomStructureEditor &);
 
 namespace SireMol
 {
 
-class MolStructureEditor;
-class SegStructureEditor;
-class ChainStructureEditor;
-class ResStructureEditor;
-class CGStructureEditor;
+    class MolStructureEditor;
+    class SegStructureEditor;
+    class ChainStructureEditor;
+    class ResStructureEditor;
+    class CGStructureEditor;
 
-class MolEditor;
-class SegEditor;
-class ChainEditor;
-class ResEditor;
-class CGEditor;
+    class MolEditor;
+    class SegEditor;
+    class ChainEditor;
+    class ResEditor;
+    class CGEditor;
 
-class CGIdx;
-class CGID;
-class ResIdx;
-class ResID;
+    class CGIdx;
+    class CGID;
+    class ResIdx;
+    class ResID;
 
-class AtomEditor;
-typedef Editor<AtomEditor, Atom> AtomEditorBase;
+    class AtomEditor;
+    typedef Editor<AtomEditor, Atom> AtomEditorBase;
 
-/** This class is used to edit an atom in a molecule. This
-    class is able to edit everything about the molecule
-    *except* for its relationship to other parts of the
-    molecule. To do that, you need an AtomStructureEditor
-    (which is created automatically by the 'reparent()'
-    function)
+    /** This class is used to edit an atom in a molecule. This
+        class is able to edit everything about the molecule
+        *except* for its relationship to other parts of the
+        molecule. To do that, you need an AtomStructureEditor
+        (which is created automatically by the 'reparent()'
+        function)
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT AtomEditor
-            : public SireBase::ConcreteProperty<AtomEditor,AtomEditorBase>
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomEditor&);
-
-public:
-    AtomEditor();
-
-    AtomEditor(const Atom &atom);
-
-    AtomEditor(const AtomEditor &other);
-
-    ~AtomEditor();
-
-    AtomEditor& operator=(const Atom &other);
-    AtomEditor& operator=(const AtomEditor &other);
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT AtomEditor : public SireBase::ConcreteProperty<AtomEditor, AtomEditorBase>
     {
-        return AtomEditor::typeName();
-    }
 
-    QString toString() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomEditor &);
 
-    AtomEditor& rename(const AtomName &name);
-    AtomEditor& renumber(AtomNum number);
+    public:
+        AtomEditor();
 
-    AtomStructureEditor reindex(AtomIdx atomidx) const;
+        AtomEditor(const Atom &atom);
 
-    MolStructureEditor remove() const;
+        AtomEditor(const AtomEditor &other);
 
-    AtomStructureEditor reparent(CGIdx cgidx) const;
-    AtomStructureEditor reparent(const CGID &cgid) const;
+        ~AtomEditor();
 
-    AtomStructureEditor reparent(ResIdx residx) const;
-    AtomStructureEditor reparent(const ResID &resid) const;
+        AtomEditor &operator=(const Atom &other);
+        AtomEditor &operator=(const AtomEditor &other);
 
-    AtomStructureEditor reparent(SegIdx segidx) const;
-    AtomStructureEditor reparent(const SegID &segid) const;
-};
+        static const char *typeName();
 
-/** This class is used to edit an atom's relationship to
-    other parts of the molecule (e.g. which CutGroup it
-    is in, or which Residue it is in)
+        const char *what() const
+        {
+            return AtomEditor::typeName();
+        }
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT AtomStructureEditor : public StructureEditor
-{
+        QString toString() const;
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomStructureEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomStructureEditor&);
+        AtomEditor &rename(const AtomName &name);
+        AtomEditor &renumber(AtomNum number);
 
-public:
-    AtomStructureEditor();
-    AtomStructureEditor(const Atom &atom);
-    AtomStructureEditor(const StructureEditor &data, AtomIdx atomidx);
+        AtomStructureEditor reindex(AtomIdx atomidx) const;
 
-    AtomStructureEditor(const AtomStructureEditor &other);
+        MolStructureEditor remove() const;
 
-    ~AtomStructureEditor();
+        AtomStructureEditor reparent(CGIdx cgidx) const;
+        AtomStructureEditor reparent(const CGID &cgid) const;
 
-    static const char* typeName();
+        AtomStructureEditor reparent(ResIdx residx) const;
+        AtomStructureEditor reparent(const ResID &resid) const;
 
-    const char* what() const
+        AtomStructureEditor reparent(SegIdx segidx) const;
+        AtomStructureEditor reparent(const SegID &segid) const;
+    };
+
+    /** This class is used to edit an atom's relationship to
+        other parts of the molecule (e.g. which CutGroup it
+        is in, or which Residue it is in)
+
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT AtomStructureEditor : public StructureEditor
     {
-        return AtomStructureEditor::typeName();
-    }
 
-    AtomStructureEditor* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomStructureEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomStructureEditor &);
 
-    AtomStructureEditor& operator=(const Atom &atom);
-    AtomStructureEditor& operator=(const AtomStructureEditor &other);
+    public:
+        AtomStructureEditor();
+        AtomStructureEditor(const Atom &atom);
+        AtomStructureEditor(const StructureEditor &data, AtomIdx atomidx);
 
-    bool selectedAll() const;
+        AtomStructureEditor(const AtomStructureEditor &other);
 
-    QString toString() const;
+        ~AtomStructureEditor();
 
-    ResStructureEditor residue();
-    CGStructureEditor cutGroup();
-    ChainStructureEditor chain();
-    SegStructureEditor segment();
-    MolStructureEditor molecule();
+        static const char *typeName();
 
-    const AtomName& name() const;
-    AtomNum number() const;
-    AtomIdx index() const;
+        const char *what() const
+        {
+            return AtomStructureEditor::typeName();
+        }
 
-    AtomStructureEditor& rename(const AtomName &name);
-    AtomStructureEditor& renumber(AtomNum number);
-    AtomStructureEditor& reindex(AtomIdx idx);
+        AtomStructureEditor *clone() const;
 
-    MolStructureEditor remove();
+        AtomStructureEditor &operator=(const Atom &atom);
+        AtomStructureEditor &operator=(const AtomStructureEditor &other);
 
-    AtomStructureEditor& reparent(CGIdx cgidx);
-    AtomStructureEditor& reparent(const CGID &cgid);
+        bool selectedAll() const;
 
-    AtomStructureEditor& reparent(ResIdx residx);
-    AtomStructureEditor& reparent(const ResID &resid);
+        QString toString() const;
 
-    AtomStructureEditor& reparent(SegIdx segidx);
-    AtomStructureEditor& reparent(const SegID &segid);
+        ResStructureEditor residue();
+        CGStructureEditor cutGroup();
+        ChainStructureEditor chain();
+        SegStructureEditor segment();
+        MolStructureEditor molecule();
 
-    template<class T>
-    T property(const QString &key) const;
+        const AtomName &name() const;
+        AtomNum number() const;
+        AtomIdx index() const;
 
-    template<class T>
-    T metadata(const QString &metakey) const;
+        AtomStructureEditor &rename(const AtomName &name);
+        AtomStructureEditor &renumber(AtomNum number);
+        AtomStructureEditor &reindex(AtomIdx idx);
 
-    template<class T>
-    T metadata(const QString &key, const QString &metakey) const;
+        MolStructureEditor remove();
 
-    template<class T>
-    AtomStructureEditor& setProperty(const QString &key, const T &value);
+        AtomStructureEditor &reparent(CGIdx cgidx);
+        AtomStructureEditor &reparent(const CGID &cgid);
 
-    template<class T>
-    AtomStructureEditor& setMetadata(const QString &metakey, const T &value);
+        AtomStructureEditor &reparent(ResIdx residx);
+        AtomStructureEditor &reparent(const ResID &resid);
 
-    template<class T>
-    AtomStructureEditor& setMetadata(const QString &key, const QString &metakey,
-                                     const T &value);
+        AtomStructureEditor &reparent(SegIdx segidx);
+        AtomStructureEditor &reparent(const SegID &segid);
 
-    Atom commit() const;
+        template <class T>
+        T property(const QString &key) const;
 
-    operator Atom() const;
+        template <class T>
+        T metadata(const QString &metakey) const;
 
-private:
-    /** The unique (temporary) ID of this atom in the molecule.
-        A temporary and private ID is used as this atom can have
-        all of its other ID tokens changed, so it would be difficult
-        to keep track of if it didn't have a private, non-editable ID */
-    quint32 uid;
-};
+        template <class T>
+        T metadata(const QString &key, const QString &metakey) const;
+
+        template <class T>
+        AtomStructureEditor &setProperty(const QString &key, const T &value);
+
+        template <class T>
+        AtomStructureEditor &setMetadata(const QString &metakey, const T &value);
+
+        template <class T>
+        AtomStructureEditor &setMetadata(const QString &key, const QString &metakey, const T &value);
+
+        Atom commit() const;
+
+        operator Atom() const;
+
+    private:
+        /** The unique (temporary) ID of this atom in the molecule.
+            A temporary and private ID is used as this atom can have
+            all of its other ID tokens changed, so it would be difficult
+            to keep track of if it didn't have a private, non-editable ID */
+        quint32 uid;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the value for this atom of the property at key 'key'.
-    Note that this property *must* be of type AtomProperty<T> for
-    this to work!
+    /** Return the value for this atom of the property at key 'key'.
+        Note that this property *must* be of type AtomProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T AtomStructureEditor::property(const QString &key) const
-{
-    const QVariant &value = this->getAtomProperty(uid, key);
-    return this->_pvt_getProperty<T>(key, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T AtomStructureEditor::property(const QString &key) const
+    {
+        const QVariant &value = this->getAtomProperty(uid, key);
+        return this->_pvt_getProperty<T>(key, value);
+    }
 
-/** Return the value for this atom of the metadata at metakey 'metakey'.
-    Note that this property *must* be of type AtomProperty<T> for
-    this to work!
+    /** Return the value for this atom of the metadata at metakey 'metakey'.
+        Note that this property *must* be of type AtomProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T AtomStructureEditor::metadata(const QString &metakey) const
-{
-    const QVariant &value = this->getAtomMetadata(uid, metakey);
-    return this->_pvt_getMetadata<T>(metakey, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T AtomStructureEditor::metadata(const QString &metakey) const
+    {
+        const QVariant &value = this->getAtomMetadata(uid, metakey);
+        return this->_pvt_getMetadata<T>(metakey, value);
+    }
 
-/** Return the value for this atom of the metadata at metakey 'metakey'
-    for the property at key 'key'.
+    /** Return the value for this atom of the metadata at metakey 'metakey'
+        for the property at key 'key'.
 
-    Note that this property *must* be of type AtomProperty<T> for
-    this to work!
+        Note that this property *must* be of type AtomProperty<T> for
+        this to work!
 
-    \throw SireBase::missing_property
-    \throw SireError::invalid_cast
-*/
-template<class T>
-T AtomStructureEditor::metadata(const QString &key,
-                                const QString &metakey) const
-{
-    const QVariant &value = this->getAtomMetadata(uid, key, metakey);
-    return this->_pvt_getMetadata<T>(key, metakey, value);
-}
+        \throw SireBase::missing_property
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    T AtomStructureEditor::metadata(const QString &key, const QString &metakey) const
+    {
+        const QVariant &value = this->getAtomMetadata(uid, key, metakey);
+        return this->_pvt_getMetadata<T>(key, metakey, value);
+    }
 
-/** Set the property at key 'key' to have the value 'value' for this atom.
-    Note that an exception will be thrown if an existing property for
-    this key is not of type AtomProperty<T>
+    /** Set the property at key 'key' to have the value 'value' for this atom.
+        Note that an exception will be thrown if an existing property for
+        this key is not of type AtomProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-AtomStructureEditor& AtomStructureEditor::setProperty(const QString &key,
-                                                      const T &value)
-{
-    this->assertValidAtom(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    AtomStructureEditor &AtomStructureEditor::setProperty(const QString &key, const T &value)
+    {
+        this->assertValidAtom(uid);
 
-    //create space for this property
-    this->_pvt_createSpaceForProperty< AtomProperty<T> >(key);
+        // create space for this property
+        this->_pvt_createSpaceForProperty<AtomProperty<T>>(key);
 
-    //now set the value of the property
-    this->_pvt_setAtomProperty(uid, key, QVariant::fromValue<T>(value));
+        // now set the value of the property
+        this->_pvt_setAtomProperty(uid, key, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Set the metadata at metakey 'metakey' to have the value 'value' for
-    this atom. Note that an exception will be thrown if an existing
-    property for this metakey is not of type AtomProperty<T>
+    /** Set the metadata at metakey 'metakey' to have the value 'value' for
+        this atom. Note that an exception will be thrown if an existing
+        property for this metakey is not of type AtomProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-AtomStructureEditor& AtomStructureEditor::setMetadata(const QString &metakey,
-                                                      const T &value)
-{
-    this->assertValidAtom(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    AtomStructureEditor &AtomStructureEditor::setMetadata(const QString &metakey, const T &value)
+    {
+        this->assertValidAtom(uid);
 
-    //create space for this metadata
-    this->_pvt_createSpaceForMetadata< AtomProperty<T> >(metakey);
+        // create space for this metadata
+        this->_pvt_createSpaceForMetadata<AtomProperty<T>>(metakey);
 
-    //now set the value of this metadata
-    this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
+        // now set the value of this metadata
+        this->_pvt_setAtomMetadata(uid, metakey, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Set the metadata at metakey 'metakey' for the property at
-    key 'key' to have the value 'value' for
-    this atom. Note that an exception will be thrown if an existing
-    property for this metakey is not of type AtomProperty<T>
+    /** Set the metadata at metakey 'metakey' for the property at
+        key 'key' to have the value 'value' for
+        this atom. Note that an exception will be thrown if an existing
+        property for this metakey is not of type AtomProperty<T>
 
-    \throw SireError::invalid_cast
-*/
-template<class T>
-AtomStructureEditor& AtomStructureEditor::setMetadata(const QString &key,
-                                                      const QString &metakey,
-                                                      const T &value)
-{
-    this->assertValidAtom(uid);
+        \throw SireError::invalid_cast
+    */
+    template <class T>
+    AtomStructureEditor &AtomStructureEditor::setMetadata(const QString &key, const QString &metakey, const T &value)
+    {
+        this->assertValidAtom(uid);
 
-    //create space for this metadata
-    this->_pvt_createSpaceForMetadata< AtomProperty<T> >(key, metakey);
+        // create space for this metadata
+        this->_pvt_createSpaceForMetadata<AtomProperty<T>>(key, metakey);
 
-    //now set the value of this metadata
-    this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
+        // now set the value of this metadata
+        this->_pvt_setAtomMetadata(uid, key, metakey, QVariant::fromValue<T>(value));
 
-    return *this;
-}
+        return *this;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::AtomEditor );
-Q_DECLARE_METATYPE( SireMol::AtomStructureEditor );
+Q_DECLARE_METATYPE(SireMol::AtomEditor);
+Q_DECLARE_METATYPE(SireMol::AtomStructureEditor);
 
-SIRE_EXPOSE_ALIAS( (SireMol::Editor<SireMol::AtomEditor, SireMol::Atom>),
-                    SireMol::AtomEditorBase )
+SIRE_EXPOSE_ALIAS((SireMol::Editor<SireMol::AtomEditor, SireMol::Atom>), SireMol::AtomEditorBase)
 
-SIRE_EXPOSE_CLASS( SireMol::AtomEditor )
-SIRE_EXPOSE_CLASS( SireMol::AtomStructureEditor )
+SIRE_EXPOSE_CLASS(SireMol::AtomEditor)
+SIRE_EXPOSE_CLASS(SireMol::AtomStructureEditor)
 
 SIRE_END_HEADER
 

@@ -28,23 +28,23 @@
 #include "atomeditor.h"
 #include "atom.h"
 
-#include "molecule.h"
-#include "segment.h"
 #include "chain.h"
-#include "residue.h"
 #include "cutgroup.h"
+#include "molecule.h"
+#include "residue.h"
+#include "segment.h"
 
-#include "moleditor.h"
-#include "segeditor.h"
-#include "chaineditor.h"
-#include "reseditor.h"
 #include "cgeditor.h"
+#include "chaineditor.h"
+#include "moleditor.h"
+#include "reseditor.h"
+#include "segeditor.h"
 
-#include "selector.hpp"
 #include "mover.hpp"
+#include "selector.hpp"
 
-#include "residx.h"
 #include "cgidx.h"
+#include "residx.h"
 #include "segidx.h"
 
 #include "SireError/errors.h"
@@ -57,10 +57,10 @@ using namespace SireStream;
 
 namespace SireMol
 {
-    //fully instantiate the Editor<Atom> and Editor< Selector<Atom> > classes
+    // fully instantiate the Editor<Atom> and Editor< Selector<Atom> > classes
     template class Editor<AtomEditor, Atom>;
-    //template class Editor< Selector<Atom> >;
-}
+    // template class Editor< Selector<Atom> >;
+} // namespace SireMol
 
 /////////
 ///////// Implementation of AtomEditor
@@ -69,25 +69,23 @@ namespace SireMol
 static const RegisterMetaType<AtomEditor> r_atomeditor;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AtomEditor &atomeditor)
+QDataStream &operator<<(QDataStream &ds, const AtomEditor &atomeditor)
 {
     writeHeader(ds, r_atomeditor, 1);
 
-    ds << static_cast<const Editor<AtomEditor,Atom>&>(atomeditor);
+    ds << static_cast<const Editor<AtomEditor, Atom> &>(atomeditor);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       AtomEditor &atomeditor)
+QDataStream &operator>>(QDataStream &ds, AtomEditor &atomeditor)
 {
     VersionID v = readHeader(ds, r_atomeditor);
 
     if (v == 1)
     {
-        ds >> static_cast<Editor<AtomEditor,Atom>&>(atomeditor);
+        ds >> static_cast<Editor<AtomEditor, Atom> &>(atomeditor);
     }
     else
         throw version_error(v, "1", r_atomeditor, CODELOC);
@@ -96,63 +94,65 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-AtomEditor::AtomEditor() : ConcreteProperty< AtomEditor,Editor<AtomEditor,Atom> >()
-{}
+AtomEditor::AtomEditor() : ConcreteProperty<AtomEditor, Editor<AtomEditor, Atom>>()
+{
+}
 
 /** Construct an editor that edits a copy of 'atom' */
-AtomEditor::AtomEditor(const Atom &atom)
-           : ConcreteProperty< AtomEditor,Editor<AtomEditor,Atom> >(atom)
-{}
+AtomEditor::AtomEditor(const Atom &atom) : ConcreteProperty<AtomEditor, Editor<AtomEditor, Atom>>(atom)
+{
+}
 
 /** Copy constructor */
-AtomEditor::AtomEditor(const AtomEditor &other)
-           : ConcreteProperty< AtomEditor,Editor<AtomEditor,Atom> >(other)
-{}
+AtomEditor::AtomEditor(const AtomEditor &other) : ConcreteProperty<AtomEditor, Editor<AtomEditor, Atom>>(other)
+{
+}
 
 /** Destructor */
 AtomEditor::~AtomEditor()
-{}
+{
+}
 
 /** Set this editor so that it is editing a copy of 'atom' */
-AtomEditor& AtomEditor::operator=(const Atom &atom)
+AtomEditor &AtomEditor::operator=(const Atom &atom)
 {
-    Editor<AtomEditor,Atom>::operator=(atom);
+    Editor<AtomEditor, Atom>::operator=(atom);
     return *this;
 }
 
 /** Copy assignment operator */
-AtomEditor& AtomEditor::operator=(const AtomEditor &other)
+AtomEditor &AtomEditor::operator=(const AtomEditor &other)
 {
-    Editor<AtomEditor,Atom>::operator=(other);
+    Editor<AtomEditor, Atom>::operator=(other);
     return *this;
 }
 
 /** Return a string representation of this editor */
 QString AtomEditor::toString() const
 {
-    return QObject::tr( "Editor{ %1 }" ).arg( Atom::toString() );
+    return QObject::tr("Editor{ %1 }").arg(Atom::toString());
 }
 
 /** Rename this atom so that it is called 'newname' */
-AtomEditor& AtomEditor::rename(const AtomName &newname)
+AtomEditor &AtomEditor::rename(const AtomName &newname)
 {
     if (newname == this->name())
-        //nothing needs to be done
+        // nothing needs to be done
         return *this;
 
-    d->rename( this->index(), newname );
+    d->rename(this->index(), newname);
 
     return *this;
 }
 
 /** Renumber this atom so that it has number 'newnum' */
-AtomEditor& AtomEditor::renumber(AtomNum newnum)
+AtomEditor &AtomEditor::renumber(AtomNum newnum)
 {
     if (newnum == this->number())
-        //nothing needs to be done
+        // nothing needs to be done
         return *this;
 
-    d->renumber( this->index(), newnum );
+    d->renumber(this->index(), newnum);
 
     return *this;
 }
@@ -187,7 +187,7 @@ MolStructureEditor AtomEditor::remove() const
 AtomStructureEditor AtomEditor::reparent(CGIdx cgidx) const
 {
     AtomStructureEditor editor(*this);
-    editor.reparent( cgidx );
+    editor.reparent(cgidx);
     return editor;
 }
 
@@ -267,9 +267,9 @@ AtomStructureEditor AtomEditor::reparent(const SegID &segid) const
     return editor;
 }
 
-const char* AtomEditor::typeName()
+const char *AtomEditor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomEditor>() );
+    return QMetaType::typeName(qMetaTypeId<AtomEditor>());
 }
 
 /////////
@@ -279,30 +279,26 @@ const char* AtomEditor::typeName()
 static const RegisterMetaType<AtomStructureEditor> r_atomstructeditor;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AtomStructureEditor &atomeditor)
+QDataStream &operator<<(QDataStream &ds, const AtomStructureEditor &atomeditor)
 {
     writeHeader(ds, r_atomstructeditor, 1);
 
-    ds << atomeditor.uid
-       << static_cast<const StructureEditor&>(atomeditor);
+    ds << atomeditor.uid << static_cast<const StructureEditor &>(atomeditor);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       AtomStructureEditor &atomeditor)
+QDataStream &operator>>(QDataStream &ds, AtomStructureEditor &atomeditor)
 {
     VersionID v = readHeader(ds, r_atomstructeditor);
 
     if (v == 1)
     {
-        ds >> atomeditor.uid
-           >> static_cast<StructureEditor&>(atomeditor);
+        ds >> atomeditor.uid >> static_cast<StructureEditor &>(atomeditor);
     }
     else
-        throw version_error( v, "1", r_atomstructeditor, CODELOC );
+        throw version_error(v, "1", r_atomstructeditor, CODELOC);
 
     return ds;
 }
@@ -310,12 +306,11 @@ QDataStream &operator>>(QDataStream &ds,
 /** Null constructor */
 AtomStructureEditor::AtomStructureEditor() : StructureEditor()
 {
-    this->operator=( StructureEditor::addAtom() );
+    this->operator=(StructureEditor::addAtom());
 }
 
 /** Construct from an Atom */
-AtomStructureEditor::AtomStructureEditor(const Atom &atom)
-                    : StructureEditor(atom.data())
+AtomStructureEditor::AtomStructureEditor(const Atom &atom) : StructureEditor(atom.data())
 {
     uid = this->getUID(atom.index());
 }
@@ -325,24 +320,23 @@ AtomStructureEditor::AtomStructureEditor(const Atom &atom)
 
     \throw SireError::invalid_index
 */
-AtomStructureEditor::AtomStructureEditor(const StructureEditor &moldata,
-                                         AtomIdx idx)
-                    : StructureEditor(moldata)
+AtomStructureEditor::AtomStructureEditor(const StructureEditor &moldata, AtomIdx idx) : StructureEditor(moldata)
 {
     uid = this->getUID(idx);
 }
 
 /** Copy constructor */
-AtomStructureEditor::AtomStructureEditor(const AtomStructureEditor &other)
-                    : StructureEditor(other), uid(other.uid)
-{}
+AtomStructureEditor::AtomStructureEditor(const AtomStructureEditor &other) : StructureEditor(other), uid(other.uid)
+{
+}
 
 /** Destructor */
 AtomStructureEditor::~AtomStructureEditor()
-{}
+{
+}
 
 /** Assign to edit the structure of a copy of 'atom' */
-AtomStructureEditor& AtomStructureEditor::operator=(const Atom &atom)
+AtomStructureEditor &AtomStructureEditor::operator=(const Atom &atom)
 {
     StructureEditor::operator=(atom.data());
     uid = this->getUID(atom.index());
@@ -351,7 +345,7 @@ AtomStructureEditor& AtomStructureEditor::operator=(const Atom &atom)
 }
 
 /** Copy assignment operator */
-AtomStructureEditor& AtomStructureEditor::operator=(const AtomStructureEditor &other)
+AtomStructureEditor &AtomStructureEditor::operator=(const AtomStructureEditor &other)
 {
     StructureEditor::operator=(other);
     uid = other.uid;
@@ -361,9 +355,7 @@ AtomStructureEditor& AtomStructureEditor::operator=(const AtomStructureEditor &o
 /** Return a string representation of this editor */
 QString AtomStructureEditor::toString() const
 {
-    return QObject::tr( "StructureEditor{ Atom( %1 : %2 ) }" )
-                    .arg( this->name() )
-                    .arg( this->number() );
+    return QObject::tr("StructureEditor{ Atom( %1 : %2 ) }").arg(this->name()).arg(this->number());
 }
 
 /** Return whether or not this contains the whole molecule */
@@ -373,7 +365,7 @@ bool AtomStructureEditor::selectedAll() const
 }
 
 /** Return the name of this atom */
-const AtomName& AtomStructureEditor::name() const
+const AtomName &AtomStructureEditor::name() const
 {
     return this->atomName(uid);
 }
@@ -421,14 +413,14 @@ MolStructureEditor AtomStructureEditor::molecule()
 }
 
 /** Rename this atom to 'newname' */
-AtomStructureEditor& AtomStructureEditor::rename(const AtomName &newname)
+AtomStructureEditor &AtomStructureEditor::rename(const AtomName &newname)
 {
     this->renameAtom(uid, newname);
     return *this;
 }
 
 /** Renumber this atom to 'newnum' */
-AtomStructureEditor& AtomStructureEditor::renumber(AtomNum newnum)
+AtomStructureEditor &AtomStructureEditor::renumber(AtomNum newnum)
 {
     this->renumberAtom(uid, newnum);
     return *this;
@@ -437,7 +429,7 @@ AtomStructureEditor& AtomStructureEditor::renumber(AtomNum newnum)
 /** Reindex this atom to 'newidx' - this will move the atom to
     the end if 'newidx' is greater than the number of atoms
     in the molecule */
-AtomStructureEditor& AtomStructureEditor::reindex(AtomIdx newidx)
+AtomStructureEditor &AtomStructureEditor::reindex(AtomIdx newidx)
 {
     this->reindexAtom(uid, newidx);
     return *this;
@@ -456,7 +448,7 @@ MolStructureEditor AtomStructureEditor::remove()
 
     \throw SireError::invalid_index
 */
-AtomStructureEditor& AtomStructureEditor::reparent(CGIdx cgidx)
+AtomStructureEditor &AtomStructureEditor::reparent(CGIdx cgidx)
 {
     this->reparentAtom(uid, cgidx);
     return *this;
@@ -469,16 +461,16 @@ AtomStructureEditor& AtomStructureEditor::reparent(CGIdx cgidx)
     \throw SireMol::duplicate_cutgroup
     \throw SireMol::invalid_index
 */
-AtomStructureEditor& AtomStructureEditor::reparent(const CGID &cgid)
+AtomStructureEditor &AtomStructureEditor::reparent(const CGID &cgid)
 {
-    return this->reparent( this->cgIdx(cgid) );
+    return this->reparent(this->cgIdx(cgid));
 }
 
 /** Reparent this atom so that it is now in the residue at index 'residx'
 
     \throw SireError::invalid_index
 */
-AtomStructureEditor& AtomStructureEditor::reparent(ResIdx residx)
+AtomStructureEditor &AtomStructureEditor::reparent(ResIdx residx)
 {
     this->reparentAtom(uid, residx);
     return *this;
@@ -491,16 +483,16 @@ AtomStructureEditor& AtomStructureEditor::reparent(ResIdx residx)
     \throw SireMol::duplicate_residue
     \throw SireMol::invalid_index
 */
-AtomStructureEditor& AtomStructureEditor::reparent(const ResID &resid)
+AtomStructureEditor &AtomStructureEditor::reparent(const ResID &resid)
 {
-    return this->reparent( this->resIdx(resid) );
+    return this->reparent(this->resIdx(resid));
 }
 
 /** Reparent this atom so that it is now in the segment at index 'segidx'
 
     \throw SireError::invalid_index
 */
-AtomStructureEditor& AtomStructureEditor::reparent(SegIdx segidx)
+AtomStructureEditor &AtomStructureEditor::reparent(SegIdx segidx)
 {
     this->reparentAtom(uid, segidx);
     return *this;
@@ -513,15 +505,15 @@ AtomStructureEditor& AtomStructureEditor::reparent(SegIdx segidx)
     \throw SireMol::duplicate_segment
     \throw SireMol::invalid_index
 */
-AtomStructureEditor& AtomStructureEditor::reparent(const SegID &segid)
+AtomStructureEditor &AtomStructureEditor::reparent(const SegID &segid)
 {
-    return this->reparent( this->segIdx(segid) );
+    return this->reparent(this->segIdx(segid));
 }
 
 /** Commit all of the changes, returning the uneditable Atom */
 Atom AtomStructureEditor::commit() const
 {
-    return Atom( this->commitChanges(), this->index() );
+    return Atom(this->commitChanges(), this->index());
 }
 
 /** Allow automatic casting to an Atom() */
@@ -530,12 +522,12 @@ AtomStructureEditor::operator Atom() const
     return this->commit();
 }
 
-const char* AtomStructureEditor::typeName()
+const char *AtomStructureEditor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomStructureEditor>() );
+    return QMetaType::typeName(qMetaTypeId<AtomStructureEditor>());
 }
 
-AtomStructureEditor* AtomStructureEditor::clone() const
+AtomStructureEditor *AtomStructureEditor::clone() const
 {
     return new AtomStructureEditor(*this);
 }

@@ -34,7 +34,7 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-  class Molecule;
+    class Molecule;
 }
 
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Molecule &);
@@ -43,159 +43,154 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Molecule &);
 namespace SireMol
 {
 
-  class MolID;
-  class MolName;
-  class MolNum;
+    class MolID;
+    class MolName;
+    class MolNum;
 
-  class Evaluator;
-  class MolEditor;
+    class Evaluator;
+    class MolEditor;
 
-  template <class T>
-  class Mover;
+    template <class T>
+    class Mover;
 
-  template <class T>
-  class Selector;
+    template <class T>
+    class Selector;
 
-  class SelectorMol;
+    class SelectorMol;
 
-  class Atom;
-  class CutGroup;
-  class Residue;
-  class Chain;
-  class Segment;
+    class Atom;
+    class CutGroup;
+    class Residue;
+    class Chain;
+    class Segment;
 
-  /** A Molecule represents a complete molecule.
+    /** A Molecule represents a complete molecule.
 
-      Most of the manipulation of a molecule is handled by the 'or/er' classes,
-      e.g. Mover, Selector, Editer, Evaluator.
+        Most of the manipulation of a molecule is handled by the 'or/er' classes,
+        e.g. Mover, Selector, Editer, Evaluator.
 
-      These classes provide additional member functions, thereby allowing me
-      to keep the API of Molecule small.
+        These classes provide additional member functions, thereby allowing me
+        to keep the API of Molecule small.
 
-      Examples of use include;
+        Examples of use include;
 
-      mol = mol.move().translate( Vector(1,2,3) )
-      point = mol.evaluate().center()
-      mass = mol.evaluate().mass()
+        mol = mol.move().translate( Vector(1,2,3) )
+        point = mol.evaluate().center()
+        mass = mol.evaluate().mass()
 
-      mol = mol.edit().rename( ResNum(43)[0], "ALA" ).commit()
+        mol = mol.edit().rename( ResNum(43)[0], "ALA" ).commit()
 
-      Equally, we can quickly select well-defined subgroups within the
-      molecule, e.g. atom(s), residue(e), chain(s), CutGroup(s) and
-      segment(s), via the 'select' functions, e.g.
+        Equally, we can quickly select well-defined subgroups within the
+        molecule, e.g. atom(s), residue(e), chain(s), CutGroup(s) and
+        segment(s), via the 'select' functions, e.g.
 
-      ala49 = mol.select( ResName("ala") + ResNum(49) );
+        ala49 = mol.select( ResName("ala") + ResNum(49) );
 
-      or if there is more than one residue designate ALA:49
+        or if there is more than one residue designate ALA:49
 
-      ala49_0 = mol.select( (ResName("ala")+ResNum(49))[0] );
+        ala49_0 = mol.select( (ResName("ala")+ResNum(49))[0] );
 
-      or to get all of these residues, do
+        or to get all of these residues, do
 
-      all_ala49 = mol.selectAll( ResName("ala") + ResNum(49) );
+        all_ala49 = mol.selectAll( ResName("ala") + ResNum(49) );
 
-      @author Christopher Woods
-  */
-  class SIREMOL_EXPORT Molecule : public SireBase::ConcreteProperty<Molecule, MoleculeView>
-  {
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT Molecule : public SireBase::ConcreteProperty<Molecule, MoleculeView>
+    {
 
-    friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Molecule &);
-    friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, Molecule &);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Molecule &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, Molecule &);
 
-  public:
-    Molecule();
-    Molecule(const QString &molname);
+    public:
+        Molecule();
+        Molecule(const QString &molname);
 
-    Molecule(const MoleculeData &moldata);
+        Molecule(const MoleculeData &moldata);
 
-    Molecule(const Molecule &other);
+        Molecule(const Molecule &other);
 
-    ~Molecule();
+        ~Molecule();
 
-    Molecule &operator=(const Molecule &other);
+        Molecule &operator=(const Molecule &other);
 
-    bool operator==(const Molecule &other) const;
-    bool operator!=(const Molecule &other) const;
+        bool operator==(const Molecule &other) const;
+        bool operator!=(const Molecule &other) const;
 
-    static const char *typeName();
+        static const char *typeName();
 
-    Molecule *clone() const;
+        Molecule *clone() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isEmpty() const;
-    bool selectedAll() const;
+        bool isEmpty() const;
+        bool selectedAll() const;
 
-    MolViewPtr toSelector() const;
+        MolViewPtr toSelector() const;
 
-    SelectorMol selector() const;
-    SelectorMol invert() const;
+        SelectorMol selector() const;
+        SelectorMol invert() const;
 
-    AtomSelection selection() const;
+        AtomSelection selection() const;
 
-    const MolName &name() const;
-    MolNum number() const;
+        const MolName &name() const;
+        MolNum number() const;
 
-    quint64 version() const;
-    quint64 version(const PropertyName &key) const;
+        quint64 version() const;
+        quint64 version(const PropertyName &key) const;
 
-    int nAtoms() const;
-    int nAtoms(const ResID &id) const;
-    int nAtoms(const ChainID &id) const;
-    int nAtoms(const SegID &seg) const;
-    int nAtoms(const CGID &id) const;
+        int nAtoms() const;
+        int nAtoms(const ResID &id) const;
+        int nAtoms(const ChainID &id) const;
+        int nAtoms(const SegID &seg) const;
+        int nAtoms(const CGID &id) const;
 
-    int nCutGroups() const;
+        int nCutGroups() const;
 
-    int nResidues() const;
-    int nResidues(const ChainID &id) const;
+        int nResidues() const;
+        int nResidues(const ChainID &id) const;
 
-    int nChains() const;
-    int nSegments() const;
+        int nChains() const;
+        int nSegments() const;
 
-    MoleculeInfo info() const;
+        MoleculeInfo info() const;
 
-    Mover<Molecule> move() const;
-    Evaluator evaluate() const;
-    MolEditor edit() const;
+        Mover<Molecule> move() const;
+        Evaluator evaluate() const;
+        MolEditor edit() const;
 
-    void update(const MoleculeData &moldata);
+        void update(const MoleculeData &moldata);
 
-    bool hasProperty(const PropertyName &key) const;
-    bool hasMetadata(const PropertyName &metakey) const;
-    bool hasMetadata(const PropertyName &key,
-                     const PropertyName &metakey) const;
+        bool hasProperty(const PropertyName &key) const;
+        bool hasMetadata(const PropertyName &metakey) const;
+        bool hasMetadata(const PropertyName &key, const PropertyName &metakey) const;
 
-    QStringList propertyKeys() const;
-    QStringList metadataKeys() const;
-    QStringList metadataKeys(const PropertyName &key) const;
+        QStringList propertyKeys() const;
+        QStringList metadataKeys() const;
+        QStringList metadataKeys(const PropertyName &key) const;
 
-    const Properties &properties() const;
+        const Properties &properties() const;
 
-    const Property &property(const PropertyName &key) const;
+        const Property &property(const PropertyName &key) const;
 
-    const Property &metadata(const PropertyName &metakey) const;
+        const Property &metadata(const PropertyName &metakey) const;
 
-    const Property &metadata(const PropertyName &key,
-                             const PropertyName &metakey) const;
+        const Property &metadata(const PropertyName &key, const PropertyName &metakey) const;
 
-    void assertContainsProperty(const PropertyName &key) const;
+        void assertContainsProperty(const PropertyName &key) const;
 
-    void assertContainsMetadata(const PropertyName &metakey) const;
-    void assertContainsMetadata(const PropertyName &key,
-                                const PropertyName &metakey) const;
+        void assertContainsMetadata(const PropertyName &metakey) const;
+        void assertContainsMetadata(const PropertyName &key, const PropertyName &metakey) const;
 
-  protected:
-    void setProperty(const QString &key, const Property &value);
+    protected:
+        void setProperty(const QString &key, const Property &value);
 
-    void setMetadata(const QString &metakey,
-                     const Property &value);
+        void setMetadata(const QString &metakey, const Property &value);
 
-    void setMetadata(const QString &key, const QString &metakey,
-                     const Property &value);
-  };
+        void setMetadata(const QString &key, const QString &metakey, const Property &value);
+    };
 
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::Molecule);
 Q_DECLARE_METATYPE(SireMol::Mover<SireMol::Molecule>);

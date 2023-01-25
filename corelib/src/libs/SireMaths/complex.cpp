@@ -54,9 +54,9 @@ QDataStream &operator>>(QDataStream &ds, SireMaths::Complex &z)
 
     if (v == 1)
     {
-        double r,i;
+        double r, i;
         ds >> r >> i;
-        z.setRectangular(r,i);
+        z.setRectangular(r, i);
     }
     else
         throw version_error(v, "1", r_complex, CODELOC);
@@ -65,21 +65,24 @@ QDataStream &operator>>(QDataStream &ds, SireMaths::Complex &z)
 }
 
 /** Construct the complex number  real + imag i */
-Complex::Complex(double r, double i)
-        : gsl_complex( gsl_complex_rect(r,i) )
-{}
+Complex::Complex(double r, double i) : gsl_complex(gsl_complex_rect(r, i))
+{
+}
 
 /** Construct from a gsl_complex struct */
 Complex::Complex(const gsl_complex &complex) : gsl_complex(complex)
-{}
+{
+}
 
 /** Copy constructor */
 Complex::Complex(const Complex &other) : gsl_complex(other)
-{}
+{
+}
 
 /** Destructor */
 Complex::~Complex()
-{}
+{
+}
 
 /** Return the real part of this number */
 double Complex::real() const
@@ -123,9 +126,9 @@ QString Complex::toString() const
 
         if (SireMaths::isZero(r))
         {
-            if (SireMaths::areEqual(i,1.0))
+            if (SireMaths::areEqual(i, 1.0))
                 return "i";
-            else if (SireMaths::areEqual(i,-1.0))
+            else if (SireMaths::areEqual(i, -1.0))
                 return "-i";
             else
                 return QString("%1i").arg(i);
@@ -141,7 +144,7 @@ QString Complex::toString() const
     return the complex number z = x + i y. */
 Complex Complex::rect(double x, double y)
 {
-    return Complex( gsl_complex_rect(x,y) );
+    return Complex(gsl_complex_rect(x, y));
 }
 
 /** This function returns the complex number
@@ -149,7 +152,7 @@ Complex Complex::rect(double x, double y)
     from the polar representation (r,theta). */
 Complex Complex::polar(double r, double theta)
 {
-   return Complex( gsl_complex_polar(r,theta) );
+    return Complex(gsl_complex_polar(r, theta));
 }
 
 /** This function sets the rectangular cartesian components (x,y) to
@@ -164,19 +167,19 @@ void Complex::setRectangular(double x, double y)
     from the polar representation (r,theta). */
 void Complex::setPolar(double r, double theta)
 {
-    *this = gsl_complex_polar(r,theta);
+    *this = gsl_complex_polar(r, theta);
 }
 
 /** This function sets the real part of the complex number */
 void Complex::setReal(double x)
 {
-    GSL_SET_REAL(this,x);
+    GSL_SET_REAL(this, x);
 }
 
 /** This function set the imaginary part of the complex number */
 void Complex::setImag(double y)
 {
-    GSL_SET_IMAG(this,y);
+    GSL_SET_IMAG(this, y);
 }
 
 /** Comparison operator */
@@ -192,37 +195,37 @@ bool Complex::operator!=(const Complex &other) const
 }
 
 /** Assignment operator */
-Complex& Complex::operator=(const Complex &other)
+Complex &Complex::operator=(const Complex &other)
 {
     gsl_complex::operator=(other);
     return *this;
 }
 
 /** self-addition */
-Complex& Complex::operator+=(const Complex &other)
+Complex &Complex::operator+=(const Complex &other)
 {
-    *this = gsl_complex_add(*this,other);
+    *this = gsl_complex_add(*this, other);
     return *this;
 }
 
 /** self-subtraction */
-Complex& Complex::operator-=(const Complex &other)
+Complex &Complex::operator-=(const Complex &other)
 {
-    *this = gsl_complex_sub(*this,other);
+    *this = gsl_complex_sub(*this, other);
     return *this;
 }
 
 /** self-multiplication */
-Complex& Complex::operator*=(const Complex &other)
+Complex &Complex::operator*=(const Complex &other)
 {
-    *this = gsl_complex_mul(*this,other);
+    *this = gsl_complex_mul(*this, other);
     return *this;
 }
 
 /** self-division */
-Complex& Complex::operator/=(const Complex &other)
+Complex &Complex::operator/=(const Complex &other)
 {
-    *this = gsl_complex_div(*this,other);
+    *this = gsl_complex_div(*this, other);
     return *this;
 }
 
@@ -246,37 +249,37 @@ bool Complex::operator!=(double r) const
 }
 
 /** Assignment operator */
-Complex& Complex::operator=(double r)
+Complex &Complex::operator=(double r)
 {
-    GSL_SET_REAL(this,r);
+    GSL_SET_REAL(this, r);
     return *this;
 }
 
 /** self-addition */
-Complex& Complex::operator+=(double r)
+Complex &Complex::operator+=(double r)
 {
     *this = gsl_complex_add_real(*this, r);
     return *this;
 }
 
 /** self-subtraction */
-Complex& Complex::operator-=(double r)
+Complex &Complex::operator-=(double r)
 {
     *this = gsl_complex_sub_real(*this, r);
     return *this;
 }
 
 /** self-multiplication */
-Complex& Complex::operator*=(double r)
+Complex &Complex::operator*=(double r)
 {
-    *this = gsl_complex_mul_real(*this,r);
+    *this = gsl_complex_mul_real(*this, r);
     return *this;
 }
 
 /** self-division */
-Complex& Complex::operator/=(double r)
+Complex &Complex::operator/=(double r)
 {
-    *this = gsl_complex_div_real(*this,r);
+    *this = gsl_complex_div_real(*this, r);
     return *this;
 }
 
@@ -329,9 +332,9 @@ Complex Complex::negative() const
     return gsl_complex_negative(*this);
 }
 
-const char* Complex::typeName()
+const char *Complex::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Complex>() );
+    return QMetaType::typeName(qMetaTypeId<Complex>());
 }
 
 namespace SireMaths
@@ -339,49 +342,49 @@ namespace SireMaths
     /** Addition */
     Complex operator+(const Complex &z0, const Complex &z1)
     {
-        return gsl_complex_add(z0,z1);
+        return gsl_complex_add(z0, z1);
     }
 
     /** Subtraction */
     Complex operator-(const Complex &z0, const Complex &z1)
     {
-        return gsl_complex_sub(z0,z1);
+        return gsl_complex_sub(z0, z1);
     }
 
     /** Multiplication */
     Complex operator*(const Complex &z0, const Complex &z1)
     {
-        return gsl_complex_mul(z0,z1);
+        return gsl_complex_mul(z0, z1);
     }
 
     /** Division */
     Complex operator/(const Complex &z0, const Complex &z1)
     {
-        return gsl_complex_div(z0,z1);
+        return gsl_complex_div(z0, z1);
     }
 
     /** Addition */
     Complex operator+(const Complex &z, double x)
     {
-        return gsl_complex_add_real(z,x);
+        return gsl_complex_add_real(z, x);
     }
 
     /** Subtraction */
     Complex operator-(const Complex &z, double x)
     {
-        return gsl_complex_sub_real(z,x);
+        return gsl_complex_sub_real(z, x);
     }
 
     /** Multiplication */
     Complex operator*(const Complex &z, double x)
     {
-        return gsl_complex_mul_real(z,x);
+        return gsl_complex_mul_real(z, x);
     }
 
     /** Division */
     Complex operator/(const Complex &z, double x)
     {
-        return gsl_complex_div_real(z,x);
+        return gsl_complex_div_real(z, x);
     }
 
     /** Addition */
@@ -428,13 +431,13 @@ namespace SireMaths
         exponentials. */
     Complex pow(const Complex &z, const Complex &a)
     {
-        return gsl_complex_pow(z,a);
+        return gsl_complex_pow(z, a);
     }
 
     /** This function returns the complex number z raised to the real power x, z^x. */
     Complex pow(const Complex &z, double x)
     {
-        return gsl_complex_pow_real(z,x);
+        return gsl_complex_pow_real(z, x);
     }
 
     /** This function returns the complex number z raised to an integer power n, z^n */
@@ -442,16 +445,16 @@ namespace SireMaths
     {
         if (n >= 0)
         {
-            switch(n)
+            switch (n)
             {
-                case 0:
-                    return Complex(1);
-                case 1:
-                    return z;
-                case 2:
-                    return z*z;
-                default:
-                    return pow(z, double(n));
+            case 0:
+                return Complex(1);
+            case 1:
+                return z;
+            case 2:
+                return z * z;
+            default:
+                return pow(z, double(n));
             }
         }
         else
@@ -470,7 +473,7 @@ namespace SireMaths
     /** This function returns the real number x raised to the complex power z, x^z. */
     Complex pow(double x, const Complex &z)
     {
-        return gsl_complex_pow( Complex(x), z );
+        return gsl_complex_pow(Complex(x), z);
     }
 
     /** This function returns the complex exponential of the complex number z,
@@ -498,7 +501,7 @@ namespace SireMaths
        \log_b(z). This quantity is computed as the ratio \log(z)/\log(b). */
     Complex log_b(const Complex &z, const Complex &b)
     {
-        return gsl_complex_log_b(z,b);
+        return gsl_complex_log_b(z, b);
     }
 
     /** This function returns the complex sine of the complex number
@@ -727,4 +730,4 @@ namespace SireMaths
     {
         return gsl_complex_arccoth(z);
     }
-}
+} // namespace SireMaths

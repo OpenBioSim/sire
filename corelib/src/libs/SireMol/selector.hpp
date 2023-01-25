@@ -28,22 +28,22 @@
 #ifndef SIREMOL_SELECTOR_HPP
 #define SIREMOL_SELECTOR_HPP
 
-#include "moleculeview.h"
 #include "evaluator.h"
+#include "moleculeview.h"
 
 #include "atom.h"
-#include "cutgroup.h"
-#include "residue.h"
 #include "chain.h"
-#include "segment.h"
+#include "cutgroup.h"
 #include "molecules.h"
+#include "residue.h"
+#include "segment.h"
 #include "viewsofmol.h"
 
 #include "SireBase/slice.h"
 
 #include "SireStream/datastream.h"
-#include "SireStream/shareddatastream.h"
 #include "SireStream/errors.h"
+#include "SireStream/shareddatastream.h"
 
 #include "SireMol/errors.h"
 
@@ -58,7 +58,7 @@ namespace SireMol
 
     template <class T>
     class SelectorM;
-}
+} // namespace SireMol
 
 template <class T>
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Selector<T> &);
@@ -74,38 +74,28 @@ namespace SireMol
     namespace detail
     {
 
-        SIREMOL_EXPORT bool has_property(const Atom *, const MoleculeData &moldata,
-                                         const PropertyName &key);
-        SIREMOL_EXPORT bool has_property(const Chain *, const MoleculeData &moldata,
-                                         const PropertyName &key);
-        SIREMOL_EXPORT bool has_property(const CutGroup *, const MoleculeData &moldata,
-                                         const PropertyName &key);
-        SIREMOL_EXPORT bool has_property(const Residue *, const MoleculeData &moldata,
-                                         const PropertyName &key);
-        SIREMOL_EXPORT bool has_property(const Segment *, const MoleculeData &moldata,
-                                         const PropertyName &key);
+        SIREMOL_EXPORT bool has_property(const Atom *, const MoleculeData &moldata, const PropertyName &key);
+        SIREMOL_EXPORT bool has_property(const Chain *, const MoleculeData &moldata, const PropertyName &key);
+        SIREMOL_EXPORT bool has_property(const CutGroup *, const MoleculeData &moldata, const PropertyName &key);
+        SIREMOL_EXPORT bool has_property(const Residue *, const MoleculeData &moldata, const PropertyName &key);
+        SIREMOL_EXPORT bool has_property(const Segment *, const MoleculeData &moldata, const PropertyName &key);
 
-        SIREMOL_EXPORT bool has_metadata(const Atom *, const MoleculeData &moldata,
-                                         const PropertyName &metakey);
-        SIREMOL_EXPORT bool has_metadata(const Chain *, const MoleculeData &moldata,
-                                         const PropertyName &metakey);
-        SIREMOL_EXPORT bool has_metadata(const CutGroup *, const MoleculeData &moldata,
-                                         const PropertyName &metakey);
-        SIREMOL_EXPORT bool has_metadata(const Residue *, const MoleculeData &moldata,
-                                         const PropertyName &metakey);
-        SIREMOL_EXPORT bool has_metadata(const Segment *, const MoleculeData &moldata,
-                                         const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const Atom *, const MoleculeData &moldata, const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const Chain *, const MoleculeData &moldata, const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const CutGroup *, const MoleculeData &moldata, const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const Residue *, const MoleculeData &moldata, const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const Segment *, const MoleculeData &moldata, const PropertyName &metakey);
 
-        SIREMOL_EXPORT bool has_metadata(const Atom *, const MoleculeData &moldata,
-                                         const PropertyName &key, const PropertyName &metakey);
-        SIREMOL_EXPORT bool has_metadata(const Chain *, const MoleculeData &moldata,
-                                         const PropertyName &key, const PropertyName &metakey);
-        SIREMOL_EXPORT bool has_metadata(const CutGroup *, const MoleculeData &moldata,
-                                         const PropertyName &key, const PropertyName &metakey);
-        SIREMOL_EXPORT bool has_metadata(const Residue *, const MoleculeData &moldata,
-                                         const PropertyName &key, const PropertyName &metakey);
-        SIREMOL_EXPORT bool has_metadata(const Segment *, const MoleculeData &moldata,
-                                         const PropertyName &key, const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const Atom *, const MoleculeData &moldata, const PropertyName &key,
+                                         const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const Chain *, const MoleculeData &moldata, const PropertyName &key,
+                                         const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const CutGroup *, const MoleculeData &moldata, const PropertyName &key,
+                                         const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const Residue *, const MoleculeData &moldata, const PropertyName &key,
+                                         const PropertyName &metakey);
+        SIREMOL_EXPORT bool has_metadata(const Segment *, const MoleculeData &moldata, const PropertyName &key,
+                                         const PropertyName &metakey);
 
     } // end of namespace detail
 
@@ -133,8 +123,7 @@ namespace SireMol
 
         Selector(const MoleculeData &moldata);
 
-        Selector(const MoleculeData &moldata,
-                 const AtomSelection &selected_atoms);
+        Selector(const MoleculeData &moldata, const AtomSelection &selected_atoms);
 
         Selector(const MoleculeData &moldata, const typename T::ID &viewid);
 
@@ -250,8 +239,7 @@ namespace SireMol
 
         bool hasProperty(const PropertyName &key) const;
         bool hasMetadata(const PropertyName &metakey) const;
-        bool hasMetadata(const PropertyName &key,
-                         const PropertyName &metakey) const;
+        bool hasMetadata(const PropertyName &key, const PropertyName &metakey) const;
 
         QStringList propertyKeys() const;
         QStringList metadataKeys() const;
@@ -264,8 +252,7 @@ namespace SireMol
         QList<V> metadata(const PropertyName &metakey) const;
 
         template <class V>
-        QList<V> metadata(const PropertyName &key,
-                          const PropertyName &metakey) const;
+        QList<V> metadata(const PropertyName &key, const PropertyName &metakey) const;
 
     protected:
         template <class V>
@@ -275,8 +262,7 @@ namespace SireMol
         void setMetadata(const QString &metakey, const QList<V> &values);
 
         template <class V>
-        void setMetadata(const QString &key, const QString &metakey,
-                         const QList<V> &values);
+        void setMetadata(const QString &key, const QString &metakey, const QList<V> &values);
 
         template <class V>
         void setProperty(const QString &key, const V &value);
@@ -285,8 +271,7 @@ namespace SireMol
         void setMetadata(const QString &metakey, V &value);
 
         template <class V>
-        void setMetadata(const QString &key, const QString &metakey,
-                         const V &value);
+        void setMetadata(const QString &key, const QString &metakey, const V &value);
 
     private:
         /** The list of indicies of the selected parts
@@ -300,16 +285,14 @@ namespace SireMol
 
     /** Null constructor */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    Selector<T>::Selector() : SireBase::ConcreteProperty<Selector<T>, MoleculeView>()
+    SIRE_OUTOFLINE_TEMPLATE Selector<T>::Selector() : SireBase::ConcreteProperty<Selector<T>, MoleculeView>()
     {
     }
 
     /** Construct the set of all groups for the molecule whose
         data is in 'moldata' */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    Selector<T>::Selector(const MoleculeData &moldata)
+    SIRE_OUTOFLINE_TEMPLATE Selector<T>::Selector(const MoleculeData &moldata)
         : SireBase::ConcreteProperty<Selector<T>, MoleculeView>(moldata)
     {
     }
@@ -317,9 +300,7 @@ namespace SireMol
     /** Construct the set of all groups for the molecule whose data is in 'moldata'
         and with the specfied groups selected */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    Selector<T>::Selector(const MoleculeData &moldata,
-                          const QList<typename T::Index> &indexes)
+    SIRE_OUTOFLINE_TEMPLATE Selector<T>::Selector(const MoleculeData &moldata, const QList<typename T::Index> &indexes)
         : SireBase::ConcreteProperty<Selector<T>, MoleculeView>(moldata)
     {
         int n = detail::getCount<T>(moldata.info());
@@ -339,9 +320,7 @@ namespace SireMol
         \throw SireError::incompatible_error
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    Selector<T>::Selector(const MoleculeData &moldata,
-                          const AtomSelection &selected_atoms)
+    SIRE_OUTOFLINE_TEMPLATE Selector<T>::Selector(const MoleculeData &moldata, const AtomSelection &selected_atoms)
         : SireBase::ConcreteProperty<Selector<T>, MoleculeView>(moldata)
     {
         if (selected_atoms.selectedNone())
@@ -356,8 +335,7 @@ namespace SireMol
 
     /** Construct the set that contains only the view 'view' */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    Selector<T>::Selector(const T &view)
+    SIRE_OUTOFLINE_TEMPLATE Selector<T>::Selector(const T &view)
         : SireBase::ConcreteProperty<Selector<T>, MoleculeView>(view)
     {
         idxs.append(view.index());
@@ -374,9 +352,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    Selector<T>::Selector(const MoleculeData &moldata,
-                          const typename T::ID &viewid)
+    SIRE_OUTOFLINE_TEMPLATE Selector<T>::Selector(const MoleculeData &moldata, const typename T::ID &viewid)
         : SireBase::ConcreteProperty<Selector<T>, MoleculeView>(moldata)
     {
         idxs = viewid.map(moldata.info());
@@ -393,25 +369,20 @@ namespace SireMol
 
     /** Copy constructor */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    Selector<T>::Selector(const Selector<T> &other)
-        : SireBase::ConcreteProperty<Selector<T>, MoleculeView>(other),
-          idxs(other.idxs)
+    SIRE_OUTOFLINE_TEMPLATE Selector<T>::Selector(const Selector<T> &other)
+        : SireBase::ConcreteProperty<Selector<T>, MoleculeView>(other), idxs(other.idxs)
     {
     }
 
     /** Destructor */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>::~Selector()
+    SIRE_OUTOFLINE_TEMPLATE Selector<T>::~Selector()
     {
     }
 
     /** Copy assignment operator */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T> &
-        Selector<T>::operator=(const Selector<T> &other)
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> &Selector<T>::operator=(const Selector<T> &other)
     {
         MoleculeView::operator=(other);
         idxs = other.idxs;
@@ -421,9 +392,7 @@ namespace SireMol
 
     /** Copy so that this contains just 'view' */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T> &
-        Selector<T>::operator=(const T &view)
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> &Selector<T>::operator=(const T &view)
     {
         MoleculeView::operator=(view);
 
@@ -454,9 +423,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T> *
-        Selector<T>::clone() const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> *Selector<T>::clone() const
     {
         return new Selector<T>(*this);
     }
@@ -465,9 +432,7 @@ namespace SireMol
      *  order they appear in the selector
      */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<typename T::Index>
-        Selector<T>::IDs() const
+    SIRE_OUTOFLINE_TEMPLATE QList<typename T::Index> Selector<T>::IDs() const
     {
         if (this->isEmpty())
             return QList<typename T::Index>();
@@ -494,9 +459,7 @@ namespace SireMol
      *  order they appear in the selector
      */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<typename T::Index>
-        Selector<T>::indexes() const
+    SIRE_OUTOFLINE_TEMPLATE QList<typename T::Index> Selector<T>::indexes() const
     {
         return this->IDs();
     }
@@ -505,9 +468,7 @@ namespace SireMol
      *  order they appear in the selector
      */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<typename T::Name>
-        Selector<T>::names() const
+    SIRE_OUTOFLINE_TEMPLATE QList<typename T::Name> Selector<T>::names() const
     {
         auto indexes = this->IDs();
 
@@ -528,9 +489,7 @@ namespace SireMol
      *  order they appear in the selector
      */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<typename T::Number>
-        Selector<T>::numbers() const
+    SIRE_OUTOFLINE_TEMPLATE QList<typename T::Number> Selector<T>::numbers() const
     {
         auto indexes = this->IDs();
 
@@ -585,9 +544,7 @@ namespace SireMol
 
     /** Return a string representation of this selector */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QString
-        Selector<T>::toString() const
+    SIRE_OUTOFLINE_TEMPLATE QString Selector<T>::toString() const
     {
         if (this->isEmpty())
         {
@@ -619,10 +576,7 @@ namespace SireMol
                 }
             }
 
-            return QObject::tr("Selector<%1>( size=%2\n%3\n)")
-                .arg(T::typeName())
-                .arg(this->count())
-                .arg(parts.join("\n"));
+            return QObject::tr("Selector<%1>( size=%2\n%3\n)").arg(T::typeName()).arg(this->count()).arg(parts.join("\n"));
         }
     }
 
@@ -633,9 +587,7 @@ namespace SireMol
         \throw SireError::incompatible_error
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::add(const Selector<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::add(const Selector<T> &other) const
     {
         if (this->selectedAll())
         {
@@ -700,9 +652,7 @@ namespace SireMol
 
     /** Return the view 'view' to this set */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::add(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::add(const T &view) const
     {
         return this->add(Selector<T>(view));
     }
@@ -718,9 +668,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::add(const typename T::ID &id) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::add(const typename T::ID &id) const
     {
         return this->operator+(Selector<T>(this->data(), id));
     }
@@ -730,9 +678,7 @@ namespace SireMol
         \throw SireError::incompatible_error
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::subtract(const Selector<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::subtract(const Selector<T> &other) const
     {
         if (this->isEmpty())
             return Selector<T>();
@@ -771,9 +717,7 @@ namespace SireMol
         \throw SireError::incompatible_error
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::subtract(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::subtract(const T &view) const
     {
         return this->subtract(Selector<T>(view));
     }
@@ -789,63 +733,49 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::subtract(const typename T::ID &id) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::subtract(const typename T::ID &id) const
     {
         return this->subtract(Selector<T>(this->data(), id));
     }
 
     /** Syntactic sugar for add() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::operator+(const Selector<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator+(const Selector<T> &other) const
     {
         return this->add(other);
     }
 
     /** Syntactic sugar for subtract() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::operator-(const Selector<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator-(const Selector<T> &other) const
     {
         return this->subtract(other);
     }
 
     /** Syntactic sugar for add() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::operator+(const typename T::ID &id) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator+(const typename T::ID &id) const
     {
         return this->add(id);
     }
 
     /** Syntactic sugar for subtract() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::operator-(const typename T::ID &id) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator-(const typename T::ID &id) const
     {
         return this->subtract(id);
     }
 
     /** Syntactic sugar for add() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::operator+(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator+(const T &view) const
     {
         return this->add(view);
     }
 
     /** Syntactic sugar for subtract() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::operator-(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator-(const T &view) const
     {
         return this->subtract(view);
     }
@@ -855,17 +785,13 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](int i) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](int i) const
     {
         return this->operator()(i);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](const QString &name) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](const QString &name) const
     {
         auto match = this->operator()(AtomName(name));
 
@@ -876,26 +802,20 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](const SireBase::Slice &slice) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](const SireBase::Slice &slice) const
     {
         return this->operator()(slice);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](const QList<qint64> &idxs) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](const QList<qint64> &idxs) const
     {
         return this->operator()(idxs);
     }
 
     /** Exposing MoleculeView::operator[] */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](const AtomID &atom) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](const AtomID &atom) const
     {
         auto match = this->operator()(atom);
 
@@ -907,9 +827,7 @@ namespace SireMol
 
     /** Exposing MoleculeView::operator[] */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](const ResID &res) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](const ResID &res) const
     {
         auto match = this->operator()(res);
 
@@ -921,9 +839,7 @@ namespace SireMol
 
     /** Exposing MoleculeView::operator[] */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](const CGID &cg) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](const CGID &cg) const
     {
         auto match = this->operator()(cg);
 
@@ -935,9 +851,7 @@ namespace SireMol
 
     /** Exposing MoleculeView::operator[] */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](const ChainID &chain) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](const ChainID &chain) const
     {
         auto match = this->operator()(chain);
 
@@ -949,9 +863,7 @@ namespace SireMol
 
     /** Exposing MoleculeView::operator[] */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](const SegID &seg) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](const SegID &seg) const
     {
         auto match = this->operator()(seg);
 
@@ -963,9 +875,7 @@ namespace SireMol
 
     /** Exposing MoleculeView::operator[] */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::operator[](const SireID::Index &idx) const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::operator[](const SireID::Index &idx) const
     {
         return this->operator()(idx.value());
     }
@@ -975,9 +885,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        typename T::Index
-        Selector<T>::index(int i) const
+    SIRE_OUTOFLINE_TEMPLATE typename T::Index Selector<T>::index(int i) const
     {
         if (not this->isEmpty())
         {
@@ -1000,9 +908,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        T
-        Selector<T>::operator()(int i) const
+    SIRE_OUTOFLINE_TEMPLATE T Selector<T>::operator()(int i) const
     {
         return T(this->data(), this->index(i));
     }
@@ -1014,9 +920,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::operator()(int i, int j) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator()(int i, int j) const
     {
         if (this->isEmpty())
             // raise an index exception
@@ -1085,9 +989,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::operator()(const SireBase::Slice &slice) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator()(const SireBase::Slice &slice) const
     {
         if (this->isEmpty())
             // raise an exception
@@ -1112,8 +1014,7 @@ namespace SireMol
             Selector<T> ret(*this);
             ret.idxs.clear();
 
-            for (auto it = slice.begin(this->idxs.count());
-                 not it.atEnd(); it.next())
+            for (auto it = slice.begin(this->idxs.count()); not it.atEnd(); it.next())
             {
                 ret.idxs.append(this->idxs.at(it.value()));
             }
@@ -1127,9 +1028,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::operator()(const QList<qint64> &idxs) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator()(const QList<qint64> &idxs) const
     {
         if (idxs.isEmpty())
             return Selector<T>();
@@ -1181,65 +1080,49 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<Atom>
-        Selector<T>::operator()(const AtomID &atomid) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<Atom> Selector<T>::operator()(const AtomID &atomid) const
     {
         return this->atoms(atomid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<Residue>
-        Selector<T>::operator()(const ResID &resid) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<Residue> Selector<T>::operator()(const ResID &resid) const
     {
         return this->residues(resid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<CutGroup>
-        Selector<T>::operator()(const CGID &cgid) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<CutGroup> Selector<T>::operator()(const CGID &cgid) const
     {
         return this->cutGroups(cgid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<Chain>
-        Selector<T>::operator()(const ChainID &chainid) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<Chain> Selector<T>::operator()(const ChainID &chainid) const
     {
         return this->chains(chainid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<Segment>
-        Selector<T>::operator()(const SegID &segid) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<Segment> Selector<T>::operator()(const SegID &segid) const
     {
         return this->segments(segid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MolViewPtr
-        Selector<T>::toSelector() const
+    SIRE_OUTOFLINE_TEMPLATE MolViewPtr Selector<T>::toSelector() const
     {
         return MolViewPtr(*this);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Molecules
-        Selector<T>::toMolecules() const
+    SIRE_OUTOFLINE_TEMPLATE Molecules Selector<T>::toMolecules() const
     {
         return Molecules(ViewsOfMol(*this));
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<MolViewPtr>
-        Selector<T>::toList() const
+    SIRE_OUTOFLINE_TEMPLATE QList<MolViewPtr> Selector<T>::toList() const
     {
         QList<MolViewPtr> l;
 
@@ -1276,9 +1159,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        T
-        Selector<T>::operator()(const SireID::Index &idx) const
+    SIRE_OUTOFLINE_TEMPLATE T Selector<T>::operator()(const SireID::Index &idx) const
     {
         return this->operator()(idx.value());
     }
@@ -1296,9 +1177,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_INLINE_TEMPLATE
-        QSet<T>
-        _list_to_set(const QList<T> &vals)
+    SIRE_INLINE_TEMPLATE QSet<T> _list_to_set(const QList<T> &vals)
     {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         return QSet<T>(vals.constBegin(), vals.constEnd());
@@ -1314,9 +1193,7 @@ namespace SireMol
         \throw SireError::incompatible_error
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::intersection(const Selector<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::intersection(const Selector<T> &other) const
     {
         if (this->isEmpty() or other.isEmpty())
             return Selector<T>();
@@ -1385,9 +1262,7 @@ namespace SireMol
         \throw SireError::incompatible_error
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::intersection(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::intersection(const T &view) const
     {
         return this->intersection(Selector<T>(view));
     }
@@ -1403,9 +1278,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::intersection(const typename T::ID &id) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::intersection(const typename T::ID &id) const
     {
         return this->intersection(Selector<T>(this->data(), id));
     }
@@ -1415,9 +1288,7 @@ namespace SireMol
      *  view is not in this collection
      */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<qint64>
-        Selector<T>::find(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE QList<qint64> Selector<T>::find(const T &view) const
     {
         QList<qint64> matches;
 
@@ -1444,9 +1315,7 @@ namespace SireMol
      *  the views are in this collection
      */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<qint64>
-        Selector<T>::find(const Selector<T> &views) const
+    SIRE_OUTOFLINE_TEMPLATE QList<qint64> Selector<T>::find(const Selector<T> &views) const
     {
         QList<qint64> matches;
 
@@ -1496,15 +1365,11 @@ namespace SireMol
 
     /** Return the set that has a completely inverted selection */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::invert() const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::invert() const
     {
         if (this->isEmpty())
         {
-            throw SireMol::missing_atom(QObject::tr(
-                                            "Cannot invert an empty selection!"),
-                                        CODELOC);
+            throw SireMol::missing_atom(QObject::tr("Cannot invert an empty selection!"), CODELOC);
         }
         else if (this->selectedAll())
         {
@@ -1634,9 +1499,7 @@ namespace SireMol
 
     /** Return all of the atoms selected in this set */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        AtomSelection
-        Selector<T>::selection() const
+    SIRE_OUTOFLINE_TEMPLATE AtomSelection Selector<T>::selection() const
     {
         if (this->isEmpty())
             return AtomSelection();
@@ -1663,9 +1526,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        AtomSelection
-        Selector<T>::selection(int i) const
+    SIRE_OUTOFLINE_TEMPLATE AtomSelection Selector<T>::selection(int i) const
     {
         return this->operator()(i).selection();
     }
@@ -1675,9 +1536,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        AtomSelection
-        Selector<T>::selection(int i, int j) const
+    SIRE_OUTOFLINE_TEMPLATE AtomSelection Selector<T>::selection(int i, int j) const
     {
         return this->operator()(i, j).selection();
     }
@@ -1685,27 +1544,21 @@ namespace SireMol
     /** Return an object that can move a copy of all of the views
         in this set */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Mover<Selector<T>>
-        Selector<T>::move() const
+    SIRE_OUTOFLINE_TEMPLATE Mover<Selector<T>> Selector<T>::move() const
     {
         return Mover<Selector<T>>(*this);
     }
 
     /** Return an object that can move the ith view in this set */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Mover<Selector<T>>
-        Selector<T>::move(int i) const
+    SIRE_OUTOFLINE_TEMPLATE Mover<Selector<T>> Selector<T>::move(int i) const
     {
         return Mover<Selector<T>>(Selector<T>(this->operator()(i)));
     }
 
     /** Return an object that can move the ith to jth views in this set */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Mover<Selector<T>>
-        Selector<T>::move(int i, int j) const
+    SIRE_OUTOFLINE_TEMPLATE Mover<Selector<T>> Selector<T>::move(int i, int j) const
     {
         return Mover<Selector<T>>(this->operator()(i, j));
     }
@@ -1713,9 +1566,7 @@ namespace SireMol
     /** Return an evaluator that can evaluate properties over all
         of the views in this set */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Evaluator
-        Selector<T>::evaluate() const
+    SIRE_OUTOFLINE_TEMPLATE Evaluator Selector<T>::evaluate() const
     {
         return Evaluator(*this);
     }
@@ -1723,9 +1574,7 @@ namespace SireMol
     /** Return an evaluator that can evaluate properties over the
         ith view in this set */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Evaluator
-        Selector<T>::evaluate(int i) const
+    SIRE_OUTOFLINE_TEMPLATE Evaluator Selector<T>::evaluate(int i) const
     {
         return Evaluator(this->operator()(i));
     }
@@ -1733,18 +1582,14 @@ namespace SireMol
     /** Return an evaluator that can evaluate properties over
         the ith to jth views in this set */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Evaluator
-        Selector<T>::evaluate(int i, int j) const
+    SIRE_OUTOFLINE_TEMPLATE Evaluator Selector<T>::evaluate(int i, int j) const
     {
         return Evaluator(this->operator()(i, j));
     }
 
     /** Return a selector that can change the selection of this view */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::selector() const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::selector() const
     {
         return *this;
     }
@@ -1755,9 +1600,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::selector(int i) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::selector(int i) const
     {
         return Selector<T>(this->operator()(i));
     }
@@ -1767,9 +1610,7 @@ namespace SireMol
         \throw SireError::invalid_index
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Selector<T>
-        Selector<T>::selector(int i, int j) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::selector(int i, int j) const
     {
         return this->operator()(i, j);
     }
@@ -1782,9 +1623,7 @@ namespace SireMol
     */
     template <class T>
     template <class V>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<V>
-        Selector<T>::property(const PropertyName &key) const
+    SIRE_OUTOFLINE_TEMPLATE QList<V> Selector<T>::property(const PropertyName &key) const
     {
         T *ptr = 0;
         return detail::get_property<V>(ptr, this->data(), this->IDs(), key);
@@ -1798,13 +1637,10 @@ namespace SireMol
     */
     template <class T>
     template <class V>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<V>
-        Selector<T>::metadata(const PropertyName &metakey) const
+    SIRE_OUTOFLINE_TEMPLATE QList<V> Selector<T>::metadata(const PropertyName &metakey) const
     {
         T *ptr = 0;
-        return detail::get_metadata<V>(ptr, this->data(),
-                                       this->IDs(), metakey);
+        return detail::get_metadata<V>(ptr, this->data(), this->IDs(), metakey);
     }
 
     /** Return a list of all of the metadata called 'key'/'metakey' for each
@@ -1815,14 +1651,10 @@ namespace SireMol
     */
     template <class T>
     template <class V>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<V>
-        Selector<T>::metadata(const PropertyName &key,
-                              const PropertyName &metakey) const
+    SIRE_OUTOFLINE_TEMPLATE QList<V> Selector<T>::metadata(const PropertyName &key, const PropertyName &metakey) const
     {
         T *ptr = 0;
-        return detail::get_metadata<V>(ptr, this->data(), this->IDs(),
-                                       key, metakey);
+        return detail::get_metadata<V>(ptr, this->data(), this->IDs(), key, metakey);
     }
 
     /** Set the property at key 'key' for all of the views in this set
@@ -1904,8 +1736,7 @@ namespace SireMol
     */
     template <class T>
     template <class V>
-    SIRE_OUTOFLINE_TEMPLATE void Selector<T>::setMetadata(const QString &key, const QString &metakey,
-                                                          const V &value)
+    SIRE_OUTOFLINE_TEMPLATE void Selector<T>::setMetadata(const QString &key, const QString &metakey, const V &value)
     {
         T *ptr = 0;
         detail::set_metadata<V>(ptr, this->data(), this->IDs(), key, metakey, value);
@@ -1935,8 +1766,7 @@ namespace SireMol
         \throw SireBase::missing_property
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE bool Selector<T>::hasMetadata(const PropertyName &key,
-                                                          const PropertyName &metakey) const
+    SIRE_OUTOFLINE_TEMPLATE bool Selector<T>::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
     {
         T *ptr = 0;
         return detail::has_metadata(ptr, this->data(), key, metakey);
@@ -1945,9 +1775,7 @@ namespace SireMol
     /** Return all of the keys for the properties attached to the
         parts of this selection */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QStringList
-        Selector<T>::propertyKeys() const
+    SIRE_OUTOFLINE_TEMPLATE QStringList Selector<T>::propertyKeys() const
     {
         if (this->isEmpty())
             return QStringList();
@@ -1958,9 +1786,7 @@ namespace SireMol
     /** Return all of the metakeys for the metadata attached to the
         parts of this selection */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QStringList
-        Selector<T>::metadataKeys() const
+    SIRE_OUTOFLINE_TEMPLATE QStringList Selector<T>::metadataKeys() const
     {
         if (this->isEmpty())
             return QStringList();
@@ -1974,9 +1800,7 @@ namespace SireMol
         \throw SireBase::missing_property
     */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QStringList
-        Selector<T>::metadataKeys(const PropertyName &key) const
+    SIRE_OUTOFLINE_TEMPLATE QStringList Selector<T>::metadataKeys(const PropertyName &key) const
     {
         if (this->isEmpty())
             return QStringList();
@@ -1992,9 +1816,7 @@ namespace SireMol
 
 /** Extract from a binary datastream */
 template <class T>
-SIRE_OUTOFLINE_TEMPLATE
-    SIREMOL_EXPORT QDataStream &
-    operator>>(QDataStream &ds, SireMol::Selector<T> &views)
+SIRE_OUTOFLINE_TEMPLATE SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, SireMol::Selector<T> &views)
 {
     QString cls;
     SireStream::VersionID version;
@@ -2003,8 +1825,7 @@ SIRE_OUTOFLINE_TEMPLATE
 
     if (cls != QString(SireMol::Selector<T>::typeName()))
     {
-        throw SireStream::corrupted_data(QObject::tr(
-                                             "Found the wrong class (%1) when trying to read a %2.")
+        throw SireStream::corrupted_data(QObject::tr("Found the wrong class (%1) when trying to read a %2.")
                                              .arg(cls)
                                              .arg(SireMol::Selector<T>::typeName()),
                                          CODELOC);
@@ -2029,9 +1850,7 @@ SIRE_OUTOFLINE_TEMPLATE
     }
     else
     {
-        throw SireStream::version_error(version, "1",
-                                        SireMol::Selector<T>::typeName(),
-                                        CODELOC);
+        throw SireStream::version_error(version, "1", SireMol::Selector<T>::typeName(), CODELOC);
     }
 
     return ds;
@@ -2039,9 +1858,7 @@ SIRE_OUTOFLINE_TEMPLATE
 
 /** Serialise to a binary datastream */
 template <class T>
-SIRE_OUTOFLINE_TEMPLATE
-    SIREMOL_EXPORT QDataStream &
-    operator<<(QDataStream &ds, const SireMol::Selector<T> &views)
+SIRE_OUTOFLINE_TEMPLATE SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds, const SireMol::Selector<T> &views)
 {
     ds << QString(SireMol::Selector<T>::typeName()) << SireStream::VersionID(2);
 

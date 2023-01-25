@@ -37,81 +37,80 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class MolWithResID;
+    class MolWithResID;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MolWithResID&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MolWithResID&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MolWithResID &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MolWithResID &);
 
 namespace SireMol
 {
 
-/** This class is used to identify a molecule according to
-    whether or not it contains a residue with matching
-    residue ID
+    /** This class is used to identify a molecule according to
+        whether or not it contains a residue with matching
+        residue ID
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MolWithResID : public MolID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MolWithResID&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MolWithResID&);
-
-public:
-    MolWithResID();
-    explicit MolWithResID(const QString &resname);
-    explicit MolWithResID(int resnum);
-    explicit MolWithResID(const ResID &resid);
-
-    MolWithResID(const QString &resname, SireID::CaseSensitivity case_sensitivity);
-
-    MolWithResID(const MolWithResID &other);
-
-    ~MolWithResID();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MolWithResID : public MolID
     {
-        return MolWithResID::typeName();
-    }
 
-    MolWithResID* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MolWithResID &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MolWithResID &);
 
-    bool isNull() const;
+    public:
+        MolWithResID();
+        explicit MolWithResID(const QString &resname);
+        explicit MolWithResID(int resnum);
+        explicit MolWithResID(const ResID &resid);
 
-    uint hash() const;
+        MolWithResID(const QString &resname, SireID::CaseSensitivity case_sensitivity);
 
-    QString toString() const;
+        MolWithResID(const MolWithResID &other);
 
-    MolWithResID& operator=(const MolWithResID &other);
+        ~MolWithResID();
 
-    bool operator==(const SireID::ID &other) const;
+        static const char *typeName();
 
-    bool operator==(const MolWithResID &other) const;
+        const char *what() const
+        {
+            return MolWithResID::typeName();
+        }
 
-    bool operator!=(const MolWithResID &other) const;
+        MolWithResID *clone() const;
 
-    const ResID& resID() const;
+        bool isNull() const;
 
-    QList<MolNum> map(const Molecules &molecules) const;
-    QList<MolNum> map(const MoleculeGroup &molgroup) const;
-    QList<MolNum> map(const MolGroupsBase &molgroups) const;
+        uint hash() const;
 
-private:
-    /** The ResID of the residue that any matching molecule
-        must contain */
-    ResIdentifier resid;
-};
+        QString toString() const;
 
-}
+        MolWithResID &operator=(const MolWithResID &other);
+
+        bool operator==(const SireID::ID &other) const;
+
+        bool operator==(const MolWithResID &other) const;
+
+        bool operator!=(const MolWithResID &other) const;
+
+        const ResID &resID() const;
+
+        QList<MolNum> map(const Molecules &molecules) const;
+        QList<MolNum> map(const MoleculeGroup &molgroup) const;
+        QList<MolNum> map(const MolGroupsBase &molgroups) const;
+
+    private:
+        /** The ResID of the residue that any matching molecule
+            must contain */
+        ResIdentifier resid;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::MolWithResID);
 
-SIRE_EXPOSE_CLASS( SireMol::MolWithResID )
+SIRE_EXPOSE_CLASS(SireMol::MolWithResID)
 
 SIRE_END_HEADER
 
 #endif
-

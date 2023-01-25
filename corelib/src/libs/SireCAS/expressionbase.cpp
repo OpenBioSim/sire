@@ -26,13 +26,13 @@
 \*********************************************/
 
 #include "expressionbase.h"
-#include "exbase.h"
+#include "complexvalues.h"
 #include "constant.h"
+#include "exbase.h"
+#include "expressions.h"
+#include "functions.h"
 #include "identities.h"
 #include "symbols.h"
-#include "functions.h"
-#include "expressions.h"
-#include "complexvalues.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -73,31 +73,34 @@ QDataStream &operator>>(QDataStream &ds, ExpressionBase &ex)
 }
 
 /** Construct a default ExpressionBase (equals the number 1) */
-ExpressionBase::ExpressionBase() : d( one.d )
-{}
+ExpressionBase::ExpressionBase() : d(one.d)
+{
+}
 
 /** Construct an expression from an ExBase */
 ExpressionBase::ExpressionBase(const ExBase &ex) : d(ex)
-{}
+{
+}
 
 /** Copy constructor */
-ExpressionBase::ExpressionBase(const ExpressionBase &other)
-               : d(other.d)
-{}
+ExpressionBase::ExpressionBase(const ExpressionBase &other) : d(other.d)
+{
+}
 
 /** Destructor */
 ExpressionBase::~ExpressionBase()
-{}
+{
+}
 
 /** Assignment operator */
-ExpressionBase& ExpressionBase::operator=(const ExpressionBase &other)
+ExpressionBase &ExpressionBase::operator=(const ExpressionBase &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Assign from an ExBase object */
-ExpressionBase& ExpressionBase::operator=(const ExBase &other)
+ExpressionBase &ExpressionBase::operator=(const ExBase &other)
 {
     d = other;
     return *this;
@@ -145,7 +148,7 @@ Expression ExpressionBase::integrate(const Symbol &symbol) const
     will be returned, together with an estimate of the error (e.g. O(x^2)) */
 Expression ExpressionBase::series(const Symbol &symbol, int n) const
 {
-    return d->series(symbol,n);
+    return d->series(symbol, n);
 }
 
 /** Try to simplify this expression. This will try to use known mathematical
@@ -200,7 +203,7 @@ uint ExpressionBase::hash() const
 }
 
 /** Return the name of the type of this ExBase object */
-const char* ExpressionBase::what() const
+const char *ExpressionBase::what() const
 {
     return d->what();
 }
@@ -214,12 +217,11 @@ QString ExpressionBase::toString() const
         return "WARNING: NULL EXPRESSIONBASE";
 }
 
-QString ExpressionBase::toOpenMMString() const{
+QString ExpressionBase::toOpenMMString() const
+{
 
     return d->toOpenMMString();
-
 }
-
 
 /** Evaluate this ExBase using values 'values'. Any
     missing symbols are assumed to equal zero.

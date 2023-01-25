@@ -38,212 +38,209 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class NMatrix;
+    class NMatrix;
 }
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::NMatrix&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::NMatrix&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::NMatrix &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::NMatrix &);
 
 namespace SireBase
 {
-template<class T>
-class Array2D;
+    template <class T>
+    class Array2D;
 
-template<class T>
-class TrigArray2D;
-}
+    template <class T>
+    class TrigArray2D;
+} // namespace SireBase
 
 namespace SireMaths
 {
 
-class Matrix;
-class Vector;
-class NVector;
-class TrigMatrix;
+    class Matrix;
+    class Vector;
+    class NVector;
+    class TrigMatrix;
 
-/** This is a dense, double, general N*M 2-dimensional matrix.
-    The data is stored in column-major order, suitable for
-    use with Fortran BLAS or LAPACK functions. This is
-    designed for high speed.
+    /** This is a dense, double, general N*M 2-dimensional matrix.
+        The data is stored in column-major order, suitable for
+        use with Fortran BLAS or LAPACK functions. This is
+        designed for high speed.
 
-    The data is implicitly shared (copy on write), so
-    copying a matrix is very fast.
+        The data is implicitly shared (copy on write), so
+        copying a matrix is very fast.
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT NMatrix
-{
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT NMatrix
+    {
 
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const NMatrix&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, NMatrix&);
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const NMatrix &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, NMatrix &);
 
-public:
-    NMatrix();
+    public:
+        NMatrix();
 
-    NMatrix(int nrows, int ncolumns);
-    NMatrix(int nrows, int ncolumns, double initial_value);
+        NMatrix(int nrows, int ncolumns);
+        NMatrix(int nrows, int ncolumns, double initial_value);
 
-    NMatrix(const Matrix &matrix);
-    NMatrix(const SireBase::Array2D<double> &array);
-    NMatrix(const QVector< QVector<double> > &array);
+        NMatrix(const Matrix &matrix);
+        NMatrix(const SireBase::Array2D<double> &array);
+        NMatrix(const QVector<QVector<double>> &array);
 
-    NMatrix(const Vector &vector, bool transpose=false);
-    NMatrix(const QVector<double> &vector, bool transpose=false);
-    NMatrix(const NVector &vector, bool transpose=false);
+        NMatrix(const Vector &vector, bool transpose = false);
+        NMatrix(const QVector<double> &vector, bool transpose = false);
+        NMatrix(const NVector &vector, bool transpose = false);
 
-    NMatrix(const TrigMatrix &matrix);
+        NMatrix(const TrigMatrix &matrix);
 
-    NMatrix(const NMatrix &other);
+        NMatrix(const NMatrix &other);
 
-    ~NMatrix();
+        ~NMatrix();
 
-    static NMatrix createRowMajor(int nrows, int ncolumns);
-    static NMatrix createColumnMajor(int nrows, int ncolumns);
+        static NMatrix createRowMajor(int nrows, int ncolumns);
+        static NMatrix createColumnMajor(int nrows, int ncolumns);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    NMatrix& operator=(const NMatrix &other);
+        NMatrix &operator=(const NMatrix &other);
 
-    bool operator==(const NMatrix &other) const;
-    bool operator!=(const NMatrix &other) const;
+        bool operator==(const NMatrix &other) const;
+        bool operator!=(const NMatrix &other) const;
 
-    double& operator()(int i, int j);
-    const double& operator()(int i, int j) const;
+        double &operator()(int i, int j);
+        const double &operator()(int i, int j) const;
 
-    NMatrix& operator+=(const NMatrix &other);
-    NMatrix& operator-=(const NMatrix &other);
-    NMatrix& operator*=(const NMatrix &other);
-    NMatrix& operator/=(const NMatrix &other);
+        NMatrix &operator+=(const NMatrix &other);
+        NMatrix &operator-=(const NMatrix &other);
+        NMatrix &operator*=(const NMatrix &other);
+        NMatrix &operator/=(const NMatrix &other);
 
-    NMatrix& operator*=(double scale);
-    NMatrix& operator/=(double scale);
+        NMatrix &operator*=(double scale);
+        NMatrix &operator/=(double scale);
 
-    NMatrix operator-() const;
+        NMatrix operator-() const;
 
-    NMatrix operator+(const NMatrix &other) const;
-    NMatrix operator-(const NMatrix &other) const;
-    NMatrix operator*(const NMatrix &other) const;
-    NMatrix operator/(const NMatrix &other) const;
+        NMatrix operator+(const NMatrix &other) const;
+        NMatrix operator-(const NMatrix &other) const;
+        NMatrix operator*(const NMatrix &other) const;
+        NMatrix operator/(const NMatrix &other) const;
 
-    NMatrix operator*(double scale) const;
-    NMatrix operator/(double scale) const;
+        NMatrix operator*(double scale) const;
+        NMatrix operator/(double scale) const;
 
-    NVector operator*(const NVector &vector) const;
-    NVector operator*(const Vector &vector) const;
+        NVector operator*(const NVector &vector) const;
+        NVector operator*(const Vector &vector) const;
 
-    int nRows() const;
-    int nColumns() const;
+        int nRows() const;
+        int nColumns() const;
 
-    NVector row(int i) const;
-    NVector column(int j) const;
+        NVector row(int i) const;
+        NVector column(int j) const;
 
-    void set(int i, int j, double value);
+        void set(int i, int j, double value);
 
-    void setRow(int i, double value);
-    void setRow(int i, const NVector &row);
+        void setRow(int i, double value);
+        void setRow(int i, const NVector &row);
 
-    void setColumn(int j, double value);
-    void setColumn(int j, const NVector &column);
+        void setColumn(int j, double value);
+        void setColumn(int j, const NVector &column);
 
-    void setAll(double value);
+        void setAll(double value);
 
-    double* data();
-    const double* data() const;
-    const double* constData() const;
+        double *data();
+        const double *data() const;
+        const double *constData() const;
 
-    QVector<double> memory() const;
+        QVector<double> memory() const;
 
-    int offset(int i, int j) const;
-    int checkedOffset(int i, int j) const;
+        int offset(int i, int j) const;
+        int checkedOffset(int i, int j) const;
 
-    void redimension(int nrows, int ncolumns);
+        void redimension(int nrows, int ncolumns);
 
-    QString toString() const;
+        QString toString() const;
 
-    void reflectTopToBottom();
-    void reflectBottomToTop();
-    void reflectLeftToRight();
-    void reflectRightToLeft();
+        void reflectTopToBottom();
+        void reflectBottomToTop();
+        void reflectLeftToRight();
+        void reflectRightToLeft();
 
-    void reflectTopLeftToBottomRight();
-    void reflectTopRightToBottomLeft();
-    void reflectBottomRightToTopLeft();
-    void reflectBottomLeftToTopRight();
+        void reflectTopLeftToBottomRight();
+        void reflectTopRightToBottomLeft();
+        void reflectBottomRightToTopLeft();
+        void reflectBottomLeftToTopRight();
 
-    double determinant() const;
-    double trace() const;
+        double determinant() const;
+        double trace() const;
 
-    NVector diagonal() const;
+        NVector diagonal() const;
 
-    std::pair<NVector,NMatrix> diagonalise() const;
+        std::pair<NVector, NMatrix> diagonalise() const;
 
-    NMatrix inverse() const;
+        NMatrix inverse() const;
 
-    NMatrix transpose() const;
-    NMatrix fullTranspose() const;
+        NMatrix transpose() const;
+        NMatrix fullTranspose() const;
 
-    bool isTransposed() const;
+        bool isTransposed() const;
 
-    void assertValidIndex(int i, int j) const;
+        void assertValidIndex(int i, int j) const;
 
-    void assertValidRow(int i) const;
-    void assertValidColumn(int j) const;
+        void assertValidRow(int i) const;
+        void assertValidColumn(int j) const;
 
-    void assertNRows(int nrows) const;
-    void assertNColumns(int ncolumns) const;
+        void assertNRows(int nrows) const;
+        void assertNColumns(int ncolumns) const;
 
-    void assertSquare() const;
+        void assertSquare() const;
 
-private:
-    /** The raw data for the matrix */
-    QVector<double> array;
+    private:
+        /** The raw data for the matrix */
+        QVector<double> array;
 
-    /** The number of rows and columns in the matrix */
-    qint32 nrows, ncolumns;
+        /** The number of rows and columns in the matrix */
+        qint32 nrows, ncolumns;
 
-    /** Whether the transpose of this matrix is stored */
-    bool is_transpose;
-};
+        /** Whether the transpose of this matrix is stored */
+        bool is_transpose;
+    };
 
-/** Return the offset into the 1D array for the value
-    at index [i,j] - note that this performs *NO* checking,
-    and invalid input will result in invalid output. If you
-    want to check the indicies, use checkOffset(int i, int j) */
-SIRE_ALWAYS_INLINE int NMatrix::offset(int i, int j) const
-{
-    if (is_transpose)
-        return (i*ncolumns) + j;
-    else
-        return i + (j*nrows);
-}
+    /** Return the offset into the 1D array for the value
+        at index [i,j] - note that this performs *NO* checking,
+        and invalid input will result in invalid output. If you
+        want to check the indicies, use checkOffset(int i, int j) */
+    SIRE_ALWAYS_INLINE int NMatrix::offset(int i, int j) const
+    {
+        if (is_transpose)
+            return (i * ncolumns) + j;
+        else
+            return i + (j * nrows);
+    }
 
-}
+} // namespace SireMaths
 
-Q_DECLARE_METATYPE( SireMaths::NMatrix )
+Q_DECLARE_METATYPE(SireMaths::NMatrix)
 
-SIRE_EXPOSE_CLASS( SireMaths::NMatrix )
+SIRE_EXPOSE_CLASS(SireMaths::NMatrix)
 
-SIRE_EXPOSE_ALIAS( SireBase::Array2D<SireMaths::Vector>, SireBase::Array2D_Vector_ )
-SIRE_EXPOSE_ALIAS( SireBase::Array2D<SireMaths::Matrix>, SireBase::Array2D_Matrix_ )
+SIRE_EXPOSE_ALIAS(SireBase::Array2D<SireMaths::Vector>, SireBase::Array2D_Vector_)
+SIRE_EXPOSE_ALIAS(SireBase::Array2D<SireMaths::Matrix>, SireBase::Array2D_Matrix_)
 
-SIRE_EXPOSE_ALIAS( SireBase::TrigArray2D<SireMaths::Vector>,
-                   SireBase::TrigArray2D_Vector_ )
-SIRE_EXPOSE_ALIAS( SireBase::TrigArray2D<SireMaths::Matrix>,
-                   SireBase::TrigArray2D_Matrix_ )
+SIRE_EXPOSE_ALIAS(SireBase::TrigArray2D<SireMaths::Vector>, SireBase::TrigArray2D_Vector_)
+SIRE_EXPOSE_ALIAS(SireBase::TrigArray2D<SireMaths::Matrix>, SireBase::TrigArray2D_Matrix_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 #include "SireBase/array2d.hpp"
 #include "SireBase/trigarray2d.hpp"
-#include "vector.h"
 #include "matrix.h"
+#include "vector.h"
 template class SireBase::Array2D<SireMaths::Vector>;
 template class SireBase::Array2D<SireMaths::Matrix>;
 template class SireBase::TrigArray2D<SireMaths::Vector>;
 template class SireBase::TrigArray2D<SireMaths::Matrix>;
 #endif
-
 
 SIRE_END_HEADER
 

@@ -40,8 +40,7 @@ using namespace SireStream;
 ///////// Implementation of AtomFunction
 /////////
 
-QDataStream &operator<<(QDataStream &ds,
-                                      const AtomFunction &atomfunc)
+QDataStream &operator<<(QDataStream &ds, const AtomFunction &atomfunc)
 {
     SharedDataStream sds(ds);
     sds << atomfunc.func;
@@ -49,8 +48,7 @@ QDataStream &operator<<(QDataStream &ds,
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                      AtomFunction &atomfunc)
+QDataStream &operator>>(QDataStream &ds, AtomFunction &atomfunc)
 {
     SharedDataStream sds(ds);
     sds >> atomfunc.func;
@@ -60,24 +58,26 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 AtomFunction::AtomFunction()
-{}
+{
+}
 
 /** Construct to hold the passed function */
-AtomFunction::AtomFunction(const SireCAS::Expression &function)
-             : func(function)
-{}
+AtomFunction::AtomFunction(const SireCAS::Expression &function) : func(function)
+{
+}
 
 /** Copy constructor */
-AtomFunction::AtomFunction(const AtomFunction &other)
-             : func(other.func)
-{}
+AtomFunction::AtomFunction(const AtomFunction &other) : func(other.func)
+{
+}
 
 /** Destructor */
 AtomFunction::~AtomFunction()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomFunction& AtomFunction::operator=(const AtomFunction &other)
+AtomFunction &AtomFunction::operator=(const AtomFunction &other)
 {
     func = other.func;
     return *this;
@@ -99,12 +99,10 @@ bool AtomFunction::operator!=(const AtomFunction &other) const
 ///////// Implementation of AtomFunctions
 /////////
 
-static const RegisterMetaType<AtomFunctions> r_atomfuncs(MAGIC_ONLY,
-                                                         "SireMM::AtomFunctions");
+static const RegisterMetaType<AtomFunctions> r_atomfuncs(MAGIC_ONLY, "SireMM::AtomFunctions");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const AtomFunctions &atomfuncs)
+QDataStream &operator<<(QDataStream &ds, const AtomFunctions &atomfuncs)
 {
     writeHeader(ds, r_atomfuncs, 1);
 
@@ -115,8 +113,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                      AtomFunctions &atomfuncs)
+QDataStream &operator>>(QDataStream &ds, AtomFunctions &atomfuncs)
 {
     VersionID v = readHeader(ds, r_atomfuncs);
 
@@ -127,41 +124,41 @@ QDataStream &operator>>(QDataStream &ds,
         sds >> atomfuncs.molinfo >> atomfuncs.symbls;
     }
     else
-        throw version_error( v, "1", r_atomfuncs, CODELOC );
+        throw version_error(v, "1", r_atomfuncs, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 AtomFunctions::AtomFunctions() : MoleculeProperty()
-{}
+{
+}
 
 /** Construct to hold the atom functions for the molecule whose
     data is in 'moldata' */
-AtomFunctions::AtomFunctions(const MoleculeData &moldata)
-              : MoleculeProperty(),
-                molinfo( moldata.info() )
-{}
+AtomFunctions::AtomFunctions(const MoleculeData &moldata) : MoleculeProperty(), molinfo(moldata.info())
+{
+}
 
 /** Construct to hold the atom functions for the molecule whose
     layout information is in 'molinfo' */
-AtomFunctions::AtomFunctions(const MoleculeInfoData &info)
-              : MoleculeProperty(),
-                molinfo(info)
-{}
+AtomFunctions::AtomFunctions(const MoleculeInfoData &info) : MoleculeProperty(), molinfo(info)
+{
+}
 
 /** Copy constructor */
 AtomFunctions::AtomFunctions(const AtomFunctions &other)
-              : MoleculeProperty(other),
-                molinfo(other.molinfo), symbls(other.symbls)
-{}
+    : MoleculeProperty(other), molinfo(other.molinfo), symbls(other.symbls)
+{
+}
 
 /** Destructor */
 AtomFunctions::~AtomFunctions()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomFunctions& AtomFunctions::operator=(const AtomFunctions &other)
+AtomFunctions &AtomFunctions::operator=(const AtomFunctions &other)
 {
     MoleculeProperty::operator=(other);
     molinfo = other.molinfo;

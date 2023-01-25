@@ -40,60 +40,60 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class MoleculeConstraint;
+    class MoleculeConstraint;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::MoleculeConstraint&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::MoleculeConstraint&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::MoleculeConstraint &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::MoleculeConstraint &);
 
 namespace SireMol
 {
-class MolNum;
-class Molecules;
-}
+    class MolNum;
+    class Molecules;
+} // namespace SireMol
 
 namespace SireSystem
 {
 
-using SireBase::Version;
+    using SireBase::Version;
 
-using SireMol::MolNum;
-using SireMol::Molecules;
+    using SireMol::Molecules;
+    using SireMol::MolNum;
 
-/** This is the base class of all Molecule constraints. These
-    are constraints that affect molecules in a system. A molecule
-    constraint works by being updated by a system and returning
-    the molecules that must then be changed to maintain the
-    constraint
+    /** This is the base class of all Molecule constraints. These
+        are constraints that affect molecules in a system. A molecule
+        constraint works by being updated by a system and returning
+        the molecules that must then be changed to maintain the
+        constraint
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT MoleculeConstraint : public Constraint
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT MoleculeConstraint : public Constraint
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const MoleculeConstraint&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, MoleculeConstraint&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const MoleculeConstraint &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, MoleculeConstraint &);
 
-public:
-    MoleculeConstraint();
-    MoleculeConstraint(const MoleculeConstraint &other);
+    public:
+        MoleculeConstraint();
+        MoleculeConstraint(const MoleculeConstraint &other);
 
-    virtual ~MoleculeConstraint();
+        virtual ~MoleculeConstraint();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual MoleculeConstraint* clone() const=0;
+        virtual MoleculeConstraint *clone() const = 0;
 
-protected:
-    MoleculeConstraint& operator=(const MoleculeConstraint &other);
+    protected:
+        MoleculeConstraint &operator=(const MoleculeConstraint &other);
 
-    bool operator==(const MoleculeConstraint &other) const;
-    bool operator!=(const MoleculeConstraint &other) const;
-};
+        bool operator==(const MoleculeConstraint &other) const;
+        bool operator!=(const MoleculeConstraint &other) const;
+    };
 
-}
+} // namespace SireSystem
 
-SIRE_EXPOSE_CLASS( SireSystem::MoleculeConstraint )
+SIRE_EXPOSE_CLASS(SireSystem::MoleculeConstraint)
 
 SIRE_END_HEADER
 

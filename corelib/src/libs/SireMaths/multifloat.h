@@ -353,8 +353,7 @@ namespace SireMaths
         {
             const __m512 zero = _mm512_set1_ps(0.0);
             const quint32 x = 0xFFFFFFFF;
-            const __m512 one = _mm512_set1_ps(
-                *(reinterpret_cast<const float *>(&x)));
+            const __m512 one = _mm512_set1_ps(*(reinterpret_cast<const float *>(&x)));
 
             v.x = _mm512_mask_blend_ps(mask, zero, one);
         }
@@ -452,8 +451,7 @@ namespace SireMaths
     static const MultiFloat MULTIFLOAT_NEGATIVE_ONE(-1.0f);
 
     static quint32 MULTIFLOAT_POS_MASK_INT = 0x7FFFFFFF;
-    static const MultiFloat MULTIFLOAT_POS_MASK(
-        *(reinterpret_cast<const float *>(&MULTIFLOAT_POS_MASK_INT)));
+    static const MultiFloat MULTIFLOAT_POS_MASK(*(reinterpret_cast<const float *>(&MULTIFLOAT_POS_MASK_INT)));
 
     /** Constructor. This creates a MultiFloat with an undefined initial state */
     SIRE_ALWAYS_INLINE
@@ -525,14 +523,13 @@ namespace SireMaths
     {
         assertAligned();
 #ifdef MULTIFLOAT_AVX512F_IS_AVAILABLE
-        v.x = _mm512_set_ps(generator(), generator(), generator(), generator(),
-                            generator(), generator(), generator(), generator(),
-                            generator(), generator(), generator(), generator(),
-                            generator(), generator(), generator(), generator());
+        v.x = _mm512_set_ps(generator(), generator(), generator(), generator(), generator(), generator(), generator(),
+                            generator(), generator(), generator(), generator(), generator(), generator(), generator(),
+                            generator(), generator());
 #else
 #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-        v.x = _mm256_set_ps(generator(), generator(), generator(), generator(),
-                            generator(), generator(), generator(), generator());
+        v.x = _mm256_set_ps(generator(), generator(), generator(), generator(), generator(), generator(), generator(),
+                            generator());
 #else
 #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
         v.x = _mm_set_ps(generator(), generator(), generator(), generator());
@@ -1028,8 +1025,7 @@ namespace SireMaths
         for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
         {
             reinterpret_cast<unsigned int *>(ret.v.a)[i] =
-                reinterpret_cast<const unsigned int *>(other.v.a)[i] &
-                reinterpret_cast<const unsigned int *>(v.a)[i];
+                reinterpret_cast<const unsigned int *>(other.v.a)[i] & reinterpret_cast<const unsigned int *>(v.a)[i];
         }
 
         return ret;
@@ -1059,8 +1055,7 @@ namespace SireMaths
         for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
         {
             reinterpret_cast<unsigned int *>(ret.v.a)[i] =
-                (~reinterpret_cast<const unsigned int *>(other.v.a)[i]) &
-                reinterpret_cast<const unsigned int *>(v.a)[i];
+                (~reinterpret_cast<const unsigned int *>(other.v.a)[i]) & reinterpret_cast<const unsigned int *>(v.a)[i];
         }
 
         return ret;
@@ -1087,8 +1082,7 @@ namespace SireMaths
         for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
         {
             reinterpret_cast<unsigned int *>(ret.v.a)[i] =
-                reinterpret_cast<const unsigned int *>(other.v.a)[i] |
-                reinterpret_cast<const unsigned int *>(v.a)[i];
+                reinterpret_cast<const unsigned int *>(other.v.a)[i] | reinterpret_cast<const unsigned int *>(v.a)[i];
         }
 
         return ret;
@@ -1115,8 +1109,7 @@ namespace SireMaths
         for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
         {
             reinterpret_cast<unsigned int *>(ret.v.a)[i] =
-                reinterpret_cast<const unsigned int *>(other.v.a)[i] ^
-                reinterpret_cast<const unsigned int *>(v.a)[i];
+                reinterpret_cast<const unsigned int *>(other.v.a)[i] ^ reinterpret_cast<const unsigned int *>(v.a)[i];
         }
 
         return ret;
@@ -1133,8 +1126,7 @@ namespace SireMaths
 
         for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
         {
-            reinterpret_cast<unsigned int *>(ret.v.a)[i] =
-                ~reinterpret_cast<const unsigned int *>(v.a)[i];
+            reinterpret_cast<unsigned int *>(ret.v.a)[i] = ~reinterpret_cast<const unsigned int *>(v.a)[i];
         }
 
         return ret;
@@ -1184,8 +1176,7 @@ namespace SireMaths
 #else
         for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
         {
-            reinterpret_cast<unsigned int *>(v.a)[i] &=
-                reinterpret_cast<const unsigned int *>(other.v.a)[i];
+            reinterpret_cast<unsigned int *>(v.a)[i] &= reinterpret_cast<const unsigned int *>(other.v.a)[i];
         }
 #endif
 #endif
@@ -1209,8 +1200,7 @@ namespace SireMaths
 #else
         for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
         {
-            reinterpret_cast<unsigned int *>(v.a)[i] |=
-                reinterpret_cast<const unsigned int *>(other.v.a)[i];
+            reinterpret_cast<unsigned int *>(v.a)[i] |= reinterpret_cast<const unsigned int *>(other.v.a)[i];
         }
 #endif
 #endif
@@ -1234,8 +1224,7 @@ namespace SireMaths
 #else
         for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
         {
-            reinterpret_cast<unsigned int *>(v.a)[i] ^=
-                reinterpret_cast<const unsigned int *>(other.v.a)[i];
+            reinterpret_cast<unsigned int *>(v.a)[i] ^= reinterpret_cast<const unsigned int *>(other.v.a)[i];
         }
 #endif
 #endif
@@ -1588,8 +1577,8 @@ namespace SireMaths
     MultiFloat MultiFloat::rotate() const
     {
 #ifdef MULTIFLOAT_AVX512F_IS_AVAILABLE
-        return MultiFloat(_mm512_permutexvar_ps(
-            _mm512_set_epi32(0, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1), v.x));
+        return MultiFloat(
+            _mm512_permutexvar_ps(_mm512_set_epi32(0, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1), v.x));
 #else
 #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
         __m256 tmp = _mm256_permute_ps(v.x, _MM_SHUFFLE(0, 3, 2, 1));
@@ -1619,14 +1608,11 @@ namespace SireMaths
     float MultiFloat::sum() const
     {
 #ifdef MULTIFLOAT_AVX512F_IS_AVAILABLE
-        return v.a[0] + v.a[1] + v.a[2] + v.a[3] +
-               v.a[4] + v.a[5] + v.a[6] + v.a[7] +
-               v.a[8] + v.a[9] + v.a[10] + v.a[11] +
+        return v.a[0] + v.a[1] + v.a[2] + v.a[3] + v.a[4] + v.a[5] + v.a[6] + v.a[7] + v.a[8] + v.a[9] + v.a[10] + v.a[11] +
                v.a[12] + v.a[13] + v.a[14] + v.a[15];
 #else
 #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-        return v.a[0] + v.a[1] + v.a[2] + v.a[3] +
-               v.a[4] + v.a[5] + v.a[6] + v.a[7];
+        return v.a[0] + v.a[1] + v.a[2] + v.a[3] + v.a[4] + v.a[5] + v.a[6] + v.a[7];
 #else
 #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
         return v.a[0] + v.a[1] + v.a[2] + v.a[3];
@@ -1647,14 +1633,13 @@ namespace SireMaths
     double MultiFloat::doubleSum() const
     {
 #ifdef MULTIFLOAT_AVX512F_IS_AVAILABLE
-        return double(v.a[0]) + double(v.a[1]) + double(v.a[2]) + double(v.a[3]) +
-               double(v.a[4]) + double(v.a[5]) + double(v.a[6]) + double(v.a[7]) +
-               double(v.a[8]) + double(v.a[9]) + double(v.a[10]) + double(v.a[11]) +
+        return double(v.a[0]) + double(v.a[1]) + double(v.a[2]) + double(v.a[3]) + double(v.a[4]) + double(v.a[5]) +
+               double(v.a[6]) + double(v.a[7]) + double(v.a[8]) + double(v.a[9]) + double(v.a[10]) + double(v.a[11]) +
                double(v.a[12]) + double(v.a[3]) + double(v.a[14]) + double(v.a[15]);
 #else
 #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-        return double(v.a[0]) + double(v.a[1]) + double(v.a[2]) + double(v.a[3]) +
-               double(v.a[4]) + double(v.a[5]) + double(v.a[6]) + double(v.a[7]);
+        return double(v.a[0]) + double(v.a[1]) + double(v.a[2]) + double(v.a[3]) + double(v.a[4]) + double(v.a[5]) +
+               double(v.a[6]) + double(v.a[7]);
 #else
 #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
         return double(v.a[0]) + double(v.a[1]) + double(v.a[2]) + double(v.a[3]);
@@ -1710,7 +1695,7 @@ namespace SireMaths
 
 #endif // #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMaths
 
 Q_DECLARE_TYPEINFO(SireMaths::MultiFloat, Q_PRIMITIVE_TYPE);
 

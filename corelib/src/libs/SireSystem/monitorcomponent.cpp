@@ -40,16 +40,13 @@ using namespace SireStream;
 static const RegisterMetaType<MonitorComponent> r_moncomp;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const MonitorComponent &moncomp)
+QDataStream &operator<<(QDataStream &ds, const MonitorComponent &moncomp)
 {
     writeHeader(ds, r_moncomp, 1);
 
     SharedDataStream sds(ds);
 
-    sds << moncomp.monitored_component
-        << moncomp.accume
-        << static_cast<const SystemMonitor&>(moncomp);
+    sds << moncomp.monitored_component << moncomp.accume << static_cast<const SystemMonitor &>(moncomp);
 
     return ds;
 }
@@ -63,52 +60,48 @@ QDataStream &operator>>(QDataStream &ds, MonitorComponent &moncomp)
     {
         SharedDataStream sds(ds);
 
-        sds >> moncomp.monitored_component
-            >> moncomp.accume
-            >> static_cast<SystemMonitor&>(moncomp);
+        sds >> moncomp.monitored_component >> moncomp.accume >> static_cast<SystemMonitor &>(moncomp);
     }
     else
-        throw version_error( v, "1", r_moncomp, CODELOC );
+        throw version_error(v, "1", r_moncomp, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
-MonitorComponent::MonitorComponent()
-                 : ConcreteProperty<MonitorComponent,SystemMonitor>()
-{}
+MonitorComponent::MonitorComponent() : ConcreteProperty<MonitorComponent, SystemMonitor>()
+{
+}
 
 /** Construct a monitor to collect the average value of the component
     represented by the symbol 'component' */
 MonitorComponent::MonitorComponent(const Symbol &component)
-                 : ConcreteProperty<MonitorComponent,SystemMonitor>(),
-                   monitored_component(component),
-                   accume( Average() )
-{}
+    : ConcreteProperty<MonitorComponent, SystemMonitor>(), monitored_component(component), accume(Average())
+{
+}
 
 /** Construct a monitor to accumulate the value of the component
     represented by the symbol 'component' using the accumulator
     in 'accumulator' */
-MonitorComponent::MonitorComponent(const Symbol &component,
-                                   const Accumulator &accumulator)
-                 : ConcreteProperty<MonitorComponent,SystemMonitor>(),
-                   monitored_component(component),
-                   accume(accumulator)
-{}
+MonitorComponent::MonitorComponent(const Symbol &component, const Accumulator &accumulator)
+    : ConcreteProperty<MonitorComponent, SystemMonitor>(), monitored_component(component), accume(accumulator)
+{
+}
 
 /** Copy constructor */
 MonitorComponent::MonitorComponent(const MonitorComponent &other)
-                 : ConcreteProperty<MonitorComponent,SystemMonitor>(other),
-                   monitored_component(other.monitored_component),
-                   accume(other.accume)
-{}
+    : ConcreteProperty<MonitorComponent, SystemMonitor>(other), monitored_component(other.monitored_component),
+      accume(other.accume)
+{
+}
 
 /** Destructor */
 MonitorComponent::~MonitorComponent()
-{}
+{
+}
 
 /** Copy assignment operator */
-MonitorComponent& MonitorComponent::operator=(const MonitorComponent &other)
+MonitorComponent &MonitorComponent::operator=(const MonitorComponent &other)
 {
     if (this != &other)
     {
@@ -123,8 +116,7 @@ MonitorComponent& MonitorComponent::operator=(const MonitorComponent &other)
 /** Comparison operator */
 bool MonitorComponent::operator==(const MonitorComponent &other) const
 {
-    return monitored_component == other.monitored_component and
-           accume == other.accume;
+    return monitored_component == other.monitored_component and accume == other.accume;
 }
 
 /** Comparison operator */
@@ -134,14 +126,14 @@ bool MonitorComponent::operator!=(const MonitorComponent &other) const
 }
 
 /** Return the symbol representing the component being monitored */
-const Symbol& MonitorComponent::component() const
+const Symbol &MonitorComponent::component() const
 {
     return monitored_component;
 }
 
 /** Return the accumulator that is being used to accumulate the
     values of the component being monitored */
-const Accumulator& MonitorComponent::accumulator() const
+const Accumulator &MonitorComponent::accumulator() const
 {
     return accume;
 }
@@ -156,10 +148,10 @@ void MonitorComponent::clearStatistics()
     component from the passed system to the accumulator */
 void MonitorComponent::monitor(System &system)
 {
-    accume.edit().accumulate( system.componentValue(monitored_component) );
+    accume.edit().accumulate(system.componentValue(monitored_component));
 }
 
-const char* MonitorComponent::typeName()
+const char *MonitorComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MonitorComponent>() );
+    return QMetaType::typeName(qMetaTypeId<MonitorComponent>());
 }

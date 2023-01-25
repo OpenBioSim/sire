@@ -39,68 +39,68 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-using SireID::IDAndSet;
-using SireID::IDOrSet;
-using SireID::Specify;
+    using SireID::IDAndSet;
+    using SireID::IDOrSet;
+    using SireID::Specify;
 
-class MGIdx;
-class MGIdentifier;
-class MGNum;
+    class MGIdx;
+    class MGIdentifier;
+    class MGNum;
 
-class MolGroupsBase;
+    class MolGroupsBase;
 
-/** This is the base class of all identifiers that are used
-    to identify a MoleculeGroup
+    /** This is the base class of all identifiers that are used
+        to identify a MoleculeGroup
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MGID : public SireID::ID
-{
-public:
-    typedef MGNum Index;
-    typedef MGIdentifier Identifier;
-    typedef MolGroupsBase SearchObject;
-
-    MGID();
-
-    MGID(const MGID &other);
-
-    virtual ~MGID();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MGID : public SireID::ID
     {
-        return "SireMol::MGID";
-    }
+    public:
+        typedef MGNum Index;
+        typedef MGIdentifier Identifier;
+        typedef MolGroupsBase SearchObject;
 
-    Specify<MGID> operator[](int i) const;
-    Specify<MGID> operator()(int i) const;
-    Specify<MGID> operator()(int i, int j) const;
+        MGID();
 
-    IDAndSet<MGID> operator+(const MGID &other) const;
-    IDOrSet<MGID> operator*(const MGID &other) const;
+        MGID(const MGID &other);
 
-    IDAndSet<MGID> operator&&(const MGID &other) const;
-    IDAndSet<MGID> operator&(const MGID &other) const;
+        virtual ~MGID();
 
-    IDOrSet<MGID> operator||(const MGID &other) const;
-    IDOrSet<MGID> operator|(const MGID &other) const;
+        static const char *typeName()
+        {
+            return "SireMol::MGID";
+        }
 
-    virtual MGID* clone() const=0;
+        Specify<MGID> operator[](int i) const;
+        Specify<MGID> operator()(int i) const;
+        Specify<MGID> operator()(int i, int j) const;
 
-    virtual QList<MGNum> map(const MolGroupsBase &molgroups) const=0;
+        IDAndSet<MGID> operator+(const MGID &other) const;
+        IDOrSet<MGID> operator*(const MGID &other) const;
 
-protected:
-    void processMatches(QList<MGNum> &matches, const MolGroupsBase &molgroups) const;
-};
+        IDAndSet<MGID> operator&&(const MGID &other) const;
+        IDAndSet<MGID> operator&(const MGID &other) const;
 
-}
+        IDOrSet<MGID> operator||(const MGID &other) const;
+        IDOrSet<MGID> operator|(const MGID &other) const;
+
+        virtual MGID *clone() const = 0;
+
+        virtual QList<MGNum> map(const MolGroupsBase &molgroups) const = 0;
+
+    protected:
+        void processMatches(QList<MGNum> &matches, const MolGroupsBase &molgroups) const;
+    };
+
+} // namespace SireMol
 
 #include "mgidentifier.h"
 
-SIRE_EXPOSE_CLASS( SireMol::MGID )
-SIRE_EXPOSE_ALIAS( SireID::Specify<SireMol::MGID>, SireMol::Specify_MGID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDAndSet<SireMol::MGID>, SireMol::IDAndSet_MGID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDOrSet<SireMol::MGID>, SireMol::IDOrSet_MGID_ )
+SIRE_EXPOSE_CLASS(SireMol::MGID)
+SIRE_EXPOSE_ALIAS(SireID::Specify<SireMol::MGID>, SireMol::Specify_MGID_)
+SIRE_EXPOSE_ALIAS(SireID::IDAndSet<SireMol::MGID>, SireMol::IDAndSet_MGID_)
+SIRE_EXPOSE_ALIAS(SireID::IDOrSet<SireMol::MGID>, SireMol::IDOrSet_MGID_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireID::IDAndSet<SireMol::MGID>;

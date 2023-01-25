@@ -36,407 +36,384 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class Expression;
-class Symbol;
-}
+    class Expression;
+    class Symbol;
+} // namespace SireCAS
 
 namespace SireIO
 {
-class PSFAtom;
-class CharmmParam;
-class CharmmPSF;
-}
+    class PSFAtom;
+    class CharmmParam;
+    class CharmmPSF;
+} // namespace SireIO
 
 namespace SireMM
 {
-class TwoAtomFunctions;
-class ThreeAtomFunctions;
-class FourAtomFunctions;
-}
+    class TwoAtomFunctions;
+    class ThreeAtomFunctions;
+    class FourAtomFunctions;
+} // namespace SireMM
 
 namespace SireMol
 {
-class Atom;
-class MolEditor;
-class MoleculeData;
-class MoleculeInfoData;
-class MoleculeView;
-class Residue;
-}
+    class Atom;
+    class MolEditor;
+    class MoleculeData;
+    class MoleculeInfoData;
+    class MoleculeView;
+    class Residue;
+} // namespace SireMol
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::PSFAtom&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::PSFAtom&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::PSFAtom &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::PSFAtom &);
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::CharmmParam&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::CharmmParam&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::CharmmParam &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::CharmmParam &);
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::CharmmPSF&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::CharmmPSF&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::CharmmPSF &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::CharmmPSF &);
 
 namespace SireIO
 {
 
-/** This class provides functionality for reading/writing
-    CHARMM PSF atom records (!NATOM).
+    /** This class provides functionality for reading/writing
+        CHARMM PSF atom records (!NATOM).
 
-    @author Lester Hedges
-*/
-class SIREIO_EXPORT PSFAtom
-{
+        @author Lester Hedges
+    */
+    class SIREIO_EXPORT PSFAtom
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const PSFAtom&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, PSFAtom&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const PSFAtom &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, PSFAtom &);
 
-public:
-    /** Default constructor. */
-    PSFAtom();
+    public:
+        /** Default constructor. */
+        PSFAtom();
 
-    /** Constructor. */
-    PSFAtom(const QString &line, int index, QStringList &errors);
+        /** Constructor. */
+        PSFAtom(const QString &line, int index, QStringList &errors);
 
-    /** Constructor. */
-    PSFAtom(const SireMol::Atom &atom, const QString &segment,
-        QStringList &errors, const PropertyMap &map);
+        /** Constructor. */
+        PSFAtom(const SireMol::Atom &atom, const QString &segment, QStringList &errors, const PropertyMap &map);
 
-    /** Generate a PSD record from the atom data. */
-    QString toPSFRecord() const;
+        /** Generate a PSD record from the atom data. */
+        QString toPSFRecord() const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    /** Get the atom index. */
-    int getIndex() const;
+        /** Get the atom index. */
+        int getIndex() const;
 
-    /** Get the molecule index. */
-    int getMolIndex() const;
+        /** Get the molecule index. */
+        int getMolIndex() const;
 
-    /** Set the molecule index. */
-    void setMolIndex(int index);
+        /** Set the molecule index. */
+        void setMolIndex(int index);
 
-    /** Get the atom number. */
-    int getNumber() const;
+        /** Get the atom number. */
+        int getNumber() const;
 
-    /** Get the segment name. */
-    QString getSegment() const;
+        /** Get the segment name. */
+        QString getSegment() const;
 
-    /** Get the residue number. */
-    qint64 getResNum() const;
+        /** Get the residue number. */
+        qint64 getResNum() const;
 
-    /** Get the residue name. */
-    QString getResName() const;
+        /** Get the residue name. */
+        QString getResName() const;
 
-    /** Get the atom name. */
-    QString getName() const;
+        /** Get the atom name. */
+        QString getName() const;
 
-    /** Get the atom type. */
-    QString getType() const;
+        /** Get the atom type. */
+        QString getType() const;
 
-    /** Get the atom charge. */
-    double getCharge() const;
+        /** Get the atom charge. */
+        double getCharge() const;
 
-    /** Get the atom mass. */
-    double getMass() const;
+        /** Get the atom mass. */
+        double getMass() const;
 
-    /** Get the non-bonded exclusion. */
-    bool isNonBondedExcluded() const;
+        /** Get the non-bonded exclusion. */
+        bool isNonBondedExcluded() const;
 
-    /** Set the non-bonded exclusion. */
-    void setNonBondedExclusion(bool is_nb_excluded);
+        /** Set the non-bonded exclusion. */
+        void setNonBondedExclusion(bool is_nb_excluded);
 
-private:
-    /** The index in the atoms vector. */
-    qint64 index;
+    private:
+        /** The index in the atoms vector. */
+        qint64 index;
 
-    /** The index of the molecule to which this atom belongs. */
-    qint64 mol_idx;
+        /** The index of the molecule to which this atom belongs. */
+        qint64 mol_idx;
 
-    /** Serial number. */
-    qint64 number;
+        /** Serial number. */
+        qint64 number;
 
-    /** Segment name. */
-    QString segment;
+        /** Segment name. */
+        QString segment;
 
-    /** Residue number. */
-    qint64 res_num;
+        /** Residue number. */
+        qint64 res_num;
 
-    /** Residue name. */
-    QString res_name;
+        /** Residue name. */
+        QString res_name;
 
-    /** Atom name. */
-    QString name;
+        /** Atom name. */
+        QString name;
 
-    /** Atom number. */
-    QString type;
+        /** Atom number. */
+        QString type;
 
-    /** Charge. */
-    double charge;
+        /** Charge. */
+        double charge;
 
-    /** Mass. */
-    double mass;
+        /** Mass. */
+        double mass;
 
-    /** Non-bonded exclusion. */
-    bool is_nb_excluded;
-};
+        /** Non-bonded exclusion. */
+        bool is_nb_excluded;
+    };
 
-/** This is a container class for CHARMM parameter records.
+    /** This is a container class for CHARMM parameter records.
 
-    @author Lester Hedges
-*/
-class SIREIO_EXPORT CharmmParam
-{
+        @author Lester Hedges
+    */
+    class SIREIO_EXPORT CharmmParam
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const CharmmParam&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, CharmmParam&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const CharmmParam &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, CharmmParam &);
 
-public:
-    /* Default constructor. */
-    CharmmParam();
+    public:
+        /* Default constructor. */
+        CharmmParam();
 
-    /** Constructor. */
-    CharmmParam(const QString &line, int type, QStringList &errors, bool is_xplor = false);
+        /** Constructor. */
+        CharmmParam(const QString &line, int type, QStringList &errors, bool is_xplor = false);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    /** Get the original parameter string. */
-    QString getString() const;
+        /** Get the original parameter string. */
+        QString getString() const;
 
-    /** Get the vector of atoms. */
-    const QVector<QString>& getAtoms() const;
+        /** Get the vector of atoms. */
+        const QVector<QString> &getAtoms() const;
 
-    /** Get the vector of parameters. */
-    const QVector<double>& getParams() const;
+        /** Get the vector of parameters. */
+        const QVector<double> &getParams() const;
 
-    /** Get the parameter type. */
-    qint64 getType() const;
+        /** Get the parameter type. */
+        qint64 getType() const;
 
-private:
-    /** The original parameter string. */
-    QString param_string;
+    private:
+        /** The original parameter string. */
+        QString param_string;
 
-    /** The vector of atoms to which the parameter set applies. */
-    QVector<QString> atoms;
+        /** The vector of atoms to which the parameter set applies. */
+        QVector<QString> atoms;
 
-    /** The vector of parameters. */
-    QVector<double> params;
+        /** The vector of parameters. */
+        QVector<double> params;
 
-    /** The parameter type. */
-    qint64 type;
-};
+        /** The parameter type. */
+        qint64 type;
+    };
 
-/** This class holds a parser for reading and writing CHARMM PSF files.
+    /** This class holds a parser for reading and writing CHARMM PSF files.
 
-    @author Lester Hedges
-*/
-class SIREIO_EXPORT CharmmPSF : public SireBase::ConcreteProperty<CharmmPSF,MoleculeParser>
-{
+        @author Lester Hedges
+    */
+    class SIREIO_EXPORT CharmmPSF : public SireBase::ConcreteProperty<CharmmPSF, MoleculeParser>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const CharmmPSF&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, CharmmPSF&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const CharmmPSF &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, CharmmPSF &);
 
-public:
-    CharmmPSF();
-    CharmmPSF(const QString &filename,
-         const PropertyMap &map = PropertyMap());
+    public:
+        CharmmPSF();
+        CharmmPSF(const QString &filename, const PropertyMap &map = PropertyMap());
 
-    CharmmPSF(const QStringList &lines,
-         const PropertyMap &map = PropertyMap());
-    CharmmPSF(const SireSystem::System &system,
-         const PropertyMap &map = PropertyMap());
+        CharmmPSF(const QStringList &lines, const PropertyMap &map = PropertyMap());
+        CharmmPSF(const SireSystem::System &system, const PropertyMap &map = PropertyMap());
 
-    CharmmPSF(const CharmmPSF &other);
+        CharmmPSF(const CharmmPSF &other);
 
-    ~CharmmPSF();
+        ~CharmmPSF();
 
-    CharmmPSF& operator=(const CharmmPSF &other);
+        CharmmPSF &operator=(const CharmmPSF &other);
 
-    bool operator==(const CharmmPSF &other) const;
-    bool operator!=(const CharmmPSF &other) const;
+        bool operator==(const CharmmPSF &other) const;
+        bool operator!=(const CharmmPSF &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
-
-    MoleculeParserPtr construct(const QString &filename,
-                                const PropertyMap &map) const;
-
-    MoleculeParserPtr construct(const QStringList &lines,
-                                const PropertyMap &map) const;
+        const char *what() const;
 
-    MoleculeParserPtr construct(const SireSystem::System &system,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QString &filename, const PropertyMap &map) const;
 
-    QString toString() const;
-    QVector<QString> toLines() const;
+        MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const;
 
-    QString formatName() const;
-    QString formatDescription() const;
-    QStringList formatSuffix() const;
+        MoleculeParserPtr construct(const SireSystem::System &system, const PropertyMap &map) const;
 
-    bool isTopology() const;
-    bool isFrame() const;
+        QString toString() const;
+        QVector<QString> toLines() const;
 
-    int nMolecules() const;
-    int nAtoms() const;
-    int nAtoms(int i) const;
-    int nBonds() const;
-    int nBonds(int i) const;
-    int nAngles() const;
-    int nAngles(int i) const;
-    int nDihedrals() const;
-    int nDihedrals(int i) const;
-    int nImpropers() const;
-    int nImpropers(int i) const;
-    int nNonBondedExclusions() const;
-    int nNonBondedExclusions(int i) const;
-    int nCrossTerms() const;
-    int nCrossTerms(int i) const;
+        QString formatName() const;
+        QString formatDescription() const;
+        QStringList formatSuffix() const;
 
-protected:
-    SireSystem::System startSystem(const PropertyMap &map) const;
-    SireSystem::System startSystem(const QVector<QString> &param_lines,
-                                   const PropertyMap &map) const;
+        bool isTopology() const;
+        bool isFrame() const;
 
-    void writeToFile(const QString &filename) const;
+        int nMolecules() const;
+        int nAtoms() const;
+        int nAtoms(int i) const;
+        int nBonds() const;
+        int nBonds(int i) const;
+        int nAngles() const;
+        int nAngles(int i) const;
+        int nDihedrals() const;
+        int nDihedrals(int i) const;
+        int nImpropers() const;
+        int nImpropers(int i) const;
+        int nNonBondedExclusions() const;
+        int nNonBondedExclusions(int i) const;
+        int nCrossTerms() const;
+        int nCrossTerms(int i) const;
 
-private:
-    void assertSane() const;
-    void parseLines(const PropertyMap &map);
-    bool parseParameters(
-        const QVector<QString> &param_lines,
-        QMultiHash<QString, CharmmParam> &bond_params,
-        QMultiHash<QString, CharmmParam> &angle_params,
-        QMultiHash<QString, CharmmParam> &dihedral_params,
-        QMultiHash<QString, CharmmParam> &improper_params,
-        QMultiHash<QString, CharmmParam> &nonbonded_params,
-        SireVol::TriclinicBox &box, bool &has_box_params) const;
+    protected:
+        SireSystem::System startSystem(const PropertyMap &map) const;
+        SireSystem::System startSystem(const QVector<QString> &param_lines, const PropertyMap &map) const;
 
-    SireMol::MolStructureEditor getMolStructure(int imol,
-        const SireBase::PropertyName &cutting) const;
+        void writeToFile(const QString &filename) const;
 
-    SireMol::MolEditor getMolecule(int imol,
-        const PropertyMap &map = PropertyMap()) const;
+    private:
+        void assertSane() const;
+        void parseLines(const PropertyMap &map);
+        bool parseParameters(const QVector<QString> &param_lines, QMultiHash<QString, CharmmParam> &bond_params,
+                             QMultiHash<QString, CharmmParam> &angle_params,
+                             QMultiHash<QString, CharmmParam> &dihedral_params,
+                             QMultiHash<QString, CharmmParam> &improper_params,
+                             QMultiHash<QString, CharmmParam> &nonbonded_params, SireVol::TriclinicBox &box,
+                             bool &has_box_params) const;
 
-    void findMolecules();
+        SireMol::MolStructureEditor getMolStructure(int imol, const SireBase::PropertyName &cutting) const;
 
-    void findBondedAtoms(int atom_idx, int mol_idx, const QMultiHash<int, int> &bonded_atoms,
-        QHash<int, int> &atom_to_mol, QSet<qint64> &atoms_in_mol) const;
+        SireMol::MolEditor getMolecule(int imol, const PropertyMap &map = PropertyMap()) const;
 
-    QList<CharmmParam> findParameters(const QVector<QString> &search_atoms,
-        const QMultiHash<QString, CharmmParam> &params, int type) const;
+        void findMolecules();
 
-    QString generateKey(QVector<QString> words, int type) const;
+        void findBondedAtoms(int atom_idx, int mol_idx, const QMultiHash<int, int> &bonded_atoms,
+                             QHash<int, int> &atom_to_mol, QSet<qint64> &atoms_in_mol) const;
 
-    template<class T>
-    T getProperty(const SireBase::PropertyName &prop,
-        const SireMol::MoleculeData &moldata, bool *found);
+        QList<CharmmParam> findParameters(const QVector<QString> &search_atoms,
+                                          const QMultiHash<QString, CharmmParam> &params, int type) const;
 
-    SireMol::Molecule parameteriseMolecule(
-        int imol,
-        const SireMol::Molecule &sire_mol,
-        const QMultiHash<QString, CharmmParam> &bond_params,
-        const QMultiHash<QString, CharmmParam> &angle_params,
-        const QMultiHash<QString, CharmmParam> &dihedral_params,
-        const QMultiHash<QString, CharmmParam> &improper_params,
-        const QMultiHash<QString, CharmmParam> &nonbonded_params,
-        const PropertyMap &map = PropertyMap()) const;
+        QString generateKey(QVector<QString> words, int type) const;
 
-    void parseMolecule(
-        int imol,
-        const SireMol::Molecule &sire_mol,
-        QVector<PSFAtom> &local_atoms,
-        QVector<QVector<qint64> > &local_bonds,
-        QVector<QVector<qint64> > &local_angles,
-        QVector<QVector<qint64> > &local_dihedrals,
-        QVector<QVector<qint64> > &local_impropers,
-        QVector<QVector<qint64> > &local_nonbonded,
-        QSet<QString> &bond_params,
-        QSet<QString> &angle_params,
-        QSet<QString> &dihedral_params,
-        QSet<QString> &improper_params,
-        QSet<QString> &nonbonded_params,
-        QStringList &local_errors,
-        const PropertyMap &map);
+        template <class T>
+        T getProperty(const SireBase::PropertyName &prop, const SireMol::MoleculeData &moldata, bool *found);
 
-    void getBondsFrom(const SireMM::TwoAtomFunctions &funcs, const SireMol::Molecule &sire_mol,
-        QVector<QVector<qint64> > &local_bonds, QSet<QString> &bond_params, const PropertyMap &map);
+        SireMol::Molecule parameteriseMolecule(int imol, const SireMol::Molecule &sire_mol,
+                                               const QMultiHash<QString, CharmmParam> &bond_params,
+                                               const QMultiHash<QString, CharmmParam> &angle_params,
+                                               const QMultiHash<QString, CharmmParam> &dihedral_params,
+                                               const QMultiHash<QString, CharmmParam> &improper_params,
+                                               const QMultiHash<QString, CharmmParam> &nonbonded_params,
+                                               const PropertyMap &map = PropertyMap()) const;
 
-    void getAnglesFrom(const SireMM::ThreeAtomFunctions &funcs, const SireMM::TwoAtomFunctions &ub_funcs,
-        const SireMol::Molecule &sire_mol, QVector<QVector<qint64> > &local_angles,
-        QSet<QString> &angle_params, const PropertyMap &map);
+        void parseMolecule(int imol, const SireMol::Molecule &sire_mol, QVector<PSFAtom> &local_atoms,
+                           QVector<QVector<qint64>> &local_bonds, QVector<QVector<qint64>> &local_angles,
+                           QVector<QVector<qint64>> &local_dihedrals, QVector<QVector<qint64>> &local_impropers,
+                           QVector<QVector<qint64>> &local_nonbonded, QSet<QString> &bond_params,
+                           QSet<QString> &angle_params, QSet<QString> &dihedral_params, QSet<QString> &improper_params,
+                           QSet<QString> &nonbonded_params, QStringList &local_errors, const PropertyMap &map);
 
-    void getDihedralsFrom(const SireMM::FourAtomFunctions &funcs, const SireMol::Molecule &sire_mol,
-        QVector<QVector<qint64> > &local_dihedrals, QSet<QString> &dihedral_params, const PropertyMap &map);
+        void getBondsFrom(const SireMM::TwoAtomFunctions &funcs, const SireMol::Molecule &sire_mol,
+                          QVector<QVector<qint64>> &local_bonds, QSet<QString> &bond_params, const PropertyMap &map);
 
-    void getImpropersFrom(const SireMM::FourAtomFunctions &funcs, const SireMol::Molecule &sire_mol,
-        QVector<QVector<qint64> > &local_impropers, QSet<QString> &improper_params, const PropertyMap &map);
+        void getAnglesFrom(const SireMM::ThreeAtomFunctions &funcs, const SireMM::TwoAtomFunctions &ub_funcs,
+                           const SireMol::Molecule &sire_mol, QVector<QVector<qint64>> &local_angles,
+                           QSet<QString> &angle_params, const PropertyMap &map);
 
-    QString getNonBondedFrom(const SireMol::Atom &atom, const PropertyMap &map) const;
+        void getDihedralsFrom(const SireMM::FourAtomFunctions &funcs, const SireMol::Molecule &sire_mol,
+                              QVector<QVector<qint64>> &local_dihedrals, QSet<QString> &dihedral_params,
+                              const PropertyMap &map);
 
-    /** The atom record data (!NATOM). */
-    QVector<PSFAtom> atoms;
+        void getImpropersFrom(const SireMM::FourAtomFunctions &funcs, const SireMol::Molecule &sire_mol,
+                              QVector<QVector<qint64>> &local_impropers, QSet<QString> &improper_params,
+                              const PropertyMap &map);
 
-    /** The bond record data (!NBOND). */
-    QVector<QVector<qint64> > bonds;
+        QString getNonBondedFrom(const SireMol::Atom &atom, const PropertyMap &map) const;
 
-    /** The indices of the bonds for each molecule. */
-    QVector<QVector<qint64> > mol_bonds;
+        /** The atom record data (!NATOM). */
+        QVector<PSFAtom> atoms;
 
-    /** The angle record data (!NTHETA). */
-    QVector<QVector<qint64> > angles;
+        /** The bond record data (!NBOND). */
+        QVector<QVector<qint64>> bonds;
 
-    /** The indices of the angles for each molecule. */
-    QVector<QVector<qint64> > mol_angles;
+        /** The indices of the bonds for each molecule. */
+        QVector<QVector<qint64>> mol_bonds;
 
-    /** The dihedral record data (!NPHI). */
-    QVector<QVector<qint64> > dihedrals;
+        /** The angle record data (!NTHETA). */
+        QVector<QVector<qint64>> angles;
 
-    /** The indices of the dihedrals for each molecule. */
-    QVector<QVector<qint64> > mol_dihedrals;
+        /** The indices of the angles for each molecule. */
+        QVector<QVector<qint64>> mol_angles;
 
-    /** The improper record data (!NIMPHI). */
-    QVector<QVector<qint64> > impropers;
+        /** The dihedral record data (!NPHI). */
+        QVector<QVector<qint64>> dihedrals;
 
-    /** The indices of the impropers for each molecule. */
-    QVector<QVector<qint64> > mol_impropers;
+        /** The indices of the dihedrals for each molecule. */
+        QVector<QVector<qint64>> mol_dihedrals;
 
-    /** The non-bonded exclusion record data (!NNB) . */
-    QVector<QVector<qint64> > nonbonded_exclusions;
+        /** The improper record data (!NIMPHI). */
+        QVector<QVector<qint64>> impropers;
 
-    /** The indices of the non-bonded exclusions for each molecule. */
-    QVector<QVector<qint64> > mol_nonbonded_exclusions;
+        /** The indices of the impropers for each molecule. */
+        QVector<QVector<qint64>> mol_impropers;
 
-    /** The cross term record data (!NCRTERM). */
-    QVector<QVector<qint64> > cross_terms;
+        /** The non-bonded exclusion record data (!NNB) . */
+        QVector<QVector<qint64>> nonbonded_exclusions;
 
-    /** The indices of the cross-terms for each molecule. */
-    QVector<QVector<qint64> > mol_cross_terms;
+        /** The indices of the non-bonded exclusions for each molecule. */
+        QVector<QVector<qint64>> mol_nonbonded_exclusions;
 
-    /** A hash between atom numbers from the PSF record and
-        indices in the atoms vector. */
-    QHash<qint64, qint64> num_to_idx;
+        /** The cross term record data (!NCRTERM). */
+        QVector<QVector<qint64>> cross_terms;
 
-    /** The indices of the atoms in each molecule. */
-    QVector<QVector<qint64> > molecules;
+        /** The indices of the cross-terms for each molecule. */
+        QVector<QVector<qint64>> mol_cross_terms;
 
-    /** A list of CHARMM parameter strings. */
-    QStringList charmm_params;
+        /** A hash between atom numbers from the PSF record and
+            indices in the atoms vector. */
+        QHash<qint64, qint64> num_to_idx;
 
-    /** Triclinic box data. */
-    SireVol::TriclinicBox box;
+        /** The indices of the atoms in each molecule. */
+        QVector<QVector<qint64>> molecules;
 
-    /** Whether the system has a periodic box. */
-    bool has_box;
+        /** A list of CHARMM parameter strings. */
+        QStringList charmm_params;
 
-    /** Any warnings that were raised when reading the file. */
-    QStringList parse_warnings;
-};
+        /** Triclinic box data. */
+        SireVol::TriclinicBox box;
 
-}
+        /** Whether the system has a periodic box. */
+        bool has_box;
 
-Q_DECLARE_METATYPE( SireIO::PSFAtom )
-Q_DECLARE_METATYPE( SireIO::CharmmParam )
-Q_DECLARE_METATYPE( SireIO::CharmmPSF )
+        /** Any warnings that were raised when reading the file. */
+        QStringList parse_warnings;
+    };
 
-SIRE_EXPOSE_CLASS( SireIO::CharmmPSF )
+} // namespace SireIO
+
+Q_DECLARE_METATYPE(SireIO::PSFAtom)
+Q_DECLARE_METATYPE(SireIO::CharmmParam)
+Q_DECLARE_METATYPE(SireIO::CharmmPSF)
+
+SIRE_EXPOSE_CLASS(SireIO::CharmmPSF)
 
 SIRE_END_HEADER
 

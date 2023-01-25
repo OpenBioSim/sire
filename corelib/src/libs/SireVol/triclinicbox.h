@@ -36,247 +36,225 @@ SIRE_BEGIN_HEADER
 
 namespace SireVol
 {
-class TriclinicBox;
+    class TriclinicBox;
 }
 
-SIREVOL_EXPORT QDataStream& operator<<(QDataStream&, const SireVol::TriclinicBox&);
-SIREVOL_EXPORT QDataStream& operator>>(QDataStream&, SireVol::TriclinicBox&);
+SIREVOL_EXPORT QDataStream &operator<<(QDataStream &, const SireVol::TriclinicBox &);
+SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::TriclinicBox &);
 
 namespace SireVol
 {
 
-using SireMaths::Matrix;
-using SireMaths::Vector;
+    using SireMaths::Matrix;
+    using SireMaths::Vector;
 
-/**
-A TriclinicBox is a volume  that represents standard periodic boundary conditions
-(a 3D box replicated to infinity along all three dimensions).
+    /**
+    A TriclinicBox is a volume  that represents standard periodic boundary conditions
+    (a 3D box replicated to infinity along all three dimensions).
 
-@author Christopher Woods
-*/
-class SIREVOL_EXPORT TriclinicBox
-        : public SireBase::ConcreteProperty<TriclinicBox,Cartesian>
-{
+    @author Christopher Woods
+    */
+    class SIREVOL_EXPORT TriclinicBox : public SireBase::ConcreteProperty<TriclinicBox, Cartesian>
+    {
 
-friend SIREVOL_EXPORT QDataStream& ::operator<<(QDataStream&, const TriclinicBox&);
-friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, TriclinicBox&);
+        friend SIREVOL_EXPORT QDataStream & ::operator<<(QDataStream &, const TriclinicBox &);
+        friend SIREVOL_EXPORT QDataStream & ::operator>>(QDataStream &, TriclinicBox &);
 
-public:
-    TriclinicBox();
-    TriclinicBox(const Vector &v0, const Vector &v1, const Vector &v2);
-    TriclinicBox(double a, double b, double c,
-                 const SireUnits::Dimension::Angle &alpha,
-                 const SireUnits::Dimension::Angle &beta,
-                 const SireUnits::Dimension::Angle &gamma);
+    public:
+        TriclinicBox();
+        TriclinicBox(const Vector &v0, const Vector &v1, const Vector &v2);
+        TriclinicBox(double a, double b, double c, const SireUnits::Dimension::Angle &alpha,
+                     const SireUnits::Dimension::Angle &beta, const SireUnits::Dimension::Angle &gamma);
 
-    TriclinicBox(const TriclinicBox &other);
+        TriclinicBox(const TriclinicBox &other);
 
-    ~TriclinicBox();
+        ~TriclinicBox();
 
-    TriclinicBox& operator=(const TriclinicBox &other);
+        TriclinicBox &operator=(const TriclinicBox &other);
 
-    bool operator==(const TriclinicBox &other) const;
-    bool operator!=(const TriclinicBox &other) const;
+        bool operator==(const TriclinicBox &other) const;
+        bool operator!=(const TriclinicBox &other) const;
 
-    bool isPeriodic() const;
-    bool isCartesian() const;
+        bool isPeriodic() const;
+        bool isCartesian() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    /** Get the volume of the triclinic box. */
-    SireUnits::Dimension::Volume volume() const;
+        /** Get the volume of the triclinic box. */
+        SireUnits::Dimension::Volume volume() const;
 
-    /** Set the volume of the triclinic box. */
-    SpacePtr setVolume(SireUnits::Dimension::Volume volume) const;
+        /** Set the volume of the triclinic box. */
+        SpacePtr setVolume(SireUnits::Dimension::Volume volume) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    /** Whether the triclinic cell has been rotated to comply with the contraints
-        of molecular dynamics engines, i.e. vector0 aligned with x axis, vector1
-        in x-y plane, and vector2 with positive z component.
-     */
-    bool isRotated() const;
+        /** Whether the triclinic cell has been rotated to comply with the contraints
+            of molecular dynamics engines, i.e. vector0 aligned with x axis, vector1
+            in x-y plane, and vector2 with positive z component.
+         */
+        bool isRotated() const;
 
-    double calcDist(const Vector &point0, const Vector &point1) const;
+        double calcDist(const Vector &point0, const Vector &point1) const;
 
-    double calcDist2(const Vector &point0, const Vector &point1) const;
+        double calcDist2(const Vector &point0, const Vector &point1) const;
 
-    double calcDist(const CoordGroup &group1, const CoordGroup &group2,
-                    DistMatrix &distmat) const;
+        double calcDist(const CoordGroup &group1, const CoordGroup &group2, DistMatrix &distmat) const;
 
-    double calcDist(const CoordGroup &group, const Vector &point,
-                    DistMatrix &mat) const;
+        double calcDist(const CoordGroup &group, const Vector &point, DistMatrix &mat) const;
 
-    double calcDist2(const CoordGroup &group, const Vector &point,
-                     DistMatrix &mat) const;
+        double calcDist2(const CoordGroup &group, const Vector &point, DistMatrix &mat) const;
 
-    double calcDist2(const CoordGroup &group1, const CoordGroup &group2,
-                     DistMatrix &distmat) const;
+        double calcDist2(const CoordGroup &group1, const CoordGroup &group2, DistMatrix &distmat) const;
 
-    double calcInvDist(const CoordGroup &group1, const CoordGroup &group2,
-                       DistMatrix &distmat) const;
+        double calcInvDist(const CoordGroup &group1, const CoordGroup &group2, DistMatrix &distmat) const;
 
-    double calcInvDist2(const CoordGroup &group1, const CoordGroup &group2,
-                        DistMatrix &distmat) const;
+        double calcInvDist2(const CoordGroup &group1, const CoordGroup &group2, DistMatrix &distmat) const;
 
-    DistVector calcDistVector(const Vector &point0, const Vector &point1) const;
+        DistVector calcDistVector(const Vector &point0, const Vector &point1) const;
 
-    double calcDistVectors(const CoordGroup &group1, const CoordGroup &group2,
-                           DistVectorMatrix &distmat) const;
+        double calcDistVectors(const CoordGroup &group1, const CoordGroup &group2, DistVectorMatrix &distmat) const;
 
-    double calcDistVectors(const CoordGroup &group, const Vector &point,
-                           DistVectorMatrix &distmat) const;
+        double calcDistVectors(const CoordGroup &group, const Vector &point, DistVectorMatrix &distmat) const;
 
-    SireUnits::Dimension::Angle calcAngle(const Vector &point0,
-                                          const Vector &point1,
-                                          const Vector &point2) const;
+        SireUnits::Dimension::Angle calcAngle(const Vector &point0, const Vector &point1, const Vector &point2) const;
 
-    SireUnits::Dimension::Angle calcDihedral(const Vector &point0,
-                                             const Vector &point1,
-                                             const Vector &point2,
-                                             const Vector &point3) const;
+        SireUnits::Dimension::Angle calcDihedral(const Vector &point0, const Vector &point1, const Vector &point2,
+                                                 const Vector &point3) const;
 
-    bool beyond(double dist, const AABox &aabox0, const AABox &aabox1) const;
+        bool beyond(double dist, const AABox &aabox0, const AABox &aabox1) const;
 
-    bool beyond(double dist, const CoordGroup &group0,
-                const CoordGroup &group1) const;
+        bool beyond(double dist, const CoordGroup &group0, const CoordGroup &group1) const;
 
-    double minimumDistance(const CoordGroup &group0, const CoordGroup &group1) const;
+        double minimumDistance(const CoordGroup &group0, const CoordGroup &group1) const;
 
-    double minimumDistance(const AABox &box0, const AABox &box1) const;
+        double minimumDistance(const AABox &box0, const AABox &box1) const;
 
-    Vector getMinimumImage(const Vector &point, const Vector &center) const;
+        Vector getMinimumImage(const Vector &point, const Vector &center) const;
 
-    CoordGroup getMinimumImage(const CoordGroup &group, const Vector &center) const;
+        CoordGroup getMinimumImage(const CoordGroup &group, const Vector &center) const;
 
-    CoordGroupArray getMinimumImage(const CoordGroupArray &groups,
-                                    const Vector &center,
-                                    bool translate_as_one=false) const;
+        CoordGroupArray getMinimumImage(const CoordGroupArray &groups, const Vector &center,
+                                        bool translate_as_one = false) const;
 
-    AABox getMinimumImage(const AABox &aabox, const Vector &center) const;
+        AABox getMinimumImage(const AABox &aabox, const Vector &center) const;
 
-    QVector<Vector> getImagesWithin(const Vector &point, const Vector &center, double dist) const;
+        QVector<Vector> getImagesWithin(const Vector &point, const Vector &center, double dist) const;
 
-    QList< boost::tuple<double,CoordGroup> >
-               getCopiesWithin(const CoordGroup &group,
-                               const CoordGroup &center, double dist) const;
+        QList<boost::tuple<double, CoordGroup>> getCopiesWithin(const CoordGroup &group, const CoordGroup &center,
+                                                                double dist) const;
 
+        Vector getRandomPoint(const Vector &center, const RanGenerator &generator) const;
 
-    Vector getRandomPoint(const Vector &center, const RanGenerator &generator) const;
+        Vector getBoxCenter(const Vector &p) const;
+        Vector getBoxCenter(const Vector &p, const Vector &center) const;
 
-	Vector getBoxCenter(const Vector &p) const;
-    Vector getBoxCenter(const Vector &p, const Vector &center) const;
+        /** Return the first box vector. */
+        const Vector &vector0() const;
 
-    /** Return the first box vector. */
-    const Vector& vector0() const;
+        /** Return the second box vector. */
+        const Vector &vector1() const;
 
-    /** Return the second box vector. */
-    const Vector& vector1() const;
+        /** Return the third box vector. */
+        const Vector &vector2() const;
 
-    /** Return the third box vector. */
-    const Vector& vector2() const;
+        /** Return the angle between v1 and v2 in degrees. */
+        double alpha() const;
 
-    /** Return the angle between v1 and v2 in degrees. */
-    double alpha() const;
+        /** Return the angle between v0 and v2 in degrees. */
+        double beta() const;
 
-    /** Return the angle between v0 and v2 in degrees. */
-    double beta() const;
+        /** Return the angle between v1 and v0 in degrees. */
+        double gamma() const;
 
-    /** Return the angle between v1 and v0 in degrees. */
-    double gamma() const;
+        /** Return the rotation matrix. */
+        const Matrix &rotationMatrix() const;
 
-    /** Return the rotation matrix. */
-    const Matrix& rotationMatrix() const;
+        /** Return the cell matrix. */
+        Matrix cellMatrix() const;
 
-    /** Return the cell matrix. */
-    Matrix cellMatrix() const;
+        /** Return a cubic TriclinicBox with image distance d. */
+        static TriclinicBox cubic(double d);
 
-    /** Return a cubic TriclinicBox with image distance d. */
-    static TriclinicBox cubic(double d);
+        /** Return a square rhombic dodecahedron TriclinicBox with image distance d. */
+        static TriclinicBox rhombicDodecahedronSquare(double d);
 
-    /** Return a square rhombic dodecahedron TriclinicBox with image distance d. */
-    static TriclinicBox rhombicDodecahedronSquare(double d);
+        /** Return a hexagonal rhombic dodecahedron TriclinicBox with image distance d. */
+        static TriclinicBox rhombicDodecahedronHexagon(double d);
 
-    /** Return a hexagonal rhombic dodecahedron TriclinicBox with image distance d. */
-    static TriclinicBox rhombicDodecahedronHexagon(double d);
+        /** Return a truncated octahedron with image distance d. */
+        static TriclinicBox truncatedOctahedron(double d);
 
-    /** Return a truncated octahedron with image distance d. */
-    static TriclinicBox truncatedOctahedron(double d);
+    protected:
+        void construct(const Vector &v0, const Vector &v1, const Vector &v2);
 
-protected:
+        Vector wrapDelta(const Vector &v0, const Vector &v1) const;
 
-    void construct(const Vector &v0, const Vector &v1, const Vector &v2);
+        CoordGroupArray _pvt_getMinimumImage(const CoordGroupArray &groups, const Vector &point) const;
 
-    Vector wrapDelta(const Vector &v0, const Vector &v1) const;
+        /** The first box vector */
+        Vector v0;
 
-    CoordGroupArray _pvt_getMinimumImage(
-                                const CoordGroupArray &groups,
-                                const Vector &point) const;
+        /** The second box vector */
+        Vector v1;
 
-    /** The first box vector */
-    Vector v0;
+        /** The third box vector */
+        Vector v2;
 
-    /** The second box vector */
-    Vector v1;
+        /** The first box vector (original copy) */
+        Vector v0_orig;
 
-    /** The third box vector */
-    Vector v2;
+        /** The second box vector (original copy) */
+        Vector v1_orig;
 
-    /** The first box vector (original copy) */
-    Vector v0_orig;
+        /** The third box vector (original copy) */
+        Vector v2_orig;
 
-    /** The second box vector (original copy) */
-    Vector v1_orig;
+        /** The rotation matrix used to transform the box to meet the requirements
+            of molecular dynamics engines.
+          */
+        Matrix rotation_matrix;
 
-    /** The third box vector (original copy) */
-    Vector v2_orig;
+        /** The cell matrix. */
+        Matrix cell_matrix;
 
-    /** The rotation matrix used to transform the box to meet the requirements
-        of molecular dynamics engines.
-      */
-    Matrix rotation_matrix;
+        /** The inverse of the cell matrix. */
+        Matrix cell_matrix_inverse;
 
-    /** The cell matrix. */
-    Matrix cell_matrix;
+        /** The matrix product of cell_matrix_inverse and cell_matrix. */
+        Matrix M;
 
-    /** The inverse of the cell matrix. */
-    Matrix cell_matrix_inverse;
+        /** The maximum distance within which a point will always be closer to the
+            origin than any of its images.
+          */
+        double dist_max;
 
-    /** The matrix product of cell_matrix_inverse and cell_matrix. */
-    Matrix M;
+        /** The maximum axis length of the cell. */
+        double max_length;
 
-    /** The maximum distance within which a point will always be closer to the
-        origin than any of its images.
-      */
-    double dist_max;
+        /** The angle between vectors v1 and v2. */
+        double _alpha;
 
-    /** The maximum axis length of the cell. */
-    double max_length;
+        /** The angle between vectors v0 and v2. */
+        double _beta;
 
-    /** The angle between vectors v1 and v2. */
-    double _alpha;
+        /** The angle between vectors v1 and v2. */
+        double _gamma;
 
-    /** The angle between vectors v0 and v2. */
-    double _beta;
+        /** The volume of the triclinic cell. */
+        double vol;
 
-    /** The angle between vectors v1 and v2. */
-    double _gamma;
+        /** Whether the triclinic cell has been rotated. */
+        bool is_rotated;
 
-    /** The volume of the triclinic cell. */
-    double vol;
+        /** The inverse of the lengths of each side of the box */
+        Vector invlength;
+    };
 
-    /** Whether the triclinic cell has been rotated. */
-    bool is_rotated;
-
-    /** The inverse of the lengths of each side of the box */
-    Vector invlength;
-};
-
-}
+} // namespace SireVol
 
 Q_DECLARE_METATYPE(SireVol::TriclinicBox)
 
-SIRE_EXPOSE_CLASS( SireVol::TriclinicBox )
+SIRE_EXPOSE_CLASS(SireVol::TriclinicBox)
 
 SIRE_END_HEADER
 

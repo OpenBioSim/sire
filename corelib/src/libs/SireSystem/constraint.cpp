@@ -26,16 +26,16 @@
 \*********************************************/
 
 #include "constraint.h"
-#include "system.h"
 #include "delta.h"
+#include "system.h"
 
 #include "SireBase/numberproperty.h"
 #include "SireBase/propertylist.h"
 
 #include "SireMaths/maths.h"
 
-#include "SireSystem/errors.h"
 #include "SireError/errors.h"
+#include "SireSystem/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -51,15 +51,14 @@ using namespace SireStream;
 ////////// Implementation of Constraint
 //////////
 
-static const RegisterMetaType<Constraint> r_constraint( MAGIC_ONLY,
-                                                        "SireSystem::Constraint" );
+static const RegisterMetaType<Constraint> r_constraint(MAGIC_ONLY, "SireSystem::Constraint");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Constraint &constraint)
 {
     writeHeader(ds, r_constraint, 1);
 
-    ds << static_cast<const Property&>(constraint);
+    ds << static_cast<const Property &>(constraint);
 
     return ds;
 }
@@ -71,34 +70,34 @@ QDataStream &operator>>(QDataStream &ds, Constraint &constraint)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(constraint);
+        ds >> static_cast<Property &>(constraint);
         constraint.clearLastSystem();
     }
     else
-        throw version_error( v, "1", r_constraint, CODELOC );
+        throw version_error(v, "1", r_constraint, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 Constraint::Constraint() : Property(), last_subversion(0), last_was_satisfied(false)
-{}
+{
+}
 
 /** Copy constructor */
 Constraint::Constraint(const Constraint &other)
-           : Property(other),
-             last_sysuid(other.last_sysuid),
-             last_sysversion(other.last_sysversion),
-             last_subversion(other.last_subversion),
-             last_was_satisfied(other.last_was_satisfied)
-{}
+    : Property(other), last_sysuid(other.last_sysuid), last_sysversion(other.last_sysversion),
+      last_subversion(other.last_subversion), last_was_satisfied(other.last_was_satisfied)
+{
+}
 
 /** Destructor */
 Constraint::~Constraint()
-{}
+{
+}
 
 /** Copy assignment operator */
-Constraint& Constraint::operator=(const Constraint &other)
+Constraint &Constraint::operator=(const Constraint &other)
 {
     if (this != &other)
     {
@@ -117,9 +116,9 @@ bool Constraint::mayAffect(const Delta &delta) const
 {
     const System &system = delta.deltaSystem();
 
-    if ( Constraint::wasLastSatisfied() and Constraint::wasLastSystem(system) )
+    if (Constraint::wasLastSatisfied() and Constraint::wasLastSystem(system))
     {
-        if ( Constraint::wasLastSubVersion(system) )
+        if (Constraint::wasLastSubVersion(system))
             return false;
         else
             return this->mayChange(delta, last_subversion);
@@ -138,14 +137,14 @@ bool Constraint::apply(Delta &delta)
     {
         const System &system = delta.deltaSystem();
 
-        if ( not Constraint::wasLastSystem(system) )
+        if (not Constraint::wasLastSystem(system))
             this->setSystem(system);
 
         bool changed = false;
 
-        if ( not Constraint::wasLastSatisfied() )
+        if (not Constraint::wasLastSatisfied())
         {
-            if ( not Constraint::wasLastSubVersion(system) )
+            if (not Constraint::wasLastSubVersion(system))
             {
                 this->setSystem(system);
 
@@ -155,23 +154,23 @@ bool Constraint::apply(Delta &delta)
             else
                 changed = this->fullApply(delta);
         }
-        else if ( not Constraint::wasLastSubVersion(system) )
+        else if (not Constraint::wasLastSubVersion(system))
         {
-            if ( this->mayChange(delta, last_subversion) )
+            if (this->mayChange(delta, last_subversion))
                 changed = this->deltaApply(delta, last_subversion);
         }
 
         if (not this->isSatisfied(delta.deltaSystem()))
-            throw SireError::program_bug( QObject::tr(
-                "Constraint %1 is not satisfied despite having just been applied!!!")
-                    .arg(this->toString()), CODELOC );
+            throw SireError::program_bug(
+                QObject::tr("Constraint %1 is not satisfied despite having just been applied!!!").arg(this->toString()),
+                CODELOC);
 
-        //the above function *MUST* have set the system to satisfy the constraint
+        // the above function *MUST* have set the system to satisfy the constraint
         setSatisfied(delta.deltaSystem(), true);
 
         return changed;
     }
-    catch(...)
+    catch (...)
     {
         clearLastSystem();
         throw;
@@ -187,14 +186,14 @@ System Constraint::apply(const System &system)
     this->setSystem(system);
 
     if (wasLastSatisfied())
-        //nothing to do
+        // nothing to do
         return system;
 
     Delta delta(system);
 
     System new_system = system;
 
-    for (int i=0; i<10; ++i)
+    for (int i = 0; i < 10; ++i)
     {
         if (this->apply(delta))
         {
@@ -202,17 +201,16 @@ System Constraint::apply(const System &system)
         }
         else
         {
-            //the system satisfies this constraint
+            // the system satisfies this constraint
             this->committed(new_system);
             return new_system;
         }
     }
 
-    throw SireSystem::constraint_error( QObject::tr(
-            "The constraint %1 could not be satisfied in concert with the "
-            "constraints already present in the system %2 (%3)")
-                .arg(this->toString(), system.toString(),
-                     system.constraints().toString()), CODELOC );
+    throw SireSystem::constraint_error(QObject::tr("The constraint %1 could not be satisfied in concert with the "
+                                                   "constraints already present in the system %2 (%3)")
+                                           .arg(this->toString(), system.toString(), system.constraints().toString()),
+                                       CODELOC);
 
     return System();
 }
@@ -228,33 +226,33 @@ void Constraint::committed(const System &system)
     the passed system */
 bool Constraint::isSatisfied(const System &system) const
 {
-    if ( wasLastSystem(system) and wasLastSubVersion(system) )
+    if (wasLastSystem(system) and wasLastSubVersion(system))
         return last_was_satisfied;
 
     else
     {
-        #ifdef BOOST_NO_CXX11_SMART_PTR
-          std::auto_ptr<Constraint> copy( this->clone() );
-        #else
-          std::unique_ptr<Constraint> copy( this->clone() );
-        #endif
+#ifdef BOOST_NO_CXX11_SMART_PTR
+        std::auto_ptr<Constraint> copy(this->clone());
+#else
+        std::unique_ptr<Constraint> copy(this->clone());
+#endif
 
         copy->setSystem(system);
 
-        if (not (copy->wasLastSystem(system) and copy->wasLastSubVersion(system)))
+        if (not(copy->wasLastSystem(system) and copy->wasLastSubVersion(system)))
         {
-            throw SireError::program_bug( QObject::tr(
-                    "Error with setSystem for constraint %1. This should "
-                    "set the last system to %2:%3.%4, but is has instead "
-                    "set it to %5:%6.%7 (%8).")
-                        .arg(copy->toString())
-                        .arg(system.UID().toString())
-                        .arg(system.version().toString())
-                        .arg(system.subVersion())
-                        .arg(copy->last_sysuid.toString())
-                        .arg(copy->last_sysversion.toString())
-                        .arg(copy->last_subversion)
-                        .arg(copy->last_was_satisfied), CODELOC );
+            throw SireError::program_bug(QObject::tr("Error with setSystem for constraint %1. This should "
+                                                     "set the last system to %2:%3.%4, but is has instead "
+                                                     "set it to %5:%6.%7 (%8).")
+                                             .arg(copy->toString())
+                                             .arg(system.UID().toString())
+                                             .arg(system.version().toString())
+                                             .arg(system.subVersion())
+                                             .arg(copy->last_sysuid.toString())
+                                             .arg(copy->last_sysversion.toString())
+                                             .arg(copy->last_subversion)
+                                             .arg(copy->last_was_satisfied),
+                                         CODELOC);
         }
 
         return copy->last_was_satisfied;
@@ -287,8 +285,7 @@ void Constraint::clearLastSystem()
     to test if this is exactly the same as the last system */
 bool Constraint::wasLastSystem(const System &system) const
 {
-    return system.UID() == last_sysuid and
-           system.version() == last_sysversion;
+    return system.UID() == last_sysuid and system.version() == last_sysversion;
 }
 
 /** Return whether or not the passed system has the same subversion
@@ -311,10 +308,10 @@ bool Constraint::wasLastSatisfied() const
 void Constraint::assertSatisfied(const System &system) const
 {
     if (not this->isSatisfied(system))
-        throw SireSystem::constraint_error( QObject::tr(
-            "The constraint %1 is not maintained in the system %2.")
-                .arg(this->toString())
-                .arg(system.toString()), CODELOC );
+        throw SireSystem::constraint_error(QObject::tr("The constraint %1 is not maintained in the system %2.")
+                                               .arg(this->toString())
+                                               .arg(system.toString()),
+                                           CODELOC);
 }
 
 //////////
@@ -324,25 +321,23 @@ void Constraint::assertSatisfied(const System &system) const
 static const RegisterMetaType<NullConstraint> r_nullconstraint;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const NullConstraint &nullconstraint)
+QDataStream &operator<<(QDataStream &ds, const NullConstraint &nullconstraint)
 {
     writeHeader(ds, r_nullconstraint, 1);
 
-    ds << static_cast<const Constraint&>(nullconstraint);
+    ds << static_cast<const Constraint &>(nullconstraint);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          NullConstraint &nullconstraint)
+QDataStream &operator>>(QDataStream &ds, NullConstraint &nullconstraint)
 {
     VersionID v = readHeader(ds, r_nullconstraint);
 
     if (v == 1)
     {
-        ds >> static_cast<Constraint&>(nullconstraint);
+        ds >> static_cast<Constraint &>(nullconstraint);
     }
     else
         throw version_error(v, "1", r_nullconstraint, CODELOC);
@@ -351,33 +346,35 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-NullConstraint::NullConstraint() : ConcreteProperty<NullConstraint,Constraint>()
-{}
+NullConstraint::NullConstraint() : ConcreteProperty<NullConstraint, Constraint>()
+{
+}
 
 /** Copy constructor */
-NullConstraint::NullConstraint(const NullConstraint &other)
-               : ConcreteProperty<NullConstraint,Constraint>(other)
-{}
+NullConstraint::NullConstraint(const NullConstraint &other) : ConcreteProperty<NullConstraint, Constraint>(other)
+{
+}
 
 /** Destructor */
 NullConstraint::~NullConstraint()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullConstraint& NullConstraint::operator=(const NullConstraint &other)
+NullConstraint &NullConstraint::operator=(const NullConstraint &other)
 {
     Constraint::operator=(other);
     return *this;
 }
 
 /** Comparison operator */
-bool NullConstraint::operator==(const NullConstraint&) const
+bool NullConstraint::operator==(const NullConstraint &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool NullConstraint::operator!=(const NullConstraint&) const
+bool NullConstraint::operator!=(const NullConstraint &) const
 {
     return false;
 }
@@ -399,14 +396,14 @@ void NullConstraint::setSystem(const System &system)
 /** Return whether or not the changes in the passed
     delta *may* have changed the system since the system
     with subversion 'last_subversion' */
-bool NullConstraint::mayChange(const Delta&, quint32) const
+bool NullConstraint::mayChange(const Delta &, quint32) const
 {
     return false;
 }
 
 /** Fully apply this constraint on the passed delta - this returns
     whether or not this constraint affects the delta */
-bool NullConstraint::fullApply(Delta&)
+bool NullConstraint::fullApply(Delta &)
 {
     return false;
 }
@@ -414,19 +411,19 @@ bool NullConstraint::fullApply(Delta&)
 /** Apply this constraint based on the delta, knowing that the
     last application of this constraint was on this system,
     at subversion number last_subversion */
-bool NullConstraint::deltaApply(Delta&, quint32)
+bool NullConstraint::deltaApply(Delta &, quint32)
 {
     return false;
 }
 
-const NullConstraint& Constraint::null()
+const NullConstraint &Constraint::null()
 {
     return *(create_shared_null<NullConstraint>());
 }
 
-const char* NullConstraint::typeName()
+const char *NullConstraint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullConstraint>() );
+    return QMetaType::typeName(qMetaTypeId<NullConstraint>());
 }
 
 //////////
@@ -436,23 +433,19 @@ const char* NullConstraint::typeName()
 static const RegisterMetaType<PropertyConstraint> r_propconstraint;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const PropertyConstraint &constraint)
+QDataStream &operator<<(QDataStream &ds, const PropertyConstraint &constraint)
 {
     writeHeader(ds, r_propconstraint, 1);
 
     SharedDataStream sds(ds);
 
-    sds << constraint.ffid << constraint.propname
-        << constraint.eqn
-        << static_cast<const Constraint&>(constraint);
+    sds << constraint.ffid << constraint.propname << constraint.eqn << static_cast<const Constraint &>(constraint);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          PropertyConstraint &constraint)
+QDataStream &operator>>(QDataStream &ds, PropertyConstraint &constraint)
 {
     VersionID v = readHeader(ds, r_propconstraint);
 
@@ -460,12 +453,10 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        //completely clear any cached data
+        // completely clear any cached data
         constraint = PropertyConstraint();
 
-        sds >> constraint.ffid >> constraint.propname
-            >> constraint.eqn
-            >> static_cast<Constraint&>(constraint);
+        sds >> constraint.ffid >> constraint.propname >> constraint.eqn >> static_cast<Constraint &>(constraint);
 
         constraint.syms = constraint.eqn.symbols();
     }
@@ -476,47 +467,43 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-PropertyConstraint::PropertyConstraint()
-                   : ConcreteProperty<PropertyConstraint,Constraint>(),
-                     target_value(0)
-{}
+PropertyConstraint::PropertyConstraint() : ConcreteProperty<PropertyConstraint, Constraint>(), target_value(0)
+{
+}
 
 /** Construct to constrain the property with name 'name' in all forcefields
     to have the value resulting from the expression 'expression' */
-PropertyConstraint::PropertyConstraint(const QString &name,
-                                       const SireCAS::Expression &expression)
-                   : ConcreteProperty<PropertyConstraint,Constraint>(),
-                     propname(name), eqn(expression), syms(expression.symbols()),
-                     target_value(0)
-{}
+PropertyConstraint::PropertyConstraint(const QString &name, const SireCAS::Expression &expression)
+    : ConcreteProperty<PropertyConstraint, Constraint>(), propname(name), eqn(expression), syms(expression.symbols()),
+      target_value(0)
+{
+}
 
 /** Construct to constrain the property with name 'name' in the forcefield(s)
     that match the ID 'ffid' to have the value resulting the expression
     'expression' */
 PropertyConstraint::PropertyConstraint(const QString &name, const SireFF::FFID &id,
                                        const SireCAS::Expression &expression)
-                   : ConcreteProperty<PropertyConstraint,Constraint>(),
-                     ffid(id), propname(name), eqn(expression),
-                     syms(expression.symbols()), target_value(0)
-{}
+    : ConcreteProperty<PropertyConstraint, Constraint>(), ffid(id), propname(name), eqn(expression),
+      syms(expression.symbols()), target_value(0)
+{
+}
 
 /** Copy constructor */
 PropertyConstraint::PropertyConstraint(const PropertyConstraint &other)
-                   : ConcreteProperty<PropertyConstraint,Constraint>(other),
-                     ffid(other.ffid), ffidxs(other.ffidxs),
-                     propname(other.propname), eqn(other.eqn),
-                     syms(other.syms),
-                     component_vals(other.component_vals),
-                     constrained_value(other.constrained_value),
-                     target_value(other.target_value)
-{}
+    : ConcreteProperty<PropertyConstraint, Constraint>(other), ffid(other.ffid), ffidxs(other.ffidxs),
+      propname(other.propname), eqn(other.eqn), syms(other.syms), component_vals(other.component_vals),
+      constrained_value(other.constrained_value), target_value(other.target_value)
+{
+}
 
 /** Destructor */
 PropertyConstraint::~PropertyConstraint()
-{}
+{
+}
 
 /** Copy assignment operator */
-PropertyConstraint& PropertyConstraint::operator=(const PropertyConstraint &other)
+PropertyConstraint &PropertyConstraint::operator=(const PropertyConstraint &other)
 {
     if (this != &other)
     {
@@ -537,8 +524,7 @@ PropertyConstraint& PropertyConstraint::operator=(const PropertyConstraint &othe
 /** Comparison operator */
 bool PropertyConstraint::operator==(const PropertyConstraint &other) const
 {
-    return ffid == other.ffid and propname == other.propname and
-           eqn == other.eqn;
+    return ffid == other.ffid and propname == other.propname and eqn == other.eqn;
 }
 
 /** Comparison operator */
@@ -551,11 +537,10 @@ bool PropertyConstraint::operator!=(const PropertyConstraint &other) const
 QString PropertyConstraint::toString() const
 {
     return QObject::tr("PropertyConstraint( FFID=%1 property=%2 expression=%3 )")
-                .arg(ffid.toString(), propname, eqn.toString());
+        .arg(ffid.toString(), propname, eqn.toString());
 }
 
-static PropertyPtr getProperty(const System &system, const QString &propname,
-                               const QList<FFIdx> &ffidxs)
+static PropertyPtr getProperty(const System &system, const QString &propname, const QList<FFIdx> &ffidxs)
 {
     bool is_first = true;
 
@@ -596,10 +581,9 @@ static PropertyPtr getProperty(const System &system, const QString &propname,
     subversion 'subversion' */
 bool PropertyConstraint::mayChange(const Delta &delta, quint32 last_subversion) const
 {
-    BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) );
+    BOOST_ASSERT(Constraint::wasLastSystem(delta.deltaSystem()));
 
-    return (not Constraint::wasLastSatisfied()) or
-           delta.sinceChanged(propname, last_subversion) or
+    return (not Constraint::wasLastSatisfied()) or delta.sinceChanged(propname, last_subversion) or
            delta.sinceChanged(syms, last_subversion);
 }
 
@@ -641,16 +625,14 @@ void PropertyConstraint::setSystem(const System &system)
 
     target_value = eqn(component_vals);
 
-    Constraint::setSatisfied(system, has_constrained_value and
-                                     SireMaths::areEqual(constrained_val, target_value));
+    Constraint::setSatisfied(system, has_constrained_value and SireMaths::areEqual(constrained_val, target_value));
 }
 
 /** Fully apply this constraint on the passed delta - this returns
     whether or not this constraint affects the delta */
 bool PropertyConstraint::fullApply(Delta &delta)
 {
-    BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) and
-                  Constraint::wasLastSubVersion(delta.deltaSystem()) );
+    BOOST_ASSERT(Constraint::wasLastSystem(delta.deltaSystem()) and Constraint::wasLastSubVersion(delta.deltaSystem()));
 
     bool changed = false;
 
@@ -660,7 +642,7 @@ bool PropertyConstraint::fullApply(Delta &delta)
         changed = delta.update(propname, ffidxs, wrap(target_value));
 
     if (changed)
-        this->setSystem( delta.deltaSystem() );
+        this->setSystem(delta.deltaSystem());
 
     return changed;
 }
@@ -670,7 +652,7 @@ bool PropertyConstraint::fullApply(Delta &delta)
     at subversion number last_subversion */
 bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
 {
-    BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) );
+    BOOST_ASSERT(Constraint::wasLastSystem(delta.deltaSystem()));
 
     bool changed_prop = delta.sinceChanged(propname, last_subversion);
     bool changed_syms = delta.sinceChanged(syms, last_subversion);
@@ -700,8 +682,7 @@ bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
                 {
                     const Property &new_property = system.property(propname);
 
-                    if (constrained_value.isNull() or
-                          (not constrained_value.read().equals(new_property)))
+                    if (constrained_value.isNull() or (not constrained_value.read().equals(new_property)))
                     {
                         constrained_value = new_property;
                     }
@@ -715,8 +696,8 @@ bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
             {
                 PropertyPtr new_property = ::getProperty(system, propname, ffidxs);
 
-                if ( constrained_value.isNull() or new_property.isNull() or
-                      (not constrained_value.read().equals(new_property)) )
+                if (constrained_value.isNull() or new_property.isNull() or
+                    (not constrained_value.read().equals(new_property)))
                 {
                     constrained_value = new_property;
                 }
@@ -727,7 +708,7 @@ bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
 
         if (changed_target or changed_prop)
         {
-            //get the current value of the property
+            // get the current value of the property
             if (not constrained_value.isNull())
             {
                 if (target_value == constrained_value.read().asADouble())
@@ -750,9 +731,9 @@ bool PropertyConstraint::deltaApply(Delta &delta, quint32 last_subversion)
     return false;
 }
 
-const char* PropertyConstraint::typeName()
+const char *PropertyConstraint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<PropertyConstraint>() );
+    return QMetaType::typeName(qMetaTypeId<PropertyConstraint>());
 }
 
 //////////
@@ -762,23 +743,19 @@ const char* PropertyConstraint::typeName()
 static const RegisterMetaType<ComponentConstraint> r_compconstraint;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const ComponentConstraint &constraint)
+QDataStream &operator<<(QDataStream &ds, const ComponentConstraint &constraint)
 {
     writeHeader(ds, r_compconstraint, 1);
 
     SharedDataStream sds(ds);
 
-    sds << constraint.constrained_component
-        << constraint.eqn
-        << static_cast<const Constraint&>(constraint);
+    sds << constraint.constrained_component << constraint.eqn << static_cast<const Constraint &>(constraint);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          ComponentConstraint &constraint)
+QDataStream &operator>>(QDataStream &ds, ComponentConstraint &constraint)
 {
     VersionID v = readHeader(ds, r_compconstraint);
 
@@ -788,9 +765,7 @@ QDataStream &operator>>(QDataStream &ds,
 
         constraint = ComponentConstraint();
 
-        sds >> constraint.constrained_component
-            >> constraint.eqn
-            >> static_cast<Constraint&>(constraint);
+        sds >> constraint.constrained_component >> constraint.eqn >> static_cast<Constraint &>(constraint);
 
         constraint.syms = constraint.eqn.symbols();
     }
@@ -802,38 +777,35 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 ComponentConstraint::ComponentConstraint()
-                    : ConcreteProperty<ComponentConstraint,Constraint>(),
-                      constrained_value(0), target_value(0),
-                      has_constrained_value(false)
-{}
+    : ConcreteProperty<ComponentConstraint, Constraint>(), constrained_value(0), target_value(0),
+      has_constrained_value(false)
+{
+}
 
 /** Construct to constrain the component with symbol 'component'
     to have the value resulting from the expression 'expression' */
-ComponentConstraint::ComponentConstraint(const Symbol &component,
-                                         const SireCAS::Expression &expression)
-                   : ConcreteProperty<ComponentConstraint,Constraint>(),
-                     constrained_component(component), eqn(expression),
-                     syms(expression.symbols()),
-                     constrained_value(0), target_value(0),
-                     has_constrained_value(false)
-{}
+ComponentConstraint::ComponentConstraint(const Symbol &component, const SireCAS::Expression &expression)
+    : ConcreteProperty<ComponentConstraint, Constraint>(), constrained_component(component), eqn(expression),
+      syms(expression.symbols()), constrained_value(0), target_value(0), has_constrained_value(false)
+{
+}
 
 /** Copy constructor */
 ComponentConstraint::ComponentConstraint(const ComponentConstraint &other)
-                   : ConcreteProperty<ComponentConstraint,Constraint>(other),
-                     constrained_component(other.constrained_component), eqn(other.eqn),
-                     syms(other.syms), component_vals(other.component_vals),
-                     constrained_value(other.constrained_value),
-                     target_value(other.target_value),
-                     has_constrained_value(other.has_constrained_value)
-{}
+    : ConcreteProperty<ComponentConstraint, Constraint>(other), constrained_component(other.constrained_component),
+      eqn(other.eqn), syms(other.syms), component_vals(other.component_vals),
+      constrained_value(other.constrained_value), target_value(other.target_value),
+      has_constrained_value(other.has_constrained_value)
+{
+}
 
 /** Destructor */
 ComponentConstraint::~ComponentConstraint()
-{}
+{
+}
 
 /** Copy assignment operator */
-ComponentConstraint& ComponentConstraint::operator=(const ComponentConstraint &other)
+ComponentConstraint &ComponentConstraint::operator=(const ComponentConstraint &other)
 {
     if (this != &other)
     {
@@ -853,8 +825,7 @@ ComponentConstraint& ComponentConstraint::operator=(const ComponentConstraint &o
 /** Comparison operator */
 bool ComponentConstraint::operator==(const ComponentConstraint &other) const
 {
-    return constrained_component == other.constrained_component and
-           eqn == other.eqn;
+    return constrained_component == other.constrained_component and eqn == other.eqn;
 }
 
 /** Comparison operator */
@@ -867,17 +838,17 @@ bool ComponentConstraint::operator!=(const ComponentConstraint &other) const
 QString ComponentConstraint::toString() const
 {
     return QObject::tr("ComponentConstraint( component=%1 expression=%2 )")
-                .arg(constrained_component.toString(), eqn.toString());
+        .arg(constrained_component.toString(), eqn.toString());
 }
 
 /** Return the symbol representing the component being constrained */
-const Symbol& ComponentConstraint::component() const
+const Symbol &ComponentConstraint::component() const
 {
     return constrained_component;
 }
 
 /** Return the expression used to evaluate the constraint */
-const Expression& ComponentConstraint::expression() const
+const Expression &ComponentConstraint::expression() const
 {
     return eqn;
 }
@@ -887,12 +858,11 @@ const Expression& ComponentConstraint::expression() const
     subversion 'subversion' */
 bool ComponentConstraint::mayChange(const Delta &delta, quint32 last_subversion) const
 {
-    BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) );
+    BOOST_ASSERT(Constraint::wasLastSystem(delta.deltaSystem()));
 
     return true;
 
-    return (not Constraint::wasLastSatisfied()) or
-           delta.sinceChanged(constrained_component, last_subversion) or
+    return (not Constraint::wasLastSatisfied()) or delta.sinceChanged(constrained_component, last_subversion) or
            delta.sinceChanged(syms, last_subversion);
 }
 
@@ -901,7 +871,7 @@ bool ComponentConstraint::mayChange(const Delta &delta, quint32 last_subversion)
     and to check if the constraint is satisfied */
 void ComponentConstraint::setSystem(const System &system)
 {
-    if ( Constraint::wasLastSystem(system) and Constraint::wasLastSubVersion(system) )
+    if (Constraint::wasLastSystem(system) and Constraint::wasLastSubVersion(system))
         return;
 
     Constraint::clearLastSystem();
@@ -919,16 +889,14 @@ void ComponentConstraint::setSystem(const System &system)
 
     target_value = eqn(component_vals);
 
-    Constraint::setSatisfied(system, has_constrained_value and
-                                     SireMaths::areEqual(target_value, constrained_value));
+    Constraint::setSatisfied(system, has_constrained_value and SireMaths::areEqual(target_value, constrained_value));
 }
 
 /** Fully apply this constraint on the passed delta - this returns
     whether or not this constraint affects the delta */
 bool ComponentConstraint::fullApply(Delta &delta)
 {
-    BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) and
-                  Constraint::wasLastSubVersion(delta.deltaSystem()) );
+    BOOST_ASSERT(Constraint::wasLastSystem(delta.deltaSystem()) and Constraint::wasLastSubVersion(delta.deltaSystem()));
 
     bool changed = delta.update(constrained_component, target_value);
 
@@ -943,7 +911,7 @@ bool ComponentConstraint::fullApply(Delta &delta)
     at subversion number last_subversion */
 bool ComponentConstraint::deltaApply(Delta &delta, quint32 last_subversion)
 {
-    BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) );
+    BOOST_ASSERT(Constraint::wasLastSystem(delta.deltaSystem()));
 
     bool changed_comp = delta.sinceChanged(constrained_component, last_subversion);
     bool changed_syms = delta.sinceChanged(syms, last_subversion);
@@ -968,7 +936,7 @@ bool ComponentConstraint::deltaApply(Delta &delta, quint32 last_subversion)
             {
                 double new_comp = system.constant(constrained_component);
 
-                if ( (not has_constrained_value) or constrained_value != new_comp )
+                if ((not has_constrained_value) or constrained_value != new_comp)
                 {
                     has_constrained_value = true;
                     constrained_value = new_comp;
@@ -990,7 +958,7 @@ bool ComponentConstraint::deltaApply(Delta &delta, quint32 last_subversion)
             {
                 double new_comp = system.constant(constrained_component);
 
-                if ( (not has_constrained_value) or constrained_value != new_comp )
+                if ((not has_constrained_value) or constrained_value != new_comp)
                 {
                     has_constrained_value = true;
                     constrained_value = new_comp;
@@ -1007,8 +975,7 @@ bool ComponentConstraint::deltaApply(Delta &delta, quint32 last_subversion)
             }
         }
 
-        if ( (changed_target or changed_comp) and not
-             (has_constrained_value and (constrained_value == target_value)) )
+        if ((changed_target or changed_comp) and not(has_constrained_value and (constrained_value == target_value)))
         {
             return delta.update(constrained_component, target_value);
         }
@@ -1021,9 +988,9 @@ bool ComponentConstraint::deltaApply(Delta &delta, quint32 last_subversion)
     return false;
 }
 
-const char* ComponentConstraint::typeName()
+const char *ComponentConstraint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ComponentConstraint>() );
+    return QMetaType::typeName(qMetaTypeId<ComponentConstraint>());
 }
 
 //////////
@@ -1033,25 +1000,20 @@ const char* ComponentConstraint::typeName()
 static const RegisterMetaType<WindowedComponent> r_windowedcomp;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const WindowedComponent &windowedcomp)
+QDataStream &operator<<(QDataStream &ds, const WindowedComponent &windowedcomp)
 {
     writeHeader(ds, r_windowedcomp, 1);
 
     SharedDataStream sds(ds);
 
-    sds << windowedcomp.constrained_component
-        << windowedcomp.reference_component
-        << windowedcomp.window_values
-        << windowedcomp.step_size
-        << static_cast<const Constraint&>(windowedcomp);
+    sds << windowedcomp.constrained_component << windowedcomp.reference_component << windowedcomp.window_values
+        << windowedcomp.step_size << static_cast<const Constraint &>(windowedcomp);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          WindowedComponent &windowedcomp)
+QDataStream &operator>>(QDataStream &ds, WindowedComponent &windowedcomp)
 {
     VersionID v = readHeader(ds, r_windowedcomp);
 
@@ -1061,11 +1023,8 @@ QDataStream &operator>>(QDataStream &ds,
 
         windowedcomp = WindowedComponent();
 
-        sds >> windowedcomp.constrained_component
-            >> windowedcomp.reference_component
-            >> windowedcomp.window_values
-            >> windowedcomp.step_size
-            >> static_cast<Constraint&>(windowedcomp);
+        sds >> windowedcomp.constrained_component >> windowedcomp.reference_component >> windowedcomp.window_values >>
+            windowedcomp.step_size >> static_cast<Constraint &>(windowedcomp);
     }
     else
         throw version_error(v, "1", r_windowedcomp, CODELOC);
@@ -1075,10 +1034,10 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 WindowedComponent::WindowedComponent()
-                  : ConcreteProperty<WindowedComponent,Constraint>(),
-                    step_size(0), component_val(0), constrained_value(0),
-                    target_value(0), has_constrained_value(false)
-{}
+    : ConcreteProperty<WindowedComponent, Constraint>(), step_size(0), component_val(0), constrained_value(0),
+      target_value(0), has_constrained_value(false)
+{
+}
 
 /** Construct a WindowedConstraint that constrains the component represented
     by the symbol 'component' to lie 'step_size' windows above (or below if
@@ -1087,35 +1046,28 @@ WindowedComponent::WindowedComponent()
     the values of the windows, in the order that you have arranged
     them. Whilst this will not sort 'window_values', it will remove
     all duplicate values */
-WindowedComponent::WindowedComponent(const SireCAS::Symbol &component,
-                                     const SireCAS::Symbol &reference,
-                                     const QVector<double> &values,
-                                     int step)
-                  : ConcreteProperty<WindowedComponent,Constraint>(),
-                    constrained_component(component),
-                    reference_component(reference),
-                    window_values(values),
-                    step_size(step),
-                    component_val(0),
-                    constrained_value(0), target_value(0),
-                    has_constrained_value(false)
+WindowedComponent::WindowedComponent(const SireCAS::Symbol &component, const SireCAS::Symbol &reference,
+                                     const QVector<double> &values, int step)
+    : ConcreteProperty<WindowedComponent, Constraint>(), constrained_component(component),
+      reference_component(reference), window_values(values), step_size(step), component_val(0), constrained_value(0),
+      target_value(0), has_constrained_value(false)
 {
     if (component == reference)
-        throw SireError::invalid_arg( QObject::tr(
-                "You cannot use the component %1 as both the constrained "
-                "and reference components in a WindowedComponent.")
-                    .arg(component.toString()), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("You cannot use the component %1 as both the constrained "
+                                                 "and reference components in a WindowedComponent.")
+                                         .arg(component.toString()),
+                                     CODELOC);
 
     int i = 0;
 
-    while(true)
+    while (true)
     {
         if (i >= window_values.count())
             break;
 
-        while (window_values.count( window_values[i] ) > 1)
+        while (window_values.count(window_values[i]) > 1)
         {
-            window_values.remove( window_values.lastIndexOf(window_values[i]) );
+            window_values.remove(window_values.lastIndexOf(window_values[i]));
         }
 
         ++i;
@@ -1124,23 +1076,20 @@ WindowedComponent::WindowedComponent(const SireCAS::Symbol &component,
 
 /** Copy constructor */
 WindowedComponent::WindowedComponent(const WindowedComponent &other)
-                  : ConcreteProperty<WindowedComponent,Constraint>(other),
-                    constrained_component(other.constrained_component),
-                    reference_component(other.reference_component),
-                    window_values(other.window_values),
-                    step_size(other.step_size),
-                    component_val(other.component_val),
-                    constrained_value(other.constrained_value),
-                    target_value(other.target_value),
-                    has_constrained_value(other.has_constrained_value)
-{}
+    : ConcreteProperty<WindowedComponent, Constraint>(other), constrained_component(other.constrained_component),
+      reference_component(other.reference_component), window_values(other.window_values), step_size(other.step_size),
+      component_val(other.component_val), constrained_value(other.constrained_value), target_value(other.target_value),
+      has_constrained_value(other.has_constrained_value)
+{
+}
 
 /** Destructor */
 WindowedComponent::~WindowedComponent()
-{}
+{
+}
 
 /** Copy assignment operator */
-WindowedComponent& WindowedComponent::operator=(const WindowedComponent &other)
+WindowedComponent &WindowedComponent::operator=(const WindowedComponent &other)
 {
     if (this != &other)
     {
@@ -1162,10 +1111,8 @@ WindowedComponent& WindowedComponent::operator=(const WindowedComponent &other)
 /** Comparison operator */
 bool WindowedComponent::operator==(const WindowedComponent &other) const
 {
-    return constrained_component == other.constrained_component and
-           reference_component == other.reference_component and
-           window_values == other.window_values and
-           step_size == other.step_size;
+    return constrained_component == other.constrained_component and reference_component == other.reference_component and
+           window_values == other.window_values and step_size == other.step_size;
 }
 
 /** Comparison operator */
@@ -1179,24 +1126,25 @@ QString WindowedComponent::toString() const
 {
     return QObject::tr("WindowedComponent( component=%1 reference=%2 step_size=%3 )\n"
                        "   windowed_values = %4")
-                .arg(constrained_component.toString(), reference_component.toString())
-                .arg(step_size).arg(Sire::toString(window_values));
+        .arg(constrained_component.toString(), reference_component.toString())
+        .arg(step_size)
+        .arg(Sire::toString(window_values));
 }
 
 /** Return the symbol representing the component being constrained */
-const SireCAS::Symbol& WindowedComponent::component() const
+const SireCAS::Symbol &WindowedComponent::component() const
 {
     return constrained_component;
 }
 
 /** Return the symbol representing the reference component */
-const SireCAS::Symbol& WindowedComponent::referenceComponent() const
+const SireCAS::Symbol &WindowedComponent::referenceComponent() const
 {
     return reference_component;
 }
 
 /** Return the values of all of the windows */
-const QVector<double>& WindowedComponent::windowValues() const
+const QVector<double> &WindowedComponent::windowValues() const
 {
     return window_values;
 }
@@ -1209,20 +1157,18 @@ int WindowedComponent::stepSize() const
     return step_size;
 }
 
-static double getNextWindow(double reference_value,
-                            const QVector<double> &window_values,
-                            int step_size)
+static double getNextWindow(double reference_value, const QVector<double> &window_values, int step_size)
 {
     int idx = window_values.indexOf(reference_value);
 
     if (idx == -1)
     {
-        //find the closest value
+        // find the closest value
         double del2 = std::numeric_limits<double>::max();
 
-        for (int i=0; i<window_values.count(); ++i)
+        for (int i = 0; i < window_values.count(); ++i)
         {
-            double my_del2 = SireMaths::pow_2( reference_value - window_values.at(i) );
+            double my_del2 = SireMaths::pow_2(reference_value - window_values.at(i));
 
             if (my_del2 < del2)
             {
@@ -1232,7 +1178,7 @@ static double getNextWindow(double reference_value,
         }
     }
 
-    BOOST_ASSERT( idx != -1 );
+    BOOST_ASSERT(idx != -1);
 
     idx += step_size;
 
@@ -1249,10 +1195,9 @@ static double getNextWindow(double reference_value,
     subversion 'subversion' */
 bool WindowedComponent::mayChange(const Delta &delta, quint32 last_subversion) const
 {
-    BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) );
+    BOOST_ASSERT(Constraint::wasLastSystem(delta.deltaSystem()));
 
-    return (not Constraint::wasLastSatisfied()) or
-           delta.sinceChanged(reference_component, last_subversion) or
+    return (not Constraint::wasLastSatisfied()) or delta.sinceChanged(reference_component, last_subversion) or
            delta.sinceChanged(constrained_component, last_subversion);
 }
 
@@ -1261,7 +1206,7 @@ bool WindowedComponent::mayChange(const Delta &delta, quint32 last_subversion) c
     and to check if the constraint is satisfied */
 void WindowedComponent::setSystem(const System &system)
 {
-    if ( Constraint::wasLastSystem(system) and Constraint::wasLastSubVersion(system) )
+    if (Constraint::wasLastSystem(system) and Constraint::wasLastSubVersion(system))
         return;
 
     Constraint::clearLastSystem();
@@ -1289,8 +1234,7 @@ void WindowedComponent::setSystem(const System &system)
     else
         target_value = ::getNextWindow(component_val, window_values, step_size);
 
-    Constraint::setSatisfied( system, has_constrained_value and
-                                      SireMaths::areEqual(constrained_value,target_value) );
+    Constraint::setSatisfied(system, has_constrained_value and SireMaths::areEqual(constrained_value, target_value));
 }
 
 /** Fully apply this constraint on the passed delta - this returns
@@ -1300,8 +1244,7 @@ bool WindowedComponent::fullApply(Delta &delta)
     if (window_values.isEmpty())
         return false;
 
-    BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) and
-                  Constraint::wasLastSubVersion(delta.deltaSystem()) );
+    BOOST_ASSERT(Constraint::wasLastSystem(delta.deltaSystem()) and Constraint::wasLastSubVersion(delta.deltaSystem()));
 
     constrained_value = target_value;
 
@@ -1323,7 +1266,7 @@ bool WindowedComponent::deltaApply(Delta &delta, quint32 last_subversion)
     if (window_values.isEmpty())
         return false;
 
-    BOOST_ASSERT( Constraint::wasLastSystem(delta.deltaSystem()) );
+    BOOST_ASSERT(Constraint::wasLastSystem(delta.deltaSystem()));
 
     bool changed_comp = delta.sinceChanged(constrained_component, last_subversion);
     bool changed_sym = delta.sinceChanged(reference_component, last_subversion);
@@ -1357,7 +1300,7 @@ bool WindowedComponent::deltaApply(Delta &delta, quint32 last_subversion)
             {
                 double new_comp = system.constant(constrained_component);
 
-                if ( (not has_constrained_value) or constrained_value != new_comp )
+                if ((not has_constrained_value) or constrained_value != new_comp)
                 {
                     has_constrained_value = true;
                     constrained_value = new_comp;
@@ -1374,8 +1317,7 @@ bool WindowedComponent::deltaApply(Delta &delta, quint32 last_subversion)
             }
         }
 
-        if ( (changed_target or changed_comp) and not
-             (has_constrained_value and (constrained_value == target_value)) )
+        if ((changed_target or changed_comp) and not(has_constrained_value and (constrained_value == target_value)))
         {
             bool changed = delta.update(constrained_component, target_value);
             constrained_value = delta.deltaSystem().constant(constrained_component);
@@ -1390,13 +1332,12 @@ bool WindowedComponent::deltaApply(Delta &delta, quint32 last_subversion)
     return false;
 }
 
-const char* WindowedComponent::typeName()
+const char *WindowedComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<WindowedComponent>() );
+    return QMetaType::typeName(qMetaTypeId<WindowedComponent>());
 }
 
-NullConstraint* NullConstraint::clone() const
+NullConstraint *NullConstraint::clone() const
 {
     return new NullConstraint(*this);
 }
-

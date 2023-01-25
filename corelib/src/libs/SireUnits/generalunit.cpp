@@ -1,7 +1,7 @@
 
-#include <QStringList>
-#include <QMutex>
 #include <QHash>
+#include <QMutex>
+#include <QStringList>
 
 #include "generalunit.h"
 
@@ -36,9 +36,7 @@ QDataStream &operator<<(QDataStream &ds, const SireUnits::Dimension::GeneralUnit
     qint8 t2 = u.TIME();
     qint8 q = u.QUANTITY();
 
-    sds << u.comps
-        << a << c << l << m << t1 << t2 << q
-        << static_cast<const Unit &>(u);
+    sds << u.comps << a << c << l << m << t1 << t2 << q << static_cast<const Unit &>(u);
 
     return ds;
 }
@@ -160,8 +158,7 @@ GeneralUnit::GeneralUnit(const TempBase &t) : Unit(t)
     Angle = 0;
 }
 
-GeneralUnit::GeneralUnit(const GeneralUnit &other)
-    : Unit(other), comps(other.comps)
+GeneralUnit::GeneralUnit(const GeneralUnit &other) : Unit(other), comps(other.comps)
 {
     Mass = other.Mass;
     Length = other.Length;
@@ -197,36 +194,22 @@ void GeneralUnit::assertCompatible(const GeneralUnit &other) const
     if (this->isZero() or other.isZero())
         return;
 
-    if (Mass != other.Mass or
-        Length != other.Length or
-        Time != other.Time or
-        Charge != other.Charge or
-        temperature != other.temperature or
-        Quantity != other.Quantity or
-        Angle != other.Angle)
+    if (Mass != other.Mass or Length != other.Length or Time != other.Time or Charge != other.Charge or
+        temperature != other.temperature or Quantity != other.Quantity or Angle != other.Angle)
     {
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Units for values %1 and %2 are incompatible.")
-                                                .arg(this->toString())
-                                                .arg(other.toString()));
+        throw SireError::incompatible_error(
+            QObject::tr("Units for values %1 and %2 are incompatible.").arg(this->toString()).arg(other.toString()));
     }
 }
 
 QString GeneralUnit::unitString() const
 {
-    return SireUnits::Dimension::getUnitString(Mass, Length,
-                                               Time, Charge,
-                                               temperature, Quantity,
-                                               Angle)
-        .second;
+    return SireUnits::Dimension::getUnitString(Mass, Length, Time, Charge, temperature, Quantity, Angle).second;
 }
 
 QString GeneralUnit::toString() const
 {
-    auto u = SireUnits::Dimension::getUnitString(Mass, Length,
-                                                 Time, Charge,
-                                                 temperature, Quantity,
-                                                 Angle);
+    auto u = SireUnits::Dimension::getUnitString(Mass, Length, Time, Charge, temperature, Quantity, Angle);
 
     double v = value();
 
@@ -259,12 +242,7 @@ double GeneralUnit::to(const TempBase &other) const
 
 bool GeneralUnit::isDimensionless() const
 {
-    return Mass == 0 and
-           Length == 0 and
-           Time == 0 and
-           Charge == 0 and
-           temperature == 0 and
-           Quantity == 0 and
+    return Mass == 0 and Length == 0 and Time == 0 and Charge == 0 and temperature == 0 and Quantity == 0 and
            Angle == 0;
 }
 
@@ -323,13 +301,8 @@ GeneralUnit GeneralUnit::units() const
 
 bool GeneralUnit::hasSameUnits(const GeneralUnit &other) const
 {
-    return Mass == other.Mass and
-           Length == other.Length and
-           Time == other.Time and
-           Charge == other.Charge and
-           temperature == other.temperature and
-           Quantity == other.Quantity and
-           Angle == other.Angle;
+    return Mass == other.Mass and Length == other.Length and Time == other.Time and Charge == other.Charge and
+           temperature == other.temperature and Quantity == other.Quantity and Angle == other.Angle;
 }
 
 GeneralUnit &GeneralUnit::operator=(const GeneralUnit &other)
@@ -816,8 +789,7 @@ GeneralUnit GeneralUnit::getComponent(const QString &component) const
     return v;
 }
 
-void GeneralUnit::setComponent(const QString &component,
-                               const GeneralUnit &value)
+void GeneralUnit::setComponent(const QString &component, const GeneralUnit &value)
 {
     this->assertCompatible(value);
 
@@ -843,8 +815,7 @@ void GeneralUnit::setComponent(const QString &component,
         this->operator=(GeneralUnit());
 }
 
-void GeneralUnit::addComponent(const QString &component,
-                               const GeneralUnit &value)
+void GeneralUnit::addComponent(const QString &component, const GeneralUnit &value)
 {
     if (value.isZero())
         return;
@@ -871,8 +842,7 @@ void GeneralUnit::addComponent(const QString &component,
         this->operator=(GeneralUnit());
 }
 
-void GeneralUnit::subtractComponent(const QString &component,
-                                    const GeneralUnit &value)
+void GeneralUnit::subtractComponent(const QString &component, const GeneralUnit &value)
 {
     this->addComponent(component, -value);
 }

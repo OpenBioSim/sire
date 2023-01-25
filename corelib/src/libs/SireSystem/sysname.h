@@ -36,64 +36,64 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class SysName;
+    class SysName;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::SysName&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::SysName&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::SysName &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::SysName &);
 
 namespace SireSystem
 {
 
-/** This class holds the name of a simulation system
+    /** This class holds the name of a simulation system
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT SysName : public SireID::Name, public SysID
-{
-
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const SysName&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, SysName&);
-
-public:
-    SysName();
-    explicit SysName(const QString &name);
-
-    SysName(const SysName &other);
-
-    ~SysName();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT SysName : public SireID::Name, public SysID
     {
-        return SysName::typeName();
-    }
 
-    SysName* clone() const;
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const SysName &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, SysName &);
 
-    bool isNull() const;
+    public:
+        SysName();
+        explicit SysName(const QString &name);
 
-    uint hash() const;
+        SysName(const SysName &other);
 
-    QString toString() const;
+        ~SysName();
 
-    SysName& operator=(const SysName &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return SysName::typeName();
+        }
 
-    bool operator==(const SysName &other) const;
+        SysName *clone() const;
 
-    bool operator!=(const SysName &other) const;
+        bool isNull() const;
 
-    QList<SysIdx> map(const Systems &systems) const;
-};
+        uint hash() const;
 
-}
+        QString toString() const;
 
-Q_DECLARE_METATYPE( SireSystem::SysName );
+        SysName &operator=(const SysName &other);
 
-SIRE_EXPOSE_CLASS( SireSystem::SysName )
+        bool operator==(const SireID::ID &other) const;
+
+        bool operator==(const SysName &other) const;
+
+        bool operator!=(const SysName &other) const;
+
+        QList<SysIdx> map(const Systems &systems) const;
+    };
+
+} // namespace SireSystem
+
+Q_DECLARE_METATYPE(SireSystem::SysName);
+
+SIRE_EXPOSE_CLASS(SireSystem::SysName)
 
 SIRE_END_HEADER
 

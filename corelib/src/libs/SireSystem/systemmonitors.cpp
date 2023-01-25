@@ -29,8 +29,8 @@
 
 #include "system.h"
 
-#include "monitorname.h"
 #include "monitoridx.h"
+#include "monitorname.h"
 
 #include "tostring.h"
 
@@ -51,8 +51,7 @@ QDataStream &operator<<(QDataStream &ds, const SystemMonitors &sysmons)
 
     SharedDataStream sds(ds);
 
-    sds << sysmons.mons_by_name << sysmons.mons_by_idx
-        << sysmons.mons_by_frequency << sysmons.stepnum;
+    sds << sysmons.mons_by_name << sysmons.mons_by_idx << sysmons.mons_by_frequency << sysmons.stepnum;
 
     return ds;
 }
@@ -66,8 +65,7 @@ QDataStream &operator>>(QDataStream &ds, SystemMonitors &sysmons)
     {
         SharedDataStream sds(ds);
 
-        sds >> sysmons.mons_by_name >> sysmons.mons_by_idx
-            >> sysmons.mons_by_frequency >> sysmons.stepnum;
+        sds >> sysmons.mons_by_name >> sysmons.mons_by_idx >> sysmons.mons_by_frequency >> sysmons.stepnum;
     }
     else
         throw version_error(v, "1", r_sysmons, CODELOC);
@@ -77,22 +75,23 @@ QDataStream &operator>>(QDataStream &ds, SystemMonitors &sysmons)
 
 /** Constructor */
 SystemMonitors::SystemMonitors() : stepnum(0)
-{}
+{
+}
 
 /** Copy constructor */
 SystemMonitors::SystemMonitors(const SystemMonitors &other)
-               : mons_by_name(other.mons_by_name),
-                 mons_by_idx(other.mons_by_idx),
-                 mons_by_frequency(other.mons_by_frequency),
-                 stepnum(other.stepnum)
-{}
+    : mons_by_name(other.mons_by_name), mons_by_idx(other.mons_by_idx), mons_by_frequency(other.mons_by_frequency),
+      stepnum(other.stepnum)
+{
+}
 
 /** Destructor */
 SystemMonitors::~SystemMonitors()
-{}
+{
+}
 
 /** Copy assignment operator */
-SystemMonitors& SystemMonitors::operator=(const SystemMonitors &other)
+SystemMonitors &SystemMonitors::operator=(const SystemMonitors &other)
 {
     if (this != &other)
     {
@@ -108,10 +107,8 @@ SystemMonitors& SystemMonitors::operator=(const SystemMonitors &other)
 /** Comparison operator */
 bool SystemMonitors::operator==(const SystemMonitors &other) const
 {
-    return mons_by_name == other.mons_by_name and
-           mons_by_idx == other.mons_by_idx and
-           mons_by_frequency == other.mons_by_frequency and
-           stepnum == other.stepnum;
+    return mons_by_name == other.mons_by_name and mons_by_idx == other.mons_by_idx and
+           mons_by_frequency == other.mons_by_frequency and stepnum == other.stepnum;
 }
 
 /** Comparison operator */
@@ -137,11 +134,10 @@ MonitorName SystemMonitors::monitorName(const MonitorID &monid) const
     QList<MonitorName> names = monid.map(*this);
 
     if (names.count() > 1)
-        throw SireSystem::duplicate_monitor( QObject::tr(
-            "More than one system monitor matches the ID '%1'. Matching "
-            "monitors have names %2.")
-                .arg(monid.toString(), Sire::toString(names)),
-                    CODELOC );
+        throw SireSystem::duplicate_monitor(QObject::tr("More than one system monitor matches the ID '%1'. Matching "
+                                                        "monitors have names %2.")
+                                                .arg(monid.toString(), Sire::toString(names)),
+                                            CODELOC);
 
     return names.at(0);
 }
@@ -152,9 +148,9 @@ MonitorName SystemMonitors::monitorName(const MonitorID &monid) const
     \throw SireSystem::duplicate_monitor
     \throw SireError::invalid_index
 */
-const SystemMonitor& SystemMonitors::operator[](const MonitorID &monid) const
+const SystemMonitor &SystemMonitors::operator[](const MonitorID &monid) const
 {
-    return mons_by_name.constFind( this->monitorName(monid) )->read();
+    return mons_by_name.constFind(this->monitorName(monid))->read();
 }
 
 /** Return the monitor at ID 'monid'
@@ -163,7 +159,7 @@ const SystemMonitor& SystemMonitors::operator[](const MonitorID &monid) const
     \throw SireSystem::duplicate_monitor
     \throw SireError::invalid_index
 */
-const SystemMonitor& SystemMonitors::at(const MonitorID &monid) const
+const SystemMonitor &SystemMonitors::at(const MonitorID &monid) const
 {
     return this->operator[](monid);
 }
@@ -175,11 +171,10 @@ const SystemMonitor& SystemMonitors::at(const MonitorID &monid) const
 QList<MonitorName> SystemMonitors::map(const MonitorName &monname) const
 {
     if (not mons_by_name.contains(monname))
-        throw SireSystem::missing_monitor( QObject::tr(
-            "There is no system monitor called %1. Available "
-            "monitors are %2.")
-                .arg(monname, Sire::toString(mons_by_name.keys())),
-                    CODELOC );
+        throw SireSystem::missing_monitor(QObject::tr("There is no system monitor called %1. Available "
+                                                      "monitors are %2.")
+                                              .arg(monname, Sire::toString(mons_by_name.keys())),
+                                          CODELOC);
 
     QList<MonitorName> names;
     names.append(monname);
@@ -194,7 +189,7 @@ QList<MonitorName> SystemMonitors::map(const MonitorIdx &monidx) const
 {
     QList<MonitorName> names;
 
-    names.append( mons_by_idx.at( monidx.map(mons_by_idx.count()) ) );
+    names.append(mons_by_idx.at(monidx.map(mons_by_idx.count())));
 
     return names;
 }
@@ -219,10 +214,8 @@ int SystemMonitors::getFrequency(const MonitorID &monid) const
 {
     MonitorName name = this->monitorName(monid);
 
-    for (QHash< quint32, QList<MonitorName> >::const_iterator
-                                        it = mons_by_frequency.constBegin();
-         it != mons_by_frequency.constEnd();
-         ++it)
+    for (QHash<quint32, QList<MonitorName>>::const_iterator it = mons_by_frequency.constBegin();
+         it != mons_by_frequency.constEnd(); ++it)
     {
         if (it.value().contains(name))
             return it.key();
@@ -248,18 +241,18 @@ QList<MonitorName> SystemMonitors::names() const
 
     \throw SireSystem::duplicate_monitor
 */
-void SystemMonitors::add(const QString &name, const SystemMonitor &monitor,
-                         int frequency)
+void SystemMonitors::add(const QString &name, const SystemMonitor &monitor, int frequency)
 {
-    MonitorName monname( name );
+    MonitorName monname(name);
 
     if (mons_by_name.contains(monname))
-        throw SireSystem::duplicate_monitor( QObject::tr(
-            "Cannot add the monitor of type %1 as a monitor with "
-            "the same name (%2, of type %3) is already present in this "
-            "collection.")
-                .arg(monitor.what()).arg(name).arg(mons_by_name.value(monname)->what()),
-                    CODELOC );
+        throw SireSystem::duplicate_monitor(QObject::tr("Cannot add the monitor of type %1 as a monitor with "
+                                                        "the same name (%2, of type %3) is already present in this "
+                                                        "collection.")
+                                                .arg(monitor.what())
+                                                .arg(name)
+                                                .arg(mons_by_name.value(monname)->what()),
+                                            CODELOC);
 
     mons_by_name.insert(monname, monitor);
     mons_by_idx.append(monname);
@@ -292,10 +285,10 @@ void SystemMonitors::add(const SystemMonitors &other)
     {
         foreach (const MonitorName &name, other.names())
         {
-            this->add( name, other[name], other.getFrequency(name) );
+            this->add(name, other[name], other.getFrequency(name));
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -318,21 +311,20 @@ void SystemMonitors::add(const SystemMonitors &other, int frequency)
 /** Set the frequency of all of the monitors to 'frequency' */
 void SystemMonitors::setAllFrequency(int frequency)
 {
-    //do we need to make any change?
+    // do we need to make any change?
     if (this->isEmpty())
         return;
 
     if (frequency < 0)
         frequency = 0;
 
-    if (mons_by_frequency.count() == 1 and
-        mons_by_frequency.contains( quint32(frequency) ))
+    if (mons_by_frequency.count() == 1 and mons_by_frequency.contains(quint32(frequency)))
     {
         return;
     }
 
     mons_by_frequency.clear();
-    mons_by_frequency.insert( quint32(frequency), mons_by_idx );
+    mons_by_frequency.insert(quint32(frequency), mons_by_idx);
 }
 
 /** Remove all of the monitors that match the ID 'monid'
@@ -349,7 +341,7 @@ void SystemMonitors::remove(const MonitorID &monid)
         mons_by_name.remove(name);
         mons_by_idx.removeAll(name);
 
-        QMutableHashIterator< quint32,QList<MonitorName> > it(mons_by_frequency);
+        QMutableHashIterator<quint32, QList<MonitorName>> it(mons_by_frequency);
 
         while (it.hasNext())
         {
@@ -373,9 +365,7 @@ void SystemMonitors::removeAll()
 /** Completely clear any statistics held in these monitors */
 void SystemMonitors::clearStatistics()
 {
-    for (QHash<MonitorName,SysMonPtr>::iterator it = mons_by_name.begin();
-         it != mons_by_name.end();
-         ++it)
+    for (QHash<MonitorName, SysMonPtr>::iterator it = mons_by_name.begin(); it != mons_by_name.end(); ++it)
     {
         it.value().edit().clearStatistics();
     }
@@ -392,12 +382,13 @@ void SystemMonitors::clearStatistics(const MonitorID &monid)
     {
         monitor_names = monid.map(*this);
     }
-    catch(...)
-    {}
+    catch (...)
+    {
+    }
 
     foreach (MonitorName monitor_name, monitor_names)
     {
-        BOOST_ASSERT( mons_by_name.contains(monitor_name) );
+        BOOST_ASSERT(mons_by_name.contains(monitor_name));
 
         mons_by_name[monitor_name].edit().clearStatistics();
     }
@@ -415,7 +406,7 @@ void SystemMonitors::setFrequency(const MonitorID &monid, int frequency)
 
     foreach (const MonitorName &name, names)
     {
-        QMutableHashIterator< quint32,QList<MonitorName> > it(mons_by_frequency);
+        QMutableHashIterator<quint32, QList<MonitorName>> it(mons_by_frequency);
 
         while (it.hasNext())
         {
@@ -439,7 +430,7 @@ void SystemMonitors::setFrequency(const MonitorID &monid, int frequency)
     \throw SireSystem::duplicate_monitor
     \throw SireError::invalid_index
 */
-const SystemMonitor& SystemMonitors::monitor(const MonitorID &monid) const
+const SystemMonitor &SystemMonitors::monitor(const MonitorID &monid) const
 {
     return this->operator[](monid);
 }
@@ -457,7 +448,7 @@ QList<SysMonPtr> SystemMonitors::monitors(const MonitorID &monid) const
 
     foreach (const MonitorName &name, names)
     {
-        mons.append( mons_by_name.value(name) );
+        mons.append(mons_by_name.value(name));
     }
 
     return mons;
@@ -471,7 +462,7 @@ QList<SysMonPtr> SystemMonitors::monitors() const
 
     foreach (const MonitorName &name, mons_by_idx)
     {
-        mons.append( mons_by_name.value(name) );
+        mons.append(mons_by_name.value(name));
     }
 
     return mons;
@@ -510,17 +501,15 @@ void SystemMonitors::monitor(System &system)
     try
     {
 
-        //increment the step number
+        // increment the step number
         stepnum += 1;
 
-        for (QHash< quint32,QList<MonitorName> >::const_iterator
-                                            it = mons_by_frequency.constBegin();
-             it != mons_by_frequency.constEnd();
-             ++it)
+        for (QHash<quint32, QList<MonitorName>>::const_iterator it = mons_by_frequency.constBegin();
+             it != mons_by_frequency.constEnd(); ++it)
         {
             if (stepnum % it.key() == 0)
             {
-                //it is time to update these monitors!
+                // it is time to update these monitors!
                 foreach (const MonitorName &name, it.value())
                 {
                     mons_by_name[name].edit().monitor(system);
@@ -528,14 +517,14 @@ void SystemMonitors::monitor(System &system)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
     }
 }
 
-const char* SystemMonitors::typeName()
+const char *SystemMonitors::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SystemMonitors>() );
+    return QMetaType::typeName(qMetaTypeId<SystemMonitors>());
 }

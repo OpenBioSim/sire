@@ -36,70 +36,69 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ChainName;
+    class ChainName;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ChainName&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ChainName&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ChainName &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ChainName &);
 
 namespace SireMol
 {
 
-/** This class holds the name of an atom. This can be used
-    to identify an atom within a residue.
+    /** This class holds the name of an atom. This can be used
+        to identify an atom within a residue.
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ChainName : public SireID::Name, public ChainID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ChainName&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ChainName&);
-
-public:
-    ChainName();
-
-    explicit ChainName(const QString &name);
-
-    ChainName(const QString &name, SireID::CaseSensitivity case_sensitivity);
-
-    ChainName(const ChainName &other);
-
-    ~ChainName();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ChainName : public SireID::Name, public ChainID
     {
-        return ChainName::typeName();
-    }
 
-    ChainName* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ChainName &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ChainName &);
 
-    bool isNull() const;
+    public:
+        ChainName();
 
-    uint hash() const;
+        explicit ChainName(const QString &name);
 
-    QString toString() const;
+        ChainName(const QString &name, SireID::CaseSensitivity case_sensitivity);
 
-    ChainName& operator=(const ChainName &other);
+        ChainName(const ChainName &other);
 
-    bool operator==(const SireID::ID &other) const;
+        ~ChainName();
 
-    bool operator==(const ChainName &other) const;
+        static const char *typeName();
 
-    bool operator!=(const ChainName &other) const;
+        const char *what() const
+        {
+            return ChainName::typeName();
+        }
 
-    QList<ChainIdx> map(const MolInfo &molinfo) const;
-};
+        ChainName *clone() const;
 
-}
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        ChainName &operator=(const ChainName &other);
+
+        bool operator==(const SireID::ID &other) const;
+
+        bool operator==(const ChainName &other) const;
+
+        bool operator!=(const ChainName &other) const;
+
+        QList<ChainIdx> map(const MolInfo &molinfo) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::ChainName);
 
-SIRE_EXPOSE_CLASS( SireMol::ChainName )
+SIRE_EXPOSE_CLASS(SireMol::ChainName)
 
 SIRE_END_HEADER
 
 #endif
-

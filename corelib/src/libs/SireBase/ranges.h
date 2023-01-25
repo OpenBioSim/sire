@@ -32,65 +32,65 @@
 
 namespace SireBase
 {
-class SimpleRange;
-class SetRange;
-}
+    class SimpleRange;
+    class SetRange;
+} // namespace SireBase
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::SimpleRange&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::SimpleRange&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::SimpleRange &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::SimpleRange &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::SetRange&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::SetRange&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::SetRange &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::SetRange &);
 
 namespace SireBase
 {
 
-/** This class represents a simple range from start to end in steps
-    of increment
+    /** This class represents a simple range from start to end in steps
+        of increment
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT SimpleRange : public SireBase::ConcreteProperty<SimpleRange,Range>
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT SimpleRange : public SireBase::ConcreteProperty<SimpleRange, Range>
+    {
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const SireBase::SimpleRange&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, SireBase::SimpleRange&);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const SireBase::SimpleRange &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, SireBase::SimpleRange &);
 
-public:
-    SimpleRange();
-    SimpleRange(qint64 i);
-    SimpleRange(qint64 start, qint64 end, qint64 increment=1);
+    public:
+        SimpleRange();
+        SimpleRange(qint64 i);
+        SimpleRange(qint64 start, qint64 end, qint64 increment = 1);
 
-    SimpleRange(const SimpleRange &other);
+        SimpleRange(const SimpleRange &other);
 
-    ~SimpleRange();
+        ~SimpleRange();
 
-    SimpleRange& operator=(const SimpleRange &other);
+        SimpleRange &operator=(const SimpleRange &other);
 
-    bool operator==(const SimpleRange &other) const;
-    bool operator!=(const SimpleRange &other) const;
+        bool operator==(const SimpleRange &other) const;
+        bool operator!=(const SimpleRange &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    SimpleRange* clone() const;
+        SimpleRange *clone() const;
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    qint64 next();
+        qint64 next();
 
-    bool atEnd() const;
+        bool atEnd() const;
 
-    RangePtr populate(int nvalues) const;
+        RangePtr populate(int nvalues) const;
 
-private:
-    qint64 strtval, endval, incr;
-};
+    private:
+        qint64 strtval, endval, incr;
+    };
 
-}
+} // namespace SireBase
 
-Q_DECLARE_METATYPE( SireBase::SimpleRange )
+Q_DECLARE_METATYPE(SireBase::SimpleRange)
 
-SIRE_EXPOSE_CLASS( SireBase::SimpleRange )
+SIRE_EXPOSE_CLASS(SireBase::SimpleRange)
 
 #endif

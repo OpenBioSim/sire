@@ -42,219 +42,215 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class Matrix;
+    class Matrix;
 }
 
 class QDataStream;
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Matrix&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Matrix&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Matrix &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Matrix &);
 
 namespace SireMaths
 {
 
-class Vector;
-class NMatrix;
+    class Vector;
+    class NMatrix;
 
-SIREMATHS_EXPORT const Matrix operator+(const Matrix &m1, const Matrix &m2);
-SIREMATHS_EXPORT const Matrix operator-(const Matrix &m1, const Matrix &m2);
-SIREMATHS_EXPORT const Matrix operator*(const Matrix &m1, const Matrix &m2);
-SIREMATHS_EXPORT const Vector operator*(const Matrix &m, const Vector &p);
-SIREMATHS_EXPORT const Matrix operator*(const Matrix &m, double c);
-SIREMATHS_EXPORT const Matrix operator*(double c, const Matrix &m);
+    SIREMATHS_EXPORT const Matrix operator+(const Matrix &m1, const Matrix &m2);
+    SIREMATHS_EXPORT const Matrix operator-(const Matrix &m1, const Matrix &m2);
+    SIREMATHS_EXPORT const Matrix operator*(const Matrix &m1, const Matrix &m2);
+    SIREMATHS_EXPORT const Vector operator*(const Matrix &m, const Vector &p);
+    SIREMATHS_EXPORT const Matrix operator*(const Matrix &m, double c);
+    SIREMATHS_EXPORT const Matrix operator*(double c, const Matrix &m);
 
-/**
-This class represents a 3x3 square matrix, used to represent 3D transformations.
+    /**
+    This class represents a 3x3 square matrix, used to represent 3D transformations.
 
-@author Christopher Woods
-*/
-class SIREMATHS_EXPORT Matrix
-{
-
-friend class Quaternion;
-
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Matrix&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Matrix&);
-
-public:
-    Matrix();
-
-    Matrix(double diagonal_value);
-
-    Matrix(double xx, double xy, double xz,
-           double yx, double yy, double yz,
-           double zx, double zy, double zz);
-
-    Matrix(const Vector& r1, const Vector& r2, const Vector& r3);
-    Matrix(const tuple<Vector,Vector,Vector> &rows);
-
-    Matrix(const NMatrix &m);
-    Matrix(const gsl_matrix *m);
-
-    Matrix(const Matrix& m);
-
-    ~Matrix();
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Matrix
     {
-        return Matrix::typeName();
-    }
 
-    const double& operator()(int i, int j) const;
-    double& operator()(int i, int j);
+        friend class Quaternion;
 
-    double* data();
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Matrix &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Matrix &);
 
-    const double* data() const;
-    const double* constData() const;
+    public:
+        Matrix();
 
-    int offset(int i, int j) const;
-    int checkedOffset(int i, int j) const;
+        Matrix(double diagonal_value);
 
-    double at(int i, int j) const;
+        Matrix(double xx, double xy, double xz, double yx, double yy, double yz, double zx, double zy, double zz);
 
-    Matrix transpose() const;
-    Matrix inverse() const;
-    Vector trace() const;
+        Matrix(const Vector &r1, const Vector &r2, const Vector &r3);
+        Matrix(const tuple<Vector, Vector, Vector> &rows);
 
-    QString toString() const;
+        Matrix(const NMatrix &m);
+        Matrix(const gsl_matrix *m);
 
-    bool isSymmetric() const;
-    void enforceSymmetric();
-    Matrix getPrincipalAxes() const;
+        Matrix(const Matrix &m);
 
-    boost::tuple<Vector,Matrix> diagonalise() const;
+        ~Matrix();
 
-    boost::tuple<Matrix,Matrix,Matrix> svd() const;
-    boost::tuple<Matrix,Matrix,Matrix> singleValueDecomposition() const;
+        static const char *typeName();
 
-    double xx() const;
-    double xy() const;
-    double xz() const;
+        const char *what() const
+        {
+            return Matrix::typeName();
+        }
 
-    double yx() const;
-    double yy() const;
-    double yz() const;
+        const double &operator()(int i, int j) const;
+        double &operator()(int i, int j);
 
-    double zx() const;
-    double zy() const;
-    double zz() const;
+        double *data();
 
-    Vector column0() const;
-    Vector column1() const;
-    Vector column2() const;
+        const double *data() const;
+        const double *constData() const;
 
-    Vector row0() const;
-    Vector row1() const;
-    Vector row2() const;
+        int offset(int i, int j) const;
+        int checkedOffset(int i, int j) const;
 
-    double determinant() const;
+        double at(int i, int j) const;
 
-    void setToIdentity();
+        Matrix transpose() const;
+        Matrix inverse() const;
+        Vector trace() const;
 
-    bool isIdentity() const;
+        QString toString() const;
 
-    static Matrix identity();
-    static Matrix zero();
+        bool isSymmetric() const;
+        void enforceSymmetric();
+        Matrix getPrincipalAxes() const;
 
-    Matrix& operator=(const Matrix &other);
+        boost::tuple<Vector, Matrix> diagonalise() const;
 
-    bool operator==(const Matrix& m) const;
-    bool operator!=(const Matrix& m) const;
+        boost::tuple<Matrix, Matrix, Matrix> svd() const;
+        boost::tuple<Matrix, Matrix, Matrix> singleValueDecomposition() const;
 
-    Matrix& operator+=(const Matrix &m);
-    Matrix& operator-=(const Matrix &m);
-    Matrix& operator*=(const Matrix &m);
-    Matrix& operator*=(double c);
-    Matrix& operator/=(double c);
+        double xx() const;
+        double xy() const;
+        double xz() const;
 
-    friend SIREMATHS_EXPORT const Matrix operator+(const Matrix &m1, const Matrix &m2);
-    friend SIREMATHS_EXPORT const Matrix operator-(const Matrix &m1, const Matrix &m2);
-    friend SIREMATHS_EXPORT const Matrix operator*(const Matrix &m1, const Matrix &m2);
-    friend SIREMATHS_EXPORT const Vector operator*(const Matrix &m, const Vector &p);
-    friend SIREMATHS_EXPORT const Matrix operator*(const Matrix &m, double c);
-    friend SIREMATHS_EXPORT const Matrix operator*(double c, const Matrix &m);
+        double yx() const;
+        double yy() const;
+        double yz() const;
 
-    static Matrix covariance(const QVector<Vector> &p,
-                             const QVector<Vector> &q,
-                             int n=-1);
+        double zx() const;
+        double zy() const;
+        double zz() const;
 
-protected:
-    /** The components of the matrix */
-    double array[9];
-};
+        Vector column0() const;
+        Vector column1() const;
+        Vector column2() const;
+
+        Vector row0() const;
+        Vector row1() const;
+        Vector row2() const;
+
+        double determinant() const;
+
+        void setToIdentity();
+
+        bool isIdentity() const;
+
+        static Matrix identity();
+        static Matrix zero();
+
+        Matrix &operator=(const Matrix &other);
+
+        bool operator==(const Matrix &m) const;
+        bool operator!=(const Matrix &m) const;
+
+        Matrix &operator+=(const Matrix &m);
+        Matrix &operator-=(const Matrix &m);
+        Matrix &operator*=(const Matrix &m);
+        Matrix &operator*=(double c);
+        Matrix &operator/=(double c);
+
+        friend SIREMATHS_EXPORT const Matrix operator+(const Matrix &m1, const Matrix &m2);
+        friend SIREMATHS_EXPORT const Matrix operator-(const Matrix &m1, const Matrix &m2);
+        friend SIREMATHS_EXPORT const Matrix operator*(const Matrix &m1, const Matrix &m2);
+        friend SIREMATHS_EXPORT const Vector operator*(const Matrix &m, const Vector &p);
+        friend SIREMATHS_EXPORT const Matrix operator*(const Matrix &m, double c);
+        friend SIREMATHS_EXPORT const Matrix operator*(double c, const Matrix &m);
+
+        static Matrix covariance(const QVector<Vector> &p, const QVector<Vector> &q, int n = -1);
+
+    protected:
+        /** The components of the matrix */
+        double array[9];
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the offset into the array of the value at index [i,j] */
-SIRE_ALWAYS_INLINE int Matrix::offset(int i, int j) const
-{
-    return 3*i + j;
-}
+    /** Return the offset into the array of the value at index [i,j] */
+    SIRE_ALWAYS_INLINE int Matrix::offset(int i, int j) const
+    {
+        return 3 * i + j;
+    }
 
-/** Return the xx element (matrix[0,0]) */
-SIRE_ALWAYS_INLINE double Matrix::xx() const
-{
-    return array[0];
-}
+    /** Return the xx element (matrix[0,0]) */
+    SIRE_ALWAYS_INLINE double Matrix::xx() const
+    {
+        return array[0];
+    }
 
-/** Return the xy element (matrix[0,1]) */
-SIRE_ALWAYS_INLINE double Matrix::xy() const
-{
-    return array[1];
-}
+    /** Return the xy element (matrix[0,1]) */
+    SIRE_ALWAYS_INLINE double Matrix::xy() const
+    {
+        return array[1];
+    }
 
-/** Return the xz element (matrix[0,2]) */
-SIRE_ALWAYS_INLINE double Matrix::xz() const
-{
-    return array[2];
-}
+    /** Return the xz element (matrix[0,2]) */
+    SIRE_ALWAYS_INLINE double Matrix::xz() const
+    {
+        return array[2];
+    }
 
-/** Return the yx element (matrix[1,0]) */
-SIRE_ALWAYS_INLINE double Matrix::yx() const
-{
-    return array[3];
-}
+    /** Return the yx element (matrix[1,0]) */
+    SIRE_ALWAYS_INLINE double Matrix::yx() const
+    {
+        return array[3];
+    }
 
-/** Return the yy element (matrix[1,1]) */
-SIRE_ALWAYS_INLINE double Matrix::yy() const
-{
-    return array[4];
-}
+    /** Return the yy element (matrix[1,1]) */
+    SIRE_ALWAYS_INLINE double Matrix::yy() const
+    {
+        return array[4];
+    }
 
-/** Return the yz element (matrix[1,2]) */
-SIRE_ALWAYS_INLINE double Matrix::yz() const
-{
-    return array[5];
-}
+    /** Return the yz element (matrix[1,2]) */
+    SIRE_ALWAYS_INLINE double Matrix::yz() const
+    {
+        return array[5];
+    }
 
-/** Return the zx element (matrix[2,0]) */
-SIRE_ALWAYS_INLINE double Matrix::zx() const
-{
-    return array[6];
-}
+    /** Return the zx element (matrix[2,0]) */
+    SIRE_ALWAYS_INLINE double Matrix::zx() const
+    {
+        return array[6];
+    }
 
-/** Return the zy element (matrix[2,1]) */
-SIRE_ALWAYS_INLINE double Matrix::zy() const
-{
-    return array[7];
-}
+    /** Return the zy element (matrix[2,1]) */
+    SIRE_ALWAYS_INLINE double Matrix::zy() const
+    {
+        return array[7];
+    }
 
-/** Return the zz element (matrix[2,2]) */
-SIRE_ALWAYS_INLINE double Matrix::zz() const
-{
-    return array[8];
-}
+    /** Return the zz element (matrix[2,2]) */
+    SIRE_ALWAYS_INLINE double Matrix::zz() const
+    {
+        return array[8];
+    }
 
 #endif // #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::Matrix)
 Q_DECLARE_TYPEINFO(SireMaths::Matrix, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMaths::Matrix )
+SIRE_EXPOSE_CLASS(SireMaths::Matrix)
 
 SIRE_END_HEADER
 

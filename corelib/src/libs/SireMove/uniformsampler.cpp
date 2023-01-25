@@ -46,11 +46,9 @@ using namespace SireStream;
 static const RegisterMetaType<UniformSampler> r_sampler;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const UniformSampler &sampler)
+QDataStream &operator<<(QDataStream &ds, const UniformSampler &sampler)
 {
-    writeHeader(ds, r_sampler, 1)
-          << static_cast<const Sampler&>(sampler);
+    writeHeader(ds, r_sampler, 1) << static_cast<const Sampler &>(sampler);
 
     return ds;
 }
@@ -62,7 +60,7 @@ QDataStream &operator>>(QDataStream &ds, UniformSampler &sampler)
 
     if (v == 1)
     {
-        ds >> static_cast<Sampler&>(sampler);
+        ds >> static_cast<Sampler &>(sampler);
     }
     else
         throw version_error(v, "1", r_sampler, CODELOC);
@@ -71,32 +69,33 @@ QDataStream &operator>>(QDataStream &ds, UniformSampler &sampler)
 }
 
 /** Constructor */
-UniformSampler::UniformSampler()
-               : ConcreteProperty<UniformSampler,Sampler>()
-{}
+UniformSampler::UniformSampler() : ConcreteProperty<UniformSampler, Sampler>()
+{
+}
 
-const UniformSampler& Sampler::null()
+const UniformSampler &Sampler::null()
 {
     return *(create_shared_null<UniformSampler>());
 }
 
 /** Constructor a sampler that chooses views at random from the
     passed molecule group */
-UniformSampler::UniformSampler(const MoleculeGroup &molgroup)
-               : ConcreteProperty<UniformSampler,Sampler>(molgroup)
-{}
+UniformSampler::UniformSampler(const MoleculeGroup &molgroup) : ConcreteProperty<UniformSampler, Sampler>(molgroup)
+{
+}
 
 /** Copy constructor */
-UniformSampler::UniformSampler(const UniformSampler &other)
-               : ConcreteProperty<UniformSampler,Sampler>(other)
-{}
+UniformSampler::UniformSampler(const UniformSampler &other) : ConcreteProperty<UniformSampler, Sampler>(other)
+{
+}
 
 /** Destructor */
 UniformSampler::~UniformSampler()
-{}
+{
+}
 
 /** Copy assignment */
-UniformSampler& UniformSampler::operator=(const UniformSampler &other)
+UniformSampler &UniformSampler::operator=(const UniformSampler &other)
 {
     Sampler::operator=(other);
 
@@ -105,46 +104,44 @@ UniformSampler& UniformSampler::operator=(const UniformSampler &other)
 
 /** Return a random view molecule from the molecule group, together with
     the probability of choosing that view. */
-tuple<PartialMolecule,double> UniformSampler::sample() const
+tuple<PartialMolecule, double> UniformSampler::sample() const
 {
-    //how many molecule views are there in this molecule group?
+    // how many molecule views are there in this molecule group?
     int nviews = group().nViews();
 
     if (nviews == 0)
-        throw SireMol::missing_molecule( QObject::tr(
-            "The MoleculeGroup is empty, so we can't choose a molecule!"),
-                CODELOC );
+        throw SireMol::missing_molecule(QObject::tr("The MoleculeGroup is empty, so we can't choose a molecule!"),
+                                        CODELOC);
 
     else if (nviews == 1)
-        return tuple<PartialMolecule,double>(group().viewAt(0), 1);
+        return tuple<PartialMolecule, double>(group().viewAt(0), 1);
 
-    //choose a random view
-    quint32 i = generator().randInt(nviews-1);
+    // choose a random view
+    quint32 i = generator().randInt(nviews - 1);
 
-    //return the matching molecule
-    return tuple<PartialMolecule,double>(group().viewAt(i), 1.0 / nviews);
+    // return the matching molecule
+    return tuple<PartialMolecule, double>(group().viewAt(i), 1.0 / nviews);
 }
 
 /** Return a random molecule from the molecule group, together with
     the probability of choosing that molecule. This returns the entire
     molecule even if only a part of the molecule is in the group */
-tuple<Molecule,double> UniformSampler::sampleMolecule() const
+tuple<Molecule, double> UniformSampler::sampleMolecule() const
 {
-    //how many molecules are there in the molecule group?
+    // how many molecules are there in the molecule group?
     int nmols = group().nMolecules();
 
     if (nmols == 0)
-        throw SireMol::missing_molecule( QObject::tr(
-            "The MoleculeGroup is empty, so we can't choose a molecule!"),
-                CODELOC );
+        throw SireMol::missing_molecule(QObject::tr("The MoleculeGroup is empty, so we can't choose a molecule!"),
+                                        CODELOC);
 
     else if (nmols == 1)
-        return tuple<Molecule,double>( Molecule(group().moleculeAt(0)) , 1);
+        return tuple<Molecule, double>(Molecule(group().moleculeAt(0)), 1);
 
-    //choose a random molecule
-    quint32 i = generator().randInt(nmols-1);
+    // choose a random molecule
+    quint32 i = generator().randInt(nmols - 1);
 
-    return tuple<Molecule,double>( Molecule(group().moleculeAt(i)), 1.0 / nmols );
+    return tuple<Molecule, double>(Molecule(group().moleculeAt(i)), 1.0 / nmols);
 }
 
 /** Return the probability of selecting the view in 'molview' from
@@ -171,13 +168,12 @@ double UniformSampler::probabilityOfMolecule(const Molecule &molecule) const
         return 0;
 }
 
-const char* UniformSampler::typeName()
+const char *UniformSampler::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<UniformSampler>() );
+    return QMetaType::typeName(qMetaTypeId<UniformSampler>());
 }
 
-UniformSampler* UniformSampler::clone() const
+UniformSampler *UniformSampler::clone() const
 {
     return new UniformSampler(*this);
 }
-

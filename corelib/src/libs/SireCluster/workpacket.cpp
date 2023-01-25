@@ -37,11 +37,11 @@
 #include <QDebug>
 
 #ifdef Q_OS_WIN
-   #include <windows.h>    // CONDITIONAL_INCLUDE
+#include <windows.h> // CONDITIONAL_INCLUDE
 #else
-   #ifdef Q_OS_UNIX
-       #include <unistd.h>  // CONDITIONAL_INCLUDE
-   #endif
+#ifdef Q_OS_UNIX
+#include <unistd.h> // CONDITIONAL_INCLUDE
+#endif
 #endif
 
 using namespace SireCluster;
@@ -52,12 +52,10 @@ using namespace SireStream;
 /////////// Implementation of WorkPacketBase
 ///////////
 
-static const RegisterMetaType<WorkPacketBase> r_workbase( MAGIC_ONLY,
-                                                          WorkPacketBase::typeName() );
+static const RegisterMetaType<WorkPacketBase> r_workbase(MAGIC_ONLY, WorkPacketBase::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                           const WorkPacketBase &workbase)
+QDataStream &operator<<(QDataStream &ds, const WorkPacketBase &workbase)
 {
     writeHeader(ds, r_workbase, 1);
 
@@ -86,22 +84,22 @@ QDataStream &operator>>(QDataStream &ds, WorkPacketBase &workbase)
 }
 
 /** Constructor */
-WorkPacketBase::WorkPacketBase()
-               : RefCountData(), current_progress(0)
-{}
+WorkPacketBase::WorkPacketBase() : RefCountData(), current_progress(0)
+{
+}
 
 /** Copy constructor */
-WorkPacketBase::WorkPacketBase(const WorkPacketBase &other)
-               : RefCountData(),
-                 current_progress(other.current_progress)
-{}
+WorkPacketBase::WorkPacketBase(const WorkPacketBase &other) : RefCountData(), current_progress(other.current_progress)
+{
+}
 
 /** Destructor */
 WorkPacketBase::~WorkPacketBase()
-{}
+{
+}
 
 /** Copy assignment operator */
-WorkPacketBase& WorkPacketBase::operator=(const WorkPacketBase &other)
+WorkPacketBase &WorkPacketBase::operator=(const WorkPacketBase &other)
 {
     if (this != &other)
     {
@@ -148,7 +146,8 @@ bool WorkPacketBase::isError() const
 
 /** Throw the error, if this is in an error state */
 void WorkPacketBase::throwError() const
-{}
+{
+}
 
 /** Whether or not the job has been aborted */
 bool WorkPacketBase::wasAborted() const
@@ -167,7 +166,7 @@ void WorkPacketBase::runChunk()
     }
 
     float new_progress = this->chunk();
-    current_progress = qMin( float(0), qMax(new_progress,float(100)) );
+    current_progress = qMin(float(0), qMax(new_progress, float(100)));
 }
 
 ///////////
@@ -177,15 +176,13 @@ void WorkPacketBase::runChunk()
 static const RegisterMetaType<ErrorPacket> r_errorpacket;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                           const ErrorPacket &errorpacket)
+QDataStream &operator<<(QDataStream &ds, const ErrorPacket &errorpacket)
 {
     writeHeader(ds, r_errorpacket, 1);
 
     SharedDataStream sds(ds);
 
-    sds << errorpacket.error_data
-        << static_cast<const WorkPacketBase&>(errorpacket);
+    sds << errorpacket.error_data << static_cast<const WorkPacketBase &>(errorpacket);
 
     return ds;
 }
@@ -199,8 +196,7 @@ QDataStream &operator>>(QDataStream &ds, ErrorPacket &errorpacket)
     {
         SharedDataStream sds(ds);
 
-        sds >> errorpacket.error_data
-            >> static_cast<WorkPacketBase&>(errorpacket);
+        sds >> errorpacket.error_data >> static_cast<WorkPacketBase &>(errorpacket);
     }
     else
         throw version_error(v, "1", r_errorpacket, CODELOC);
@@ -210,26 +206,27 @@ QDataStream &operator>>(QDataStream &ds, ErrorPacket &errorpacket)
 
 /** Constructor */
 ErrorPacket::ErrorPacket() : WorkPacketBase()
-{}
+{
+}
 
 /** Construct an ErrorPacket for the error 'e' */
-ErrorPacket::ErrorPacket(const SireError::exception &e)
-            : WorkPacketBase()
+ErrorPacket::ErrorPacket(const SireError::exception &e) : WorkPacketBase()
 {
     error_data = e.pack();
 }
 
 /** Copy constructor */
-ErrorPacket::ErrorPacket(const ErrorPacket &other)
-            : WorkPacketBase(other), error_data(other.error_data)
-{}
+ErrorPacket::ErrorPacket(const ErrorPacket &other) : WorkPacketBase(other), error_data(other.error_data)
+{
+}
 
 /** Destructor */
 ErrorPacket::~ErrorPacket()
-{}
+{
+}
 
 /** Copy assignment operator */
-ErrorPacket& ErrorPacket::operator=(const ErrorPacket &other)
+ErrorPacket &ErrorPacket::operator=(const ErrorPacket &other)
 {
     if (this != &other)
     {
@@ -287,14 +284,13 @@ float ErrorPacket::chunk()
 static const RegisterMetaType<AbortPacket> r_abortpacket;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                           const AbortPacket &abortpacket)
+QDataStream &operator<<(QDataStream &ds, const AbortPacket &abortpacket)
 {
     writeHeader(ds, r_abortpacket, 1);
 
     SharedDataStream sds(ds);
 
-    sds << static_cast<const WorkPacketBase&>(abortpacket);
+    sds << static_cast<const WorkPacketBase &>(abortpacket);
 
     return ds;
 }
@@ -308,7 +304,7 @@ QDataStream &operator>>(QDataStream &ds, AbortPacket &abortpacket)
     {
         SharedDataStream sds(ds);
 
-        sds >> static_cast<WorkPacketBase&>(abortpacket);
+        sds >> static_cast<WorkPacketBase &>(abortpacket);
     }
     else
         throw version_error(v, "1", r_abortpacket, CODELOC);
@@ -318,18 +314,21 @@ QDataStream &operator>>(QDataStream &ds, AbortPacket &abortpacket)
 
 /** Constructor */
 AbortPacket::AbortPacket() : WorkPacketBase()
-{}
+{
+}
 
 /** Copy constructor */
 AbortPacket::AbortPacket(const AbortPacket &other) : WorkPacketBase(other)
-{}
+{
+}
 
 /** Destructor */
 AbortPacket::~AbortPacket()
-{}
+{
+}
 
 /** Copy assignment operator */
-AbortPacket& AbortPacket::operator=(const AbortPacket &other)
+AbortPacket &AbortPacket::operator=(const AbortPacket &other)
 {
     WorkPacketBase::operator=(other);
     return *this;
@@ -361,8 +360,7 @@ float AbortPacket::chunk()
 static const RegisterMetaType<WorkPacket> r_workpacket(NO_ROOT);
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                           const WorkPacket &workpacket)
+QDataStream &operator<<(QDataStream &ds, const WorkPacket &workpacket)
 {
     writeHeader(ds, r_workpacket, 1);
 
@@ -391,22 +389,26 @@ QDataStream &operator>>(QDataStream &ds, WorkPacket &workpacket)
 
 /** Create a null work packet */
 WorkPacket::WorkPacket()
-{}
+{
+}
 
 /** Construct from the passed work object */
 WorkPacket::WorkPacket(const WorkPacketBase &work) : d(work)
-{}
+{
+}
 
 /** Copy constructor */
 WorkPacket::WorkPacket(const WorkPacket &other) : d(other.d)
-{}
+{
+}
 
 /** Destructor */
 WorkPacket::~WorkPacket()
-{}
+{
+}
 
 /** Copy assignment operator */
-WorkPacket& WorkPacket::operator=(const WorkPacket &other)
+WorkPacket &WorkPacket::operator=(const WorkPacket &other)
 {
     if (other.isNull())
     {
@@ -442,7 +444,7 @@ QByteArray WorkPacket::pack() const
         return QByteArray();
 
     QByteArray data;
-    data.reserve( d->approximatePacketSize() );
+    data.reserve(d->approximatePacketSize());
 
     QDataStream ds(&data, QIODevice::WriteOnly);
 
@@ -534,15 +536,14 @@ void WorkPacket::setError(const SireError::exception &e) throw()
     {
         d = ErrorPacket(e);
     }
-    catch(const SireError::exception &e2)
+    catch (const SireError::exception &e2)
     {
         d = ErrorPacket(e2);
     }
-    catch(...)
+    catch (...)
     {
-        d = ErrorPacket( SireError::unknown_exception( QObject::tr(
-                "An unknown error occured while creating an ErrorPacket."),
-                    CODELOC ) );
+        d = ErrorPacket(SireError::unknown_exception(
+            QObject::tr("An unknown error occured while creating an ErrorPacket."), CODELOC));
     }
 }
 
@@ -559,20 +560,22 @@ void WorkPacket::runChunk() throw()
 
         d->runChunk();
     }
-    catch(const SireError::exception &e)
+    catch (const SireError::exception &e)
     {
         this->setError(e);
     }
-    catch(const std::exception &e)
+    catch (const std::exception &e)
     {
-        this->setError( SireError::std_exception(e) );
+        this->setError(SireError::std_exception(e));
     }
-    catch(...)
+    catch (...)
     {
-        this->setError( SireError::unknown_exception( QObject::tr(
-                "There was an unknown exception thrown while running a chunk "
-                "of the WorkPacket %1 (progress = %2 %%)")
-                    .arg(d->what()).arg(d->progress()), CODELOC ) );
+        this->setError(
+            SireError::unknown_exception(QObject::tr("There was an unknown exception thrown while running a chunk "
+                                                     "of the WorkPacket %1 (progress = %2 %%)")
+                                             .arg(d->what())
+                                             .arg(d->progress()),
+                                         CODELOC));
     }
 }
 
@@ -588,11 +591,10 @@ float WorkPacket::progress() const
 }
 
 /** Return a reference to the underlying Worker object */
-const WorkPacketBase& WorkPacket::base() const
+const WorkPacketBase &WorkPacket::base() const
 {
     if (this->isNull())
-        throw SireError::nullptr_error( QObject::tr(
-            "The null WorkPacket has no base!"), CODELOC );
+        throw SireError::nullptr_error(QObject::tr("The null WorkPacket has no base!"), CODELOC);
 
     return *d;
 }
@@ -610,9 +612,8 @@ QDataStream &operator<<(QDataStream &ds, const WorkTest &worktest)
 
     SharedDataStream sds(ds);
 
-    sds << worktest.current << worktest.start
-        << worktest.end << worktest.step
-        << static_cast<const WorkPacketBase&>(worktest);
+    sds << worktest.current << worktest.start << worktest.end << worktest.step
+        << static_cast<const WorkPacketBase &>(worktest);
 
     return ds;
 }
@@ -626,8 +627,8 @@ QDataStream &operator>>(QDataStream &ds, WorkTest &worktest)
     {
         SharedDataStream sds(ds);
 
-        sds >> worktest.current >> worktest.start >> worktest.end >> worktest.step
-            >> static_cast<WorkPacketBase&>(worktest);
+        sds >> worktest.current >> worktest.start >> worktest.end >> worktest.step >>
+            static_cast<WorkPacketBase &>(worktest);
     }
     else
         throw version_error(v, "1", r_worktest, CODELOC);
@@ -636,28 +637,29 @@ QDataStream &operator>>(QDataStream &ds, WorkTest &worktest)
 }
 
 /** Constructor */
-WorkTest::WorkTest()
-         : WorkPacketBase(), current(0), start(0), end(0), step(0)
-{}
+WorkTest::WorkTest() : WorkPacketBase(), current(0), start(0), end(0), step(0)
+{
+}
 
 /** Construct a work test that counts from start to end in steps of 'step' */
 WorkTest::WorkTest(int _start, int _end, int _step)
-         : WorkPacketBase(),
-           current(_start), start(_start), end(_end), step(_step)
-{}
+    : WorkPacketBase(), current(_start), start(_start), end(_end), step(_step)
+{
+}
 
 /** Copy constructor */
 WorkTest::WorkTest(const WorkTest &other)
-         : WorkPacketBase(other), current(other.current),
-           start(other.start), end(other.end), step(other.step)
-{}
+    : WorkPacketBase(other), current(other.current), start(other.start), end(other.end), step(other.step)
+{
+}
 
 /** Destructor */
 WorkTest::~WorkTest()
-{}
+{
+}
 
 /** Copy assignment operator */
-WorkTest& WorkTest::operator=(const WorkTest &other)
+WorkTest &WorkTest::operator=(const WorkTest &other)
 {
     if (this != &other)
     {
@@ -694,85 +696,79 @@ bool WorkTest::hasFinished() const
 float WorkTest::chunk()
 {
     if (step == 0)
-        throw SireError::invalid_arg( QObject::tr(
-                "You cannot use a step size of zero!"), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("You cannot use a step size of zero!"), CODELOC);
 
     if (start < end)
     {
         if (step < 0)
-            throw SireError::invalid_arg( QObject::tr(
-                "You cannot use a negative step size if start is less than end!"),
-                    CODELOC );
+            throw SireError::invalid_arg(QObject::tr("You cannot use a negative step size if start is less than end!"),
+                                         CODELOC);
 
-        current = qMin( current+step, end );
+        current = qMin(current + step, end);
 
         QTextStream ts(stdout);
         ts << "I've counted to " << current << "\n";
 
-        #ifdef Q_OS_WIN
-            Sleep(1);
-        #else
-            sleep(1);
-        #endif
+#ifdef Q_OS_WIN
+        Sleep(1);
+#else
+        sleep(1);
+#endif
 
-        return 100.0 - ( 100.0 * double(end - current) / double(end - start) );
+        return 100.0 - (100.0 * double(end - current) / double(end - start));
     }
     else
     {
         if (step > 0)
-            throw SireError::invalid_arg( QObject::tr(
-                "You cannot use a positive step size if start is greater than end!"),
-                    CODELOC );
+            throw SireError::invalid_arg(
+                QObject::tr("You cannot use a positive step size if start is greater than end!"), CODELOC);
 
-        current = qMax( current+step, end );
+        current = qMax(current + step, end);
 
         QTextStream ts(stdout);
         ts << "I've counted to " << current << "\n";
 
-        #ifdef Q_OS_WIN
-            Sleep(1);
-        #else
-            sleep(1);
-        #endif
+#ifdef Q_OS_WIN
+        Sleep(1);
+#else
+        sleep(1);
+#endif
 
-        return 100.0 - ( 100.0 * double(end - current) / double(end - start) );
+        return 100.0 - (100.0 * double(end - current) / double(end - start));
     }
 }
 
-const char* WorkPacket::typeName()
+const char *WorkPacket::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<WorkPacket>() );
+    return QMetaType::typeName(qMetaTypeId<WorkPacket>());
 }
 
-const char* ErrorPacket::typeName()
+const char *ErrorPacket::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ErrorPacket>() );
+    return QMetaType::typeName(qMetaTypeId<ErrorPacket>());
 }
 
-const char* AbortPacket::typeName()
+const char *AbortPacket::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AbortPacket>() );
+    return QMetaType::typeName(qMetaTypeId<AbortPacket>());
 }
 
-const char* WorkTest::typeName()
+const char *WorkTest::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<WorkTest>() );
+    return QMetaType::typeName(qMetaTypeId<WorkTest>());
 }
 
-WorkTest* WorkTest::clone() const
+WorkTest *WorkTest::clone() const
 {
     return new WorkTest(*this);
 }
 
-
-AbortPacket* AbortPacket::clone() const
+AbortPacket *AbortPacket::clone() const
 {
     return new AbortPacket(*this);
 }
 
-
-ErrorPacket* ErrorPacket::clone() const
+ErrorPacket *ErrorPacket::clone() const
 {
     return new ErrorPacket(*this);
 }
-

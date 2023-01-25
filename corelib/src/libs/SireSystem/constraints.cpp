@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "constraints.h"
+#include "delta.h"
 #include "moleculeconstraint.h"
 #include "system.h"
-#include "delta.h"
 
 #include "SireMol/molecules.h"
 
@@ -36,8 +36,8 @@
 
 #include "SireBase/savestate.h"
 
-#include "SireSystem/errors.h"
 #include "SireError/errors.h"
+#include "SireSystem/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -53,15 +53,13 @@ using namespace SireStream;
 static const RegisterMetaType<Constraints> r_constraints;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const Constraints &constraints)
+QDataStream &operator<<(QDataStream &ds, const Constraints &constraints)
 {
     writeHeader(ds, r_constraints, 3);
 
     SharedDataStream sds(ds);
 
-    sds << constraints.cons
-        << static_cast<const Property&>(constraints);
+    sds << constraints.cons << static_cast<const Property &>(constraints);
 
     return ds;
 }
@@ -75,7 +73,7 @@ QDataStream &operator>>(QDataStream &ds, Constraints &constraints)
     {
         SharedDataStream sds(ds);
 
-        sds >> constraints.cons >> static_cast<Property&>(constraints);
+        sds >> constraints.cons >> static_cast<Property &>(constraints);
     }
     else if (v == 2)
     {
@@ -83,8 +81,7 @@ QDataStream &operator>>(QDataStream &ds, Constraints &constraints)
 
         QVector<ConstraintPtr> molcons;
 
-        sds >> constraints.cons >> molcons
-            >> static_cast<Property&>(constraints);
+        sds >> constraints.cons >> molcons >> static_cast<Property &>(constraints);
 
         constraints.cons += molcons;
     }
@@ -105,19 +102,18 @@ QDataStream &operator>>(QDataStream &ds, Constraints &constraints)
 }
 
 /** Null constructor */
-Constraints::Constraints() : ConcreteProperty<Constraints,Property>()
-{}
+Constraints::Constraints() : ConcreteProperty<Constraints, Property>()
+{
+}
 
 /** Construct to contain just the constraint 'constraint' */
-Constraints::Constraints(const Constraint &constraint)
-            : ConcreteProperty<Constraints,Property>()
+Constraints::Constraints(const Constraint &constraint) : ConcreteProperty<Constraints, Property>()
 {
     this->add(constraint);
 }
 
 /** Construct from the passed list of constraints */
-Constraints::Constraints(const QVector<ConstraintPtr> &constraints)
-            : ConcreteProperty<Constraints,Property>()
+Constraints::Constraints(const QVector<ConstraintPtr> &constraints) : ConcreteProperty<Constraints, Property>()
 {
     foreach (const ConstraintPtr constraint, constraints)
     {
@@ -126,8 +122,7 @@ Constraints::Constraints(const QVector<ConstraintPtr> &constraints)
 }
 
 /** Construct from the passed list of constraints */
-Constraints::Constraints(const QList<ConstraintPtr> &constraints)
-            : ConcreteProperty<Constraints,Property>()
+Constraints::Constraints(const QList<ConstraintPtr> &constraints) : ConcreteProperty<Constraints, Property>()
 {
     foreach (const ConstraintPtr constraint, constraints)
     {
@@ -136,17 +131,17 @@ Constraints::Constraints(const QList<ConstraintPtr> &constraints)
 }
 
 /** Copy constructor */
-Constraints::Constraints(const Constraints &other)
-            : ConcreteProperty<Constraints,Property>(other),
-              cons(other.cons)
-{}
+Constraints::Constraints(const Constraints &other) : ConcreteProperty<Constraints, Property>(other), cons(other.cons)
+{
+}
 
 /** Destructor */
 Constraints::~Constraints()
-{}
+{
+}
 
 /** Copy assignment operator */
-Constraints& Constraints::operator=(const Constraints &other)
+Constraints &Constraints::operator=(const Constraints &other)
 {
     if (this != &other)
     {
@@ -173,36 +168,36 @@ bool Constraints::operator!=(const Constraints &other) const
 
     \throw SireError::invalid_index
 */
-const Constraint& Constraints::operator[](int i) const
+const Constraint &Constraints::operator[](int i) const
 {
-    i = Index(i).map( this->nConstraints() );
+    i = Index(i).map(this->nConstraints());
 
-    return cons.at( i ).read();
+    return cons.at(i).read();
 }
 
 /** Syntactic sugar for Constraints::add */
-Constraints& Constraints::operator+=(const Constraint &constraint)
+Constraints &Constraints::operator+=(const Constraint &constraint)
 {
     this->add(constraint);
     return *this;
 }
 
 /** Syntactic sugar for Constraints::add */
-Constraints& Constraints::operator+=(const Constraints &constraints)
+Constraints &Constraints::operator+=(const Constraints &constraints)
 {
     this->add(constraints);
     return *this;
 }
 
 /** Syntactic sugar for Constraints::remove */
-Constraints& Constraints::operator-=(const Constraint &constraint)
+Constraints &Constraints::operator-=(const Constraint &constraint)
 {
     this->remove(constraint);
     return *this;
 }
 
 /** Syntactic sugar for Constraints::remove */
-Constraints& Constraints::operator-=(const Constraints &constraints)
+Constraints &Constraints::operator-=(const Constraints &constraints)
 {
     this->remove(constraints);
     return *this;
@@ -245,7 +240,7 @@ void Constraints::add(const Constraint &constraint)
     foreach (const ConstraintPtr con, cons)
     {
         if (con->equals(constraint))
-           return;
+            return;
     }
 
     cons.append(constraint);
@@ -256,8 +251,7 @@ void Constraints::add(const Constraint &constraint)
     adds the constraints that are not already part of this set */
 void Constraints::add(const Constraints &constraints)
 {
-    for (QVector<ConstraintPtr>::const_iterator it = constraints.cons.constBegin();
-         it != constraints.cons.constEnd();
+    for (QVector<ConstraintPtr>::const_iterator it = constraints.cons.constBegin(); it != constraints.cons.constEnd();
          ++it)
     {
         this->add(it->read());
@@ -285,18 +279,17 @@ void Constraints::remove(const Constraint &constraint)
     set - this ignores constraints that are not in this set */
 void Constraints::remove(const Constraints &constraints)
 {
-    for (QVector<ConstraintPtr>::const_iterator it = constraints.cons.constBegin();
-         it != constraints.cons.constEnd();
+    for (QVector<ConstraintPtr>::const_iterator it = constraints.cons.constBegin(); it != constraints.cons.constEnd();
          ++it)
     {
-        this->remove( it->read() );
+        this->remove(it->read());
     }
 }
 
 /** Remove the constraint at index 'i' */
 void Constraints::removeAt(int i)
 {
-    i = Index(i).map( this->nConstraints() );
+    i = Index(i).map(this->nConstraints());
 
     cons.remove(i);
     cons.squeeze();
@@ -306,9 +299,7 @@ void Constraints::removeAt(int i)
     satisfied in the passed system */
 bool Constraints::areSatisfied(const System &system) const
 {
-    for (QVector<ConstraintPtr>::const_iterator it = cons.constBegin();
-         it != cons.constEnd();
-         ++it)
+    for (QVector<ConstraintPtr>::const_iterator it = cons.constBegin(); it != cons.constEnd(); ++it)
     {
         if (not it->read().isSatisfied(system))
         {
@@ -328,26 +319,24 @@ void Constraints::assertSatisfied(const System &system) const
 {
     QStringList broken_constraints;
 
-    for (QVector<ConstraintPtr>::const_iterator it = cons.constBegin();
-         it != cons.constEnd();
-         ++it)
+    for (QVector<ConstraintPtr>::const_iterator it = cons.constBegin(); it != cons.constEnd(); ++it)
     {
         if (not it->read().isSatisfied(system))
         {
-            broken_constraints.append( QObject::tr("%1 : %2")
-                        .arg(broken_constraints.count() + 1)
-                        .arg(it->read().toString()) );
+            broken_constraints.append(
+                QObject::tr("%1 : %2").arg(broken_constraints.count() + 1).arg(it->read().toString()));
         }
     }
 
     if (not broken_constraints.isEmpty())
     {
-        throw SireSystem::constraint_error( QObject::tr(
-            "Some of the constraints are not satisfied in the system %1. "
-            "The number of unsatisfied constraints in %2. Here they are;\n%3")
+        throw SireSystem::constraint_error(
+            QObject::tr("Some of the constraints are not satisfied in the system %1. "
+                        "The number of unsatisfied constraints in %2. Here they are;\n%3")
                 .arg(system.name())
                 .arg(broken_constraints.count())
-                .arg(broken_constraints.join("\n")), CODELOC );
+                .arg(broken_constraints.join("\n")),
+            CODELOC);
     }
 }
 
@@ -362,7 +351,7 @@ System Constraints::apply(const System &system)
 
     System new_system(system);
 
-    for (int i=0; i<10; ++i)
+    for (int i = 0; i < 10; ++i)
     {
         if (this->apply(delta))
             new_system = delta.apply();
@@ -370,11 +359,10 @@ System Constraints::apply(const System &system)
             return new_system;
     }
 
-    throw SireSystem::constraint_error( QObject::tr(
-            "The constraints %1 cannot be satisfied in connection with "
-            "the constraints in the system %2, %3.")
-                .arg(this->toString(), system.toString(),
-                     system.constraints().toString()), CODELOC );
+    throw SireSystem::constraint_error(QObject::tr("The constraints %1 cannot be satisfied in connection with "
+                                                   "the constraints in the system %2, %3.")
+                                           .arg(this->toString(), system.toString(), system.constraints().toString()),
+                                       CODELOC);
 
     return System();
 }
@@ -398,11 +386,11 @@ bool Constraints::apply(Delta &delta)
     {
         bool system_changed = false;
 
-        for (int i=0; i<10; ++i)
+        for (int i = 0; i < 10; ++i)
         {
             bool something_changed = false;
 
-            for (int j=0; j<cons.count(); ++j)
+            for (int j = 0; j < cons.count(); ++j)
             {
                 if (cons.at(j).read().mayAffect(delta))
                 {
@@ -417,7 +405,7 @@ bool Constraints::apply(Delta &delta)
             {
                 bool all_satisfied = true;
 
-                for (int j=0; j<cons.count(); ++j)
+                for (int j = 0; j < cons.count(); ++j)
                 {
                     if (not cons.at(j).read().isSatisfied(delta.deltaSystem()))
                     {
@@ -436,23 +424,23 @@ bool Constraints::apply(Delta &delta)
 
         bool all_satisfied = true;
 
-        for (int j=0; j<cons.count(); ++j)
+        for (int j = 0; j < cons.count(); ++j)
         {
             if (not cons.at(j).read().isSatisfied(delta.deltaSystem()))
             {
-                 all_satisfied = false;
-                 break;
+                all_satisfied = false;
+                break;
             }
         }
 
         if (all_satisfied)
             return system_changed;
 
-        //the constraints couldn't be satisfied - get the list
-        //of unsatisfied constraints
+        // the constraints couldn't be satisfied - get the list
+        // of unsatisfied constraints
         QStringList unsatisfied_constraints;
 
-        for (int j=0; j<cons.count(); ++j)
+        for (int j = 0; j < cons.count(); ++j)
         {
             if (not cons.at(j).read().isSatisfied(delta.deltaSystem()))
             {
@@ -460,12 +448,10 @@ bool Constraints::apply(Delta &delta)
             }
         }
 
-        throw SireSystem::constraint_error( QObject::tr(
-                "Cannot simultaneously satisfy the following constraints "
-                "on the system %1\n%2")
-                    .arg(delta.deltaSystem().toString(),
-                         unsatisfied_constraints.join("\n")),
-                            CODELOC );
+        throw SireSystem::constraint_error(QObject::tr("Cannot simultaneously satisfy the following constraints "
+                                                       "on the system %1\n%2")
+                                               .arg(delta.deltaSystem().toString(), unsatisfied_constraints.join("\n")),
+                                           CODELOC);
 
         return true;
     }
@@ -478,14 +464,14 @@ void Constraints::committed(const System &system)
 
     else
     {
-        for (int i=0; i<cons.count(); ++i)
+        for (int i = 0; i < cons.count(); ++i)
         {
             cons[i].edit().committed(system);
         }
     }
 }
 
-const char* Constraints::typeName()
+const char *Constraints::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Constraints>() );
+    return QMetaType::typeName(qMetaTypeId<Constraints>());
 }

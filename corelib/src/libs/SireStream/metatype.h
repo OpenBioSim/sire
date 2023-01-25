@@ -53,49 +53,49 @@ namespace SireStream
     QSet<QString> registeredClasses();
 
     /** Return whether the class called "type_name" is derived from the root (base) class T */
-    template<class T>
+    template <class T>
     bool isDerivedFrom(const QString &type_name)
     {
         return isDerivedFrom(T::typeName(), type_name);
     }
 
     /** Return whether the class "T" is derived from the root (base) class "S" */
-    template<class S, class T>
+    template <class S, class T>
     bool isDerivedFrom()
     {
         return isDerivedFrom(S::typeName(), QLatin1String(T::typeName()));
     }
 
     /** Return whether the class called "type_name" is a leaf of the root (base) class T */
-    template<class T>
+    template <class T>
     bool isLeafOf(const QString &type_name)
     {
         return isLeafOf(T::typeName(), type_name);
     }
 
     /** Return whether the class "T" is a leaf of the root (base) class "S" */
-    template<class S, class T>
+    template <class S, class T>
     bool isLeafOf()
     {
         return isLeafOf(S::typeName(), QLatin1String(T::typeName()));
     }
 
     /** Return whether the class called "type_name" is a branch of the root (base) class T */
-    template<class T>
+    template <class T>
     bool isBranchOf(const QString &type_name)
     {
         return isBranchOf(T::typeName(), type_name);
     }
 
     /** Return whether the class "T" is a branch of the root (base) class "S" */
-    template<class S, class T>
+    template <class S, class T>
     bool isBranchOf()
     {
         return isBranchOf(S::typeName(), QLatin1String(T::typeName()));
     }
 
     /** Return whether or not class T is rootless */
-    template<class T>
+    template <class T>
     bool isRootless()
     {
         return isRootless(T::typeName());
@@ -103,40 +103,40 @@ namespace SireStream
 
     /** Return the registered root of class T. This returns an empty
         string if the class has not been registered */
-    template<class T>
+    template <class T>
     QString registeredRoot()
     {
-        return registeredRoot( T::typeName() );
+        return registeredRoot(T::typeName());
     }
 
     /** Return whether or not class T is registered */
-    template<class T>
+    template <class T>
     bool isRegistered()
     {
         return isRegistered(T::typeName());
     }
 
     /** Return all of the leaf classes derived from root/base class T */
-    template<class T>
+    template <class T>
     QSet<QString> leafClassesOf()
     {
         return leafClassesOf(T::typeName());
     }
 
     /** Return all of the branch classes derived from root/base class T */
-    template<class T>
+    template <class T>
     QSet<QString> branchClassesOf()
     {
         return branchClassesOf(T::typeName());
     }
 
     /** Return all of the classes derived from root/base class T */
-    template<class T>
+    template <class T>
     QSet<QString> derivedClassesOf()
     {
         return derivedClassesOf(T::typeName());
     }
-}
+} // namespace SireStream
 
 SIRE_END_HEADER
 

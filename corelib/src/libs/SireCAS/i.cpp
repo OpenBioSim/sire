@@ -26,8 +26,8 @@
 \*********************************************/
 
 #include "i.h"
-#include "expression.h"
 #include "complexvalues.h"
+#include "expression.h"
 
 #include "SireMaths/errors.h"
 
@@ -41,7 +41,7 @@ static const RegisterMetaType<SireCAS::I> r_i;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const I &i)
 {
-    writeHeader(ds, r_i, 1) << static_cast<const Constant&>(i);
+    writeHeader(ds, r_i, 1) << static_cast<const Constant &>(i);
 
     return ds;
 }
@@ -53,7 +53,7 @@ QDataStream &operator>>(QDataStream &ds, I &i)
 
     if (v == 1)
     {
-        ds >> static_cast<Constant&>(i);
+        ds >> static_cast<Constant &>(i);
     }
     else
         throw version_error(v, "1", r_i, CODELOC);
@@ -63,20 +63,23 @@ QDataStream &operator>>(QDataStream &ds, I &i)
 
 /** Constructor */
 I::I() : Constant()
-{}
+{
+}
 
 /** Copy constructor */
 I::I(const I &other) : Constant(other)
-{}
+{
+}
 
 /** Destructor */
 I::~I()
-{}
+{
+}
 
 /** Comparison operator */
 bool I::operator==(const ExBase &other) const
 {
-    const I *other_i = dynamic_cast<const I*>(&other);
+    const I *other_i = dynamic_cast<const I *>(&other);
 
     return other_i != 0 and typeid(other).name() == typeid(*this).name();
 }
@@ -84,7 +87,7 @@ bool I::operator==(const ExBase &other) const
 /** Return a hash of this expression */
 uint I::hash() const
 {
-    return ( r_i.magicID() << 16 ) | ( r_i.magicID() & 0x0000FFFF );
+    return (r_i.magicID() << 16) | (r_i.magicID() & 0x0000FFFF);
 }
 
 /** Return a string representation */
@@ -94,16 +97,15 @@ QString I::toString() const
 }
 
 /** Cannot evaluate 'i' as a real number, so throw a domain error */
-double I::evaluate(const Values&) const
+double I::evaluate(const Values &) const
 {
-    throw SireMaths::domain_error(QObject::tr(
-        "Cannot evaluate 'i' as a real number"), CODELOC);
+    throw SireMaths::domain_error(QObject::tr("Cannot evaluate 'i' as a real number"), CODELOC);
 }
 
 /** Evaluate this as a complex number - return 'i' */
-Complex I::evaluate(const ComplexValues&) const
+Complex I::evaluate(const ComplexValues &) const
 {
-    return Complex(0,1);
+    return Complex(0, 1);
 }
 
 /** Return the complex conjugate of 'i' (-i) */
@@ -118,12 +120,12 @@ bool I::isComplex() const
     return true;
 }
 
-const char* I::typeName()
+const char *I::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<I>() );
+    return QMetaType::typeName(qMetaTypeId<I>());
 }
 
-I* I::clone() const
+I *I::clone() const
 {
     return new I(*this);
 }

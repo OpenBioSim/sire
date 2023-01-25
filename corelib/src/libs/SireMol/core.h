@@ -30,23 +30,22 @@
 
 // All of main molecule container type header files, arranged in the
 // order they need to avoid compile errors
-#include "SireBase/slice.h"
 #include "SireBase/property.h"
+#include "SireBase/slice.h"
 
+#include "atom.h"
+#include "chain.h"
+#include "cutgroup.h"
+#include "evaluator.h"
+#include "evaluatorm.h"
 #include "moleculedata.h"
 #include "moleculeinfo.h"
 #include "moleculeview.h"
-#include "atom.h"
-#include "residue.h"
-#include "chain.h"
-#include "cutgroup.h"
-#include "segment.h"
 #include "mover.hpp"
+#include "residue.h"
+#include "segment.h"
 #include "selector.hpp"
-#include "evaluator.h"
-#include "selectormol.h"
 #include "selectorm.hpp"
-#include "evaluatorm.h"
+#include "selectormol.h"
 
 #endif
-

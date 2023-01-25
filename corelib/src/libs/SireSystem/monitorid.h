@@ -32,78 +32,74 @@
 
 #include "SireID/id.h"
 
-#include "SireID/specify.hpp"
 #include "SireID/idandset.hpp"
 #include "SireID/idorset.hpp"
+#include "SireID/specify.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
 
-using SireID::Specify;
-using SireID::IDAndSet;
-using SireID::IDOrSet;
+    using SireID::IDAndSet;
+    using SireID::IDOrSet;
+    using SireID::Specify;
 
-class MonitorIdx;
-class MonitorIdentifier;
-class MonitorName;
+    class MonitorIdx;
+    class MonitorIdentifier;
+    class MonitorName;
 
-class SystemMonitors;
+    class SystemMonitors;
 
-/** The base class of all system monitor identifiers
+    /** The base class of all system monitor identifiers
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT MonitorID : public SireID::ID
-{
-public:
-    typedef MonitorName Index;
-    typedef MonitorIdentifier Identifier;
-    typedef SystemMonitors SearchObject;
-
-    MonitorID();
-    MonitorID(const MonitorID &other);
-
-    virtual ~MonitorID();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT MonitorID : public SireID::ID
     {
-        return "SireSystem::MonitorID";
-    }
+    public:
+        typedef MonitorName Index;
+        typedef MonitorIdentifier Identifier;
+        typedef SystemMonitors SearchObject;
 
-    virtual MonitorID* clone() const=0;
+        MonitorID();
+        MonitorID(const MonitorID &other);
 
-    Specify<MonitorID> operator[](int i) const;
-    Specify<MonitorID> operator()(int i) const;
-    Specify<MonitorID> operator()(int i, int j) const;
+        virtual ~MonitorID();
 
-    IDAndSet<MonitorID> operator+(const MonitorID &other) const;
-    IDAndSet<MonitorID> operator&&(const MonitorID &other) const;
-    IDAndSet<MonitorID> operator&(const MonitorID &other) const;
+        static const char *typeName()
+        {
+            return "SireSystem::MonitorID";
+        }
 
-    IDOrSet<MonitorID> operator*(const MonitorID &other) const;
-    IDOrSet<MonitorID> operator||(const MonitorID &other) const;
-    IDOrSet<MonitorID> operator|(const MonitorID &other) const;
+        virtual MonitorID *clone() const = 0;
 
-    virtual QList<MonitorName> map(const SystemMonitors &monitors) const=0;
+        Specify<MonitorID> operator[](int i) const;
+        Specify<MonitorID> operator()(int i) const;
+        Specify<MonitorID> operator()(int i, int j) const;
 
-protected:
-    QList<MonitorName> processMatches(QList<MonitorName> &matches,
-                                      const SystemMonitors &monitors) const;
-};
+        IDAndSet<MonitorID> operator+(const MonitorID &other) const;
+        IDAndSet<MonitorID> operator&&(const MonitorID &other) const;
+        IDAndSet<MonitorID> operator&(const MonitorID &other) const;
 
-}
+        IDOrSet<MonitorID> operator*(const MonitorID &other) const;
+        IDOrSet<MonitorID> operator||(const MonitorID &other) const;
+        IDOrSet<MonitorID> operator|(const MonitorID &other) const;
+
+        virtual QList<MonitorName> map(const SystemMonitors &monitors) const = 0;
+
+    protected:
+        QList<MonitorName> processMatches(QList<MonitorName> &matches, const SystemMonitors &monitors) const;
+    };
+
+} // namespace SireSystem
 
 #include "monitoridentifier.h"
 
-SIRE_EXPOSE_CLASS( SireSystem::MonitorID )
-SIRE_EXPOSE_ALIAS( SireID::Specify<SireSystem::MonitorID>,
-                   SireSystem::Specify_MonitorID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDAndSet<SireSystem::MonitorID>,
-                   SireSystem::IDAndSet_MonitorID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDOrSet<SireSystem::MonitorID>,
-                   SireSystem::IDOrSet_MonitorID_ )
+SIRE_EXPOSE_CLASS(SireSystem::MonitorID)
+SIRE_EXPOSE_ALIAS(SireID::Specify<SireSystem::MonitorID>, SireSystem::Specify_MonitorID_)
+SIRE_EXPOSE_ALIAS(SireID::IDAndSet<SireSystem::MonitorID>, SireSystem::IDAndSet_MonitorID_)
+SIRE_EXPOSE_ALIAS(SireID::IDOrSet<SireSystem::MonitorID>, SireSystem::IDOrSet_MonitorID_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireID::Specify<SireSystem::MonitorID>;

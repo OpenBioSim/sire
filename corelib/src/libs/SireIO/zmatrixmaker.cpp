@@ -29,14 +29,14 @@
 
 #include "zmatrixmaker.h"
 
+#include "SireMol/bondid.h"
+#include "SireMol/connectivity.h"
 #include "SireMol/molecule.h"
+#include "SireMol/moleculedata.h"
 #include "SireMol/molecules.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/reseditor.h"
 #include "SireMol/selector.hpp"
-#include "SireMol/connectivity.h"
-#include "SireMol/moleculedata.h"
-#include "SireMol/bondid.h"
 
 #include "SireMove/zmatrix.h"
 
@@ -63,8 +63,8 @@ using namespace SireUnits;
 ZmatrixLineTemplate::ZmatrixLineTemplate(const QString &atom, const QString &bond, const QString &angle,
                                          const QString &dihedral, const double &bondDelta, const double &angleDelta,
                                          const double &dihedralDelta)
-    : atom(atom), bond(bond), angle(angle), dihedral(dihedral),
-      bondDelta(bondDelta), angleDelta(angleDelta), dihedralDelta(dihedralDelta)
+    : atom(atom), bond(bond), angle(angle), dihedral(dihedral), bondDelta(bondDelta), angleDelta(angleDelta),
+      dihedralDelta(dihedralDelta)
 {
 }
 
@@ -142,8 +142,7 @@ QString ZmatrixLineTemplate::toString()
 // Implementation of ZmatrixTemplate
 //
 
-ZmatrixTemplate::ZmatrixTemplate(const QString &name)
-    : name(name)
+ZmatrixTemplate::ZmatrixTemplate(const QString &name) : name(name)
 {
 }
 
@@ -199,8 +198,8 @@ void ZmatrixTemplate::setAngleDelta(const QString &atom, const QString &bond, co
         this->zmatrix[atom].setAngleDelta(angleDelta);
 }
 
-void ZmatrixTemplate::setDihedralDelta(const QString &atom, const QString &bond,
-                                       const QString &angle, const QString &dihedral, double dihedralDelta)
+void ZmatrixTemplate::setDihedralDelta(const QString &atom, const QString &bond, const QString &angle,
+                                       const QString &dihedral, double dihedralDelta)
 {
     if (not this->zmatrix.contains(atom))
         throw SireError::invalid_key(atom, CODELOC);
@@ -218,8 +217,7 @@ void ZmatrixTemplate::setDihedralDelta(const QString &atom, const QString &bond,
 // Implementation of ZmatrixResidue
 //
 
-ZmatrixResidue::ZmatrixResidue(const QString &name)
-    : ZmatrixTemplate(name)
+ZmatrixResidue::ZmatrixResidue(const QString &name) : ZmatrixTemplate(name)
 {
 }
 
@@ -287,9 +285,9 @@ static int processVersionLine(QString &line)
     bool ok;
     int version = words[1].toInt(&ok);
     if (not ok)
-        throw SireError::program_bug(QObject::tr(
-                                         "Unexpected error while trying to read the version line of the zmatrix template file"),
-                                     CODELOC);
+        throw SireError::program_bug(
+            QObject::tr("Unexpected error while trying to read the version line of the zmatrix template file"),
+            CODELOC);
     return version;
 }
 
@@ -358,10 +356,8 @@ void ZmatrixMaker::loadTemplates(const QString &templatefile)
     /** The first line contains the version*/
     int version = ::processVersionLine(line);
     if (version != 1)
-        throw SireError::process_error(QObject::tr(
-                                           "Invalid version of the template, got '%1' but only support '1' ")
-                                           .arg(version),
-                                       CODELOC);
+        throw SireError::process_error(
+            QObject::tr("Invalid version of the template, got '%1' but only support '1' ").arg(version), CODELOC);
 
     /** Holds the dictionnary of chain and residues read from the templates*/
     QHash<QString, ZmatrixTemplate> chains;
@@ -399,9 +395,8 @@ void ZmatrixMaker::loadTemplates(const QString &templatefile)
         else if (line.startsWith("bbatom"))
         {
             if (currentType != RESIDUE)
-                throw SireError::io_error(QObject::tr(
-                                              "There is a problem with the input file %1, "
-                                              " a bbatom line should only be defined for a residue template")
+                throw SireError::io_error(QObject::tr("There is a problem with the input file %1, "
+                                                      " a bbatom line should only be defined for a residue template")
                                               .arg(templatefile),
                                           CODELOC);
             residues[current].addBBatom(words[1]);
@@ -438,9 +433,8 @@ void ZmatrixMaker::loadTemplates(const QString &templatefile)
         else if (line.startsWith("rigidbody"))
         {
             if (currentType != RESIDUE)
-                throw SireError::io_error(QObject::tr(
-                                              " There is a problem with the input file %1, "
-                                              " a rigidbody line should only be defined for a residue template")
+                throw SireError::io_error(QObject::tr(" There is a problem with the input file %1, "
+                                                      " a rigidbody line should only be defined for a residue template")
                                               .arg(templatefile),
                                           CODELOC);
             residues[current].setRotation(words[2].toDouble());
@@ -449,9 +443,8 @@ void ZmatrixMaker::loadTemplates(const QString &templatefile)
         else if (line.startsWith("backbone"))
         {
             if (currentType != RESIDUE)
-                throw SireError::io_error(QObject::tr(
-                                              " There is a problem with the input file %1, "
-                                              " a backbone line should only be defined for a residue template")
+                throw SireError::io_error(QObject::tr(" There is a problem with the input file %1, "
+                                                      " a backbone line should only be defined for a residue template")
                                               .arg(templatefile),
                                           CODELOC);
             /** The appropriate chain can be defined for a variety of environments */
@@ -496,9 +489,7 @@ Molecule ZmatrixMaker::applyTemplates(Molecule &molecule)
     if (molecule.hasProperty(zmatrix_property))
         return molecule;
 
-    const Connectivity &connectivity = molecule.data()
-                                           .property("connectivity")
-                                           .asA<Connectivity>();
+    const Connectivity &connectivity = molecule.data().property("connectivity").asA<Connectivity>();
 
     MolEditor editmol = molecule.edit();
 
@@ -580,7 +571,7 @@ Molecule ZmatrixMaker::applyTemplates(Molecule &molecule)
         else
             position = "single";
 
-        //qDebug() << " The position of this residue is " << position ;
+        // qDebug() << " The position of this residue is " << position ;
 
         /** Need to decide where to store info about rigid body
             translation and rotations of this residue*/
@@ -617,8 +608,7 @@ Molecule ZmatrixMaker::applyTemplates(Molecule &molecule)
             double angleDelta = linetemplate.getAngleDelta();
             double dihedralDelta = linetemplate.getDihedralDelta();
 
-            ZMatrixLine zmatrixline = ZMatrixLine(atom.index(), bond.index(),
-                                                  angle.index(), dihedral.index());
+            ZMatrixLine zmatrixline = ZMatrixLine(atom.index(), bond.index(), angle.index(), dihedral.index());
 
             zmatrixline.setBondDelta(bondDelta * angstrom);
             zmatrixline.setAngleDelta(angleDelta * degrees);

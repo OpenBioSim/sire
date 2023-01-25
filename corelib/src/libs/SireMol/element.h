@@ -34,126 +34,126 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class Element;
+    class Element;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::Element&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::Element&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Element &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Element &);
 
 namespace SireMol
 {
 
-class ElementData;
+    class ElementData;
 
-/**
-  * This class is used to represent a chemical element. The implementation
-  * of this class is such that it is quick and easy to pass and copy
-  * Elements, while the storage requirements are very low (just a single
-  * pointer). The actual element data is held in a private ElementData
-  * class that is declared in elementdb.cpp
-  *
-  * @author Christopher Woods
-  */
-class SIREMOL_EXPORT Element
-{
-
-public:
-    Element();
-
-    Element(QString element);
-    Element(const char *element);
-    Element(unsigned int nprotons);
-    Element(int nprotons);
-
-    Element(const Element &element);
-
-    ~Element();
-
-    static const char* typeName();
-
-    const char* what() const
+    /**
+     * This class is used to represent a chemical element. The implementation
+     * of this class is such that it is quick and easy to pass and copy
+     * Elements, while the storage requirements are very low (just a single
+     * pointer). The actual element data is held in a private ElementData
+     * class that is declared in elementdb.cpp
+     *
+     * @author Christopher Woods
+     */
+    class SIREMOL_EXPORT Element
     {
-        return Element::typeName();
-    }
 
-    bool operator==(const Element &other) const;
-    bool operator!=(const Element &other) const;
+    public:
+        Element();
 
-    bool operator>(const Element &other) const;
-    bool operator<(const Element &other) const;
-    bool operator>=(const Element &other) const;
-    bool operator<=(const Element &other) const;
+        Element(QString element);
+        Element(const char *element);
+        Element(unsigned int nprotons);
+        Element(int nprotons);
 
-    const Element& operator=(const Element &element);
+        Element(const Element &element);
 
-    int nProtons() const;
+        ~Element();
 
-    QString symbol() const;
-    QString name() const;
+        static const char *typeName();
 
-    QString toString() const;
+        const char *what() const
+        {
+            return Element::typeName();
+        }
 
-    SireUnits::Dimension::Length covalentRadius() const;
-    SireUnits::Dimension::Length bondOrderRadius() const;
-    SireUnits::Dimension::Length vdwRadius() const;
+        bool operator==(const Element &other) const;
+        bool operator!=(const Element &other) const;
 
-    int maxBonds() const;
+        bool operator>(const Element &other) const;
+        bool operator<(const Element &other) const;
+        bool operator>=(const Element &other) const;
+        bool operator<=(const Element &other) const;
 
-    SireUnits::Dimension::MolarMass mass() const;
+        const Element &operator=(const Element &element);
 
-    float red() const;
-    float green() const;
-    float blue() const;
+        int nProtons() const;
 
-    int group() const;
-    int period() const;
+        QString symbol() const;
+        QString name() const;
 
-    bool nobleGas() const;
-    bool halogen() const;
-    bool biological() const;
-    bool alkaliMetal() const;
-    bool alkaliEarthMetal() const;
-    bool transitionMetal() const;
-    bool lanthanide() const;
-    bool actinide() const;
-    bool rareEarth() const;
+        QString toString() const;
 
-    static Element elementWithMass(const SireUnits::Dimension::MolarMass &mass);
+        SireUnits::Dimension::Length covalentRadius() const;
+        SireUnits::Dimension::Length bondOrderRadius() const;
+        SireUnits::Dimension::Length vdwRadius() const;
 
-    static Element biologicalElement(const QString &name);
+        int maxBonds() const;
 
-private:
-    /** Pointer to the object containing the data for this element */
-    ElementData *eldata;
-};
+        SireUnits::Dimension::MolarMass mass() const;
+
+        float red() const;
+        float green() const;
+        float blue() const;
+
+        int group() const;
+        int period() const;
+
+        bool nobleGas() const;
+        bool halogen() const;
+        bool biological() const;
+        bool alkaliMetal() const;
+        bool alkaliEarthMetal() const;
+        bool transitionMetal() const;
+        bool lanthanide() const;
+        bool actinide() const;
+        bool rareEarth() const;
+
+        static Element elementWithMass(const SireUnits::Dimension::MolarMass &mass);
+
+        static Element biologicalElement(const QString &name);
+
+    private:
+        /** Pointer to the object containing the data for this element */
+        ElementData *eldata;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-SIRE_ALWAYS_INLINE uint qHash(const Element &element)
-{
-    return element.nProtons();
-}
+    SIRE_ALWAYS_INLINE uint qHash(const Element &element)
+    {
+        return element.nProtons();
+    }
 
-/** Comparison operators. These are very quick */
-SIRE_ALWAYS_INLINE bool Element::operator==(const Element &other) const
-{
-    return eldata == other.eldata;
-}
+    /** Comparison operators. These are very quick */
+    SIRE_ALWAYS_INLINE bool Element::operator==(const Element &other) const
+    {
+        return eldata == other.eldata;
+    }
 
-/** Comparison operators. These are very quick */
-SIRE_ALWAYS_INLINE bool Element::operator!=(const Element &other) const
-{
-    return eldata != other.eldata;
-}
+    /** Comparison operators. These are very quick */
+    SIRE_ALWAYS_INLINE bool Element::operator!=(const Element &other) const
+    {
+        return eldata != other.eldata;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::Element);
 Q_DECLARE_TYPEINFO(SireMol::Element, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMol::Element )
+SIRE_EXPOSE_CLASS(SireMol::Element)
 
 SIRE_END_HEADER
 

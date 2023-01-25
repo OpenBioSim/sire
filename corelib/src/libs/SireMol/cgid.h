@@ -34,171 +34,160 @@
 
 #include "SireID/idandset.hpp"
 #include "SireID/idorset.hpp"
-#include "SireID/specify.hpp"
 #include "SireID/invertmatch.hpp"
 #include "SireID/matchall.hpp"
+#include "SireID/specify.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
 
-using SireID::IDAndSet;
-using SireID::IDOrSet;
-using SireID::Specify;
+    using SireID::IDAndSet;
+    using SireID::IDOrSet;
+    using SireID::Specify;
 
-template<class T>
-class Selector;
+    template <class T>
+    class Selector;
 
-template<class GROUPID, class ATOMID>
-class GroupAtomID;
+    template <class GROUPID, class ATOMID>
+    class GroupAtomID;
 
-template<class GROUP0, class GROUP1>
-class GroupGroupID;
+    template <class GROUP0, class GROUP1>
+    class GroupGroupID;
 
-class MolInfo;
+    class MolInfo;
 
-class CGIdx;
-class CGIdentifier;
+    class CGIdx;
+    class CGIdentifier;
 
-class CutGroup;
+    class CutGroup;
 
-class Molecules;
-class MoleculeGroup;
-class MolGroupsBase;
-class MolNum;
+    class Molecules;
+    class MoleculeGroup;
+    class MolGroupsBase;
+    class MolNum;
 
-/** This is the base class of all identifiers that are used
-    to identify a CutGroup
+    /** This is the base class of all identifiers that are used
+        to identify a CutGroup
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT CGID : public SireID::ID
-{
-
-public:
-    typedef CGIdx Index;
-    typedef CGIdentifier Identifier;
-    typedef MolInfo SearchObject;
-
-    CGID();
-    CGID(const CGID &other);
-
-    virtual ~CGID();
-
-    Specify<CGID> operator[](qint64 i) const;
-    Specify<CGID> operator[](const SireBase::Range &range) const;
-    Specify<CGID> operator()(const SireBase::Range &range) const;
-    Specify<CGID> operator()(qint64 i) const;
-    Specify<CGID> operator()(qint64 start, qint64 end) const;
-    Specify<CGID> operator()(qint64 start, qint64 end, qint64 increment) const;
-
-    IDAndSet<CGID> operator+(const CGID &other) const;
-    GroupAtomID<CGID,AtomID> operator+(const AtomID &other) const;
-    GroupGroupID<SegID,CGID> operator+(const SegID &other) const;
-    GroupGroupID<CGID,ChainID> operator+(const ChainID &other) const;
-    GroupGroupID<CGID,ResID> operator+(const ResID &other) const;
-
-    IDAndSet<CGID> operator-(const CGID &other) const;
-    GroupAtomID<CGID,AtomID> operator-(const AtomID &other) const;
-    GroupGroupID<SegID,CGID> operator-(const SegID &other) const;
-    GroupGroupID<CGID,ChainID> operator-(const ChainID &other) const;
-    GroupGroupID<CGID,ResID> operator-(const ResID &other) const;
-
-    SireID::InvertMatch<CGID> operator-() const;
-
-    IDAndSet<CGID> operator&&(const CGID &other) const;
-    GroupAtomID<CGID,AtomID> operator&&(const AtomID &other) const;
-    GroupGroupID<SegID,CGID> operator&&(const SegID &other) const;
-    GroupGroupID<CGID,ChainID> operator&&(const ChainID &other) const;
-    GroupGroupID<CGID,ResID> operator&&(const ResID &other) const;
-
-    IDAndSet<CGID> operator&(const CGID &other) const;
-    GroupAtomID<CGID,AtomID> operator&(const AtomID &other) const;
-    GroupGroupID<SegID,CGID> operator&(const SegID &other) const;
-    GroupGroupID<CGID,ChainID> operator&(const ChainID &other) const;
-    GroupGroupID<CGID,ResID> operator&(const ResID &other) const;
-
-    IDOrSet<CGID> operator*(const CGID &other) const;
-    IDOrSet<AtomID> operator*(const AtomID &other) const;
-
-    IDOrSet<CGID> operator||(const CGID &other) const;
-    IDOrSet<AtomID> operator||(const AtomID &other) const;
-
-    IDOrSet<CGID> operator|(const CGID &other) const;
-    IDOrSet<AtomID> operator|(const AtomID &other) const;
-
-    SireID::InvertMatch<CGID> operator!() const;
-
-    AtomsIn<CGID> atoms() const;
-    AtomsIn<CGID> atom(int i) const;
-    AtomsIn<CGID> atoms(int i, int j) const;
-
-    static SireID::MatchAll<CGID> any();
-    SireID::InvertMatch<CGID> invert() const;
-    SireID::InvertMatch<CGID> inverse() const;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT CGID : public SireID::ID
     {
-        return "SireMol::CGID";
-    }
 
-    virtual CGID* clone() const=0;
+    public:
+        typedef CGIdx Index;
+        typedef CGIdentifier Identifier;
+        typedef MolInfo SearchObject;
 
-    static CGIdentifier fromString(const QString &id);
+        CGID();
+        CGID(const CGID &other);
 
-    /** Map this ID back to the indicies of the CutGroups
-        within the molecule described by the info in 'molinfo' */
-    virtual QList<CGIdx> map(const MolInfo &molinfo) const=0;
+        virtual ~CGID();
 
+        Specify<CGID> operator[](qint64 i) const;
+        Specify<CGID> operator[](const SireBase::Range &range) const;
+        Specify<CGID> operator()(const SireBase::Range &range) const;
+        Specify<CGID> operator()(qint64 i) const;
+        Specify<CGID> operator()(qint64 start, qint64 end) const;
+        Specify<CGID> operator()(qint64 start, qint64 end, qint64 increment) const;
 
-    virtual QList<CGIdx> map(const MoleculeView &molview,
-                             const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<CGID> operator+(const CGID &other) const;
+        GroupAtomID<CGID, AtomID> operator+(const AtomID &other) const;
+        GroupGroupID<SegID, CGID> operator+(const SegID &other) const;
+        GroupGroupID<CGID, ChainID> operator+(const ChainID &other) const;
+        GroupGroupID<CGID, ResID> operator+(const ResID &other) const;
 
-    virtual CutGroup selectFrom(const MoleculeView &molview,
-                                const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<CGID> operator-(const CGID &other) const;
+        GroupAtomID<CGID, AtomID> operator-(const AtomID &other) const;
+        GroupGroupID<SegID, CGID> operator-(const SegID &other) const;
+        GroupGroupID<CGID, ChainID> operator-(const ChainID &other) const;
+        GroupGroupID<CGID, ResID> operator-(const ResID &other) const;
 
-    virtual Selector<CutGroup> selectAllFrom(const MoleculeView &molview,
-                                         const PropertyMap &map = PropertyMap()) const;
+        SireID::InvertMatch<CGID> operator-() const;
 
-    virtual CutGroup selectFrom(const Molecules &molecules,
-                                const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<CGID> operator&&(const CGID &other) const;
+        GroupAtomID<CGID, AtomID> operator&&(const AtomID &other) const;
+        GroupGroupID<SegID, CGID> operator&&(const SegID &other) const;
+        GroupGroupID<CGID, ChainID> operator&&(const ChainID &other) const;
+        GroupGroupID<CGID, ResID> operator&&(const ResID &other) const;
 
-    virtual QHash< MolNum,Selector<CutGroup> >
-                selectAllFrom(const Molecules &molecules,
-                              const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<CGID> operator&(const CGID &other) const;
+        GroupAtomID<CGID, AtomID> operator&(const AtomID &other) const;
+        GroupGroupID<SegID, CGID> operator&(const SegID &other) const;
+        GroupGroupID<CGID, ChainID> operator&(const ChainID &other) const;
+        GroupGroupID<CGID, ResID> operator&(const ResID &other) const;
 
-    virtual CutGroup selectFrom(const MoleculeGroup &molgroup,
-                                const PropertyMap &map = PropertyMap()) const;
+        IDOrSet<CGID> operator*(const CGID &other) const;
+        IDOrSet<AtomID> operator*(const AtomID &other) const;
 
-    virtual QHash< MolNum,Selector<CutGroup> >
-                selectAllFrom(const MoleculeGroup &molgroup,
-                              const PropertyMap &map = PropertyMap()) const;
+        IDOrSet<CGID> operator||(const CGID &other) const;
+        IDOrSet<AtomID> operator||(const AtomID &other) const;
 
-    virtual CutGroup selectFrom(const MolGroupsBase &molgroups,
-                               const PropertyMap &map = PropertyMap()) const;
-    virtual QHash< MolNum,Selector<CutGroup> >
-                selectAllFrom(const MolGroupsBase &molgroups,
-                              const PropertyMap &map = PropertyMap()) const;
+        IDOrSet<CGID> operator|(const CGID &other) const;
+        IDOrSet<AtomID> operator|(const AtomID &other) const;
 
-protected:
-    static QList<CGIdx> matchAll(const MolInfo &molinfo);
+        SireID::InvertMatch<CGID> operator!() const;
 
-    void processMatches(QList<CGIdx> &matches, const MolInfo &molinfo) const;
+        AtomsIn<CGID> atoms() const;
+        AtomsIn<CGID> atom(int i) const;
+        AtomsIn<CGID> atoms(int i, int j) const;
 
-};
+        static SireID::MatchAll<CGID> any();
+        SireID::InvertMatch<CGID> invert() const;
+        SireID::InvertMatch<CGID> inverse() const;
 
-}
+        static const char *typeName()
+        {
+            return "SireMol::CGID";
+        }
+
+        virtual CGID *clone() const = 0;
+
+        static CGIdentifier fromString(const QString &id);
+
+        /** Map this ID back to the indicies of the CutGroups
+            within the molecule described by the info in 'molinfo' */
+        virtual QList<CGIdx> map(const MolInfo &molinfo) const = 0;
+
+        virtual QList<CGIdx> map(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+
+        virtual CutGroup selectFrom(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+
+        virtual Selector<CutGroup> selectAllFrom(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+
+        virtual CutGroup selectFrom(const Molecules &molecules, const PropertyMap &map = PropertyMap()) const;
+
+        virtual QHash<MolNum, Selector<CutGroup>> selectAllFrom(const Molecules &molecules,
+                                                                const PropertyMap &map = PropertyMap()) const;
+
+        virtual CutGroup selectFrom(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap()) const;
+
+        virtual QHash<MolNum, Selector<CutGroup>> selectAllFrom(const MoleculeGroup &molgroup,
+                                                                const PropertyMap &map = PropertyMap()) const;
+
+        virtual CutGroup selectFrom(const MolGroupsBase &molgroups, const PropertyMap &map = PropertyMap()) const;
+        virtual QHash<MolNum, Selector<CutGroup>> selectAllFrom(const MolGroupsBase &molgroups,
+                                                                const PropertyMap &map = PropertyMap()) const;
+
+    protected:
+        static QList<CGIdx> matchAll(const MolInfo &molinfo);
+
+        void processMatches(QList<CGIdx> &matches, const MolInfo &molinfo) const;
+    };
+
+} // namespace SireMol
 
 #include "cgidentifier.h"
 
-SIRE_EXPOSE_CLASS( SireMol::CGID )
-SIRE_EXPOSE_ALIAS( (SireID::Specify<SireMol::CGID>), SireMol::Specify_CGID_ )
-SIRE_EXPOSE_ALIAS( (SireMol::AtomsIn<SireMol::CGID>), SireMol::AtomsIn_CGID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDAndSet<SireMol::CGID>, SireMol::IDAndSet_CGID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDOrSet<SireMol::CGID>, SireMol::IDOrSet_CGID_ )
-SIRE_EXPOSE_ALIAS( SireID::MatchAll<SireMol::CGID>, SireMol::MatchAll_CGID_ )
-SIRE_EXPOSE_ALIAS( SireID::InvertMatch<SireMol::CGID>, SireMol::InvertMatch_CGID_ )
+SIRE_EXPOSE_CLASS(SireMol::CGID)
+SIRE_EXPOSE_ALIAS((SireID::Specify<SireMol::CGID>), SireMol::Specify_CGID_)
+SIRE_EXPOSE_ALIAS((SireMol::AtomsIn<SireMol::CGID>), SireMol::AtomsIn_CGID_)
+SIRE_EXPOSE_ALIAS(SireID::IDAndSet<SireMol::CGID>, SireMol::IDAndSet_CGID_)
+SIRE_EXPOSE_ALIAS(SireID::IDOrSet<SireMol::CGID>, SireMol::IDOrSet_CGID_)
+SIRE_EXPOSE_ALIAS(SireID::MatchAll<SireMol::CGID>, SireMol::MatchAll_CGID_)
+SIRE_EXPOSE_ALIAS(SireID::InvertMatch<SireMol::CGID>, SireMol::InvertMatch_CGID_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireID::Specify<SireMol::CGID>;

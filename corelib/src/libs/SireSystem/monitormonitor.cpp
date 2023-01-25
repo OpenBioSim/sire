@@ -42,32 +42,28 @@ using namespace SireStream;
 static const RegisterMetaType<MonitorMonitor> r_monmon;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const MonitorMonitor &monmon)
+QDataStream &operator<<(QDataStream &ds, const MonitorMonitor &monmon)
 {
     writeHeader(ds, r_monmon, 1);
 
     SharedDataStream sds(ds);
 
-    sds << monmon.monitor_states << monmon.monitor_id
-        << monmon.clear_original << monmon.remove_original
-        << static_cast<const SystemMonitor&>(monmon);
+    sds << monmon.monitor_states << monmon.monitor_id << monmon.clear_original << monmon.remove_original
+        << static_cast<const SystemMonitor &>(monmon);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          MonitorMonitor &monmon)
+QDataStream &operator>>(QDataStream &ds, MonitorMonitor &monmon)
 {
     VersionID v = readHeader(ds, r_monmon);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> monmon.monitor_states >> monmon.monitor_id
-            >> monmon.clear_original >> monmon.remove_original
-            >> static_cast<SystemMonitor&>(monmon);
+        sds >> monmon.monitor_states >> monmon.monitor_id >> monmon.clear_original >> monmon.remove_original >>
+            static_cast<SystemMonitor &>(monmon);
     }
     else
         throw version_error(v, "1", r_monmon, CODELOC);
@@ -77,34 +73,33 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 MonitorMonitor::MonitorMonitor()
-               : ConcreteProperty<MonitorMonitor,SystemMonitor>(),
-                 clear_original(false), remove_original(false)
-{}
+    : ConcreteProperty<MonitorMonitor, SystemMonitor>(), clear_original(false), remove_original(false)
+{
+}
 
 /** Construct to monitor the SystemMonitor identified by 'id',
     optionally clearing the original monitor if 'clear_original' is
     true, and optionally removing the original monitor
     if 'remove_original' is true */
 MonitorMonitor::MonitorMonitor(const MonitorID &id, bool clear, bool remove)
-               : ConcreteProperty<MonitorMonitor,SystemMonitor>(),
-                 monitor_id(id), clear_original(clear),
-                 remove_original(remove)
-{}
+    : ConcreteProperty<MonitorMonitor, SystemMonitor>(), monitor_id(id), clear_original(clear), remove_original(remove)
+{
+}
 
 /** Copy constructor */
 MonitorMonitor::MonitorMonitor(const MonitorMonitor &other)
-               : ConcreteProperty<MonitorMonitor,SystemMonitor>(other),
-                 monitor_states(other.monitor_states),
-                 monitor_id(other.monitor_id), clear_original(other.clear_original),
-                 remove_original(other.remove_original)
-{}
+    : ConcreteProperty<MonitorMonitor, SystemMonitor>(other), monitor_states(other.monitor_states),
+      monitor_id(other.monitor_id), clear_original(other.clear_original), remove_original(other.remove_original)
+{
+}
 
 /** Destructor */
 MonitorMonitor::~MonitorMonitor()
-{}
+{
+}
 
 /** Copy assignment operator */
-MonitorMonitor& MonitorMonitor::operator=(const MonitorMonitor &other)
+MonitorMonitor &MonitorMonitor::operator=(const MonitorMonitor &other)
 {
     if (this != &other)
     {
@@ -122,12 +117,9 @@ MonitorMonitor& MonitorMonitor::operator=(const MonitorMonitor &other)
 /** Comparison operator */
 bool MonitorMonitor::operator==(const MonitorMonitor &other) const
 {
-    return (this == &other) or
-           (monitor_states == other.monitor_states and
-            monitor_id == other.monitor_id and
-            clear_original == other.clear_original and
-            remove_original == other.remove_original and
-            SystemMonitor::operator==(other));
+    return (this == &other) or (monitor_states == other.monitor_states and monitor_id == other.monitor_id and
+                                clear_original == other.clear_original and remove_original == other.remove_original and
+                                SystemMonitor::operator==(other));
 }
 
 /** Comparison operator */
@@ -158,22 +150,22 @@ int MonitorMonitor::size() const
 
     \throw SireError::invalid_index
 */
-const SystemMonitor& MonitorMonitor::operator[](int i) const
+const SystemMonitor &MonitorMonitor::operator[](int i) const
 {
-    return monitor_states.at( Index(i).map(monitor_states.count()) );
+    return monitor_states.at(Index(i).map(monitor_states.count()));
 }
 
 /** Return the ith state monitored
 
     \throw SireError::invalid_index
 */
-const SystemMonitor& MonitorMonitor::at(int i) const
+const SystemMonitor &MonitorMonitor::at(int i) const
 {
     return this->operator[](i);
 }
 
 /** Return all of the states monitored */
-const QList<SysMonPtr>& MonitorMonitor::states() const
+const QList<SysMonPtr> &MonitorMonitor::states() const
 {
     return monitor_states;
 }
@@ -217,7 +209,7 @@ void MonitorMonitor::clearStatistics()
 /** Monitor the passed system */
 void MonitorMonitor::monitor(System &system)
 {
-    monitor_states.append( system.monitor(monitor_id) );
+    monitor_states.append(system.monitor(monitor_id));
 
     if (remove_original)
         system.remove(monitor_id);
@@ -226,7 +218,7 @@ void MonitorMonitor::monitor(System &system)
         system.clearStatistics(monitor_id);
 }
 
-const char* MonitorMonitor::typeName()
+const char *MonitorMonitor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MonitorMonitor>() );
+    return QMetaType::typeName(qMetaTypeId<MonitorMonitor>());
 }

@@ -26,24 +26,23 @@
 \*********************************************/
 
 #include "internalmovesingle.h"
-#include "flexibility.h"
 #include "ensemble.h"
+#include "flexibility.h"
 
 #include "SireSystem/system.h"
 
-#include "SireMol/partialmolecule.h"
+#include "SireMol/angleid.h"
+#include "SireMol/atomidx.h"
+#include "SireMol/bondid.h"
+#include "SireMol/connectivity.h"
+#include "SireMol/core.h"
+#include "SireMol/dihedralid.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/mover.hpp"
-#include "SireMol/atomidx.h"
-#include "SireMol/connectivity.h"
-#include "SireMol/bondid.h"
-#include "SireMol/angleid.h"
-#include "SireMol/dihedralid.h"
-#include "SireMol/core.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireUnits/dimensions.h"
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
 #include "SireUnits/units.h"
 
@@ -69,10 +68,8 @@ QDataStream &operator<<(QDataStream &ds, const InternalMoveSingle &internalmove)
 
     SharedDataStream sds(ds);
 
-    sds << internalmove.smplr
-        << internalmove.flexibility_property
-	<< internalmove.synched_molgroup
-        << static_cast<const MonteCarlo&>(internalmove);
+    sds << internalmove.smplr << internalmove.flexibility_property << internalmove.synched_molgroup
+        << static_cast<const MonteCarlo &>(internalmove);
 
     return ds;
 }
@@ -86,10 +83,8 @@ QDataStream &operator>>(QDataStream &ds, InternalMoveSingle &internalmove)
     {
         SharedDataStream sds(ds);
 
-        sds >> internalmove.smplr
-            >> internalmove.flexibility_property
-	    >> internalmove.synched_molgroup
-            >> static_cast<MonteCarlo&>(internalmove);
+        sds >> internalmove.smplr >> internalmove.flexibility_property >> internalmove.synched_molgroup >>
+            static_cast<MonteCarlo &>(internalmove);
     }
     else
         throw version_error(v, "1", r_internalmovesingle, CODELOC);
@@ -98,55 +93,52 @@ QDataStream &operator>>(QDataStream &ds, InternalMoveSingle &internalmove)
 }
 
 /** Null constructor */
-InternalMoveSingle::InternalMoveSingle(const PropertyMap &map)
-             : ConcreteProperty<InternalMoveSingle,MonteCarlo>(map)
+InternalMoveSingle::InternalMoveSingle(const PropertyMap &map) : ConcreteProperty<InternalMoveSingle, MonteCarlo>(map)
 {
     flexibility_property = map["flexibility"];
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
 }
 
 /** Construct the internal move for the passed group of molecules */
 InternalMoveSingle::InternalMoveSingle(const MoleculeGroup &molgroup, const PropertyMap &map)
-             : ConcreteProperty<InternalMoveSingle,MonteCarlo>(),
-               smplr( UniformSampler(molgroup) )
+    : ConcreteProperty<InternalMoveSingle, MonteCarlo>(), smplr(UniformSampler(molgroup))
 {
     flexibility_property = map["flexibility"];
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
-    smplr.edit().setGenerator( this->generator() );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
+    smplr.edit().setGenerator(this->generator());
 }
 
 /** Construct the mover move that samples molecules from the
     passed sampler */
 InternalMoveSingle::InternalMoveSingle(const Sampler &sampler, const PropertyMap &map)
-             : ConcreteProperty<InternalMoveSingle,MonteCarlo>(),
-               smplr(sampler)
+    : ConcreteProperty<InternalMoveSingle, MonteCarlo>(), smplr(sampler)
 {
     flexibility_property = map["flexibility"];
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
-    smplr.edit().setGenerator( this->generator() );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
+    smplr.edit().setGenerator(this->generator());
 }
 
 /** Copy constructor */
 InternalMoveSingle::InternalMoveSingle(const InternalMoveSingle &other)
-             : ConcreteProperty<InternalMoveSingle,MonteCarlo>(other),
-               smplr(other.smplr),
-               flexibility_property(other.flexibility_property),
-	       synched_molgroup(other.synched_molgroup)
-{}
+    : ConcreteProperty<InternalMoveSingle, MonteCarlo>(other), smplr(other.smplr),
+      flexibility_property(other.flexibility_property), synched_molgroup(other.synched_molgroup)
+{
+}
 
 /** Destructor */
 InternalMoveSingle::~InternalMoveSingle()
-{}
+{
+}
 
 /** Copy assignment operator */
-InternalMoveSingle& InternalMoveSingle::operator=(const InternalMoveSingle &other)
+InternalMoveSingle &InternalMoveSingle::operator=(const InternalMoveSingle &other)
 {
     if (this != &other)
     {
         MonteCarlo::operator=(other);
         smplr = other.smplr;
         flexibility_property = other.flexibility_property;
-	synched_molgroup = other.synched_molgroup;
+        synched_molgroup = other.synched_molgroup;
     }
 
     return *this;
@@ -156,8 +148,7 @@ InternalMoveSingle& InternalMoveSingle::operator=(const InternalMoveSingle &othe
 bool InternalMoveSingle::operator==(const InternalMoveSingle &other) const
 {
     return MonteCarlo::operator==(other) and smplr == other.smplr and
-           flexibility_property == other.flexibility_property and
-           synched_molgroup == other.synched_molgroup ;
+           flexibility_property == other.flexibility_property and synched_molgroup == other.synched_molgroup;
 }
 
 /** Comparison operator */
@@ -170,38 +161,38 @@ bool InternalMoveSingle::operator!=(const InternalMoveSingle &other) const
 QString InternalMoveSingle::toString() const
 {
     return QObject::tr("InternalMoveSingle( nAccepted() = %1 nRejected() == %2 )")
-                            .arg( this->nAccepted() )
-                            .arg( this->nRejected() );
+        .arg(this->nAccepted())
+        .arg(this->nRejected());
 }
 
 /** Set the sampler used to sample molecules for this move */
 void InternalMoveSingle::setSampler(const Sampler &sampler)
 {
     smplr = sampler;
-    smplr.edit().setGenerator( this->generator() );
+    smplr.edit().setGenerator(this->generator());
 }
 
 /** Set the sampler so that it draws molecules uniformly from the
     molecule group 'molgroup' */
 void InternalMoveSingle::setSampler(const MoleculeGroup &molgroup)
 {
-    this->setSampler( UniformSampler(molgroup) );
+    this->setSampler(UniformSampler(molgroup));
 }
 
 /** Return the sampler used to sample molecules to move */
-const Sampler& InternalMoveSingle::sampler() const
+const Sampler &InternalMoveSingle::sampler() const
 {
     return smplr;
 }
 
 /** Return the molecule group that is sampled for this move */
-const MoleculeGroup& InternalMoveSingle::moleculeGroup() const
+const MoleculeGroup &InternalMoveSingle::moleculeGroup() const
 {
     return smplr->group();
 }
 
 /** Return the property used to find the flexibility of each molecule*/
-const PropertyName& InternalMoveSingle::flexibilityProperty() const
+const PropertyName &InternalMoveSingle::flexibilityProperty() const
 {
     return flexibility_property;
 }
@@ -223,19 +214,19 @@ void InternalMoveSingle::setGenerator(const RanGenerator &rangenerator)
 
 void InternalMoveSingle::setSynchronisedCoordinates(const MoleculeGroup &molgroup)
 {
-  synched_molgroup = molgroup;
+    synched_molgroup = molgroup;
 }
 
-const MoleculeGroup& InternalMoveSingle::synchronisedMols() const
+const MoleculeGroup &InternalMoveSingle::synchronisedMols() const
 {
-  return synched_molgroup;
+    return synched_molgroup;
 }
 
 /** Internal function used to set the ensemble based on the
     passed temperature */
 void InternalMoveSingle::_pvt_setTemperature(const Temperature &temperature)
 {
-    MonteCarlo::setEnsemble( Ensemble::NVT(temperature) );
+    MonteCarlo::setEnsemble(Ensemble::NVT(temperature));
 }
 
 /** Actually perform 'nmoves' moves of the molecules in the
@@ -254,21 +245,21 @@ void InternalMoveSingle::move(System &system, int nmoves, bool record_stats)
         PropertyMap map;
         map.set("coordinates", this->coordinatesProperty());
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
-            double old_nrg = system.energy( this->energyComponent() );
+            double old_nrg = system.energy(this->energyComponent());
             System old_system(system);
             SamplerPtr old_sampler(smplr);
 
             double old_bias = 1;
             double new_bias = 1;
 
-            //move one molecule
-            //update the sampler with the latest version of the molecules
+            // move one molecule
+            // update the sampler with the latest version of the molecules
             smplr.edit().updateFrom(system);
 
-            //this will randomly select one molecule
-            tuple<PartialMolecule,double> mol_and_bias = smplr.read().sample();
+            // this will randomly select one molecule
+            tuple<PartialMolecule, double> mol_and_bias = smplr.read().sample();
 
             const PartialMolecule &oldmol = mol_and_bias.get<0>();
             old_bias = mol_and_bias.get<1>();
@@ -285,130 +276,130 @@ void InternalMoveSingle::move(System &system, int nmoves, bool record_stats)
             QList<DihedralID> flex_dihs = flex.flexibleDihedrals();
 
             int maxbondvar = flex.maximumBondVar();
-	    int maxanglevar = flex.maximumAngleVar();
-	    int maxdihedralvar = flex.maximumDihedralVar();
+            int maxanglevar = flex.maximumAngleVar();
+            int maxdihedralvar = flex.maximumDihedralVar();
 
             int nbonds = flex_bonds.count();
             int nangles = flex_angs.count();
             int ndihedrals = flex_dihs.count();
-//             int ndofs = nbonds + nangles + ndihedrals ;
+            //             int ndofs = nbonds + nangles + ndihedrals ;
 
-	    // Select bonds
-	    if ( nbonds == 0  || maxbondvar < 0  || maxbondvar >= nbonds )
-	      {
-		moved_bonds = flex_bonds;
-	      }
-	    else
-	      {
-		int movecount = 0;
-		while (movecount < maxbondvar)
-		  {
-		    int rand = this->generator().randInt(0, nbonds - 1);
-		    const BondID &bond = flex_bonds.at( rand );
-		    if ( not moved_bonds.contains(bond) )
-		      {
-			moved_bonds.append(bond);
-			++movecount;
-		      }
-		  }
-	      }
-	    // Select angles
-	    if ( nangles == 0  || maxanglevar < 0  || maxanglevar >= nangles )
-	      {
-		moved_angles = flex_angs;
-	      }
-	    else
-	      {
-		int movecount = 0;
-		while (movecount < maxanglevar)
-		  {
-		    int rand = this->generator().randInt(0, nangles - 1);
-		    const AngleID &angle = flex_angs.at( rand );
-		    if ( not moved_angles.contains(angle) )
-		      {
-			moved_angles.append(angle);
-			++movecount;
-		      }
-		  }
-	      }
-	    // Select dihedrals
-	    if ( ndihedrals == 0  || maxdihedralvar < 0  || maxdihedralvar >= ndihedrals )
-	      {
-		moved_dihedrals = flex_dihs;
-	      }
-	    else
-	      {
-		int movecount = 0;
-		while (movecount < maxdihedralvar)
-		  {
-		    int rand = this->generator().randInt(0, ndihedrals - 1);
-		    const DihedralID &dihedral = flex_dihs.at( rand );
-		    if ( not moved_dihedrals.contains(dihedral) )
-		      {
-			moved_dihedrals.append(dihedral);
-			++movecount;
-		      }
-		  }
-	      }
+            // Select bonds
+            if (nbonds == 0 || maxbondvar < 0 || maxbondvar >= nbonds)
+            {
+                moved_bonds = flex_bonds;
+            }
+            else
+            {
+                int movecount = 0;
+                while (movecount < maxbondvar)
+                {
+                    int rand = this->generator().randInt(0, nbonds - 1);
+                    const BondID &bond = flex_bonds.at(rand);
+                    if (not moved_bonds.contains(bond))
+                    {
+                        moved_bonds.append(bond);
+                        ++movecount;
+                    }
+                }
+            }
+            // Select angles
+            if (nangles == 0 || maxanglevar < 0 || maxanglevar >= nangles)
+            {
+                moved_angles = flex_angs;
+            }
+            else
+            {
+                int movecount = 0;
+                while (movecount < maxanglevar)
+                {
+                    int rand = this->generator().randInt(0, nangles - 1);
+                    const AngleID &angle = flex_angs.at(rand);
+                    if (not moved_angles.contains(angle))
+                    {
+                        moved_angles.append(angle);
+                        ++movecount;
+                    }
+                }
+            }
+            // Select dihedrals
+            if (ndihedrals == 0 || maxdihedralvar < 0 || maxdihedralvar >= ndihedrals)
+            {
+                moved_dihedrals = flex_dihs;
+            }
+            else
+            {
+                int movecount = 0;
+                while (movecount < maxdihedralvar)
+                {
+                    int rand = this->generator().randInt(0, ndihedrals - 1);
+                    const DihedralID &dihedral = flex_dihs.at(rand);
+                    if (not moved_dihedrals.contains(dihedral))
+                    {
+                        moved_dihedrals.append(dihedral);
+                        ++movecount;
+                    }
+                }
+            }
 
-//             if ( ndofs == 0 || maxvar < 0 || maxvar >= ndofs  )
-//             {
-//                 // We move everything in these cases..
-//                 moved_bonds = flex_bonds;
-//                 moved_angles = flex_angs;
-//                 moved_dihedrals = flex_dihs;
-//             }
-//             else
-//             {
-//                 // draw a random number [0, bonds.size()+angles.size()+dihedrals.size())
-//                 // to find matching dof.
-//                 // Add it to moved_bonds or moved_angles or moved_dihedrals
-//                 // if not already present
-//                 int movecount = 0;
+            //             if ( ndofs == 0 || maxvar < 0 || maxvar >= ndofs  )
+            //             {
+            //                 // We move everything in these cases..
+            //                 moved_bonds = flex_bonds;
+            //                 moved_angles = flex_angs;
+            //                 moved_dihedrals = flex_dihs;
+            //             }
+            //             else
+            //             {
+            //                 // draw a random number [0, bonds.size()+angles.size()+dihedrals.size())
+            //                 // to find matching dof.
+            //                 // Add it to moved_bonds or moved_angles or moved_dihedrals
+            //                 // if not already present
+            //                 int movecount = 0;
 
-//                 while (movecount < maxvar)
-//                 {
-//                     int rand = this->generator().randInt(0, ndofs - 1);
-//                     //qDebug() << " rand is " << rand;
+            //                 while (movecount < maxvar)
+            //                 {
+            //                     int rand = this->generator().randInt(0, ndofs - 1);
+            //                     //qDebug() << " rand is " << rand;
 
-//                     if ( rand < nbonds )
-//                     {
-//                         // it is a bond...
-//                         const BondID &bond = flex_bonds.at( rand );
-//                         if ( not moved_bonds.contains(bond) )
-//                         {
-//                             //qDebug() << " adding bond " << rand;
-//                             moved_bonds.append(bond);
-//                             ++movecount;
-//                         }
-//                     }
-//                     else if ( rand < ( nbonds + nangles ) )
-//                     {
-//                         // it is an angle...
-//                         const AngleID &angle = flex_angs.at( rand - nbonds );
+            //                     if ( rand < nbonds )
+            //                     {
+            //                         // it is a bond...
+            //                         const BondID &bond = flex_bonds.at( rand );
+            //                         if ( not moved_bonds.contains(bond) )
+            //                         {
+            //                             //qDebug() << " adding bond " << rand;
+            //                             moved_bonds.append(bond);
+            //                             ++movecount;
+            //                         }
+            //                     }
+            //                     else if ( rand < ( nbonds + nangles ) )
+            //                     {
+            //                         // it is an angle...
+            //                         const AngleID &angle = flex_angs.at( rand - nbonds );
 
-//                         if ( not moved_angles.contains(angle) )
-//                         {
-//                             //qDebug() << " adding angle " << rand - nbonds;
-//                             moved_angles.append(angle);
-//                             ++movecount;
-//                         }
-//                     }
-//                     else
-//                     {
-//                         // it is a dihedral...
-//                         const DihedralID &dihedral = flex_dihs.at(
-//                                                             rand - nbonds - nangles );
+            //                         if ( not moved_angles.contains(angle) )
+            //                         {
+            //                             //qDebug() << " adding angle " << rand - nbonds;
+            //                             moved_angles.append(angle);
+            //                             ++movecount;
+            //                         }
+            //                     }
+            //                     else
+            //                     {
+            //                         // it is a dihedral...
+            //                         const DihedralID &dihedral = flex_dihs.at(
+            //                                                             rand - nbonds - nangles );
 
-//                         if ( not moved_dihedrals.contains(dihedral) )
-//                         {
-//                             //qDebug() << " adding dihedral " << rand - nbonds - nangles;
-//                             moved_dihedrals.append(dihedral);
-//                             ++movecount;
-//                         }
-//                     }
-//                 }
-//             }
+            //                         if ( not moved_dihedrals.contains(dihedral) )
+            //                         {
+            //                             //qDebug() << " adding dihedral " << rand - nbonds - nangles;
+            //                             moved_dihedrals.append(dihedral);
+            //                             ++movecount;
+            //                         }
+            //                     }
+            //                 }
+            //             }
 
             // Now actually move the selected dofs
             Mover<Molecule> mol_mover = oldmol.molecule().move();
@@ -418,10 +409,9 @@ void InternalMoveSingle::move(System &system, int nmoves, bool record_stats)
 
             foreach (const BondID &bond, moved_bonds)
             {
-                //const Length bond_delta_value = flex.bond_deltas[bond];
+                // const Length bond_delta_value = flex.bond_deltas[bond];
                 double bond_delta_value = flex.delta(bond);
-                bond_delta = Length( this->generator().rand(-bond_delta_value,
-                                                             bond_delta_value) );
+                bond_delta = Length(this->generator().rand(-bond_delta_value, bond_delta_value));
 
                 mol_mover.change(bond, bond_delta);
             }
@@ -431,10 +421,9 @@ void InternalMoveSingle::move(System &system, int nmoves, bool record_stats)
 
             foreach (const AngleID &angle, moved_angles)
             {
-                //const Angle angle_delta_value = flex.angle_deltas[angle];
+                // const Angle angle_delta_value = flex.angle_deltas[angle];
                 double angle_delta_value = flex.delta(angle);
-                angle_delta = Angle( this->generator().rand(-angle_delta_value,
-                                                             angle_delta_value) );
+                angle_delta = Angle(this->generator().rand(-angle_delta_value, angle_delta_value));
 
                 mol_mover.change(angle, angle_delta);
             }
@@ -446,17 +435,16 @@ void InternalMoveSingle::move(System &system, int nmoves, bool record_stats)
             {
                 // We rotate by picking the central bond of the dihedral to
                 // handle concerted motions
-                //BondID centralbond;
-                //centralbond = BondID(dihedral.atom1(), dihedral.atom2());
+                // BondID centralbond;
+                // centralbond = BondID(dihedral.atom1(), dihedral.atom2());
 
-                //const Angle angle_delta_value = flex.angle_deltas[dihedral];
+                // const Angle angle_delta_value = flex.angle_deltas[dihedral];
                 double angle_delta_value = flex.delta(dihedral);
-                dihedral_delta =  Angle( this->generator().rand(-angle_delta_value,
-                                                                 angle_delta_value) );
-                //mol_mover.change(centralbond, dihedral_delta);
+                dihedral_delta = Angle(this->generator().rand(-angle_delta_value, angle_delta_value));
+                // mol_mover.change(centralbond, dihedral_delta);
                 if (this->generator().randBool())
                 {
-                    //move only this specific dihedral
+                    // move only this specific dihedral
                     mol_mover.change(dihedral, dihedral_delta);
                 }
                 else
@@ -467,74 +455,68 @@ void InternalMoveSingle::move(System &system, int nmoves, bool record_stats)
                 }
             }
 
-            //update the system with the new coordinates
+            // update the system with the new coordinates
             Molecule newmol = mol_mover.commit();
 
-            //system.update(newmol);
+            // system.update(newmol);
 
-	    //JM 03/11 test if molecule coordinates synched with others
-	    // if so, for each synched mol, set coordinates to those of newmol
-	    // This only works if all molecules have identical topology
-	    // --> This should be a constraint ?
+            // JM 03/11 test if molecule coordinates synched with others
+            //  if so, for each synched mol, set coordinates to those of newmol
+            //  This only works if all molecules have identical topology
+            //  --> This should be a constraint ?
 
-	    //qDebug() << "HELLO " << synched_molgroup.molecules().toString();
+            // qDebug() << "HELLO " << synched_molgroup.molecules().toString();
 
-	    // Get the synched_molgroup from system using the name of the stored synched_molgroup
-	    // We have to look up by names at numbers may have changed if for instance
-	    // two replicas have been swapped
+            // Get the synched_molgroup from system using the name of the stored synched_molgroup
+            // We have to look up by names at numbers may have changed if for instance
+            // two replicas have been swapped
 
-	    const MGName &sync_name = synched_molgroup.name();
+            const MGName &sync_name = synched_molgroup.name();
 
-	    synched_molgroup = system[ sync_name ];
+            synched_molgroup = system[sync_name];
 
-	    if (not synched_molgroup.molecules().isEmpty())
-	      {
-		const PropertyName &coords_property = map["coordinates"];
-		const AtomCoords &coords = newmol.data().property(coords_property)
-                                         		  .asA<AtomCoords>();
+            if (not synched_molgroup.molecules().isEmpty())
+            {
+                const PropertyName &coords_property = map["coordinates"];
+                const AtomCoords &coords = newmol.data().property(coords_property).asA<AtomCoords>();
 
-		Molecules new_molecules = synched_molgroup.molecules();
+                Molecules new_molecules = synched_molgroup.molecules();
 
-		for (Molecules::const_iterator it = synched_molgroup.molecules().constBegin();
-		     it != synched_molgroup.molecules().constEnd();
-		     ++it)
-		  {
-		    //qDebug() << it;
-		    new_molecules.update( it->molecule().edit()
-					  .setProperty( map["coordinates"],
-							coords )
-					  .commit() ) ;
-		    //qDebug() << molecule.toString();
-		    //MolEditor editmol = molecule.edit()
-		  }
+                for (Molecules::const_iterator it = synched_molgroup.molecules().constBegin();
+                     it != synched_molgroup.molecules().constEnd(); ++it)
+                {
+                    // qDebug() << it;
+                    new_molecules.update(it->molecule().edit().setProperty(map["coordinates"], coords).commit());
+                    // qDebug() << molecule.toString();
+                    // MolEditor editmol = molecule.edit()
+                }
 
-		new_molecules.add(newmol);
+                new_molecules.add(newmol);
 
-		system.update(new_molecules);
-	      }
-	    else
-	      {
-		//update the system with the new coordinates
-		system.update(newmol);
-	      }
+                system.update(new_molecules);
+            }
+            else
+            {
+                // update the system with the new coordinates
+                system.update(newmol);
+            }
 
-            //get the new bias on this molecule
+            // get the new bias on this molecule
             smplr.edit().updateFrom(system);
 
-            new_bias = smplr.read().probabilityOf( PartialMolecule(newmol,
-			                                                       oldmol.selection()) );
+            new_bias = smplr.read().probabilityOf(PartialMolecule(newmol, oldmol.selection()));
 
-	    // JM DEBUG THERE IS A BUG AND THE INTRAGROUP FORCEFIELDS ENERGIES OF THE MOVED MOLECULE
-	    // ARE NOT UPDATED ( BUT THE PERTURBED ENERGIES ARE CORRECT ! )
-	    //system.mustNowRecalculateFromScratch();
-            //calculate the energy of the system
-            double new_nrg = system.energy( this->energyComponent() );
+            // JM DEBUG THERE IS A BUG AND THE INTRAGROUP FORCEFIELDS ENERGIES OF THE MOVED MOLECULE
+            // ARE NOT UPDATED ( BUT THE PERTURBED ENERGIES ARE CORRECT ! )
+            // system.mustNowRecalculateFromScratch();
+            // calculate the energy of the system
+            double new_nrg = system.energy(this->energyComponent());
 
-            //accept or reject the move based on the change of energy
-            //and the biasing factors
+            // accept or reject the move based on the change of energy
+            // and the biasing factors
             if (not this->test(new_nrg, old_nrg, new_bias, old_bias))
             {
-                //the move has been rejected - reset the state
+                // the move has been rejected - reset the state
                 smplr = old_sampler;
                 system = old_system;
             }
@@ -545,7 +527,7 @@ void InternalMoveSingle::move(System &system, int nmoves, bool record_stats)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         system = old_system_state;
         this->operator=(old_state);
@@ -553,7 +535,7 @@ void InternalMoveSingle::move(System &system, int nmoves, bool record_stats)
     }
 }
 
-const char* InternalMoveSingle::typeName()
+const char *InternalMoveSingle::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<InternalMoveSingle>() );
+    return QMetaType::typeName(qMetaTypeId<InternalMoveSingle>());
 }

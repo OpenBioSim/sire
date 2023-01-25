@@ -36,137 +36,134 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class Replicas;
+    class Replicas;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::Replicas&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::Replicas&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::Replicas &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::Replicas &);
 
 namespace SireMaths
 {
-class RanGenerator;
+    class RanGenerator;
 }
 
 namespace SireMove
 {
 
-class Replica;
+    class Replica;
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-/** This class is used to hold all of the replicas in
-    a replica exchange simulation
+    /** This class is used to hold all of the replicas in
+        a replica exchange simulation
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT Replicas
-        : public SireBase::ConcreteProperty<Replicas,SupraSystem>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT Replicas : public SireBase::ConcreteProperty<Replicas, SupraSystem>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const Replicas&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Replicas&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const Replicas &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, Replicas &);
 
-public:
-    Replicas();
-    Replicas(int n);
-    Replicas(const System &system, int n=1);
-    Replicas(const QVector<System> &systems);
+    public:
+        Replicas();
+        Replicas(int n);
+        Replicas(const System &system, int n = 1);
+        Replicas(const QVector<System> &systems);
 
-    Replicas(const SupraSubSystem &subsystem, int n=1);
-    Replicas(const SupraSystem &suprasystem);
+        Replicas(const SupraSubSystem &subsystem, int n = 1);
+        Replicas(const SupraSystem &suprasystem);
 
-    Replicas(const Replicas &other);
+        Replicas(const Replicas &other);
 
-    ~Replicas();
+        ~Replicas();
 
-    Replicas& operator=(const Replicas &other);
+        Replicas &operator=(const Replicas &other);
 
-    bool operator==(const Replicas &other) const;
-    bool operator!=(const Replicas &other) const;
+        bool operator==(const Replicas &other) const;
+        bool operator!=(const Replicas &other) const;
 
-    const Replica& operator[](int i) const;
+        const Replica &operator[](int i) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const Replica& at(int i) const;
+        const Replica &at(int i) const;
 
-    int nReplicas() const;
+        int nReplicas() const;
 
-    void resetReplicaIDs();
+        void resetReplicaIDs();
 
-    const QVector<quint32>& replicaIDs() const;
+        const QVector<quint32> &replicaIDs() const;
 
-    void collectSupraStats();
+        void collectSupraStats();
 
-    QVector<double> lambdaTrajectory() const;
+        QVector<double> lambdaTrajectory() const;
 
-    QList< QVector<double> > lambdaTrajectoryHistory() const;
+        QList<QVector<double>> lambdaTrajectoryHistory() const;
 
-    void setReplicas(const Replicas &replicas);
+        void setReplicas(const Replicas &replicas);
 
-    void setReplica(const Replica &replica);
-    void setReplica(int i, const Replica &replica);
+        void setReplica(const Replica &replica);
+        void setReplica(int i, const Replica &replica);
 
-    void setSubSystem(const System &system);
-    void setSubSystem(const SupraSubSystem &subsystem);
+        void setSubSystem(const System &system);
+        void setSubSystem(const SupraSubSystem &subsystem);
 
-    void setSubSystem(int i, const System &system);
-    void setSubSystem(int i, const SupraSubSystem &subsystem);
+        void setSubSystem(int i, const System &system);
+        void setSubSystem(int i, const SupraSubSystem &subsystem);
 
-    void setEnergyComponent(const Symbol &symbol);
-    void setEnergyComponent(int i, const Symbol &symbol);
+        void setEnergyComponent(const Symbol &symbol);
+        void setEnergyComponent(int i, const Symbol &symbol);
 
-    void setSpaceProperty(const PropertyName &spaceproperty);
-    void setSpaceProperty(int i, const PropertyName &spaceproperty);
+        void setSpaceProperty(const PropertyName &spaceproperty);
+        void setSpaceProperty(int i, const PropertyName &spaceproperty);
 
-    void setLambdaComponent(const Symbol &symbol);
-    void setLambdaComponent(int i, const Symbol &symbol);
+        void setLambdaComponent(const Symbol &symbol);
+        void setLambdaComponent(int i, const Symbol &symbol);
 
-    void setLambdaValue(double value);
-    void setLambdaValue(int i, double value);
+        void setLambdaValue(double value);
+        void setLambdaValue(int i, double value);
 
-    void setTemperature(const SireUnits::Dimension::Temperature &temperature);
-    void setTemperature(int i, const SireUnits::Dimension::Temperature &temperature);
+        void setTemperature(const SireUnits::Dimension::Temperature &temperature);
+        void setTemperature(int i, const SireUnits::Dimension::Temperature &temperature);
 
-    void setPressure(const SireUnits::Dimension::Pressure &pressure);
-    void setPressure(int i, const SireUnits::Dimension::Pressure &pressure);
+        void setPressure(const SireUnits::Dimension::Pressure &pressure);
+        void setPressure(int i, const SireUnits::Dimension::Pressure &pressure);
 
-    void setFugacity(const SireUnits::Dimension::Pressure &fugacity);
-    void setFugacity(int i, const SireUnits::Dimension::Pressure &fugacity);
+        void setFugacity(const SireUnits::Dimension::Pressure &fugacity);
+        void setFugacity(int i, const SireUnits::Dimension::Pressure &fugacity);
 
-    void setChemicalPotential(
-                const SireUnits::Dimension::MolarEnergy &chemical_potential);
+        void setChemicalPotential(const SireUnits::Dimension::MolarEnergy &chemical_potential);
 
-    void setChemicalPotential(int i,
-                const SireUnits::Dimension::MolarEnergy &chemical_potential);
+        void setChemicalPotential(int i, const SireUnits::Dimension::MolarEnergy &chemical_potential);
 
-    void setGenerator(const RanGenerator &rangenerator);
-    void setGenerator(int i, const RanGenerator &rangenerator);
+        void setGenerator(const RanGenerator &rangenerator);
+        void setGenerator(int i, const RanGenerator &rangenerator);
 
-    void swapSystems(int i, int j, bool swap_monitors=true);
+        void swapSystems(int i, int j, bool swap_monitors = true);
 
-    void swapMolecules(int i, int j);
+        void swapMolecules(int i, int j);
 
-protected:
-    Replica& _pvt_replica(int i);
-    const Replica& _pvt_replica(int i) const;
+    protected:
+        Replica &_pvt_replica(int i);
+        const Replica &_pvt_replica(int i) const;
 
-    const Replica& _pvt_constReplica(int i) const;
+        const Replica &_pvt_constReplica(int i) const;
 
-private:
-    /** The index of each of the replicas - this allows the
-        replicas to be tracked as they are swapped around */
-    QVector<quint32> replica_ids;
+    private:
+        /** The index of each of the replicas - this allows the
+            replicas to be tracked as they are swapped around */
+        QVector<quint32> replica_ids;
 
-    /** The history of lambda values sampled by each replica */
-    QList< QVector<double> > replica_history;
-};
+        /** The history of lambda values sampled by each replica */
+        QList<QVector<double>> replica_history;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::Replicas )
+Q_DECLARE_METATYPE(SireMove::Replicas)
 
-SIRE_EXPOSE_CLASS( SireMove::Replicas )
+SIRE_EXPOSE_CLASS(SireMove::Replicas)
 
 SIRE_END_HEADER
 

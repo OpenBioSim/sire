@@ -32,8 +32,8 @@
 
 #include "SireMol/atom.h"
 #include "SireMol/molecules.h"
-#include "SireMol/selector.hpp"
 #include "SireMol/mover.hpp"
+#include "SireMol/selector.hpp"
 
 #include "SireVol/space.h"
 
@@ -42,530 +42,523 @@ SIRE_BEGIN_HEADER
 namespace SireFF
 {
 
-class Point;
-class PointBase;
+    class Point;
+    class PointBase;
 
-class AtomPoint;
-class VectorPoint;
-class Center;
-class CenterOfMass;
-class CenterOfGeometry;
+    class AtomPoint;
+    class VectorPoint;
+    class Center;
+    class CenterOfMass;
+    class CenterOfGeometry;
 
-}
+} // namespace SireFF
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::Point&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::Point&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::Point &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::Point &);
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::AtomPoint&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::AtomPoint&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::AtomPoint &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::AtomPoint &);
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::VectorPoint&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::VectorPoint&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::VectorPoint &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::VectorPoint &);
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::Center&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::Center&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::Center &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::Center &);
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::CenterOfGeometry&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::CenterOfGeometry&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::CenterOfGeometry &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::CenterOfGeometry &);
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::CenterOfMass&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::CenterOfMass&);
-
-namespace SireFF
-{
-class MolForceTable;
-class ForceTable;
-}
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::CenterOfMass &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::CenterOfMass &);
 
 namespace SireFF
 {
+    class MolForceTable;
+    class ForceTable;
+} // namespace SireFF
 
-using SireMol::Atom;
-using SireMol::MoleculeData;
-using SireMol::MoleculeView;
-using SireMol::Molecules;
-using SireMol::MoleculeGroup;
-using SireMol::MolGroupsBase;
-using SireMol::MolNum;
-using SireMol::MolID;
-
-using SireBase::PropertyMap;
-
-using SireVol::Space;
-
-using SireMaths::Vector;
-
-class Point;
-typedef SireBase::PropPtr<Point> PointPtr;
-
-/** This is the base class of all Points. A Point is a class that
-    allows a view of a molecule (or molecules) to be turned
-    into a 3D point. This 3D point can then be used within a restraint
-    class (thereby seperating out the code that implements the
-    restraint from the code that selects the parts of the molecule(s)
-    being restrained)
-
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT Point : public SireBase::Property
+namespace SireFF
 {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const Point&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, Point&);
+    using SireMol::Atom;
+    using SireMol::MoleculeData;
+    using SireMol::MoleculeGroup;
+    using SireMol::Molecules;
+    using SireMol::MoleculeView;
+    using SireMol::MolGroupsBase;
+    using SireMol::MolID;
+    using SireMol::MolNum;
 
-public:
-    Point();
+    using SireBase::PropertyMap;
 
-    virtual ~Point();
+    using SireVol::Space;
 
-    virtual Point* clone() const=0;
+    using SireMaths::Vector;
 
-    const Vector& operator()() const;
+    class Point;
+    typedef SireBase::PropPtr<Point> PointPtr;
 
-    static const char* typeName()
+    /** This is the base class of all Points. A Point is a class that
+        allows a view of a molecule (or molecules) to be turned
+        into a 3D point. This 3D point can then be used within a restraint
+        class (thereby seperating out the code that implements the
+        restraint from the code that selects the parts of the molecule(s)
+        being restrained)
+
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT Point : public SireBase::Property
     {
-        return "SireFF::Point";
-    }
 
-    const Vector& point() const;
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const Point &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, Point &);
 
-    const Space& space() const;
+    public:
+        Point();
 
-    virtual void setSpace(const Space &space);
+        virtual ~Point();
 
-    virtual bool update(const MoleculeData &moldata)=0;
-    virtual bool update(const Molecules &molecules)=0;
-    virtual bool update(const MoleculeGroup &molgroup)=0;
-    virtual bool update(const MolGroupsBase &molgroups)=0;
+        virtual Point *clone() const = 0;
 
-    virtual bool wouldUpdate(const MoleculeData &moldata) const=0;
-    virtual bool wouldUpdate(const Molecules &molecules) const=0;
-    virtual bool wouldUpdate(const MoleculeGroup &molgroup) const=0;
-    virtual bool wouldUpdate(const MolGroupsBase &molgroups) const=0;
+        const Vector &operator()() const;
 
-    virtual Molecules molecules() const=0;
+        static const char *typeName()
+        {
+            return "SireFF::Point";
+        }
 
-    virtual int nMolecules() const=0;
+        const Vector &point() const;
 
-    virtual bool contains(MolNum molnum) const=0;
-    virtual bool contains(const MolID &molid) const=0;
+        const Space &space() const;
 
-    virtual bool usesMoleculesIn(const ForceTable &forcetable) const=0;
-    virtual bool usesMoleculesIn(const Molecules &molecules) const=0;
-    virtual bool usesMoleculesIn(const MoleculeGroup &molgroup) const=0;
-    virtual bool usesMoleculesIn(const MolGroupsBase &molgroups) const=0;
+        virtual void setSpace(const Space &space);
 
-    virtual bool addForce(MolForceTable &molforces, const Vector &force) const=0;
-    virtual bool addForce(ForceTable &forces, const Vector &force) const=0;
+        virtual bool update(const MoleculeData &moldata) = 0;
+        virtual bool update(const Molecules &molecules) = 0;
+        virtual bool update(const MoleculeGroup &molgroup) = 0;
+        virtual bool update(const MolGroupsBase &molgroups) = 0;
 
-    static const VectorPoint& null();
+        virtual bool wouldUpdate(const MoleculeData &moldata) const = 0;
+        virtual bool wouldUpdate(const Molecules &molecules) const = 0;
+        virtual bool wouldUpdate(const MoleculeGroup &molgroup) const = 0;
+        virtual bool wouldUpdate(const MolGroupsBase &molgroups) const = 0;
 
-    virtual bool isExtraMoleculePoint() const=0;
-    virtual bool isIntraMoleculePoint() const=0;
-    virtual bool isInterMoleculePoint() const=0;
+        virtual Molecules molecules() const = 0;
 
-    static bool areIntraMoleculePoints(const Point &point0, const Point &point1);
-    static bool areIntraMoleculePoints(const Point &point0, const Point &point1,
-                                       const Point &point2);
-    static bool areIntraMoleculePoints(const Point &point0, const Point &point1,
-                                       const Point &point2, const Point &point3);
+        virtual int nMolecules() const = 0;
 
-    static bool areIntraMoleculePoints(const QVector<PointPtr> &points);
+        virtual bool contains(MolNum molnum) const = 0;
+        virtual bool contains(const MolID &molid) const = 0;
 
-protected:
-    Point(const Vector &point);
-    Point(const Point &other);
+        virtual bool usesMoleculesIn(const ForceTable &forcetable) const = 0;
+        virtual bool usesMoleculesIn(const Molecules &molecules) const = 0;
+        virtual bool usesMoleculesIn(const MoleculeGroup &molgroup) const = 0;
+        virtual bool usesMoleculesIn(const MolGroupsBase &molgroups) const = 0;
 
-    Point& operator=(const Point &other);
+        virtual bool addForce(MolForceTable &molforces, const Vector &force) const = 0;
+        virtual bool addForce(ForceTable &forces, const Vector &force) const = 0;
 
-    bool operator==(const Point &other) const;
-    bool operator!=(const Point &other) const;
+        static const VectorPoint &null();
 
-    bool updatePoint(const Vector &point);
+        virtual bool isExtraMoleculePoint() const = 0;
+        virtual bool isIntraMoleculePoint() const = 0;
+        virtual bool isInterMoleculePoint() const = 0;
 
-private:
-    /** The actual point in space */
-    Vector p;
+        static bool areIntraMoleculePoints(const Point &point0, const Point &point1);
+        static bool areIntraMoleculePoints(const Point &point0, const Point &point1, const Point &point2);
+        static bool areIntraMoleculePoints(const Point &point0, const Point &point1, const Point &point2,
+                                           const Point &point3);
 
-    /** The 3D space in which this point is calculated and exists */
-    SireVol::SpacePtr spce;
-};
+        static bool areIntraMoleculePoints(const QVector<PointPtr> &points);
 
-/** This is a small class used to help convert different molecule
-    views into a Point class in function signatures, e.g.
+    protected:
+        Point(const Vector &point);
+        Point(const Point &other);
 
-    DistanceRestraint(const PointRef &point0, const PointRef &point1);
+        Point &operator=(const Point &other);
 
-    would allow distance restraints to be created between pairs
-    of atoms, or an atom and a vector etc.
+        bool operator==(const Point &other) const;
+        bool operator!=(const Point &other) const;
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT PointRef
-{
-public:
-    PointRef(const Atom &atom);
-    PointRef(const Vector &point);
-    PointRef(const Point &point);
-    PointRef(const PointPtr &point);
+        bool updatePoint(const Vector &point);
 
-    ~PointRef();
+    private:
+        /** The actual point in space */
+        Vector p;
 
-    const Vector& operator()() const;
+        /** The 3D space in which this point is calculated and exists */
+        SireVol::SpacePtr spce;
+    };
 
-    const Vector& point() const;
+    /** This is a small class used to help convert different molecule
+        views into a Point class in function signatures, e.g.
 
-    operator const Point&() const;
+        DistanceRestraint(const PointRef &point0, const PointRef &point1);
 
-    bool addForce(MolForceTable &molforces, const Vector &force) const;
-    bool addForce(ForceTable &forces, const Vector &force) const;
+        would allow distance restraints to be created between pairs
+        of atoms, or an atom and a vector etc.
 
-private:
-    /** Pointer to the implementation of this point */
-    PointPtr ptr;
-};
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT PointRef
+    {
+    public:
+        PointRef(const Atom &atom);
+        PointRef(const Vector &point);
+        PointRef(const Point &point);
+        PointRef(const PointPtr &point);
 
-/** This point returns the location of an atom */
-class SIREFF_EXPORT AtomPoint : public SireBase::ConcreteProperty<AtomPoint,Point>
-{
+        ~PointRef();
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomPoint&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, AtomPoint&);
+        const Vector &operator()() const;
 
-public:
-    AtomPoint();
-    AtomPoint(const Atom &atom, const PropertyMap &map=PropertyMap());
+        const Vector &point() const;
 
-    AtomPoint(const AtomPoint &other);
+        operator const Point &() const;
 
-    ~AtomPoint();
+        bool addForce(MolForceTable &molforces, const Vector &force) const;
+        bool addForce(ForceTable &forces, const Vector &force) const;
 
-    AtomPoint& operator=(const AtomPoint &other);
+    private:
+        /** Pointer to the implementation of this point */
+        PointPtr ptr;
+    };
 
-    bool operator==(const AtomPoint &other) const;
-    bool operator!=(const AtomPoint &other) const;
+    /** This point returns the location of an atom */
+    class SIREFF_EXPORT AtomPoint : public SireBase::ConcreteProperty<AtomPoint, Point>
+    {
 
-    static const char* typeName();
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomPoint &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, AtomPoint &);
 
-    QString toString() const;
+    public:
+        AtomPoint();
+        AtomPoint(const Atom &atom, const PropertyMap &map = PropertyMap());
 
-    bool update(const MoleculeData &moldata);
-    bool update(const Molecules &molecules);
-    bool update(const MoleculeGroup &molgroup);
-    bool update(const MolGroupsBase &molgroups);
+        AtomPoint(const AtomPoint &other);
 
-    bool wouldUpdate(const MoleculeData &moldata) const;
-    bool wouldUpdate(const Molecules &molecules) const;
-    bool wouldUpdate(const MoleculeGroup &molgroup) const;
-    bool wouldUpdate(const MolGroupsBase &molgroups) const;
+        ~AtomPoint();
 
-    Molecules molecules() const;
+        AtomPoint &operator=(const AtomPoint &other);
 
-    int nMolecules() const;
+        bool operator==(const AtomPoint &other) const;
+        bool operator!=(const AtomPoint &other) const;
 
-    bool contains(MolNum molnum) const;
-    bool contains(const MolID &molid) const;
+        static const char *typeName();
 
-    bool usesMoleculesIn(const ForceTable &forcetable) const;
-    bool usesMoleculesIn(const Molecules &molecules) const;
-    bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
-    bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
+        QString toString() const;
 
-    const Atom& atom() const;
+        bool update(const MoleculeData &moldata);
+        bool update(const Molecules &molecules);
+        bool update(const MoleculeGroup &molgroup);
+        bool update(const MolGroupsBase &molgroups);
 
-    bool addForce(MolForceTable &molforces, const Vector &force) const;
-    bool addForce(ForceTable &forces, const Vector &force) const;
+        bool wouldUpdate(const MoleculeData &moldata) const;
+        bool wouldUpdate(const Molecules &molecules) const;
+        bool wouldUpdate(const MoleculeGroup &molgroup) const;
+        bool wouldUpdate(const MolGroupsBase &molgroups) const;
 
-    bool isExtraMoleculePoint() const;
-    bool isIntraMoleculePoint() const;
-    bool isInterMoleculePoint() const;
+        Molecules molecules() const;
 
-private:
-    /** The actual atom! */
-    Atom atm;
+        int nMolecules() const;
 
-    /** The coordinates property */
-    SireBase::PropertyName coords_property;
-};
+        bool contains(MolNum molnum) const;
+        bool contains(const MolID &molid) const;
 
-/** This is a simple wrapper for a point in space */
-class SIREFF_EXPORT VectorPoint : public SireBase::ConcreteProperty<VectorPoint,Point>
-{
+        bool usesMoleculesIn(const ForceTable &forcetable) const;
+        bool usesMoleculesIn(const Molecules &molecules) const;
+        bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
+        bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const VectorPoint&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, VectorPoint&);
+        const Atom &atom() const;
 
-public:
-    VectorPoint();
-    VectorPoint(const Vector &point);
+        bool addForce(MolForceTable &molforces, const Vector &force) const;
+        bool addForce(ForceTable &forces, const Vector &force) const;
 
-    VectorPoint(const VectorPoint &other);
+        bool isExtraMoleculePoint() const;
+        bool isIntraMoleculePoint() const;
+        bool isInterMoleculePoint() const;
 
-    ~VectorPoint();
+    private:
+        /** The actual atom! */
+        Atom atm;
 
-    VectorPoint& operator=(const VectorPoint &other);
+        /** The coordinates property */
+        SireBase::PropertyName coords_property;
+    };
 
-    bool operator==(const VectorPoint &other) const;
-    bool operator!=(const VectorPoint &other) const;
+    /** This is a simple wrapper for a point in space */
+    class SIREFF_EXPORT VectorPoint : public SireBase::ConcreteProperty<VectorPoint, Point>
+    {
 
-    static const char* typeName();
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const VectorPoint &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, VectorPoint &);
 
-    QString toString() const;
+    public:
+        VectorPoint();
+        VectorPoint(const Vector &point);
 
-    bool update(const MoleculeData &moldata);
-    bool update(const Molecules &molecules);
-    bool update(const MoleculeGroup &molgroup);
-    bool update(const MolGroupsBase &molgroups);
+        VectorPoint(const VectorPoint &other);
 
-    bool wouldUpdate(const MoleculeData &moldata) const;
-    bool wouldUpdate(const Molecules &molecules) const;
-    bool wouldUpdate(const MoleculeGroup &molgroup) const;
-    bool wouldUpdate(const MolGroupsBase &molgroups) const;
+        ~VectorPoint();
 
-    Molecules molecules() const;
+        VectorPoint &operator=(const VectorPoint &other);
 
-    int nMolecules() const;
+        bool operator==(const VectorPoint &other) const;
+        bool operator!=(const VectorPoint &other) const;
 
-    bool contains(MolNum molnum) const;
-    bool contains(const MolID &molid) const;
+        static const char *typeName();
 
-    bool usesMoleculesIn(const ForceTable &forcetable) const;
-    bool usesMoleculesIn(const Molecules &molecules) const;
-    bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
-    bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
+        QString toString() const;
 
-    bool addForce(MolForceTable &molforces, const Vector &force) const;
-    bool addForce(ForceTable &forces, const Vector &force) const;
+        bool update(const MoleculeData &moldata);
+        bool update(const Molecules &molecules);
+        bool update(const MoleculeGroup &molgroup);
+        bool update(const MolGroupsBase &molgroups);
 
-    bool isExtraMoleculePoint() const;
-    bool isIntraMoleculePoint() const;
-    bool isInterMoleculePoint() const;
-};
+        bool wouldUpdate(const MoleculeData &moldata) const;
+        bool wouldUpdate(const Molecules &molecules) const;
+        bool wouldUpdate(const MoleculeGroup &molgroup) const;
+        bool wouldUpdate(const MolGroupsBase &molgroups) const;
 
-/** This point returns the center of a view of a molecule, or group
-    of molecules */
-class SIREFF_EXPORT Center : public SireBase::ConcreteProperty<Center,Point>
-{
+        Molecules molecules() const;
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const Center&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, Center&);
+        int nMolecules() const;
 
-public:
-    Center();
-    Center(const MoleculeView &molview, const PropertyMap &map = PropertyMap());
-    Center(const Molecules &molecules, const PropertyMap &map = PropertyMap());
+        bool contains(MolNum molnum) const;
+        bool contains(const MolID &molid) const;
 
-    Center(const Center &other);
+        bool usesMoleculesIn(const ForceTable &forcetable) const;
+        bool usesMoleculesIn(const Molecules &molecules) const;
+        bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
+        bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
 
-    ~Center();
+        bool addForce(MolForceTable &molforces, const Vector &force) const;
+        bool addForce(ForceTable &forces, const Vector &force) const;
 
-    Center& operator=(const Center &other);
+        bool isExtraMoleculePoint() const;
+        bool isIntraMoleculePoint() const;
+        bool isInterMoleculePoint() const;
+    };
 
-    bool operator==(const Center &other) const;
-    bool operator!=(const Center &other) const;
+    /** This point returns the center of a view of a molecule, or group
+        of molecules */
+    class SIREFF_EXPORT Center : public SireBase::ConcreteProperty<Center, Point>
+    {
 
-    static const char* typeName();
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const Center &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, Center &);
 
-    QString toString() const;
+    public:
+        Center();
+        Center(const MoleculeView &molview, const PropertyMap &map = PropertyMap());
+        Center(const Molecules &molecules, const PropertyMap &map = PropertyMap());
 
-    void setSpace(const Space &space);
+        Center(const Center &other);
 
-    bool update(const MoleculeData &moldata);
-    bool update(const Molecules &molecules);
-    bool update(const MoleculeGroup &molgroup);
-    bool update(const MolGroupsBase &molgroups);
+        ~Center();
 
-    bool wouldUpdate(const MoleculeData &moldata) const;
-    bool wouldUpdate(const Molecules &molecules) const;
-    bool wouldUpdate(const MoleculeGroup &molgroup) const;
-    bool wouldUpdate(const MolGroupsBase &molgroups) const;
+        Center &operator=(const Center &other);
 
-    Molecules molecules() const;
+        bool operator==(const Center &other) const;
+        bool operator!=(const Center &other) const;
 
-    int nMolecules() const;
+        static const char *typeName();
 
-    bool contains(MolNum molnum) const;
-    bool contains(const MolID &molid) const;
+        QString toString() const;
 
-    bool usesMoleculesIn(const ForceTable &forcetable) const;
-    bool usesMoleculesIn(const Molecules &molecules) const;
-    bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
-    bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
+        void setSpace(const Space &space);
 
-    bool addForce(MolForceTable &molforces, const Vector &force) const;
-    bool addForce(ForceTable &forces, const Vector &force) const;
+        bool update(const MoleculeData &moldata);
+        bool update(const Molecules &molecules);
+        bool update(const MoleculeGroup &molgroup);
+        bool update(const MolGroupsBase &molgroups);
 
-    bool isExtraMoleculePoint() const;
-    bool isIntraMoleculePoint() const;
-    bool isInterMoleculePoint() const;
+        bool wouldUpdate(const MoleculeData &moldata) const;
+        bool wouldUpdate(const Molecules &molecules) const;
+        bool wouldUpdate(const MoleculeGroup &molgroup) const;
+        bool wouldUpdate(const MolGroupsBase &molgroups) const;
 
-private:
-    bool recalculatePoint();
+        Molecules molecules() const;
 
-    /** The molecules whose center is to be determined */
-    Molecules mols;
+        int nMolecules() const;
 
-    /** The map used to find the properties */
-    PropertyMap property_map;
-};
+        bool contains(MolNum molnum) const;
+        bool contains(const MolID &molid) const;
 
-/** This point returns the center of geometry of a view of a molecule,
-    or group of molecules */
-class SIREFF_EXPORT CenterOfGeometry
-            : public SireBase::ConcreteProperty<CenterOfGeometry,Point>
-{
+        bool usesMoleculesIn(const ForceTable &forcetable) const;
+        bool usesMoleculesIn(const Molecules &molecules) const;
+        bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
+        bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const CenterOfGeometry&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, CenterOfGeometry&);
+        bool addForce(MolForceTable &molforces, const Vector &force) const;
+        bool addForce(ForceTable &forces, const Vector &force) const;
 
-public:
-    CenterOfGeometry();
-    CenterOfGeometry(const MoleculeView &molview,
-                     const PropertyMap &map = PropertyMap());
-    CenterOfGeometry(const Molecules &molecules,
-                     const PropertyMap &map = PropertyMap());
+        bool isExtraMoleculePoint() const;
+        bool isIntraMoleculePoint() const;
+        bool isInterMoleculePoint() const;
 
-    CenterOfGeometry(const CenterOfGeometry &other);
+    private:
+        bool recalculatePoint();
 
-    ~CenterOfGeometry();
+        /** The molecules whose center is to be determined */
+        Molecules mols;
 
-    CenterOfGeometry& operator=(const CenterOfGeometry &other);
+        /** The map used to find the properties */
+        PropertyMap property_map;
+    };
 
-    bool operator==(const CenterOfGeometry &other) const;
-    bool operator!=(const CenterOfGeometry &other) const;
+    /** This point returns the center of geometry of a view of a molecule,
+        or group of molecules */
+    class SIREFF_EXPORT CenterOfGeometry : public SireBase::ConcreteProperty<CenterOfGeometry, Point>
+    {
 
-    static const char* typeName();
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const CenterOfGeometry &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, CenterOfGeometry &);
 
-    QString toString() const;
+    public:
+        CenterOfGeometry();
+        CenterOfGeometry(const MoleculeView &molview, const PropertyMap &map = PropertyMap());
+        CenterOfGeometry(const Molecules &molecules, const PropertyMap &map = PropertyMap());
 
-    void setSpace(const Space &space);
+        CenterOfGeometry(const CenterOfGeometry &other);
 
-    bool update(const MoleculeData &moldata);
-    bool update(const Molecules &molecules);
-    bool update(const MoleculeGroup &molgroup);
-    bool update(const MolGroupsBase &molgroups);
+        ~CenterOfGeometry();
 
-    bool wouldUpdate(const MoleculeData &moldata) const;
-    bool wouldUpdate(const Molecules &molecules) const;
-    bool wouldUpdate(const MoleculeGroup &molgroup) const;
-    bool wouldUpdate(const MolGroupsBase &molgroups) const;
+        CenterOfGeometry &operator=(const CenterOfGeometry &other);
 
-    Molecules molecules() const;
+        bool operator==(const CenterOfGeometry &other) const;
+        bool operator!=(const CenterOfGeometry &other) const;
 
-    int nMolecules() const;
+        static const char *typeName();
 
-    bool contains(MolNum molnum) const;
-    bool contains(const MolID &molid) const;
+        QString toString() const;
 
-    bool usesMoleculesIn(const ForceTable &forcetable) const;
-    bool usesMoleculesIn(const Molecules &molecules) const;
-    bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
-    bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
+        void setSpace(const Space &space);
 
-    bool addForce(MolForceTable &molforces, const Vector &force) const;
-    bool addForce(ForceTable &forces, const Vector &force) const;
+        bool update(const MoleculeData &moldata);
+        bool update(const Molecules &molecules);
+        bool update(const MoleculeGroup &molgroup);
+        bool update(const MolGroupsBase &molgroups);
 
-    bool isExtraMoleculePoint() const;
-    bool isIntraMoleculePoint() const;
-    bool isInterMoleculePoint() const;
+        bool wouldUpdate(const MoleculeData &moldata) const;
+        bool wouldUpdate(const Molecules &molecules) const;
+        bool wouldUpdate(const MoleculeGroup &molgroup) const;
+        bool wouldUpdate(const MolGroupsBase &molgroups) const;
 
-private:
-    bool recalculatePoint();
+        Molecules molecules() const;
 
-    /** The molecules whose center of geometry is to be determined */
-    Molecules mols;
+        int nMolecules() const;
 
-    /** The map used to find the properties */
-    PropertyMap property_map;
-};
+        bool contains(MolNum molnum) const;
+        bool contains(const MolID &molid) const;
 
-/** This point returns the center of mass of a view of a molecule,
-    or group of molecules */
-class SIREFF_EXPORT CenterOfMass
-            : public SireBase::ConcreteProperty<CenterOfMass,Point>
-{
+        bool usesMoleculesIn(const ForceTable &forcetable) const;
+        bool usesMoleculesIn(const Molecules &molecules) const;
+        bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
+        bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const CenterOfMass&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, CenterOfMass&);
+        bool addForce(MolForceTable &molforces, const Vector &force) const;
+        bool addForce(ForceTable &forces, const Vector &force) const;
 
-public:
-    CenterOfMass();
-    CenterOfMass(const MoleculeView &molview,
-                 const PropertyMap &map = PropertyMap());
-    CenterOfMass(const Molecules &molecules,
-                 const PropertyMap &map = PropertyMap());
+        bool isExtraMoleculePoint() const;
+        bool isIntraMoleculePoint() const;
+        bool isInterMoleculePoint() const;
 
-    CenterOfMass(const CenterOfMass &other);
+    private:
+        bool recalculatePoint();
 
-    ~CenterOfMass();
+        /** The molecules whose center of geometry is to be determined */
+        Molecules mols;
 
-    CenterOfMass& operator=(const CenterOfMass &other);
+        /** The map used to find the properties */
+        PropertyMap property_map;
+    };
 
-    bool operator==(const CenterOfMass &other) const;
-    bool operator!=(const CenterOfMass &other) const;
+    /** This point returns the center of mass of a view of a molecule,
+        or group of molecules */
+    class SIREFF_EXPORT CenterOfMass : public SireBase::ConcreteProperty<CenterOfMass, Point>
+    {
 
-    static const char* typeName();
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const CenterOfMass &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, CenterOfMass &);
 
-    QString toString() const;
+    public:
+        CenterOfMass();
+        CenterOfMass(const MoleculeView &molview, const PropertyMap &map = PropertyMap());
+        CenterOfMass(const Molecules &molecules, const PropertyMap &map = PropertyMap());
 
-    void setSpace(const Space &space);
+        CenterOfMass(const CenterOfMass &other);
 
-    bool update(const MoleculeData &moldata);
-    bool update(const Molecules &molecules);
-    bool update(const MoleculeGroup &molgroup);
-    bool update(const MolGroupsBase &molgroups);
+        ~CenterOfMass();
 
-    bool wouldUpdate(const MoleculeData &moldata) const;
-    bool wouldUpdate(const Molecules &molecules) const;
-    bool wouldUpdate(const MoleculeGroup &molgroup) const;
-    bool wouldUpdate(const MolGroupsBase &molgroups) const;
+        CenterOfMass &operator=(const CenterOfMass &other);
 
-    Molecules molecules() const;
+        bool operator==(const CenterOfMass &other) const;
+        bool operator!=(const CenterOfMass &other) const;
 
-    int nMolecules() const;
+        static const char *typeName();
 
-    bool contains(MolNum molnum) const;
-    bool contains(const MolID &molid) const;
+        QString toString() const;
 
-    bool usesMoleculesIn(const ForceTable &forcetable) const;
-    bool usesMoleculesIn(const Molecules &molecules) const;
-    bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
-    bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
+        void setSpace(const Space &space);
 
-    bool addForce(MolForceTable &molforces, const Vector &force) const;
-    bool addForce(ForceTable &forces, const Vector &force) const;
+        bool update(const MoleculeData &moldata);
+        bool update(const Molecules &molecules);
+        bool update(const MoleculeGroup &molgroup);
+        bool update(const MolGroupsBase &molgroups);
 
-    bool isExtraMoleculePoint() const;
-    bool isIntraMoleculePoint() const;
-    bool isInterMoleculePoint() const;
+        bool wouldUpdate(const MoleculeData &moldata) const;
+        bool wouldUpdate(const Molecules &molecules) const;
+        bool wouldUpdate(const MoleculeGroup &molgroup) const;
+        bool wouldUpdate(const MolGroupsBase &molgroups) const;
 
-private:
-    bool recalculatePoint();
+        Molecules molecules() const;
 
-    /** The molecules whose center of geometry is to be determined */
-    Molecules mols;
+        int nMolecules() const;
 
-    /** The map used to find the properties */
-    PropertyMap property_map;
-};
+        bool contains(MolNum molnum) const;
+        bool contains(const MolID &molid) const;
 
-}
+        bool usesMoleculesIn(const ForceTable &forcetable) const;
+        bool usesMoleculesIn(const Molecules &molecules) const;
+        bool usesMoleculesIn(const MoleculeGroup &molgroup) const;
+        bool usesMoleculesIn(const MolGroupsBase &molgroups) const;
 
-Q_DECLARE_METATYPE( SireFF::AtomPoint )
-Q_DECLARE_METATYPE( SireFF::VectorPoint )
-Q_DECLARE_METATYPE( SireFF::Center )
-Q_DECLARE_METATYPE( SireFF::CenterOfGeometry )
-Q_DECLARE_METATYPE( SireFF::CenterOfMass )
+        bool addForce(MolForceTable &molforces, const Vector &force) const;
+        bool addForce(ForceTable &forces, const Vector &force) const;
 
-SIRE_EXPOSE_CLASS( SireFF::Point )
-SIRE_EXPOSE_CLASS( SireFF::PointRef )
-SIRE_EXPOSE_CLASS( SireFF::AtomPoint )
-SIRE_EXPOSE_CLASS( SireFF::VectorPoint )
-SIRE_EXPOSE_CLASS( SireFF::Center )
-SIRE_EXPOSE_CLASS( SireFF::CenterOfGeometry )
-SIRE_EXPOSE_CLASS( SireFF::CenterOfMass )
+        bool isExtraMoleculePoint() const;
+        bool isIntraMoleculePoint() const;
+        bool isInterMoleculePoint() const;
 
-SIRE_EXPOSE_PROPERTY( SireFF::PointPtr, SireFF::Point )
+    private:
+        bool recalculatePoint();
+
+        /** The molecules whose center of geometry is to be determined */
+        Molecules mols;
+
+        /** The map used to find the properties */
+        PropertyMap property_map;
+    };
+
+} // namespace SireFF
+
+Q_DECLARE_METATYPE(SireFF::AtomPoint)
+Q_DECLARE_METATYPE(SireFF::VectorPoint)
+Q_DECLARE_METATYPE(SireFF::Center)
+Q_DECLARE_METATYPE(SireFF::CenterOfGeometry)
+Q_DECLARE_METATYPE(SireFF::CenterOfMass)
+
+SIRE_EXPOSE_CLASS(SireFF::Point)
+SIRE_EXPOSE_CLASS(SireFF::PointRef)
+SIRE_EXPOSE_CLASS(SireFF::AtomPoint)
+SIRE_EXPOSE_CLASS(SireFF::VectorPoint)
+SIRE_EXPOSE_CLASS(SireFF::Center)
+SIRE_EXPOSE_CLASS(SireFF::CenterOfGeometry)
+SIRE_EXPOSE_CLASS(SireFF::CenterOfMass)
+
+SIRE_EXPOSE_PROPERTY(SireFF::PointPtr, SireFF::Point)
 
 SIRE_END_HEADER
 

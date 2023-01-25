@@ -26,13 +26,13 @@
 \*********************************************/
 
 #include "beadeditor.h"
-#include "mover.hpp"
-#include "selector.hpp"
 #include "atom.h"
-#include "residue.h"
 #include "chain.h"
 #include "cutgroup.h"
+#include "mover.hpp"
+#include "residue.h"
 #include "segment.h"
+#include "selector.hpp"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -47,7 +47,7 @@ QDataStream &operator<<(QDataStream &ds, const BeadEditor &beadeditor)
 {
     writeHeader(ds, r_beadeditor, 1);
 
-    ds << static_cast<const Bead&>(beadeditor);
+    ds << static_cast<const Bead &>(beadeditor);
 
     return ds;
 }
@@ -58,7 +58,7 @@ QDataStream &operator>>(QDataStream &ds, BeadEditor &beadeditor)
 
     if (v == 1)
     {
-        ds >> static_cast<Bead&>(beadeditor);
+        ds >> static_cast<Bead &>(beadeditor);
     }
     else
         throw version_error(v, "1", r_beadeditor, CODELOC);
@@ -67,40 +67,42 @@ QDataStream &operator>>(QDataStream &ds, BeadEditor &beadeditor)
 }
 
 /** Null constructor */
-BeadEditor::BeadEditor() : ConcreteProperty<BeadEditor,BeadEditorBase>()
-{}
+BeadEditor::BeadEditor() : ConcreteProperty<BeadEditor, BeadEditorBase>()
+{
+}
 
 /** Constructor an editor for the passed bead */
-BeadEditor::BeadEditor(const Bead &bead)
-           : ConcreteProperty<BeadEditor,BeadEditorBase>(bead)
-{}
+BeadEditor::BeadEditor(const Bead &bead) : ConcreteProperty<BeadEditor, BeadEditorBase>(bead)
+{
+}
 
 /** Copy constructor */
-BeadEditor::BeadEditor(const BeadEditor &other)
-           : ConcreteProperty<BeadEditor,BeadEditorBase>(other)
-{}
+BeadEditor::BeadEditor(const BeadEditor &other) : ConcreteProperty<BeadEditor, BeadEditorBase>(other)
+{
+}
 
 /** Destructor */
 BeadEditor::~BeadEditor()
-{}
+{
+}
 
 /** Copy assignment operator */
-BeadEditor& BeadEditor::operator=(const Bead &bead)
+BeadEditor &BeadEditor::operator=(const Bead &bead)
 {
     Bead::operator=(bead);
     return *this;
 }
 
 /** Copy assignment operator */
-BeadEditor& BeadEditor::operator=(const BeadEditor &other)
+BeadEditor &BeadEditor::operator=(const BeadEditor &other)
 {
     Bead::operator=(other);
     return *this;
 }
 
-const char* BeadEditor::typeName()
+const char *BeadEditor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<BeadEditor>() );
+    return QMetaType::typeName(qMetaTypeId<BeadEditor>());
 }
 
 /** Return a string representation of this editor */

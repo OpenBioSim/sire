@@ -38,129 +38,129 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class CLJ14Group;
+    class CLJ14Group;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJ14Group&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJ14Group&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJ14Group &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJ14Group &);
 
 namespace SireMM
 {
 
-namespace detail
-{
-class CLJ14PairData;
-}
+    namespace detail
+    {
+        class CLJ14PairData;
+    }
 
-using SireMol::PartialMolecule;
-using SireMol::MoleculeView;
-using SireMol::CGIdx;
-using SireMol::AtomSelection;
+    using SireMol::AtomSelection;
+    using SireMol::CGIdx;
+    using SireMol::MoleculeView;
+    using SireMol::PartialMolecule;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-/** This class holds all of the information needed to calculate
-    the 14-nonbonded energy for a molecule
+    /** This class holds all of the information needed to calculate
+        the 14-nonbonded energy for a molecule
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJ14Group
-{
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJ14Group
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJ14Group&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJ14Group&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJ14Group &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJ14Group &);
 
-public:
-    CLJ14Group();
-    CLJ14Group(const MoleculeView &molecule, const PropertyMap &map = PropertyMap());
-    CLJ14Group(const MoleculeView &molecule, CLJFunction::COMBINING_RULES combining_rules,
-               bool is_strict, const PropertyMap &map = PropertyMap());
-    CLJ14Group(const CLJ14Group &other);
+    public:
+        CLJ14Group();
+        CLJ14Group(const MoleculeView &molecule, const PropertyMap &map = PropertyMap());
+        CLJ14Group(const MoleculeView &molecule, CLJFunction::COMBINING_RULES combining_rules, bool is_strict,
+                   const PropertyMap &map = PropertyMap());
+        CLJ14Group(const CLJ14Group &other);
 
-    ~CLJ14Group();
+        ~CLJ14Group();
 
-    CLJ14Group& operator=(const CLJ14Group &other);
+        CLJ14Group &operator=(const CLJ14Group &other);
 
-    bool operator==(const CLJ14Group &other) const;
-    bool operator!=(const CLJ14Group &other) const;
+        bool operator==(const CLJ14Group &other) const;
+        bool operator!=(const CLJ14Group &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isNull() const;
+        bool isNull() const;
 
-    bool setStrict(bool isstrict);
-    bool isStrict() const;
+        bool setStrict(bool isstrict);
+        bool isStrict() const;
 
-    const MoleculeView& molecule() const;
-    PropertyMap propertyMap() const;
+        const MoleculeView &molecule() const;
+        PropertyMap propertyMap() const;
 
-    void add(const MoleculeView &new_molecule);
-    void add(const AtomSelection &new_selection);
+        void add(const MoleculeView &new_molecule);
+        void add(const AtomSelection &new_selection);
 
-    void updateSelection(const AtomSelection &selection);
+        void updateSelection(const AtomSelection &selection);
 
-    void update(const MoleculeView &new_molecule);
+        void update(const MoleculeView &new_molecule);
 
-    void remove(const AtomSelection &new_selection);
-    void remove(const MoleculeView &new_molecule);
+        void remove(const AtomSelection &new_selection);
+        void remove(const MoleculeView &new_molecule);
 
-    boost::tuple<double,double> energy();
+        boost::tuple<double, double> energy();
 
-    bool recalculatingFromScratch() const;
-    void mustNowRecalculateFromScratch();
-    void mustReallyRecalculateFromScratch();
+        bool recalculatingFromScratch() const;
+        void mustNowRecalculateFromScratch();
+        void mustReallyRecalculateFromScratch();
 
-    void setArithmeticCombiningRules(bool on);
-    void setGeometricCombiningRules(bool on);
+        void setArithmeticCombiningRules(bool on);
+        void setGeometricCombiningRules(bool on);
 
-    CLJFunction::COMBINING_RULES combiningRules() const;
-    void setCombiningRules(CLJFunction::COMBINING_RULES rules);
+        CLJFunction::COMBINING_RULES combiningRules() const;
+        void setCombiningRules(CLJFunction::COMBINING_RULES rules);
 
-    bool usingArithmeticCombiningRules() const;
-    bool usingGeometricCombiningRules() const;
+        bool usingArithmeticCombiningRules() const;
+        bool usingGeometricCombiningRules() const;
 
-    bool wouldChangeProperties(const PropertyMap &map) const;
+        bool wouldChangeProperties(const PropertyMap &map) const;
 
-private:
-    void reextract();
+    private:
+        void reextract();
 
-    /** The molecule whose 14 energy is being calculated */
-    PartialMolecule mol;
+        /** The molecule whose 14 energy is being calculated */
+        PartialMolecule mol;
 
-    /** The new molecule if we have been updated */
-    PartialMolecule newmol;
+        /** The new molecule if we have been updated */
+        PartialMolecule newmol;
 
-    /** The property map to use to extract parameters */
-    PropertyMap propmap;
+        /** The property map to use to extract parameters */
+        PropertyMap propmap;
 
-    /** The 14 pair data for 1-4 pairs in the molecule */
-    QVector<detail::CLJ14PairData> data_for_pair;
+        /** The 14 pair data for 1-4 pairs in the molecule */
+        QVector<detail::CLJ14PairData> data_for_pair;
 
-    /** Combining rules to use for the LJ calculation */
-    CLJFunction::COMBINING_RULES combining_rules;
+        /** Combining rules to use for the LJ calculation */
+        CLJFunction::COMBINING_RULES combining_rules;
 
-    /** The current coulomb and LJ energies */
-    double total_cnrg, total_ljnrg;
+        /** The current coulomb and LJ energies */
+        double total_cnrg, total_ljnrg;
 
-    /** Whether or not the energy needs to be recalculated */
-    bool needs_energy;
+        /** Whether or not the energy needs to be recalculated */
+        bool needs_energy;
 
-    /** Whether or not this group is strict
-        (1-4 values are only calculated when both atoms in the
-         pair are contained in the group, as opposed to when only
-         one of the atoms are in the group) */
-    bool is_strict;
-};
+        /** Whether or not this group is strict
+            (1-4 values are only calculated when both atoms in the
+             pair are contained in the group, as opposed to when only
+             one of the atoms are in the group) */
+        bool is_strict;
+    };
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::CLJ14Group )
+Q_DECLARE_METATYPE(SireMM::CLJ14Group)
 
-SIRE_EXPOSE_CLASS( SireMM::CLJ14Group )
+SIRE_EXPOSE_CLASS(SireMM::CLJ14Group)
 
 SIRE_END_HEADER
 

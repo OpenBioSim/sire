@@ -36,56 +36,55 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class CheckPoint;
+    class CheckPoint;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::CheckPoint&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::CheckPoint&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::CheckPoint &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::CheckPoint &);
 
 namespace SireSystem
 {
 
-/** This class holds a checkpoint of a system. This allows you to
-    save the current state of a system so that you can restore
-    it at a later point (or even save it to disk/database)
+    /** This class holds a checkpoint of a system. This allows you to
+        save the current state of a system so that you can restore
+        it at a later point (or even save it to disk/database)
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT CheckPoint
-          : public SireBase::ConcreteProperty<CheckPoint,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT CheckPoint : public SireBase::ConcreteProperty<CheckPoint, SireBase::Property>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const CheckPoint&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, CheckPoint&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const CheckPoint &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, CheckPoint &);
 
-public:
-    CheckPoint();
-    CheckPoint(const System &system);
+    public:
+        CheckPoint();
+        CheckPoint(const System &system);
 
-    CheckPoint(const CheckPoint &other);
+        CheckPoint(const CheckPoint &other);
 
-    ~CheckPoint();
+        ~CheckPoint();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    CheckPoint& operator=(const System &system);
-    CheckPoint& operator=(const CheckPoint &other);
+        CheckPoint &operator=(const System &system);
+        CheckPoint &operator=(const CheckPoint &other);
 
-    bool operator==(const CheckPoint &other) const;
-    bool operator!=(const CheckPoint &other) const;
+        bool operator==(const CheckPoint &other) const;
+        bool operator!=(const CheckPoint &other) const;
 
-    operator System() const;
+        operator System() const;
 
-private:
-    /** A copy of the system that has been checkpointed */
-    System old_system;
-};
+    private:
+        /** A copy of the system that has been checkpointed */
+        System old_system;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::CheckPoint )
+Q_DECLARE_METATYPE(SireSystem::CheckPoint)
 
-SIRE_EXPOSE_CLASS( SireSystem::CheckPoint )
+SIRE_EXPOSE_CLASS(SireSystem::CheckPoint)
 
 SIRE_END_HEADER
 

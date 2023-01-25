@@ -40,8 +40,8 @@
 
 #include "SireID/index.h"
 
-#include "SireBase/slice.h"
 #include "SireBase/errors.h"
+#include "SireBase/slice.h"
 
 #include "SireUnits/units.h"
 
@@ -63,22 +63,22 @@ using SireMM::detail::IDTriple;
 
 static const RegisterMetaType<SelectorAngle> r_sangle;
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream &ds, const SelectorAngle &sangle)
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const SelectorAngle &sangle)
 {
     writeHeader(ds, r_sangle, 1);
     SharedDataStream sds(ds);
-    sds << sangle.angs << static_cast<const MoleculeView&>(sangle);
+    sds << sangle.angs << static_cast<const MoleculeView &>(sangle);
     return ds;
 }
 
-SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, SelectorAngle &sangle)
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, SelectorAngle &sangle)
 {
     auto v = readHeader(ds, r_sangle);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> sangle.angs >> static_cast<MoleculeView&>(sangle);
+        sds >> sangle.angs >> static_cast<MoleculeView &>(sangle);
     }
     else
         throw SireStream::version_error(v, "1", r_sangle, CODELOC);
@@ -87,10 +87,10 @@ SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, SelectorAngle &sangle)
 }
 
 SelectorAngle::SelectorAngle() : ConcreteProperty<SelectorAngle, MoleculeView>()
-{}
+{
+}
 
-SelectorAngle::SelectorAngle(const Angle &angle)
-              : ConcreteProperty<SelectorAngle, MoleculeView>(angle)
+SelectorAngle::SelectorAngle(const Angle &angle) : ConcreteProperty<SelectorAngle, MoleculeView>(angle)
 {
     if (not angle.isEmpty())
     {
@@ -113,9 +113,8 @@ SelectorAngle::SelectorAngle(const Angle &angle)
     }
 }
 
-SelectorAngle::SelectorAngle(const MoleculeView &mol,
-                             const SireBase::PropertyMap &map)
-     : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
+SelectorAngle::SelectorAngle(const MoleculeView &mol, const SireBase::PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
 {
     if (mol.data().hasProperty(map["connectivity"]))
     {
@@ -133,9 +132,7 @@ SelectorAngle::SelectorAngle(const MoleculeView &mol,
 
             for (const auto &angle : angles)
             {
-                if (s.selected(angle.atom0()) and
-                    s.selected(angle.atom1()) and
-                    s.selected(angle.atom2()))
+                if (s.selected(angle.atom0()) and s.selected(angle.atom1()) and s.selected(angle.atom2()))
                 {
                     angs.append(angle);
                 }
@@ -144,32 +141,27 @@ SelectorAngle::SelectorAngle(const MoleculeView &mol,
     }
 }
 
-SelectorAngle::SelectorAngle(const MoleculeData &moldata,
-                             const SireBase::PropertyMap &map)
-     : ConcreteProperty<SelectorAngle, MoleculeView>()
+SelectorAngle::SelectorAngle(const MoleculeData &moldata, const SireBase::PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>()
 {
     this->operator=(SelectorAngle(Molecule(moldata), map));
 }
 
-inline
-QSet<IDTriple> _to_int_set(const QList<AngleID> &vals,
-                           const MoleculeInfoData &molinfo)
+inline QSet<IDTriple> _to_int_set(const QList<AngleID> &vals, const MoleculeInfoData &molinfo)
 {
     QSet<IDTriple> s;
     s.reserve(vals.count());
 
     for (const auto &val : vals)
     {
-        s.insert(IDTriple(molinfo.atomIdx(val[0]).value(),
-                          molinfo.atomIdx(val[1]).value(),
+        s.insert(IDTriple(molinfo.atomIdx(val[0]).value(), molinfo.atomIdx(val[1]).value(),
                           molinfo.atomIdx(val[2]).value()));
     }
 
     return s;
 }
 
-inline
-QList<AngleID> _from_int_set(const QSet<IDTriple> &vals)
+inline QList<AngleID> _from_int_set(const QSet<IDTriple> &vals)
 {
     QVector<IDTriple> v;
     v.reserve(vals.count());
@@ -186,16 +178,13 @@ QList<AngleID> _from_int_set(const QSet<IDTriple> &vals)
 
     for (const auto &val : v)
     {
-        l.append(AngleID(AtomIdx(val.atom0),
-                         AtomIdx(val.atom1),
-                         AtomIdx(val.atom2)));
+        l.append(AngleID(AtomIdx(val.atom0), AtomIdx(val.atom1), AtomIdx(val.atom2)));
     }
 
     return l;
 }
 
-inline
-QList<AtomIdx> _filter(const QList<AtomIdx> &atoms, const AtomSelection &selection)
+inline QList<AtomIdx> _filter(const QList<AtomIdx> &atoms, const AtomSelection &selection)
 {
     QList<AtomIdx> ret;
     ret.reserve(atoms.count());
@@ -211,10 +200,7 @@ QList<AtomIdx> _filter(const QList<AtomIdx> &atoms, const AtomSelection &selecti
     return ret;
 }
 
-inline
-QSet<IDTriple> _filter(const QSet<IDTriple> &angles,
-                       const QVector<quint32> &atoms,
-                       int position)
+inline QSet<IDTriple> _filter(const QSet<IDTriple> &angles, const QVector<quint32> &atoms, int position)
 {
     QSet<IDTriple> result;
 
@@ -237,8 +223,7 @@ QSet<IDTriple> _filter(const QSet<IDTriple> &angles,
     return result;
 }
 
-inline
-QVector<quint32> _to_int(const Selector<Atom> &atoms)
+inline QVector<quint32> _to_int(const Selector<Atom> &atoms)
 {
     QVector<quint32> ret;
 
@@ -246,7 +231,7 @@ QVector<quint32> _to_int(const Selector<Atom> &atoms)
 
     ret.reserve(n);
 
-    for (int i=0; i<n; ++i)
+    for (int i = 0; i < n; ++i)
     {
         ret.append(atoms.index(i));
     }
@@ -254,8 +239,7 @@ QVector<quint32> _to_int(const Selector<Atom> &atoms)
     return ret;
 }
 
-inline
-QVector<quint32> _to_int(const QList<AtomIdx> &atoms)
+inline QVector<quint32> _to_int(const QList<AtomIdx> &atoms)
 {
     QVector<quint32> ret;
     ret.reserve(atoms.count());
@@ -268,9 +252,8 @@ QVector<quint32> _to_int(const QList<AtomIdx> &atoms)
     return ret;
 }
 
-SelectorAngle::SelectorAngle(const MoleculeView &mol,
-                             const AngleID &angle, const PropertyMap &map)
-             : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
+SelectorAngle::SelectorAngle(const MoleculeView &mol, const AngleID &angle, const PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
 {
     auto atoms0 = mol.data().info().map(angle.atom0());
     auto atoms1 = mol.data().info().map(angle.atom1());
@@ -306,10 +289,8 @@ SelectorAngle::SelectorAngle(const MoleculeView &mol,
     }
 }
 
-SelectorAngle::SelectorAngle(const MoleculeView &mol,
-                             const QList<AngleID> &angles,
-                             const SireBase::PropertyMap &map)
-              : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
+SelectorAngle::SelectorAngle(const MoleculeView &mol, const QList<AngleID> &angles, const SireBase::PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
 {
     if (angles.count() == 1)
     {
@@ -362,9 +343,8 @@ SelectorAngle::SelectorAngle(const MoleculeView &mol,
     }
 }
 
-SelectorAngle::SelectorAngle(const MoleculeView &mol,
-                             const AtomID &atom, const PropertyMap &map)
-              : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
+SelectorAngle::SelectorAngle(const MoleculeView &mol, const AtomID &atom, const PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
 {
     auto atoms = mol.data().info().map(atom);
 
@@ -390,10 +370,8 @@ SelectorAngle::SelectorAngle(const MoleculeView &mol,
     }
 }
 
-SelectorAngle::SelectorAngle(const MoleculeView &mol,
-                             const AtomID &atom0, const AtomID &atom1,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
+SelectorAngle::SelectorAngle(const MoleculeView &mol, const AtomID &atom0, const AtomID &atom1, const PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>(mol)
 {
     auto atoms0 = mol.data().info().map(atom0);
     auto atoms1 = mol.data().info().map(atom1);
@@ -430,42 +408,34 @@ SelectorAngle::SelectorAngle(const MoleculeView &mol,
     }
 }
 
-SelectorAngle::SelectorAngle(const MoleculeView &mol,
-                             const AtomID &atom0, const AtomID &atom1,
-                             const AtomID &atom2,
+SelectorAngle::SelectorAngle(const MoleculeView &mol, const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
                              const PropertyMap &map)
-              : ConcreteProperty<SelectorAngle, MoleculeView>()
+    : ConcreteProperty<SelectorAngle, MoleculeView>()
 {
     this->operator=(SelectorAngle(mol, AngleID(atom0, atom1, atom2), map));
 }
 
-SelectorAngle::SelectorAngle(const MoleculeData &mol,
-                             const AtomID &atom, const PropertyMap &map)
-              : ConcreteProperty<SelectorAngle, MoleculeView>()
+SelectorAngle::SelectorAngle(const MoleculeData &mol, const AtomID &atom, const PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>()
 {
     this->operator=(SelectorAngle(Molecule(mol), atom, map));
 }
 
-SelectorAngle::SelectorAngle(const MoleculeData &mol,
-                             const AtomID &atom0, const AtomID &atom1,
-                             const PropertyMap &map)
-             : ConcreteProperty<SelectorAngle, MoleculeView>()
+SelectorAngle::SelectorAngle(const MoleculeData &mol, const AtomID &atom0, const AtomID &atom1, const PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>()
 {
     this->operator=(SelectorAngle(Molecule(mol), atom0, atom1, map));
 }
 
-SelectorAngle::SelectorAngle(const MoleculeData &mol,
-                             const AtomID &atom0, const AtomID &atom1,
-                             const AtomID &atom2,
+SelectorAngle::SelectorAngle(const MoleculeData &mol, const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
                              const PropertyMap &map)
-             : ConcreteProperty<SelectorAngle, MoleculeView>()
+    : ConcreteProperty<SelectorAngle, MoleculeView>()
 {
     this->operator=(SelectorAngle(Molecule(mol), atom0, atom1, atom2, map));
 }
 
-SelectorAngle::SelectorAngle(const Selector<Atom> &atoms,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorAngle, MoleculeView>(atoms)
+SelectorAngle::SelectorAngle(const Selector<Atom> &atoms, const PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>(atoms)
 {
     if (this->data().hasProperty(map["connectivity"]))
     {
@@ -483,18 +453,17 @@ SelectorAngle::SelectorAngle(const Selector<Atom> &atoms,
     }
 }
 
-SelectorAngle::SelectorAngle(const Selector<Atom> &atoms0,
-                             const Selector<Atom> &atoms1,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorAngle, MoleculeView>(atoms0)
+SelectorAngle::SelectorAngle(const Selector<Atom> &atoms0, const Selector<Atom> &atoms1, const PropertyMap &map)
+    : ConcreteProperty<SelectorAngle, MoleculeView>(atoms0)
 {
     if (not atoms0.isSameMolecule(atoms1))
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create an angle from atoms in the same molecule. "
-            "%1 and %2 are from different molecules (%3 and %4)")
-                .arg(atoms0.toString()).arg(atoms1.toString())
-                .arg(atoms0.molecule().toString())
-                .arg(atoms1.molecule().toString()), CODELOC);
+        throw SireError::incompatible_error(QObject::tr("You can only create an angle from atoms in the same molecule. "
+                                                        "%1 and %2 are from different molecules (%3 and %4)")
+                                                .arg(atoms0.toString())
+                                                .arg(atoms1.toString())
+                                                .arg(atoms0.molecule().toString())
+                                                .arg(atoms1.molecule().toString()),
+                                            CODELOC);
 
     if (this->data().hasProperty(map["connectivity"]))
     {
@@ -521,22 +490,20 @@ SelectorAngle::SelectorAngle(const Selector<Atom> &atoms0,
     }
 }
 
-SelectorAngle::SelectorAngle(const Selector<Atom> &atoms0,
-                             const Selector<Atom> &atoms1,
-                             const Selector<Atom> &atoms2,
+SelectorAngle::SelectorAngle(const Selector<Atom> &atoms0, const Selector<Atom> &atoms1, const Selector<Atom> &atoms2,
                              const PropertyMap &map)
-              : ConcreteProperty<SelectorAngle, MoleculeView>(atoms0)
+    : ConcreteProperty<SelectorAngle, MoleculeView>(atoms0)
 {
-    if (not (atoms0.isSameMolecule(atoms1) and
-             atoms0.isSameMolecule(atoms2)))
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create an angle from atoms in the same molecule. "
-            "%1, %2 and %3 are from different molecules (%4, %5 and %6)")
-                .arg(atoms0.toString()).arg(atoms1.toString())
-                .arg(atoms2.toString())
-                .arg(atoms0.molecule().toString())
-                .arg(atoms1.molecule().toString())
-                .arg(atoms2.molecule().toString()), CODELOC);
+    if (not(atoms0.isSameMolecule(atoms1) and atoms0.isSameMolecule(atoms2)))
+        throw SireError::incompatible_error(QObject::tr("You can only create an angle from atoms in the same molecule. "
+                                                        "%1, %2 and %3 are from different molecules (%4, %5 and %6)")
+                                                .arg(atoms0.toString())
+                                                .arg(atoms1.toString())
+                                                .arg(atoms2.toString())
+                                                .arg(atoms0.molecule().toString())
+                                                .arg(atoms1.molecule().toString())
+                                                .arg(atoms2.molecule().toString()),
+                                            CODELOC);
 
     if (this->data().hasProperty(map["connectivity"]))
     {
@@ -561,19 +528,20 @@ SelectorAngle::SelectorAngle(const Selector<Atom> &atoms0,
 }
 
 SelectorAngle::SelectorAngle(const SelectorAngle &other)
-              : ConcreteProperty<SelectorAngle, MoleculeView>(other),
-                angs(other.angs)
-{}
+    : ConcreteProperty<SelectorAngle, MoleculeView>(other), angs(other.angs)
+{
+}
 
 SelectorAngle::~SelectorAngle()
-{}
+{
+}
 
-const char* SelectorAngle::typeName()
+const char *SelectorAngle::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<SelectorAngle>());
 }
 
-SelectorAngle& SelectorAngle::operator=(const SelectorAngle &other)
+SelectorAngle &SelectorAngle::operator=(const SelectorAngle &other)
 {
     if (this != &other)
     {
@@ -620,31 +588,27 @@ QString SelectorAngle::toString() const
 
     if (this->count() <= 10)
     {
-        for (int i=0; i<this->count(); ++i)
+        for (int i = 0; i < this->count(); ++i)
         {
-            parts.append(QObject::tr("%1: %2").arg(i)
-                            .arg(this->operator()(i).toString()));
+            parts.append(QObject::tr("%1: %2").arg(i).arg(this->operator()(i).toString()));
         }
     }
     else
     {
-        for (int i=0; i<5; ++i)
+        for (int i = 0; i < 5; ++i)
         {
-            parts.append(QObject::tr("%1: %2").arg(i)
-                            .arg(this->operator()(i).toString()));
+            parts.append(QObject::tr("%1: %2").arg(i).arg(this->operator()(i).toString()));
         }
 
         parts.append("...");
 
-        for (int i=this->count()-5; i<this->count(); ++i)
+        for (int i = this->count() - 5; i < this->count(); ++i)
         {
-            parts.append(QObject::tr("%1: %2").arg(i)
-                            .arg(this->operator()(i).toString()));
+            parts.append(QObject::tr("%1: %2").arg(i).arg(this->operator()(i).toString()));
         }
     }
 
-    return QObject::tr("SelectorAngle( size=%1\n%2\n)")
-                .arg(this->count()).arg(parts.join("\n"));
+    return QObject::tr("SelectorAngle( size=%1\n%2\n)").arg(this->count()).arg(parts.join("\n"));
 }
 
 SelectorAngle SelectorAngle::add(const Angle &angle) const
@@ -659,12 +623,11 @@ SelectorAngle SelectorAngle::add(const Angle &angle) const
 
     if (angle.data().number() != this->data().number())
     {
-        throw SireError::incompatible_error(QObject::tr(
-            "You cannot add Angles from a different molecule (%1) to "
-            "a set of Angles from molecule %2.")
-                .arg(angle.data().number())
-                .arg(this->data().number()),
-                    CODELOC);
+        throw SireError::incompatible_error(QObject::tr("You cannot add Angles from a different molecule (%1) to "
+                                                        "a set of Angles from molecule %2.")
+                                                .arg(angle.data().number())
+                                                .arg(this->data().number()),
+                                            CODELOC);
     }
 
     auto atom0 = this->data().info().atomIdx(angle.ID().atom0());
@@ -747,14 +710,14 @@ SelectorAngle SelectorAngle::operator()(int i, int j) const
 
     if (i <= j)
     {
-        for ( ; i<=j; ++i)
+        for (; i <= j; ++i)
         {
             ret.angs.append(this->angs.at(i));
         }
     }
     else
     {
-        for ( ; i >= j; --i)
+        for (; i >= j; --i)
         {
             ret.angs.append(this->angs.at(i));
         }
@@ -918,7 +881,7 @@ AtomSelection SelectorAngle::selection() const
 
 bool SelectorAngle::hasProperty(const PropertyName &key) const
 {
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         if (this->operator()(i).hasProperty(key))
             return true;
@@ -932,8 +895,7 @@ bool SelectorAngle::hasMetadata(const PropertyName &key) const
     return false;
 }
 
-bool SelectorAngle::hasMetadata(const PropertyName &key,
-                                const PropertyName &metakey) const
+bool SelectorAngle::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return false;
 }
@@ -942,7 +904,7 @@ QStringList SelectorAngle::propertyKeys() const
 {
     QSet<QString> keys;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         for (const auto &k : this->operator()(i).propertyKeys())
         {
@@ -950,7 +912,7 @@ QStringList SelectorAngle::propertyKeys() const
         }
     }
 
-    //QStringList ret(keys.constBegin(), keys.constEnd());
+    // QStringList ret(keys.constBegin(), keys.constEnd());
     QStringList ret = keys.values();
 
     return ret;
@@ -970,7 +932,7 @@ QList<Properties> SelectorAngle::properties() const
 {
     QList<Properties> props;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         props.append(this->operator()(i).properties());
     }
@@ -994,33 +956,31 @@ QList<PropertyPtr> SelectorAngle::property(const PropertyName &key) const
 
     QList<PropertyPtr> props;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         try
         {
             props.append(this->operator()(i).property(key));
             has_prop = true;
         }
-        catch(SireError::exception&)
+        catch (SireError::exception &)
         {
             props.append(NullProperty());
         }
     }
 
     if (not has_prop)
-        throw SireBase::missing_property(QObject::tr(
-            "None of the Angles in this container have a property called %1.")
-                .arg(key.source()), CODELOC);
+        throw SireBase::missing_property(
+            QObject::tr("None of the Angles in this container have a property called %1.").arg(key.source()), CODELOC);
 
     return props;
 }
 
-QList<PropertyPtr> SelectorAngle::property(const PropertyName &key,
-                                           const Property &default_value) const
+QList<PropertyPtr> SelectorAngle::property(const PropertyName &key, const Property &default_value) const
 {
     QList<PropertyPtr> props;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         props.append(this->operator()(i).property(key, default_value));
     }
@@ -1032,7 +992,7 @@ QList<SireUnits::Dimension::Angle> SelectorAngle::sizes(const PropertyMap &map) 
 {
     QList<SireUnits::Dimension::Angle> s;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         s.append(this->operator()(i).size(map));
     }
@@ -1064,7 +1024,7 @@ QList<Expression> SelectorAngle::potentials(const PropertyMap &map) const
 {
     QList<Expression> p;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         p.append(this->operator()(i).potential(map));
     }
@@ -1081,7 +1041,7 @@ QList<SireUnits::Dimension::GeneralUnit> SelectorAngle::energies(const PropertyM
 {
     QList<SireUnits::Dimension::GeneralUnit> nrgs;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         nrgs.append(this->operator()(i).energy(map));
     }
@@ -1098,7 +1058,7 @@ SireUnits::Dimension::GeneralUnit SelectorAngle::energy(const PropertyMap &map) 
 {
     SireUnits::Dimension::GeneralUnit nrg(0);
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
         nrg += this->operator()(i).energy(map);
     }

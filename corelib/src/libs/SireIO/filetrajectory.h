@@ -36,56 +36,56 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class FileTrajectory;
+    class FileTrajectory;
 }
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::FileTrajectory&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::FileTrajectory&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::FileTrajectory &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::FileTrajectory &);
 
 namespace SireIO
 {
 
-/** This is a trajectory that loads frames dynamically from the
- *  filesystem using MoleculeParser objects that implement
- *  the trajectory API
- */
-class SIREIO_EXPORT FileTrajectory : public SireMol::TrajectoryData
-{
+    /** This is a trajectory that loads frames dynamically from the
+     *  filesystem using MoleculeParser objects that implement
+     *  the trajectory API
+     */
+    class SIREIO_EXPORT FileTrajectory : public SireMol::TrajectoryData
+    {
 
-friend QDataStream& ::operator<<(QDataStream&, const FileTrajectory&);
-friend QDataStream& ::operator>>(QDataStream&, FileTrajectory&);
+        friend QDataStream & ::operator<<(QDataStream &, const FileTrajectory &);
+        friend QDataStream & ::operator>>(QDataStream &, FileTrajectory &);
 
-public:
-    FileTrajectory();
-    FileTrajectory(const MoleculeParser &parser);
+    public:
+        FileTrajectory();
+        FileTrajectory(const MoleculeParser &parser);
 
-    FileTrajectory(const FileTrajectory &other);
+        FileTrajectory(const FileTrajectory &other);
 
-    ~FileTrajectory();
+        ~FileTrajectory();
 
-    const char* what() const;
+        const char *what() const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    FileTrajectory* clone() const;
+        FileTrajectory *clone() const;
 
-    int nFrames() const;
-    int nAtoms() const;
+        int nFrames() const;
+        int nAtoms() const;
 
-    QStringList filenames() const;
+        QStringList filenames() const;
 
-    SireMol::Frame getFrame(int i) const;
+        SireMol::Frame getFrame(int i) const;
 
-    bool isEditable() const;
+        bool isEditable() const;
 
-protected:
-    bool _equals(const TrajectoryData &other) const;
+    protected:
+        bool _equals(const TrajectoryData &other) const;
 
-private:
-    MoleculeParserPtr parser;
-};
+    private:
+        MoleculeParserPtr parser;
+    };
 
-}
+} // namespace SireIO
 
 Q_DECLARE_METATYPE(SireIO::FileTrajectory)
 

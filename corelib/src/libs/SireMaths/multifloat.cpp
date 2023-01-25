@@ -27,8 +27,8 @@
 
 #include "multifloat.h"
 #include "multidouble.h"
-#include "multiuint.h"
 #include "multiint.h"
+#include "multiuint.h"
 
 #include "SireBase/unittest.h"
 
@@ -49,10 +49,8 @@ static SIRE_ALWAYS_INLINE bool isAligned64(const void *pointer)
 static void assertAligned64(const void *pointer, QString place)
 {
     if (not isAligned64(pointer))
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiFloat has been created! %1")
-                                         .arg((quintptr)pointer % size_t(64)),
-                                     place);
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiFloat has been created! %1").arg((quintptr)pointer % size_t(64)), place);
 }
 #endif
 
@@ -85,10 +83,8 @@ static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
 static void assertAligned32(const void *pointer, QString place)
 {
     if (not isAligned32(pointer))
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiFloat has been created! %1")
-                                         .arg((quintptr)pointer % size_t(32)),
-                                     place);
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiFloat has been created! %1").arg((quintptr)pointer % size_t(32)), place);
 }
 
 namespace SireMaths
@@ -166,7 +162,7 @@ namespace SireMaths
         }
 #endif
     }
-}
+} // namespace SireMaths
 
 #else
 #if defined(MULTIFLOAT_SSE_IS_AVAILABLE) && defined(MULTIFLOAT_SSE_MATHFUN_IS_AVAILABLE)
@@ -180,10 +176,8 @@ static SIRE_ALWAYS_INLINE bool isAligned16(const void *pointer)
 static void assertAligned16(const void *pointer, QString place)
 {
     if (not isAligned16(pointer))
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiFloat has been created! %1")
-                                         .arg((quintptr)pointer % size_t(16)),
-                                     place);
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiFloat has been created! %1").arg((quintptr)pointer % size_t(16)), place);
 }
 
 namespace SireMaths
@@ -212,7 +206,7 @@ namespace SireMaths
     {
         sincos_ps(val.v.x, &(sval.v.x), &(cval.v.x));
     }
-}
+} // namespace SireMaths
 
 #else
 #include "sincos.h"
@@ -227,10 +221,8 @@ static SIRE_ALWAYS_INLINE bool isAligned16(const void *pointer)
 static void assertAligned16(const void *pointer, QString place)
 {
     if (not isAligned16(pointer))
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiFloat has been created! %1")
-                                         .arg((quintptr)pointer % size_t(16)),
-                                     place);
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiFloat has been created! %1").arg((quintptr)pointer % size_t(16)), place);
 }
 
 #else
@@ -243,10 +235,8 @@ static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
 static void assertAligned32(const void *pointer, QString place)
 {
     if (not isAligned32(pointer))
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiFloat has been created! %1")
-                                         .arg((quintptr)pointer % size_t(32)),
-                                     place);
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiFloat has been created! %1").arg((quintptr)pointer % size_t(32)), place);
 }
 
 #endif
@@ -308,7 +298,7 @@ namespace SireMaths
             SireMaths::sincos(val.v.a[i], &(sval.v.a[i]), &(cval.v.a[i]));
         }
     }
-}
+} // namespace SireMaths
 
 #endif
 #endif
@@ -316,8 +306,7 @@ namespace SireMaths
 void MultiFloat::assertAligned(const void *ptr, size_t size)
 {
     if ((quintptr)ptr % size != 0)
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiFloat has been created! %1, %2, %3")
+        throw SireError::program_bug(QObject::tr("An unaligned MultiFloat has been created! %1, %2, %3")
                                          .arg((quintptr)ptr)
                                          .arg((quintptr)ptr % size)
                                          .arg(size),
@@ -345,9 +334,8 @@ MultiFloat::MultiFloat(const float *array, int size)
     assertAligned();
 
     if (size > MULTIFLOAT_SIZE)
-        throw SireError::unsupported(QObject::tr(
-                                         "Cannot fit an array of size %1 in this MultiFloat, as it is only "
-                                         "capable of holding %2 values...")
+        throw SireError::unsupported(QObject::tr("Cannot fit an array of size %1 in this MultiFloat, as it is only "
+                                                 "capable of holding %2 values...")
                                          .arg(size)
                                          .arg(MULTIFLOAT_SIZE),
                                      CODELOC);
@@ -374,14 +362,11 @@ MultiFloat::MultiFloat(const float *array, int size)
     else if (size == MULTIFLOAT_SIZE)
     {
 #ifdef MULTIFLOAT_AVX512F_IS_AVAILABLE
-        v.x = _mm512_set_ps(array[15], array[14], array[13], array[12],
-                            array[11], array[10], array[9], array[8],
-                            array[7], array[6], array[5], array[4],
-                            array[3], array[2], array[1], array[0]);
+        v.x = _mm512_set_ps(array[15], array[14], array[13], array[12], array[11], array[10], array[9], array[8],
+                            array[7], array[6], array[5], array[4], array[3], array[2], array[1], array[0]);
 #else
 #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-        v.x = _mm256_set_ps(array[7], array[6], array[5], array[4],
-                            array[3], array[2], array[1], array[0]);
+        v.x = _mm256_set_ps(array[7], array[6], array[5], array[4], array[3], array[2], array[1], array[0]);
 #else
 #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
         // note that SSE packs things the 'wrong' way around
@@ -410,14 +395,11 @@ MultiFloat::MultiFloat(const float *array, int size)
         }
 
 #ifdef MULTIFLOAT_AVX512F_IS_AVAILABLE
-        v.x = _mm512_set_ps(tmp[15], tmp[14], tmp[13], tmp[12],
-                            tmp[11], tmp[10], tmp[9], tmp[8],
-                            tmp[7], tmp[6], tmp[5], tmp[4],
-                            tmp[3], tmp[2], tmp[1], tmp[0]);
+        v.x = _mm512_set_ps(tmp[15], tmp[14], tmp[13], tmp[12], tmp[11], tmp[10], tmp[9], tmp[8], tmp[7], tmp[6],
+                            tmp[5], tmp[4], tmp[3], tmp[2], tmp[1], tmp[0]);
 #else
 #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-        v.x = _mm256_set_ps(tmp[7], tmp[6], tmp[5], tmp[4],
-                            tmp[3], tmp[2], tmp[1], tmp[0]);
+        v.x = _mm256_set_ps(tmp[7], tmp[6], tmp[5], tmp[4], tmp[3], tmp[2], tmp[1], tmp[0]);
 #else
 #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
         // note that sse packs things the 'wrong' way around
@@ -881,11 +863,9 @@ void MultiFloat::set(int i, float value)
 
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
-        throw SireError::invalid_index(QObject::tr(
-                                           "Cannot access element %1 of MultiFloat (holds only %2 values)")
-                                           .arg(i)
-                                           .arg(MULTIFLOAT_SIZE),
-                                       CODELOC);
+        throw SireError::invalid_index(
+            QObject::tr("Cannot access element %1 of MultiFloat (holds only %2 values)").arg(i).arg(MULTIFLOAT_SIZE),
+            CODELOC);
     }
 
     v.a[i] = value;
@@ -899,11 +879,9 @@ float MultiFloat::get(int i) const
 
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
-        throw SireError::invalid_index(QObject::tr(
-                                           "Cannot access element %1 of MultiFloat (holds only %2 values)")
-                                           .arg(i)
-                                           .arg(MULTIFLOAT_SIZE),
-                                       CODELOC);
+        throw SireError::invalid_index(
+            QObject::tr("Cannot access element %1 of MultiFloat (holds only %2 values)").arg(i).arg(MULTIFLOAT_SIZE),
+            CODELOC);
     }
 
     return v.a[i];
