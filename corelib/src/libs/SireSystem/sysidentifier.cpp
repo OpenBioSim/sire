@@ -39,8 +39,7 @@ using namespace SireStream;
 static const RegisterMetaType<SysIdentifier> r_sysid;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const SysIdentifier &sysid)
+QDataStream &operator<<(QDataStream &ds, const SysIdentifier &sysid)
 {
     writeHeader(ds, r_sysid, 1);
 
@@ -59,33 +58,34 @@ QDataStream &operator>>(QDataStream &ds, SysIdentifier &sysid)
         SireStream::loadPolyPointer(ds, sysid.d);
     }
     else
-        throw version_error( v, "1", r_sysid, CODELOC );
+        throw version_error(v, "1", r_sysid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 SysIdentifier::SysIdentifier() : SysID()
-{}
+{
+}
 
 /** Construct from the passed SysID */
-SysIdentifier::SysIdentifier(const SysID &sysid)
-              : SysID()
+SysIdentifier::SysIdentifier(const SysID &sysid) : SysID()
 {
     if (sysid.isA<SysIdentifier>())
         d = sysid.asA<SysIdentifier>().d;
     else if (not sysid.isNull())
-        d.reset( sysid.clone() );
+        d.reset(sysid.clone());
 }
 
 /** Copy constructor */
-SysIdentifier::SysIdentifier(const SysIdentifier &other)
-              : SysID(other), d(other.d)
-{}
+SysIdentifier::SysIdentifier(const SysIdentifier &other) : SysID(other), d(other.d)
+{
+}
 
 /** Destructor */
 SysIdentifier::~SysIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool SysIdentifier::isNull() const
@@ -112,7 +112,7 @@ QString SysIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const SysID& SysIdentifier::base() const
+const SysID &SysIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -121,14 +121,14 @@ const SysID& SysIdentifier::base() const
 }
 
 /** Copy assignment operator */
-SysIdentifier& SysIdentifier::operator=(const SysIdentifier &other)
+SysIdentifier &SysIdentifier::operator=(const SysIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-SysIdentifier& SysIdentifier::operator=(const SysID &other)
+SysIdentifier &SysIdentifier::operator=(const SysID &other)
 {
     if (other.isA<SysIdentifier>())
         d = other.asA<SysIdentifier>().d;
@@ -195,12 +195,12 @@ QList<SysIdx> SysIdentifier::map(const Systems &systems) const
         return d->map(systems);
 }
 
-const char* SysIdentifier::typeName()
+const char *SysIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SysIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<SysIdentifier>());
 }
 
-SysIdentifier* SysIdentifier::clone() const
+SysIdentifier *SysIdentifier::clone() const
 {
     return new SysIdentifier(*this);
 }

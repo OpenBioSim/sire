@@ -31,8 +31,8 @@
 
 #include "SireFF/forcefields.h"
 
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
+#include "SireUnits/units.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -55,10 +55,8 @@ QDataStream &operator<<(QDataStream &ds, const MonteCarlo &mc)
 
     SharedDataStream sds(ds);
 
-    sds << mc.ensmble << mc.rangenerator
-        << mc.naccept << mc.nreject
-        << mc.optimise_moves
-        << static_cast<const Move&>(mc);
+    sds << mc.ensmble << mc.rangenerator << mc.naccept << mc.nreject << mc.optimise_moves
+        << static_cast<const Move &>(mc);
 
     return ds;
 }
@@ -74,20 +72,14 @@ QDataStream &operator>>(QDataStream &ds, MonteCarlo &mc)
     {
         SharedDataStream sds(ds);
 
-        sds >> mc.ensmble
-            >> mc.rangenerator
-            >> mc.naccept >> mc.nreject
-            >> mc.optimise_moves
-            >> static_cast<Move&>(mc);
+        sds >> mc.ensmble >> mc.rangenerator >> mc.naccept >> mc.nreject >> mc.optimise_moves >>
+            static_cast<Move &>(mc);
     }
     else if (v == 1)
     {
         SharedDataStream sds(ds);
 
-        sds >> mc.ensmble
-            >> mc.rangenerator
-            >> mc.naccept >> mc.nreject
-            >> static_cast<Move&>(mc);
+        sds >> mc.ensmble >> mc.rangenerator >> mc.naccept >> mc.nreject >> static_cast<Move &>(mc);
     }
     else
         throw version_error(v, "1,2", r_mc, CODELOC);
@@ -96,21 +88,21 @@ QDataStream &operator>>(QDataStream &ds, MonteCarlo &mc)
 }
 
 /** Construct using the supplied random number generator */
-MonteCarlo::MonteCarlo(const PropertyMap &map)
-           : Move(map), naccept(0), nreject(0), optimise_moves(false)
-{}
+MonteCarlo::MonteCarlo(const PropertyMap &map) : Move(map), naccept(0), nreject(0), optimise_moves(false)
+{
+}
 
 /** Copy constructor */
 MonteCarlo::MonteCarlo(const MonteCarlo &other)
-           : Move(other), ensmble(other.ensmble),
-             rangenerator(other.rangenerator),
-             naccept(other.naccept), nreject(other.nreject),
-             optimise_moves(other.optimise_moves)
-{}
+    : Move(other), ensmble(other.ensmble), rangenerator(other.rangenerator), naccept(other.naccept),
+      nreject(other.nreject), optimise_moves(other.optimise_moves)
+{
+}
 
 /** Destructor */
 MonteCarlo::~MonteCarlo()
-{}
+{
+}
 
 /** Internal function called by derived classes to set the ensemble
     for this move */
@@ -126,7 +118,7 @@ Ensemble MonteCarlo::ensemble() const
 }
 
 /** Copy assignment */
-MonteCarlo& MonteCarlo::operator=(const MonteCarlo &other)
+MonteCarlo &MonteCarlo::operator=(const MonteCarlo &other)
 {
     ensmble = other.ensmble;
     rangenerator = other.rangenerator;
@@ -142,9 +134,7 @@ MonteCarlo& MonteCarlo::operator=(const MonteCarlo &other)
 /** Comparison operator */
 bool MonteCarlo::operator==(const MonteCarlo &other) const
 {
-    return rangenerator == other.rangenerator and
-           naccept == other.naccept and
-           nreject == other.nreject and
+    return rangenerator == other.rangenerator and naccept == other.naccept and nreject == other.nreject and
            optimise_moves == other.optimise_moves;
 }
 
@@ -161,7 +151,7 @@ void MonteCarlo::setGenerator(const RanGenerator &generator)
 }
 
 /** Return the random number generator used for these moves */
-const RanGenerator& MonteCarlo::generator() const
+const RanGenerator &MonteCarlo::generator() const
 {
     return rangenerator;
 }
@@ -239,12 +229,11 @@ bool MonteCarlo::usingOptimisedMoves() const
 
 /** Perform the NVT Monte Carlo test, using the supplied change in energy
     and the supplied change in biasing probabilities */
-bool MonteCarlo::test(double new_energy, double old_energy,
-                      double new_bias, double old_bias)
+bool MonteCarlo::test(double new_energy, double old_energy, double new_bias, double old_bias)
 {
     double beta = -1.0 / (k_boltz * ensmble.temperature().value());
 
-    double x = (new_bias / old_bias) * std::exp( beta*(new_energy - old_energy) );
+    double x = (new_bias / old_bias) * std::exp(beta * (new_energy - old_energy));
 
     if (x > 1 or x > rangenerator.rand())
     {
@@ -270,7 +259,7 @@ bool MonteCarlo::test(double new_energy, double old_energy)
 
     double beta = -1.0 / (k_boltz * ensmble.temperature().value());
 
-    double x = std::exp( beta*(new_energy - old_energy) );
+    double x = std::exp(beta * (new_energy - old_energy));
 
     if (x > 1 or x > rangenerator.rand())
     {
@@ -286,9 +275,8 @@ bool MonteCarlo::test(double new_energy, double old_energy)
 
 /** Perform the NPT Monte Carlo test, using the supplied change in
     energy and supplied change in volume (no change in biasing factor) */
-bool MonteCarlo::test(double new_energy, double old_energy,
-                      int nmolecules,
-                      const Volume &new_volume, const Volume &old_volume)
+bool MonteCarlo::test(double new_energy, double old_energy, int nmolecules, const Volume &new_volume,
+                      const Volume &old_volume)
 {
     double p_deltav = this->pressure() * (new_volume - old_volume);
 
@@ -296,9 +284,9 @@ bool MonteCarlo::test(double new_energy, double old_energy,
 
     double beta = -1.0 / (k_boltz * ensmble.temperature().value());
 
-    double x = std::exp( beta * (new_energy - old_energy + p_deltav) + vratio );
+    double x = std::exp(beta * (new_energy - old_energy + p_deltav) + vratio);
 
-    if ( x > 1 or x >= rangenerator.rand() )
+    if (x > 1 or x >= rangenerator.rand())
     {
         ++naccept;
         return true;
@@ -312,10 +300,8 @@ bool MonteCarlo::test(double new_energy, double old_energy,
 
 /** Perform the NPT Monte Carlo test, using the supplied change in
     energy and supplied change in volume (with a change in biasing factor) */
-bool MonteCarlo::test(double new_energy, double old_energy,
-                      int nmolecules,
-                      const Volume &new_volume, const Volume &old_volume,
-                      double new_bias, double old_bias)
+bool MonteCarlo::test(double new_energy, double old_energy, int nmolecules, const Volume &new_volume,
+                      const Volume &old_volume, double new_bias, double old_bias)
 {
     double p_deltav = this->pressure() * (new_volume - old_volume);
 
@@ -323,10 +309,9 @@ bool MonteCarlo::test(double new_energy, double old_energy,
 
     double beta = -1.0 / (k_boltz * ensmble.temperature().value());
 
-    double x =  (new_bias / old_bias) *
-                    std::exp( beta * (new_energy - old_energy + p_deltav) + vratio );
+    double x = (new_bias / old_bias) * std::exp(beta * (new_energy - old_energy + p_deltav) + vratio);
 
-    if ( x > 1 or x >= rangenerator.rand() )
+    if (x > 1 or x >= rangenerator.rand())
     {
         ++naccept;
         return true;

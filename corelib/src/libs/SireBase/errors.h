@@ -35,97 +35,106 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-/** This is the base class of all SireBase errors */
-class SIREBASE_EXPORT sirebase_error : public SireError::exception
-{
-public:
-    sirebase_error() : exception()
-    {}
-
-    sirebase_error(QString err, QString place = QString()) : exception(err,place)
-    {}
-
-    sirebase_error(const sirebase_error &other) : exception(other)
-    {}
-
-    ~sirebase_error() throw()
-    {}
-
-    static const char* typeName()
+    /** This is the base class of all SireBase errors */
+    class SIREBASE_EXPORT sirebase_error : public SireError::exception
     {
-        return "SireBase::sirebase_error";
-    }
-};
+    public:
+        sirebase_error() : exception()
+        {
+        }
 
-/** This exception is thrown when a request is made of a non-existant property
+        sirebase_error(QString err, QString place = QString()) : exception(err, place)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT missing_property : public sirebase_error
-{
-public:
-    missing_property() : sirebase_error()
-    {}
+        sirebase_error(const sirebase_error &other) : exception(other)
+        {
+        }
 
-    missing_property(QString err, QString place = QString())
-              : sirebase_error(err,place)
-    {}
+        ~sirebase_error() throw()
+        {
+        }
 
-    missing_property(const missing_property &other) : sirebase_error(other)
-    {}
+        static const char *typeName()
+        {
+            return "SireBase::sirebase_error";
+        }
+    };
 
-    ~missing_property() throw()
-    {}
+    /** This exception is thrown when a request is made of a non-existant property
 
-    static const char* typeName();
-
-    const char* what() const throw()
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT missing_property : public sirebase_error
     {
-        return missing_property::typeName();
-    }
+    public:
+        missing_property() : sirebase_error()
+        {
+        }
 
-    void throwSelf() const
+        missing_property(QString err, QString place = QString()) : sirebase_error(err, place)
+        {
+        }
+
+        missing_property(const missing_property &other) : sirebase_error(other)
+        {
+        }
+
+        ~missing_property() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return missing_property::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw missing_property(*this);
+        }
+    };
+
+    /** This exception is thrown when a request is made to duplicate a
+        property when this would be inappropriate
+
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT duplicate_property : public sirebase_error
     {
-        throw missing_property(*this);
-    }
-};
+    public:
+        duplicate_property() : sirebase_error()
+        {
+        }
 
+        duplicate_property(QString err, QString place = QString()) : sirebase_error(err, place)
+        {
+        }
 
-/** This exception is thrown when a request is made to duplicate a
-    property when this would be inappropriate
+        duplicate_property(const duplicate_property &other) : sirebase_error(other)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT duplicate_property : public sirebase_error
-{
-public:
-    duplicate_property() : sirebase_error()
-    {}
+        ~duplicate_property() throw()
+        {
+        }
 
-    duplicate_property(QString err, QString place = QString())
-              : sirebase_error(err,place)
-    {}
+        static const char *typeName();
 
-    duplicate_property(const duplicate_property &other) : sirebase_error(other)
-    {}
+        const char *what() const throw()
+        {
+            return duplicate_property::typeName();
+        }
 
-    ~duplicate_property() throw()
-    {}
+        void throwSelf() const
+        {
+            throw duplicate_property(*this);
+        }
+    };
 
-    static const char* typeName();
-
-    const char* what() const throw()
-    {
-        return duplicate_property::typeName();
-    }
-
-    void throwSelf() const
-    {
-        throw duplicate_property(*this);
-    }
-};
-
-}
+} // namespace SireBase
 
 Q_DECLARE_METATYPE(SireBase::missing_property)
 Q_DECLARE_METATYPE(SireBase::duplicate_property)

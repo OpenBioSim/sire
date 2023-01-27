@@ -34,58 +34,57 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class TitrationMove;
+    class TitrationMove;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::TitrationMove&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::TitrationMove&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::TitrationMove &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::TitrationMove &);
 
 namespace SireMove
 {
 
-/** This class performs a Monte Carlo titration move. This moves
-    a charge from one place to another by swapping the coordinates
-    of once molecule with another, e.g. swapping a charge with a water.
-    This allows ions to move quickly through a simulation box, and for
-    ions to equilibrate between boxes (e.g. during a WSRC calcualtion)
+    /** This class performs a Monte Carlo titration move. This moves
+        a charge from one place to another by swapping the coordinates
+        of once molecule with another, e.g. swapping a charge with a water.
+        This allows ions to move quickly through a simulation box, and for
+        ions to equilibrate between boxes (e.g. during a WSRC calcualtion)
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT TitrationMove
-        : public SireBase::ConcreteProperty<TitrationMove,MonteCarlo>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT TitrationMove : public SireBase::ConcreteProperty<TitrationMove, MonteCarlo>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const TitrationMove&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, TitrationMove&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const TitrationMove &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, TitrationMove &);
 
-public:
-    TitrationMove();
-    TitrationMove(const TitrationMove &other);
+    public:
+        TitrationMove();
+        TitrationMove(const TitrationMove &other);
 
-    ~TitrationMove();
+        ~TitrationMove();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    TitrationMove& operator=(const TitrationMove &other);
+        TitrationMove &operator=(const TitrationMove &other);
 
-    bool operator==(const TitrationMove &other) const;
-    bool operator!=(const TitrationMove &other) const;
+        bool operator==(const TitrationMove &other) const;
+        bool operator!=(const TitrationMove &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    void move(System &system, int nmoves, bool record_stats=true);
+        void move(System &system, int nmoves, bool record_stats = true);
 
-protected:
-    void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
-};
+    protected:
+        void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
+    };
 
 } // end of namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::TitrationMove )
+Q_DECLARE_METATYPE(SireMove::TitrationMove)
 
-SIRE_EXPOSE_CLASS( SireMove::TitrationMove )
+SIRE_EXPOSE_CLASS(SireMove::TitrationMove)
 
 SIRE_END_HEADER
 

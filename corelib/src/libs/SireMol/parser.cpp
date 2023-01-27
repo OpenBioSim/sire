@@ -35,7 +35,7 @@ namespace SireMol
 {
     namespace parser
     {
-        Parser* Parser::global_parser(0);
+        Parser *Parser::global_parser(0);
 
         void Parser::install_parser(Parser *parser)
         {
@@ -45,11 +45,10 @@ namespace SireMol
             global_parser = parser;
         }
 
-        Parser& Parser::globalParser()
+        Parser &Parser::globalParser()
         {
             if (global_parser == 0)
-                throw SireError::program_bug( QObject::tr(
-                    "No parser has been loaded!"), CODELOC );
+                throw SireError::program_bug(QObject::tr("No parser has been loaded!"), CODELOC);
 
             return *global_parser;
         }
@@ -81,9 +80,9 @@ namespace SireMol
 
         /** Internal function used to parse the passed string and convert
             it into a SelectEngine object */
-        SelectEnginePtr parse( const QString &str )
+        SelectEnginePtr parse(const QString &str)
         {
             return Parser::globalParser().parse(str);
         }
-    }
-}
+    } // namespace parser
+} // namespace SireMol

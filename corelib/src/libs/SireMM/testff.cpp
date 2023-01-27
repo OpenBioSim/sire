@@ -49,17 +49,19 @@ using namespace SireVol;
 
 using boost::tuple;
 
-TestFF::TestFF() : cljfunc(new CLJShiftFunction(15*angstrom, 15*angstrom))
-{}
+TestFF::TestFF() : cljfunc(new CLJShiftFunction(15 * angstrom, 15 * angstrom))
+{
+}
 
-TestFF::TestFF(const TestFF &other)
-       : atoms0(other.atoms0), atoms1(other.atoms1), cljfunc(other.cljfunc)
-{}
+TestFF::TestFF(const TestFF &other) : atoms0(other.atoms0), atoms1(other.atoms1), cljfunc(other.cljfunc)
+{
+}
 
 TestFF::~TestFF()
-{}
+{
+}
 
-TestFF& TestFF::operator=(const TestFF &other)
+TestFF &TestFF::operator=(const TestFF &other)
 {
     atoms0 = other.atoms0;
     atoms1 = other.atoms1;
@@ -81,43 +83,39 @@ void TestFF::addFixedAtoms(const Molecules &molecules)
 
 void TestFF::setCutoff(Length coul_cutoff, Length lj_cutoff)
 {
-    cljfunc.reset( new CLJShiftFunction(coul_cutoff, lj_cutoff) );
+    cljfunc.reset(new CLJShiftFunction(coul_cutoff, lj_cutoff));
 }
 
 class CLJCalculator
 {
 public:
     CLJCalculator();
-    CLJCalculator(const CLJFunction* const function,
-                  const CLJBoxDistance* const distances,
-                  const CLJBoxes::Container &cljboxes,
-                  const float coulomb_cutoff, const float lenj_cutoff,
+    CLJCalculator(const CLJFunction *const function, const CLJBoxDistance *const distances,
+                  const CLJBoxes::Container &cljboxes, const float coulomb_cutoff, const float lenj_cutoff,
                   double *coulomb_energy, double *lj_energy)
-        : func(function), dists(distances), boxes(&cljboxes),
-          coul_nrg(coulomb_energy), lj_nrg(lj_energy),
+        : func(function), dists(distances), boxes(&cljboxes), coul_nrg(coulomb_energy), lj_nrg(lj_energy),
           coul_cutoff(coulomb_cutoff), lj_cutoff(lenj_cutoff)
-    {}
+    {
+    }
 
     ~CLJCalculator()
-    {}
+    {
+    }
 
     void operator()(const tbb::blocked_range<int> &range) const
     {
-        const CLJBoxDistance* ptr = dists + range.begin();
-        const CLJBoxPtr* const b = boxes->constData();
+        const CLJBoxDistance *ptr = dists + range.begin();
+        const CLJBoxPtr *const b = boxes->constData();
 
         for (int i = range.begin(); i != range.end(); ++i)
         {
             if (ptr->box0() == ptr->box1())
             {
-                (*func)(b[ptr->box0()].read().atoms(),
-                        coul_nrg[i], lj_nrg[i]);
+                (*func)(b[ptr->box0()].read().atoms(), coul_nrg[i], lj_nrg[i]);
             }
             else
             {
-                (*func)(b[ptr->box0()].read().atoms(),
-                        b[ptr->box1()].read().atoms(),
-                        coul_nrg[i], lj_nrg[i]);
+                (*func)(b[ptr->box0()].read().atoms(), b[ptr->box1()].read().atoms(), coul_nrg[i], lj_nrg[i]);
             }
 
             ptr += 1;
@@ -125,9 +123,9 @@ public:
     }
 
 private:
-    const CLJFunction* const func;
-    const CLJBoxDistance* const dists;
-    const CLJBoxes::Container* boxes;
+    const CLJFunction *const func;
+    const CLJBoxDistance *const dists;
+    const CLJBoxes::Container *boxes;
 
     double *coul_nrg;
     double *lj_nrg;
@@ -151,7 +149,7 @@ void TestFF::calculateEnergy()
 
     quint64 ns = t.nsecsElapsed();
 
-    qDebug() << "TestFF" << (cnrg+ljnrg) << cnrg << ljnrg << "took" << (0.000001*ns) << "ms";
+    qDebug() << "TestFF" << (cnrg + ljnrg) << cnrg << ljnrg << "took" << (0.000001 * ns) << "ms";
 
     qDebug() << "\nintra group energy";
 
@@ -161,7 +159,7 @@ void TestFF::calculateEnergy()
 
     ns = t.nsecsElapsed();
 
-    qDebug() << "TestFF" << (cnrg+ljnrg) << cnrg << ljnrg << "took" << (0.000001*ns) << "ms";
+    qDebug() << "TestFF" << (cnrg + ljnrg) << cnrg << ljnrg << "took" << (0.000001 * ns) << "ms";
 
     qDebug() << "\nUsing CLJBoxes to accelerate the calculation";
 
@@ -188,10 +186,9 @@ void TestFF::calculateEnergy()
 
     const CLJBoxDistance *ptr = dists.constData();
 
-    for (int i=0; i<dists.count(); ++i)
+    for (int i = 0; i < dists.count(); ++i)
     {
-        (*cljfunc)(boxes0[ptr->box0()].read().atoms(), boxes1[ptr->box1()].read().atoms(),
-                   icnrg, iljnrg);
+        (*cljfunc)(boxes0[ptr->box0()].read().atoms(), boxes1[ptr->box1()].read().atoms(), icnrg, iljnrg);
 
         cnrg += icnrg;
         ljnrg += iljnrg;
@@ -201,8 +198,8 @@ void TestFF::calculateEnergy()
 
     ns = t.nsecsElapsed();
 
-    qDebug() << "Boxed" << (cnrg+ljnrg) << cnrg << ljnrg;
-    qDebug() << "Took" << (0.000001*ns) << "ms";
+    qDebug() << "Boxed" << (cnrg + ljnrg) << cnrg << ljnrg;
+    qDebug() << "Took" << (0.000001 * ns) << "ms";
 
     qDebug() << "\nintra energy";
 
@@ -215,7 +212,7 @@ void TestFF::calculateEnergy()
 
     t.start();
 
-    for (int i=0; i<dists.count(); ++i)
+    for (int i = 0; i < dists.count(); ++i)
     {
         if (ptr->box0() == ptr->box1())
         {
@@ -223,8 +220,7 @@ void TestFF::calculateEnergy()
         }
         else
         {
-            (*cljfunc)(boxes1[ptr->box0()].read().atoms(), boxes1[ptr->box1()].read().atoms(),
-                       icnrg, iljnrg);
+            (*cljfunc)(boxes1[ptr->box0()].read().atoms(), boxes1[ptr->box1()].read().atoms(), icnrg, iljnrg);
         }
 
         cnrg += icnrg;
@@ -235,22 +231,22 @@ void TestFF::calculateEnergy()
 
     ns = t.nsecsElapsed();
 
-    qDebug() << "Boxed" << (cnrg+ljnrg) << cnrg << ljnrg;
-    qDebug() << "Took" << (0.000001*ns) << "ms";
+    qDebug() << "Boxed" << (cnrg + ljnrg) << cnrg << ljnrg;
+    qDebug() << "Took" << (0.000001 * ns) << "ms";
 
     QVector<double> coul_nrgs(dists.count());
     QVector<double> lj_nrgs(dists.count());
 
-    ::CLJCalculator calc(cljfunc.get(), dists.constData(), boxes1, coul_cutoff.value(),
-                         lj_cutoff.value(), coul_nrgs.data(), lj_nrgs.data());
+    ::CLJCalculator calc(cljfunc.get(), dists.constData(), boxes1, coul_cutoff.value(), lj_cutoff.value(),
+                         coul_nrgs.data(), lj_nrgs.data());
 
     t.start();
-    tbb::parallel_for(tbb::blocked_range<int>(0,dists.count(),25), calc);
+    tbb::parallel_for(tbb::blocked_range<int>(0, dists.count(), 25), calc);
 
     cnrg = 0;
     ljnrg = 0;
 
-    for (int i=0; i<dists.count(); ++i)
+    for (int i = 0; i < dists.count(); ++i)
     {
         cnrg += coul_nrgs.constData()[i];
         ljnrg += lj_nrgs.constData()[i];
@@ -258,20 +254,20 @@ void TestFF::calculateEnergy()
 
     ns = t.nsecsElapsed();
 
-    qDebug() << "\nParallel" << (cnrg+ljnrg) << cnrg << ljnrg;
-    qDebug() << "Parallel version took" << (0.000001*ns) << "ms";
+    qDebug() << "\nParallel" << (cnrg + ljnrg) << cnrg << ljnrg;
+    qDebug() << "Parallel version took" << (0.000001 * ns) << "ms";
 
     qDebug() << "\nCLJCalculator (reproducible) version";
     SireMM::CLJCalculator calculator(true);
     t.start();
-    tuple<double,double> nrgs = calculator.calculate(*cljfunc, cljboxes1);
+    tuple<double, double> nrgs = calculator.calculate(*cljfunc, cljboxes1);
     ns = t.nsecsElapsed();
 
     cnrg = nrgs.get<0>();
     ljnrg = nrgs.get<1>();
 
-    qDebug() << "\nCLJCalculator" << (cnrg+ljnrg) << cnrg << ljnrg;
-    qDebug() << "Took" << (0.000001*ns) << "ms";
+    qDebug() << "\nCLJCalculator" << (cnrg + ljnrg) << cnrg << ljnrg;
+    qDebug() << "Took" << (0.000001 * ns) << "ms";
 
     qDebug() << "\nCLJCalculator (non-reproducible) version";
     calculator = SireMM::CLJCalculator(false);
@@ -282,8 +278,8 @@ void TestFF::calculateEnergy()
     cnrg = nrgs.get<0>();
     ljnrg = nrgs.get<1>();
 
-    qDebug() << "\nCLJCalculator" << (cnrg+ljnrg) << cnrg << ljnrg;
-    qDebug() << "Took" << (0.000001*ns) << "ms";
+    qDebug() << "\nCLJCalculator" << (cnrg + ljnrg) << cnrg << ljnrg;
+    qDebug() << "Took" << (0.000001 * ns) << "ms";
 
     qDebug() << "\nCLJCalculator inter (reproducible) version";
     calculator = SireMM::CLJCalculator(true);
@@ -294,8 +290,8 @@ void TestFF::calculateEnergy()
     cnrg = nrgs.get<0>();
     ljnrg = nrgs.get<1>();
 
-    qDebug() << "\nCLJCalculator" << (cnrg+ljnrg) << cnrg << ljnrg;
-    qDebug() << "Took" << (0.000001*ns) << "ms";
+    qDebug() << "\nCLJCalculator" << (cnrg + ljnrg) << cnrg << ljnrg;
+    qDebug() << "Took" << (0.000001 * ns) << "ms";
 
     qDebug() << "\nCLJCalculator inter (non-reproducible) version";
     calculator = SireMM::CLJCalculator(false);
@@ -306,6 +302,6 @@ void TestFF::calculateEnergy()
     cnrg = nrgs.get<0>();
     ljnrg = nrgs.get<1>();
 
-    qDebug() << "\nCLJCalculator" << (cnrg+ljnrg) << cnrg << ljnrg;
-    qDebug() << "Took" << (0.000001*ns) << "ms";
+    qDebug() << "\nCLJCalculator" << (cnrg + ljnrg) << cnrg << ljnrg;
+    qDebug() << "Took" << (0.000001 * ns) << "ms";
 }

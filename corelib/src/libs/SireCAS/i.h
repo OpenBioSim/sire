@@ -36,61 +36,61 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class I;
+    class I;
 }
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::I&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::I&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::I &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::I &);
 
 namespace SireCAS
 {
 
-using SireMaths::Complex;
+    using SireMaths::Complex;
 
-/**
-This is the complex number, i
+    /**
+    This is the complex number, i
 
-@author Christopher Woods
-*/
-class SIRECAS_EXPORT I : public Constant
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const I&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, I&);
-
-public:
-    I();
-    I(const I &other);
-
-    ~I();
-
-    bool operator==(const ExBase &other) const;
-
-    uint hash() const;
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIRECAS_EXPORT I : public Constant
     {
-        return I::typeName();
-    }
 
-    I* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const I &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, I &);
 
-    QString toString() const;
-    double evaluate(const Values&) const;
-    Complex evaluate(const ComplexValues&) const;
+    public:
+        I();
+        I(const I &other);
 
-    Expression conjugate() const;
+        ~I();
 
-    bool isComplex() const;
-};
+        bool operator==(const ExBase &other) const;
 
-}
+        uint hash() const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return I::typeName();
+        }
+
+        I *clone() const;
+
+        QString toString() const;
+        double evaluate(const Values &) const;
+        Complex evaluate(const ComplexValues &) const;
+
+        Expression conjugate() const;
+
+        bool isComplex() const;
+    };
+
+} // namespace SireCAS
 
 Q_DECLARE_METATYPE(SireCAS::I)
 
-SIRE_EXPOSE_CLASS( SireCAS::I )
+SIRE_EXPOSE_CLASS(SireCAS::I)
 
 SIRE_END_HEADER
 

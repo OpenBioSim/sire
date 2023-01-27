@@ -41,129 +41,141 @@ This file contains the exceptions that can be thrown by the SireMM library.
 namespace SireMM
 {
 
-/** This is the base class of all SireMM errors */
-class SIREMM_EXPORT siremm_error : public SireError::exception
-{
-public:
-    siremm_error() : exception()
-    {}
-
-    siremm_error(QString err, QString place = QString()) : exception(err,place)
-    {}
-
-    siremm_error(const siremm_error &other) : exception(other)
-    {}
-
-    ~siremm_error() throw()
-    {}
-
-    static const char* typeName()
+    /** This is the base class of all SireMM errors */
+    class SIREMM_EXPORT siremm_error : public SireError::exception
     {
-        return "SireMM::siremm_error";
-    }
-};
+    public:
+        siremm_error() : exception()
+        {
+        }
 
+        siremm_error(QString err, QString place = QString()) : exception(err, place)
+        {
+        }
 
-/** This exception is thrown when a request is made of a non-existant bond
+        siremm_error(const siremm_error &other) : exception(other)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT missing_bond : public siremm_error
-{
-public:
-    missing_bond() : siremm_error()
-    {}
+        ~siremm_error() throw()
+        {
+        }
 
-    missing_bond(QString err, QString place = QString())
-              : siremm_error(err,place)
-    {}
+        static const char *typeName()
+        {
+            return "SireMM::siremm_error";
+        }
+    };
 
-    missing_bond(const missing_bond &other) : siremm_error(other)
-    {}
+    /** This exception is thrown when a request is made of a non-existant bond
 
-    ~missing_bond() throw()
-    {}
-
-    static const char* typeName();
-
-    const char* what() const throw()
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT missing_bond : public siremm_error
     {
-        return missing_bond::typeName();
-    }
+    public:
+        missing_bond() : siremm_error()
+        {
+        }
 
-    void throwSelf() const
+        missing_bond(QString err, QString place = QString()) : siremm_error(err, place)
+        {
+        }
+
+        missing_bond(const missing_bond &other) : siremm_error(other)
+        {
+        }
+
+        ~missing_bond() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return missing_bond::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw missing_bond(*this);
+        }
+    };
+
+    /** This exception is thrown when a request is made of a non-existant angle
+
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT missing_angle : public siremm_error
     {
-        throw missing_bond(*this);
-    }
-};
+    public:
+        missing_angle() : siremm_error()
+        {
+        }
 
-/** This exception is thrown when a request is made of a non-existant angle
+        missing_angle(QString err, QString place = QString()) : siremm_error(err, place)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT missing_angle : public siremm_error
-{
-public:
-    missing_angle() : siremm_error()
-    {}
+        missing_angle(const missing_angle &other) : siremm_error(other)
+        {
+        }
 
-    missing_angle(QString err, QString place = QString())
-              : siremm_error(err,place)
-    {}
+        ~missing_angle() throw()
+        {
+        }
 
-    missing_angle(const missing_angle &other) : siremm_error(other)
-    {}
+        static const char *typeName();
 
-    ~missing_angle() throw()
-    {}
+        const char *what() const throw()
+        {
+            return missing_angle::typeName();
+        }
 
-    static const char* typeName();
+        void throwSelf() const
+        {
+            throw missing_angle(*this);
+        }
+    };
 
-    const char* what() const throw()
+    /** This exception is thrown when a request is made of a non-existant dihedral
+
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT missing_dihedral : public siremm_error
     {
-        return missing_angle::typeName();
-    }
+    public:
+        missing_dihedral() : siremm_error()
+        {
+        }
 
-    void throwSelf() const
-    {
-        throw missing_angle(*this);
-    }
-};
+        missing_dihedral(QString err, QString place = QString()) : siremm_error(err, place)
+        {
+        }
 
-/** This exception is thrown when a request is made of a non-existant dihedral
+        missing_dihedral(const missing_dihedral &other) : siremm_error(other)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT missing_dihedral : public siremm_error
-{
-public:
-    missing_dihedral() : siremm_error()
-    {}
+        ~missing_dihedral() throw()
+        {
+        }
 
-    missing_dihedral(QString err, QString place = QString())
-              : siremm_error(err,place)
-    {}
+        static const char *typeName();
 
-    missing_dihedral(const missing_dihedral &other) : siremm_error(other)
-    {}
+        const char *what() const throw()
+        {
+            return missing_dihedral::typeName();
+        }
 
-    ~missing_dihedral() throw()
-    {}
+        void throwSelf() const
+        {
+            throw missing_dihedral(*this);
+        }
+    };
 
-    static const char* typeName();
-
-    const char* what() const throw()
-    {
-        return missing_dihedral::typeName();
-    }
-
-    void throwSelf() const
-    {
-        throw missing_dihedral(*this);
-    }
-};
-
-}
+} // namespace SireMM
 
 Q_DECLARE_METATYPE(SireMM::missing_bond)
 Q_DECLARE_METATYPE(SireMM::missing_angle)

@@ -36,71 +36,71 @@ SIRE_BEGIN_HEADER
 
 namespace SireID
 {
-class Identifier;
+    class Identifier;
 }
 
-SIREID_EXPORT QDataStream& operator<<(QDataStream&, const SireID::Identifier&);
-SIREID_EXPORT QDataStream& operator>>(QDataStream&, SireID::Identifier&);
+SIREID_EXPORT QDataStream &operator<<(QDataStream &, const SireID::Identifier &);
+SIREID_EXPORT QDataStream &operator>>(QDataStream &, SireID::Identifier &);
 
 namespace SireID
 {
 
-/** This is a generic holder for any ID class!
+    /** This is a generic holder for any ID class!
 
-    @author Christopher Woods
-*/
-class SIREID_EXPORT Identifier : public ID
-{
-
-friend SIREID_EXPORT QDataStream& ::operator<<(QDataStream&, const Identifier&);
-friend SIREID_EXPORT QDataStream& ::operator>>(QDataStream&, Identifier&);
-
-public:
-    Identifier();
-    Identifier(const ID &id);
-    Identifier(const Identifier &other);
-
-    ~Identifier();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREID_EXPORT Identifier : public ID
     {
-        return Identifier::typeName();
+
+        friend SIREID_EXPORT QDataStream & ::operator<<(QDataStream &, const Identifier &);
+        friend SIREID_EXPORT QDataStream & ::operator>>(QDataStream &, Identifier &);
+
+    public:
+        Identifier();
+        Identifier(const ID &id);
+        Identifier(const Identifier &other);
+
+        ~Identifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Identifier::typeName();
+        }
+
+        Identifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const ID &base() const;
+
+        Identifier &operator=(const Identifier &other);
+        Identifier &operator=(const ID &other);
+
+        bool operator==(const ID &other) const;
+        bool operator!=(const ID &other) const;
+
+        bool operator==(const Identifier &other) const;
+        bool operator!=(const Identifier &other) const;
+
+    private:
+        /** Pointer to the ID */
+        boost::shared_ptr<ID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const Identifier &id)
+    {
+        return id.hash();
     }
 
-    Identifier* clone() const;
+} // namespace SireID
 
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const ID& base() const;
-
-    Identifier& operator=(const Identifier &other);
-    Identifier& operator=(const ID &other);
-
-    bool operator==(const ID &other) const;
-    bool operator!=(const ID &other) const;
-
-    bool operator==(const Identifier &other) const;
-    bool operator!=(const Identifier &other) const;
-
-private:
-    /** Pointer to the ID */
-    boost::shared_ptr<ID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const Identifier &id)
-{
-    return id.hash();
-}
-
-}
-
-Q_DECLARE_METATYPE( SireID::Identifier )
+Q_DECLARE_METATYPE(SireID::Identifier)
 
 SIRE_END_HEADER
 

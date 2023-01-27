@@ -27,13 +27,13 @@
 
 #include <QMutex>
 
-#include "move.h"
 #include "ensemble.h"
+#include "move.h"
 
 #include "SireMol/core.h"
 
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
+#include "SireUnits/units.h"
 
 #include "SireMaths/rangenerator.h"
 
@@ -55,7 +55,7 @@ using namespace SireStream;
 /////// Implementation of Move
 ///////
 
-static const RegisterMetaType<Move> r_move( MAGIC_ONLY, "SireMove::Move" );
+static const RegisterMetaType<Move> r_move(MAGIC_ONLY, "SireMove::Move");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Move &move)
@@ -64,10 +64,8 @@ QDataStream &operator<<(QDataStream &ds, const Move &move)
 
     SharedDataStream sds(ds);
 
-    sds << move.nrgcomponent
-        << move.coordsproperty << move.spaceproperty
-        << move.map
-        << static_cast<const Property&>(move);
+    sds << move.nrgcomponent << move.coordsproperty << move.spaceproperty << move.map
+        << static_cast<const Property &>(move);
 
     return ds;
 }
@@ -81,18 +79,14 @@ QDataStream &operator>>(QDataStream &ds, Move &move)
     {
         SharedDataStream sds(ds);
 
-        sds >> move.nrgcomponent
-            >> move.coordsproperty >> move.spaceproperty
-            >> move.map
-            >> static_cast<Property&>(move);
+        sds >> move.nrgcomponent >> move.coordsproperty >> move.spaceproperty >> move.map >>
+            static_cast<Property &>(move);
     }
     else if (v == 1)
     {
         SharedDataStream sds(ds);
 
-        sds >> move.nrgcomponent
-            >> move.coordsproperty >> move.spaceproperty
-            >> static_cast<Property&>(move);
+        sds >> move.nrgcomponent >> move.coordsproperty >> move.spaceproperty >> static_cast<Property &>(move);
 
         move.map = PropertyMap();
     }
@@ -103,8 +97,7 @@ QDataStream &operator>>(QDataStream &ds, Move &move)
 }
 
 /** Constructor */
-Move::Move(const PropertyMap &map)
-     : Property(), nrgcomponent(ForceFields::totalComponent())
+Move::Move(const PropertyMap &map) : Property(), nrgcomponent(ForceFields::totalComponent())
 {
     coordsproperty = map["coordinates"];
     spaceproperty = map["space"];
@@ -112,17 +105,18 @@ Move::Move(const PropertyMap &map)
 
 /** Copy constructor */
 Move::Move(const Move &other)
-     : Property(other), nrgcomponent(other.nrgcomponent),
-       coordsproperty(other.coordsproperty), spaceproperty(other.spaceproperty),
-       map(other.map)
-{}
+    : Property(other), nrgcomponent(other.nrgcomponent), coordsproperty(other.coordsproperty),
+      spaceproperty(other.spaceproperty), map(other.map)
+{
+}
 
 /** Destructor */
 Move::~Move()
-{}
+{
+}
 
 /** Copy assignment operator */
-Move& Move::operator=(const Move &other)
+Move &Move::operator=(const Move &other)
 {
     nrgcomponent = other.nrgcomponent;
     coordsproperty = other.coordsproperty;
@@ -137,10 +131,8 @@ Move& Move::operator=(const Move &other)
 /** Comparison operator */
 bool Move::operator==(const Move &other) const
 {
-    return nrgcomponent == other.nrgcomponent and
-           coordsproperty == other.coordsproperty and
-           spaceproperty == other.spaceproperty and
-           map == other.map;
+    return nrgcomponent == other.nrgcomponent and coordsproperty == other.coordsproperty and
+           spaceproperty == other.spaceproperty and map == other.map;
 }
 
 /** Comparison operator */
@@ -172,7 +164,7 @@ void Move::setEnergyComponent(const Symbol &component)
 
 /** Return the symbol that describes the Hamiltonian that this move
     will sample */
-const Symbol& Move::energyComponent() const
+const Symbol &Move::energyComponent() const
 {
     return nrgcomponent;
 }
@@ -190,7 +182,7 @@ void Move::setSpaceProperty(const PropertyName &space_property)
 /** Return the property used to find the simulation space (box)
     for this move. This property is only used when the move
     involves changing the simulation box. */
-const PropertyName& Move::spaceProperty() const
+const PropertyName &Move::spaceProperty() const
 {
     return spaceproperty;
 }
@@ -203,13 +195,13 @@ void Move::setCoordinatesProperty(const PropertyName &coords_property)
 }
 
 /** Return the property used to find the molecule coordinates to be moves */
-const PropertyName& Move::coordinatesProperty() const
+const PropertyName &Move::coordinatesProperty() const
 {
     return coordsproperty;
 }
 
 /** Return the property map used to perform this move */
-const PropertyMap& Move::propertyMap() const
+const PropertyMap &Move::propertyMap() const
 {
     return map;
 }
@@ -278,11 +270,11 @@ bool Move::isConstantFugacity() const
 Temperature Move::temperature() const
 {
     if (not this->isConstantTemperature())
-        throw SireError::incompatible_error( QObject::tr(
-            "The move %1 does not have a constant temperature as it "
-            "samples from the %2")
-                .arg( this->what() ).arg(this->ensemble().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The move %1 does not have a constant temperature as it "
+                                                        "samples from the %2")
+                                                .arg(this->what())
+                                                .arg(this->ensemble().toString()),
+                                            CODELOC);
 
     return this->ensemble().temperature();
 }
@@ -294,11 +286,11 @@ Temperature Move::temperature() const
 Pressure Move::pressure() const
 {
     if (not this->isConstantPressure())
-        throw SireError::incompatible_error( QObject::tr(
-            "The move %1 does not have a constant pressure as it "
-            "samples from the %2")
-                .arg( this->what() ).arg(this->ensemble().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The move %1 does not have a constant pressure as it "
+                                                        "samples from the %2")
+                                                .arg(this->what())
+                                                .arg(this->ensemble().toString()),
+                                            CODELOC);
 
     return this->ensemble().pressure();
 }
@@ -310,11 +302,11 @@ Pressure Move::pressure() const
 Pressure Move::fugacity() const
 {
     if (not this->isConstantFugacity())
-        throw SireError::incompatible_error( QObject::tr(
-            "The move %1 does not have a constant fugacity as it "
-            "samples from the %2")
-                .arg( this->what() ).arg(this->ensemble().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The move %1 does not have a constant fugacity as it "
+                                                        "samples from the %2")
+                                                .arg(this->what())
+                                                .arg(this->ensemble().toString()),
+                                            CODELOC);
 
     return this->ensemble().fugacity();
 }
@@ -326,17 +318,17 @@ Pressure Move::fugacity() const
 MolarEnergy Move::chemicalPotential() const
 {
     if (not this->isConstantChemicalPotential())
-        throw SireError::incompatible_error( QObject::tr(
-            "The move %1 does not have a constant chemical potential as it "
-            "samples from the %2")
-                .arg( this->what() ).arg(this->ensemble().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The move %1 does not have a constant chemical potential as it "
+                                                        "samples from the %2")
+                                                .arg(this->what())
+                                                .arg(this->ensemble().toString()),
+                                            CODELOC);
 
     return this->ensemble().chemicalPotential();
 }
 
 /** Return whether or not this move keeps the symbol 'lam' constant */
-bool Move::isConstantLambda(const Symbol&) const
+bool Move::isConstantLambda(const Symbol &) const
 {
     return true;
 }
@@ -344,34 +336,34 @@ bool Move::isConstantLambda(const Symbol&) const
 /** Set the temperature - this should never be called! */
 void Move::_pvt_setTemperature(const Temperature &temperature)
 {
-    throw SireError::program_bug( QObject::tr(
-        "Cannot set the temperature to %1 C in %2, as, despite the move promising "
-        "it samples the %3, it doesn't provide a function to set the temperature!")
-            .arg(temperature.to(celsius))
-            .arg(this->what())
-            .arg(this->ensemble().toString()), CODELOC );
+    throw SireError::program_bug(QObject::tr("Cannot set the temperature to %1 C in %2, as, despite the move promising "
+                                             "it samples the %3, it doesn't provide a function to set the temperature!")
+                                     .arg(temperature.to(celsius))
+                                     .arg(this->what())
+                                     .arg(this->ensemble().toString()),
+                                 CODELOC);
 }
 
 /** Set the pressure - this should never be called! */
 void Move::_pvt_setPressure(const Pressure &pressure)
 {
-    throw SireError::program_bug( QObject::tr(
-        "Cannot set the pressure to %1 atm in %2, as, despite the move promising "
-        "it samples the %3, it doesn't provide a function to set the pressure!")
-            .arg(pressure.to(atm))
-            .arg(this->what())
-            .arg(this->ensemble().toString()), CODELOC );
+    throw SireError::program_bug(QObject::tr("Cannot set the pressure to %1 atm in %2, as, despite the move promising "
+                                             "it samples the %3, it doesn't provide a function to set the pressure!")
+                                     .arg(pressure.to(atm))
+                                     .arg(this->what())
+                                     .arg(this->ensemble().toString()),
+                                 CODELOC);
 }
 
 /** Set the pressure - this should never be called! */
 void Move::_pvt_setFugacity(const Pressure &fugacity)
 {
-    throw SireError::program_bug( QObject::tr(
-        "Cannot set the fugacity to %1 bar in %2, as, despite the move promising "
-        "it samples the %3, it doesn't provide a function to set the fugacity!")
-            .arg(fugacity.to(bar))
-            .arg(this->what())
-            .arg(this->ensemble().toString()), CODELOC );
+    throw SireError::program_bug(QObject::tr("Cannot set the fugacity to %1 bar in %2, as, despite the move promising "
+                                             "it samples the %3, it doesn't provide a function to set the fugacity!")
+                                     .arg(fugacity.to(bar))
+                                     .arg(this->what())
+                                     .arg(this->ensemble().toString()),
+                                 CODELOC);
 }
 
 /** Set the temperature that this constant temperature move samples
@@ -382,13 +374,13 @@ void Move::_pvt_setFugacity(const Pressure &fugacity)
 void Move::setTemperature(const Temperature &temperature)
 {
     if (not this->isConstantTemperature())
-        throw SireError::incompatible_error( QObject::tr(
-            "The move %1 cannot not have a constant temperature (%2 C) as it "
-            "samples from the %3")
-                .arg( this->what() )
-                .arg( temperature.to(celsius) )
+        throw SireError::incompatible_error(
+            QObject::tr("The move %1 cannot not have a constant temperature (%2 C) as it "
+                        "samples from the %3")
+                .arg(this->what())
+                .arg(temperature.to(celsius))
                 .arg(this->ensemble().toString()),
-                    CODELOC );
+            CODELOC);
 
     this->_pvt_setTemperature(temperature);
 }
@@ -401,13 +393,13 @@ void Move::setTemperature(const Temperature &temperature)
 void Move::setPressure(const SireUnits::Dimension::Pressure &pressure)
 {
     if (not this->isConstantPressure())
-        throw SireError::incompatible_error( QObject::tr(
-            "The move %1 cannot not have a constant pressure (%2 atm) as it "
-            "samples from the %3")
-                .arg( this->what() )
-                .arg( pressure.to(atm) )
+        throw SireError::incompatible_error(
+            QObject::tr("The move %1 cannot not have a constant pressure (%2 atm) as it "
+                        "samples from the %3")
+                .arg(this->what())
+                .arg(pressure.to(atm))
                 .arg(this->ensemble().toString()),
-                    CODELOC );
+            CODELOC);
 
     this->_pvt_setPressure(pressure);
 }
@@ -420,17 +412,15 @@ void Move::setPressure(const SireUnits::Dimension::Pressure &pressure)
 void Move::setChemicalPotential(const MolarEnergy &chemical_potential)
 {
     if (not this->isConstantChemicalPotential())
-        throw SireError::incompatible_error( QObject::tr(
-            "The move %1 cannot not have a constant chemical potential "
-            "(%2 kcal mol-1) as it "
-            "samples from the %3")
-                .arg( this->what() )
-                .arg(chemical_potential.to(kcal_per_mol) )
-                .arg(this->ensemble().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The move %1 cannot not have a constant chemical potential "
+                                                        "(%2 kcal mol-1) as it "
+                                                        "samples from the %3")
+                                                .arg(this->what())
+                                                .arg(chemical_potential.to(kcal_per_mol))
+                                                .arg(this->ensemble().toString()),
+                                            CODELOC);
 
-    this->_pvt_setFugacity( Ensemble::MuVT(this->temperature(), chemical_potential)
-                                        .fugacity() );
+    this->_pvt_setFugacity(Ensemble::MuVT(this->temperature(), chemical_potential).fugacity());
 }
 
 /** Set the fugacity that this constant fugacity move samples
@@ -441,16 +431,15 @@ void Move::setChemicalPotential(const MolarEnergy &chemical_potential)
 void Move::setFugacity(const Pressure &fugacity)
 {
     if (not this->isConstantFugacity())
-        throw SireError::incompatible_error( QObject::tr(
-            "The move %1 cannot not have a constant fugacity "
-            "(%2 bar) as it "
-            "samples from the %3")
-                .arg( this->what() )
-                .arg(fugacity.to(bar) )
-                .arg(this->ensemble().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The move %1 cannot not have a constant fugacity "
+                                                        "(%2 bar) as it "
+                                                        "samples from the %3")
+                                                .arg(this->what())
+                                                .arg(fugacity.to(bar))
+                                                .arg(this->ensemble().toString()),
+                                            CODELOC);
 
-    this->_pvt_setFugacity( fugacity );
+    this->_pvt_setFugacity(fugacity);
 }
 
 ///////
@@ -463,7 +452,7 @@ static const RegisterMetaType<NullMove> r_nullmove;
 QDataStream &operator<<(QDataStream &ds, const NullMove &nullmove)
 {
     writeHeader(ds, r_nullmove, 1);
-    ds << static_cast<const Move&>(nullmove);
+    ds << static_cast<const Move &>(nullmove);
 
     return ds;
 }
@@ -475,7 +464,7 @@ QDataStream &operator>>(QDataStream &ds, NullMove &nullmove)
 
     if (v == 1)
     {
-        ds >> static_cast<Move&>(nullmove);
+        ds >> static_cast<Move &>(nullmove);
     }
     else
         throw version_error(v, "1", r_nullmove, CODELOC);
@@ -484,25 +473,27 @@ QDataStream &operator>>(QDataStream &ds, NullMove &nullmove)
 }
 
 /** Constructor */
-NullMove::NullMove() : ConcreteProperty<NullMove,Move>()
-{}
+NullMove::NullMove() : ConcreteProperty<NullMove, Move>()
+{
+}
 
-const NullMove& Move::null()
+const NullMove &Move::null()
 {
     return *(create_shared_null<NullMove>());
 }
 
 /** Copy constructor */
-NullMove::NullMove(const NullMove &other)
-         : ConcreteProperty<NullMove,Move>(other)
-{}
+NullMove::NullMove(const NullMove &other) : ConcreteProperty<NullMove, Move>(other)
+{
+}
 
 /** Destructor */
 NullMove::~NullMove()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullMove& NullMove::operator=(const NullMove &other)
+NullMove &NullMove::operator=(const NullMove &other)
 {
     return *this;
 }
@@ -527,11 +518,13 @@ QString NullMove::toString() const
 
 /** There are no statistics to clear */
 void NullMove::clearStatistics()
-{}
+{
+}
 
 /* The NullMove does not use a random number generator */
-void NullMove::setGenerator(const RanGenerator&)
-{}
+void NullMove::setGenerator(const RanGenerator &)
+{
+}
 
 /** NullMove doesn't perform any moves - no matter how hard you try! */
 void NullMove::move(System &system, int nmoves, bool record_stats)
@@ -551,13 +544,12 @@ Ensemble NullMove::ensemble() const
     return Ensemble::NVE();
 }
 
-const char* NullMove::typeName()
+const char *NullMove::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullMove>() );
+    return QMetaType::typeName(qMetaTypeId<NullMove>());
 }
 
-NullMove* NullMove::clone() const
+NullMove *NullMove::clone() const
 {
     return new NullMove(*this);
 }
-

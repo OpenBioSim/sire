@@ -25,8 +25,8 @@
   *
 \*********************************************/
 
-#include <QRegExp>
 #include <QDataStream>
+#include <QRegExp>
 #include <cmath>
 
 #include <limits>
@@ -48,13 +48,13 @@ static const RegisterMetaType<Element> r_element(NO_ROOT);
 /** Serialise to a binary data stream */
 QDataStream &operator<<(QDataStream &ds, const Element &element)
 {
-    //this seems slightly over the top, adding magic and version to element,
-    //as element has only a single quint32 data member. However, this may
-    //change (e.g. perhaps to qint64 to allow negative proton numbers) and
-    //the best way to help maintain backwards compatibility is if the
-    //magic and version numbers are present
+    // this seems slightly over the top, adding magic and version to element,
+    // as element has only a single quint32 data member. However, this may
+    // change (e.g. perhaps to qint64 to allow negative proton numbers) and
+    // the best way to help maintain backwards compatibility is if the
+    // magic and version numbers are present
 
-    writeHeader(ds, r_element, 1) << quint32( element.nProtons() );
+    writeHeader(ds, r_element, 1) << quint32(element.nProtons());
     return ds;
 }
 
@@ -79,50 +79,45 @@ QDataStream &operator>>(QDataStream &ds, Element &element)
 namespace SireMol
 {
 
-class ElementData
+    class ElementData
+    {
+    public:
+        ElementData(int protnum, QString name, QString symbol, int group, int period, double covalent_radii,
+                    double bond_order_radii, double vdw_radii, int maxbonds, double mass, double elec_neg, float red,
+                    float green, float blue);
+        ~ElementData();
+
+        Length cov_rad, bond_rad, vdw_rad;
+        MolarMass mss;
+        double electro;
+
+        float r, g, b;
+        QString symb;
+        QString name;
+
+        uchar protnum; // none of these will exceed 255! (not in my lifetime, anyway!)
+        uchar maxbonds;
+        uchar group;
+        uchar period;
+    };
+} // namespace SireMol
+
+ElementData::ElementData(int pnum, QString nam, QString sym, int grp, int per, double crad, double brad, double vdw,
+                         int mxb, double m, double elec, float rd, float grn, float blu)
+    : cov_rad(crad * angstrom), bond_rad(brad * angstrom), vdw_rad(vdw * angstrom), mss(m * g_per_mol), electro(elec),
+      r(rd), g(grn), b(blu), symb(sym), name(nam), protnum(static_cast<uchar>(pnum)), maxbonds(static_cast<uchar>(mxb)),
+      group(static_cast<uchar>(grp)), period(static_cast<uchar>(per))
 {
-public:
-    ElementData(int protnum, QString name, QString symbol, int group,
-                int period, double covalent_radii, double bond_order_radii,
-                double vdw_radii, int maxbonds,
-                double mass, double elec_neg, float red, float green, float blue);
-    ~ElementData();
-
-    Length cov_rad, bond_rad, vdw_rad;
-    MolarMass mss;
-    double electro;
-
-    float r, g, b;
-    QString symb;
-    QString name;
-
-    uchar protnum;  //none of these will exceed 255! (not in my lifetime, anyway!)
-    uchar maxbonds;
-    uchar group;
-    uchar period;
-};
 }
 
-ElementData::ElementData(int pnum, QString nam, QString sym, int grp, int per,
-                         double crad, double brad, double vdw, int mxb,
-                         double m, double elec, float rd, float grn, float blu)
-        : cov_rad(crad * angstrom),
-          bond_rad(brad * angstrom),
-          vdw_rad(vdw * angstrom),
-          mss(m * g_per_mol),
-          electro(elec),
-          r(rd), g(grn), b(blu), symb(sym), name(nam),
-          protnum(static_cast<uchar>(pnum)), maxbonds(static_cast<uchar>(mxb)),
-          group(static_cast<uchar>(grp)), period(static_cast<uchar>(per))
-{}
-
 ElementData::~ElementData()
-{}
+{
+}
 
-ElementDB* ElementDB::db = 0;
+ElementDB *ElementDB::db = 0;
 
-#include <QObject>
 #include "element-data.h"
+#include <QObject>
 
 ///////////
 /////////// Implementation of Element
@@ -149,7 +144,7 @@ Element::Element(QString element)
     as an unsigned int */
 Element::Element(const char *element)
 {
-    eldata = ElementDB::db->element( QString(element) );
+    eldata = ElementDB::db->element(QString(element));
 }
 
 /** Construct an element with proton number 'nprot'. If there is no
@@ -169,14 +164,16 @@ Element::Element(int nprots)
 /** Copy constructor. This is very quick as it involves copying
     only a single pointer. */
 Element::Element(const Element &element) : eldata(element.eldata)
-{}
+{
+}
 
 /** Destructor */
 Element::~Element()
-{}
+{
+}
 
 /** Assignment operator */
-const Element& Element::operator=(const Element &element)
+const Element &Element::operator=(const Element &element)
 {
     eldata = element.eldata;
     return *this;
@@ -274,12 +271,12 @@ float Element::blue() const
 }
 
 /**
-  * Now the implementation of the ElementDB class
-  *
-  */
+ * Now the implementation of the ElementDB class
+ *
+ */
 
-//use a static global variable to initialise the ElementDB at the point
-//the SireMol library is loaded
+// use a static global variable to initialise the ElementDB at the point
+// the SireMol library is loaded
 class EDB_loader
 {
 public:
@@ -289,7 +286,8 @@ public:
     }
 
     ~EDB_loader()
-    {}
+    {
+    }
 };
 
 static EDB_loader loader;
@@ -309,15 +307,13 @@ ElementDB::ElementDB()
 
 ElementDB::~ElementDB()
 {
-    //delete the data
-    for (QHash<QString,ElementData*>::iterator it = symbolindex.begin();
-            it != symbolindex.end();
-            ++it)
+    // delete the data
+    for (QHash<QString, ElementData *>::iterator it = symbolindex.begin(); it != symbolindex.end(); ++it)
     {
         delete it.value();
     }
 
-    //clear the hashes
+    // clear the hashes
     protonindex.clear();
     symbolindex.clear();
     nameindex.clear();
@@ -328,12 +324,12 @@ void ElementDB::import(ElementData *element)
     if (not element)
         return;
 
-    symbolindex.insert(element->symb.toLower(),element);
-    protonindex.insert(element->protnum,element);
-    nameindex.insert(element->name.toLower(),element);
+    symbolindex.insert(element->symb.toLower(), element);
+    protonindex.insert(element->protnum, element);
+    nameindex.insert(element->name.toLower(), element);
 }
 
-ElementData* ElementDB::element(int z) const
+ElementData *ElementDB::element(int z) const
 {
     if (protonindex.contains(z))
         return protonindex.value(z);
@@ -341,28 +337,28 @@ ElementData* ElementDB::element(int z) const
         return protonindex.value(0);
 }
 
-ElementData* ElementDB::element(const QString &s) const
+ElementData *ElementDB::element(const QString &s) const
 {
     const QRegExp numregexp("[0-9]");
-    //lowercase the name, remove spaces and numbers
+    // lowercase the name, remove spaces and numbers
     QString el = s.toLower().remove(numregexp).trimmed();
 
     if (symbolindex.contains(el))
         return symbolindex.value(el);
     else
     {
-        //try and interpret this string as the element name
+        // try and interpret this string as the element name
         if (nameindex.contains(el))
             return nameindex.value(el);
         else
         {
-            //try to guess the name...
+            // try to guess the name...
             if (symbolindex.contains(el.left(2)))
                 return symbolindex.value(el.left(2));
             else if (symbolindex.contains(el.left(1)))
                 return symbolindex.value(el.left(1));
             else
-                //no luck, return a dummy atom
+                // no luck, return a dummy atom
                 return protonindex.value(0);
         }
     }
@@ -374,26 +370,26 @@ ElementData* ElementDB::element(const QString &s) const
     is in the first couple of rows (proton number < 18) and is not a noble gas. */
 Element Element::biologicalElement(const QString &name)
 {
-    //guess an element with this name...
+    // guess an element with this name...
     Element elmnt(name);
 
-    //is this a biological element? - if so, return it!
+    // is this a biological element? - if so, return it!
     if (elmnt.biological())
         return elmnt;
 
-    //try to guess the atom from just the first two letters...
+    // try to guess the atom from just the first two letters...
     Element elmnt2(name.left(2));
 
     if (elmnt2.biological())
         return elmnt2;
 
-    //try to guess the atom from just the first letter...
+    // try to guess the atom from just the first letter...
     Element elmnt3(name.left(1));
 
     if (elmnt3.biological())
         return elmnt3;
 
-    //we couldn't find anything - return the original, non-biological guess
+    // we couldn't find anything - return the original, non-biological guess
     return elmnt;
 }
 
@@ -489,38 +485,38 @@ bool Element::operator<=(const Element &other) const
 /** Return a string representation of the Element */
 QString Element::toString() const
 {
-    return QObject::tr("%1 (%2, %3)").arg(name(),symbol()).arg(nProtons());
+    return QObject::tr("%1 (%2, %3)").arg(name(), symbol()).arg(nProtons());
 }
 
 /** Return an element which has the closest mass to 'mass' (in atomic
     mass units, g mol-1) */
 Element Element::elementWithMass(const MolarMass &molar_mass)
 {
-    double mass = molar_mass.to( g_per_mol );
+    double mass = molar_mass.to(g_per_mol);
 
-    //round up the mass to the nearest integer to see if we can match to
-    //a core, biological type
-    int i_mass = int( mass + 0.5 );    //this rounds to the nearest int
+    // round up the mass to the nearest integer to see if we can match to
+    // a core, biological type
+    int i_mass = int(mass + 0.5); // this rounds to the nearest int
 
-    switch(i_mass)
+    switch (i_mass)
     {
-        case 1:  //hydrogen
-            return Element(1);
-        case 12:  //carbon
-            return Element(6);
-        case 16:  //oxygen
-            return Element(8);
-        case 14:  //nitrogen
-            return Element(7);
-        case 32:  //sulfur
-            return Element(16);
+    case 1: // hydrogen
+        return Element(1);
+    case 12: // carbon
+        return Element(6);
+    case 16: // oxygen
+        return Element(8);
+    case 14: // nitrogen
+        return Element(7);
+    case 32: // sulfur
+        return Element(16);
     }
 
-    //the quick test failed, so now we will do a long lookup
+    // the quick test failed, so now we will do a long lookup
     double diff = std::numeric_limits<double>::max();
     ElementData *bestmatch = 0;
 
-    //loop over all of the elements...
+    // loop over all of the elements...
     foreach (ElementData *element, ElementDB::db->protonindex.values())
     {
         double testdiff = std::abs(mass - element->mss);
@@ -534,14 +530,14 @@ Element Element::elementWithMass(const MolarMass &molar_mass)
         }
     }
 
-    //return the closest match
+    // return the closest match
     if (bestmatch)
         return Element(bestmatch->protnum);
     else
         return Element(0);
 }
 
-const char* Element::typeName()
+const char *Element::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Element>() );
+    return QMetaType::typeName(qMetaTypeId<Element>());
 }

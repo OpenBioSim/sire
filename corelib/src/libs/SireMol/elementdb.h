@@ -28,8 +28,8 @@
 #ifndef SIREMOL_ELEMENTDB_H
 #define SIREMOL_ELEMENTDB_H
 
-#include <QString>
 #include <QHash>
+#include <QString>
 
 #include "element.h"
 
@@ -38,52 +38,54 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-/**
-This singleton class holds a database of element properties and information indexed by atomic number or element symbol. You must initialise this database before you can create any Element objects.
+    /**
+    This singleton class holds a database of element properties and information indexed by atomic number or element symbol.
+    You must initialise this database before you can create any Element objects.
 
-@author Christopher Woods
-*/
-class ElementDB
-{
-friend class Element;
+    @author Christopher Woods
+    */
+    class ElementDB
+    {
+        friend class Element;
 
-public:
-    /** You must call this function before you can access the database */
-    static void initialise();
-protected:
-    ElementDB();
-    ~ElementDB();
+    public:
+        /** You must call this function before you can access the database */
+        static void initialise();
 
-    /** Populate this database with data. This function is defined
-        in element-data.h, which is automatically generated from the
-        openbabel data. */
-    void populate();
+    protected:
+        ElementDB();
+        ~ElementDB();
 
-    /** Import an individual element to the database */
-    void import(ElementData *element);
+        /** Populate this database with data. This function is defined
+            in element-data.h, which is automatically generated from the
+            openbabel data. */
+        void populate();
 
-    /** Return the ElementData for the string 'element'. See the QString
-        constructor for Element for a description of how 'element' is
-        interpreted. This will never return a null pointer. */
-    ElementData* element(const QString &element) const;
+        /** Import an individual element to the database */
+        void import(ElementData *element);
 
-    /** Return the element with proton number 'nprotons'. This will
-        never return a null pointer. */
-    ElementData* element(int nprotons) const;
+        /** Return the ElementData for the string 'element'. See the QString
+            constructor for Element for a description of how 'element' is
+            interpreted. This will never return a null pointer. */
+        ElementData *element(const QString &element) const;
 
-    /** Pointer to the single instance of this class */
-    static ElementDB *db;
+        /** Return the element with proton number 'nprotons'. This will
+            never return a null pointer. */
+        ElementData *element(int nprotons) const;
 
-    /** A hash indexing the elements by proton number */
-    QHash<int, ElementData*> protonindex;
+        /** Pointer to the single instance of this class */
+        static ElementDB *db;
 
-    /** A hash indexing the elements by symbol */
-    QHash<QString, ElementData*> symbolindex;
-    /** A hash indexing the elements by their name */
-    QHash<QString, ElementData*> nameindex;
-};
+        /** A hash indexing the elements by proton number */
+        QHash<int, ElementData *> protonindex;
 
-}
+        /** A hash indexing the elements by symbol */
+        QHash<QString, ElementData *> symbolindex;
+        /** A hash indexing the elements by their name */
+        QHash<QString, ElementData *> nameindex;
+    };
+
+} // namespace SireMol
 
 SIRE_END_HEADER
 

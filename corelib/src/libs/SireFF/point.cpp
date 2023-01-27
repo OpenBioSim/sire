@@ -30,10 +30,10 @@
 #include "forcetable.h"
 
 #include "SireMol/evaluator.h"
+#include "SireMol/mgidx.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleculegroup.h"
 #include "SireMol/moleculegroups.h"
-#include "SireMol/mgidx.h"
 
 #include "SireVol/aabox.h"
 
@@ -57,7 +57,7 @@ using boost::tuples::tuple;
 ////////////// Implementation of Point
 //////////////
 
-static const RegisterMetaType<Point> r_point( MAGIC_ONLY, Point::typeName() );
+static const RegisterMetaType<Point> r_point(MAGIC_ONLY, Point::typeName());
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Point &point)
@@ -66,8 +66,7 @@ QDataStream &operator<<(QDataStream &ds, const Point &point)
 
     SharedDataStream sds(ds);
 
-    sds << point.p << point.spce
-        << static_cast<const Property&>(point);
+    sds << point.p << point.spce << static_cast<const Property &>(point);
 
     return ds;
 }
@@ -81,8 +80,7 @@ QDataStream &operator>>(QDataStream &ds, Point &point)
     {
         SharedDataStream sds(ds);
 
-        sds >> point.p >> point.spce
-            >> static_cast<Property&>(point);
+        sds >> point.p >> point.spce >> static_cast<Property &>(point);
     }
     else
         throw version_error(v, "1", r_point, CODELOC);
@@ -92,23 +90,26 @@ QDataStream &operator>>(QDataStream &ds, Point &point)
 
 /** Constructor */
 Point::Point() : Property()
-{}
+{
+}
 
 /** Construct with the passed initial point */
 Point::Point(const Vector &point) : Property(), p(point)
-{}
+{
+}
 
 /** Copy constructor */
-Point::Point(const Point &other)
-      : Property(other), p(other.p), spce(other.spce)
-{}
+Point::Point(const Point &other) : Property(other), p(other.p), spce(other.spce)
+{
+}
 
 /** Destructor */
 Point::~Point()
-{}
+{
+}
 
 /** Copy assignment operator */
-Point& Point::operator=(const Point &other)
+Point &Point::operator=(const Point &other)
 {
     p = other.p;
     spce = other.spce;
@@ -120,8 +121,7 @@ Point& Point::operator=(const Point &other)
 /** Comparison operator */
 bool Point::operator==(const Point &other) const
 {
-    return p == other.p and spce.read().equals(other.spce) and
-           Property::operator==(other);
+    return p == other.p and spce.read().equals(other.spce) and Property::operator==(other);
 }
 
 /** Comparison operator */
@@ -131,7 +131,7 @@ bool Point::operator!=(const Point &other) const
 }
 
 /** Return the point in 3D space */
-const Vector& Point::operator()() const
+const Vector &Point::operator()() const
 {
     return p;
 }
@@ -150,7 +150,7 @@ bool Point::updatePoint(const Vector &point)
 }
 
 /** Return the point in 3D space */
-const Vector& Point::point() const
+const Vector &Point::point() const
 {
     return Point::operator()();
 }
@@ -158,7 +158,7 @@ const Vector& Point::point() const
 /** Return the 3D space in which this point is calculated
     (although note that this 3D point, like the molecules,
     exists in the infinite cartesian space) */
-const Space& Point::space() const
+const Space &Point::space() const
 {
     return spce.read();
 }
@@ -177,8 +177,7 @@ bool Point::areIntraMoleculePoints(const Point &point0, const Point &point1)
 {
     if (point0.isIntraMoleculePoint() and point1.isIntraMoleculePoint())
     {
-        return point0.molecules().constBegin()->number() ==
-               point1.molecules().constBegin()->number();
+        return point0.molecules().constBegin()->number() == point1.molecules().constBegin()->number();
     }
     else
         return false;
@@ -186,16 +185,13 @@ bool Point::areIntraMoleculePoints(const Point &point0, const Point &point1)
 
 /** Return whether or not the points 'point0', 'point1' and 'point2' are
     within the same molecule (so together are intra-molecule points) */
-bool Point::areIntraMoleculePoints(const Point &point0, const Point &point1,
-                                   const Point &point2)
+bool Point::areIntraMoleculePoints(const Point &point0, const Point &point1, const Point &point2)
 {
-    if (point0.isIntraMoleculePoint() and point1.isIntraMoleculePoint() and
-        point2.isIntraMoleculePoint())
+    if (point0.isIntraMoleculePoint() and point1.isIntraMoleculePoint() and point2.isIntraMoleculePoint())
     {
         MolNum mol0 = point0.molecules().constBegin()->number();
 
-        return point1.molecules().constBegin()->number() == mol0 and
-               point2.molecules().constBegin()->number() == mol0;
+        return point1.molecules().constBegin()->number() == mol0 and point2.molecules().constBegin()->number() == mol0;
     }
     else
         return false;
@@ -203,17 +199,15 @@ bool Point::areIntraMoleculePoints(const Point &point0, const Point &point1,
 
 /** Return whether or not the points 'point0', 'point1', 'point2' and 'point3' are
     within the same molecule (so together are intra-molecule points) */
-bool Point::areIntraMoleculePoints(const Point &point0, const Point &point1,
-                                   const Point &point2, const Point &point3)
+bool Point::areIntraMoleculePoints(const Point &point0, const Point &point1, const Point &point2, const Point &point3)
 {
-    if (point0.isIntraMoleculePoint() and point1.isIntraMoleculePoint() and
-        point2.isIntraMoleculePoint() and point3.isIntraMoleculePoint())
+    if (point0.isIntraMoleculePoint() and point1.isIntraMoleculePoint() and point2.isIntraMoleculePoint() and
+        point3.isIntraMoleculePoint())
     {
         MolNum mol0 = point0.molecules().constBegin()->number();
 
         return point1.molecules().constBegin()->number() == mol0 and
-               point2.molecules().constBegin()->number() == mol0 and
-               point3.molecules().constBegin()->number() == mol0;
+               point2.molecules().constBegin()->number() == mol0 and point3.molecules().constBegin()->number() == mol0;
     }
     else
         return false;
@@ -230,7 +224,7 @@ bool Point::areIntraMoleculePoints(const QVector<PointPtr> &points)
 
     MolNum mol0;
 
-    for ( ; it != points.constEnd(); ++it )
+    for (; it != points.constEnd(); ++it)
     {
         if (not it->isNull())
         {
@@ -243,7 +237,7 @@ bool Point::areIntraMoleculePoints(const QVector<PointPtr> &points)
         }
     }
 
-    for ( ; it != points.constEnd(); ++it )
+    for (; it != points.constEnd(); ++it)
     {
         if (not it->isNull())
         {
@@ -260,9 +254,9 @@ bool Point::areIntraMoleculePoints(const QVector<PointPtr> &points)
     return true;
 }
 
-Q_GLOBAL_STATIC( VectorPoint, vectorPoint )
+Q_GLOBAL_STATIC(VectorPoint, vectorPoint)
 
-const VectorPoint& Point::null()
+const VectorPoint &Point::null()
 {
     return *(vectorPoint());
 }
@@ -280,8 +274,7 @@ QDataStream &operator<<(QDataStream &ds, const AtomPoint &atompoint)
 
     SharedDataStream sds(ds);
 
-    sds << atompoint.atm << atompoint.coords_property
-        << static_cast<const Point&>(atompoint);
+    sds << atompoint.atm << atompoint.coords_property << static_cast<const Point &>(atompoint);
 
     return ds;
 }
@@ -295,8 +288,7 @@ QDataStream &operator>>(QDataStream &ds, AtomPoint &atompoint)
     {
         SharedDataStream sds(ds);
 
-        sds >> atompoint.atm >> atompoint.coords_property
-            >> static_cast<Point&>(atompoint);
+        sds >> atompoint.atm >> atompoint.coords_property >> static_cast<Point &>(atompoint);
     }
     else
         throw version_error(v, "1", r_atompoint, CODELOC);
@@ -305,12 +297,12 @@ QDataStream &operator>>(QDataStream &ds, AtomPoint &atompoint)
 }
 
 /** Constructor */
-AtomPoint::AtomPoint() : ConcreteProperty<AtomPoint,Point>()
-{}
+AtomPoint::AtomPoint() : ConcreteProperty<AtomPoint, Point>()
+{
+}
 
 /** Construct for the passed atom */
-AtomPoint::AtomPoint(const Atom &atom, const PropertyMap &map)
-          : ConcreteProperty<AtomPoint,Point>(), atm(atom)
+AtomPoint::AtomPoint(const Atom &atom, const PropertyMap &map) : ConcreteProperty<AtomPoint, Point>(), atm(atom)
 {
     coords_property = map["coordinates"];
     AtomPoint::update(atom.data());
@@ -318,16 +310,17 @@ AtomPoint::AtomPoint(const Atom &atom, const PropertyMap &map)
 
 /** Copy constructor */
 AtomPoint::AtomPoint(const AtomPoint &other)
-          : ConcreteProperty<AtomPoint,Point>(other),
-            atm(other.atm), coords_property(other.coords_property)
-{}
+    : ConcreteProperty<AtomPoint, Point>(other), atm(other.atm), coords_property(other.coords_property)
+{
+}
 
 /** Destructor */
 AtomPoint::~AtomPoint()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomPoint& AtomPoint::operator=(const AtomPoint &other)
+AtomPoint &AtomPoint::operator=(const AtomPoint &other)
 {
     Point::operator=(other);
     atm = other.atm;
@@ -339,27 +332,24 @@ AtomPoint& AtomPoint::operator=(const AtomPoint &other)
 /** Comparison operator */
 bool AtomPoint::operator==(const AtomPoint &other) const
 {
-    return atm == other.atm and coords_property == other.coords_property and
-           Point::operator==(other);
+    return atm == other.atm and coords_property == other.coords_property and Point::operator==(other);
 }
 
 /** Comparison operator */
 bool AtomPoint::operator!=(const AtomPoint &other) const
 {
-    return atm != other.atm or coords_property != other.coords_property or
-           Point::operator!=(other);
+    return atm != other.atm or coords_property != other.coords_property or Point::operator!=(other);
 }
 
-const char* AtomPoint::typeName()
+const char *AtomPoint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomPoint>() );
+    return QMetaType::typeName(qMetaTypeId<AtomPoint>());
 }
 
 /** Return a string representation */
 QString AtomPoint::toString() const
 {
-    return QString("AtomPoint{ %1 : %2 }").arg(atm.toString(),
-                                               this->point().toString());
+    return QString("AtomPoint{ %1 : %2 }").arg(atm.toString(), this->point().toString());
 }
 
 /** Update this point, returning whether or not this changes
@@ -391,7 +381,7 @@ bool AtomPoint::update(const Molecules &molecules)
 {
     if (molecules.contains(atm.data().number()))
     {
-        return this->update( molecules[atm.data().number()].data() );
+        return this->update(molecules[atm.data().number()].data());
     }
     else
         return false;
@@ -408,7 +398,7 @@ bool AtomPoint::update(const MoleculeGroup &molgroup)
 {
     if (molgroup.contains(atm.data().number()))
     {
-        return this->update( molgroup[atm.data().number()].data() );
+        return this->update(molgroup[atm.data().number()].data());
     }
     else
         return false;
@@ -430,7 +420,7 @@ bool AtomPoint::update(const MolGroupsBase &molgroups)
         if (mgnums.isEmpty())
             return false;
 
-        return this->update( molgroups[mgnums.first()][atm.data().number()].data() );
+        return this->update(molgroups[mgnums.first()][atm.data().number()].data());
     }
     else
         return false;
@@ -447,8 +437,7 @@ bool AtomPoint::wouldUpdate(const MoleculeData &moldata) const
 {
     if (atm.data().number() == moldata.number())
     {
-        return moldata.property(coords_property)
-                      .asA<AtomCoords>()[atm.cgAtomIdx()] != this->point();
+        return moldata.property(coords_property).asA<AtomCoords>()[atm.cgAtomIdx()] != this->point();
     }
     else
         return false;
@@ -465,7 +454,7 @@ bool AtomPoint::wouldUpdate(const Molecules &molecules) const
 {
     if (molecules.contains(atm.data().number()))
     {
-        return this->wouldUpdate( molecules[atm.data().number()].data() );
+        return this->wouldUpdate(molecules[atm.data().number()].data());
     }
     else
         return false;
@@ -482,7 +471,7 @@ bool AtomPoint::wouldUpdate(const MoleculeGroup &molgroup) const
 {
     if (molgroup.contains(atm.data().number()))
     {
-        return this->wouldUpdate( molgroup[atm.data().number()].data() );
+        return this->wouldUpdate(molgroup[atm.data().number()].data());
     }
     else
         return false;
@@ -504,7 +493,7 @@ bool AtomPoint::wouldUpdate(const MolGroupsBase &molgroups) const
         if (mgnums.isEmpty())
             return false;
 
-        return this->wouldUpdate( molgroups[mgnums.first()][atm.data().number()].data() );
+        return this->wouldUpdate(molgroups[mgnums.first()][atm.data().number()].data());
     }
     else
         return false;
@@ -541,9 +530,9 @@ bool AtomPoint::contains(const MolID &molid) const
 {
     try
     {
-        return not molid.map( this->molecules() ).isEmpty();
+        return not molid.map(this->molecules()).isEmpty();
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -590,7 +579,7 @@ bool AtomPoint::usesMoleculesIn(const MolGroupsBase &molgroups) const
 }
 
 /** Return the actual atom */
-const Atom& AtomPoint::atom() const
+const Atom &AtomPoint::atom() const
 {
     return atm;
 }
@@ -601,7 +590,7 @@ bool AtomPoint::addForce(MolForceTable &molforces, const Vector &force) const
 {
     if (molforces.molNum() == atm.data().number())
     {
-        return molforces.add( atm.cgAtomIdx(), force );
+        return molforces.add(atm.cgAtomIdx(), force);
     }
     else
         return false;
@@ -613,7 +602,7 @@ bool AtomPoint::addForce(ForceTable &forces, const Vector &force) const
 {
     if (forces.containsTable(atm.data().number()))
     {
-        return forces.getTable(atm.data().number()).add( atm.cgAtomIdx(), force );
+        return forces.getTable(atm.data().number()).add(atm.cgAtomIdx(), force);
     }
     else
         return false;
@@ -651,7 +640,7 @@ QDataStream &operator<<(QDataStream &ds, const VectorPoint &vectorpoint)
 {
     writeHeader(ds, r_vectorpoint, 1);
 
-    ds << static_cast<const Point&>(vectorpoint);
+    ds << static_cast<const Point &>(vectorpoint);
 
     return ds;
 }
@@ -663,34 +652,36 @@ QDataStream &operator>>(QDataStream &ds, VectorPoint &vectorpoint)
 
     if (v == 1)
     {
-        ds >> static_cast<Point&>(vectorpoint);
+        ds >> static_cast<Point &>(vectorpoint);
     }
     else
-        throw version_error( v, "1", r_vectorpoint, CODELOC );
+        throw version_error(v, "1", r_vectorpoint, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
-VectorPoint::VectorPoint() : ConcreteProperty<VectorPoint,Point>()
-{}
+VectorPoint::VectorPoint() : ConcreteProperty<VectorPoint, Point>()
+{
+}
 
 /** Constructor for the specified point */
-VectorPoint::VectorPoint(const Vector &point)
-            : ConcreteProperty<VectorPoint,Point>(point)
-{}
+VectorPoint::VectorPoint(const Vector &point) : ConcreteProperty<VectorPoint, Point>(point)
+{
+}
 
 /** Copy constructor */
-VectorPoint::VectorPoint(const VectorPoint &other)
-            : ConcreteProperty<VectorPoint,Point>(other)
-{}
+VectorPoint::VectorPoint(const VectorPoint &other) : ConcreteProperty<VectorPoint, Point>(other)
+{
+}
 
 /** Destructor */
 VectorPoint::~VectorPoint()
-{}
+{
+}
 
 /** Copy assignment operator */
-VectorPoint& VectorPoint::operator=(const VectorPoint &other)
+VectorPoint &VectorPoint::operator=(const VectorPoint &other)
 {
     Point::operator=(other);
     return *this;
@@ -708,9 +699,9 @@ bool VectorPoint::operator!=(const VectorPoint &other) const
     return Point::operator!=(other);
 }
 
-const char* VectorPoint::typeName()
+const char *VectorPoint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<VectorPoint>() );
+    return QMetaType::typeName(qMetaTypeId<VectorPoint>());
 }
 
 /** Return a string representation */
@@ -720,49 +711,49 @@ QString VectorPoint::toString() const
 }
 
 /** A VectorPoint is not updatable */
-bool VectorPoint::update(const MoleculeData&)
+bool VectorPoint::update(const MoleculeData &)
 {
     return false;
 }
 
 /** A VectorPoint is not updatable */
-bool VectorPoint::update(const Molecules&)
+bool VectorPoint::update(const Molecules &)
 {
     return false;
 }
 
 /** A VectorPoint is not updatable */
-bool VectorPoint::update(const MoleculeGroup&)
+bool VectorPoint::update(const MoleculeGroup &)
 {
     return false;
 }
 
 /** A VectorPoint is not updatable */
-bool VectorPoint::update(const MolGroupsBase&)
+bool VectorPoint::update(const MolGroupsBase &)
 {
     return false;
 }
 
 /** A VectorPoint is not updatable */
-bool VectorPoint::wouldUpdate(const MoleculeData&) const
+bool VectorPoint::wouldUpdate(const MoleculeData &) const
 {
     return false;
 }
 
 /** A VectorPoint is not updatable */
-bool VectorPoint::wouldUpdate(const Molecules&) const
+bool VectorPoint::wouldUpdate(const Molecules &) const
 {
     return false;
 }
 
 /** A VectorPoint is not updatable */
-bool VectorPoint::wouldUpdate(const MoleculeGroup&) const
+bool VectorPoint::wouldUpdate(const MoleculeGroup &) const
 {
     return false;
 }
 
 /** A VectorPoint is not updatable */
-bool VectorPoint::wouldUpdate(const MolGroupsBase&) const
+bool VectorPoint::wouldUpdate(const MolGroupsBase &) const
 {
     return false;
 }
@@ -786,43 +777,43 @@ bool VectorPoint::contains(MolNum) const
 }
 
 /** No molecules are needed to create this point */
-bool VectorPoint::contains(const MolID&) const
+bool VectorPoint::contains(const MolID &) const
 {
     return false;
 }
 
 /** No molecules are needed to create this point */
-bool VectorPoint::usesMoleculesIn(const ForceTable&) const
+bool VectorPoint::usesMoleculesIn(const ForceTable &) const
 {
     return false;
 }
 
 /** No molecules are needed to create this point */
-bool VectorPoint::usesMoleculesIn(const Molecules&) const
+bool VectorPoint::usesMoleculesIn(const Molecules &) const
 {
     return false;
 }
 
 /** No molecules are needed to create this point */
-bool VectorPoint::usesMoleculesIn(const MoleculeGroup&) const
+bool VectorPoint::usesMoleculesIn(const MoleculeGroup &) const
 {
     return false;
 }
 
 /** No molecules are needed to create this point */
-bool VectorPoint::usesMoleculesIn(const MolGroupsBase&) const
+bool VectorPoint::usesMoleculesIn(const MolGroupsBase &) const
 {
     return false;
 }
 
 /** No forces on a point */
-bool VectorPoint::addForce(MolForceTable&, const Vector&) const
+bool VectorPoint::addForce(MolForceTable &, const Vector &) const
 {
     return false;
 }
 
 /** No forces on a point */
-bool VectorPoint::addForce(ForceTable&, const Vector&) const
+bool VectorPoint::addForce(ForceTable &, const Vector &) const
 {
     return false;
 }
@@ -861,8 +852,7 @@ QDataStream &operator<<(QDataStream &ds, const Center &center)
 
     SharedDataStream sds(ds);
 
-    sds << center.mols << center.property_map
-        << static_cast<const Point&>(center);
+    sds << center.mols << center.property_map << static_cast<const Point &>(center);
 
     return ds;
 }
@@ -876,18 +866,18 @@ QDataStream &operator>>(QDataStream &ds, Center &center)
     {
         SharedDataStream sds(ds);
 
-        sds >> center.mols >> center.property_map
-            >> static_cast<Point&>(center);
+        sds >> center.mols >> center.property_map >> static_cast<Point &>(center);
     }
     else
-        throw version_error( v, "1", r_center, CODELOC );
+        throw version_error(v, "1", r_center, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
-Center::Center() : ConcreteProperty<Center,Point>()
-{}
+Center::Center() : ConcreteProperty<Center, Point>()
+{
+}
 
 /** Construct to get the center of the molecule view 'molview' using the
     passed property map to find the required properties
@@ -896,7 +886,7 @@ Center::Center() : ConcreteProperty<Center,Point>()
     \throw SireError::invalid_cast
 */
 Center::Center(const MoleculeView &molview, const PropertyMap &map)
-       : ConcreteProperty<Center,Point>(), mols(molview), property_map(map)
+    : ConcreteProperty<Center, Point>(), mols(molview), property_map(map)
 {
     this->recalculatePoint();
 }
@@ -908,23 +898,24 @@ Center::Center(const MoleculeView &molview, const PropertyMap &map)
     \throw SireError::invalid_cast
 */
 Center::Center(const Molecules &molecules, const PropertyMap &map)
-       : ConcreteProperty<Center,Point>(), mols(molecules), property_map(map)
+    : ConcreteProperty<Center, Point>(), mols(molecules), property_map(map)
 {
     this->recalculatePoint();
 }
 
 /** Copy constructor */
 Center::Center(const Center &other)
-       : ConcreteProperty<Center,Point>(other), mols(other.mols),
-         property_map(other.property_map)
-{}
+    : ConcreteProperty<Center, Point>(other), mols(other.mols), property_map(other.property_map)
+{
+}
 
 /** Destructor */
 Center::~Center()
-{}
+{
+}
 
 /** Copy assignment operator */
-Center& Center::operator=(const Center &other)
+Center &Center::operator=(const Center &other)
 {
     mols = other.mols;
     property_map = other.property_map;
@@ -936,27 +927,24 @@ Center& Center::operator=(const Center &other)
 /** Comparison operator */
 bool Center::operator==(const Center &other) const
 {
-    return mols == other.mols and property_map == other.property_map and
-           Point::operator==(other);
+    return mols == other.mols and property_map == other.property_map and Point::operator==(other);
 }
 
 /** Comparison operator */
 bool Center::operator!=(const Center &other) const
 {
-    return mols != other.mols or property_map != other.property_map or
-           Point::operator!=(other);
+    return mols != other.mols or property_map != other.property_map or Point::operator!=(other);
 }
 
-const char* Center::typeName()
+const char *Center::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Center>() );
+    return QMetaType::typeName(qMetaTypeId<Center>());
 }
 
 /** Return a string representation */
 QString Center::toString() const
 {
-    return QString("Center{ %1 : %2 }").arg(mols.toString())
-                                       .arg(this->point().toString());
+    return QString("Center{ %1 : %2 }").arg(mols.toString()).arg(this->point().toString());
 }
 
 /** Set the space - if there is more than one molecule, then this
@@ -966,18 +954,20 @@ void Center::setSpace(const Space &space)
     if (mols.nMolecules() > 1)
     {
         if (space.isPeriodic())
-            throw SireVol::incompatible_space( QObject::tr(
-                "A Center point with more than one molecule cannot be used "
-                "with the periodic space \"%1\". Either use a Center point "
-                "built from a single molecule, or switch to a Cartesian space.")
-                    .arg(space.what()), CODELOC );
+            throw SireVol::incompatible_space(
+                QObject::tr("A Center point with more than one molecule cannot be used "
+                            "with the periodic space \"%1\". Either use a Center point "
+                            "built from a single molecule, or switch to a Cartesian space.")
+                    .arg(space.what()),
+                CODELOC);
 
         if (not space.isCartesian())
-            throw SireVol::incompatible_space( QObject::tr(
-                "A Center point with more than one molecule cannot be used "
-                "with the non-cartesian space \"%1\". Either use a Center point "
-                "built from a single molecule, or switch to a Cartesian space.")
-                    .arg(space.what()), CODELOC );
+            throw SireVol::incompatible_space(
+                QObject::tr("A Center point with more than one molecule cannot be used "
+                            "with the non-cartesian space \"%1\". Either use a Center point "
+                            "built from a single molecule, or switch to a Cartesian space.")
+                    .arg(space.what()),
+                CODELOC);
     }
 
     Point::setSpace(space);
@@ -998,7 +988,7 @@ bool Center::recalculatePoint()
         aabox += it->evaluate().center(property_map);
     }
 
-    return this->updatePoint( aabox.center() );
+    return this->updatePoint(aabox.center());
 }
 
 /** Update the molecules used to create this point */
@@ -1101,7 +1091,7 @@ bool Center::contains(const MolID &molid) const
     {
         return not molid.map(mols).isEmpty();
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -1111,9 +1101,7 @@ bool Center::contains(const MolID &molid) const
     molecules in the passed forcetable */
 bool Center::usesMoleculesIn(const ForceTable &forcetable) const
 {
-    for (Molecules::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
         if (forcetable.containsTable(it->number()))
             return true;
@@ -1126,9 +1114,7 @@ bool Center::usesMoleculesIn(const ForceTable &forcetable) const
     molecules in 'molecules' */
 bool Center::usesMoleculesIn(const Molecules &molecules) const
 {
-    for (Molecules::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
         if (molecules.contains(it->number()))
             return true;
@@ -1148,7 +1134,7 @@ bool Center::usesMoleculesIn(const MoleculeGroup &molgroup) const
     molecules in the groups in 'molgroups' */
 bool Center::usesMoleculesIn(const MolGroupsBase &molgroups) const
 {
-    for (MGIdx i(0); i<molgroups.nGroups(); ++i)
+    for (MGIdx i(0); i < molgroups.nGroups(); ++i)
     {
         if (this->usesMoleculesIn(molgroups[i]))
             return true;
@@ -1162,8 +1148,7 @@ bool Center::usesMoleculesIn(const MolGroupsBase &molgroups) const
     force onto the table */
 bool Center::addForce(MolForceTable &molforces, const Vector &force) const
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "Need to work out how to decompose forces..."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Need to work out how to decompose forces..."), CODELOC);
 
     return false;
 }
@@ -1173,8 +1158,7 @@ bool Center::addForce(MolForceTable &molforces, const Vector &force) const
     forces onto the table 'forces' */
 bool Center::addForce(ForceTable &forces, const Vector &force) const
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "Need to work out how to decompose forces..."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Need to work out how to decompose forces..."), CODELOC);
 
     return false;
 }
@@ -1213,8 +1197,7 @@ QDataStream &operator<<(QDataStream &ds, const CenterOfGeometry &cog)
 
     SharedDataStream sds(ds);
 
-    sds << cog.mols << cog.property_map
-        << static_cast<const Point&>(cog);
+    sds << cog.mols << cog.property_map << static_cast<const Point &>(cog);
 
     return ds;
 }
@@ -1228,18 +1211,18 @@ QDataStream &operator>>(QDataStream &ds, CenterOfGeometry &cog)
     {
         SharedDataStream sds(ds);
 
-        sds >> cog.mols >> cog.property_map
-            >> static_cast<Point&>(cog);
+        sds >> cog.mols >> cog.property_map >> static_cast<Point &>(cog);
     }
     else
-        throw version_error( v, "1", r_cog, CODELOC );
+        throw version_error(v, "1", r_cog, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
-CenterOfGeometry::CenterOfGeometry() : ConcreteProperty<CenterOfGeometry,Point>()
-{}
+CenterOfGeometry::CenterOfGeometry() : ConcreteProperty<CenterOfGeometry, Point>()
+{
+}
 
 /** Construct to get the center of the molecule view 'molview' using the
     passed property map to find the required properties
@@ -1248,8 +1231,7 @@ CenterOfGeometry::CenterOfGeometry() : ConcreteProperty<CenterOfGeometry,Point>(
     \throw SireError::invalid_cast
 */
 CenterOfGeometry::CenterOfGeometry(const MoleculeView &molview, const PropertyMap &map)
-                 : ConcreteProperty<CenterOfGeometry,Point>(),
-                   mols(molview), property_map(map)
+    : ConcreteProperty<CenterOfGeometry, Point>(), mols(molview), property_map(map)
 {
     this->recalculatePoint();
 }
@@ -1261,24 +1243,24 @@ CenterOfGeometry::CenterOfGeometry(const MoleculeView &molview, const PropertyMa
     \throw SireError::invalid_cast
 */
 CenterOfGeometry::CenterOfGeometry(const Molecules &molecules, const PropertyMap &map)
-                 : ConcreteProperty<CenterOfGeometry,Point>(),
-                   mols(molecules), property_map(map)
+    : ConcreteProperty<CenterOfGeometry, Point>(), mols(molecules), property_map(map)
 {
     this->recalculatePoint();
 }
 
 /** Copy constructor */
 CenterOfGeometry::CenterOfGeometry(const CenterOfGeometry &other)
-                 : ConcreteProperty<CenterOfGeometry,Point>(other),
-                   mols(other.mols), property_map(other.property_map)
-{}
+    : ConcreteProperty<CenterOfGeometry, Point>(other), mols(other.mols), property_map(other.property_map)
+{
+}
 
 /** Destructor */
 CenterOfGeometry::~CenterOfGeometry()
-{}
+{
+}
 
 /** Copy assignment operator */
-CenterOfGeometry& CenterOfGeometry::operator=(const CenterOfGeometry &other)
+CenterOfGeometry &CenterOfGeometry::operator=(const CenterOfGeometry &other)
 {
     mols = other.mols;
     property_map = other.property_map;
@@ -1290,36 +1272,31 @@ CenterOfGeometry& CenterOfGeometry::operator=(const CenterOfGeometry &other)
 /** Comparison operator */
 bool CenterOfGeometry::operator==(const CenterOfGeometry &other) const
 {
-    return mols == other.mols and property_map == other.property_map and
-           Point::operator==(other);
+    return mols == other.mols and property_map == other.property_map and Point::operator==(other);
 }
 
 /** Comparison operator */
 bool CenterOfGeometry::operator!=(const CenterOfGeometry &other) const
 {
-    return mols != other.mols or property_map != other.property_map or
-           Point::operator!=(other);
+    return mols != other.mols or property_map != other.property_map or Point::operator!=(other);
 }
 
-const char* CenterOfGeometry::typeName()
+const char *CenterOfGeometry::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CenterOfGeometry>() );
+    return QMetaType::typeName(qMetaTypeId<CenterOfGeometry>());
 }
 
 /** Return a string representation */
 QString CenterOfGeometry::toString() const
 {
-    return QString("CenterOfGeometry{ %1 : %2 }").arg(mols.toString())
-                                                 .arg(this->point().toString());
+    return QString("CenterOfGeometry{ %1 : %2 }").arg(mols.toString()).arg(this->point().toString());
 }
 
-static Vector averagePoints(const QList< tuple<Vector,double> > &points)
+static Vector averagePoints(const QList<tuple<Vector, double>> &points)
 {
     double sum_of_weights = 0;
 
-    for (QList< tuple<Vector,double> >::const_iterator it = points.constBegin();
-         it != points.constEnd();
-         ++it)
+    for (QList<tuple<Vector, double>>::const_iterator it = points.constBegin(); it != points.constEnd(); ++it)
     {
         sum_of_weights += it->get<1>();
     }
@@ -1328,9 +1305,7 @@ static Vector averagePoints(const QList< tuple<Vector,double> > &points)
 
     Vector point;
 
-    for (QList< tuple<Vector,double> >::const_iterator it = points.constBegin();
-         it != points.constEnd();
-         ++it)
+    for (QList<tuple<Vector, double>>::const_iterator it = points.constBegin(); it != points.constEnd(); ++it)
     {
         point += (sum_of_weights * it->get<1>()) * it->get<0>();
     }
@@ -1346,18 +1321,20 @@ void CenterOfGeometry::setSpace(const Space &space)
     if (mols.nMolecules() > 1)
     {
         if (space.isPeriodic())
-            throw SireVol::incompatible_space( QObject::tr(
-                "A CenterOfGeometry point with more than one molecule cannot be used "
-                "with the periodic space \"%1\". Either use a CenterOfGeometry point "
-                "built from a single molecule, or switch to a Cartesian space.")
-                    .arg(space.what()), CODELOC );
+            throw SireVol::incompatible_space(
+                QObject::tr("A CenterOfGeometry point with more than one molecule cannot be used "
+                            "with the periodic space \"%1\". Either use a CenterOfGeometry point "
+                            "built from a single molecule, or switch to a Cartesian space.")
+                    .arg(space.what()),
+                CODELOC);
 
         if (not space.isCartesian())
-            throw SireVol::incompatible_space( QObject::tr(
-               "A CenterOfGeometry point with more than one molecule cannot be used "
-               "with the non-cartesian space \"%1\". Either use a CenterOfGeometry point "
-               "built from a single molecule, or switch to a Cartesian space.")
-                   .arg(space.what()), CODELOC );
+            throw SireVol::incompatible_space(
+                QObject::tr("A CenterOfGeometry point with more than one molecule cannot be used "
+                            "with the non-cartesian space \"%1\". Either use a CenterOfGeometry point "
+                            "built from a single molecule, or switch to a Cartesian space.")
+                    .arg(space.what()),
+                CODELOC);
     }
 
     Point::setSpace(space);
@@ -1371,21 +1348,17 @@ bool CenterOfGeometry::recalculatePoint()
 
     else if (mols.count() == 1)
     {
-        return Point::updatePoint( mols.constBegin()->evaluate()
-                                       .centerOfGeometry(property_map) );
+        return Point::updatePoint(mols.constBegin()->evaluate().centerOfGeometry(property_map));
     }
 
-    QList< tuple<Vector,double> > points;
+    QList<tuple<Vector, double>> points;
 
-    for (Molecules::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
-        points.append( tuple<Vector,double>(it->evaluate().centerOfGeometry(property_map),
-                                            it->selection().nAtoms()) );
+        points.append(tuple<Vector, double>(it->evaluate().centerOfGeometry(property_map), it->selection().nAtoms()));
     }
 
-    return Point::updatePoint( ::averagePoints(points) );
+    return Point::updatePoint(::averagePoints(points));
 }
 
 /** Update the molecules used to create this point */
@@ -1486,7 +1459,7 @@ bool CenterOfGeometry::contains(const MolID &molid) const
     {
         return not molid.map(mols).isEmpty();
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -1496,9 +1469,7 @@ bool CenterOfGeometry::contains(const MolID &molid) const
     molecules in the passed forcetable */
 bool CenterOfGeometry::usesMoleculesIn(const ForceTable &forcetable) const
 {
-    for (Molecules::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
         if (forcetable.containsTable(it->number()))
             return true;
@@ -1511,9 +1482,7 @@ bool CenterOfGeometry::usesMoleculesIn(const ForceTable &forcetable) const
     molecules in 'molecules' */
 bool CenterOfGeometry::usesMoleculesIn(const Molecules &molecules) const
 {
-    for (Molecules::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
         if (molecules.contains(it->number()))
             return true;
@@ -1533,7 +1502,7 @@ bool CenterOfGeometry::usesMoleculesIn(const MoleculeGroup &molgroup) const
     molecules in the groups in 'molgroups' */
 bool CenterOfGeometry::usesMoleculesIn(const MolGroupsBase &molgroups) const
 {
-    for (MGIdx i(0); i<molgroups.nGroups(); ++i)
+    for (MGIdx i(0); i < molgroups.nGroups(); ++i)
     {
         if (this->usesMoleculesIn(molgroups[i]))
             return true;
@@ -1547,8 +1516,7 @@ bool CenterOfGeometry::usesMoleculesIn(const MolGroupsBase &molgroups) const
     force onto the table */
 bool CenterOfGeometry::addForce(MolForceTable &molforces, const Vector &force) const
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "Need to work out how to decompose forces..."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Need to work out how to decompose forces..."), CODELOC);
 
     return false;
 }
@@ -1558,8 +1526,7 @@ bool CenterOfGeometry::addForce(MolForceTable &molforces, const Vector &force) c
     forces onto the table 'forces' */
 bool CenterOfGeometry::addForce(ForceTable &forces, const Vector &force) const
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "Need to work out how to decompose forces..."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Need to work out how to decompose forces..."), CODELOC);
 
     return false;
 }
@@ -1598,8 +1565,7 @@ QDataStream &operator<<(QDataStream &ds, const CenterOfMass &com)
 
     SharedDataStream sds(ds);
 
-    sds << com.mols << com.property_map
-        << static_cast<const Point&>(com);
+    sds << com.mols << com.property_map << static_cast<const Point &>(com);
 
     return ds;
 }
@@ -1613,18 +1579,18 @@ QDataStream &operator>>(QDataStream &ds, CenterOfMass &com)
     {
         SharedDataStream sds(ds);
 
-        sds >> com.mols >> com.property_map
-            >> static_cast<Point&>(com);
+        sds >> com.mols >> com.property_map >> static_cast<Point &>(com);
     }
     else
-        throw version_error( v, "1", r_com, CODELOC );
+        throw version_error(v, "1", r_com, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
-CenterOfMass::CenterOfMass() : ConcreteProperty<CenterOfMass,Point>()
-{}
+CenterOfMass::CenterOfMass() : ConcreteProperty<CenterOfMass, Point>()
+{
+}
 
 /** Construct to get the center of the molecule view 'molview' using the
     passed property map to find the required properties
@@ -1633,8 +1599,7 @@ CenterOfMass::CenterOfMass() : ConcreteProperty<CenterOfMass,Point>()
     \throw SireError::invalid_cast
 */
 CenterOfMass::CenterOfMass(const MoleculeView &molview, const PropertyMap &map)
-                 : ConcreteProperty<CenterOfMass,Point>(),
-                   mols(molview), property_map(map)
+    : ConcreteProperty<CenterOfMass, Point>(), mols(molview), property_map(map)
 {
     this->recalculatePoint();
 }
@@ -1646,24 +1611,24 @@ CenterOfMass::CenterOfMass(const MoleculeView &molview, const PropertyMap &map)
     \throw SireError::invalid_cast
 */
 CenterOfMass::CenterOfMass(const Molecules &molecules, const PropertyMap &map)
-                 : ConcreteProperty<CenterOfMass,Point>(),
-                   mols(molecules), property_map(map)
+    : ConcreteProperty<CenterOfMass, Point>(), mols(molecules), property_map(map)
 {
     this->recalculatePoint();
 }
 
 /** Copy constructor */
 CenterOfMass::CenterOfMass(const CenterOfMass &other)
-                 : ConcreteProperty<CenterOfMass,Point>(other),
-                   mols(other.mols), property_map(other.property_map)
-{}
+    : ConcreteProperty<CenterOfMass, Point>(other), mols(other.mols), property_map(other.property_map)
+{
+}
 
 /** Destructor */
 CenterOfMass::~CenterOfMass()
-{}
+{
+}
 
 /** Copy assignment operator */
-CenterOfMass& CenterOfMass::operator=(const CenterOfMass &other)
+CenterOfMass &CenterOfMass::operator=(const CenterOfMass &other)
 {
     mols = other.mols;
     property_map = other.property_map;
@@ -1675,27 +1640,24 @@ CenterOfMass& CenterOfMass::operator=(const CenterOfMass &other)
 /** Comparison operator */
 bool CenterOfMass::operator==(const CenterOfMass &other) const
 {
-    return mols == other.mols and property_map == other.property_map and
-           Point::operator==(other);
+    return mols == other.mols and property_map == other.property_map and Point::operator==(other);
 }
 
 /** Comparison operator */
 bool CenterOfMass::operator!=(const CenterOfMass &other) const
 {
-    return mols != other.mols or property_map != other.property_map or
-           Point::operator!=(other);
+    return mols != other.mols or property_map != other.property_map or Point::operator!=(other);
 }
 
-const char* CenterOfMass::typeName()
+const char *CenterOfMass::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CenterOfMass>() );
+    return QMetaType::typeName(qMetaTypeId<CenterOfMass>());
 }
 
 /** Return a string representation */
 QString CenterOfMass::toString() const
 {
-    return QString("CenterOfMass{ %1 : %2 }").arg(mols.toString())
-                                             .arg(this->point().toString());
+    return QString("CenterOfMass{ %1 : %2 }").arg(mols.toString()).arg(this->point().toString());
 }
 
 /** Set the space used by this point - a CenterOfGeometry cannot
@@ -1706,18 +1668,20 @@ void CenterOfMass::setSpace(const Space &space)
     if (mols.nMolecules() > 1)
     {
         if (space.isPeriodic())
-            throw SireVol::incompatible_space( QObject::tr(
-                "A CenterOfMass point with more than one molecule cannot be used "
-                "with the periodic space \"%1\". Either use a CenterOfMass point "
-                "built from a single molecule, or switch to a Cartesian space.")
-                    .arg(space.what()), CODELOC );
+            throw SireVol::incompatible_space(
+                QObject::tr("A CenterOfMass point with more than one molecule cannot be used "
+                            "with the periodic space \"%1\". Either use a CenterOfMass point "
+                            "built from a single molecule, or switch to a Cartesian space.")
+                    .arg(space.what()),
+                CODELOC);
 
         if (not space.isCartesian())
-            throw SireVol::incompatible_space( QObject::tr(
-                "A CenterOfMass point with more than one molecule cannot be used "
-                "with the non-cartesian space \"%1\". Either use a CenterOfMass point "
-                "built from a single molecule, or switch to a Cartesian space.")
-                    .arg(space.what()), CODELOC );
+            throw SireVol::incompatible_space(
+                QObject::tr("A CenterOfMass point with more than one molecule cannot be used "
+                            "with the non-cartesian space \"%1\". Either use a CenterOfMass point "
+                            "built from a single molecule, or switch to a Cartesian space.")
+                    .arg(space.what()),
+                CODELOC);
     }
 
     Point::setSpace(space);
@@ -1731,23 +1695,19 @@ bool CenterOfMass::recalculatePoint()
 
     else if (mols.count() == 1)
     {
-        return Point::updatePoint( mols.constBegin()->evaluate()
-                                       .centerOfMass(property_map) );
+        return Point::updatePoint(mols.constBegin()->evaluate().centerOfMass(property_map));
     }
 
-    QList< tuple<Vector,double> > points;
+    QList<tuple<Vector, double>> points;
 
-    for (Molecules::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
         Evaluator evaluator(*it);
 
-        points.append( tuple<Vector,double>( evaluator.centerOfMass(property_map),
-                                             evaluator.mass() ) );
+        points.append(tuple<Vector, double>(evaluator.centerOfMass(property_map), evaluator.mass()));
     }
 
-    return Point::updatePoint( ::averagePoints(points) );
+    return Point::updatePoint(::averagePoints(points));
 }
 
 /** Update the molecules used to create this point */
@@ -1848,7 +1808,7 @@ bool CenterOfMass::contains(const MolID &molid) const
     {
         return not molid.map(mols).isEmpty();
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -1858,9 +1818,7 @@ bool CenterOfMass::contains(const MolID &molid) const
     molecules in the passed forcetable */
 bool CenterOfMass::usesMoleculesIn(const ForceTable &forcetable) const
 {
-    for (Molecules::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
         if (forcetable.containsTable(it->number()))
             return true;
@@ -1873,9 +1831,7 @@ bool CenterOfMass::usesMoleculesIn(const ForceTable &forcetable) const
     molecules in 'molecules' */
 bool CenterOfMass::usesMoleculesIn(const Molecules &molecules) const
 {
-    for (Molecules::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
         if (molecules.contains(it->number()))
             return true;
@@ -1895,7 +1851,7 @@ bool CenterOfMass::usesMoleculesIn(const MoleculeGroup &molgroup) const
     molecules in the groups in 'molgroups' */
 bool CenterOfMass::usesMoleculesIn(const MolGroupsBase &molgroups) const
 {
-    for (MGIdx i(0); i<molgroups.nGroups(); ++i)
+    for (MGIdx i(0); i < molgroups.nGroups(); ++i)
     {
         if (this->usesMoleculesIn(molgroups[i]))
             return true;
@@ -1909,8 +1865,7 @@ bool CenterOfMass::usesMoleculesIn(const MolGroupsBase &molgroups) const
     force onto the table */
 bool CenterOfMass::addForce(MolForceTable &molforces, const Vector &force) const
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "Need to work out how to decompose forces..."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Need to work out how to decompose forces..."), CODELOC);
 
     return false;
 }
@@ -1920,8 +1875,7 @@ bool CenterOfMass::addForce(MolForceTable &molforces, const Vector &force) const
     forces onto the table 'forces' */
 bool CenterOfMass::addForce(ForceTable &forces, const Vector &force) const
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "Need to work out how to decompose forces..."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Need to work out how to decompose forces..."), CODELOC);
 
     return false;
 }
@@ -1952,39 +1906,44 @@ bool CenterOfMass::isExtraMoleculePoint() const
 //////////////
 
 /** Construct from the passed atom */
-PointRef::PointRef(const Atom &atom) : ptr( AtomPoint(atom) )
-{}
+PointRef::PointRef(const Atom &atom) : ptr(AtomPoint(atom))
+{
+}
 
 /** Construct from the passed point */
-PointRef::PointRef(const Vector &point) : ptr( VectorPoint(point) )
-{}
+PointRef::PointRef(const Vector &point) : ptr(VectorPoint(point))
+{
+}
 
 /** Construct from the passed point */
 PointRef::PointRef(const Point &point) : ptr(point)
-{}
+{
+}
 
 /** Construct from the passed point */
 PointRef::PointRef(const PointPtr &point) : ptr(point)
-{}
+{
+}
 
 /** Destructor */
 PointRef::~PointRef()
-{}
+{
+}
 
 /** Return the point in 3D space */
-const Vector& PointRef::operator()() const
+const Vector &PointRef::operator()() const
 {
     return ptr.read().operator()();
 }
 
 /** Return the point in 3D space */
-const Vector& PointRef::point() const
+const Vector &PointRef::point() const
 {
     return ptr.read().point();
 }
 
 /** Allow automatic casting to a Point */
-PointRef::operator const Point&() const
+PointRef::operator const Point &() const
 {
     return ptr.read();
 }

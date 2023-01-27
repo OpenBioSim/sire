@@ -39,8 +39,8 @@ using namespace SireStream;
     is true */
 /*void GibbsMove::move(System &system, int nmoves, bool record_stats)
 {
-	if (nmoves == 0)
-		return;
+    if (nmoves == 0)
+        return;
 
     SaveState old_system_state = SaveState::save(system);
 
@@ -134,10 +134,10 @@ using namespace SireStream;
             if (collect_stats)
                 system.collectStats();
         }
-	}
+    }
     catch(...)
     {
-    	old_system_state.restore(system);
+        old_system_state.restore(system);
         this->operator=(old_state);
         throw;
     }

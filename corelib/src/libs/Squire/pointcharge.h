@@ -35,62 +35,62 @@ SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class PointCharge;
+    class PointCharge;
 }
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::PointCharge&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::PointCharge&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::PointCharge &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::PointCharge &);
 
 namespace Squire
 {
 
-using SireMaths::Vector;
+    using SireMaths::Vector;
 
-/** This class holds a single point charge. This class is designed
-    for speed, and is used within the integral program (the charge
-    is held in internal units, and the point is mapped into the
-    correct space for the QM program)
+    /** This class holds a single point charge. This class is designed
+        for speed, and is used within the integral program (the charge
+        is held in internal units, and the point is mapped into the
+        correct space for the QM program)
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT PointCharge
-{
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT PointCharge
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const PointCharge&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, PointCharge&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const PointCharge &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, PointCharge &);
 
-public:
-    PointCharge();
-    PointCharge(const Vector &coords, const SireUnits::Dimension::Charge &charge);
-    PointCharge(const SireUnits::Dimension::Charge &charge, const Vector &coords);
+    public:
+        PointCharge();
+        PointCharge(const Vector &coords, const SireUnits::Dimension::Charge &charge);
+        PointCharge(const SireUnits::Dimension::Charge &charge, const Vector &coords);
 
-    PointCharge(const PointCharge &other);
+        PointCharge(const PointCharge &other);
 
-    ~PointCharge();
+        ~PointCharge();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    PointCharge& operator=(const PointCharge &other);
+        PointCharge &operator=(const PointCharge &other);
 
-    bool operator==(const PointCharge &other) const;
-    bool operator!=(const PointCharge &other) const;
+        bool operator==(const PointCharge &other) const;
+        bool operator!=(const PointCharge &other) const;
 
-    const Vector& center() const;
-    double charge() const;
+        const Vector &center() const;
+        double charge() const;
 
-private:
-    /** The location of this charge, mapped into the correct space */
-    Vector cent;
+    private:
+        /** The location of this charge, mapped into the correct space */
+        Vector cent;
 
-    /** The charge, in internal units */
-    double q;
-};
+        /** The charge, in internal units */
+        double q;
+    };
 
-}
+} // namespace Squire
 
-Q_DECLARE_METATYPE( Squire::PointCharge )
+Q_DECLARE_METATYPE(Squire::PointCharge)
 
-SIRE_EXPOSE_CLASS( Squire::PointCharge )
+SIRE_EXPOSE_CLASS(Squire::PointCharge)
 
 SIRE_END_HEADER
 

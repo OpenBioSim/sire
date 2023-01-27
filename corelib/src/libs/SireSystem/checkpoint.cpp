@@ -64,35 +64,35 @@ QDataStream &operator>>(QDataStream &ds, CheckPoint &ckpt)
 }
 
 /** Create a null (empty) checkpoint */
-CheckPoint::CheckPoint() : ConcreteProperty<CheckPoint,Property>(),
-                           old_system( System::null() )
-{}
+CheckPoint::CheckPoint() : ConcreteProperty<CheckPoint, Property>(), old_system(System::null())
+{
+}
 
 /** Construct a checkpoint to hold the current state of the system 'system' */
-CheckPoint::CheckPoint(const System &system)
-           : ConcreteProperty<CheckPoint,Property>(),
-             old_system(system)
-{}
+CheckPoint::CheckPoint(const System &system) : ConcreteProperty<CheckPoint, Property>(), old_system(system)
+{
+}
 
 /** Copy constructor */
 CheckPoint::CheckPoint(const CheckPoint &other)
-           : ConcreteProperty<CheckPoint,Property>(other),
-             old_system(other.old_system)
-{}
+    : ConcreteProperty<CheckPoint, Property>(other), old_system(other.old_system)
+{
+}
 
 /** Destructor */
 CheckPoint::~CheckPoint()
-{}
+{
+}
 
 /** Set this equal to the checkpoint of the system 'system' */
-CheckPoint& CheckPoint::operator=(const System &system)
+CheckPoint &CheckPoint::operator=(const System &system)
 {
     old_system = system;
     return *this;
 }
 
 /** Copy assignment operator */
-CheckPoint& CheckPoint::operator=(const CheckPoint &other)
+CheckPoint &CheckPoint::operator=(const CheckPoint &other)
 {
     old_system = other.old_system;
     Property::operator=(other);
@@ -118,7 +118,7 @@ CheckPoint::operator System() const
     return old_system;
 }
 
-const char* CheckPoint::typeName()
+const char *CheckPoint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CheckPoint>() );
+    return QMetaType::typeName(qMetaTypeId<CheckPoint>());
 }

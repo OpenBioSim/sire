@@ -36,281 +36,265 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class CoulombScaleFactor;
-class LJScaleFactor;
-class CLJScaleFactor;
+    class CoulombScaleFactor;
+    class LJScaleFactor;
+    class CLJScaleFactor;
 
-class CoulombNBPairs;
-class LJNBPairs;
-class CLJNBPairs;
-}
+    class CoulombNBPairs;
+    class LJNBPairs;
+    class CLJNBPairs;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CoulombNBPairs&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CoulombNBPairs&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CoulombNBPairs &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CoulombNBPairs &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::LJNBPairs&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::LJNBPairs&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::LJNBPairs &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::LJNBPairs &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJNBPairs&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJNBPairs&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJNBPairs &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJNBPairs &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CoulombScaleFactor&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CoulombScaleFactor&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CoulombScaleFactor &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CoulombScaleFactor &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::LJScaleFactor&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::LJScaleFactor&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::LJScaleFactor &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::LJScaleFactor &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJScaleFactor&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJScaleFactor&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJScaleFactor &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJScaleFactor &);
 
 namespace SireMM
 {
 
-/** This is the interatomic scale factor for the coulomb
-    parameters for the intramolecular energy */
-class SIREMM_EXPORT CoulombScaleFactor
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CoulombScaleFactor&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CoulombScaleFactor&);
-
-public:
-    CoulombScaleFactor(double scl=0);
-
-    CoulombScaleFactor(const CoulombScaleFactor &other);
-
-    ~CoulombScaleFactor();
-
-    static const char* typeName();
-
-    const char* what() const
+    /** This is the interatomic scale factor for the coulomb
+        parameters for the intramolecular energy */
+    class SIREMM_EXPORT CoulombScaleFactor
     {
-        return CoulombScaleFactor::typeName();
-    }
 
-    CoulombScaleFactor& operator=(const CoulombScaleFactor &other);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CoulombScaleFactor &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CoulombScaleFactor &);
 
-    bool operator==(const CoulombScaleFactor &other) const;
-    bool operator!=(const CoulombScaleFactor &other) const;
+    public:
+        CoulombScaleFactor(double scl = 0);
 
-    double coulomb() const;
+        CoulombScaleFactor(const CoulombScaleFactor &other);
 
-private:
-    /** The coulomb scale factor */
-    double cscl;
-};
+        ~CoulombScaleFactor();
 
-/** This is the interatomic scale factor for the LJ
-    parameters for the intramolecular energy */
-class SIREMM_EXPORT LJScaleFactor
-{
+        static const char *typeName();
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const LJScaleFactor&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, LJScaleFactor&);
+        const char *what() const
+        {
+            return CoulombScaleFactor::typeName();
+        }
 
-public:
-    LJScaleFactor(double scl=0);
+        CoulombScaleFactor &operator=(const CoulombScaleFactor &other);
 
-    LJScaleFactor(const LJScaleFactor &other);
+        bool operator==(const CoulombScaleFactor &other) const;
+        bool operator!=(const CoulombScaleFactor &other) const;
 
-    ~LJScaleFactor();
+        double coulomb() const;
 
-    static const char* typeName();
+    private:
+        /** The coulomb scale factor */
+        double cscl;
+    };
 
-    const char* what() const
+    /** This is the interatomic scale factor for the LJ
+        parameters for the intramolecular energy */
+    class SIREMM_EXPORT LJScaleFactor
     {
-        return LJScaleFactor::typeName();
-    }
 
-    LJScaleFactor& operator=(const LJScaleFactor &other);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const LJScaleFactor &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, LJScaleFactor &);
 
-    bool operator==(const LJScaleFactor &other) const;
-    bool operator!=(const LJScaleFactor &other) const;
+    public:
+        LJScaleFactor(double scl = 0);
 
-    double lj() const;
+        LJScaleFactor(const LJScaleFactor &other);
 
-private:
-    /** The LJ scale factor */
-    double ljscl;
-};
+        ~LJScaleFactor();
 
-/** This is the interatomic scale factor for the coulomb and
-    LJ parameters for the intramolecular energy. */
-class SIREMM_EXPORT CLJScaleFactor : public CoulombScaleFactor,
-                                     public LJScaleFactor
-{
+        static const char *typeName();
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJScaleFactor&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJScaleFactor&);
+        const char *what() const
+        {
+            return LJScaleFactor::typeName();
+        }
 
-public:
-    CLJScaleFactor(double scl=0);
+        LJScaleFactor &operator=(const LJScaleFactor &other);
 
-    CLJScaleFactor(double scale_coul, double scale_lj);
+        bool operator==(const LJScaleFactor &other) const;
+        bool operator!=(const LJScaleFactor &other) const;
 
-    CLJScaleFactor(const CLJScaleFactor &other);
+        double lj() const;
 
-    ~CLJScaleFactor();
+    private:
+        /** The LJ scale factor */
+        double ljscl;
+    };
 
-    static const char* typeName();
-
-    const char* what() const
+    /** This is the interatomic scale factor for the coulomb and
+        LJ parameters for the intramolecular energy. */
+    class SIREMM_EXPORT CLJScaleFactor : public CoulombScaleFactor, public LJScaleFactor
     {
-        return CLJScaleFactor::typeName();
-    }
 
-    QString toString() const;
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJScaleFactor &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJScaleFactor &);
 
-    CLJScaleFactor& operator=(const CLJScaleFactor &other);
+    public:
+        CLJScaleFactor(double scl = 0);
 
-    bool operator==(const CLJScaleFactor &other) const;
-    bool operator!=(const CLJScaleFactor &other) const;
-};
+        CLJScaleFactor(double scale_coul, double scale_lj);
 
-/** This class holds all of the non-bonded scale factors that are used
-    to scale the intramolecular atom-atom coulomb
-    interactions between pairs of atoms, e.g. for most MM forcefields,
-    the scale factors for 1-1, 1-2 and 1-3 pairs are zero, the
-    1-4 pairs are scaled by a coulomb factor (e.g. 0.5 for OPLS)
-    and the 1-5 and above pairs are not scaled (i.e. the factors equal 1)
+        CLJScaleFactor(const CLJScaleFactor &other);
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CoulombNBPairs
-        : public SireBase::ConcreteProperty< CoulombNBPairs,
-                                             AtomPairs<CoulombScaleFactor> >
-{
+        ~CLJScaleFactor();
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CoulombNBPairs&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CoulombNBPairs&);
+        static const char *typeName();
 
-public:
-    typedef AtomPairs<CoulombScaleFactor>::CGPairs CGPairs;
+        const char *what() const
+        {
+            return CLJScaleFactor::typeName();
+        }
 
-    CoulombNBPairs();
+        QString toString() const;
 
-    CoulombNBPairs(const MoleculeInfoData &molinfo,
-                   const CoulombScaleFactor &default_scale = CoulombScaleFactor(1));
+        CLJScaleFactor &operator=(const CLJScaleFactor &other);
 
-    CoulombNBPairs(const MoleculeView &molview,
-                   const CoulombScaleFactor &default_scale = CoulombScaleFactor(1));
+        bool operator==(const CLJScaleFactor &other) const;
+        bool operator!=(const CLJScaleFactor &other) const;
+    };
 
-    CoulombNBPairs(const CLJNBPairs &cljpairs);
+    /** This class holds all of the non-bonded scale factors that are used
+        to scale the intramolecular atom-atom coulomb
+        interactions between pairs of atoms, e.g. for most MM forcefields,
+        the scale factors for 1-1, 1-2 and 1-3 pairs are zero, the
+        1-4 pairs are scaled by a coulomb factor (e.g. 0.5 for OPLS)
+        and the 1-5 and above pairs are not scaled (i.e. the factors equal 1)
 
-    CoulombNBPairs(const CoulombNBPairs &other);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CoulombNBPairs : public SireBase::ConcreteProperty<CoulombNBPairs, AtomPairs<CoulombScaleFactor>>
+    {
 
-    ~CoulombNBPairs();
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CoulombNBPairs &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CoulombNBPairs &);
 
-    CoulombNBPairs& operator=(const CoulombNBPairs &other);
+    public:
+        typedef AtomPairs<CoulombScaleFactor>::CGPairs CGPairs;
 
-    CoulombNBPairs& operator=(const CLJNBPairs &cljpairs);
+        CoulombNBPairs();
 
-    static const char* typeName();
+        CoulombNBPairs(const MoleculeInfoData &molinfo, const CoulombScaleFactor &default_scale = CoulombScaleFactor(1));
 
-    bool operator==(const CoulombNBPairs &other) const;
-    bool operator!=(const CoulombNBPairs &other) const;
-};
+        CoulombNBPairs(const MoleculeView &molview, const CoulombScaleFactor &default_scale = CoulombScaleFactor(1));
 
-/** This class holds all of the non-bonded scale factors that are used
-    to scale the intramolecular atom-atom Lennard-Jones
-    interactions between pairs of atoms, e.g. for most MM forcefields,
-    the scale factors for 1-1, 1-2 and 1-3 pairs are zero, the
-    1-4 pairs are scaled by a LJ factor (e.g. 0.5 for OPLS)
-    and the 1-5 and above pairs are not scaled (i.e. the factors equal 1)
+        CoulombNBPairs(const CLJNBPairs &cljpairs);
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT LJNBPairs
-        : public SireBase::ConcreteProperty< LJNBPairs,
-                                             AtomPairs<LJScaleFactor> >
-{
+        CoulombNBPairs(const CoulombNBPairs &other);
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const LJNBPairs&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, LJNBPairs&);
+        ~CoulombNBPairs();
 
-public:
-    typedef AtomPairs<LJScaleFactor>::CGPairs CGPairs;
+        CoulombNBPairs &operator=(const CoulombNBPairs &other);
 
-    LJNBPairs();
+        CoulombNBPairs &operator=(const CLJNBPairs &cljpairs);
 
-    LJNBPairs(const MoleculeView &molview,
-              const LJScaleFactor &default_scale = LJScaleFactor(1));
+        static const char *typeName();
 
-    LJNBPairs(const MoleculeInfoData &molinfo,
-              const LJScaleFactor &default_scale = LJScaleFactor(1));
+        bool operator==(const CoulombNBPairs &other) const;
+        bool operator!=(const CoulombNBPairs &other) const;
+    };
 
-    LJNBPairs(const CLJNBPairs &cljpairs);
+    /** This class holds all of the non-bonded scale factors that are used
+        to scale the intramolecular atom-atom Lennard-Jones
+        interactions between pairs of atoms, e.g. for most MM forcefields,
+        the scale factors for 1-1, 1-2 and 1-3 pairs are zero, the
+        1-4 pairs are scaled by a LJ factor (e.g. 0.5 for OPLS)
+        and the 1-5 and above pairs are not scaled (i.e. the factors equal 1)
 
-    LJNBPairs(const LJNBPairs &other);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT LJNBPairs : public SireBase::ConcreteProperty<LJNBPairs, AtomPairs<LJScaleFactor>>
+    {
 
-    ~LJNBPairs();
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const LJNBPairs &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, LJNBPairs &);
 
-    LJNBPairs& operator=(const LJNBPairs &other);
-    LJNBPairs& operator=(const CLJNBPairs &cljpairs);
+    public:
+        typedef AtomPairs<LJScaleFactor>::CGPairs CGPairs;
 
-    static const char* typeName();
+        LJNBPairs();
 
-    bool operator==(const LJNBPairs &other) const;
-    bool operator!=(const LJNBPairs &other) const;
-};
+        LJNBPairs(const MoleculeView &molview, const LJScaleFactor &default_scale = LJScaleFactor(1));
 
-/** This class holds all of the non-bonded scale factors that are used
-    to scale the intramolecular atom-atom coulomb and Lennard-Jones
-    interactions between pairs of atoms, e.g. for most MM forcefields,
-    the scale factors for 1-1, 1-2 and 1-3 pairs are zero, the
-    1-4 pairs are scaled by a coulomb and LJ factor (e.g. 0.5 for OPLS)
-    and the 1-5 and above pairs are not scaled (i.e. the coulomb and
-    LJ factors equal 1)
+        LJNBPairs(const MoleculeInfoData &molinfo, const LJScaleFactor &default_scale = LJScaleFactor(1));
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJNBPairs
-        : public SireBase::ConcreteProperty< CLJNBPairs,
-                                             AtomPairs<CLJScaleFactor> >
-{
+        LJNBPairs(const CLJNBPairs &cljpairs);
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJNBPairs&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJNBPairs&);
+        LJNBPairs(const LJNBPairs &other);
 
-public:
-    typedef AtomPairs<CLJScaleFactor>::CGPairs CGPairs;
+        ~LJNBPairs();
 
-    CLJNBPairs();
+        LJNBPairs &operator=(const LJNBPairs &other);
+        LJNBPairs &operator=(const CLJNBPairs &cljpairs);
 
-    CLJNBPairs(const MoleculeView &molview,
-               const CLJScaleFactor &default_scale = CLJScaleFactor(1,1));
+        static const char *typeName();
 
-    CLJNBPairs(const MoleculeInfoData &molinfo,
-               const CLJScaleFactor &default_scale = CLJScaleFactor(1,1));
+        bool operator==(const LJNBPairs &other) const;
+        bool operator!=(const LJNBPairs &other) const;
+    };
 
-    CLJNBPairs(const SireMol::MoleculeInfo &molinfo,
-               const CLJScaleFactor &default_scale = CLJScaleFactor(1,1));
+    /** This class holds all of the non-bonded scale factors that are used
+        to scale the intramolecular atom-atom coulomb and Lennard-Jones
+        interactions between pairs of atoms, e.g. for most MM forcefields,
+        the scale factors for 1-1, 1-2 and 1-3 pairs are zero, the
+        1-4 pairs are scaled by a coulomb and LJ factor (e.g. 0.5 for OPLS)
+        and the 1-5 and above pairs are not scaled (i.e. the coulomb and
+        LJ factors equal 1)
 
-    CLJNBPairs(const SireMol::Connectivity &connectivity,
-               const CLJScaleFactor &scale14);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJNBPairs : public SireBase::ConcreteProperty<CLJNBPairs, AtomPairs<CLJScaleFactor>>
+    {
 
-    CLJNBPairs(const CLJNBPairs &other);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJNBPairs &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJNBPairs &);
 
-    ~CLJNBPairs();
+    public:
+        typedef AtomPairs<CLJScaleFactor>::CGPairs CGPairs;
 
-    CLJNBPairs& operator=(const CLJNBPairs &other);
+        CLJNBPairs();
 
-    static const char* typeName();
+        CLJNBPairs(const MoleculeView &molview, const CLJScaleFactor &default_scale = CLJScaleFactor(1, 1));
 
-    bool operator==(const CLJNBPairs &other) const;
-    bool operator!=(const CLJNBPairs &other) const;
+        CLJNBPairs(const MoleculeInfoData &molinfo, const CLJScaleFactor &default_scale = CLJScaleFactor(1, 1));
 
-    QString toString() const;
+        CLJNBPairs(const SireMol::MoleculeInfo &molinfo, const CLJScaleFactor &default_scale = CLJScaleFactor(1, 1));
 
-    int nExcludedAtoms() const;
-    QVector<AtomIdx> excludedAtoms() const;
+        CLJNBPairs(const SireMol::Connectivity &connectivity, const CLJScaleFactor &scale14);
 
-    int nExcludedAtoms(const AtomID &atomid) const;
-    QVector<AtomIdx> excludedAtoms(const AtomID &atomid) const;
+        CLJNBPairs(const CLJNBPairs &other);
 
-};
+        ~CLJNBPairs();
 
-}
+        CLJNBPairs &operator=(const CLJNBPairs &other);
+
+        static const char *typeName();
+
+        bool operator==(const CLJNBPairs &other) const;
+        bool operator!=(const CLJNBPairs &other) const;
+
+        QString toString() const;
+
+        int nExcludedAtoms() const;
+        QVector<AtomIdx> excludedAtoms() const;
+
+        int nExcludedAtoms(const AtomID &atomid) const;
+        QVector<AtomIdx> excludedAtoms(const AtomID &atomid) const;
+    };
+
+} // namespace SireMM
 
 Q_DECLARE_METATYPE(SireMM::CoulombScaleFactor)
 Q_DECLARE_METATYPE(SireMM::LJScaleFactor)
@@ -320,25 +304,22 @@ Q_DECLARE_METATYPE(SireMM::CLJNBPairs)
 Q_DECLARE_METATYPE(SireMM::CoulombNBPairs)
 Q_DECLARE_METATYPE(SireMM::LJNBPairs)
 
-Q_DECLARE_TYPEINFO( SireMM::CoulombScaleFactor, Q_MOVABLE_TYPE );
-Q_DECLARE_TYPEINFO( SireMM::LJScaleFactor, Q_MOVABLE_TYPE );
-Q_DECLARE_TYPEINFO( SireMM::CLJScaleFactor, Q_MOVABLE_TYPE );
+Q_DECLARE_TYPEINFO(SireMM::CoulombScaleFactor, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(SireMM::LJScaleFactor, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(SireMM::CLJScaleFactor, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMM::CoulombScaleFactor )
-SIRE_EXPOSE_CLASS( SireMM::LJScaleFactor )
-SIRE_EXPOSE_CLASS( SireMM::CLJScaleFactor )
+SIRE_EXPOSE_CLASS(SireMM::CoulombScaleFactor)
+SIRE_EXPOSE_CLASS(SireMM::LJScaleFactor)
+SIRE_EXPOSE_CLASS(SireMM::CLJScaleFactor)
 
-SIRE_EXPOSE_CLASS( SireMM::CoulombNBPairs )
-SIRE_EXPOSE_ALIAS( SireMM::AtomPairs<SireMM::CoulombScaleFactor>,
-                   SireMM::AtomPairs_CoulombScaleFactor_ )
+SIRE_EXPOSE_CLASS(SireMM::CoulombNBPairs)
+SIRE_EXPOSE_ALIAS(SireMM::AtomPairs<SireMM::CoulombScaleFactor>, SireMM::AtomPairs_CoulombScaleFactor_)
 
-SIRE_EXPOSE_CLASS( SireMM::LJNBPairs )
-SIRE_EXPOSE_ALIAS( SireMM::AtomPairs<SireMM::LJScaleFactor>,
-                   SireMM::AtomPairs_LJScaleFactor_ )
+SIRE_EXPOSE_CLASS(SireMM::LJNBPairs)
+SIRE_EXPOSE_ALIAS(SireMM::AtomPairs<SireMM::LJScaleFactor>, SireMM::AtomPairs_LJScaleFactor_)
 
-SIRE_EXPOSE_CLASS( SireMM::CLJNBPairs )
-SIRE_EXPOSE_ALIAS( SireMM::AtomPairs<SireMM::CLJScaleFactor>,
-                   SireMM::AtomPairs_CLJScaleFactor_ )
+SIRE_EXPOSE_CLASS(SireMM::CLJNBPairs)
+SIRE_EXPOSE_ALIAS(SireMM::AtomPairs<SireMM::CLJScaleFactor>, SireMM::AtomPairs_CLJScaleFactor_)
 
 SIRE_END_HEADER
 

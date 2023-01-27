@@ -37,70 +37,70 @@ SIRE_BEGIN_HEADER
 namespace SireCluster
 {
 
-class Node;
-class WorkPacket;
+    class Node;
+    class WorkPacket;
 
-namespace detail
-{
-class PromisePvt;
-}
+    namespace detail
+    {
+        class PromisePvt;
+    }
 
-/** This class provides a handle to the (future) result of
-    a piece of work that is being conducted on a node
-    in the cluster
+    /** This class provides a handle to the (future) result of
+        a piece of work that is being conducted on a node
+        in the cluster
 
-    @author Christopher Woods
-*/
-class SIRECLUSTER_EXPORT Promise
-{
+        @author Christopher Woods
+    */
+    class SIRECLUSTER_EXPORT Promise
+    {
 
-friend class Node;
+        friend class Node;
 
-public:
-    Promise();
+    public:
+        Promise();
 
-    Promise(const Promise &other);
+        Promise(const Promise &other);
 
-    ~Promise();
+        ~Promise();
 
-    Promise& operator=(const Promise &other);
+        Promise &operator=(const Promise &other);
 
-    bool operator==(const Promise &other) const;
-    bool operator!=(const Promise &other) const;
+        bool operator==(const Promise &other) const;
+        bool operator!=(const Promise &other) const;
 
-    void abort();
-    void stop();
+        void abort();
+        void stop();
 
-    void wait();
-    bool wait(int timeout);
+        void wait();
+        bool wait(int timeout);
 
-    bool isNull() const;
+        bool isNull() const;
 
-    bool isRunning();
+        bool isRunning();
 
-    bool isError();
-    void throwError();
+        bool isError();
+        void throwError();
 
-    bool wasStopped();
+        bool wasStopped();
 
-    bool wasAborted();
+        bool wasAborted();
 
-    float progress();
+        float progress();
 
-    WorkPacket input();
-    WorkPacket interimResult();
-    WorkPacket result();
+        WorkPacket input();
+        WorkPacket interimResult();
+        WorkPacket result();
 
-protected:
-    Promise(const Node &node, const WorkPacket &initial_workpacket);
+    protected:
+        Promise(const Node &node, const WorkPacket &initial_workpacket);
 
-    /** Pointer to the private implementation */
-    boost::shared_ptr<detail::PromisePvt> d;
-};
+        /** Pointer to the private implementation */
+        boost::shared_ptr<detail::PromisePvt> d;
+    };
 
-}
+} // namespace SireCluster
 
-SIRE_EXPOSE_CLASS( SireCluster::Promise )
+SIRE_EXPOSE_CLASS(SireCluster::Promise)
 
 SIRE_END_HEADER
 

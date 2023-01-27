@@ -36,158 +36,159 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class LJParameter;
+    class LJParameter;
 }
 
 class QDataStream;
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::LJParameter&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::LJParameter&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::LJParameter &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::LJParameter &);
 
 namespace SireMM
 {
 
-class LJPair;
+    class LJPair;
 
-/**
-An LJParameter holds Lennard Jones parameters (sigma and epsilon)
+    /**
+    An LJParameter holds Lennard Jones parameters (sigma and epsilon)
 
-@author Christopher Woods
-*/
-class SIREMM_EXPORT LJParameter
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const LJParameter&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, LJParameter&);
-
-public:
-    enum CombiningRules { ARITHMETIC=0, GEOMETRIC=1 };
-
-    LJParameter();
-    LJParameter(SireUnits::Dimension::Length sigma,
-                SireUnits::Dimension::MolarEnergy epsilon);
-
-    LJParameter(const LJPair &ljpair);
-
-    LJParameter(const LJParameter &param);
-
-    ~LJParameter();
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIREMM_EXPORT LJParameter
     {
-        return LJParameter::typeName();
-    }
 
-    LJParameter combine(const LJParameter &other, CombiningRules rules) const;
-    LJParameter combineArithmetic(const LJParameter &other) const;
-    LJParameter combineGeometric(const LJParameter &other) const;
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const LJParameter &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, LJParameter &);
 
-    bool isDummy() const;
-    bool zeroLJ() const;
+    public:
+        enum CombiningRules
+        {
+            ARITHMETIC = 0,
+            GEOMETRIC = 1
+        };
 
-    SireUnits::Dimension::Length sigma() const;
-    SireUnits::Dimension::MolarEnergy epsilon() const;
-    double sqrtEpsilon() const;
-    double sqrtSigma() const;
+        LJParameter();
+        LJParameter(SireUnits::Dimension::Length sigma, SireUnits::Dimension::MolarEnergy epsilon);
 
-    double A() const;
-    double B() const;
+        LJParameter(const LJPair &ljpair);
 
-    SireUnits::Dimension::Length rmin() const;
+        LJParameter(const LJParameter &param);
 
-    QString toString() const;
+        ~LJParameter();
 
-    bool operator==(const LJParameter &other) const;
-    bool operator!=(const LJParameter &other) const;
+        static const char *typeName();
 
-    static LJParameter dummy();
-    static LJParameter fromSigmaAndEpsilon(SireUnits::Dimension::Length sigma,
-                                           SireUnits::Dimension::MolarEnergy epsilon);
+        const char *what() const
+        {
+            return LJParameter::typeName();
+        }
 
-    static LJParameter fromAAndB(double a, double b);
-    static LJParameter fromRMinAndEpsilon(SireUnits::Dimension::Length rmin,
-                                          SireUnits::Dimension::MolarEnergy epsilon);
+        LJParameter combine(const LJParameter &other, CombiningRules rules) const;
+        LJParameter combineArithmetic(const LJParameter &other) const;
+        LJParameter combineGeometric(const LJParameter &other) const;
 
-private:
-    /** Square-root of the sigma parameter, in sqrt(Angstroms) */
-    double sqrtsig;
+        bool isDummy() const;
+        bool zeroLJ() const;
 
-    /** Square-root of the epsilon parameter. The square-root
-        is stored to improve the efficiency of combining rules.
-        The units are sqrt(kcal mol-1) */
-    double sqrteps;
-};
+        SireUnits::Dimension::Length sigma() const;
+        SireUnits::Dimension::MolarEnergy epsilon() const;
+        double sqrtEpsilon() const;
+        double sqrtSigma() const;
+
+        double A() const;
+        double B() const;
+
+        SireUnits::Dimension::Length rmin() const;
+
+        QString toString() const;
+
+        bool operator==(const LJParameter &other) const;
+        bool operator!=(const LJParameter &other) const;
+
+        static LJParameter dummy();
+        static LJParameter fromSigmaAndEpsilon(SireUnits::Dimension::Length sigma,
+                                               SireUnits::Dimension::MolarEnergy epsilon);
+
+        static LJParameter fromAAndB(double a, double b);
+        static LJParameter fromRMinAndEpsilon(SireUnits::Dimension::Length rmin, SireUnits::Dimension::MolarEnergy epsilon);
+
+    private:
+        /** Square-root of the sigma parameter, in sqrt(Angstroms) */
+        double sqrtsig;
+
+        /** Square-root of the epsilon parameter. The square-root
+            is stored to improve the efficiency of combining rules.
+            The units are sqrt(kcal mol-1) */
+        double sqrteps;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Hash a LJ parameter */
-SIRE_ALWAYS_INLINE uint qHash(const LJParameter &ljparam)
-{
-    return uint( 1000000.0 * ljparam.sqrtEpsilon() +
-                   10000.0 * ljparam.sqrtSigma() );
-}
+    /** Hash a LJ parameter */
+    SIRE_ALWAYS_INLINE uint qHash(const LJParameter &ljparam)
+    {
+        return uint(1000000.0 * ljparam.sqrtEpsilon() + 10000.0 * ljparam.sqrtSigma());
+    }
 
-/** Return whether or not two LJParameters are equal */
-SIRE_ALWAYS_INLINE bool LJParameter::operator==(const LJParameter &other) const
-{
-    return sqrtsig == other.sqrtsig and sqrteps == other.sqrteps;
-}
+    /** Return whether or not two LJParameters are equal */
+    SIRE_ALWAYS_INLINE bool LJParameter::operator==(const LJParameter &other) const
+    {
+        return sqrtsig == other.sqrtsig and sqrteps == other.sqrteps;
+    }
 
-/** Return whether or not two LJParameters are different */
-SIRE_ALWAYS_INLINE bool LJParameter::operator!=(const LJParameter &other) const
-{
-    return not operator==(other);
-}
+    /** Return whether or not two LJParameters are different */
+    SIRE_ALWAYS_INLINE bool LJParameter::operator!=(const LJParameter &other) const
+    {
+        return not operator==(other);
+    }
 
-/** Return whether or not this is a dummy LJ parameter */
-SIRE_ALWAYS_INLINE bool LJParameter::isDummy() const
-{
-    //we only need to compare sqrtsig as this will be set to zero if
-    //sqrteps is zero
-    return sqrtsig == 0.0;
-}
+    /** Return whether or not this is a dummy LJ parameter */
+    SIRE_ALWAYS_INLINE bool LJParameter::isDummy() const
+    {
+        // we only need to compare sqrtsig as this will be set to zero if
+        // sqrteps is zero
+        return sqrtsig == 0.0;
+    }
 
-/** Return whether or not this parameter has non-zero LJ parameters */
-SIRE_ALWAYS_INLINE bool LJParameter::zeroLJ() const
-{
-    //we only need to compare sqrtsig as this will be set to zero if
-    //sqrteps is zero
-    return sqrtsig == 0;
-}
+    /** Return whether or not this parameter has non-zero LJ parameters */
+    SIRE_ALWAYS_INLINE bool LJParameter::zeroLJ() const
+    {
+        // we only need to compare sqrtsig as this will be set to zero if
+        // sqrteps is zero
+        return sqrtsig == 0;
+    }
 
-/** Return the sigma value of this parameter (in Angstroms) */
-SIRE_ALWAYS_INLINE SireUnits::Dimension::Length LJParameter::sigma() const
-{
-    return SireUnits::Dimension::Length(sqrtsig*sqrtsig);
-}
+    /** Return the sigma value of this parameter (in Angstroms) */
+    SIRE_ALWAYS_INLINE SireUnits::Dimension::Length LJParameter::sigma() const
+    {
+        return SireUnits::Dimension::Length(sqrtsig * sqrtsig);
+    }
 
-/** Return sqrt(sigma) */
-SIRE_ALWAYS_INLINE double LJParameter::sqrtSigma() const
-{
-    return sqrtsig;
-}
+    /** Return sqrt(sigma) */
+    SIRE_ALWAYS_INLINE double LJParameter::sqrtSigma() const
+    {
+        return sqrtsig;
+    }
 
-/** Return the epsilon value of this parameter (in kcal mol-1) */
-SIRE_ALWAYS_INLINE SireUnits::Dimension::MolarEnergy LJParameter::epsilon() const
-{
-    return SireUnits::Dimension::MolarEnergy(sqrteps*sqrteps);
-}
+    /** Return the epsilon value of this parameter (in kcal mol-1) */
+    SIRE_ALWAYS_INLINE SireUnits::Dimension::MolarEnergy LJParameter::epsilon() const
+    {
+        return SireUnits::Dimension::MolarEnergy(sqrteps * sqrteps);
+    }
 
-/** Return sqrt(epsilon) */
-SIRE_ALWAYS_INLINE double LJParameter::sqrtEpsilon() const
-{
-    return sqrteps;
-}
+    /** Return sqrt(epsilon) */
+    SIRE_ALWAYS_INLINE double LJParameter::sqrtEpsilon() const
+    {
+        return sqrteps;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
 Q_DECLARE_TYPEINFO(SireMM::LJParameter, Q_MOVABLE_TYPE);
 Q_DECLARE_METATYPE(SireMM::LJParameter);
 
-SIRE_EXPOSE_CLASS( SireMM::LJParameter )
+SIRE_EXPOSE_CLASS(SireMM::LJParameter)
 
 SIRE_END_HEADER
 

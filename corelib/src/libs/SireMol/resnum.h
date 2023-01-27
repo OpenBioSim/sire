@@ -36,69 +36,69 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ResNum;
+    class ResNum;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ResNum&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ResNum&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ResNum &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ResNum &);
 
 namespace SireMol
 {
 
-/** This ID number is used to identify a CutGroup by the user-supplied
-    number
+    /** This ID number is used to identify a CutGroup by the user-supplied
+        number
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ResNum : public SireID::Number, public ResID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ResNum&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ResNum&);
-
-public:
-    ResNum();
-
-    explicit ResNum(quint32 num);
-
-    ResNum(const ResNum &other);
-
-    ~ResNum();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ResNum : public SireID::Number, public ResID
     {
-        return ResNum::typeName();
-    }
 
-    ResNum* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ResNum &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ResNum &);
 
-    bool isNull() const;
+    public:
+        ResNum();
 
-    uint hash() const;
+        explicit ResNum(quint32 num);
 
-    QString toString() const;
+        ResNum(const ResNum &other);
 
-    ResNum& operator=(const ResNum &other);
+        ~ResNum();
 
-    bool operator==(const SireID::ID &other) const;
-    bool operator==(const ResNum &other) const;
-    bool operator!=(const ResNum &other) const;
+        static const char *typeName();
 
-    bool operator<(const ResNum &other) const;
-    bool operator<=(const ResNum &other) const;
-    bool operator>(const ResNum &other) const;
-    bool operator>=(const ResNum &other) const;
+        const char *what() const
+        {
+            return ResNum::typeName();
+        }
 
-    QList<ResIdx> map(const MolInfo &molinfo) const;
-};
+        ResNum *clone() const;
 
-}
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        ResNum &operator=(const ResNum &other);
+
+        bool operator==(const SireID::ID &other) const;
+        bool operator==(const ResNum &other) const;
+        bool operator!=(const ResNum &other) const;
+
+        bool operator<(const ResNum &other) const;
+        bool operator<=(const ResNum &other) const;
+        bool operator>(const ResNum &other) const;
+        bool operator>=(const ResNum &other) const;
+
+        QList<ResIdx> map(const MolInfo &molinfo) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::ResNum);
 
-SIRE_EXPOSE_CLASS( SireMol::ResNum )
+SIRE_EXPOSE_CLASS(SireMol::ResNum)
 
 SIRE_END_HEADER
 

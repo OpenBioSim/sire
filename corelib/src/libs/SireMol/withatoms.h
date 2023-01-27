@@ -29,243 +29,243 @@
 #define SIREMOL_WITHATOMS_H
 
 #include "atomid.h"
-#include "resid.h"
 #include "cgid.h"
 #include "chainid.h"
+#include "resid.h"
 #include "segid.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ResWithAtoms;
-class CGsWithAtoms;
-class ChainsWithAtoms;
-class SegsWithAtoms;
-}
+    class ResWithAtoms;
+    class CGsWithAtoms;
+    class ChainsWithAtoms;
+    class SegsWithAtoms;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ResWithAtoms&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ResWithAtoms&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ResWithAtoms &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ResWithAtoms &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::CGsWithAtoms&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::CGsWithAtoms&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::CGsWithAtoms &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::CGsWithAtoms &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ChainsWithAtoms&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ChainsWithAtoms&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ChainsWithAtoms &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ChainsWithAtoms &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::SegsWithAtoms&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::SegsWithAtoms&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::SegsWithAtoms &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::SegsWithAtoms &);
 
 namespace SireMol
 {
 
-/** This ID class identifies residues that contain atoms that
-    match the passed AtomID
+    /** This ID class identifies residues that contain atoms that
+        match the passed AtomID
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ResWithAtoms : public ResID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ResWithAtoms&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ResWithAtoms&);
-
-public:
-    ResWithAtoms();
-    ResWithAtoms(const AtomID &atomid);
-    ResWithAtoms(const ResWithAtoms &other);
-
-    ~ResWithAtoms();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ResWithAtoms : public ResID
     {
-        return ResWithAtoms::typeName();
-    }
 
-    ResWithAtoms* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ResWithAtoms &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ResWithAtoms &);
 
-    bool isNull() const;
+    public:
+        ResWithAtoms();
+        ResWithAtoms(const AtomID &atomid);
+        ResWithAtoms(const ResWithAtoms &other);
 
-    uint hash() const;
+        ~ResWithAtoms();
 
-    QString toString() const;
+        static const char *typeName();
 
-    const AtomID& atomID() const;
+        const char *what() const
+        {
+            return ResWithAtoms::typeName();
+        }
 
-    ResWithAtoms& operator=(const ResWithAtoms &other);
+        ResWithAtoms *clone() const;
 
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
+        bool isNull() const;
 
-    bool operator==(const ResWithAtoms &other) const;
-    bool operator!=(const ResWithAtoms &other) const;
+        uint hash() const;
 
-    QList<ResIdx> map(const MolInfo &molinfo) const;
+        QString toString() const;
 
-private:
-    AtomIdentifier atomid;
-};
+        const AtomID &atomID() const;
 
-/** This ID class identifies CutGroups that contain atoms that
-    match the passed AtomID
+        ResWithAtoms &operator=(const ResWithAtoms &other);
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT CGsWithAtoms : public CGID
-{
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const CGsWithAtoms&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CGsWithAtoms&);
+        bool operator==(const ResWithAtoms &other) const;
+        bool operator!=(const ResWithAtoms &other) const;
 
-public:
-    CGsWithAtoms();
-    CGsWithAtoms(const AtomID &atomid);
-    CGsWithAtoms(const CGsWithAtoms &other);
+        QList<ResIdx> map(const MolInfo &molinfo) const;
 
-    ~CGsWithAtoms();
+    private:
+        AtomIdentifier atomid;
+    };
 
-    static const char* typeName();
+    /** This ID class identifies CutGroups that contain atoms that
+        match the passed AtomID
 
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT CGsWithAtoms : public CGID
     {
-        return CGsWithAtoms::typeName();
-    }
 
-    CGsWithAtoms* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const CGsWithAtoms &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, CGsWithAtoms &);
 
-    bool isNull() const;
+    public:
+        CGsWithAtoms();
+        CGsWithAtoms(const AtomID &atomid);
+        CGsWithAtoms(const CGsWithAtoms &other);
 
-    uint hash() const;
+        ~CGsWithAtoms();
 
-    QString toString() const;
+        static const char *typeName();
 
-    const AtomID& atomID() const;
+        const char *what() const
+        {
+            return CGsWithAtoms::typeName();
+        }
 
-    CGsWithAtoms& operator=(const CGsWithAtoms &other);
+        CGsWithAtoms *clone() const;
 
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
+        bool isNull() const;
 
-    bool operator==(const CGsWithAtoms &other) const;
-    bool operator!=(const CGsWithAtoms &other) const;
+        uint hash() const;
 
-    QList<CGIdx> map(const MolInfo &molinfo) const;
+        QString toString() const;
 
-private:
-    AtomIdentifier atomid;
-};
+        const AtomID &atomID() const;
 
-/** This ID class identifies chains that contain atoms that
-    match the passed AtomID
+        CGsWithAtoms &operator=(const CGsWithAtoms &other);
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ChainsWithAtoms : public ChainID
-{
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ChainsWithAtoms&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ChainsWithAtoms&);
+        bool operator==(const CGsWithAtoms &other) const;
+        bool operator!=(const CGsWithAtoms &other) const;
 
-public:
-    ChainsWithAtoms();
-    ChainsWithAtoms(const AtomID &atomid);
-    ChainsWithAtoms(const ChainsWithAtoms &other);
+        QList<CGIdx> map(const MolInfo &molinfo) const;
 
-    ~ChainsWithAtoms();
+    private:
+        AtomIdentifier atomid;
+    };
 
-    static const char* typeName();
+    /** This ID class identifies chains that contain atoms that
+        match the passed AtomID
 
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ChainsWithAtoms : public ChainID
     {
-        return ChainsWithAtoms::typeName();
-    }
 
-    ChainsWithAtoms* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ChainsWithAtoms &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ChainsWithAtoms &);
 
-    bool isNull() const;
+    public:
+        ChainsWithAtoms();
+        ChainsWithAtoms(const AtomID &atomid);
+        ChainsWithAtoms(const ChainsWithAtoms &other);
 
-    uint hash() const;
+        ~ChainsWithAtoms();
 
-    QString toString() const;
+        static const char *typeName();
 
-    const AtomID& atomID() const;
+        const char *what() const
+        {
+            return ChainsWithAtoms::typeName();
+        }
 
-    ChainsWithAtoms& operator=(const ChainsWithAtoms &other);
+        ChainsWithAtoms *clone() const;
 
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
+        bool isNull() const;
 
-    bool operator==(const ChainsWithAtoms &other) const;
-    bool operator!=(const ChainsWithAtoms &other) const;
+        uint hash() const;
 
-    QList<ChainIdx> map(const MolInfo &molinfo) const;
+        QString toString() const;
 
-private:
-    AtomIdentifier atomid;
-};
+        const AtomID &atomID() const;
 
-/** This ID class identifies segments that contain atoms that
-    match the passed AtomID
+        ChainsWithAtoms &operator=(const ChainsWithAtoms &other);
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT SegsWithAtoms : public SegID
-{
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const SegsWithAtoms&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SegsWithAtoms&);
+        bool operator==(const ChainsWithAtoms &other) const;
+        bool operator!=(const ChainsWithAtoms &other) const;
 
-public:
-    SegsWithAtoms();
-    SegsWithAtoms(const AtomID &atomid);
-    SegsWithAtoms(const SegsWithAtoms &other);
+        QList<ChainIdx> map(const MolInfo &molinfo) const;
 
-    ~SegsWithAtoms();
+    private:
+        AtomIdentifier atomid;
+    };
 
-    static const char* typeName();
+    /** This ID class identifies segments that contain atoms that
+        match the passed AtomID
 
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT SegsWithAtoms : public SegID
     {
-        return SegsWithAtoms::typeName();
-    }
 
-    SegsWithAtoms* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const SegsWithAtoms &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, SegsWithAtoms &);
 
-    bool isNull() const;
+    public:
+        SegsWithAtoms();
+        SegsWithAtoms(const AtomID &atomid);
+        SegsWithAtoms(const SegsWithAtoms &other);
 
-    uint hash() const;
+        ~SegsWithAtoms();
 
-    QString toString() const;
+        static const char *typeName();
 
-    const AtomID& atomID() const;
+        const char *what() const
+        {
+            return SegsWithAtoms::typeName();
+        }
 
-    SegsWithAtoms& operator=(const SegsWithAtoms &other);
+        SegsWithAtoms *clone() const;
 
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
+        bool isNull() const;
 
-    bool operator==(const SegsWithAtoms &other) const;
-    bool operator!=(const SegsWithAtoms &other) const;
+        uint hash() const;
 
-    QList<SegIdx> map(const MolInfo &molinfo) const;
+        QString toString() const;
 
-private:
-    AtomIdentifier atomid;
-};
+        const AtomID &atomID() const;
 
-}
+        SegsWithAtoms &operator=(const SegsWithAtoms &other);
 
-Q_DECLARE_METATYPE( SireMol::ResWithAtoms )
-Q_DECLARE_METATYPE( SireMol::CGsWithAtoms )
-Q_DECLARE_METATYPE( SireMol::ChainsWithAtoms )
-Q_DECLARE_METATYPE( SireMol::SegsWithAtoms )
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
-SIRE_EXPOSE_CLASS( SireMol::ResWithAtoms )
-SIRE_EXPOSE_CLASS( SireMol::CGsWithAtoms )
-SIRE_EXPOSE_CLASS( SireMol::ChainsWithAtoms )
-SIRE_EXPOSE_CLASS( SireMol::SegsWithAtoms )
+        bool operator==(const SegsWithAtoms &other) const;
+        bool operator!=(const SegsWithAtoms &other) const;
+
+        QList<SegIdx> map(const MolInfo &molinfo) const;
+
+    private:
+        AtomIdentifier atomid;
+    };
+
+} // namespace SireMol
+
+Q_DECLARE_METATYPE(SireMol::ResWithAtoms)
+Q_DECLARE_METATYPE(SireMol::CGsWithAtoms)
+Q_DECLARE_METATYPE(SireMol::ChainsWithAtoms)
+Q_DECLARE_METATYPE(SireMol::SegsWithAtoms)
+
+SIRE_EXPOSE_CLASS(SireMol::ResWithAtoms)
+SIRE_EXPOSE_CLASS(SireMol::CGsWithAtoms)
+SIRE_EXPOSE_CLASS(SireMol::ChainsWithAtoms)
+SIRE_EXPOSE_CLASS(SireMol::SegsWithAtoms)
 
 SIRE_END_HEADER
 

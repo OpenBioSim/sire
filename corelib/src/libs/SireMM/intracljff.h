@@ -30,26 +30,26 @@
 
 #include "cljpotential.h"
 
-#include "SireFF/intra2b3dff.hpp"
 #include "SireFF/intra2b2g3dff.hpp"
+#include "SireFF/intra2b3dff.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
 
-using SireFF::Intra2BFF;
-using SireFF::Intra2B3DFF;
-using SireFF::Intra2B2GFF;
-using SireFF::Intra2B2G3DFF;
+    using SireFF::Intra2B2G3DFF;
+    using SireFF::Intra2B2GFF;
+    using SireFF::Intra2B3DFF;
+    using SireFF::Intra2BFF;
 
-typedef Intra2BFF< CLJPotentialInterface<IntraCLJPotential> > IntraCLJFFBase;
-typedef Intra2B3DFF< CLJPotentialInterface<IntraCLJPotential> > IntraCLJFF;
+    typedef Intra2BFF<CLJPotentialInterface<IntraCLJPotential>> IntraCLJFFBase;
+    typedef Intra2B3DFF<CLJPotentialInterface<IntraCLJPotential>> IntraCLJFF;
 
-typedef Intra2B2GFF< CLJPotentialInterface<IntraCLJPotential> > IntraGroupCLJFFBase;
-typedef Intra2B2G3DFF< CLJPotentialInterface<IntraCLJPotential> > IntraGroupCLJFF;
+    typedef Intra2B2GFF<CLJPotentialInterface<IntraCLJPotential>> IntraGroupCLJFFBase;
+    typedef Intra2B2G3DFF<CLJPotentialInterface<IntraCLJPotential>> IntraGroupCLJFF;
 
-}
+} // namespace SireMM
 
 Q_DECLARE_METATYPE(SireMM::IntraCLJFFBase);
 Q_DECLARE_METATYPE(SireMM::IntraCLJFF);
@@ -57,42 +57,32 @@ Q_DECLARE_METATYPE(SireMM::IntraCLJFF);
 Q_DECLARE_METATYPE(SireMM::IntraGroupCLJFFBase);
 Q_DECLARE_METATYPE(SireMM::IntraGroupCLJFF);
 
-SIRE_EXPOSE_ALIAS( SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>,
-                   SireMM::CLJPotentialInterface_IntraCLJPotential_ )
+SIRE_EXPOSE_ALIAS(SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>,
+                  SireMM::CLJPotentialInterface_IntraCLJPotential_)
 
-SIRE_EXPOSE_ALIAS(
-  SireFF::Intra2BFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >,
-  SireMM::IntraCLJFFBase )
+SIRE_EXPOSE_ALIAS(SireFF::Intra2BFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>>, SireMM::IntraCLJFFBase)
 
-SIRE_EXPOSE_ALIAS(
-  SireFF::Intra2B3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >,
-  SireMM::IntraCLJFF )
+SIRE_EXPOSE_ALIAS(SireFF::Intra2B3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>>, SireMM::IntraCLJFF)
 
-SIRE_EXPOSE_ALIAS(
-  SireFF::Intra2B2GFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >,
-  SireMM::IntraGroupCLJFFBase )
+SIRE_EXPOSE_ALIAS(SireFF::Intra2B2GFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>>,
+                  SireMM::IntraGroupCLJFFBase)
 
-SIRE_EXPOSE_ALIAS(
-  SireFF::Intra2B2G3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >,
-  SireMM::IntraGroupCLJFF )
+SIRE_EXPOSE_ALIAS(SireFF::Intra2B2G3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>>,
+                  SireMM::IntraGroupCLJFF)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 
 template class SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>;
 
-template class
-SireFF::Intra2BFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >;
+template class SireFF::Intra2BFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>>;
 
-template class
-SireFF::Intra2B3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >;
+template class SireFF::Intra2B3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>>;
 
-template class
-SireFF::Intra2B2GFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >;
+template class SireFF::Intra2B2GFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>>;
 
-template class
-SireFF::Intra2B2G3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential> >;
+template class SireFF::Intra2B2G3DFF<SireMM::CLJPotentialInterface<SireMM::IntraCLJPotential>>;
 
-#endif //SIRE_INSTANTIATE_TEMPLATES
+#endif // SIRE_INSTANTIATE_TEMPLATES
 
 SIRE_END_HEADER
 

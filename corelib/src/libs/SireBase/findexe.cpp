@@ -27,10 +27,10 @@
 
 #include "findexe.h"
 
-#include <QRegExp>
-#include <QStringList>
 #include <QDir>
 #include <QProcess>
+#include <QRegExp>
+#include <QStringList>
 
 #include "SireError/errors.h"
 
@@ -43,13 +43,13 @@ QFileInfo SireBase::findExe(const QString &exe)
     const QString splitChar(":");
     const QString exeSuffix;
 #endif
-    //does it exist in the current directory?
-    QFileInfo progfile( exe );
+    // does it exist in the current directory?
+    QFileInfo progfile(exe);
 
     if (progfile.isExecutable())
         return progfile;
 
-    //try to find exe in the application PATH
+    // try to find exe in the application PATH
     QStringList env_variables = QProcess::systemEnvironment();
 
     QRegExp rexp("^PATH=(.*)");
@@ -68,18 +68,19 @@ QFileInfo SireBase::findExe(const QString &exe)
 
     foreach (QString dir, path)
     {
-        QFileInfo new_exe( QDir(dir).filePath(progfile.fileName() + exeSuffix) );
+        QFileInfo new_exe(QDir(dir).filePath(progfile.fileName() + exeSuffix));
 
         if (new_exe.isExecutable())
         {
-            //we have found the executable!
+            // we have found the executable!
             return new_exe;
         }
     }
 
-    throw SireError::process_error( QObject::tr(
-              "Could not find the executable \"%1\" in the current directory, nor "
-              "in the system PATH.").arg(exe), CODELOC );
+    throw SireError::process_error(QObject::tr("Could not find the executable \"%1\" in the current directory, nor "
+                                               "in the system PATH.")
+                                       .arg(exe),
+                                   CODELOC);
 
     return QFileInfo();
 }

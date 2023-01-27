@@ -26,17 +26,17 @@
 \*********************************************/
 
 #include "symbolexpression.h"
-#include "symbol.h"
 #include "function.h"
+#include "symbol.h"
 
 #include <boost/assert.hpp>
 
 using namespace SireCAS;
 
 /** Return the symbol */
-const Symbol& SymbolExpression::symbol() const
+const Symbol &SymbolExpression::symbol() const
 {
-    BOOST_ASSERT( _sym.isA<Symbol>() );
+    BOOST_ASSERT(_sym.isA<Symbol>());
     return _sym.asA<Symbol>();
 }
 
@@ -48,8 +48,8 @@ bool SymbolExpression::isFunction() const
 
 /** Return the symbol as a function - this is only safe
     if 'isFunction()' returns true */
-const Function& SymbolExpression::function() const
+const Function &SymbolExpression::function() const
 {
-    BOOST_ASSERT( _sym.isA<Function>() );
+    BOOST_ASSERT(_sym.isA<Function>());
     return _sym.asA<Function>();
 }

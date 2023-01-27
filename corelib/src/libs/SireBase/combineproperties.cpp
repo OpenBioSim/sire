@@ -37,26 +37,23 @@ using namespace SireBase;
 using namespace SireID;
 using namespace SireStream;
 
-static const RegisterMetaType<CombineProperties> r_combineprops( MAGIC_ONLY,
-                                                    CombineProperties::typeName() );
+static const RegisterMetaType<CombineProperties> r_combineprops(MAGIC_ONLY, CombineProperties::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const CombineProperties &combineprops)
+QDataStream &operator<<(QDataStream &ds, const CombineProperties &combineprops)
 {
     writeHeader(ds, r_combineprops, 1);
 
     SharedDataStream sds(ds);
 
     sds << combineprops.property_sources << combineprops.combined_property
-        << static_cast<const Property&>(combineprops);
+        << static_cast<const Property &>(combineprops);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                        CombineProperties &combineprops)
+QDataStream &operator>>(QDataStream &ds, CombineProperties &combineprops)
 {
     VersionID v = readHeader(ds, r_combineprops);
 
@@ -64,22 +61,21 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> combineprops.property_sources >> combineprops.combined_property
-            >> static_cast<Property&>(combineprops);
+        sds >> combineprops.property_sources >> combineprops.combined_property >> static_cast<Property &>(combineprops);
     }
     else
-        throw version_error( v, "1", r_combineprops, CODELOC );
+        throw version_error(v, "1", r_combineprops, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 CombineProperties::CombineProperties() : Property()
-{}
+{
+}
 
 /** Construct for just the single passed property */
-CombineProperties::CombineProperties(const PropertyName &source)
-                  : Property()
+CombineProperties::CombineProperties(const PropertyName &source) : Property()
 {
     if (not source.isNull())
     {
@@ -108,19 +104,17 @@ static QString getSource(const PropertyName &name)
     return name.source();
 }
 
-template<class T>
+template <class T>
 QVector<PropertyName> combine_properties(const T &props)
 {
-    QHash<QString,PropertyName> properties;
+    QHash<QString, PropertyName> properties;
 
-    for (typename T::const_iterator it = props.constBegin();
-         it != props.constEnd();
-         ++it)
+    for (typename T::const_iterator it = props.constBegin(); it != props.constEnd(); ++it)
     {
-        if ( ::hasSource(*it) )
+        if (::hasSource(*it))
         {
-            if (not properties.contains( ::getSource(*it) ))
-                properties.insert( ::getSource(*it), *it );
+            if (not properties.contains(::getSource(*it)))
+                properties.insert(::getSource(*it), *it);
         }
     }
 
@@ -133,9 +127,7 @@ QVector<PropertyName> combine_properties(const T &props)
 }
 
 /** Construct to combine just the passed two properties */
-CombineProperties::CombineProperties(const PropertyName &property0,
-                                     const PropertyName &property1)
-                  : Property()
+CombineProperties::CombineProperties(const PropertyName &property0, const PropertyName &property1) : Property()
 {
     QVector<PropertyName> props(2);
     props[0] = property0;
@@ -146,37 +138,41 @@ CombineProperties::CombineProperties(const PropertyName &property0,
 
 /** Construct to combine together the list of passed properties */
 CombineProperties::CombineProperties(const QList<PropertyName> &properties)
-                  : Property(), property_sources( ::combine_properties(properties) )
-{}
+    : Property(), property_sources(::combine_properties(properties))
+{
+}
 
 /** Construct to combine together the list of passed properties */
 CombineProperties::CombineProperties(const QList<QString> &properties)
-                  : Property(), property_sources( ::combine_properties(properties) )
-{}
+    : Property(), property_sources(::combine_properties(properties))
+{
+}
 
 /** Construct to combine together the list of passed properties */
 CombineProperties::CombineProperties(const QVector<PropertyName> &properties)
-                  : Property(), property_sources( ::combine_properties(properties) )
-{}
+    : Property(), property_sources(::combine_properties(properties))
+{
+}
 
 /** Construct to combine together the list of passed properties */
 CombineProperties::CombineProperties(const QVector<QString> &properties)
-                  : Property(), property_sources( ::combine_properties(properties) )
-{}
+    : Property(), property_sources(::combine_properties(properties))
+{
+}
 
 /** Copy constructor */
 CombineProperties::CombineProperties(const CombineProperties &other)
-                  : Property(other),
-                    property_sources(other.property_sources),
-                    combined_property(other.combined_property)
-{}
+    : Property(other), property_sources(other.property_sources), combined_property(other.combined_property)
+{
+}
 
 /** Destructor */
 CombineProperties::~CombineProperties()
-{}
+{
+}
 
 /** Copy assignment operator */
-CombineProperties& CombineProperties::operator=(const CombineProperties &other)
+CombineProperties &CombineProperties::operator=(const CombineProperties &other)
 {
     if (this != &other)
     {
@@ -191,10 +187,8 @@ CombineProperties& CombineProperties::operator=(const CombineProperties &other)
 /** Comparison operator */
 bool CombineProperties::operator==(const CombineProperties &other) const
 {
-    return this == &other or
-           ( property_sources == other.property_sources and
-             combined_property == other.combined_property and
-             Property::operator==(other) );
+    return this == &other or (property_sources == other.property_sources and
+                              combined_property == other.combined_property and Property::operator==(other));
 }
 
 /** Comparison operator */
@@ -207,16 +201,16 @@ bool CombineProperties::operator!=(const CombineProperties &other) const
 
     \throw SireID::invalid_index
 */
-const PropertyName& CombineProperties::operator[](int i) const
+const PropertyName &CombineProperties::operator[](int i) const
 {
-    return property_sources.constData()[ Index(i).map(property_sources.count()) ];
+    return property_sources.constData()[Index(i).map(property_sources.count())];
 }
 
 /** Return the ith property source
 
     \throw SireID::invalid_index
 */
-const PropertyName& CombineProperties::at(int i) const
+const PropertyName &CombineProperties::at(int i) const
 {
     return this->operator[](i);
 }
@@ -251,8 +245,7 @@ bool CombineProperties::isEmpty() const
 /** Return a string representation of this combination */
 QString CombineProperties::toString() const
 {
-    return QString( "%1( nSources() == %2 )" )
-                .arg(this->what()).arg(this->nSources());
+    return QString("%1( nSources() == %2 )").arg(this->what()).arg(this->nSources());
 }
 
 CombineProperties::const_iterator CombineProperties::constBegin() const
@@ -277,7 +270,7 @@ CombineProperties::const_iterator CombineProperties::end() const
 
 /** Return the combined property. This will be null if this property
     has not been updated, or if there are no properties to combine */
-const Property& CombineProperties::combinedProperty() const
+const Property &CombineProperties::combinedProperty() const
 {
     return combined_property;
 }

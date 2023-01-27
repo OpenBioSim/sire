@@ -1,6 +1,6 @@
 
-#include "SireMaths/multifloat.h"
 #include "SireMaths/multidouble.h"
+#include "SireMaths/multifloat.h"
 #include "SireMaths/rangenerator.h"
 
 #include <QElapsedTimer>
@@ -17,19 +17,19 @@ void compareErrors(const QVector<MultiFloat> &exact, const QVector<MultiFloat> &
                    const QVector<MultiFloat> &approx_nr)
 {
     MultiFloat err(0), err_nr(0);
-    for (int i=0; i<exact.count(); ++i)
+    for (int i = 0; i < exact.count(); ++i)
     {
         MultiFloat del = exact[i] - approx[i];
-        err += del*del;
+        err += del * del;
         del = exact[i] - approx_nr[i];
-        err_nr += del*del;
+        err_nr += del * del;
     }
 
     double rmsd_err = err.sum();
     double rmsd_err_nr = err_nr.sum();
     long count = MultiFloat::count() * exact.count();
-    qDebug() << "Approx error = " << std::sqrt(rmsd_err/count);
-    qDebug() << "Approx_nr error = " << std::sqrt(rmsd_err_nr/count);
+    qDebug() << "Approx error = " << std::sqrt(rmsd_err / count);
+    qDebug() << "Approx_nr error = " << std::sqrt(rmsd_err_nr / count);
 }
 
 int main(int argc, const char **argv)
@@ -38,15 +38,15 @@ int main(int argc, const char **argv)
 
     qDebug() << "Calculating lots of square roots and approximations....";
 
-    #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-        float *x = (float*)_mm_malloc( NTEST*sizeof(float), 32 );
-    #else
-    #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
-        float *x = (float*)_mm_malloc( NTEST*sizeof(float), 16 );
-    #else
-        float *x = (float*)malloc( NTEST*sizeof(float) );
-    #endif
-    #endif
+#ifdef MULTIFLOAT_AVX_IS_AVAILABLE
+    float *x = (float *)_mm_malloc(NTEST * sizeof(float), 32);
+#else
+#ifdef MULTIFLOAT_SSE_IS_AVAILABLE
+    float *x = (float *)_mm_malloc(NTEST * sizeof(float), 16);
+#else
+    float *x = (float *)malloc(NTEST * sizeof(float));
+#endif
+#endif
 
     RanGenerator rand;
     rand.seed(1234561);
@@ -55,7 +55,7 @@ int main(int argc, const char **argv)
     {
         t.start();
 
-        for (int i=0; i<NTEST; ++i)
+        for (int i = 0; i < NTEST; ++i)
         {
             x[i] = rand.rand(0.0001, 10.0);
         }
@@ -82,9 +82,9 @@ int main(int argc, const char **argv)
     {
         MultiFloat sum(0);
 
-        for (int j=0; j<NLOOPS; ++j)
+        for (int j = 0; j < NLOOPS; ++j)
         {
-            for (int i=0; i<xf.count(); ++i)
+            for (int i = 0; i < xf.count(); ++i)
             {
                 exact[i] = xf[i].sqrt();
             }
@@ -95,7 +95,7 @@ int main(int argc, const char **argv)
         qDebug() << "Sum" << sum.sum();
         int ms = t.elapsed();
         qDebug() << "Took" << ms << "ms";
-        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS*NTEST));
+        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS * NTEST));
     }
 
     qDebug() << "Calculating approx answers...";
@@ -103,9 +103,9 @@ int main(int argc, const char **argv)
     {
         MultiFloat sum(0);
 
-        for (int j=0; j<NLOOPS; ++j)
+        for (int j = 0; j < NLOOPS; ++j)
         {
-            for (int i=0; i<xf.count(); ++i)
+            for (int i = 0; i < xf.count(); ++i)
             {
                 approx[i] = xf[i].sqrt_approx();
             }
@@ -116,7 +116,7 @@ int main(int argc, const char **argv)
         qDebug() << "Sum" << sum.sum();
         int ms = t.elapsed();
         qDebug() << "Took" << ms << "ms";
-        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS*NTEST));
+        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS * NTEST));
     }
 
     qDebug() << "Calculating approx_nr answers...";
@@ -124,9 +124,9 @@ int main(int argc, const char **argv)
     {
         MultiFloat sum(0);
 
-        for (int j=0; j<NLOOPS; ++j)
+        for (int j = 0; j < NLOOPS; ++j)
         {
-            for (int i=0; i<xf.count(); ++i)
+            for (int i = 0; i < xf.count(); ++i)
             {
                 approx_nr[i] = xf[i].sqrt_approx_nr();
             }
@@ -137,7 +137,7 @@ int main(int argc, const char **argv)
         qDebug() << "Sum" << sum.sum();
         int ms = t.elapsed();
         qDebug() << "Took" << ms << "ms";
-        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS*NTEST));
+        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS * NTEST));
     }
 
     qDebug() << xf[0].toString();
@@ -153,9 +153,9 @@ int main(int argc, const char **argv)
     {
         MultiFloat sum(0);
 
-        for (int j=0; j<NLOOPS; ++j)
+        for (int j = 0; j < NLOOPS; ++j)
         {
-            for (int i=0; i<xf.count(); ++i)
+            for (int i = 0; i < xf.count(); ++i)
             {
                 exact[i] = xf[i].rsqrt();
             }
@@ -166,7 +166,7 @@ int main(int argc, const char **argv)
         qDebug() << "Sum" << sum.sum();
         int ms = t.elapsed();
         qDebug() << "Took" << ms << "ms";
-        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS*NTEST));
+        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS * NTEST));
     }
 
     qDebug() << "Calculating approx answers...";
@@ -174,9 +174,9 @@ int main(int argc, const char **argv)
     {
         MultiFloat sum(0);
 
-        for (int j=0; j<NLOOPS; ++j)
+        for (int j = 0; j < NLOOPS; ++j)
         {
-            for (int i=0; i<xf.count(); ++i)
+            for (int i = 0; i < xf.count(); ++i)
             {
                 approx[i] = xf[i].rsqrt_approx();
             }
@@ -187,7 +187,7 @@ int main(int argc, const char **argv)
         qDebug() << "Sum" << sum.sum();
         int ms = t.elapsed();
         qDebug() << "Took" << ms << "ms";
-        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS*NTEST));
+        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS * NTEST));
     }
 
     qDebug() << "Calculating approx_nr answers...";
@@ -195,9 +195,9 @@ int main(int argc, const char **argv)
     {
         MultiFloat sum(0);
 
-        for (int j=0; j<NLOOPS; ++j)
+        for (int j = 0; j < NLOOPS; ++j)
         {
-            for (int i=0; i<xf.count(); ++i)
+            for (int i = 0; i < xf.count(); ++i)
             {
                 approx_nr[i] = xf[i].rsqrt_approx_nr();
             }
@@ -208,7 +208,7 @@ int main(int argc, const char **argv)
         qDebug() << "Sum" << sum.sum();
         int ms = t.elapsed();
         qDebug() << "Took" << ms << "ms";
-        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS*NTEST));
+        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS * NTEST));
     }
 
     qDebug() << xf[0].toString();
@@ -224,9 +224,9 @@ int main(int argc, const char **argv)
     {
         MultiFloat sum(0);
 
-        for (int j=0; j<NLOOPS; ++j)
+        for (int j = 0; j < NLOOPS; ++j)
         {
-            for (int i=0; i<xf.count(); ++i)
+            for (int i = 0; i < xf.count(); ++i)
             {
                 exact[i] = xf[i].reciprocal();
             }
@@ -237,7 +237,7 @@ int main(int argc, const char **argv)
         qDebug() << "Sum" << sum.sum();
         int ms = t.elapsed();
         qDebug() << "Took" << ms << "ms";
-        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS*NTEST));
+        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS * NTEST));
     }
 
     qDebug() << "Calculating approx answers...";
@@ -245,9 +245,9 @@ int main(int argc, const char **argv)
     {
         MultiFloat sum(0);
 
-        for (int j=0; j<NLOOPS; ++j)
+        for (int j = 0; j < NLOOPS; ++j)
         {
-            for (int i=0; i<xf.count(); ++i)
+            for (int i = 0; i < xf.count(); ++i)
             {
                 approx[i] = xf[i].reciprocal_approx();
             }
@@ -258,7 +258,7 @@ int main(int argc, const char **argv)
         qDebug() << "Sum" << sum.sum();
         int ms = t.elapsed();
         qDebug() << "Took" << ms << "ms";
-        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS*NTEST));
+        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS * NTEST));
     }
 
     qDebug() << "Calculating approx_nr answers...";
@@ -266,9 +266,9 @@ int main(int argc, const char **argv)
     {
         MultiFloat sum(0);
 
-        for (int j=0; j<NLOOPS; ++j)
+        for (int j = 0; j < NLOOPS; ++j)
         {
-            for (int i=0; i<xf.count(); ++i)
+            for (int i = 0; i < xf.count(); ++i)
             {
                 approx_nr[i] = xf[i].reciprocal_approx_nr();
             }
@@ -279,7 +279,7 @@ int main(int argc, const char **argv)
         qDebug() << "Sum" << sum.sum();
         int ms = t.elapsed();
         qDebug() << "Took" << ms << "ms";
-        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS*NTEST));
+        qDebug() << "Nanoseconds per operation:" << ((1000000.0 * ms) / (NLOOPS * NTEST));
     }
 
     qDebug() << xf[0].toString();
@@ -293,4 +293,3 @@ int main(int argc, const char **argv)
 
     return 0;
 }
-

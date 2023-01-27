@@ -31,126 +31,125 @@
 #include "SireBase/propertymap.h"
 #include "SireBase/shareddatapointer.hpp"
 
-#include "SireMol/molecule.h"
-#include "SireMol/partialmolecule.h"
-#include "SireMol/bondid.h"
 #include "SireMol/angleid.h"
-#include "SireMol/dihedralid.h"
 #include "SireMol/atomidx.h"
-#include "SireMol/mover.hpp"
+#include "SireMol/bondid.h"
+#include "SireMol/dihedralid.h"
+#include "SireMol/molecule.h"
 #include "SireMol/molviewproperty.h"
+#include "SireMol/mover.hpp"
+#include "SireMol/partialmolecule.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class AmberParameters;
+    class AmberParameters;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AmberParameters&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AmberParameters&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AmberParameters &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AmberParameters &);
 
 namespace SireMol
 {
- class BondID;
- class AngleID;
- class DihedralID;
- class Molecule;
- class MoleculeData;
- class MoleculeInfoData;
-}
+    class BondID;
+    class AngleID;
+    class DihedralID;
+    class Molecule;
+    class MoleculeData;
+    class MoleculeInfoData;
+} // namespace SireMol
 
 namespace SireMol
 {
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-using SireMol::BondID;
-using SireMol::AngleID;
-using SireMol::DihedralID;
-using SireMol::Molecule;
-using SireMol::MoleculeData;
-using SireMol::MoleculeInfoData;
+    using SireMol::AngleID;
+    using SireMol::BondID;
+    using SireMol::DihedralID;
+    using SireMol::Molecule;
+    using SireMol::MoleculeData;
+    using SireMol::MoleculeInfoData;
 
-/** This class stores AMBER bonded force field parameters for
-    a collection of bonds, angles and dihedrals
+    /** This class stores AMBER bonded force field parameters for
+        a collection of bonds, angles and dihedrals
 
-    @author Julien Michel
- */
-class SIREMOL_EXPORT AmberParameters
-    : public SireBase::ConcreteProperty<AmberParameters,SireMol::MoleculeProperty>
-{
+        @author Julien Michel
+     */
+    class SIREMOL_EXPORT AmberParameters : public SireBase::ConcreteProperty<AmberParameters, SireMol::MoleculeProperty>
+    {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const SireMol::AmberParameters&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SireMol::AmberParameters&);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const SireMol::AmberParameters &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, SireMol::AmberParameters &);
 
- public:
-    AmberParameters();
-    AmberParameters(const MoleculeData &molecule);
-    AmberParameters(const AmberParameters &other);
+    public:
+        AmberParameters();
+        AmberParameters(const MoleculeData &molecule);
+        AmberParameters(const AmberParameters &other);
 
-    ~AmberParameters();
+        ~AmberParameters();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    AmberParameters& operator=(const AmberParameters &other);
+        AmberParameters &operator=(const AmberParameters &other);
 
-    bool operator==(const AmberParameters &other) const;
-    bool operator!=(const AmberParameters &other) const;
+        bool operator==(const AmberParameters &other) const;
+        bool operator!=(const AmberParameters &other) const;
 
-    const SireMol::MoleculeInfoData& info() const;
+        const SireMol::MoleculeInfoData &info() const;
 
-    bool isCompatibleWith(const SireMol::MoleculeInfoData &molinfo) const;
+        bool isCompatibleWith(const SireMol::MoleculeInfoData &molinfo) const;
 
-    void add(const BondID &bond, const double &k, const double &ro);
-    void remove(const BondID &bond);
-    QList<double> getParams(const BondID &bond);
-    QList<BondID> getAllBonds();
+        void add(const BondID &bond, const double &k, const double &ro);
+        void remove(const BondID &bond);
+        QList<double> getParams(const BondID &bond);
+        QList<BondID> getAllBonds();
 
-    void add(const AngleID &angle, const double &k, const double &theta0);
-    void remove(const AngleID &angle);
-    QList<double> getParams(const AngleID &angle);
-    QList<AngleID> getAllAngles();
+        void add(const AngleID &angle, const double &k, const double &theta0);
+        void remove(const AngleID &angle);
+        QList<double> getParams(const AngleID &angle);
+        QList<AngleID> getAllAngles();
 
-    void add(const DihedralID &dihedral, const double &v, const double &periodicity, const double &phase);
-    void remove(const DihedralID &dihedral);
-    QList<double> getParams(const DihedralID &dihedral);
-    QList<DihedralID> getAllDihedrals();
+        void add(const DihedralID &dihedral, const double &v, const double &periodicity, const double &phase);
+        void remove(const DihedralID &dihedral);
+        QList<double> getParams(const DihedralID &dihedral);
+        QList<DihedralID> getAllDihedrals();
 
-    void add(const ImproperID &improper, const double &v, const double &periodicity, const double &phase);
-    void remove(const ImproperID &improper);
-    QList<double> getParams(const ImproperID &improper);
-    QList<ImproperID> getAllImpropers();
+        void add(const ImproperID &improper, const double &v, const double &periodicity, const double &phase);
+        void remove(const ImproperID &improper);
+        QList<double> getParams(const ImproperID &improper);
+        QList<ImproperID> getAllImpropers();
 
-    void add14Pair(const BondID &pair, const double &cscl, const double &ljscl);
-    void remove14Pair(const BondID &pair);
-    QList<double> get14PairParams(const BondID &pair);
-    QList<BondID> getAll14Pairs();
+        void add14Pair(const BondID &pair, const double &cscl, const double &ljscl);
+        void remove14Pair(const BondID &pair);
+        QList<double> get14PairParams(const BondID &pair);
+        QList<BondID> getAll14Pairs();
 
- private:
-    /** The molecule that this flexibility operates on */
-    SireBase::SharedDataPointer<SireMol::MoleculeInfoData> molinfo;
+    private:
+        /** The molecule that this flexibility operates on */
+        SireBase::SharedDataPointer<SireMol::MoleculeInfoData> molinfo;
 
-    /**A Hash of force constants and equilibrium bond lengths for bonds **/
-    QHash< BondID, QList<double> > bonds;
+        /**A Hash of force constants and equilibrium bond lengths for bonds **/
+        QHash<BondID, QList<double>> bonds;
 
-    /**A Hash of force constants and equilibrium bond angles for angles **/
-    QHash< AngleID, QList<double> > angles;
+        /**A Hash of force constants and equilibrium bond angles for angles **/
+        QHash<AngleID, QList<double>> angles;
 
-    /**A Hash of torsional parameters for dihedrals **/
-    QHash< DihedralID, QList<double> > dihedrals;
+        /**A Hash of torsional parameters for dihedrals **/
+        QHash<DihedralID, QList<double>> dihedrals;
 
-    /**A Hash of torsional parameters for impropers **/
-    QHash< ImproperID, QList<double> > impropers;
+        /**A Hash of torsional parameters for impropers **/
+        QHash<ImproperID, QList<double>> impropers;
 
-    /**A Hash of coulombic and lennard jones scale factors for 1,4 pairs**/
-    QHash< BondID, QList<double> > nb14pairs;
-};
+        /**A Hash of coulombic and lennard jones scale factors for 1,4 pairs**/
+        QHash<BondID, QList<double>> nb14pairs;
+    };
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::AmberParameters )
+Q_DECLARE_METATYPE(SireMol::AmberParameters)
 
-SIRE_EXPOSE_CLASS( SireMol::AmberParameters )
+SIRE_EXPOSE_CLASS(SireMol::AmberParameters)
 
 SIRE_END_HEADER
 

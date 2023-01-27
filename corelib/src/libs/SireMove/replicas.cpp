@@ -53,9 +53,7 @@ QDataStream &operator<<(QDataStream &ds, const Replicas &replicas)
 
     SharedDataStream sds(ds);
 
-    sds << replicas.replica_ids
-        << replicas.replica_history
-        << static_cast<const SupraSystem&>(replicas);
+    sds << replicas.replica_ids << replicas.replica_history << static_cast<const SupraSystem &>(replicas);
 
     return ds;
 }
@@ -68,25 +66,22 @@ QDataStream &operator>>(QDataStream &ds, Replicas &replicas)
     if (v == 3)
     {
         SharedDataStream sds(ds);
-        sds >> replicas.replica_ids
-            >> replicas.replica_history
-            >> static_cast<SupraSystem&>(replicas);
+        sds >> replicas.replica_ids >> replicas.replica_history >> static_cast<SupraSystem &>(replicas);
     }
     else if (v == 2)
     {
         SharedDataStream sds(ds);
-        sds >> replicas.replica_ids
-            >> static_cast<SupraSystem&>(replicas);
+        sds >> replicas.replica_ids >> static_cast<SupraSystem &>(replicas);
 
         replicas.replica_history.clear();
     }
     else if (v < 2)
     {
-        throw SireError::program_bug( QObject::tr(
-            "Reading of version %1 of SireMove::Replicas should have "
-            "been handled by the deprecated classes reader. Something has "
-            "gone wrong if they are are being read here...")
-                .arg(v), CODELOC );
+        throw SireError::program_bug(QObject::tr("Reading of version %1 of SireMove::Replicas should have "
+                                                 "been handled by the deprecated classes reader. Something has "
+                                                 "gone wrong if they are are being read here...")
+                                         .arg(v),
+                                     CODELOC);
     }
     else
         throw version_error(v, "2,3", r_replicas, CODELOC);
@@ -95,8 +90,9 @@ QDataStream &operator>>(QDataStream &ds, Replicas &replicas)
 }
 
 /** Constructor */
-Replicas::Replicas() : ConcreteProperty<Replicas,SupraSystem>()
-{}
+Replicas::Replicas() : ConcreteProperty<Replicas, SupraSystem>()
+{
+}
 
 /** Reset the replica IDs - this sets the ID of the ith replica to 'i' */
 void Replicas::resetReplicaIDs()
@@ -105,7 +101,7 @@ void Replicas::resetReplicaIDs()
 
     quint32 *replica_ids_array = replica_ids.data();
 
-    for (quint32 i=0; i<n; ++i)
+    for (quint32 i = 0; i < n; ++i)
     {
         replica_ids_array[i] = i;
     }
@@ -114,13 +110,11 @@ void Replicas::resetReplicaIDs()
 }
 
 /** Construct a set of 'n' replicas */
-Replicas::Replicas(int n)
-         : ConcreteProperty<Replicas,SupraSystem>(n),
-           replica_ids(n)
+Replicas::Replicas(int n) : ConcreteProperty<Replicas, SupraSystem>(n), replica_ids(n)
 {
     if (n > 0)
     {
-        SupraSystem::setSubSystem( Replica() );
+        SupraSystem::setSubSystem(Replica());
 
         replica_ids.squeeze();
         this->resetReplicaIDs();
@@ -128,9 +122,7 @@ Replicas::Replicas(int n)
 }
 
 /** Construct a set of 'n' replicas that contain the sub-system 'system' */
-Replicas::Replicas(const System &system, int n)
-         : ConcreteProperty<Replicas,SupraSystem>(n),
-           replica_ids(n)
+Replicas::Replicas(const System &system, int n) : ConcreteProperty<Replicas, SupraSystem>(n), replica_ids(n)
 {
     if (n > 0)
     {
@@ -146,15 +138,14 @@ Replicas::Replicas(const System &system, int n)
 
 /** Construct a set of replicas from the passed array of systems */
 Replicas::Replicas(const QVector<System> &systems)
-         : ConcreteProperty<Replicas,SupraSystem>(systems.count()),
-           replica_ids(systems.count())
+    : ConcreteProperty<Replicas, SupraSystem>(systems.count()), replica_ids(systems.count())
 {
-    for (int i=0; i<systems.count(); ++i)
+    for (int i = 0; i < systems.count(); ++i)
     {
         Replica replica;
         replica.setSubSystem(systems.at(i));
 
-        SupraSystem::setSubSystem( i, replica );
+        SupraSystem::setSubSystem(i, replica);
     }
 
     replica_ids.squeeze();
@@ -163,18 +154,16 @@ Replicas::Replicas(const QVector<System> &systems)
 
 /** Construct a Replicas object that contains 'n' copies of the
     passed subsystem */
-Replicas::Replicas(const SupraSubSystem &subsystem, int n)
-         : ConcreteProperty<Replicas,SupraSystem>(n),
-           replica_ids(n)
+Replicas::Replicas(const SupraSubSystem &subsystem, int n) : ConcreteProperty<Replicas, SupraSystem>(n), replica_ids(n)
 {
     if (subsystem.isA<Replica>())
     {
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
             SupraSystem::setSubSystem(i, subsystem);
     }
     else
     {
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
             SupraSystem::setSubSystem(i, Replica(subsystem));
     }
 
@@ -183,20 +172,19 @@ Replicas::Replicas(const SupraSubSystem &subsystem, int n)
 }
 
 /** Construct from the passed SupraSystem */
-Replicas::Replicas(const SupraSystem &suprasystem)
-         : ConcreteProperty<Replicas,SupraSystem>(suprasystem.nSubSystems())
+Replicas::Replicas(const SupraSystem &suprasystem) : ConcreteProperty<Replicas, SupraSystem>(suprasystem.nSubSystems())
 {
     if (suprasystem.isA<Replicas>())
         this->operator=(suprasystem.asA<SupraSystem>());
 
     else
     {
-        for (int i=0; i<suprasystem.nSubSystems(); ++i)
+        for (int i = 0; i < suprasystem.nSubSystems(); ++i)
         {
             if (suprasystem[i].isA<Replica>())
-                SupraSystem::setSubSystem( i, suprasystem[i] );
+                SupraSystem::setSubSystem(i, suprasystem[i]);
             else
-                SupraSystem::setSubSystem( i, Replica(suprasystem[i]) );
+                SupraSystem::setSubSystem(i, Replica(suprasystem[i]));
         }
 
         replica_ids.resize(suprasystem.nSubSystems());
@@ -207,16 +195,18 @@ Replicas::Replicas(const SupraSystem &suprasystem)
 
 /** Copy constructor */
 Replicas::Replicas(const Replicas &other)
-         : ConcreteProperty<Replicas,SupraSystem>(other),
-           replica_ids(other.replica_ids), replica_history(other.replica_history)
-{}
+    : ConcreteProperty<Replicas, SupraSystem>(other), replica_ids(other.replica_ids),
+      replica_history(other.replica_history)
+{
+}
 
 /** Destructor */
 Replicas::~Replicas()
-{}
+{
+}
 
 /** Copy assignment operator */
-Replicas& Replicas::operator=(const Replicas &other)
+Replicas &Replicas::operator=(const Replicas &other)
 {
     SupraSystem::operator=(other);
 
@@ -229,8 +219,7 @@ Replicas& Replicas::operator=(const Replicas &other)
 /** Comparison operator */
 bool Replicas::operator==(const Replicas &other) const
 {
-    return replica_ids == other.replica_ids and
-           replica_history == other.replica_history and
+    return replica_ids == other.replica_ids and replica_history == other.replica_history and
            SupraSystem::operator==(other);
 }
 
@@ -242,35 +231,33 @@ bool Replicas::operator!=(const Replicas &other) const
 
 /** Internal function used to get the ith replica - there is no
     bounds checking with this function */
-Replica& Replicas::_pvt_replica(int i)
+Replica &Replicas::_pvt_replica(int i)
 {
     SupraSubSystem &subsys = SupraSystem::_pvt_subSystem(i);
 
     if (not subsys.isA<Replica>())
-        throw SireError::program_bug( QObject::tr(
-            "How did Replicas get a replica that is a %1?")
-                .arg(subsys.what()), CODELOC );
+        throw SireError::program_bug(QObject::tr("How did Replicas get a replica that is a %1?").arg(subsys.what()),
+                                     CODELOC);
 
     return subsys.asA<Replica>();
 }
 
 /** Internal function used to get the ith replica - there is no
     bounds checking with this function */
-const Replica& Replicas::_pvt_replica(int i) const
+const Replica &Replicas::_pvt_replica(int i) const
 {
     const SupraSubSystem &subsys = SupraSystem::_pvt_subSystem(i);
 
     if (not subsys.isA<Replica>())
-        throw SireError::program_bug( QObject::tr(
-            "How did Replicas get a replica that is a %1?")
-                .arg(subsys.what()), CODELOC );
+        throw SireError::program_bug(QObject::tr("How did Replicas get a replica that is a %1?").arg(subsys.what()),
+                                     CODELOC);
 
     return subsys.asA<Replica>();
 }
 
 /** Internal function used to get the ith replica - there is no
     bounds checking with this function */
-const Replica& Replicas::_pvt_constReplica(int i) const
+const Replica &Replicas::_pvt_constReplica(int i) const
 {
     return this->_pvt_replica(i);
 }
@@ -285,22 +272,22 @@ int Replicas::nReplicas() const
 
     \throw SireError::invalid_index
 */
-const Replica& Replicas::operator[](int i) const
+const Replica &Replicas::operator[](int i) const
 {
-    return Replicas::_pvt_replica( Index(i).map(this->nReplicas()) );
+    return Replicas::_pvt_replica(Index(i).map(this->nReplicas()));
 }
 
 /** Return the ith replica
 
     \throw SireError::invalid_index
 */
-const Replica& Replicas::at(int i) const
+const Replica &Replicas::at(int i) const
 {
     return Replicas::operator[](i);
 }
 
 /** Return the current IDs of the replicas (in order of replica index) */
-const QVector<quint32>& Replicas::replicaIDs() const
+const QVector<quint32> &Replicas::replicaIDs() const
 {
     return replica_ids;
 }
@@ -313,11 +300,11 @@ QVector<double> Replicas::lambdaTrajectory() const
     if (this->nReplicas() == 0)
         return QVector<double>();
 
-    QVector<double> lamtraj( this->nReplicas() );
+    QVector<double> lamtraj(this->nReplicas());
 
-    for (int i=0; i<this->nReplicas(); ++i)
+    for (int i = 0; i < this->nReplicas(); ++i)
     {
-        lamtraj[ replica_ids[i] ] = this->at(i).lambdaValue();
+        lamtraj[replica_ids[i]] = this->at(i).lambdaValue();
     }
 
     return lamtraj;
@@ -326,11 +313,11 @@ QVector<double> Replicas::lambdaTrajectory() const
 /** Collect statistics - this records the current lambdaTrajectory and adds it to the history */
 void Replicas::collectSupraStats()
 {
-    replica_history.append( lambdaTrajectory() );
+    replica_history.append(lambdaTrajectory());
 }
 
 /** Return the history of lambda values sampled by each replica */
-QList< QVector<double> > Replicas::lambdaTrajectoryHistory() const
+QList<QVector<double>> Replicas::lambdaTrajectoryHistory() const
 {
     return replica_history;
 }
@@ -406,19 +393,18 @@ void Replicas::setEnergyComponent(const Symbol &symbol)
         QSet<int> done_systems;
         done_systems.reserve(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
 
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setEnergyComponent(symbol);
-                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)),
-                                       done_systems);
+                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)), done_systems);
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -431,7 +417,7 @@ void Replicas::setEnergyComponent(const Symbol &symbol)
 */
 void Replicas::setEnergyComponent(int i, const Symbol &symbol)
 {
-    i = Index(i).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
 
     if (this->_pvt_constReplica(i).energyComponent() != symbol)
     {
@@ -452,19 +438,18 @@ void Replicas::setSpaceProperty(const PropertyName &spaceproperty)
         QSet<int> done_systems;
         done_systems.reserve(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
 
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setSpaceProperty(spaceproperty);
-                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)),
-                                       done_systems);
+                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)), done_systems);
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -477,7 +462,7 @@ void Replicas::setSpaceProperty(const PropertyName &spaceproperty)
 */
 void Replicas::setSpaceProperty(int i, const PropertyName &spaceproperty)
 {
-    i = Index(i).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
 
     if (this->_pvt_constReplica(i).spaceProperty() != spaceproperty)
     {
@@ -498,19 +483,18 @@ void Replicas::setLambdaComponent(const Symbol &symbol)
         QSet<int> done_systems;
         done_systems.reserve(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
 
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setLambdaComponent(symbol);
-                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)),
-                                       done_systems);
+                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)), done_systems);
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -524,7 +508,7 @@ void Replicas::setLambdaComponent(const Symbol &symbol)
 */
 void Replicas::setLambdaComponent(int i, const Symbol &symbol)
 {
-    i = Index(i).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
 
     if (this->_pvt_constReplica(i).lambdaComponent() != symbol)
         this->_pvt_replica(i).setLambdaComponent(symbol);
@@ -543,19 +527,18 @@ void Replicas::setLambdaValue(double value)
         QSet<int> done_systems;
         done_systems.reserve(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
 
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setLambdaValue(value);
-                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)),
-                                       done_systems);
+                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)), done_systems);
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -569,7 +552,7 @@ void Replicas::setLambdaValue(double value)
 */
 void Replicas::setLambdaValue(int i, double value)
 {
-    i = Index(i).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
 
     if (this->_pvt_constReplica(i).lambdaValue() != value)
     {
@@ -593,19 +576,18 @@ void Replicas::setTemperature(const Temperature &temperature)
         QSet<int> done_systems;
         done_systems.reserve(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
 
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setTemperature(temperature);
-                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)),
-                                       done_systems);
+                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)), done_systems);
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -620,7 +602,7 @@ void Replicas::setTemperature(const Temperature &temperature)
 */
 void Replicas::setTemperature(int i, const Temperature &temperature)
 {
-    i = Index(i).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
 
     if (this->_pvt_constReplica(i).temperature() != temperature)
     {
@@ -641,19 +623,18 @@ void Replicas::setPressure(const Pressure &pressure)
         QSet<int> done_systems;
         done_systems.reserve(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
 
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setPressure(pressure);
-                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)),
-                                       done_systems);
+                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)), done_systems);
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -668,7 +649,7 @@ void Replicas::setPressure(const Pressure &pressure)
 */
 void Replicas::setPressure(int i, const Pressure &pressure)
 {
-    i = Index(i).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
 
     if (this->_pvt_constReplica(i).pressure() != pressure)
         this->_pvt_replica(i).setPressure(pressure);
@@ -690,19 +671,18 @@ void Replicas::setFugacity(const Pressure &fugacity)
         QSet<int> done_systems;
         done_systems.reserve(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
 
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setFugacity(fugacity);
-                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)),
-                                       done_systems);
+                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)), done_systems);
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -717,7 +697,7 @@ void Replicas::setFugacity(const Pressure &fugacity)
 */
 void Replicas::setFugacity(int i, const Pressure &fugacity)
 {
-    i = Index(i).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
 
     if (this->_pvt_constReplica(i).fugacity() != fugacity)
         this->_pvt_replica(i).setFugacity(fugacity);
@@ -739,19 +719,18 @@ void Replicas::setChemicalPotential(const MolarEnergy &chemical_potential)
         QSet<int> done_systems;
         done_systems.reserve(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             const Replica *old_replica = &(this->_pvt_constReplica(i));
 
             if (not done_systems.contains(i))
             {
                 this->_pvt_replica(i).setChemicalPotential(chemical_potential);
-                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)),
-                                       done_systems);
+                this->updateSubSystems(old_replica, &(this->_pvt_constReplica(i)), done_systems);
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -766,9 +745,9 @@ void Replicas::setGenerator(const RanGenerator &generator)
 {
     int n = this->nReplicas();
 
-    for (int i=0; i<n; ++i)
+    for (int i = 0; i < n; ++i)
     {
-        this->_pvt_replica(i).setGenerator( RanGenerator(generator.randInt()) );
+        this->_pvt_replica(i).setGenerator(RanGenerator(generator.randInt()));
     }
 }
 
@@ -778,7 +757,7 @@ void Replicas::setGenerator(const RanGenerator &generator)
 */
 void Replicas::setGenerator(int i, const RanGenerator &generator)
 {
-    i = Index(i).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
     this->_pvt_replica(i).setGenerator(generator);
 }
 
@@ -790,7 +769,7 @@ void Replicas::setGenerator(int i, const RanGenerator &generator)
 */
 void Replicas::setChemicalPotential(int i, const MolarEnergy &chemical_potential)
 {
-    i = Index(i).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
 
     if (this->_pvt_constReplica(i).chemicalPotential() != chemical_potential)
         this->_pvt_replica(i).setChemicalPotential(chemical_potential);
@@ -803,21 +782,20 @@ void Replicas::setChemicalPotential(int i, const MolarEnergy &chemical_potential
 */
 void Replicas::swapSystems(int i, int j, bool swap_monitors)
 {
-    i = Index(i).map( this->nReplicas() );
-    j = Index(j).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
+    j = Index(j).map(this->nReplicas());
 
     if (i == j)
         return;
 
     Replica old_i = this->_pvt_constReplica(i);
 
-    this->_pvt_replica(i).swapInSystem( this->_pvt_constReplica(j).subSystemAndMoves(),
-                                        swap_monitors );
+    this->_pvt_replica(i).swapInSystem(this->_pvt_constReplica(j).subSystemAndMoves(), swap_monitors);
 
-    this->_pvt_replica(j).swapInSystem( old_i.subSystemAndMoves(), swap_monitors );
+    this->_pvt_replica(j).swapInSystem(old_i.subSystemAndMoves(), swap_monitors);
 
-    //swap the ID's of the replicas
-    qSwap( replica_ids[i], replica_ids[j] );
+    // swap the ID's of the replicas
+    qSwap(replica_ids[i], replica_ids[j]);
 }
 
 /** Swap the molecules between replicas i and j
@@ -826,24 +804,23 @@ void Replicas::swapSystems(int i, int j, bool swap_monitors)
 */
 void Replicas::swapMolecules(int i, int j)
 {
-    i = Index(i).map( this->nReplicas() );
-    j = Index(j).map( this->nReplicas() );
+    i = Index(i).map(this->nReplicas());
+    j = Index(j).map(this->nReplicas());
 
     if (i == j)
         return;
 
     Replica old_i = this->_pvt_constReplica(i);
 
-    this->_pvt_replica(i).swapInMolecules(
-                                this->_pvt_constReplica(j).subSystemAndMoves() );
+    this->_pvt_replica(i).swapInMolecules(this->_pvt_constReplica(j).subSystemAndMoves());
 
-    this->_pvt_replica(j).swapInMolecules( old_i.subSystemAndMoves() );
+    this->_pvt_replica(j).swapInMolecules(old_i.subSystemAndMoves());
 
-    //swap the IDs of the replicas
-    qSwap( replica_ids[i], replica_ids[j] );
+    // swap the IDs of the replicas
+    qSwap(replica_ids[i], replica_ids[j]);
 }
 
-const char* Replicas::typeName()
+const char *Replicas::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Replicas>() );
+    return QMetaType::typeName(qMetaTypeId<Replicas>());
 }

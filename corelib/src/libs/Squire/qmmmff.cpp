@@ -31,14 +31,14 @@
 #include "SireMM/cljprobe.h"
 
 #include "SireFF/energytable.h"
-#include "SireFF/forcetable.h"
 #include "SireFF/fieldtable.h"
+#include "SireFF/forcetable.h"
 #include "SireFF/potentialtable.h"
 
 #include "SireBase/booleanproperty.h"
 
-#include "SireFF/errors.h"
 #include "SireError/errors.h"
+#include "SireFF/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -61,11 +61,8 @@ QDataStream &operator<<(QDataStream &ds, const QMMMFF &qmmmff)
 
     SharedDataStream sds(ds);
 
-    sds << static_cast<const G2FF&>(qmmmff)
-        << static_cast<const QMMMElecEmbedPotential&>(qmmmff)
-        << qmmmff.qmmols
-        << qmmmff.mmmols
-        << qmmmff.intermolecular_only;
+    sds << static_cast<const G2FF &>(qmmmff) << static_cast<const QMMMElecEmbedPotential &>(qmmmff) << qmmmff.qmmols
+        << qmmmff.mmmols << qmmmff.intermolecular_only;
 
     return ds;
 }
@@ -79,10 +76,8 @@ QDataStream &operator>>(QDataStream &ds, QMMMFF &qmmmff)
     {
         SharedDataStream sds(ds);
 
-        sds >> static_cast<G2FF&>(qmmmff)
-            >> static_cast<QMMMElecEmbedPotential&>(qmmmff)
-            >> qmmmff.qmmols
-            >> qmmmff.mmmols;
+        sds >> static_cast<G2FF &>(qmmmff) >> static_cast<QMMMElecEmbedPotential &>(qmmmff) >> qmmmff.qmmols >>
+            qmmmff.mmmols;
 
         if (v == 2)
             sds >> qmmmff.intermolecular_only;
@@ -98,34 +93,32 @@ QDataStream &operator>>(QDataStream &ds, QMMMFF &qmmmff)
 }
 
 /** Construct an empty, unnamed QM/MM forcefield */
-QMMMFF::QMMMFF() : ConcreteProperty<QMMMFF,G2FF>(), FF3D(),
-                   QMMMElecEmbedPotential(), intermolecular_only(false)
+QMMMFF::QMMMFF() : ConcreteProperty<QMMMFF, G2FF>(), FF3D(), QMMMElecEmbedPotential(), intermolecular_only(false)
 {
     this->_pvt_updateName();
 }
 
 /** Construct an empty, named QM/MM forcefield */
-QMMMFF::QMMMFF(const QString &name) : ConcreteProperty<QMMMFF,G2FF>(), FF3D(),
-                                      QMMMElecEmbedPotential(), intermolecular_only(false)
+QMMMFF::QMMMFF(const QString &name)
+    : ConcreteProperty<QMMMFF, G2FF>(), FF3D(), QMMMElecEmbedPotential(), intermolecular_only(false)
 {
     G2FF::setName(name);
 }
 
 /** Copy constructor */
 QMMMFF::QMMMFF(const QMMMFF &other)
-       : ConcreteProperty<QMMMFF,G2FF>(other), FF3D(),
-         QMMMElecEmbedPotential(other),
-         ffcomponents(other.ffcomponents),
-         qmmols(other.qmmols), mmmols(other.mmmols),
-         intermolecular_only(other.intermolecular_only)
-{}
+    : ConcreteProperty<QMMMFF, G2FF>(other), FF3D(), QMMMElecEmbedPotential(other), ffcomponents(other.ffcomponents),
+      qmmols(other.qmmols), mmmols(other.mmmols), intermolecular_only(other.intermolecular_only)
+{
+}
 
 /** Destructor */
 QMMMFF::~QMMMFF()
-{}
+{
+}
 
 /** Copy assignment operator */
-QMMMFF& QMMMFF::operator=(const QMMMFF &other)
+QMMMFF &QMMMFF::operator=(const QMMMFF &other)
 {
     if (this != &other)
     {
@@ -155,33 +148,34 @@ bool QMMMFF::operator!=(const QMMMFF &other) const
 
 void QMMMFF::throwInvalidGroup(int group_id) const
 {
-    throw SireError::program_bug( QObject::tr(
-        "Program bug! The only groups in QM/MM forcefield are groups 0 and 1. "
-        "There is no group %1.").arg(group_id), CODELOC );
+    throw SireError::program_bug(QObject::tr("Program bug! The only groups in QM/MM forcefield are groups 0 and 1. "
+                                             "There is no group %1.")
+                                     .arg(group_id),
+                                 CODELOC);
 }
 
 /** Return the symbols representing the energy components of this forcefield */
-const QMMMFF::Components& QMMMFF::components() const
+const QMMMFF::Components &QMMMFF::components() const
 {
     return ffcomponents;
 }
 
 /** Return the space within which the QM molecules exist */
-const Space& QMMMFF::space() const
+const Space &QMMMFF::space() const
 {
     return QMMMElecEmbedPotential::space();
 }
 
 /** Return the switching function used to provide the nonbonded cutoff
     between the QM and MM regions */
-const SwitchingFunction& QMMMFF::switchingFunction() const
+const SwitchingFunction &QMMMFF::switchingFunction() const
 {
     return QMMMElecEmbedPotential::switchingFunction();
 }
 
 /** Return the QM program that will be used to calculate the
     energies and forces on the molecules */
-const QMProgram& QMMMFF::quantumProgram() const
+const QMProgram &QMMMFF::quantumProgram() const
 {
     return QMMMElecEmbedPotential::quantumProgram();
 }
@@ -228,7 +222,7 @@ bool QMMMFF::setQuantumProgram(const QMProgram &qmprog)
 bool QMMMFF::setZeroEnergy(MolarEnergy zero_energy)
 {
     if (intermolecular_only.value())
-        //do not set zero energy if we are only calculating intermolecular energies
+        // do not set zero energy if we are only calculating intermolecular energies
         return false;
 
     return QMMMElecEmbedPotential::setZeroEnergy(zero_energy);
@@ -247,8 +241,8 @@ bool QMMMFF::setIntermolecularOnly(bool on)
     if (intermolecular_only.value() != on)
     {
         if (on)
-            //there is no zero energy if we are only calculating intermolecular energies
-            setZeroEnergy( MolarEnergy(0) );
+            // there is no zero energy if we are only calculating intermolecular energies
+            setZeroEnergy(MolarEnergy(0));
 
         intermolecular_only = on;
         mustNowRecalculateFromScratch();
@@ -283,7 +277,7 @@ bool QMMMFF::setProperty(const QString &name, const Property &value)
 
     \throw SireBase::missing_property
 */
-const Property& QMMMFF::property(const QString &name) const
+const Property &QMMMFF::property(const QString &name) const
 {
     if (name == "intermolecularOnly")
         return intermolecular_only;
@@ -301,9 +295,9 @@ bool QMMMFF::containsProperty(const QString &name) const
 static Properties global_props;
 
 /** Return the properties available in this forcefield (and their values) */
-const Properties& QMMMFF::properties() const
+const Properties &QMMMFF::properties() const
 {
-    //dangerous, but will be fixed by me getting rid of const Properties& from the API!
+    // dangerous, but will be fixed by me getting rid of const Properties& from the API!
     global_props = QMMMElecEmbedPotential::properties();
     global_props.setProperty("intermolecularOnly", intermolecular_only);
     return global_props;
@@ -317,15 +311,12 @@ void QMMMFF::mustNowRecalculateFromScratch()
 
 void QMMMFF::energy(EnergyTable &energytable, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-						  "QMMMFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("QMMMFF does not yet support energy calculations!"), CODELOC);
 }
 
-void QMMMFF::energy(EnergyTable &energytable, const Symbol &symbol,
-		    double scale_energy)
+void QMMMFF::energy(EnergyTable &energytable, const Symbol &symbol, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "QMMMFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("QMMMFF does not yet support energy calculations!"), CODELOC);
 }
 
 /** Calculate the QM/MM forces on the molecules in this forcefield
@@ -335,8 +326,9 @@ void QMMMFF::energy(EnergyTable &energytable, const Symbol &symbol,
 void QMMMFF::force(ForceTable &forcetable, double scale_force)
 {
     if (intermolecular_only.value())
-        throw SireError::unsupported( QObject::tr("Support for QM/MM intermolecular "
-                 "only forces is not yet available."), CODELOC );
+        throw SireError::unsupported(QObject::tr("Support for QM/MM intermolecular "
+                                                 "only forces is not yet available."),
+                                     CODELOC);
     else
         QMMMElecEmbedPotential::calculateForce(qmmols, mmmols, forcetable, scale_force);
 }
@@ -345,17 +337,14 @@ void QMMMFF::force(ForceTable &forcetable, double scale_force)
     and add the results to the forces for the molecules contained
     in the table 'forcetable' - this scales the forces by
     the optional 'scale_force' */
-void QMMMFF::force(ForceTable &forcetable, const Symbol &symbol,
-                   double scale_force)
+void QMMMFF::force(ForceTable &forcetable, const Symbol &symbol, double scale_force)
 {
     if (intermolecular_only.value())
-        throw SireError::unsupported( QObject::tr("Support for QM/MM intermolecular "
-                 "only forces is not yet available."), CODELOC );
+        throw SireError::unsupported(QObject::tr("Support for QM/MM intermolecular "
+                                                 "only forces is not yet available."),
+                                     CODELOC);
     else
-        QMMMElecEmbedPotential::calculateForce(qmmols, mmmols,
-                                               forcetable, symbol,
-                                               this->components(),
-                                               scale_force);
+        QMMMElecEmbedPotential::calculateForce(qmmols, mmmols, forcetable, symbol, this->components(), scale_force);
 }
 
 /** This function is called whenever the underlying potential is changed */
@@ -372,14 +361,14 @@ void QMMMFF::changedPotential()
 /** Recalculate the QM energy */
 void QMMMFF::recalculateEnergy()
 {
-    //QM/MM energies are always recalculated from scratch
+    // QM/MM energies are always recalculated from scratch
     QMEnergy nrg(0);
 
     QMMMElecEmbedPotential::calculateEnergy(qmmols, mmmols, nrg);
 
     if (intermolecular_only.value())
     {
-        //also calculate only the QM energy, and subtract this from the QM/MM energy
+        // also calculate only the QM energy, and subtract this from the QM/MM energy
         QMEnergy qmnrg(0);
         QMMMElecEmbedPotential::calculateEnergy(qmmols, MMMolecules(), qmnrg);
 
@@ -389,7 +378,6 @@ void QMMMFF::recalculateEnergy()
     this->components().setEnergy(*this, nrg);
     this->setClean();
 }
-
 
 /** Function used to update the symbols representing the forcefield
     components whenever the name of the forcefield changes */
@@ -409,12 +397,10 @@ void QMMMFF::_pvt_updateName()
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void QMMMFF::_pvt_added(quint32 group_id,
-                        const SireMol::PartialMolecule &molecule,
-                        const SireBase::PropertyMap &map)
+void QMMMFF::_pvt_added(quint32 group_id, const SireMol::PartialMolecule &molecule, const SireBase::PropertyMap &map)
 {
-    //add the molecule (don't record changes as everything
-    //is recalculated from scratch)
+    // add the molecule (don't record changes as everything
+    // is recalculated from scratch)
     if (group_id == 0)
     {
         qmmols.add(molecule, map, *this, false);
@@ -430,8 +416,7 @@ void QMMMFF::_pvt_added(quint32 group_id,
 }
 
 /** Record the fact that the molecule 'mol' has been removed from this forcefield */
-void QMMMFF::_pvt_removed(quint32 group_id,
-                          const SireMol::PartialMolecule &molecule)
+void QMMMFF::_pvt_removed(quint32 group_id, const SireMol::PartialMolecule &molecule)
 {
     if (group_id == 0)
     {
@@ -475,8 +460,7 @@ void QMMMFF::_pvt_changed(quint32 group_id, const SireMol::Molecule &molecule, b
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void QMMMFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &molecules,
-                          bool auto_update)
+void QMMMFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &molecules, bool auto_update)
 {
     if (group_id == 0)
     {
@@ -484,18 +468,16 @@ void QMMMFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &mole
 
         try
         {
-            for (QList<SireMol::Molecule>::const_iterator it = molecules.constBegin();
-                 it != molecules.constEnd();
-                 ++it)
+            for (QList<SireMol::Molecule>::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
             {
                 qmmols.change(*it, *this, false);
             }
 
             G2FF::setDirty();
         }
-        catch(...)
+        catch (...)
         {
-            //restore the state
+            // restore the state
             qmmols = old_mols;
             throw;
         }
@@ -506,18 +488,16 @@ void QMMMFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &mole
 
         try
         {
-            for (QList<SireMol::Molecule>::const_iterator it = molecules.constBegin();
-                 it != molecules.constEnd();
-                 ++it)
+            for (QList<SireMol::Molecule>::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
             {
                 mmmols.change(*it, *this, false);
             }
 
             G2FF::setDirty();
         }
-        catch(...)
+        catch (...)
         {
-            //restore the state
+            // restore the state
             mmmols = old_mols;
             throw;
         }
@@ -545,8 +525,7 @@ void QMMMFF::_pvt_removedAll(quint32 group_id)
 
 /** Return whether or not the supplied property map contains different
     properties for the molecule with number 'molnum' */
-bool QMMMFF::_pvt_wouldChangeProperties(quint32 group_id,
-                                        SireMol::MolNum molnum,
+bool QMMMFF::_pvt_wouldChangeProperties(quint32 group_id, SireMol::MolNum molnum,
                                         const SireBase::PropertyMap &map) const
 {
     if (group_id == 0)
@@ -578,11 +557,9 @@ QString QMMMFF::forceCommandFile(const ForceTable &forcetable) const
 
 /** Return the command file that would be used to calculate the potential
     of the molecules in this forcefield */
-QString QMMMFF::potentialCommandFile(const PotentialTable &potentialtable,
-                                     const SireFF::Probe &probe) const
+QString QMMMFF::potentialCommandFile(const PotentialTable &potentialtable, const SireFF::Probe &probe) const
 {
-    return QMMMElecEmbedPotential::potentialCommandFile(qmmols, mmmols,
-                                                        potentialtable, probe);
+    return QMMMElecEmbedPotential::potentialCommandFile(qmmols, mmmols, potentialtable, probe);
 }
 
 /** Return the command file that would be used to calculate the potential
@@ -594,8 +571,7 @@ QString QMMMFF::potentialCommandFile(const PotentialTable &potentialtable) const
 
 /** Return the command file that would be used to calculate the fields
     of the molecules in this forcefield */
-QString QMMMFF::fieldCommandFile(const FieldTable &fieldtable,
-                                 const SireFF::Probe &probe) const
+QString QMMMFF::fieldCommandFile(const FieldTable &fieldtable, const SireFF::Probe &probe) const
 {
     return QMMMElecEmbedPotential::fieldCommandFile(qmmols, mmmols, fieldtable, probe);
 }
@@ -611,37 +587,31 @@ QString QMMMFF::fieldCommandFile(const FieldTable &fieldtable) const
 void QMMMFF::field(FieldTable &fieldtable, const SireFF::Probe &probe, double scale_field)
 {
     if (scale_field != 0)
-        QMMMElecEmbedPotential::calculateField(qmmols, mmmols, fieldtable,
-                                               probe, scale_field);
+        QMMMElecEmbedPotential::calculateField(qmmols, mmmols, fieldtable, probe, scale_field);
 }
 
 /** Calculate the field from this forcefield in the passed fieldtable */
-void QMMMFF::field(FieldTable &fieldtable, const Symbol &component,
-                   const SireFF::Probe &probe, double scale_field)
+void QMMMFF::field(FieldTable &fieldtable, const Symbol &component, const SireFF::Probe &probe, double scale_field)
 {
     if (scale_field != 0)
-        QMMMElecEmbedPotential::calculateField(qmmols, mmmols, fieldtable, probe,
-                                               component, this->components(),
+        QMMMElecEmbedPotential::calculateField(qmmols, mmmols, fieldtable, probe, component, this->components(),
                                                scale_field);
 }
 
 /** Calculate the potential from this forcefield in the passed potentialtable */
-void QMMMFF::potential(PotentialTable &potentialtable, const SireFF::Probe &probe,
-                       double scale_potential)
+void QMMMFF::potential(PotentialTable &potentialtable, const SireFF::Probe &probe, double scale_potential)
 {
     if (scale_potential != 0)
-        QMMMElecEmbedPotential::calculatePotential(qmmols, mmmols, potentialtable,
-                                                   probe, scale_potential);
+        QMMMElecEmbedPotential::calculatePotential(qmmols, mmmols, potentialtable, probe, scale_potential);
 }
 
 /** Calculate the potential from this forcefield in the passed potentialtable */
-void QMMMFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                       const SireFF::Probe &probe, double scale_potential)
+void QMMMFF::potential(PotentialTable &potentialtable, const Symbol &component, const SireFF::Probe &probe,
+                       double scale_potential)
 {
     if (scale_potential != 0)
-        QMMMElecEmbedPotential::calculatePotential(qmmols, mmmols, potentialtable,
-                                                   probe, component,
-                                                   this->components(), scale_potential);
+        QMMMElecEmbedPotential::calculatePotential(qmmols, mmmols, potentialtable, probe, component, this->components(),
+                                                   scale_potential);
 }
 
 /** Calculate the field from this forcefield in the passed fieldtable */
@@ -651,11 +621,9 @@ void QMMMFF::field(FieldTable &fieldtable, double scale_field)
 }
 
 /** Calculate the field from this forcefield in the passed fieldtable */
-void QMMMFF::field(FieldTable &fieldtable, const Symbol &component,
-                   double scale_field)
+void QMMMFF::field(FieldTable &fieldtable, const Symbol &component, double scale_field)
 {
-    QMMMFF::field(fieldtable, component, QMMMElecEmbedPotential::Probe(),
-                  scale_field);
+    QMMMFF::field(fieldtable, component, QMMMElecEmbedPotential::Probe(), scale_field);
 }
 
 /** Calculate the potential from this forcefield in the passed potentialtable */
@@ -665,14 +633,12 @@ void QMMMFF::potential(PotentialTable &potentialtable, double scale_potential)
 }
 
 /** Calculate the potential from this forcefield in the passed potentialtable */
-void QMMMFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                       double scale_potential)
+void QMMMFF::potential(PotentialTable &potentialtable, const Symbol &component, double scale_potential)
 {
-    QMMMFF::potential(potentialtable, component, QMMMElecEmbedPotential::Probe(),
-                      scale_potential);
+    QMMMFF::potential(potentialtable, component, QMMMElecEmbedPotential::Probe(), scale_potential);
 }
 
-const char* QMMMFF::typeName()
+const char *QMMMFF::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<QMMMFF>() );
+    return QMetaType::typeName(qMetaTypeId<QMMMFF>());
 }

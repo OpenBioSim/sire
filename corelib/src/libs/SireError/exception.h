@@ -30,9 +30,9 @@
 
 #include <exception>
 
+#include <QAtomicInt>
 #include <QString>
 #include <QStringList>
-#include <QAtomicInt>
 
 #include <boost/shared_ptr.hpp>
 
@@ -42,107 +42,107 @@ SIRE_BEGIN_HEADER
 
 namespace SireError
 {
-class exception;
+    class exception;
 }
 
 class QDataStream;
-SIRESTREAM_EXPORT QDataStream& operator<<(QDataStream&, const SireError::exception&);
-SIRESTREAM_EXPORT QDataStream& operator>>(QDataStream&, SireError::exception&);
+SIRESTREAM_EXPORT QDataStream &operator<<(QDataStream &, const SireError::exception &);
+SIRESTREAM_EXPORT QDataStream &operator>>(QDataStream &, SireError::exception &);
 
 namespace SireError
 {
 
-/** This is a small class that is used to ensure
-    that fast exceptions are switched off when no longer
-    needed */
-class SIREERROR_EXPORT FastExceptionFlag
-{
-public:
-    FastExceptionFlag();
-    FastExceptionFlag(const FastExceptionFlag &other);
-    ~FastExceptionFlag();
-
-    FastExceptionFlag& operator=(const FastExceptionFlag &other);
-
-    void disable();
-
-private:
-    friend class exception;
-    static FastExceptionFlag construct();
-
-    class FastExceptionFlagData
+    /** This is a small class that is used to ensure
+        that fast exceptions are switched off when no longer
+        needed */
+    class SIREERROR_EXPORT FastExceptionFlag
     {
     public:
-        FastExceptionFlagData();
-        ~FastExceptionFlagData();
+        FastExceptionFlag();
+        FastExceptionFlag(const FastExceptionFlag &other);
+        ~FastExceptionFlag();
+
+        FastExceptionFlag &operator=(const FastExceptionFlag &other);
+
+        void disable();
+
+    private:
+        friend class exception;
+        static FastExceptionFlag construct();
+
+        class FastExceptionFlagData
+        {
+        public:
+            FastExceptionFlagData();
+            ~FastExceptionFlagData();
+        };
+
+        boost::shared_ptr<FastExceptionFlagData> d;
+
+        /** Whether or not fast exceptions are enabled */
+        static QAtomicInt enable_fast_exceptions;
     };
 
-    boost::shared_ptr<FastExceptionFlagData> d;
+    /** This is the base class of all Sire specific exceptions. The python wrapping
+        allows for automatic conversion of any exception derived from this base.
+        The exception system in Sire is very basic, namely there are a collection
+        of named exceptions. Each exception only has basic information such as
+        from where is was thrown, and an optional message to say why is was thrown.
 
-    /** Whether or not fast exceptions are enabled */
-    static QAtomicInt enable_fast_exceptions;
-};
-
-/** This is the base class of all Sire specific exceptions. The python wrapping
-    allows for automatic conversion of any exception derived from this base.
-    The exception system in Sire is very basic, namely there are a collection
-    of named exceptions. Each exception only has basic information such as
-    from where is was thrown, and an optional message to say why is was thrown.
-
-    @author Christopher Woods
-*/
-class SIREERROR_EXPORT exception : public std::exception
-{
-
-friend SIRESTREAM_EXPORT QDataStream& ::operator<<(QDataStream&, const exception&);
-friend SIRESTREAM_EXPORT QDataStream& ::operator>>(QDataStream&, exception&);
-
-public:
-    typedef SireError::exception ROOT;
-
-    exception();
-    exception(QString error, QString place = QString());
-
-    exception(const exception &other);
-
-    virtual ~exception() throw();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREERROR_EXPORT exception : public std::exception
     {
-        return "SireError::exception";
-    }
 
-    virtual const char* what() const throw()=0;
+        friend SIRESTREAM_EXPORT QDataStream & ::operator<<(QDataStream &, const exception &);
+        friend SIRESTREAM_EXPORT QDataStream & ::operator>>(QDataStream &, exception &);
 
-    exception* clone() const;
+    public:
+        typedef SireError::exception ROOT;
 
-    QByteArray pack() const;
-    static boost::shared_ptr<SireError::exception> unpack(const QByteArray &data);
+        exception();
+        exception(QString error, QString place = QString());
 
-    static void unpackAndThrow(const QByteArray &errordata);
+        exception(const exception &other);
 
-    static FastExceptionFlag enableFastExceptions();
+        virtual ~exception() throw();
 
-    QString error() const throw();
-    QString from() const throw();
-    QStringList trace() const throw();
-    QString where() const throw();
-    QString why() const throw();
-    QString pid() const throw();
+        static const char *typeName()
+        {
+            return "SireError::exception";
+        }
 
-    QString toString() const throw();
+        virtual const char *what() const throw() = 0;
 
-    virtual void throwSelf() const=0;
+        exception *clone() const;
 
-protected:
-    QString err;  ///< The error associated with the exception.
-    QString plce; ///< Description of from where the exception was thrown.
-    QStringList bt; ///< Backtrace at the point that the exception was constructed
-    QString pidstr; /**< String identifying the process from which
-                             process/thread this exception was thrown */
-};
+        QByteArray pack() const;
+        static boost::shared_ptr<SireError::exception> unpack(const QByteArray &data);
 
-}
+        static void unpackAndThrow(const QByteArray &errordata);
+
+        static FastExceptionFlag enableFastExceptions();
+
+        QString error() const throw();
+        QString from() const throw();
+        QStringList trace() const throw();
+        QString where() const throw();
+        QString why() const throw();
+        QString pid() const throw();
+
+        QString toString() const throw();
+
+        virtual void throwSelf() const = 0;
+
+    protected:
+        QString err;    ///< The error associated with the exception.
+        QString plce;   ///< Description of from where the exception was thrown.
+        QStringList bt; ///< Backtrace at the point that the exception was constructed
+        QString pidstr; /**< String identifying the process from which
+                                 process/thread this exception was thrown */
+    };
+
+} // namespace SireError
 
 SIRE_END_HEADER
 

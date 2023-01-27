@@ -37,13 +37,13 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-typedef AtomProperty< SireUnits::Dimension::Charge > AtomCharges;
+    typedef AtomProperty<SireUnits::Dimension::Charge> AtomCharges;
 
 }
 
-Q_DECLARE_METATYPE( SireMol::AtomCharges );
+Q_DECLARE_METATYPE(SireMol::AtomCharges);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireUnits::Dimension::Charge, SireMol::AtomCharges )
+SIRE_EXPOSE_ATOM_PROPERTY(SireUnits::Dimension::Charge, SireMol::AtomCharges)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireMol::AtomProperty<SireUnits::Dimension::Charge>;

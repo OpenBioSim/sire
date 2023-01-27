@@ -37,75 +37,75 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class AtomNum;
+    class AtomNum;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AtomNum&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AtomNum&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomNum &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomNum &);
 
 namespace SireMol
 {
 
-/** This ID number is used to identify an atom by the user-supplied
-    atom number (this is typically the number assigned to the
-    atom from the PDB or other coordinate file)
+    /** This ID number is used to identify an atom by the user-supplied
+        atom number (this is typically the number assigned to the
+        atom from the PDB or other coordinate file)
 
-    Be careful not to confuse this with AtomID, which is the
-    index of the atom in the residue or CutGroup (e.g. the
-    fifth atom in the residue would have AtomID '4' but has
-    whatever AtomNum the user supplied.
+        Be careful not to confuse this with AtomID, which is the
+        index of the atom in the residue or CutGroup (e.g. the
+        fifth atom in the residue would have AtomID '4' but has
+        whatever AtomNum the user supplied.
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT AtomNum : public SireID::Number, public AtomID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomNum&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomNum&);
-
-public:
-    AtomNum();
-
-    explicit AtomNum(quint32 num);
-
-    AtomNum(const AtomNum &other);
-
-    ~AtomNum();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT AtomNum : public SireID::Number, public AtomID
     {
-        return AtomNum::typeName();
-    }
 
-    AtomNum* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomNum &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomNum &);
 
-    bool isNull() const;
+    public:
+        AtomNum();
 
-    uint hash() const;
+        explicit AtomNum(quint32 num);
 
-    QString toString() const;
+        AtomNum(const AtomNum &other);
 
-    AtomNum& operator=(const AtomNum &other);
+        ~AtomNum();
 
-    bool operator==(const SireID::ID &other) const;
-    bool operator==(const AtomNum &other) const;
-    bool operator!=(const AtomNum &other) const;
+        static const char *typeName();
 
-    bool operator<(const AtomNum &other) const;
-    bool operator<=(const AtomNum &other) const;
-    bool operator>(const AtomNum &other) const;
-    bool operator>=(const AtomNum &other) const;
+        const char *what() const
+        {
+            return AtomNum::typeName();
+        }
 
-    QList<AtomIdx> map(const MolInfo &molinfo) const;
-};
+        AtomNum *clone() const;
 
-}
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        AtomNum &operator=(const AtomNum &other);
+
+        bool operator==(const SireID::ID &other) const;
+        bool operator==(const AtomNum &other) const;
+        bool operator!=(const AtomNum &other) const;
+
+        bool operator<(const AtomNum &other) const;
+        bool operator<=(const AtomNum &other) const;
+        bool operator>(const AtomNum &other) const;
+        bool operator>=(const AtomNum &other) const;
+
+        QList<AtomIdx> map(const MolInfo &molinfo) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::AtomNum);
 
-SIRE_EXPOSE_CLASS( SireMol::AtomNum )
+SIRE_EXPOSE_CLASS(SireMol::AtomNum)
 
 SIRE_END_HEADER
 

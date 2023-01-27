@@ -61,25 +61,27 @@ QDataStream &operator>>(QDataStream &ds, PointDipole &q)
 
 /** Constructor */
 PointDipole::PointDipole()
-{}
+{
+}
 
 /** Construct a point dipole at the specified location with the
     specified dipole */
-PointDipole::PointDipole(const Vector &coords, const Vector &dipole)
-            : cent(coords), dipol(dipole)
-{}
+PointDipole::PointDipole(const Vector &coords, const Vector &dipole) : cent(coords), dipol(dipole)
+{
+}
 
 /** Copy constructor */
-PointDipole::PointDipole(const PointDipole &other)
-            : cent(other.cent), dipol(other.dipol)
-{}
+PointDipole::PointDipole(const PointDipole &other) : cent(other.cent), dipol(other.dipol)
+{
+}
 
 /** Destructor */
 PointDipole::~PointDipole()
-{}
+{
+}
 
 /** Copy assignment operator */
-PointDipole& PointDipole::operator=(const PointDipole &other)
+PointDipole &PointDipole::operator=(const PointDipole &other)
 {
     cent = other.cent;
     dipol = other.dipol;
@@ -99,19 +101,18 @@ bool PointDipole::operator!=(const PointDipole &other) const
 }
 
 /** Return the location of this point charge */
-const Vector& PointDipole::center() const
+const Vector &PointDipole::center() const
 {
     return cent;
 }
 
 /** Return the dipole */
-const Vector& PointDipole::dipole() const
+const Vector &PointDipole::dipole() const
 {
     return dipol;
 }
 
-const char* PointDipole::typeName()
+const char *PointDipole::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<PointDipole>() );
+    return QMetaType::typeName(qMetaTypeId<PointDipole>());
 }
-

@@ -28,8 +28,8 @@
 #ifndef SIREMOL_MOLRESID_H
 #define SIREMOL_MOLRESID_H
 
-#include "residentifier.h"
 #include "molidentifier.h"
+#include "residentifier.h"
 
 #include "molnum.h"
 #include "resnum.h"
@@ -40,161 +40,161 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class MolResID;
-class MolResNum;
-}
+    class MolResID;
+    class MolResNum;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MolResID&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MolResID&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MolResID &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MolResID &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MolResNum&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MolResNum&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MolResNum &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MolResNum &);
 
 namespace SireMol
 {
 
-/** This class represents an ID that is used to identify
-    a specific residue (or residues) in a specific molecule
-    (of molecules)
+    /** This class represents an ID that is used to identify
+        a specific residue (or residues) in a specific molecule
+        (of molecules)
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MolResID : public ResID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MolResID&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MolResID&);
-
-public:
-    MolResID();
-    MolResID(const MolID &molid, const ResID &resid);
-    MolResID(const ResID &resid, const MolID &molid);
-
-    MolResID(const boost::tuple<MolIdentifier,ResIdentifier> &molresid);
-    MolResID(const boost::tuple<ResIdentifier,MolIdentifier> &molresid);
-
-    MolResID(const MolResNum &molresnum);
-
-    MolResID(const MolResID &other);
-
-    ~MolResID();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MolResID : public ResID
     {
-        return MolResID::typeName();
-    }
 
-    MolResID* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MolResID &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MolResID &);
 
-    bool isNull() const;
+    public:
+        MolResID();
+        MolResID(const MolID &molid, const ResID &resid);
+        MolResID(const ResID &resid, const MolID &molid);
 
-    uint hash() const;
+        MolResID(const boost::tuple<MolIdentifier, ResIdentifier> &molresid);
+        MolResID(const boost::tuple<ResIdentifier, MolIdentifier> &molresid);
 
-    QString toString() const;
+        MolResID(const MolResNum &molresnum);
 
-    const ResID& resID() const;
-    const MolID& molID() const;
+        MolResID(const MolResID &other);
 
-    MolResID& operator=(const MolResID &other);
+        ~MolResID();
 
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
+        static const char *typeName();
 
-    bool operator==(const MolResID &other) const;
-    bool operator!=(const MolResID &other) const;
+        const char *what() const
+        {
+            return MolResID::typeName();
+        }
 
-    QList<ResIdx> map(const MolInfo &molinfo) const;
+        MolResID *clone() const;
 
-    QHash< MolNum,Selector<Residue> > selectAllFrom(const Molecules &molecules,
-                                                    const PropertyMap &map = PropertyMap()) const;
-    QHash< MolNum,Selector<Residue> > selectAllFrom(const MoleculeGroup &molgroup,
-                                                    const PropertyMap &map = PropertyMap()) const;
-    QHash< MolNum,Selector<Residue> > selectAllFrom(const MolGroupsBase &molgroups,
-                                                    const PropertyMap &map = PropertyMap()) const;
+        bool isNull() const;
 
-private:
-    void collapse();
+        uint hash() const;
 
-    /** The molecule identifier */
-    MolIdentifier molid;
+        QString toString() const;
 
-    /** The residue identifier */
-    ResIdentifier resid;
-};
+        const ResID &resID() const;
+        const MolID &molID() const;
 
-/** This class represents an ID that is used to identify
-    a specific residue using both the residue and
-    molecule number
+        MolResID &operator=(const MolResID &other);
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MolResNum : public ResID
-{
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MolResNum&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MolResNum&);
+        bool operator==(const MolResID &other) const;
+        bool operator!=(const MolResID &other) const;
 
-public:
-    MolResNum();
-    MolResNum(const MolNum &molnum, const ResNum &resnum);
-    MolResNum(const ResNum &resnum, const MolNum &molnum);
+        QList<ResIdx> map(const MolInfo &molinfo) const;
 
-    MolResNum(const MolResNum &other);
+        QHash<MolNum, Selector<Residue>> selectAllFrom(const Molecules &molecules,
+                                                       const PropertyMap &map = PropertyMap()) const;
+        QHash<MolNum, Selector<Residue>> selectAllFrom(const MoleculeGroup &molgroup,
+                                                       const PropertyMap &map = PropertyMap()) const;
+        QHash<MolNum, Selector<Residue>> selectAllFrom(const MolGroupsBase &molgroups,
+                                                       const PropertyMap &map = PropertyMap()) const;
 
-    ~MolResNum();
+    private:
+        void collapse();
 
-    static const char* typeName();
+        /** The molecule identifier */
+        MolIdentifier molid;
 
-    const char* what() const
+        /** The residue identifier */
+        ResIdentifier resid;
+    };
+
+    /** This class represents an ID that is used to identify
+        a specific residue using both the residue and
+        molecule number
+
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MolResNum : public ResID
     {
-        return MolResNum::typeName();
-    }
 
-    MolResNum* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MolResNum &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MolResNum &);
 
-    bool isNull() const;
+    public:
+        MolResNum();
+        MolResNum(const MolNum &molnum, const ResNum &resnum);
+        MolResNum(const ResNum &resnum, const MolNum &molnum);
 
-    uint hash() const;
+        MolResNum(const MolResNum &other);
 
-    QString toString() const;
+        ~MolResNum();
 
-    const ResNum& resNum() const;
-    const MolNum& molNum() const;
+        static const char *typeName();
 
-    MolResNum& operator=(const MolResNum &other);
+        const char *what() const
+        {
+            return MolResNum::typeName();
+        }
 
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
+        MolResNum *clone() const;
 
-    bool operator==(const MolResNum &other) const;
-    bool operator!=(const MolResNum &other) const;
+        bool isNull() const;
 
-    QList<ResIdx> map(const MolInfo &molinfo) const;
+        uint hash() const;
 
-    QHash< MolNum,Selector<Residue> > selectAllFrom(const Molecules &molecules,
-                                                    const PropertyMap &map = PropertyMap()) const;
-    QHash< MolNum,Selector<Residue> > selectAllFrom(const MoleculeGroup &molgroup,
-                                                    const PropertyMap &map = PropertyMap()) const;
-    QHash< MolNum,Selector<Residue> > selectAllFrom(const MolGroupsBase &molgroups,
-                                                    const PropertyMap &map = PropertyMap()) const;
+        QString toString() const;
 
-private:
-    /** The molecule number */
-    MolNum molnum;
+        const ResNum &resNum() const;
+        const MolNum &molNum() const;
 
-    /** The residue numner */
-    ResNum resnum;
-};
+        MolResNum &operator=(const MolResNum &other);
 
-}
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
-Q_DECLARE_METATYPE( SireMol::MolResID )
-Q_DECLARE_METATYPE( SireMol::MolResNum )
+        bool operator==(const MolResNum &other) const;
+        bool operator!=(const MolResNum &other) const;
 
-SIRE_EXPOSE_CLASS( SireMol::MolResID )
-SIRE_EXPOSE_CLASS( SireMol::MolResNum )
+        QList<ResIdx> map(const MolInfo &molinfo) const;
+
+        QHash<MolNum, Selector<Residue>> selectAllFrom(const Molecules &molecules,
+                                                       const PropertyMap &map = PropertyMap()) const;
+        QHash<MolNum, Selector<Residue>> selectAllFrom(const MoleculeGroup &molgroup,
+                                                       const PropertyMap &map = PropertyMap()) const;
+        QHash<MolNum, Selector<Residue>> selectAllFrom(const MolGroupsBase &molgroups,
+                                                       const PropertyMap &map = PropertyMap()) const;
+
+    private:
+        /** The molecule number */
+        MolNum molnum;
+
+        /** The residue numner */
+        ResNum resnum;
+    };
+
+} // namespace SireMol
+
+Q_DECLARE_METATYPE(SireMol::MolResID)
+Q_DECLARE_METATYPE(SireMol::MolResNum)
+
+SIRE_EXPOSE_CLASS(SireMol::MolResID)
+SIRE_EXPOSE_CLASS(SireMol::MolResNum)
 
 SIRE_END_HEADER
 

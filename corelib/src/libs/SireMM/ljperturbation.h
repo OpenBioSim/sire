@@ -36,107 +36,102 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class LJPerturbation;
+    class LJPerturbation;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::LJPerturbation&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::LJPerturbation&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::LJPerturbation &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::LJPerturbation &);
 
 namespace SireMM
 {
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-/** This is a perturbation that maps LJ parameters for a molecule
-    from an initial to a final state
+    /** This is a perturbation that maps LJ parameters for a molecule
+        from an initial to a final state
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT LJPerturbation
-         : public SireBase::ConcreteProperty<LJPerturbation,SireMol::Perturbation>
-{
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT LJPerturbation : public SireBase::ConcreteProperty<LJPerturbation, SireMol::Perturbation>
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const LJPerturbation&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, LJPerturbation&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const LJPerturbation &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, LJPerturbation &);
 
-public:
-    enum MapType { MAP_SIGMA_AND_EPSILON = 1,
-                   MAP_RMIN_AND_EPSILON = 2,
-                   MAP_A_AND_B = 3 };
+    public:
+        enum MapType
+        {
+            MAP_SIGMA_AND_EPSILON = 1,
+            MAP_RMIN_AND_EPSILON = 2,
+            MAP_A_AND_B = 3
+        };
 
-    LJPerturbation(const PropertyMap &map = PropertyMap());
-    LJPerturbation(MapType maptype, const PropertyMap &map = PropertyMap());
+        LJPerturbation(const PropertyMap &map = PropertyMap());
+        LJPerturbation(MapType maptype, const PropertyMap &map = PropertyMap());
 
-    LJPerturbation(const SireCAS::Expression &mapping_function,
-                   const PropertyMap &map = PropertyMap());
+        LJPerturbation(const SireCAS::Expression &mapping_function, const PropertyMap &map = PropertyMap());
 
-    LJPerturbation(const SireCAS::Expression &mapping_function,
-                   MapType maptype,
-                   const PropertyMap &map = PropertyMap());
+        LJPerturbation(const SireCAS::Expression &mapping_function, MapType maptype,
+                       const PropertyMap &map = PropertyMap());
 
-    LJPerturbation(const SireCAS::Expression &sigma_mapping_function,
-                   const SireCAS::Expression &epsilon_mapping_function,
-                   const PropertyMap &map = PropertyMap());
+        LJPerturbation(const SireCAS::Expression &sigma_mapping_function,
+                       const SireCAS::Expression &epsilon_mapping_function, const PropertyMap &map = PropertyMap());
 
-    LJPerturbation(const SireCAS::Expression &sigma_mapping_function,
-                   const SireCAS::Expression &epsilon_mapping_function,
-                   MapType maptype,
-                   const PropertyMap &map = PropertyMap());
+        LJPerturbation(const SireCAS::Expression &sigma_mapping_function,
+                       const SireCAS::Expression &epsilon_mapping_function, MapType maptype,
+                       const PropertyMap &map = PropertyMap());
 
-    LJPerturbation(const LJPerturbation &other);
+        LJPerturbation(const LJPerturbation &other);
 
-    ~LJPerturbation();
+        ~LJPerturbation();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    LJPerturbation& operator=(const LJPerturbation &other);
+        LJPerturbation &operator=(const LJPerturbation &other);
 
-    bool operator==(const LJPerturbation &other) const;
-    bool operator!=(const LJPerturbation &other) const;
+        bool operator==(const LJPerturbation &other) const;
+        bool operator!=(const LJPerturbation &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    SireMol::PerturbationPtr recreate(const SireCAS::Expression &mapping_function) const;
-    SireMol::PerturbationPtr recreate(const SireCAS::Expression &mapping_function,
-                                      const PropertyMap &map) const;
+        SireMol::PerturbationPtr recreate(const SireCAS::Expression &mapping_function) const;
+        SireMol::PerturbationPtr recreate(const SireCAS::Expression &mapping_function, const PropertyMap &map) const;
 
-    SireMol::PerturbationPtr substitute(const SireCAS::Identities &identities) const;
+        SireMol::PerturbationPtr substitute(const SireCAS::Identities &identities) const;
 
-    const SireCAS::Expression& mappingFunction() const;
+        const SireCAS::Expression &mappingFunction() const;
 
-    const SireCAS::Expression& rMinMappingFunction() const;
-    const SireCAS::Expression& sigmaMappingFunction() const;
-    const SireCAS::Expression& epsilonMappingFunction() const;
+        const SireCAS::Expression &rMinMappingFunction() const;
+        const SireCAS::Expression &sigmaMappingFunction() const;
+        const SireCAS::Expression &epsilonMappingFunction() const;
 
-    const SireCAS::Expression& A_MappingFunction() const;
-    const SireCAS::Expression& B_MappingFunction() const;
+        const SireCAS::Expression &A_MappingFunction() const;
+        const SireCAS::Expression &B_MappingFunction() const;
 
-    bool mapSigmaEpsilon() const;
-    bool mapRMinEpsilon() const;
-    bool mapAB() const;
+        bool mapSigmaEpsilon() const;
+        bool mapRMinEpsilon() const;
+        bool mapAB() const;
 
-    QSet<QString> requiredProperties() const;
+        QSet<QString> requiredProperties() const;
 
-    bool wouldChange(const SireMol::Molecule &molecule,
-                     const SireCAS::Values &values) const;
+        bool wouldChange(const SireMol::Molecule &molecule, const SireCAS::Values &values) const;
 
-protected:
-    void perturbMolecule(SireMol::MolEditor &molecule,
-                         const SireCAS::Values &values) const;
+    protected:
+        void perturbMolecule(SireMol::MolEditor &molecule, const SireCAS::Values &values) const;
 
-private:
-    /** Mapping function for sigma or A value */
-    SireCAS::Expression sigma_mapfunc;
+    private:
+        /** Mapping function for sigma or A value */
+        SireCAS::Expression sigma_mapfunc;
 
-    /** How the LJ parameter is mapped */
-    MapType maptype;
-};
+        /** How the LJ parameter is mapped */
+        MapType maptype;
+    };
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::LJPerturbation )
+Q_DECLARE_METATYPE(SireMM::LJPerturbation)
 
-SIRE_EXPOSE_CLASS( SireMM::LJPerturbation )
+SIRE_EXPOSE_CLASS(SireMM::LJPerturbation)
 
 SIRE_END_HEADER
 

@@ -61,28 +61,30 @@ QDataStream &operator>>(QDataStream &ds, ResWithAtoms &resid)
         ds >> resid.atomid;
     }
     else
-        throw version_error( v, "1", r_resid, CODELOC );
+        throw version_error(v, "1", r_resid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 ResWithAtoms::ResWithAtoms() : ResID()
-{}
+{
+}
 
 /** Construct from the passed AtomID */
-ResWithAtoms::ResWithAtoms(const AtomID &id)
-              : ResID(), atomid(id)
-{}
+ResWithAtoms::ResWithAtoms(const AtomID &id) : ResID(), atomid(id)
+{
+}
 
 /** Copy constructor */
-ResWithAtoms::ResWithAtoms(const ResWithAtoms &other)
-              : ResID(other), atomid(other.atomid)
-{}
+ResWithAtoms::ResWithAtoms(const ResWithAtoms &other) : ResID(other), atomid(other.atomid)
+{
+}
 
 /** Destructor */
 ResWithAtoms::~ResWithAtoms()
-{}
+{
+}
 
 /** Is this selection null? */
 bool ResWithAtoms::isNull() const
@@ -103,13 +105,13 @@ QString ResWithAtoms::toString() const
 }
 
 /** Return the atom ID */
-const AtomID& ResWithAtoms::atomID() const
+const AtomID &ResWithAtoms::atomID() const
 {
     return atomid.base();
 }
 
 /** Copy assignment operator */
-ResWithAtoms& ResWithAtoms::operator=(const ResWithAtoms &other)
+ResWithAtoms &ResWithAtoms::operator=(const ResWithAtoms &other)
 {
     atomid = other.atomid;
     return *this;
@@ -156,27 +158,28 @@ QList<ResIdx> ResWithAtoms::map(const MolInfo &molinfo) const
                 resids.insert(residx);
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (residxs.isEmpty())
-        throw SireMol::missing_residue( QObject::tr(
-                "There are no residues that contain atoms that match "
-                "the Atom ID \"%1\".")
-                    .arg(atomid.toString()), CODELOC );
+        throw SireMol::missing_residue(QObject::tr("There are no residues that contain atoms that match "
+                                                   "the Atom ID \"%1\".")
+                                           .arg(atomid.toString()),
+                                       CODELOC);
 
     std::sort(residxs.begin(), residxs.end());
 
     return residxs;
 }
 
-const char* ResWithAtoms::typeName()
+const char *ResWithAtoms::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResWithAtoms>() );
+    return QMetaType::typeName(qMetaTypeId<ResWithAtoms>());
 }
 
-ResWithAtoms* ResWithAtoms::clone() const
+ResWithAtoms *ResWithAtoms::clone() const
 {
     return new ResWithAtoms(*this);
 }
@@ -207,28 +210,30 @@ QDataStream &operator>>(QDataStream &ds, CGsWithAtoms &cgid)
         ds >> cgid.atomid;
     }
     else
-        throw version_error( v, "1", r_cgid, CODELOC );
+        throw version_error(v, "1", r_cgid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 CGsWithAtoms::CGsWithAtoms() : CGID()
-{}
+{
+}
 
 /** Construct from the passed AtomID */
-CGsWithAtoms::CGsWithAtoms(const AtomID &id)
-             : CGID(), atomid(id)
-{}
+CGsWithAtoms::CGsWithAtoms(const AtomID &id) : CGID(), atomid(id)
+{
+}
 
 /** Copy constructor */
-CGsWithAtoms::CGsWithAtoms(const CGsWithAtoms &other)
-             : CGID(other), atomid(other.atomid)
-{}
+CGsWithAtoms::CGsWithAtoms(const CGsWithAtoms &other) : CGID(other), atomid(other.atomid)
+{
+}
 
 /** Destructor */
 CGsWithAtoms::~CGsWithAtoms()
-{}
+{
+}
 
 /** Is this selection null? */
 bool CGsWithAtoms::isNull() const
@@ -245,17 +250,17 @@ uint CGsWithAtoms::hash() const
 /** Return a string representatio of this ID */
 QString CGsWithAtoms::toString() const
 {
-    return QObject::tr( "CGsWithAtoms( %1 )" ).arg(atomid.toString());
+    return QObject::tr("CGsWithAtoms( %1 )").arg(atomid.toString());
 }
 
 /** Return the atom ID */
-const AtomID& CGsWithAtoms::atomID() const
+const AtomID &CGsWithAtoms::atomID() const
 {
     return atomid.base();
 }
 
 /** Copy assignment operator */
-CGsWithAtoms& CGsWithAtoms::operator=(const CGsWithAtoms &other)
+CGsWithAtoms &CGsWithAtoms::operator=(const CGsWithAtoms &other)
 {
     atomid = other.atomid;
     return *this;
@@ -301,27 +306,28 @@ QList<CGIdx> CGsWithAtoms::map(const MolInfo &molinfo) const
                 cgids.insert(cgidx);
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (cgidxs.isEmpty())
-        throw SireMol::missing_cutgroup( QObject::tr(
-                "There are no CutGroups that contain atoms that match "
-                "the Atom ID \"%1\".")
-                    .arg(atomid.toString()), CODELOC );
+        throw SireMol::missing_cutgroup(QObject::tr("There are no CutGroups that contain atoms that match "
+                                                    "the Atom ID \"%1\".")
+                                            .arg(atomid.toString()),
+                                        CODELOC);
 
     std::sort(cgidxs.begin(), cgidxs.end());
 
     return cgidxs;
 }
 
-const char* CGsWithAtoms::typeName()
+const char *CGsWithAtoms::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CGsWithAtoms>() );
+    return QMetaType::typeName(qMetaTypeId<CGsWithAtoms>());
 }
 
-CGsWithAtoms* CGsWithAtoms::clone() const
+CGsWithAtoms *CGsWithAtoms::clone() const
 {
     return new CGsWithAtoms(*this);
 }
@@ -352,28 +358,30 @@ QDataStream &operator>>(QDataStream &ds, ChainsWithAtoms &chainid)
         ds >> chainid.atomid;
     }
     else
-        throw version_error( v, "1", r_chainid, CODELOC );
+        throw version_error(v, "1", r_chainid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 ChainsWithAtoms::ChainsWithAtoms() : ChainID()
-{}
+{
+}
 
 /** Construct from the passed atom ID */
-ChainsWithAtoms::ChainsWithAtoms(const AtomID &id)
-               : ChainID(), atomid(id)
-{}
+ChainsWithAtoms::ChainsWithAtoms(const AtomID &id) : ChainID(), atomid(id)
+{
+}
 
 /** Copy constructor */
-ChainsWithAtoms::ChainsWithAtoms(const ChainsWithAtoms &other)
-               : ChainID(other), atomid(other.atomid)
-{}
+ChainsWithAtoms::ChainsWithAtoms(const ChainsWithAtoms &other) : ChainID(other), atomid(other.atomid)
+{
+}
 
 /** Destructor */
 ChainsWithAtoms::~ChainsWithAtoms()
-{}
+{
+}
 
 /** Is this selection null? */
 bool ChainsWithAtoms::isNull() const
@@ -394,13 +402,13 @@ QString ChainsWithAtoms::toString() const
 }
 
 /** Return the atom ID */
-const AtomID& ChainsWithAtoms::atomID() const
+const AtomID &ChainsWithAtoms::atomID() const
 {
     return atomid.base();
 }
 
 /** Copy assignment operator */
-ChainsWithAtoms& ChainsWithAtoms::operator=(const ChainsWithAtoms &other)
+ChainsWithAtoms &ChainsWithAtoms::operator=(const ChainsWithAtoms &other)
 {
     atomid = other.atomid;
     return *this;
@@ -446,27 +454,28 @@ QList<ChainIdx> ChainsWithAtoms::map(const MolInfo &molinfo) const
                 chainids.insert(chainidx);
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (chainidxs.isEmpty())
-        throw SireMol::missing_chain( QObject::tr(
-                "There are no chains that contain atoms that match "
-                "the Atom ID \"%1\".")
-                    .arg(atomid.toString()), CODELOC );
+        throw SireMol::missing_chain(QObject::tr("There are no chains that contain atoms that match "
+                                                 "the Atom ID \"%1\".")
+                                         .arg(atomid.toString()),
+                                     CODELOC);
 
     std::sort(chainidxs.begin(), chainidxs.end());
 
     return chainidxs;
 }
 
-const char* ChainsWithAtoms::typeName()
+const char *ChainsWithAtoms::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ChainsWithAtoms>() );
+    return QMetaType::typeName(qMetaTypeId<ChainsWithAtoms>());
 }
 
-ChainsWithAtoms* ChainsWithAtoms::clone() const
+ChainsWithAtoms *ChainsWithAtoms::clone() const
 {
     return new ChainsWithAtoms(*this);
 }
@@ -497,28 +506,30 @@ QDataStream &operator>>(QDataStream &ds, SegsWithAtoms &segid)
         ds >> segid.atomid;
     }
     else
-        throw version_error( v, "1", r_segid, CODELOC );
+        throw version_error(v, "1", r_segid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 SegsWithAtoms::SegsWithAtoms() : SegID()
-{}
+{
+}
 
 /** Construct from the passed atom ID */
-SegsWithAtoms::SegsWithAtoms(const AtomID &id)
-              : SegID(), atomid(id)
-{}
+SegsWithAtoms::SegsWithAtoms(const AtomID &id) : SegID(), atomid(id)
+{
+}
 
 /** Copy constructor */
-SegsWithAtoms::SegsWithAtoms(const SegsWithAtoms &other)
-              : SegID(other), atomid(other.atomid)
-{}
+SegsWithAtoms::SegsWithAtoms(const SegsWithAtoms &other) : SegID(other), atomid(other.atomid)
+{
+}
 
 /** Destructor */
 SegsWithAtoms::~SegsWithAtoms()
-{}
+{
+}
 
 /** Is this selection null? */
 bool SegsWithAtoms::isNull() const
@@ -539,13 +550,13 @@ QString SegsWithAtoms::toString() const
 }
 
 /** Return the atom ID */
-const AtomID& SegsWithAtoms::atomID() const
+const AtomID &SegsWithAtoms::atomID() const
 {
     return atomid.base();
 }
 
 /** Copy assignment operator */
-SegsWithAtoms& SegsWithAtoms::operator=(const SegsWithAtoms &other)
+SegsWithAtoms &SegsWithAtoms::operator=(const SegsWithAtoms &other)
 {
     atomid = other.atomid;
     return *this;
@@ -591,27 +602,28 @@ QList<SegIdx> SegsWithAtoms::map(const MolInfo &molinfo) const
                 segids.insert(segidx);
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (segidxs.isEmpty())
-        throw SireMol::missing_segment( QObject::tr(
-                "There are no segments that contain atoms that match "
-                "the Atom ID \"%1\".")
-                    .arg(atomid.toString()), CODELOC );
+        throw SireMol::missing_segment(QObject::tr("There are no segments that contain atoms that match "
+                                                   "the Atom ID \"%1\".")
+                                           .arg(atomid.toString()),
+                                       CODELOC);
 
     std::sort(segidxs.begin(), segidxs.end());
 
     return segidxs;
 }
 
-const char* SegsWithAtoms::typeName()
+const char *SegsWithAtoms::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SegsWithAtoms>() );
+    return QMetaType::typeName(qMetaTypeId<SegsWithAtoms>());
 }
 
-SegsWithAtoms* SegsWithAtoms::clone() const
+SegsWithAtoms *SegsWithAtoms::clone() const
 {
     return new SegsWithAtoms(*this);
 }

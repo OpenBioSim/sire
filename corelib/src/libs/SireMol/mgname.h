@@ -36,69 +36,68 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class MGName;
+    class MGName;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MGName&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MGName&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MGName &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MGName &);
 
 namespace SireMol
 {
 
-/** This class holds the name of a MoleculeGroup.
+    /** This class holds the name of a MoleculeGroup.
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MGName : public SireID::Name, public MGID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MGName&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MGName&);
-
-public:
-    MGName();
-
-    explicit MGName(const QString &name);
-
-    MGName(const QString &name, SireID::CaseSensitivity case_sensitivity);
-
-    MGName(const MGName &other);
-
-    ~MGName();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MGName : public SireID::Name, public MGID
     {
-        return MGName::typeName();
-    }
 
-    MGName* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MGName &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MGName &);
 
-    bool isNull() const;
+    public:
+        MGName();
 
-    uint hash() const;
+        explicit MGName(const QString &name);
 
-    QString toString() const;
+        MGName(const QString &name, SireID::CaseSensitivity case_sensitivity);
 
-    MGName& operator=(const MGName &other);
+        MGName(const MGName &other);
 
-    bool operator==(const SireID::ID &other) const;
+        ~MGName();
 
-    bool operator==(const MGName &other) const;
+        static const char *typeName();
 
-    bool operator!=(const MGName &other) const;
+        const char *what() const
+        {
+            return MGName::typeName();
+        }
 
-    QList<MGNum> map(const MolGroupsBase &molgroups) const;
-};
+        MGName *clone() const;
 
-}
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        MGName &operator=(const MGName &other);
+
+        bool operator==(const SireID::ID &other) const;
+
+        bool operator==(const MGName &other) const;
+
+        bool operator!=(const MGName &other) const;
+
+        QList<MGNum> map(const MolGroupsBase &molgroups) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::MGName);
 
-SIRE_EXPOSE_CLASS( SireMol::MGName )
+SIRE_EXPOSE_CLASS(SireMol::MGName)
 
 SIRE_END_HEADER
 
 #endif
-

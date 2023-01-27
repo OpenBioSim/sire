@@ -28,9 +28,9 @@
 #include "chargeconstraint.h"
 
 #include "SireMol/molecule.h"
-#include "SireMol/partialmolecule.h"
 #include "SireMol/molecules.h"
 #include "SireMol/molnum.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireSystem/system.h"
 
@@ -42,27 +42,22 @@ using namespace SireMol;
 using namespace SireBase;
 using namespace SireStream;
 
-static const RegisterMetaType<ChargeConstraint> r_chgconstraint( MAGIC_ONLY,
-                                                    ChargeConstraint::typeName() );
+static const RegisterMetaType<ChargeConstraint> r_chgconstraint(MAGIC_ONLY, ChargeConstraint::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const ChargeConstraint &chgconstraint)
+QDataStream &operator<<(QDataStream &ds, const ChargeConstraint &chgconstraint)
 {
     writeHeader(ds, r_chgconstraint, 1);
 
     SharedDataStream sds(ds);
 
-    sds << chgconstraint.molgroup
-        << chgconstraint.prop_map
-        << static_cast<const MoleculeConstraint&>(chgconstraint);
+    sds << chgconstraint.molgroup << chgconstraint.prop_map << static_cast<const MoleculeConstraint &>(chgconstraint);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          ChargeConstraint &chgconstraint)
+QDataStream &operator>>(QDataStream &ds, ChargeConstraint &chgconstraint)
 {
     VersionID v = readHeader(ds, r_chgconstraint);
 
@@ -70,9 +65,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> chgconstraint.molgroup
-            >> chgconstraint.prop_map
-            >> static_cast<MoleculeConstraint&>(chgconstraint);
+        sds >> chgconstraint.molgroup >> chgconstraint.prop_map >> static_cast<MoleculeConstraint &>(chgconstraint);
     }
     else
         throw version_error(v, "1", r_chgconstraint, CODELOC);
@@ -82,33 +75,35 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 ChargeConstraint::ChargeConstraint() : MoleculeConstraint()
-{}
+{
+}
 
 /** Construct to constrain the charges of the molecules in 'molgroup'
     using the optionally supplied property map to find the properties
     that are needed to calculate and save the charges */
 ChargeConstraint::ChargeConstraint(const MoleculeGroup &mgroup, const PropertyMap &map)
-                 : MoleculeConstraint(),
-                   molgroup(mgroup), prop_map(map)
-{}
+    : MoleculeConstraint(), molgroup(mgroup), prop_map(map)
+{
+}
 
 /** Copy constructor */
 ChargeConstraint::ChargeConstraint(const ChargeConstraint &other)
-                 : MoleculeConstraint(other),
-                   molgroup(other.molgroup), prop_map(other.prop_map)
-{}
+    : MoleculeConstraint(other), molgroup(other.molgroup), prop_map(other.prop_map)
+{
+}
 
 /** Destructor */
 ChargeConstraint::~ChargeConstraint()
-{}
+{
+}
 
-const char* ChargeConstraint::typeName()
+const char *ChargeConstraint::typeName()
 {
     return "SireSystem::ChargeConstraint";
 }
 
 /** Copy assignment operator */
-ChargeConstraint& ChargeConstraint::operator=(const ChargeConstraint &other)
+ChargeConstraint &ChargeConstraint::operator=(const ChargeConstraint &other)
 {
     if (this != &other)
     {
@@ -124,8 +119,7 @@ ChargeConstraint& ChargeConstraint::operator=(const ChargeConstraint &other)
 bool ChargeConstraint::operator==(const ChargeConstraint &other) const
 {
     return this == &other or
-           (molgroup == other.molgroup and prop_map == other.prop_map and
-            MoleculeConstraint::operator==(other));
+           (molgroup == other.molgroup and prop_map == other.prop_map and MoleculeConstraint::operator==(other));
 }
 
 /** Comparison operator */
@@ -136,14 +130,14 @@ bool ChargeConstraint::operator!=(const ChargeConstraint &other) const
 
 /** Return the molecule group that contains the molecules whose
     charges are being constrained */
-const MoleculeGroup& ChargeConstraint::moleculeGroup() const
+const MoleculeGroup &ChargeConstraint::moleculeGroup() const
 {
     return molgroup.read();
 }
 
 /** Return the property map containing the locations of the properties
     needed to apply this constraint */
-const PropertyMap& ChargeConstraint::propertyMap() const
+const PropertyMap &ChargeConstraint::propertyMap() const
 {
     return prop_map;
 }

@@ -27,17 +27,17 @@
 
 #include "qmchargeconstraint.h"
 
-#include "SireMol/molecules.h"
-#include "SireMol/partialmolecule.h"
-#include "SireMol/molecule.h"
 #include "SireMol/atomcharges.h"
-#include "SireMol/mgname.h"
-#include "SireMol/moleculegroup.h"
-#include "SireMol/moleditor.h"
 #include "SireMol/core.h"
+#include "SireMol/mgname.h"
+#include "SireMol/molecule.h"
+#include "SireMol/moleculegroup.h"
+#include "SireMol/molecules.h"
+#include "SireMol/moleditor.h"
+#include "SireMol/partialmolecule.h"
 
-#include "SireSystem/system.h"
 #include "SireSystem/delta.h"
+#include "SireSystem/system.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -51,22 +51,19 @@ using namespace SireStream;
 static const RegisterMetaType<QMChargeConstraint> r_qmchgconstraint;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const QMChargeConstraint &qmchgconstraint)
+QDataStream &operator<<(QDataStream &ds, const QMChargeConstraint &qmchgconstraint)
 {
     writeHeader(ds, r_qmchgconstraint, 1);
 
     SharedDataStream sds(ds);
 
-    sds << qmchgconstraint.charge_calculator
-        << static_cast<const ChargeConstraint&>(qmchgconstraint);
+    sds << qmchgconstraint.charge_calculator << static_cast<const ChargeConstraint &>(qmchgconstraint);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                      QMChargeConstraint &qmchgconstraint)
+QDataStream &operator>>(QDataStream &ds, QMChargeConstraint &qmchgconstraint)
 {
     VersionID v = readHeader(ds, r_qmchgconstraint);
 
@@ -74,8 +71,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> qmchgconstraint.charge_calculator
-            >> static_cast<ChargeConstraint&>(qmchgconstraint);
+        sds >> qmchgconstraint.charge_calculator >> static_cast<ChargeConstraint &>(qmchgconstraint);
 
         qmchgconstraint.must_recalc_from_scratch = true;
     }
@@ -87,51 +83,48 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 QMChargeConstraint::QMChargeConstraint()
-                   : ConcreteProperty<QMChargeConstraint,ChargeConstraint>(),
-                     must_recalc_from_scratch(true)
-{}
+    : ConcreteProperty<QMChargeConstraint, ChargeConstraint>(), must_recalc_from_scratch(true)
+{
+}
 
 /** Construct to constrain the charges for the molecules in the
     molecule group 'molgroup' using the optionally supplied property
     map to find the necessary properteis */
-QMChargeConstraint::QMChargeConstraint(const MoleculeGroup &molgroup,
-                                       const PropertyMap &map)
-                   : ConcreteProperty<QMChargeConstraint,ChargeConstraint>(molgroup,
-                                                                           map),
-                     must_recalc_from_scratch(true)
-{}
+QMChargeConstraint::QMChargeConstraint(const MoleculeGroup &molgroup, const PropertyMap &map)
+    : ConcreteProperty<QMChargeConstraint, ChargeConstraint>(molgroup, map), must_recalc_from_scratch(true)
+{
+}
 
 /** Construct to constrain the charges for the molecules in the
     molecule group 'molgroup' to those calculated using the
     QM charge calculator 'chargecalculator', using the optionally
     supplied property map to find the necessary properties */
-QMChargeConstraint::QMChargeConstraint(const MoleculeGroup &molgroup,
-                                       const QMChargeCalculator &chargecalculator,
+QMChargeConstraint::QMChargeConstraint(const MoleculeGroup &molgroup, const QMChargeCalculator &chargecalculator,
                                        const PropertyMap &map)
-                   : ConcreteProperty<QMChargeConstraint,ChargeConstraint>(molgroup,
-                                                                           map),
-                     charge_calculator(chargecalculator),
-                     must_recalc_from_scratch(true)
-{}
+    : ConcreteProperty<QMChargeConstraint, ChargeConstraint>(molgroup, map), charge_calculator(chargecalculator),
+      must_recalc_from_scratch(true)
+{
+}
 
 /** Copy constructor */
 QMChargeConstraint::QMChargeConstraint(const QMChargeConstraint &other)
-                   : ConcreteProperty<QMChargeConstraint,ChargeConstraint>(other),
-                     charge_calculator(other.charge_calculator),
-                     must_recalc_from_scratch(other.must_recalc_from_scratch)
-{}
+    : ConcreteProperty<QMChargeConstraint, ChargeConstraint>(other), charge_calculator(other.charge_calculator),
+      must_recalc_from_scratch(other.must_recalc_from_scratch)
+{
+}
 
 /** Destructor */
 QMChargeConstraint::~QMChargeConstraint()
-{}
-
-const char* QMChargeConstraint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<QMChargeConstraint>() );
+}
+
+const char *QMChargeConstraint::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<QMChargeConstraint>());
 }
 
 /** Copy assignment operator */
-QMChargeConstraint& QMChargeConstraint::operator=(const QMChargeConstraint &other)
+QMChargeConstraint &QMChargeConstraint::operator=(const QMChargeConstraint &other)
 {
     if (this != &other)
     {
@@ -148,8 +141,7 @@ QMChargeConstraint& QMChargeConstraint::operator=(const QMChargeConstraint &othe
 bool QMChargeConstraint::operator==(const QMChargeConstraint &other) const
 {
     return charge_calculator == other.charge_calculator and
-           must_recalc_from_scratch == other.must_recalc_from_scratch and
-           ChargeConstraint::operator==(other);
+           must_recalc_from_scratch == other.must_recalc_from_scratch and ChargeConstraint::operator==(other);
 }
 
 /** Comparison operator */
@@ -163,13 +155,13 @@ QString QMChargeConstraint::toString() const
 {
     return QObject::tr("QMChargeConstraint( moleculeGroup() : %1, "
                        "chargeCalculator() : %2 )")
-                            .arg(this->moleculeGroup().name())
-                            .arg(this->chargeCalculator().toString());
+        .arg(this->moleculeGroup().name())
+        .arg(this->chargeCalculator().toString());
 }
 
 /** Return the calculator used to calculate atomic partial charges
     from an underlying QM calculation */
-const QMChargeCalculator& QMChargeConstraint::chargeCalculator() const
+const QMChargeCalculator &QMChargeConstraint::chargeCalculator() const
 {
     return charge_calculator.read();
 }
@@ -187,8 +179,7 @@ void QMChargeConstraint::setChargeCalculator(const QMChargeCalculator &chargecal
     an empty molecule if the charges haven't changed */
 Molecule QMChargeConstraint::_pvt_calculateCharges(const PartialMolecule &molecule) const
 {
-    AtomCharges new_chgs = charge_calculator.read().calculate(molecule,
-                                                              this->propertyMap());
+    AtomCharges new_chgs = charge_calculator.read().calculate(molecule, this->propertyMap());
 
     const PropertyName &charge_property = this->propertyMap()["charge"];
 
@@ -199,20 +190,17 @@ Molecule QMChargeConstraint::_pvt_calculateCharges(const PartialMolecule &molecu
         if (old_chgs.isA<AtomCharges>())
         {
             if (old_chgs.asA<AtomCharges>() == new_chgs)
-                //the charges haven't changed
+                // the charges haven't changed
                 return Molecule();
         }
     }
 
-    return molecule.molecule().edit()
-                              .setProperty(charge_property, new_chgs)
-                              .commit();
+    return molecule.molecule().edit().setProperty(charge_property, new_chgs).commit();
 }
 
 void QMChargeConstraint::setSystem(const System &system)
 {
-    if ( (not must_recalc_from_scratch) and
-         Constraint::wasLastSystem(system) and Constraint::wasLastSubVersion(system) )
+    if ((not must_recalc_from_scratch) and Constraint::wasLastSystem(system) and Constraint::wasLastSubVersion(system))
     {
         return;
     }
@@ -223,9 +211,7 @@ void QMChargeConstraint::setSystem(const System &system)
 
     const Molecules &mols = this->moleculeGroup().molecules();
 
-    for (Molecules::const_iterator it = mols.constBegin();
-         it != mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
     {
         Molecule new_mol = this->_pvt_calculateCharges(*it);
 
@@ -240,7 +226,7 @@ void QMChargeConstraint::setSystem(const System &system)
 
 bool QMChargeConstraint::mayChange(const Delta &delta, quint32 last_subversion) const
 {
-    return delta.sinceChanged( moleculeGroup().molecules(), last_subversion );
+    return delta.sinceChanged(moleculeGroup().molecules(), last_subversion);
 }
 
 bool QMChargeConstraint::fullApply(Delta &delta)
@@ -265,7 +251,7 @@ bool QMChargeConstraint::fullApply(Delta &delta)
 
 bool QMChargeConstraint::deltaApply(Delta &delta, quint32 last_subversion)
 {
-    if ( must_recalc_from_scratch or (not mols_to_change.isEmpty()) )
+    if (must_recalc_from_scratch or (not mols_to_change.isEmpty()))
         return this->fullApply(delta);
 
     QList<MolNum> changed_mols = delta.changedMoleculesSince(last_subversion);

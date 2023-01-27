@@ -34,180 +34,171 @@
 
 #include "SireID/idandset.hpp"
 #include "SireID/idorset.hpp"
-#include "SireID/specify.hpp"
-#include "SireID/matchall.hpp"
 #include "SireID/invertmatch.hpp"
+#include "SireID/matchall.hpp"
+#include "SireID/specify.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
 
-using SireID::IDAndSet;
-using SireID::IDOrSet;
-using SireID::Specify;
+    using SireID::IDAndSet;
+    using SireID::IDOrSet;
+    using SireID::Specify;
 
-template<class T>
-class Selector;
+    template <class T>
+    class Selector;
 
-template<class GROUPID, class ATOMID>
-class GroupAtomID;
+    template <class GROUPID, class ATOMID>
+    class GroupAtomID;
 
-template<class G0, class G1>
-class GroupGroupID;
+    template <class G0, class G1>
+    class GroupGroupID;
 
-class ChainResID;
+    class ChainResID;
 
-class MolInfo;
+    class MolInfo;
 
-class ResIdx;
-class ResIdentifier;
+    class ResIdx;
+    class ResIdentifier;
 
-class Residue;
+    class Residue;
 
-class Molecules;
-class MoleculeGroup;
-class MolGroupsBase;
-class MolNum;
+    class Molecules;
+    class MoleculeGroup;
+    class MolGroupsBase;
+    class MolNum;
 
-class ChainsWithRes;
+    class ChainsWithRes;
 
-/** This is the base class of all identifiers that are used
-    to identify a residue within a molecule
+    /** This is the base class of all identifiers that are used
+        to identify a residue within a molecule
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ResID : public SireID::ID
-{
-
-public:
-    typedef ResIdx Index;
-    typedef ResIdentifier Identifier;
-    typedef MolInfo SearchObject;
-
-    ResID();
-
-    ResID(const ResID &other);
-
-    virtual ~ResID();
-
-    Specify<ResID> operator[](qint64 i) const;
-    Specify<ResID> operator[](const SireBase::Range &range) const;
-    Specify<ResID> operator()(const SireBase::Range &range) const;
-    Specify<ResID> operator()(qint64 i) const;
-    Specify<ResID> operator()(qint64 start, qint64 end) const;
-    Specify<ResID> operator()(qint64 start, qint64 end, qint64 increment) const;
-
-    IDAndSet<ResID> operator+(const ResID &other) const;
-    ChainResID operator+(const ChainID &other) const;
-    GroupAtomID<ResID,AtomID> operator+(const AtomID &other) const;
-    GroupGroupID<SegID,ResID> operator+(const SegID &other) const;
-    GroupGroupID<CGID,ResID> operator+(const CGID &other) const;
-
-    IDAndSet<ResID> operator-(const ResID &other) const;
-    ChainResID operator-(const ChainID &other) const;
-    GroupAtomID<ResID,AtomID> operator-(const AtomID &other) const;
-    GroupGroupID<SegID,ResID> operator-(const SegID &other) const;
-    GroupGroupID<CGID,ResID> operator-(const CGID &other) const;
-
-    SireID::InvertMatch<ResID> operator-() const;
-
-    IDAndSet<ResID> operator&&(const ResID &other) const;
-    ChainResID operator&&(const ChainID &other) const;
-    GroupAtomID<ResID,AtomID> operator&&(const AtomID &other) const;
-    GroupGroupID<SegID,ResID> operator&&(const SegID &other) const;
-    GroupGroupID<CGID,ResID> operator&&(const CGID &other) const;
-
-    IDAndSet<ResID> operator&(const ResID &other) const;
-    ChainResID operator&(const ChainID &other) const;
-    GroupAtomID<ResID,AtomID> operator&(const AtomID &other) const;
-    GroupGroupID<SegID,ResID> operator&(const SegID &other) const;
-    GroupGroupID<CGID,ResID> operator&(const CGID &other) const;
-
-    IDOrSet<ResID> operator*(const ResID &other) const;
-    IDOrSet<ResID> operator||(const ResID &other) const;
-    IDOrSet<ResID> operator|(const ResID &other) const;
-
-    IDOrSet<AtomID> operator*(const AtomID &other) const;
-    IDOrSet<AtomID> operator||(const AtomID &other) const;
-    IDOrSet<AtomID> operator|(const AtomID &other) const;
-
-    IDOrSet<ResID> operator*(const ChainID &other) const;
-    IDOrSet<ResID> operator||(const ChainID &other) const;
-    IDOrSet<ResID> operator|(const ChainID &other) const;
-
-    SireID::InvertMatch<ResID> operator!() const;
-
-    SireID::InvertMatch<ResID> invert() const;
-    SireID::InvertMatch<ResID> inverse() const;
-
-    static SireID::MatchAll<ResID> any();
-
-    AtomsIn<ResID> atoms() const;
-    AtomsIn<ResID> atom(int i) const;
-    AtomsIn<ResID> atoms(int i, int j) const;
-
-    ChainsWithRes chains() const;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ResID : public SireID::ID
     {
-        return "SireMol::ResID";
-    }
 
-    virtual ResID* clone() const=0;
+    public:
+        typedef ResIdx Index;
+        typedef ResIdentifier Identifier;
+        typedef MolInfo SearchObject;
 
-    static ResIdentifier fromString(const QString &id);
+        ResID();
 
-    /** Map this ID back to the indicies of the residues in the molecule,
-        using the passed MoleculeInfo to do the mapping */
-    virtual QList<ResIdx> map(const MolInfo &molinfo) const=0;
+        ResID(const ResID &other);
 
-    virtual QList<ResIdx> map(const MoleculeView &molview,
-                              const PropertyMap &map = PropertyMap()) const;
+        virtual ~ResID();
 
-    virtual Residue selectFrom(const MoleculeView &molview,
-                               const PropertyMap &map = PropertyMap()) const;
+        Specify<ResID> operator[](qint64 i) const;
+        Specify<ResID> operator[](const SireBase::Range &range) const;
+        Specify<ResID> operator()(const SireBase::Range &range) const;
+        Specify<ResID> operator()(qint64 i) const;
+        Specify<ResID> operator()(qint64 start, qint64 end) const;
+        Specify<ResID> operator()(qint64 start, qint64 end, qint64 increment) const;
 
-    virtual Selector<Residue> selectAllFrom(const MoleculeView &molview,
-                                         const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<ResID> operator+(const ResID &other) const;
+        ChainResID operator+(const ChainID &other) const;
+        GroupAtomID<ResID, AtomID> operator+(const AtomID &other) const;
+        GroupGroupID<SegID, ResID> operator+(const SegID &other) const;
+        GroupGroupID<CGID, ResID> operator+(const CGID &other) const;
 
-    virtual Residue selectFrom(const Molecules &molecules,
-                               const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<ResID> operator-(const ResID &other) const;
+        ChainResID operator-(const ChainID &other) const;
+        GroupAtomID<ResID, AtomID> operator-(const AtomID &other) const;
+        GroupGroupID<SegID, ResID> operator-(const SegID &other) const;
+        GroupGroupID<CGID, ResID> operator-(const CGID &other) const;
 
-    virtual QHash< MolNum,Selector<Residue> >
-                selectAllFrom(const Molecules &molecules,
-                              const PropertyMap &map = PropertyMap()) const;
+        SireID::InvertMatch<ResID> operator-() const;
 
-    virtual Residue selectFrom(const MoleculeGroup &molgroup,
-                               const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<ResID> operator&&(const ResID &other) const;
+        ChainResID operator&&(const ChainID &other) const;
+        GroupAtomID<ResID, AtomID> operator&&(const AtomID &other) const;
+        GroupGroupID<SegID, ResID> operator&&(const SegID &other) const;
+        GroupGroupID<CGID, ResID> operator&&(const CGID &other) const;
 
-    virtual QHash< MolNum,Selector<Residue> >
-                selectAllFrom(const MoleculeGroup &molgroup,
-                              const PropertyMap &map = PropertyMap()) const;
+        IDAndSet<ResID> operator&(const ResID &other) const;
+        ChainResID operator&(const ChainID &other) const;
+        GroupAtomID<ResID, AtomID> operator&(const AtomID &other) const;
+        GroupGroupID<SegID, ResID> operator&(const SegID &other) const;
+        GroupGroupID<CGID, ResID> operator&(const CGID &other) const;
 
-    virtual Residue selectFrom(const MolGroupsBase &molgroups,
-                               const PropertyMap &map = PropertyMap()) const;
-    virtual QHash< MolNum,Selector<Residue> >
-                selectAllFrom(const MolGroupsBase &molgroups,
-                              const PropertyMap &map = PropertyMap()) const;
+        IDOrSet<ResID> operator*(const ResID &other) const;
+        IDOrSet<ResID> operator||(const ResID &other) const;
+        IDOrSet<ResID> operator|(const ResID &other) const;
 
-protected:
-    static QList<ResIdx> matchAll(const MolInfo &molinfo);
+        IDOrSet<AtomID> operator*(const AtomID &other) const;
+        IDOrSet<AtomID> operator||(const AtomID &other) const;
+        IDOrSet<AtomID> operator|(const AtomID &other) const;
 
-    void processMatches(QList<ResIdx> &matches, const MolInfo &molinfo) const;
-};
+        IDOrSet<ResID> operator*(const ChainID &other) const;
+        IDOrSet<ResID> operator||(const ChainID &other) const;
+        IDOrSet<ResID> operator|(const ChainID &other) const;
 
-}
+        SireID::InvertMatch<ResID> operator!() const;
+
+        SireID::InvertMatch<ResID> invert() const;
+        SireID::InvertMatch<ResID> inverse() const;
+
+        static SireID::MatchAll<ResID> any();
+
+        AtomsIn<ResID> atoms() const;
+        AtomsIn<ResID> atom(int i) const;
+        AtomsIn<ResID> atoms(int i, int j) const;
+
+        ChainsWithRes chains() const;
+
+        static const char *typeName()
+        {
+            return "SireMol::ResID";
+        }
+
+        virtual ResID *clone() const = 0;
+
+        static ResIdentifier fromString(const QString &id);
+
+        /** Map this ID back to the indicies of the residues in the molecule,
+            using the passed MoleculeInfo to do the mapping */
+        virtual QList<ResIdx> map(const MolInfo &molinfo) const = 0;
+
+        virtual QList<ResIdx> map(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+
+        virtual Residue selectFrom(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+
+        virtual Selector<Residue> selectAllFrom(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+
+        virtual Residue selectFrom(const Molecules &molecules, const PropertyMap &map = PropertyMap()) const;
+
+        virtual QHash<MolNum, Selector<Residue>> selectAllFrom(const Molecules &molecules,
+                                                               const PropertyMap &map = PropertyMap()) const;
+
+        virtual Residue selectFrom(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap()) const;
+
+        virtual QHash<MolNum, Selector<Residue>> selectAllFrom(const MoleculeGroup &molgroup,
+                                                               const PropertyMap &map = PropertyMap()) const;
+
+        virtual Residue selectFrom(const MolGroupsBase &molgroups, const PropertyMap &map = PropertyMap()) const;
+        virtual QHash<MolNum, Selector<Residue>> selectAllFrom(const MolGroupsBase &molgroups,
+                                                               const PropertyMap &map = PropertyMap()) const;
+
+    protected:
+        static QList<ResIdx> matchAll(const MolInfo &molinfo);
+
+        void processMatches(QList<ResIdx> &matches, const MolInfo &molinfo) const;
+    };
+
+} // namespace SireMol
 
 #include "residentifier.h"
 
-SIRE_EXPOSE_CLASS( SireMol::ResID )
-SIRE_EXPOSE_ALIAS( SireID::Specify<SireMol::ResID>, SireMol::Specify_ResID_ )
-SIRE_EXPOSE_ALIAS( SireMol::AtomsIn<SireMol::ResID>, SireMol::AtomsIn_ResID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDAndSet<SireMol::ResID>, SireMol::IDAndSet_ResID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDOrSet<SireMol::ResID>, SireMol::IDOrSet_ResID_ )
-SIRE_EXPOSE_ALIAS( SireID::MatchAll<SireMol::ResID>, SireMol::MatchAll_ResID_ )
-SIRE_EXPOSE_ALIAS( SireID::InvertMatch<SireMol::ResID>, SireMol::InvertMatch_ResID_ )
+SIRE_EXPOSE_CLASS(SireMol::ResID)
+SIRE_EXPOSE_ALIAS(SireID::Specify<SireMol::ResID>, SireMol::Specify_ResID_)
+SIRE_EXPOSE_ALIAS(SireMol::AtomsIn<SireMol::ResID>, SireMol::AtomsIn_ResID_)
+SIRE_EXPOSE_ALIAS(SireID::IDAndSet<SireMol::ResID>, SireMol::IDAndSet_ResID_)
+SIRE_EXPOSE_ALIAS(SireID::IDOrSet<SireMol::ResID>, SireMol::IDOrSet_ResID_)
+SIRE_EXPOSE_ALIAS(SireID::MatchAll<SireMol::ResID>, SireMol::MatchAll_ResID_)
+SIRE_EXPOSE_ALIAS(SireID::InvertMatch<SireMol::ResID>, SireMol::InvertMatch_ResID_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireID::Specify<SireMol::ResID>;

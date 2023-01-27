@@ -36,76 +36,76 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class SysIdx;
+    class SysIdx;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::SysIdx&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::SysIdx&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::SysIdx &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::SysIdx &);
 
 namespace SireSystem
 {
 
-/** This is an ID object that is used to index simulation systems (e.g. index
-    in a list or array).
+    /** This is an ID object that is used to index simulation systems (e.g. index
+        in a list or array).
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT SysIdx : public SireID::Index_T_<SysIdx>, public SysID
-{
-
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const SysIdx&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, SysIdx&);
-
-public:
-    SysIdx();
-    explicit SysIdx(qint32 idx);
-
-    SysIdx(const SysIdx &other);
-
-    ~SysIdx();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT SysIdx : public SireID::Index_T_<SysIdx>, public SysID
     {
-        return SysIdx::typeName();
-    }
 
-    SysIdx* clone() const;
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const SysIdx &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, SysIdx &);
 
-    static SysIdx null();
+    public:
+        SysIdx();
+        explicit SysIdx(qint32 idx);
 
-    bool isNull() const;
+        SysIdx(const SysIdx &other);
 
-    uint hash() const;
+        ~SysIdx();
 
-    QString toString() const;
+        static const char *typeName();
 
-    SysIdx& operator=(const SysIdx &other);
+        const char *what() const
+        {
+            return SysIdx::typeName();
+        }
 
-    bool operator==(const SireID::ID &other) const;
+        SysIdx *clone() const;
 
-    using SireID::Index_T_<SysIdx>::operator=;
+        static SysIdx null();
 
-    using SireID::Index_T_<SysIdx>::operator==;
-    using SireID::Index_T_<SysIdx>::operator!=;
+        bool isNull() const;
 
-    using SireID::Index_T_<SysIdx>::operator+=;
-    using SireID::Index_T_<SysIdx>::operator++;
-    using SireID::Index_T_<SysIdx>::operator-=;
-    using SireID::Index_T_<SysIdx>::operator--;
+        uint hash() const;
 
-    using SireID::Index_T_<SysIdx>::map;
+        QString toString() const;
 
-    QList<SysIdx> map(const Systems &systems) const;
-};
+        SysIdx &operator=(const SysIdx &other);
 
-}
+        bool operator==(const SireID::ID &other) const;
+
+        using SireID::Index_T_<SysIdx>::operator=;
+
+        using SireID::Index_T_<SysIdx>::operator==;
+        using SireID::Index_T_<SysIdx>::operator!=;
+
+        using SireID::Index_T_<SysIdx>::operator+=;
+        using SireID::Index_T_<SysIdx>::operator++;
+        using SireID::Index_T_<SysIdx>::operator-=;
+        using SireID::Index_T_<SysIdx>::operator--;
+
+        using SireID::Index_T_<SysIdx>::map;
+
+        QList<SysIdx> map(const Systems &systems) const;
+    };
+
+} // namespace SireSystem
 
 Q_DECLARE_TYPEINFO(SireSystem::SysIdx, Q_MOVABLE_TYPE);
 Q_DECLARE_METATYPE(SireSystem::SysIdx);
 
-SIRE_EXPOSE_CLASS( SireSystem::SysIdx )
+SIRE_EXPOSE_CLASS(SireSystem::SysIdx)
 
 SIRE_END_HEADER
 

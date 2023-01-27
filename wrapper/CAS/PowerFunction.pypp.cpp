@@ -43,7 +43,7 @@ void register_PowerFunction_class(){
 
     { //::SireCAS::PowerFunction
         typedef bp::class_< SireCAS::PowerFunction, bp::bases< SireCAS::ExBase >, boost::noncopyable > PowerFunction_exposer_t;
-        PowerFunction_exposer_t PowerFunction_exposer = PowerFunction_exposer_t( "PowerFunction", "\nThis is the base class of all power expressions, e.g. x^y (all of the form core^power). There are several sub-classes that depend on exactly what is being raised to which power, e.g. Exp is e^y, Power is x^y, PowerConstant is c^y and ConstantPower is x^c (with ConstantPower further derived into RationalPower and RealPower based on whether the constant is rational). All of these can be constructed transparently by creating a Power and then calling reduce on the resulting object.\n\nAuthor: Christopher Woods\n", bp::no_init );
+        PowerFunction_exposer_t PowerFunction_exposer = PowerFunction_exposer_t( "PowerFunction", "\nThis is the base class of all power expressions, e.g. x^y (all of the form core^power). There are several sub-classes\nthat depend on exactly what is being raised to which power, e.g. Exp is e^y, Power is x^y, PowerConstant is c^y and\nConstantPower is x^c (with ConstantPower further derived into RationalPower and RealPower based on whether the constant\nis rational). All of these can be constructed transparently by creating a Power and then calling reduce on the\nresulting object.\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope PowerFunction_scope( PowerFunction_exposer );
         { //::SireCAS::PowerFunction::children
         

@@ -32,9 +32,9 @@
 #include "SireMol/molid.h"
 #include "SireMol/molnum.h"
 
+#include "SireCAS/expression.h"
 #include "SireCAS/symbols.h"
 #include "SireCAS/values.h"
-#include "SireCAS/expression.h"
 
 #include "SireFF/forcetable.h"
 
@@ -56,15 +56,14 @@ using namespace SireStream;
 //////////// Implementation of Restraint
 ////////////
 
-static const RegisterMetaType<Restraint> r_restraint( MAGIC_ONLY,
-                                                      Restraint::typeName() );
+static const RegisterMetaType<Restraint> r_restraint(MAGIC_ONLY, Restraint::typeName());
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Restraint &restraint)
 {
     writeHeader(ds, r_restraint, 1);
 
-    ds << static_cast<const Property&>(restraint);
+    ds << static_cast<const Property &>(restraint);
 
     return ds;
 }
@@ -76,28 +75,31 @@ QDataStream &operator>>(QDataStream &ds, Restraint &restraint)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(restraint);
+        ds >> static_cast<Property &>(restraint);
     }
     else
-        throw version_error( v, "1", r_restraint, CODELOC );
+        throw version_error(v, "1", r_restraint, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 Restraint::Restraint() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 Restraint::Restraint(const Restraint &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 Restraint::~Restraint()
-{}
+{
+}
 
 /** Copy assignment operator */
-Restraint& Restraint::operator=(const Restraint &other)
+Restraint &Restraint::operator=(const Restraint &other)
 {
     if (this != &other)
     {
@@ -119,10 +121,10 @@ bool Restraint::operator!=(const Restraint &other) const
     return Property::operator!=(other);
 }
 
-Q_GLOBAL_STATIC( NullRestraint, nullRestraint )
+Q_GLOBAL_STATIC(NullRestraint, nullRestraint)
 
 /** Return the global null restraint */
-const NullRestraint& Restraint::null()
+const NullRestraint &Restraint::null()
 {
     return *(nullRestraint());
 }
@@ -131,19 +133,16 @@ const NullRestraint& Restraint::null()
 //////////// Implementation of Restraint3D
 ////////////
 
-static const RegisterMetaType<Restraint3D> r_restraint3d( MAGIC_ONLY,
-                                                          Restraint3D::typeName() );
+static const RegisterMetaType<Restraint3D> r_restraint3d(MAGIC_ONLY, Restraint3D::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const Restraint3D &restraint3d)
+QDataStream &operator<<(QDataStream &ds, const Restraint3D &restraint3d)
 {
     writeHeader(ds, r_restraint3d, 1);
 
     SharedDataStream sds(ds);
 
-    sds << restraint3d.spce
-        << static_cast<const Restraint&>(restraint3d);
+    sds << restraint3d.spce << static_cast<const Restraint &>(restraint3d);
 
     return ds;
 }
@@ -157,30 +156,31 @@ QDataStream &operator>>(QDataStream &ds, Restraint3D &restraint3d)
     {
         SharedDataStream sds(ds);
 
-        sds >> restraint3d.spce
-            >> static_cast<Restraint&>(restraint3d);
+        sds >> restraint3d.spce >> static_cast<Restraint &>(restraint3d);
     }
     else
-        throw version_error( v, "1", r_restraint3d, CODELOC );
+        throw version_error(v, "1", r_restraint3d, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 Restraint3D::Restraint3D() : Restraint()
-{}
+{
+}
 
 /** Copy constructor */
-Restraint3D::Restraint3D(const Restraint3D &other)
-            : Restraint(), spce(other.spce)
-{}
+Restraint3D::Restraint3D(const Restraint3D &other) : Restraint(), spce(other.spce)
+{
+}
 
 /** Destructor */
 Restraint3D::~Restraint3D()
-{}
+{
+}
 
 /** Copy assignment operator */
-Restraint3D& Restraint3D::operator=(const Restraint3D &other)
+Restraint3D &Restraint3D::operator=(const Restraint3D &other)
 {
     Restraint::operator=(other);
     spce = other.spce;
@@ -201,7 +201,7 @@ bool Restraint3D::operator!=(const Restraint3D &other) const
 }
 
 /** Return the 3D space in which this restraint operates */
-const Space& Restraint3D::space() const
+const Space &Restraint3D::space() const
 {
     return spce.read();
 }
@@ -216,26 +216,22 @@ void Restraint3D::setSpace(const Space &space)
 //////////// Implementation of ExpressionRestraint3D
 ////////////
 
-static const RegisterMetaType<ExpressionRestraint3D> r_exprestraint3d( MAGIC_ONLY,
-                                                   ExpressionRestraint3D::typeName() );
+static const RegisterMetaType<ExpressionRestraint3D> r_exprestraint3d(MAGIC_ONLY, ExpressionRestraint3D::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const ExpressionRestraint3D &exprestraint3d)
+QDataStream &operator<<(QDataStream &ds, const ExpressionRestraint3D &exprestraint3d)
 {
     writeHeader(ds, r_exprestraint3d, 1);
 
     SharedDataStream sds(ds);
 
-    sds << exprestraint3d.nrg_expression << exprestraint3d.vals
-        << static_cast<const Restraint3D&>(exprestraint3d);
+    sds << exprestraint3d.nrg_expression << exprestraint3d.vals << static_cast<const Restraint3D &>(exprestraint3d);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                      ExpressionRestraint3D &exprestraint3d)
+QDataStream &operator>>(QDataStream &ds, ExpressionRestraint3D &exprestraint3d)
 {
     VersionID v = readHeader(ds, r_exprestraint3d);
 
@@ -243,24 +239,23 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> exprestraint3d.nrg_expression >> exprestraint3d.vals
-            >> static_cast<Restraint3D&>(exprestraint3d);
+        sds >> exprestraint3d.nrg_expression >> exprestraint3d.vals >> static_cast<Restraint3D &>(exprestraint3d);
     }
     else
-        throw version_error( v, "1", r_exprestraint3d, CODELOC );
+        throw version_error(v, "1", r_exprestraint3d, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 ExpressionRestraint3D::ExpressionRestraint3D() : Restraint3D()
-{}
+{
+}
 
 /** Construct to use the passed energy expression, with the supplied
     user values */
-ExpressionRestraint3D::ExpressionRestraint3D(const Expression &expression,
-                                             const Values &values)
-                      : Restraint3D(), nrg_expression(expression)
+ExpressionRestraint3D::ExpressionRestraint3D(const Expression &expression, const Values &values)
+    : Restraint3D(), nrg_expression(expression)
 {
     if (expression.isConstant())
     {
@@ -270,11 +265,11 @@ ExpressionRestraint3D::ExpressionRestraint3D(const Expression &expression,
     {
         if (not values.isEmpty())
         {
-            //put in any missing values into 'user_vals'
+            // put in any missing values into 'user_vals'
             foreach (Symbol symbol, nrg_expression.symbols())
             {
                 if (values.contains(symbol))
-                    vals.set( symbol, values[symbol] );
+                    vals.set(symbol, values[symbol]);
             }
         }
     }
@@ -282,17 +277,17 @@ ExpressionRestraint3D::ExpressionRestraint3D(const Expression &expression,
 
 /** Copy constructor */
 ExpressionRestraint3D::ExpressionRestraint3D(const ExpressionRestraint3D &other)
-                      : Restraint3D(other), nrg_expression(other.nrg_expression),
-                        vals(other.vals)
-{}
+    : Restraint3D(other), nrg_expression(other.nrg_expression), vals(other.vals)
+{
+}
 
 /** Destructor */
 ExpressionRestraint3D::~ExpressionRestraint3D()
-{}
+{
+}
 
 /** Copy assignment operator */
-ExpressionRestraint3D& ExpressionRestraint3D::operator=(
-                                                const ExpressionRestraint3D &other)
+ExpressionRestraint3D &ExpressionRestraint3D::operator=(const ExpressionRestraint3D &other)
 {
     if (this != &other)
     {
@@ -308,9 +303,7 @@ ExpressionRestraint3D& ExpressionRestraint3D::operator=(
 bool ExpressionRestraint3D::operator==(const ExpressionRestraint3D &other) const
 {
     return this == &other or
-           (Restraint3D::operator==(other) and
-            nrg_expression == other.nrg_expression and
-            vals == other.vals);
+           (Restraint3D::operator==(other) and nrg_expression == other.nrg_expression and vals == other.vals);
 }
 
 /** Comparison operator */
@@ -325,13 +318,11 @@ QString ExpressionRestraint3D::toString() const
     if (vals.isEmpty())
         return QString("%1( %2 )").arg(this->what()).arg(nrg_expression.toString());
     else
-        return QString("%1( %2 ; %3 )").arg( this->what() )
-                                       .arg( nrg_expression.toString() )
-                                       .arg( vals.toString() );
+        return QString("%1( %2 ; %3 )").arg(this->what()).arg(nrg_expression.toString()).arg(vals.toString());
 }
 
 /** Return the function used to evaluate the restraint */
-const Expression& ExpressionRestraint3D::restraintFunction() const
+const Expression &ExpressionRestraint3D::restraintFunction() const
 {
     return nrg_expression;
 }
@@ -352,15 +343,16 @@ void ExpressionRestraint3D::setValue(const Symbol &symbol, double value)
     if (nrg_expression.isFunction(symbol))
     {
         if (this->builtinSymbols().contains(symbol))
-            throw SireError::invalid_arg( QObject::tr(
-                "You cannot set the value of the symbol %1 to %2 in "
-                "the restraint %3 as this symbol is one of the built-in "
-                "unchangable symbols of this restraint (%4).")
-                    .arg(symbol.toString()).arg(value)
-                    .arg(this->toString())
-                    .arg( Sire::toString(this->builtinSymbols()) ), CODELOC );
+            throw SireError::invalid_arg(QObject::tr("You cannot set the value of the symbol %1 to %2 in "
+                                                     "the restraint %3 as this symbol is one of the built-in "
+                                                     "unchangable symbols of this restraint (%4).")
+                                             .arg(symbol.toString())
+                                             .arg(value)
+                                             .arg(this->toString())
+                                             .arg(Sire::toString(this->builtinSymbols())),
+                                         CODELOC);
 
-        vals.set( symbol, value );
+        vals.set(symbol, value);
     }
 }
 
@@ -372,11 +364,11 @@ double ExpressionRestraint3D::getValue(const Symbol &symbol) const
 {
     if (not nrg_expression.isFunction(symbol))
     {
-        throw SireCAS::missing_symbol( QObject::tr(
-                "There is no symbol %1 in the restraint %2. Available symbols "
-                "are %3.")
-                    .arg(symbol.toString(), this->toString())
-                    .arg(Sire::toString(this->symbols())), CODELOC );
+        throw SireCAS::missing_symbol(QObject::tr("There is no symbol %1 in the restraint %2. Available symbols "
+                                                  "are %3.")
+                                          .arg(symbol.toString(), this->toString())
+                                          .arg(Sire::toString(this->symbols())),
+                                      CODELOC);
     }
 
     return vals[symbol];
@@ -413,7 +405,7 @@ Values ExpressionRestraint3D::userValues() const
 
     foreach (Symbol symbol, this->userSymbols())
     {
-        ret.set( symbol, vals[symbol] );
+        ret.set(symbol, vals[symbol]);
     }
 
     return ret;
@@ -422,7 +414,7 @@ Values ExpressionRestraint3D::userValues() const
 /** Return the current energy of this restraint */
 MolarEnergy ExpressionRestraint3D::energy() const
 {
-    return MolarEnergy( nrg_expression.evaluate(vals) );
+    return MolarEnergy(nrg_expression.evaluate(vals));
 }
 
 ////////////
@@ -432,12 +424,11 @@ MolarEnergy ExpressionRestraint3D::energy() const
 static const RegisterMetaType<NullRestraint> r_nullrestraint;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const NullRestraint &nullrestraint)
+QDataStream &operator<<(QDataStream &ds, const NullRestraint &nullrestraint)
 {
     writeHeader(ds, r_nullrestraint, 1);
 
-    ds << static_cast<const Restraint3D&>(nullrestraint);
+    ds << static_cast<const Restraint3D &>(nullrestraint);
 
     return ds;
 }
@@ -449,29 +440,31 @@ QDataStream &operator>>(QDataStream &ds, NullRestraint &nullrestraint)
 
     if (v == 1)
     {
-        ds >> static_cast<Restraint3D&>(nullrestraint);
+        ds >> static_cast<Restraint3D &>(nullrestraint);
     }
     else
-        throw version_error( v, "1", r_nullrestraint, CODELOC );
+        throw version_error(v, "1", r_nullrestraint, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
-NullRestraint::NullRestraint() : ConcreteProperty<NullRestraint,Restraint3D>()
-{}
+NullRestraint::NullRestraint() : ConcreteProperty<NullRestraint, Restraint3D>()
+{
+}
 
 /** Copy constructor */
-NullRestraint::NullRestraint(const NullRestraint &other)
-              : ConcreteProperty<NullRestraint,Restraint3D>(other)
-{}
+NullRestraint::NullRestraint(const NullRestraint &other) : ConcreteProperty<NullRestraint, Restraint3D>(other)
+{
+}
 
 /** Destructor */
 NullRestraint::~NullRestraint()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullRestraint& NullRestraint::operator=(const NullRestraint &other)
+NullRestraint &NullRestraint::operator=(const NullRestraint &other)
 {
     Restraint3D::operator=(other);
     return *this;
@@ -489,9 +482,9 @@ bool NullRestraint::operator!=(const NullRestraint &other) const
     return Restraint3D::operator!=(other);
 }
 
-const char* NullRestraint::typeName()
+const char *NullRestraint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullRestraint>() );
+    return QMetaType::typeName(qMetaTypeId<NullRestraint>());
 }
 
 /** Return a string representation of this restraint */
@@ -507,20 +500,24 @@ MolarEnergy NullRestraint::energy() const
 }
 
 /** The null restraint will not change the force */
-void NullRestraint::force(MolForceTable&, double) const
-{}
+void NullRestraint::force(MolForceTable &, double) const
+{
+}
 
 /** The null restraint will not change the force */
-void NullRestraint::force(ForceTable&, double) const
-{}
+void NullRestraint::force(ForceTable &, double) const
+{
+}
 
 /** The null restraint cannot be updated */
-void NullRestraint::update(const MoleculeData&)
-{}
+void NullRestraint::update(const MoleculeData &)
+{
+}
 
 /** The null restraint cannot be updated */
-void NullRestraint::update(const Molecules&)
-{}
+void NullRestraint::update(const Molecules &)
+{
+}
 
 /** There are no molecules in the NullRestraint */
 Molecules NullRestraint::molecules() const
@@ -535,7 +532,7 @@ bool NullRestraint::contains(MolNum) const
 }
 
 /** There are no molecules in the NullRestraint */
-bool NullRestraint::contains(const MolID&) const
+bool NullRestraint::contains(const MolID &) const
 {
     return false;
 }
@@ -554,8 +551,9 @@ bool NullRestraint::usesMoleculesIn(const Molecules &molecules) const
 
 /** Set the value of the symbol 'symbol' in this restraint to 'value'.
     This does nothing if this symbol is not used in this restraint */
-void NullRestraint::setValue(const Symbol&, double)
-{}
+void NullRestraint::setValue(const Symbol &, double)
+{
+}
 
 /** Return the value of the symbol 'symbol' in this restraint. This
     raises an exception if this symbol is not used
@@ -564,15 +562,14 @@ void NullRestraint::setValue(const Symbol&, double)
 */
 double NullRestraint::getValue(const Symbol &symbol) const
 {
-    throw SireCAS::missing_symbol( QObject::tr(
-            "The NullRestraint class does not use the symbol %1.")
-                .arg(symbol.toString()), CODELOC );
+    throw SireCAS::missing_symbol(
+        QObject::tr("The NullRestraint class does not use the symbol %1.").arg(symbol.toString()), CODELOC);
 
     return 0;
 }
 
 /** Return whether or not this restraint has a value for the symbol 'symbol' */
-bool NullRestraint::hasValue(const Symbol&) const
+bool NullRestraint::hasValue(const Symbol &) const
 {
     return false;
 }
@@ -618,7 +615,7 @@ Values NullRestraint::builtinValues() const
 
     \throw SireCAS::unavailable_differential
 */
-RestraintPtr NullRestraint::differentiate(const Symbol&) const
+RestraintPtr NullRestraint::differentiate(const Symbol &) const
 {
     return *this;
 }

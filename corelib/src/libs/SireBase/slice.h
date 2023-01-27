@@ -35,69 +35,69 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-class SliceIterator;
+    class SliceIterator;
 
-/** Simple class that simplifies accessing Sire containers
-    via Python slices
-*/
-class SIREBASE_EXPORT Slice
-{
+    /** Simple class that simplifies accessing Sire containers
+        via Python slices
+    */
+    class SIREBASE_EXPORT Slice
+    {
 
-friend class SliceIterator;
+        friend class SliceIterator;
 
-public:
-    Slice();
-    Slice(const Slice &other);
+    public:
+        Slice();
+        Slice(const Slice &other);
 
-    ~Slice();
+        ~Slice();
 
-    static Slice fromStartStop(int start, int stop, int step=1);
-    static Slice fromStart(int start, int step=1);
+        static Slice fromStartStop(int start, int stop, int step = 1);
+        static Slice fromStart(int start, int step = 1);
 
-    static int unset();
+        static int unset();
 
-    Slice& operator=(const Slice &other);
+        Slice &operator=(const Slice &other);
 
-    bool operator==(const Slice &other) const;
-    bool operator!=(const Slice &other) const;
+        bool operator==(const Slice &other) const;
+        bool operator!=(const Slice &other) const;
 
-    const char* what() const;
-    static const char* typeName();
+        const char *what() const;
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    SliceIterator begin(int n, bool auto_fix=false) const;
+        SliceIterator begin(int n, bool auto_fix = false) const;
 
-private:
-    int start;
-    int stop;
-    int step;
-};
+    private:
+        int start;
+        int stop;
+        int step;
+    };
 
-/** A simple iterator for the slice */
-class SIREBASE_EXPORT SliceIterator
-{
-public:
-    SliceIterator();
-    SliceIterator(const Slice &slice, int n, bool auto_fix=false);
-    SliceIterator(const SliceIterator &other);
+    /** A simple iterator for the slice */
+    class SIREBASE_EXPORT SliceIterator
+    {
+    public:
+        SliceIterator();
+        SliceIterator(const Slice &slice, int n, bool auto_fix = false);
+        SliceIterator(const SliceIterator &other);
 
-    ~SliceIterator();
+        ~SliceIterator();
 
-    SliceIterator& next();
+        SliceIterator &next();
 
-    bool atEnd() const;
+        bool atEnd() const;
 
-    int value() const;
+        int value() const;
 
-private:
-    int i;
-    int start;
-    int stop;
-    int step;
-};
+    private:
+        int i;
+        int start;
+        int stop;
+        int step;
+    };
 
-}
+} // namespace SireBase
 
 SIRE_END_HEADER
 

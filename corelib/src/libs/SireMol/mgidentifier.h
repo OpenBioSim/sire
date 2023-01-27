@@ -34,80 +34,80 @@
 
 namespace SireMol
 {
-class MGIdentifier;
+    class MGIdentifier;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MGIdentifier&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MGIdentifier&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MGIdentifier &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MGIdentifier &);
 
 namespace SireMol
 {
 
-/** This is a generic holder for any MGID class!
+    /** This is a generic holder for any MGID class!
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MGIdentifier : public MGID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MGIdentifier&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MGIdentifier&);
-
-public:
-    MGIdentifier();
-    MGIdentifier(const MGID &atomid);
-    MGIdentifier(const MGIdentifier &other);
-
-    ~MGIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MGIdentifier : public MGID
     {
-        return MGIdentifier::typeName();
+
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MGIdentifier &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MGIdentifier &);
+
+    public:
+        MGIdentifier();
+        MGIdentifier(const MGID &atomid);
+        MGIdentifier(const MGIdentifier &other);
+
+        ~MGIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return MGIdentifier::typeName();
+        }
+
+        MGIdentifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const MGID &base() const;
+
+        MGIdentifier &operator=(const MGIdentifier &other);
+        MGIdentifier &operator=(const MGID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const MGIdentifier &other) const;
+        bool operator!=(const MGIdentifier &other) const;
+
+        bool operator==(const MGID &other) const;
+        bool operator!=(const MGID &other) const;
+
+        QList<MGNum> map(const MolGroupsBase &molgroups) const;
+
+    private:
+        /** Pointer to the MGID */
+        boost::shared_ptr<MGID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const MGIdentifier &mgid)
+    {
+        return mgid.hash();
     }
 
-    MGIdentifier* clone() const;
-
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const MGID& base() const;
-
-    MGIdentifier& operator=(const MGIdentifier &other);
-    MGIdentifier& operator=(const MGID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const MGIdentifier &other) const;
-    bool operator!=(const MGIdentifier &other) const;
-
-    bool operator==(const MGID &other) const;
-    bool operator!=(const MGID &other) const;
-
-    QList<MGNum> map(const MolGroupsBase &molgroups) const;
-
-private:
-    /** Pointer to the MGID */
-    boost::shared_ptr<MGID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const MGIdentifier &mgid)
-{
-    return mgid.hash();
-}
-
-}
+} // namespace SireMol
 
 #include "mgnum.h"
 
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireMol::MGID> )
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireMol::MGID> )
-Q_DECLARE_METATYPE( SireID::Specify<SireMol::MGID> )
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireMol::MGID>)
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireMol::MGID>)
+Q_DECLARE_METATYPE(SireID::Specify<SireMol::MGID>)
 
 Q_DECLARE_METATYPE(SireMol::MGIdentifier);
 

@@ -45,7 +45,7 @@ QDataStream &operator<<(QDataStream &ds, const Supplementary &supp)
 {
     writeHeader(ds, r_supp, 1);
 
-    ds << static_cast<const MoleculeParser&>(supp);
+    ds << static_cast<const MoleculeParser &>(supp);
 
     return ds;
 }
@@ -56,7 +56,7 @@ QDataStream &operator>>(QDataStream &ds, Supplementary &supp)
 
     if (v == 1)
     {
-        ds >> static_cast<MoleculeParser&>(supp);
+        ds >> static_cast<MoleculeParser &>(supp);
     }
     else
         throw version_error(v, "1", r_supp, CODELOC);
@@ -65,21 +65,22 @@ QDataStream &operator>>(QDataStream &ds, Supplementary &supp)
 }
 
 /** Constructor */
-Supplementary::Supplementary() : ConcreteProperty<Supplementary,MoleculeParser>()
-{}
+Supplementary::Supplementary() : ConcreteProperty<Supplementary, MoleculeParser>()
+{
+}
 
 /** Construct to read in the data from the file called 'filename'. The
 passed property map can be used to pass extra parameters to control
 the parsing */
 Supplementary::Supplementary(const QString &filename, const PropertyMap &map)
-     : ConcreteProperty<Supplementary,MoleculeParser>(filename,map)
+    : ConcreteProperty<Supplementary, MoleculeParser>(filename, map)
 {
-    //the file has been read into memory and is available via
-    //the MoleculeParser::lines() function.
+    // the file has been read into memory and is available via
+    // the MoleculeParser::lines() function.
 
-    //a parameter has also been read in MoleculeParser to say whether
-    //we are allowed to use multiple cores to parse the file, e.g.
-    //MoleculeParser::usesParallel() will be true
+    // a parameter has also been read in MoleculeParser to say whether
+    // we are allowed to use multiple cores to parse the file, e.g.
+    // MoleculeParser::usesParallel() will be true
 
     // Store the name of the input file.
     this->filename = filename;
@@ -98,14 +99,14 @@ Supplementary::Supplementary(const QString &filename, const PropertyMap &map)
     passed property map can be used to pass extra parameters to control
     the parsing */
 Supplementary::Supplementary(const QStringList &lines, const PropertyMap &map)
-     : ConcreteProperty<Supplementary,MoleculeParser>(lines,map)
+    : ConcreteProperty<Supplementary, MoleculeParser>(lines, map)
 {
-    //the file has been read into memory and is available via
-    //the MoleculeParser::lines() function.
+    // the file has been read into memory and is available via
+    // the MoleculeParser::lines() function.
 
-    //a parameter has also been read in MoleculeParser to say whether
-    //we are allowed to use multiple cores to parse the file, e.g.
-    //MoleculeParser::usesParallel() will be true
+    // a parameter has also been read in MoleculeParser to say whether
+    // we are allowed to use multiple cores to parse the file, e.g.
+    // MoleculeParser::usesParallel() will be true
 
     // Store the name of the input file.
     this->filename = QObject::tr("MEMORY");
@@ -117,18 +118,18 @@ Supplementary::Supplementary(const QStringList &lines, const PropertyMap &map)
 }
 
 /** Copy constructor */
-Supplementary::Supplementary(const Supplementary &other) :
-    ConcreteProperty<Supplementary,MoleculeParser>(other),
-    filename(other.filename)
+Supplementary::Supplementary(const Supplementary &other)
+    : ConcreteProperty<Supplementary, MoleculeParser>(other), filename(other.filename)
 {
 }
 
 /** Destructor */
 Supplementary::~Supplementary()
-{}
+{
+}
 
 /** Copy assignment operator */
-Supplementary& Supplementary::operator=(const Supplementary &other)
+Supplementary &Supplementary::operator=(const Supplementary &other)
 {
     if (this != &other)
     {
@@ -153,13 +154,13 @@ bool Supplementary::operator!=(const Supplementary &other) const
 }
 
 /** Return the C++ name for this class */
-const char* Supplementary::typeName()
+const char *Supplementary::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Supplementary>() );
+    return QMetaType::typeName(qMetaTypeId<Supplementary>());
 }
 
 /** Return the C++ name for this class */
-const char* Supplementary::what() const
+const char *Supplementary::what() const
 {
     return Supplementary::typeName();
 }
@@ -171,26 +172,23 @@ int Supplementary::nAtoms() const
 
 /** Return the parser that has been constructed by reading in the passed
     file using the passed properties */
-MoleculeParserPtr Supplementary::construct(const QString &filename,
-                                  const PropertyMap &map) const
+MoleculeParserPtr Supplementary::construct(const QString &filename, const PropertyMap &map) const
 {
-    return Supplementary(filename,map);
+    return Supplementary(filename, map);
 }
 
 /** Return the parser that has been constructed by reading in the passed
     text lines using the passed properties */
-MoleculeParserPtr Supplementary::construct(const QStringList &lines,
-                                    const PropertyMap &map) const
+MoleculeParserPtr Supplementary::construct(const QStringList &lines, const PropertyMap &map) const
 {
-    return Supplementary(lines,map);
+    return Supplementary(lines, map);
 }
 
 /** Return this parser constructed from the passed SireSystem::System */
-MoleculeParserPtr Supplementary::construct(const SireSystem::System &system,
-                                    const PropertyMap &map) const
+MoleculeParserPtr Supplementary::construct(const SireSystem::System &system, const PropertyMap &map) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "The Supplementary parser cannot construct from a SireSystem::System!"), CODELOC );
+    throw SireError::program_bug(QObject::tr("The Supplementary parser cannot construct from a SireSystem::System!"),
+                                 CODELOC);
 
     return MoleculeParserPtr();
 }
@@ -221,7 +219,7 @@ QString Supplementary::formatDescription() const
 /** Return the suffixes that these files are normally associated with */
 QStringList Supplementary::formatSuffix() const
 {
-    static const QStringList suffixes = { "*" };
+    static const QStringList suffixes = {"*"};
     return suffixes;
 }
 

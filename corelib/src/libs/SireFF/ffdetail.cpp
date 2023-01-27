@@ -41,7 +41,7 @@ using namespace SireFF;
 using namespace SireBase;
 using namespace SireStream;
 
-static const RegisterMetaType<FFDetail> r_ff( MAGIC_ONLY, FFDetail::typeName() );
+static const RegisterMetaType<FFDetail> r_ff(MAGIC_ONLY, FFDetail::typeName());
 
 QDataStream &operator<<(QDataStream &ds, const FFDetail &ff)
 {
@@ -49,7 +49,7 @@ QDataStream &operator<<(QDataStream &ds, const FFDetail &ff)
 
     SharedDataStream sds(ds);
 
-    sds << ff.props << static_cast<const Property&>(ff);
+    sds << ff.props << static_cast<const Property &>(ff);
 
     return ds;
 }
@@ -62,7 +62,7 @@ QDataStream &operator>>(QDataStream &ds, FFDetail &ff)
     {
         SharedDataStream sds(ds);
 
-        sds >> ff.props >> static_cast<Property&>(ff);
+        sds >> ff.props >> static_cast<Property &>(ff);
     }
     else
         throw version_error(v, "1", r_ff, CODELOC);
@@ -71,15 +71,15 @@ QDataStream &operator>>(QDataStream &ds, FFDetail &ff)
 }
 
 /** Register of all forcefields */
-typedef QHash<QString,PropertyPtr> FFDetailRegistry;
+typedef QHash<QString, PropertyPtr> FFDetailRegistry;
 
-Q_GLOBAL_STATIC( QMutex, registryMutex );
-Q_GLOBAL_STATIC( FFDetailRegistry, getRegistry );
+Q_GLOBAL_STATIC(QMutex, registryMutex);
+Q_GLOBAL_STATIC(FFDetailRegistry, getRegistry);
 
 /** Return a list of all of the forcefields that have been registered */
 QStringList FFDetail::forcefields()
 {
-    QMutexLocker lkr( registryMutex() );
+    QMutexLocker lkr(registryMutex());
 
     return getRegistry()->keys();
 }
@@ -88,7 +88,7 @@ QStringList FFDetail::forcefields()
     returns a null property if there is no property with this name */
 PropertyPtr FFDetail::get(QString forcefield)
 {
-    QMutexLocker lkr( registryMutex() );
+    QMutexLocker lkr(registryMutex());
 
     return getRegistry()->value(forcefield);
 }
@@ -97,18 +97,20 @@ PropertyPtr FFDetail::get(QString forcefield)
     is already registered, and it differs to what is passed */
 PropertyPtr FFDetail::registerForceField(const FFDetail &ff)
 {
-    QMutexLocker lkr( registryMutex() );
+    QMutexLocker lkr(registryMutex());
 
     auto oldff = getRegistry()->value(ff.name());
 
     if (not oldff.isNull())
     {
         if (not oldff.read().equals(ff))
-            throw SireError::invalid_key( QObject::tr(
-                "You cannot have two different forcefield types registered with the "
-                "same name (%1). The first forcefield is %2, while the second is %3.")
-                    .arg(ff.name()).arg(oldff.read().toString()).arg(ff.toString()),
-                        CODELOC );
+            throw SireError::invalid_key(
+                QObject::tr("You cannot have two different forcefield types registered with the "
+                            "same name (%1). The first forcefield is %2, while the second is %3.")
+                    .arg(ff.name())
+                    .arg(oldff.read().toString())
+                    .arg(ff.toString()),
+                CODELOC);
     }
 
     getRegistry()->insert(ff.name(), ff);
@@ -118,7 +120,8 @@ PropertyPtr FFDetail::registerForceField(const FFDetail &ff)
 
 /** Null constructor */
 FFDetail::FFDetail() : Property()
-{}
+{
+}
 
 /** Construct for the forcefield called 'name' */
 FFDetail::FFDetail(const QString &name) : Property()
@@ -128,14 +131,16 @@ FFDetail::FFDetail(const QString &name) : Property()
 
 /** Copy constructor */
 FFDetail::FFDetail(const FFDetail &other) : Property(other), props(other.props)
-{}
+{
+}
 
 /** Destructor */
 FFDetail::~FFDetail()
-{}
+{
+}
 
 /** Copy assignment operator */
-FFDetail& FFDetail::operator=(const FFDetail &other)
+FFDetail &FFDetail::operator=(const FFDetail &other)
 {
     props = other.props;
     Property::operator=(other);
@@ -154,7 +159,7 @@ bool FFDetail::operator!=(const FFDetail &other) const
     return not FFDetail::operator==(other);
 }
 
-const char* FFDetail::typeName()
+const char *FFDetail::typeName()
 {
     return "SireFF::FFDetail";
 }
@@ -185,23 +190,27 @@ Properties FFDetail::properties() const
 void FFDetail::setProperty(const QString &key, const Property &value)
 {
     if (props.hasProperty(key))
-        throw SireBase::duplicate_property( QObject::tr(
-            "You cannot set a value of the property '%1' twice! Current value "
-            "is %2, while the new value is %3.")
-                .arg(key).arg(props.property(key).toString()).arg(value.toString()),
-                    CODELOC );
+        throw SireBase::duplicate_property(
+            QObject::tr("You cannot set a value of the property '%1' twice! Current value "
+                        "is %2, while the new value is %3.")
+                .arg(key)
+                .arg(props.property(key).toString())
+                .arg(value.toString()),
+            CODELOC);
 
     props.setProperty(key, value);
 }
 
 /** Internal function used to return the current value of a property.
     This raises an error if the property does not exist */
-const Property& FFDetail::property(const QString &key) const
+const Property &FFDetail::property(const QString &key) const
 {
     if (not props.hasProperty(key))
-        throw SireBase::missing_property( QObject::tr(
-            "The forcefield described by '%1' does not have a property called '%2'.")
-                .arg(this->toString()).arg(key), CODELOC );
+        throw SireBase::missing_property(
+            QObject::tr("The forcefield described by '%1' does not have a property called '%2'.")
+                .arg(this->toString())
+                .arg(key),
+            CODELOC);
 
     return props.property(key);
 }
@@ -210,7 +219,9 @@ const Property& FFDetail::property(const QString &key) const
 void FFDetail::assertCompatibleWith(const FFDetail &other) const
 {
     if (not this->isCompatibleWith(other))
-        throw SireError::incompatible_error( QObject::tr(
-            "The two forcefields are not compatible with one another.\n%1\nversus\n%2.")
-                .arg(this->toString()).arg(other.toString()), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("The two forcefields are not compatible with one another.\n%1\nversus\n%2.")
+                .arg(this->toString())
+                .arg(other.toString()),
+            CODELOC);
 }

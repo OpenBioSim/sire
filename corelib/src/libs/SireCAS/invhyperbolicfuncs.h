@@ -34,331 +34,330 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class ArcCosh;
-class ArcSinh;
-class ArcTanh;
-class ArcCsch;
-class ArcSech;
-class ArcCoth;
-}
+    class ArcCosh;
+    class ArcSinh;
+    class ArcTanh;
+    class ArcCsch;
+    class ArcSech;
+    class ArcCoth;
+} // namespace SireCAS
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::ArcCosh&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::ArcCosh&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::ArcCosh &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::ArcCosh &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::ArcSinh&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::ArcSinh&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::ArcSinh &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::ArcSinh &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::ArcTanh&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::ArcTanh&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::ArcTanh &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::ArcTanh &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::ArcCsch&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::ArcCsch&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::ArcCsch &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::ArcCsch &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::ArcSech&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::ArcSech&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::ArcSech &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::ArcSech &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::ArcCoth&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::ArcCoth&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::ArcCoth &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::ArcCoth &);
 
 namespace SireCAS
 {
 
-/** Inverse-hyperbolic-cosine */
-class SIRECAS_EXPORT ArcCosh : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const ArcCosh&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, ArcCosh&);
-
-public:
-    ArcCosh();
-    ArcCosh(const Expression &ex);
-
-    ArcCosh(const ArcCosh &other);
-
-    ~ArcCosh();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
+    /** Inverse-hyperbolic-cosine */
+    class SIRECAS_EXPORT ArcCosh : public SingleFunc
     {
-        return ArcCosh::typeName();
-    }
 
-    ArcCosh* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const ArcCosh &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, ArcCosh &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        ArcCosh();
+        ArcCosh(const Expression &ex);
 
-protected:
-    Expression functionOf(const Expression &arg) const
+        ArcCosh(const ArcCosh &other);
+
+        ~ArcCosh();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return ArcCosh::typeName();
+        }
+
+        ArcCosh *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(ArcCosh(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "arccosh";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Inverse-hyperbolic-sine */
+    class SIRECAS_EXPORT ArcSinh : public SingleFunc
     {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(ArcCosh(arg));
-    }
 
-    QString stringRep() const
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const ArcSinh &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, ArcSinh &);
+
+    public:
+        ArcSinh();
+        ArcSinh(const Expression &ex);
+
+        ArcSinh(const ArcSinh &other);
+
+        ~ArcSinh();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return ArcSinh::typeName();
+        }
+
+        ArcSinh *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(ArcSinh(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "arcsinh";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Inverse-hyperbolic-tangent */
+    class SIRECAS_EXPORT ArcTanh : public SingleFunc
     {
-        return "arccosh";
-    }
 
-    uint magic() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const ArcTanh &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, ArcTanh &);
 
-    Expression diff() const;
-    Expression integ() const;
+    public:
+        ArcTanh();
+        ArcTanh(const Expression &ex);
 
-};
+        ArcTanh(const ArcTanh &other);
 
-/** Inverse-hyperbolic-sine */
-class SIRECAS_EXPORT ArcSinh : public SingleFunc
-{
+        ~ArcTanh();
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const ArcSinh&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, ArcSinh&);
+        bool operator==(const ExBase &other) const;
 
-public:
-    ArcSinh();
-    ArcSinh(const Expression &ex);
+        static const char *typeName();
 
-    ArcSinh(const ArcSinh &other);
+        const char *what() const
+        {
+            return ArcTanh::typeName();
+        }
 
-    ~ArcSinh();
+        ArcTanh *clone() const;
 
-    bool operator==(const ExBase &other) const;
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
 
-    static const char* typeName();
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(ArcTanh(arg));
+        }
 
-    const char* what() const
+        QString stringRep() const
+        {
+            return "arctanh";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Inverse-hyperbolic-secant */
+    class SIRECAS_EXPORT ArcSech : public SingleFunc
     {
-        return ArcSinh::typeName();
-    }
 
-    ArcSinh* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const ArcSech &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, ArcSech &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        ArcSech();
+        ArcSech(const Expression &ex);
 
-protected:
-    Expression functionOf(const Expression &arg) const
+        ArcSech(const ArcSech &other);
+
+        ~ArcSech();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return ArcSech::typeName();
+        }
+
+        ArcSech *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(ArcSech(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "arcsech";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Inverse-hyperbolic-cosecant */
+    class SIRECAS_EXPORT ArcCsch : public SingleFunc
     {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(ArcSinh(arg));
-    }
 
-    QString stringRep() const
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const ArcCsch &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, ArcCsch &);
+
+    public:
+        ArcCsch();
+        ArcCsch(const Expression &ex);
+
+        ArcCsch(const ArcCsch &other);
+
+        ~ArcCsch();
+
+        bool operator==(const ExBase &other) const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return ArcCsch::typeName();
+        }
+
+        ArcCsch *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(ArcCsch(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "arccsch";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+    /** Inverse-hyperbolic-cotangent */
+    class SIRECAS_EXPORT ArcCoth : public SingleFunc
     {
-        return "arcsinh";
-    }
 
-    uint magic() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const ArcCoth &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, ArcCoth &);
 
-    Expression diff() const;
-    Expression integ() const;
-};
+    public:
+        ArcCoth();
+        ArcCoth(const Expression &ex);
 
-/** Inverse-hyperbolic-tangent */
-class SIRECAS_EXPORT ArcTanh : public SingleFunc
-{
+        ArcCoth(const ArcCoth &other);
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const ArcTanh&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, ArcTanh&);
+        ~ArcCoth();
 
-public:
-    ArcTanh();
-    ArcTanh(const Expression &ex);
+        bool operator==(const ExBase &other) const;
 
-    ArcTanh(const ArcTanh &other);
+        static const char *typeName();
 
-    ~ArcTanh();
+        const char *what() const
+        {
+            return ArcCoth::typeName();
+        }
 
-    bool operator==(const ExBase &other) const;
+        ArcCoth *clone() const;
 
-    static const char* typeName();
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
 
-    const char* what() const
-    {
-        return ArcTanh::typeName();
-    }
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(ArcCoth(arg));
+        }
 
-    ArcTanh* clone() const;
+        QString stringRep() const
+        {
+            return "arccoth";
+        }
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+        uint magic() const;
 
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(ArcTanh(arg));
-    }
+        Expression diff() const;
+        Expression integ() const;
+    };
 
-    QString stringRep() const
-    {
-        return "arctanh";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-/** Inverse-hyperbolic-secant */
-class SIRECAS_EXPORT ArcSech : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const ArcSech&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, ArcSech&);
-
-public:
-    ArcSech();
-    ArcSech(const Expression &ex);
-
-    ArcSech(const ArcSech &other);
-
-    ~ArcSech();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return ArcSech::typeName();
-    }
-
-    ArcSech* clone() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(ArcSech(arg));
-    }
-
-    QString stringRep() const
-    {
-        return "arcsech";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-/** Inverse-hyperbolic-cosecant */
-class SIRECAS_EXPORT ArcCsch : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const ArcCsch&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, ArcCsch&);
-
-public:
-    ArcCsch();
-    ArcCsch(const Expression &ex);
-
-    ArcCsch(const ArcCsch &other);
-
-    ~ArcCsch();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return ArcCsch::typeName();
-    }
-
-    ArcCsch* clone() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(ArcCsch(arg));
-    }
-
-    QString stringRep() const
-    {
-        return "arccsch";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-/** Inverse-hyperbolic-cotangent */
-class SIRECAS_EXPORT ArcCoth : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const ArcCoth&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, ArcCoth&);
-
-public:
-    ArcCoth();
-    ArcCoth(const Expression &ex);
-
-    ArcCoth(const ArcCoth &other);
-
-    ~ArcCoth();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return ArcCoth::typeName();
-    }
-
-    ArcCoth* clone() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-protected:
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(ArcCoth(arg));
-    }
-
-    QString stringRep() const
-    {
-        return "arccoth";
-    }
-
-    uint magic() const;
-
-    Expression diff() const;
-    Expression integ() const;
-};
-
-}
+} // namespace SireCAS
 
 Q_DECLARE_METATYPE(SireCAS::ArcCosh)
 Q_DECLARE_METATYPE(SireCAS::ArcSinh)
@@ -367,12 +366,12 @@ Q_DECLARE_METATYPE(SireCAS::ArcCsch)
 Q_DECLARE_METATYPE(SireCAS::ArcSech)
 Q_DECLARE_METATYPE(SireCAS::ArcCoth)
 
-SIRE_EXPOSE_CLASS( SireCAS::ArcCosh )
-SIRE_EXPOSE_CLASS( SireCAS::ArcSinh )
-SIRE_EXPOSE_CLASS( SireCAS::ArcTanh )
-SIRE_EXPOSE_CLASS( SireCAS::ArcCsch )
-SIRE_EXPOSE_CLASS( SireCAS::ArcSech )
-SIRE_EXPOSE_CLASS( SireCAS::ArcCoth )
+SIRE_EXPOSE_CLASS(SireCAS::ArcCosh)
+SIRE_EXPOSE_CLASS(SireCAS::ArcSinh)
+SIRE_EXPOSE_CLASS(SireCAS::ArcTanh)
+SIRE_EXPOSE_CLASS(SireCAS::ArcCsch)
+SIRE_EXPOSE_CLASS(SireCAS::ArcSech)
+SIRE_EXPOSE_CLASS(SireCAS::ArcCoth)
 
 SIRE_END_HEADER
 

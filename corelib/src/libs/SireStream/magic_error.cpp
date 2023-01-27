@@ -33,8 +33,8 @@
 
 #include "SireError/errors.h"
 
-#include <QStringList>
 #include <QDataStream>
+#include <QStringList>
 
 using namespace SireStream;
 using namespace SireError;
@@ -43,14 +43,12 @@ using namespace SireError;
 // This is to remove the circular dependency of SireError on SireStream
 
 /** Implementation of SireError::exception */
-static const RegisterMetaType<exception> r_exception( MAGIC_ONLY,
-                                                      "SireError::exception" );
+static const RegisterMetaType<exception> r_exception(MAGIC_ONLY, "SireError::exception");
 
 /** Serialise to a binary data stream */
 QDataStream &operator<<(QDataStream &ds, const exception &e)
 {
-    writeHeader(ds, r_exception, 1)
-       << e.err << e.plce << e.bt << e.pidstr;
+    writeHeader(ds, r_exception, 1) << e.err << e.plce << e.bt << e.pidstr;
 
     return ds;
 }
@@ -70,9 +68,9 @@ QDataStream &operator>>(QDataStream &ds, exception &e)
     return ds;
 }
 
-const char* magic_error::typeName()
+const char *magic_error::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<magic_error>() );
+    return QMetaType::typeName(qMetaTypeId<magic_error>());
 }
 
 static const RegisterMetaType<SireError::program_bug> r_program_bug;

@@ -28,191 +28,187 @@
 #ifndef SIREMM_GRIDFF_H
 #define SIREMM_GRIDFF_H
 
-#include "intercljff.h"
 #include "SireMaths/histogram.h"
+#include "intercljff.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class GridFF;
+    class GridFF;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::GridFF&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::GridFF&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::GridFF &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::GridFF &);
 
 namespace SireMM
 {
 
-/** This class calculates the coulomb and LJ energy between
-    all molecules in group 1 and all molecules in group 2.
-    The calculation is optimised, as the molecules in group 2
-    are represented using a grid. This is ideal for situations
-    where the molecules on group 2 move little, or not at all.
+    /** This class calculates the coulomb and LJ energy between
+        all molecules in group 1 and all molecules in group 2.
+        The calculation is optimised, as the molecules in group 2
+        are represented using a grid. This is ideal for situations
+        where the molecules on group 2 move little, or not at all.
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT GridFF
-            : public SireBase::ConcreteProperty<GridFF,InterGroupCLJFF>
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const GridFF&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, GridFF&);
-
-public:
-    GridFF();
-    GridFF(const QString &name);
-
-    GridFF(const GridFF &other);
-
-    ~GridFF();
-
-    static const char* typeName();
-
-    const char* what() const;
-
-    GridFF& operator=(const GridFF &other);
-
-    bool operator==(const GridFF &other) const;
-    bool operator!=(const GridFF &other) const;
-
-    GridFF* clone() const;
-
-    void addFixedAtoms(const MoleculeView &fixed_atoms,
-                       const SireBase::PropertyMap &map = SireBase::PropertyMap());
-    void addFixedAtoms(const SireMol::Molecules &fixed_atoms,
-                       const SireBase::PropertyMap &map = SireBase::PropertyMap());
-    void addFixedAtoms(const SireMol::MoleculeGroup &fixed_atoms,
-                       const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    void addFixedAtoms(const GridFF &other);
-
-    void setBuffer(SireUnits::Dimension::Length buffer);
-    void setGridSpacing(SireUnits::Dimension::Length spacing);
-
-    void setCoulombCutoff(SireUnits::Dimension::Length cutoff);
-    void setLJCutoff(SireUnits::Dimension::Length cutoff);
-
-    bool setShiftElectrostatics(bool on);
-
-    bool setUseReactionField(bool on);
-    bool setReactionFieldDielectric(double dielectric);
-
-    SireUnits::Dimension::Length buffer() const;
-    SireUnits::Dimension::Length spacing() const;
-
-    SireUnits::Dimension::Length coulombCutoff() const;
-    SireUnits::Dimension::Length ljCutoff() const;
-
-    void mustNowRecalculateFromScratch();
-
-protected:
-    void recalculateEnergy();
-
-    void _pvt_added(quint32 groupid, const PartialMolecule &mol,
-                    const PropertyMap &map);
-
-    void _pvt_removed(quint32 groupid, const PartialMolecule &mol);
-
-    void _pvt_changed(quint32 groupid, const SireMol::Molecule &molecule, bool auto_commit);
-    void _pvt_changed(quint32 groupid, const QList<SireMol::Molecule> &molecules, bool auto_commit);
-
-    void _pvt_removedAll(quint32 groupid);
-
-private:
-    void rebuildGrid();
-
-    typedef InterGroupCLJFF::Parameters CLJParameters;
-    typedef InterGroupCLJFF::Molecule CLJMolecule;
-    typedef InterGroupCLJFF::Molecules CLJMolecules;
-
-    void calculateEnergy(const SireVol::CoordGroup &coords,
-                         const CLJParameters::Array &params,
-                         double &cnrg, double &ljnrg);
-
-    class Vector4
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT GridFF : public SireBase::ConcreteProperty<GridFF, InterGroupCLJFF>
     {
+
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const GridFF &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, GridFF &);
+
     public:
-        Vector4() : x(0), y(0), z(0), q(0)
-        {}
+        GridFF();
+        GridFF(const QString &name);
 
-        Vector4(const SireMaths::Vector &v, double q);
+        GridFF(const GridFF &other);
 
-        Vector4(const Vector4 &other)
-            : x(other.x), y(other.y), z(other.z), q(other.q)
-        {}
+        ~GridFF();
 
-        ~Vector4()
-        {}
+        static const char *typeName();
 
-        Vector4& operator=(const Vector4 &other)
+        const char *what() const;
+
+        GridFF &operator=(const GridFF &other);
+
+        bool operator==(const GridFF &other) const;
+        bool operator!=(const GridFF &other) const;
+
+        GridFF *clone() const;
+
+        void addFixedAtoms(const MoleculeView &fixed_atoms, const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        void addFixedAtoms(const SireMol::Molecules &fixed_atoms,
+                           const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        void addFixedAtoms(const SireMol::MoleculeGroup &fixed_atoms,
+                           const SireBase::PropertyMap &map = SireBase::PropertyMap());
+
+        void addFixedAtoms(const GridFF &other);
+
+        void setBuffer(SireUnits::Dimension::Length buffer);
+        void setGridSpacing(SireUnits::Dimension::Length spacing);
+
+        void setCoulombCutoff(SireUnits::Dimension::Length cutoff);
+        void setLJCutoff(SireUnits::Dimension::Length cutoff);
+
+        bool setShiftElectrostatics(bool on);
+
+        bool setUseReactionField(bool on);
+        bool setReactionFieldDielectric(double dielectric);
+
+        SireUnits::Dimension::Length buffer() const;
+        SireUnits::Dimension::Length spacing() const;
+
+        SireUnits::Dimension::Length coulombCutoff() const;
+        SireUnits::Dimension::Length ljCutoff() const;
+
+        void mustNowRecalculateFromScratch();
+
+    protected:
+        void recalculateEnergy();
+
+        void _pvt_added(quint32 groupid, const PartialMolecule &mol, const PropertyMap &map);
+
+        void _pvt_removed(quint32 groupid, const PartialMolecule &mol);
+
+        void _pvt_changed(quint32 groupid, const SireMol::Molecule &molecule, bool auto_commit);
+        void _pvt_changed(quint32 groupid, const QList<SireMol::Molecule> &molecules, bool auto_commit);
+
+        void _pvt_removedAll(quint32 groupid);
+
+    private:
+        void rebuildGrid();
+
+        typedef InterGroupCLJFF::Parameters CLJParameters;
+        typedef InterGroupCLJFF::Molecule CLJMolecule;
+        typedef InterGroupCLJFF::Molecules CLJMolecules;
+
+        void calculateEnergy(const SireVol::CoordGroup &coords, const CLJParameters::Array &params, double &cnrg,
+                             double &ljnrg);
+
+        class Vector4
         {
-            x = other.x;
-            y = other.y;
-            z = other.z;
-            q = other.q;
-            return *this;
-        }
+        public:
+            Vector4() : x(0), y(0), z(0), q(0)
+            {
+            }
 
-        double x;
-        double y;
-        double z;
-        double q;
+            Vector4(const SireMaths::Vector &v, double q);
+
+            Vector4(const Vector4 &other) : x(other.x), y(other.y), z(other.z), q(other.q)
+            {
+            }
+
+            ~Vector4()
+            {
+            }
+
+            Vector4 &operator=(const Vector4 &other)
+            {
+                x = other.x;
+                y = other.y;
+                z = other.z;
+                q = other.q;
+                return *this;
+            }
+
+            double x;
+            double y;
+            double z;
+            double q;
+        };
+
+        static void appendTo(QVector<Vector4> &coords_and_charges, const Vector *coords, const detail::CLJParameter *params,
+                             int nats);
+
+        void addToGrid(const QVector<Vector4> &coords_and_charges);
+
+        /** The AABox that describes the grid */
+        SireVol::AABox gridbox;
+
+        /** The distance from the atoms and the edge of the grid.
+            This prevents the grid from being re-evaluated whenever
+            the atoms move */
+        double buffer_size;
+
+        /** The grid spacing */
+        double grid_spacing;
+
+        /** The coulomb cutoff (cutoff applies from the
+            center of the grid) */
+        double coul_cutoff;
+
+        /** The LJ cutoff (cutoff applies from the
+            center of the grid) */
+        double lj_cutoff;
+
+        /** The number of grid points in x, y, and z */
+        quint32 dimx, dimy, dimz;
+
+        /** The grid of coulomb potentials */
+        QVector<double> gridpot;
+
+        /** The set of coordinates and parameters for the fixed atoms.
+            These are atoms which exist only in this GridFF, thereby
+            allowing them to be present in the energy expression without
+            needing to be present in the system */
+        QVector<SireMaths::Vector> fixedatoms_coords;
+        QVector<detail::CLJParameter> fixedatoms_params;
+
+        /** The set of coordinates and parameters of group 2
+            molecules that are within the LJ cutoff of the center of the grid */
+        QVector<SireMaths::Vector> closemols_coords;
+        QVector<detail::CLJParameter> closemols_params;
+
+        /** The old energy of each molecule */
+        QHash<SireMol::MolNum, CLJEnergy> oldnrgs;
     };
 
-    static void appendTo(QVector<Vector4> &coords_and_charges,
-                         const Vector *coords,
-                         const detail::CLJParameter *params,
-                         int nats);
+} // namespace SireMM
 
-    void addToGrid(const QVector<Vector4> &coords_and_charges);
+Q_DECLARE_METATYPE(SireMM::GridFF)
 
-    /** The AABox that describes the grid */
-    SireVol::AABox gridbox;
-
-    /** The distance from the atoms and the edge of the grid.
-        This prevents the grid from being re-evaluated whenever
-        the atoms move */
-    double buffer_size;
-
-    /** The grid spacing */
-    double grid_spacing;
-
-    /** The coulomb cutoff (cutoff applies from the
-        center of the grid) */
-    double coul_cutoff;
-
-    /** The LJ cutoff (cutoff applies from the
-        center of the grid) */
-    double lj_cutoff;
-
-    /** The number of grid points in x, y, and z */
-    quint32 dimx, dimy, dimz;
-
-    /** The grid of coulomb potentials */
-    QVector<double> gridpot;
-
-    /** The set of coordinates and parameters for the fixed atoms.
-        These are atoms which exist only in this GridFF, thereby
-        allowing them to be present in the energy expression without
-        needing to be present in the system */
-    QVector<SireMaths::Vector> fixedatoms_coords;
-    QVector<detail::CLJParameter> fixedatoms_params;
-
-    /** The set of coordinates and parameters of group 2
-        molecules that are within the LJ cutoff of the center of the grid */
-    QVector<SireMaths::Vector> closemols_coords;
-    QVector<detail::CLJParameter> closemols_params;
-
-    /** The old energy of each molecule */
-    QHash<SireMol::MolNum,CLJEnergy> oldnrgs;
-};
-
-}
-
-Q_DECLARE_METATYPE( SireMM::GridFF )
-
-SIRE_EXPOSE_CLASS( SireMM::GridFF )
+SIRE_EXPOSE_CLASS(SireMM::GridFF)
 
 SIRE_END_HEADER
 

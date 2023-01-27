@@ -25,19 +25,19 @@
   *
 \*********************************************/
 
-#include "atom.h"
-#include "atommatcher.h"
 #include "atommatchers.h"
+#include "atom.h"
+#include "atomidentifier.h"
 #include "atomidx.h"
+#include "atommatcher.h"
 #include "atomname.h"
 #include "atomselection.h"
-#include "atomidentifier.h"
 #include "evaluator.h"
 #include "moleculeinfodata.h"
 #include "moleculeview.h"
 #include "mover.h"
-#include "selector.hpp"
 #include "mover.hpp"
+#include "selector.hpp"
 
 #include "tostring.h"
 
@@ -64,7 +64,7 @@ static const RegisterMetaType<AtomIdxMatcher> r_idxmatcher;
 QDataStream &operator<<(QDataStream &ds, const AtomIdxMatcher &idxmatcher)
 {
     writeHeader(ds, r_idxmatcher, 1);
-    ds << static_cast<const AtomMatcher&>(idxmatcher);
+    ds << static_cast<const AtomMatcher &>(idxmatcher);
 
     return ds;
 }
@@ -76,7 +76,7 @@ QDataStream &operator>>(QDataStream &ds, AtomIdxMatcher &idxmatcher)
 
     if (v == 1)
     {
-        ds >> static_cast<AtomMatcher&>(idxmatcher);
+        ds >> static_cast<AtomMatcher &>(idxmatcher);
     }
     else
         throw version_error(v, "1", r_idxmatcher, CODELOC);
@@ -85,20 +85,22 @@ QDataStream &operator>>(QDataStream &ds, AtomIdxMatcher &idxmatcher)
 }
 
 /** Constructor */
-AtomIdxMatcher::AtomIdxMatcher() : ConcreteProperty<AtomIdxMatcher,AtomMatcher>()
-{}
+AtomIdxMatcher::AtomIdxMatcher() : ConcreteProperty<AtomIdxMatcher, AtomMatcher>()
+{
+}
 
 /** Copy constructor */
-AtomIdxMatcher::AtomIdxMatcher(const AtomIdxMatcher &other)
-               : ConcreteProperty<AtomIdxMatcher,AtomMatcher>(other)
-{}
+AtomIdxMatcher::AtomIdxMatcher(const AtomIdxMatcher &other) : ConcreteProperty<AtomIdxMatcher, AtomMatcher>(other)
+{
+}
 
 /** Destructor */
 AtomIdxMatcher::~AtomIdxMatcher()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomIdxMatcher& AtomIdxMatcher::operator=(const AtomIdxMatcher &other)
+AtomIdxMatcher &AtomIdxMatcher::operator=(const AtomIdxMatcher &other)
 {
     return *this;
 }
@@ -126,15 +128,13 @@ QString AtomIdxMatcher::toString() const
 
      This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> AtomIdxMatcher::pvt_match(const MoleculeView &mol0,
-                                                 const PropertyMap &map0,
-                                                 const MoleculeView &mol1,
-                                                 const PropertyMap &map1) const
+QHash<AtomIdx, AtomIdx> AtomIdxMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                  const MoleculeView &mol1, const PropertyMap &map1) const
 {
     const AtomSelection sel0 = mol0.selection();
     const AtomSelection sel1 = mol1.selection();
 
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
     if (sel0.selectedAll() and sel1.selectedAll())
     {
@@ -142,9 +142,9 @@ QHash<AtomIdx,AtomIdx> AtomIdxMatcher::pvt_match(const MoleculeView &mol0,
 
         map.reserve(nats);
 
-        for (int i=0; i<nats; ++i)
+        for (int i = 0; i < nats; ++i)
         {
-            map.insert( AtomIdx(i), AtomIdx(i) );
+            map.insert(AtomIdx(i), AtomIdx(i));
         }
     }
     else
@@ -170,33 +170,31 @@ QHash<AtomIdx,AtomIdx> AtomIdxMatcher::pvt_match(const MoleculeView &mol0,
 
      This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> AtomIdxMatcher::pvt_match(const MoleculeInfoData &mol0,
-                                                 const MoleculeInfoData &mol1) const
+QHash<AtomIdx, AtomIdx> AtomIdxMatcher::pvt_match(const MoleculeInfoData &mol0, const MoleculeInfoData &mol1) const
 {
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
     const int nats = qMin(mol0.nAtoms(), mol1.nAtoms());
 
     map.reserve(nats);
 
-    for (int i=0; i<nats; ++i)
+    for (int i = 0; i < nats; ++i)
     {
-        map.insert( AtomIdx(i), AtomIdx(i) );
+        map.insert(AtomIdx(i), AtomIdx(i));
     }
 
     return map;
 }
 
 /** The AtomIdx matcher does not change the order of the atoms */
-bool AtomIdxMatcher::pvt_changesOrder(const MoleculeInfoData &molinfo0,
-                                      const MoleculeInfoData &molinfo1) const
+bool AtomIdxMatcher::pvt_changesOrder(const MoleculeInfoData &molinfo0, const MoleculeInfoData &molinfo1) const
 {
     return false;
 }
 
-const char* AtomIdxMatcher::typeName()
+const char *AtomIdxMatcher::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomIdxMatcher>() );
+    return QMetaType::typeName(qMetaTypeId<AtomIdxMatcher>());
 }
 
 /////////
@@ -206,11 +204,10 @@ const char* AtomIdxMatcher::typeName()
 static const RegisterMetaType<AtomNameMatcher> r_namematcher;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AtomNameMatcher &namematcher)
+QDataStream &operator<<(QDataStream &ds, const AtomNameMatcher &namematcher)
 {
     writeHeader(ds, r_namematcher, 1);
-    ds << static_cast<const AtomMatcher&>(namematcher);
+    ds << static_cast<const AtomMatcher &>(namematcher);
 
     return ds;
 }
@@ -222,7 +219,7 @@ QDataStream &operator>>(QDataStream &ds, AtomNameMatcher &namematcher)
 
     if (v == 1)
     {
-        ds >> static_cast<AtomMatcher&>(namematcher);
+        ds >> static_cast<AtomMatcher &>(namematcher);
     }
     else
         throw version_error(v, "1", r_namematcher, CODELOC);
@@ -231,20 +228,22 @@ QDataStream &operator>>(QDataStream &ds, AtomNameMatcher &namematcher)
 }
 
 /** Constructor */
-AtomNameMatcher::AtomNameMatcher() : ConcreteProperty<AtomNameMatcher,AtomMatcher>()
-{}
+AtomNameMatcher::AtomNameMatcher() : ConcreteProperty<AtomNameMatcher, AtomMatcher>()
+{
+}
 
 /** Copy constructor */
-AtomNameMatcher::AtomNameMatcher(const AtomNameMatcher &other)
-               : ConcreteProperty<AtomNameMatcher,AtomMatcher>(other)
-{}
+AtomNameMatcher::AtomNameMatcher(const AtomNameMatcher &other) : ConcreteProperty<AtomNameMatcher, AtomMatcher>(other)
+{
+}
 
 /** Destructor */
 AtomNameMatcher::~AtomNameMatcher()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomNameMatcher& AtomNameMatcher::operator=(const AtomNameMatcher &other)
+AtomNameMatcher &AtomNameMatcher::operator=(const AtomNameMatcher &other)
 {
     return *this;
 }
@@ -272,19 +271,17 @@ QString AtomNameMatcher::toString() const
 
      This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> AtomNameMatcher::pvt_match(const MoleculeView &mol0,
-                                                  const PropertyMap &map0,
-                                                  const MoleculeView &mol1,
-                                                  const PropertyMap &map1) const
+QHash<AtomIdx, AtomIdx> AtomNameMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                   const MoleculeView &mol1, const PropertyMap &map1) const
 {
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
     const AtomSelection sel0 = mol0.selection();
     const AtomSelection sel1 = mol1.selection();
 
     if (sel0.selectedAll() and sel1.selectedAll())
     {
-        for (int i=0; i<mol0.data().info().nAtoms(); ++i)
+        for (int i = 0; i < mol0.data().info().nAtoms(); ++i)
         {
             const AtomIdx idx0(i);
 
@@ -293,10 +290,11 @@ QHash<AtomIdx,AtomIdx> AtomNameMatcher::pvt_match(const MoleculeView &mol0,
             try
             {
                 AtomIdx idx1 = mol1.data().info().atomIdx(name);
-                map.insert( idx0, idx1 );
+                map.insert(idx0, idx1);
             }
-            catch(...)
-            {}
+            catch (...)
+            {
+            }
         }
     }
     else
@@ -332,12 +330,11 @@ QHash<AtomIdx,AtomIdx> AtomNameMatcher::pvt_match(const MoleculeView &mol0,
 
      This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> AtomNameMatcher::pvt_match(const MoleculeInfoData &mol0,
-                                                  const MoleculeInfoData &mol1) const
+QHash<AtomIdx, AtomIdx> AtomNameMatcher::pvt_match(const MoleculeInfoData &mol0, const MoleculeInfoData &mol1) const
 {
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
-    for (int i=0; i<mol0.nAtoms(); ++i)
+    for (int i = 0; i < mol0.nAtoms(); ++i)
     {
         const AtomIdx idx0(i);
 
@@ -346,18 +343,19 @@ QHash<AtomIdx,AtomIdx> AtomNameMatcher::pvt_match(const MoleculeInfoData &mol0,
         try
         {
             AtomIdx idx1 = mol1.atomIdx(name);
-            map.insert( idx0, idx1 );
+            map.insert(idx0, idx1);
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     return map;
 }
 
-const char* AtomNameMatcher::typeName()
+const char *AtomNameMatcher::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomNameMatcher>() );
+    return QMetaType::typeName(qMetaTypeId<AtomNameMatcher>());
 }
 
 /////////
@@ -367,16 +365,14 @@ const char* AtomNameMatcher::typeName()
 static const RegisterMetaType<AtomMCSMatcher> r_mcsmatcher;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AtomMCSMatcher &mcsmatcher)
+QDataStream &operator<<(QDataStream &ds, const AtomMCSMatcher &mcsmatcher)
 {
     writeHeader(ds, r_mcsmatcher, 2);
 
     SharedDataStream sds(ds);
 
-    sds << mcsmatcher.prematcher << double(mcsmatcher.t.to(second))
-        << mcsmatcher.match_light << mcsmatcher.verbose
-        << static_cast<const AtomMatcher&>(mcsmatcher);
+    sds << mcsmatcher.prematcher << double(mcsmatcher.t.to(second)) << mcsmatcher.match_light << mcsmatcher.verbose
+        << static_cast<const AtomMatcher &>(mcsmatcher);
 
     return ds;
 }
@@ -392,11 +388,10 @@ QDataStream &operator>>(QDataStream &ds, AtomMCSMatcher &mcsmatcher)
 
         SharedDataStream sds(ds);
 
-        sds >> mcsmatcher.prematcher >> timeout
-            >> mcsmatcher.match_light >> mcsmatcher.verbose
-            >> static_cast<AtomMatcher&>(mcsmatcher);
+        sds >> mcsmatcher.prematcher >> timeout >> mcsmatcher.match_light >> mcsmatcher.verbose >>
+            static_cast<AtomMatcher &>(mcsmatcher);
 
-        mcsmatcher.t = timeout*second;
+        mcsmatcher.t = timeout * second;
     }
     else if (v == 1)
     {
@@ -404,9 +399,9 @@ QDataStream &operator>>(QDataStream &ds, AtomMCSMatcher &mcsmatcher)
 
         SharedDataStream sds(ds);
 
-        sds >> mcsmatcher.prematcher >> timeout >> static_cast<AtomMatcher&>(mcsmatcher);
+        sds >> mcsmatcher.prematcher >> timeout >> static_cast<AtomMatcher &>(mcsmatcher);
 
-        mcsmatcher.t = timeout*second;
+        mcsmatcher.t = timeout * second;
         mcsmatcher.match_light = false;
         mcsmatcher.verbose = false;
     }
@@ -418,97 +413,82 @@ QDataStream &operator>>(QDataStream &ds, AtomMCSMatcher &mcsmatcher)
 
 /** Constructor */
 AtomMCSMatcher::AtomMCSMatcher()
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(), t(1*second),
-                 match_light(false),
-                 verbose(false)
-{}
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(), t(1 * second), match_light(false), verbose(false)
+{
+}
 
 /** Constructor */
 AtomMCSMatcher::AtomMCSMatcher(bool verbose)
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(), t(1*second),
-                 match_light(false),
-                 verbose(verbose)
-{}
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(), t(1 * second), match_light(false), verbose(verbose)
+{
+}
 
 /** Construct specifying the timeout for the MCS match */
-AtomMCSMatcher::AtomMCSMatcher(const SireUnits::Dimension::Time &timeout,
-                               bool verbose)
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(), t(timeout),
-                 match_light(false),
-                 verbose(verbose)
-{}
+AtomMCSMatcher::AtomMCSMatcher(const SireUnits::Dimension::Time &timeout, bool verbose)
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(), t(timeout), match_light(false), verbose(verbose)
+{
+}
 
 /** Construct specifying the prematcher for the MCS match */
-AtomMCSMatcher::AtomMCSMatcher(const AtomMatcher &matcher,
-                               bool verbose)
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(),
-                 prematcher(matcher), t(1*second),
-                 match_light(false), verbose(verbose)
-{}
+AtomMCSMatcher::AtomMCSMatcher(const AtomMatcher &matcher, bool verbose)
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(), prematcher(matcher), t(1 * second), match_light(false),
+      verbose(verbose)
+{
+}
 
 /** Construct specifying the timeout and prematcher for the MCS match */
-AtomMCSMatcher::AtomMCSMatcher(const AtomMatcher &matcher,
-                               const SireUnits::Dimension::Time &timeout,
-                               bool verbose)
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(),
-                 prematcher(matcher), t(timeout),
-                 match_light(false), verbose(verbose)
-{}
+AtomMCSMatcher::AtomMCSMatcher(const AtomMatcher &matcher, const SireUnits::Dimension::Time &timeout, bool verbose)
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(), prematcher(matcher), t(timeout), match_light(false),
+      verbose(verbose)
+{
+}
 
 /** Constructor, specifying whether or not to match light atoms */
-AtomMCSMatcher::AtomMCSMatcher(bool match_light_atoms,
-                               bool verbose)
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(), t(1*second),
-                 match_light(match_light_atoms),
-                 verbose(verbose)
-{}
+AtomMCSMatcher::AtomMCSMatcher(bool match_light_atoms, bool verbose)
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(), t(1 * second), match_light(match_light_atoms), verbose(verbose)
+{
+}
 
 /** Construct specifying the timeout for the MCS match, and specifying whether or not
     to match light atoms */
-AtomMCSMatcher::AtomMCSMatcher(const SireUnits::Dimension::Time &timeout,
-                               bool match_light_atoms,
-                               bool verbose)
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(), t(timeout),
-                 match_light(match_light_atoms),
-                 verbose(verbose)
-{}
+AtomMCSMatcher::AtomMCSMatcher(const SireUnits::Dimension::Time &timeout, bool match_light_atoms, bool verbose)
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(), t(timeout), match_light(match_light_atoms), verbose(verbose)
+{
+}
 
 /** Construct specifying the prematcher for the MCS match,
     and specifying whether or not to match light atoms
 */
-AtomMCSMatcher::AtomMCSMatcher(const AtomMatcher &matcher,
-                               bool match_light_atoms,
-                               bool verbose)
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(),
-                 prematcher(matcher), t(1*second),
-                 match_light(match_light_atoms), verbose(verbose)
-{}
+AtomMCSMatcher::AtomMCSMatcher(const AtomMatcher &matcher, bool match_light_atoms, bool verbose)
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(), prematcher(matcher), t(1 * second),
+      match_light(match_light_atoms), verbose(verbose)
+{
+}
 
 /** Construct specifying the timeout and prematcher for the MCS match,
     and specifying whether or not to match light atoms
 */
-AtomMCSMatcher::AtomMCSMatcher(const AtomMatcher &matcher,
-                               const SireUnits::Dimension::Time &timeout,
-                               bool match_light_atoms,
-                               bool verbose)
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(),
-                 prematcher(matcher), t(timeout),
-                 match_light(match_light_atoms), verbose(verbose)
-{}
+AtomMCSMatcher::AtomMCSMatcher(const AtomMatcher &matcher, const SireUnits::Dimension::Time &timeout,
+                               bool match_light_atoms, bool verbose)
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(), prematcher(matcher), t(timeout), match_light(match_light_atoms),
+      verbose(verbose)
+{
+}
 
 /** Copy constructor */
 AtomMCSMatcher::AtomMCSMatcher(const AtomMCSMatcher &other)
-               : ConcreteProperty<AtomMCSMatcher,AtomMatcher>(other),
-                 prematcher(other.prematcher), t(other.t),
-                 match_light(other.match_light), verbose(other.verbose)
-{}
+    : ConcreteProperty<AtomMCSMatcher, AtomMatcher>(other), prematcher(other.prematcher), t(other.t),
+      match_light(other.match_light), verbose(other.verbose)
+{
+}
 
 /** Destructor */
 AtomMCSMatcher::~AtomMCSMatcher()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomMCSMatcher& AtomMCSMatcher::operator=(const AtomMCSMatcher &other)
+AtomMCSMatcher &AtomMCSMatcher::operator=(const AtomMCSMatcher &other)
 {
     if (this != &other)
     {
@@ -524,7 +504,8 @@ AtomMCSMatcher& AtomMCSMatcher::operator=(const AtomMCSMatcher &other)
 /** Comparison operator */
 bool AtomMCSMatcher::operator==(const AtomMCSMatcher &other) const
 {
-    return prematcher == other.prematcher and t == other.t and match_light == other.match_light and verbose == other.verbose;
+    return prematcher == other.prematcher and t == other.t and match_light == other.match_light and
+           verbose == other.verbose;
 }
 
 /** Comparison operator */
@@ -538,28 +519,30 @@ QString AtomMCSMatcher::toString() const
     if (prematcher.isNull() or prematcher.read().isNull())
     {
         return QObject::tr("AtomMCSMatcher( timeout() = %1 s, matchingLightAtoms() = %2, "
-                "isVerbose() = %3 )")
-                .arg(t.to(second)).arg(match_light).arg(verbose);
+                           "isVerbose() = %3 )")
+            .arg(t.to(second))
+            .arg(match_light)
+            .arg(verbose);
     }
     else
     {
         return QObject::tr("AtomMCSMatcher( preMatcher() = %1, timeout() = %2 s, "
                            "matchingLightAtoms() = %3, isVerbose() = %4 )")
-                    .arg(prematcher.read().toString())
-                    .arg(t.to(second))
-                    .arg(match_light)
-                    .arg(verbose);
+            .arg(prematcher.read().toString())
+            .arg(t.to(second))
+            .arg(match_light)
+            .arg(verbose);
     }
 }
 
-const char* AtomMCSMatcher::typeName()
+const char *AtomMCSMatcher::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomMCSMatcher>() );
+    return QMetaType::typeName(qMetaTypeId<AtomMCSMatcher>());
 }
 
 /** Return the prematcher (if any) that is used to pre-match atoms
     before the MCS match */
-const AtomMatcher& AtomMCSMatcher::preMatcher() const
+const AtomMatcher &AtomMCSMatcher::preMatcher() const
 {
     return prematcher.read();
 }
@@ -589,15 +572,13 @@ bool AtomMCSMatcher::isVerbose() const
 
      This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> AtomMCSMatcher::pvt_match(const MoleculeView &mol0,
-                                                 const PropertyMap &map0,
-                                                 const MoleculeView &mol1,
-                                                 const PropertyMap &map1) const
+QHash<AtomIdx, AtomIdx> AtomMCSMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                  const MoleculeView &mol1, const PropertyMap &map1) const
 {
     if (prematcher.isNull() or prematcher.read().isNull())
-        return Evaluator(mol0).findMCS(mol1, t, match_light, map0, map1, 6, this-verbose);
+        return Evaluator(mol0).findMCS(mol1, t, match_light, map0, map1, 6, this - verbose);
     else
-        return Evaluator(mol0).findMCS(mol1, prematcher.read(), t, match_light, map0, map1, 6, this-verbose);
+        return Evaluator(mol0).findMCS(mol1, prematcher.read(), t, match_light, map0, map1, 6, this - verbose);
 }
 
 /////////
@@ -607,13 +588,12 @@ QHash<AtomIdx,AtomIdx> AtomMCSMatcher::pvt_match(const MoleculeView &mol0,
 static const RegisterMetaType<AtomIDMatcher> r_idmatcher;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AtomIDMatcher &idmatcher)
+QDataStream &operator<<(QDataStream &ds, const AtomIDMatcher &idmatcher)
 {
     writeHeader(ds, r_idmatcher, 1);
 
     SharedDataStream sds(ds);
-    sds << idmatcher.m << static_cast<const AtomMatcher&>(idmatcher);
+    sds << idmatcher.m << static_cast<const AtomMatcher &>(idmatcher);
 
     return ds;
 }
@@ -626,7 +606,7 @@ QDataStream &operator>>(QDataStream &ds, AtomIDMatcher &idmatcher)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> idmatcher.m >> static_cast<AtomMatcher&>(idmatcher);
+        sds >> idmatcher.m >> static_cast<AtomMatcher &>(idmatcher);
     }
     else
         throw version_error(v, "1", r_idmatcher, CODELOC);
@@ -635,139 +615,129 @@ QDataStream &operator>>(QDataStream &ds, AtomIDMatcher &idmatcher)
 }
 
 /** Constructor */
-AtomIDMatcher::AtomIDMatcher() : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
-{}
+AtomIDMatcher::AtomIDMatcher() : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
+{
+}
 
 /** Construct to match atom names */
-AtomIDMatcher::AtomIDMatcher(const QList< QPair<QString,QString> > &names)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QList<QPair<QString, QString>> &names)
+    : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
-    for (int i=0; i<names.count(); ++i)
+    for (int i = 0; i < names.count(); ++i)
     {
-        const QPair<QString,QString> &name = names[i];
+        const QPair<QString, QString> &name = names[i];
 
-        if (not (name.first.isEmpty() or name.second.isEmpty()))
+        if (not(name.first.isEmpty() or name.second.isEmpty()))
         {
-            m.append( QPair<AtomIdentifier,AtomIdentifier>( AtomName(name.first),
-                                                            AtomName(name.second) ) );
+            m.append(QPair<AtomIdentifier, AtomIdentifier>(AtomName(name.first), AtomName(name.second)));
         }
     }
 }
 
 /** Construct to match atom names */
-AtomIDMatcher::AtomIDMatcher(const QHash<QString,QString> &names)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QHash<QString, QString> &names) : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
     QSet<QString> matched_names;
 
-    for (QHash<QString,QString>::const_iterator it = names.constBegin();
-         it != names.constEnd();
-         ++it)
+    for (QHash<QString, QString>::const_iterator it = names.constBegin(); it != names.constEnd(); ++it)
     {
         if (not it.key().isEmpty() or it.value().isEmpty())
         {
             if (matched_names.contains(it.value()))
-                throw SireError::invalid_arg( QObject::tr(
-                        "You are trying to match multiple atoms (%1) to the same name (%2). "
-                        "Please ensure that you have a unique name <=> name mapping.")
-                            .arg(Sire::toString(names.keys(it.value())))
-                            .arg(it.value()), CODELOC );
+                throw SireError::invalid_arg(
+                    QObject::tr("You are trying to match multiple atoms (%1) to the same name (%2). "
+                                "Please ensure that you have a unique name <=> name mapping.")
+                        .arg(Sire::toString(names.keys(it.value())))
+                        .arg(it.value()),
+                    CODELOC);
 
             matched_names.insert(it.value());
-            m.append( QPair<AtomIdentifier,AtomIdentifier>( AtomName(it.key()),
-                                                            AtomName(it.value()) ) );
+            m.append(QPair<AtomIdentifier, AtomIdentifier>(AtomName(it.key()), AtomName(it.value())));
         }
     }
 }
 
 /** Construct to match atom indexes */
-AtomIDMatcher::AtomIDMatcher(const QList< QPair<int,int> > &idxs)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QList<QPair<int, int>> &idxs) : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
-    for (int i=0; i<idxs.count(); ++i)
+    for (int i = 0; i < idxs.count(); ++i)
     {
-        const QPair<int,int> &idx = idxs[i];
+        const QPair<int, int> &idx = idxs[i];
 
-        m.append( QPair<AtomIdentifier,AtomIdentifier>( AtomIdx(idx.first),
-                                                        AtomIdx(idx.second) ) );
+        m.append(QPair<AtomIdentifier, AtomIdentifier>(AtomIdx(idx.first), AtomIdx(idx.second)));
     }
 }
 
 /** Construct to match atom indexes */
-AtomIDMatcher::AtomIDMatcher(const QHash<int,int> &idxs)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QHash<int, int> &idxs) : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
     QSet<int> matched_idxs;
 
-    for (QHash<int,int>::const_iterator it = idxs.constBegin();
-         it != idxs.constEnd();
-         ++it)
+    for (QHash<int, int>::const_iterator it = idxs.constBegin(); it != idxs.constEnd(); ++it)
     {
         if (matched_idxs.contains(it.value()))
-            throw SireError::invalid_arg( QObject::tr(
-                    "You are trying to match multiple atoms (%1) to the same index (%2). "
-                    "Please ensure that you have a unique index <=> index mapping.")
-                        .arg(Sire::toString(idxs.keys(it.value())))
-                        .arg(it.value()), CODELOC );
+            throw SireError::invalid_arg(
+                QObject::tr("You are trying to match multiple atoms (%1) to the same index (%2). "
+                            "Please ensure that you have a unique index <=> index mapping.")
+                    .arg(Sire::toString(idxs.keys(it.value())))
+                    .arg(it.value()),
+                CODELOC);
 
         matched_idxs.insert(it.value());
 
-        m.append( QPair<AtomIdentifier,AtomIdentifier>( AtomIdx(it.key()),
-                                                        AtomIdx(it.value()) ) );
+        m.append(QPair<AtomIdentifier, AtomIdentifier>(AtomIdx(it.key()), AtomIdx(it.value())));
     }
 }
 
 /** Construct to match specified AtomIdentifiers */
-AtomIDMatcher::AtomIDMatcher(const QList< QPair<AtomIdentifier,AtomIdentifier> > &ids)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QList<QPair<AtomIdentifier, AtomIdentifier>> &ids)
+    : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
-    for (int i=0; i<ids.count(); ++i)
+    for (int i = 0; i < ids.count(); ++i)
     {
-        const QPair<AtomIdentifier,AtomIdentifier> id = ids[i];
+        const QPair<AtomIdentifier, AtomIdentifier> id = ids[i];
 
-        if (not (id.first.isNull() or id.second.isNull()))
+        if (not(id.first.isNull() or id.second.isNull()))
             m.append(id);
     }
 }
 
 /** Construct to match specified AtomIdentifiers */
-AtomIDMatcher::AtomIDMatcher(const QHash<AtomIdentifier,AtomIdentifier> &ids)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QHash<AtomIdentifier, AtomIdentifier> &ids)
+    : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
     QSet<AtomIdentifier> matched_ids;
 
-    for (QHash<AtomIdentifier,AtomIdentifier>::const_iterator it = ids.constBegin();
-         it != ids.constEnd();
-         ++it)
+    for (QHash<AtomIdentifier, AtomIdentifier>::const_iterator it = ids.constBegin(); it != ids.constEnd(); ++it)
     {
         if (not it.key().isNull() or it.value().isNull())
         {
             if (matched_ids.contains(it.value()))
-                throw SireError::invalid_arg( QObject::tr(
-                        "You are trying to match multiple atoms (%1) to the same ID (%2). "
-                        "Please ensure that you have a unique ID <=> ID mapping.")
-                            .arg(Sire::toString(ids.keys(it.value())))
-                            .arg(it.value().toString()), CODELOC );
+                throw SireError::invalid_arg(
+                    QObject::tr("You are trying to match multiple atoms (%1) to the same ID (%2). "
+                                "Please ensure that you have a unique ID <=> ID mapping.")
+                        .arg(Sire::toString(ids.keys(it.value())))
+                        .arg(it.value().toString()),
+                    CODELOC);
 
             matched_ids.insert(it.value());
 
-            m.append( QPair<AtomIdentifier,AtomIdentifier>(it.key(), it.value()) );
+            m.append(QPair<AtomIdentifier, AtomIdentifier>(it.key(), it.value()));
         }
     }
 }
 
 /** Construct to match atom names */
-AtomIDMatcher::AtomIDMatcher(const QList< boost::tuple<QString,QString> > &names)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QList<boost::tuple<QString, QString>> &names)
+    : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
-    for (int i=0; i<names.count(); ++i)
+    for (int i = 0; i < names.count(); ++i)
     {
-        const boost::tuple<QString,QString> &name = names[i];
+        const boost::tuple<QString, QString> &name = names[i];
 
-        if (not (name.get<0>().isEmpty() or name.get<1>().isEmpty()))
+        if (not(name.get<0>().isEmpty() or name.get<1>().isEmpty()))
         {
-            m.append( QPair<AtomIdentifier,AtomIdentifier>( AtomName(name.get<0>()),
-                                                            AtomName(name.get<1>()) ) );
+            m.append(QPair<AtomIdentifier, AtomIdentifier>(AtomName(name.get<0>()), AtomName(name.get<1>())));
         }
     }
 }
@@ -776,14 +746,13 @@ AtomIDMatcher::AtomIDMatcher(const QList< boost::tuple<QString,QString> > &names
     with format 'atom0:atom1,atom2:atom3' etc. (i.e. comma separated pairs,
     each pair is colon separated to match atom to atom, e.g. this string
     matches atom0 to atom1, and atom2 to atom3) */
-AtomIDMatcher::AtomIDMatcher(const QString &atom_names)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QString &atom_names) : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
     auto words = atom_names.split(",");
 
     if (not words.isEmpty())
     {
-        QHash<QString,QString> match_names;
+        QHash<QString, QString> match_names;
         match_names.reserve(words.count());
 
         for (auto word : words)
@@ -792,52 +761,51 @@ AtomIDMatcher::AtomIDMatcher(const QString &atom_names)
 
             if (atoms.count() == 2)
             {
-                match_names.insert( atoms[0].simplified(), atoms[1].simplified() );
+                match_names.insert(atoms[0].simplified(), atoms[1].simplified());
             }
         }
 
-        this->operator=( AtomIDMatcher(match_names) );
+        this->operator=(AtomIDMatcher(match_names));
     }
 }
 
 /** Construct to match atom indexes */
-AtomIDMatcher::AtomIDMatcher(const QList< boost::tuple<int,int> > &idxs)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QList<boost::tuple<int, int>> &idxs) : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
-    for (int i=0; i<idxs.count(); ++i)
+    for (int i = 0; i < idxs.count(); ++i)
     {
-        const boost::tuple<int,int> &idx = idxs[i];
+        const boost::tuple<int, int> &idx = idxs[i];
 
-        m.append( QPair<AtomIdentifier,AtomIdentifier>( AtomIdx(idx.get<0>()),
-                                                        AtomIdx(idx.get<1>()) ) );
+        m.append(QPair<AtomIdentifier, AtomIdentifier>(AtomIdx(idx.get<0>()), AtomIdx(idx.get<1>())));
     }
 }
 
 /** Construct to match specified AtomIdentifiers */
-AtomIDMatcher::AtomIDMatcher(const QList< boost::tuple<AtomIdentifier,AtomIdentifier> > &ids)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>()
+AtomIDMatcher::AtomIDMatcher(const QList<boost::tuple<AtomIdentifier, AtomIdentifier>> &ids)
+    : ConcreteProperty<AtomIDMatcher, AtomMatcher>()
 {
-    for (int i=0; i<ids.count(); ++i)
+    for (int i = 0; i < ids.count(); ++i)
     {
-        const boost::tuple<AtomIdentifier,AtomIdentifier> id = ids[i];
+        const boost::tuple<AtomIdentifier, AtomIdentifier> id = ids[i];
 
-        if (not (id.get<0>().isNull() or id.get<1>().isNull()))
-            m.append( QPair<AtomIdentifier,AtomIdentifier>(id.get<0>(),id.get<1>()) );
+        if (not(id.get<0>().isNull() or id.get<1>().isNull()))
+            m.append(QPair<AtomIdentifier, AtomIdentifier>(id.get<0>(), id.get<1>()));
     }
 }
 
 /** Copy constructor */
 AtomIDMatcher::AtomIDMatcher(const AtomIDMatcher &other)
-              : ConcreteProperty<AtomIDMatcher,AtomMatcher>(other),
-                m(other.m)
-{}
+    : ConcreteProperty<AtomIDMatcher, AtomMatcher>(other), m(other.m)
+{
+}
 
 /** Destructor */
 AtomIDMatcher::~AtomIDMatcher()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomIDMatcher& AtomIDMatcher::operator=(const AtomIDMatcher &other)
+AtomIDMatcher &AtomIDMatcher::operator=(const AtomIDMatcher &other)
 {
     m = other.m;
     return *this;
@@ -868,15 +836,12 @@ QString AtomIDMatcher::toString() const
 
     QStringList matches;
 
-    for (QList< QPair<AtomIdentifier,AtomIdentifier> >::const_iterator it = m.constBegin();
-         it != m.constEnd();
-         ++it)
+    for (QList<QPair<AtomIdentifier, AtomIdentifier>>::const_iterator it = m.constBegin(); it != m.constEnd(); ++it)
     {
-        matches.append( QObject::tr(" %1 <=> %2").arg(it->first.toString(),
-                                                      it->second.toString()) );
+        matches.append(QObject::tr(" %1 <=> %2").arg(it->first.toString(), it->second.toString()));
     }
 
-    return QObject::tr("AtomIDMatcher( %1 )").arg( matches.join("\n") );
+    return QObject::tr("AtomIDMatcher( %1 )").arg(matches.join("\n"));
 }
 
 /** Match the atoms in 'mol1' to the atoms in 'mol0' - this
@@ -885,12 +850,10 @@ QString AtomIDMatcher::toString() const
 
      This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> AtomIDMatcher::pvt_match(const MoleculeView &mol0,
-                                                const PropertyMap &map0,
-                                                const MoleculeView &mol1,
-                                                const PropertyMap &map1) const
+QHash<AtomIdx, AtomIdx> AtomIDMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                 const MoleculeView &mol1, const PropertyMap &map1) const
 {
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
     const AtomSelection sel0 = mol0.selection();
     const AtomSelection sel1 = mol1.selection();
@@ -900,11 +863,9 @@ QHash<AtomIdx,AtomIdx> AtomIDMatcher::pvt_match(const MoleculeView &mol0,
     const int nats0 = sel0.nSelectedAtoms();
     const int nats1 = sel1.nSelectedAtoms();
 
-    for (QList< QPair<AtomIdentifier,AtomIdentifier> >::const_iterator it = m.constBegin();
-         it != m.constEnd();
-         ++it)
+    for (QList<QPair<AtomIdentifier, AtomIdentifier>>::const_iterator it = m.constBegin(); it != m.constEnd(); ++it)
     {
-        //find the atom in mol0
+        // find the atom in mol0
         try
         {
             AtomIdx idx0 = mol0.data().info().atomIdx(it->first);
@@ -922,12 +883,14 @@ QHash<AtomIdx,AtomIdx> AtomIDMatcher::pvt_match(const MoleculeView &mol0,
                         found_1.insert(idx1);
                     }
                 }
-                catch(...)
-                {}
+                catch (...)
+                {
+                }
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
 
         if (map.count() >= nats0 or found_1.count() >= nats1)
             break;
@@ -942,22 +905,18 @@ QHash<AtomIdx,AtomIdx> AtomIDMatcher::pvt_match(const MoleculeView &mol0,
 
      This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> AtomIDMatcher::pvt_match(const MoleculeInfoData &mol0,
-                                                const MoleculeInfoData &mol1) const
+QHash<AtomIdx, AtomIdx> AtomIDMatcher::pvt_match(const MoleculeInfoData &mol0, const MoleculeInfoData &mol1) const
 {
-    QHash<AtomIdx,AtomIdx> map;
-
+    QHash<AtomIdx, AtomIdx> map;
 
     QSet<AtomIdx> found_1;
 
     const int nats0 = mol0.nAtoms();
     const int nats1 = mol1.nAtoms();
 
-    for (QList< QPair<AtomIdentifier,AtomIdentifier> >::const_iterator it = m.constBegin();
-         it != m.constEnd();
-         ++it)
+    for (QList<QPair<AtomIdentifier, AtomIdentifier>>::const_iterator it = m.constBegin(); it != m.constEnd(); ++it)
     {
-        //find the atom in mol0
+        // find the atom in mol0
         try
         {
             AtomIdx idx0 = mol0.atomIdx(it->first);
@@ -974,12 +933,14 @@ QHash<AtomIdx,AtomIdx> AtomIDMatcher::pvt_match(const MoleculeInfoData &mol0,
                         found_1.insert(idx1);
                     }
                 }
-                catch(...)
-                {}
+                catch (...)
+                {
+                }
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
 
         if (map.count() >= nats0 or found_1.count() >= nats1)
             break;
@@ -988,9 +949,9 @@ QHash<AtomIdx,AtomIdx> AtomIDMatcher::pvt_match(const MoleculeInfoData &mol0,
     return map;
 }
 
-const char* AtomIDMatcher::typeName()
+const char *AtomIDMatcher::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomIDMatcher>() );
+    return QMetaType::typeName(qMetaTypeId<AtomIDMatcher>());
 }
 
 /////////
@@ -1000,13 +961,12 @@ const char* AtomIDMatcher::typeName()
 static const RegisterMetaType<AtomMultiMatcher> r_multimatcher;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AtomMultiMatcher &multimatcher)
+QDataStream &operator<<(QDataStream &ds, const AtomMultiMatcher &multimatcher)
 {
     writeHeader(ds, r_multimatcher, 1);
 
     SharedDataStream sds(ds);
-    sds << multimatcher.m << static_cast<const AtomMatcher&>(multimatcher);
+    sds << multimatcher.m << static_cast<const AtomMatcher &>(multimatcher);
 
     return ds;
 }
@@ -1019,7 +979,7 @@ QDataStream &operator>>(QDataStream &ds, AtomMultiMatcher &multimatcher)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> multimatcher.m >> static_cast<AtomMatcher&>(multimatcher);
+        sds >> multimatcher.m >> static_cast<AtomMatcher &>(multimatcher);
     }
     else
         throw version_error(v, "1", r_multimatcher, CODELOC);
@@ -1028,12 +988,12 @@ QDataStream &operator>>(QDataStream &ds, AtomMultiMatcher &multimatcher)
 }
 
 /** Constructor */
-AtomMultiMatcher::AtomMultiMatcher() : ConcreteProperty<AtomMultiMatcher,AtomMatcher>()
-{}
+AtomMultiMatcher::AtomMultiMatcher() : ConcreteProperty<AtomMultiMatcher, AtomMatcher>()
+{
+}
 
 /** Construct from a single match */
-AtomMultiMatcher::AtomMultiMatcher(const AtomMatcher &matcher)
-                 : ConcreteProperty<AtomMultiMatcher,AtomMatcher>()
+AtomMultiMatcher::AtomMultiMatcher(const AtomMatcher &matcher) : ConcreteProperty<AtomMultiMatcher, AtomMatcher>()
 {
     if (matcher.isA<AtomMultiMatcher>())
     {
@@ -1041,15 +1001,15 @@ AtomMultiMatcher::AtomMultiMatcher(const AtomMatcher &matcher)
     }
     else
     {
-        m.append( matcher );
+        m.append(matcher);
     }
 }
 
 /** Construct from a pair of matches */
 AtomMultiMatcher::AtomMultiMatcher(const AtomMatcher &m0, const AtomMatcher &m1)
-                 : ConcreteProperty<AtomMultiMatcher,AtomMatcher>()
+    : ConcreteProperty<AtomMultiMatcher, AtomMatcher>()
 {
-    this->operator=( AtomMultiMatcher(m0) );
+    this->operator=(AtomMultiMatcher(m0));
 
     if (m1.isA<AtomMultiMatcher>())
     {
@@ -1063,16 +1023,17 @@ AtomMultiMatcher::AtomMultiMatcher(const AtomMatcher &m0, const AtomMatcher &m1)
 
 /** Copy constructor */
 AtomMultiMatcher::AtomMultiMatcher(const AtomMultiMatcher &other)
-                 : ConcreteProperty<AtomMultiMatcher,AtomMatcher>(other),
-                   m(other.m)
-{}
+    : ConcreteProperty<AtomMultiMatcher, AtomMatcher>(other), m(other.m)
+{
+}
 
 /** Destructor */
 AtomMultiMatcher::~AtomMultiMatcher()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomMultiMatcher& AtomMultiMatcher::operator=(const AtomMultiMatcher &other)
+AtomMultiMatcher &AtomMultiMatcher::operator=(const AtomMultiMatcher &other)
 {
     m = other.m;
     return *this;
@@ -1103,14 +1064,12 @@ QString AtomMultiMatcher::toString() const
 
     QStringList matches;
 
-    for (QList<AtomMatcherPtr>::const_iterator it = m.constBegin();
-         it != m.constEnd();
-         ++it)
+    for (QList<AtomMatcherPtr>::const_iterator it = m.constBegin(); it != m.constEnd(); ++it)
     {
-        matches.append( QObject::tr(" %1").arg(it->read().toString()) );
+        matches.append(QObject::tr(" %1").arg(it->read().toString()));
     }
 
-    return QObject::tr("AtomMultiMatcher{ %1 }").arg( matches.join(" +\n") );
+    return QObject::tr("AtomMultiMatcher{ %1 }").arg(matches.join(" +\n"));
 }
 
 /** Match the atoms in 'mol1' to the atoms in 'mol0' - this
@@ -1119,36 +1078,30 @@ QString AtomMultiMatcher::toString() const
 
      This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> AtomMultiMatcher::pvt_match(const MoleculeView &mol0,
-                                                   const PropertyMap &map0,
-                                                   const MoleculeView &mol1,
-                                                   const PropertyMap &map1) const
+QHash<AtomIdx, AtomIdx> AtomMultiMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                    const MoleculeView &mol1, const PropertyMap &map1) const
 {
     if (m.isEmpty())
-        return QHash<AtomIdx,AtomIdx>();
+        return QHash<AtomIdx, AtomIdx>();
     else if (m.count() == 1)
-        return m.at(0).read().match(mol0,mol1);
+        return m.at(0).read().match(mol0, mol1);
 
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
     QSet<AtomIdx> found_1;
     const int nats0 = mol0.selection().nSelected();
     const int nats1 = mol1.selection().nSelected();
 
-    for (QList<AtomMatcherPtr>::const_iterator it = m.constBegin();
-         it != m.constEnd();
-         ++it)
+    for (QList<AtomMatcherPtr>::const_iterator it = m.constBegin(); it != m.constEnd(); ++it)
     {
-        QHash<AtomIdx,AtomIdx> lmap = it->read().match(mol0, map0, mol1, map1);
+        QHash<AtomIdx, AtomIdx> lmap = it->read().match(mol0, map0, mol1, map1);
 
-        for (QHash<AtomIdx,AtomIdx>::const_iterator it2 = lmap.constBegin();
-             it2 != lmap.constEnd();
-             ++it2)
+        for (QHash<AtomIdx, AtomIdx>::const_iterator it2 = lmap.constBegin(); it2 != lmap.constEnd(); ++it2)
         {
-            if (not (map.contains(it2.key()) or found_1.contains(it2.value())))
+            if (not(map.contains(it2.key()) or found_1.contains(it2.value())))
             {
-                map.insert( it2.key(), it2.value() );
-                found_1.insert( it2.value() );
+                map.insert(it2.key(), it2.value());
+                found_1.insert(it2.value());
             }
         }
 
@@ -1159,12 +1112,10 @@ QHash<AtomIdx,AtomIdx> AtomMultiMatcher::pvt_match(const MoleculeView &mol0,
             break;
 
         if (map.count() > nats0)
-            throw SireError::program_bug( QObject::tr(
-                    "Should not have excess matched atoms???"), CODELOC );
+            throw SireError::program_bug(QObject::tr("Should not have excess matched atoms???"), CODELOC);
 
         if (found_1.count() > nats1)
-            throw SireError::program_bug( QObject::tr(
-                    "Should not have excess matched atoms???"), CODELOC );
+            throw SireError::program_bug(QObject::tr("Should not have excess matched atoms???"), CODELOC);
     }
 
     return map;
@@ -1176,34 +1127,29 @@ QHash<AtomIdx,AtomIdx> AtomMultiMatcher::pvt_match(const MoleculeView &mol0,
 
      This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> AtomMultiMatcher::pvt_match(const MoleculeInfoData &mol0,
-                                                   const MoleculeInfoData &mol1) const
+QHash<AtomIdx, AtomIdx> AtomMultiMatcher::pvt_match(const MoleculeInfoData &mol0, const MoleculeInfoData &mol1) const
 {
     if (m.isEmpty())
-        return QHash<AtomIdx,AtomIdx>();
+        return QHash<AtomIdx, AtomIdx>();
     else if (m.count() == 1)
-        return m.at(0).read().match(mol0,mol1);
+        return m.at(0).read().match(mol0, mol1);
 
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
     QSet<AtomIdx> found_1;
     const int nats0 = mol0.nAtoms();
     const int nats1 = mol1.nAtoms();
 
-    for (QList<AtomMatcherPtr>::const_iterator it = m.constBegin();
-         it != m.constEnd();
-         ++it)
+    for (QList<AtomMatcherPtr>::const_iterator it = m.constBegin(); it != m.constEnd(); ++it)
     {
-        QHash<AtomIdx,AtomIdx> lmap = it->read().match(mol0, mol1);
+        QHash<AtomIdx, AtomIdx> lmap = it->read().match(mol0, mol1);
 
-        for (QHash<AtomIdx,AtomIdx>::const_iterator it2 = lmap.constBegin();
-             it2 != lmap.constEnd();
-             ++it2)
+        for (QHash<AtomIdx, AtomIdx>::const_iterator it2 = lmap.constBegin(); it2 != lmap.constEnd(); ++it2)
         {
-            if (not (map.contains(it2.key()) or found_1.contains(it2.value())))
+            if (not(map.contains(it2.key()) or found_1.contains(it2.value())))
             {
-                map.insert( it2.key(), it2.value() );
-                found_1.insert( it2.value() );
+                map.insert(it2.key(), it2.value());
+                found_1.insert(it2.value());
             }
         }
 
@@ -1214,20 +1160,18 @@ QHash<AtomIdx,AtomIdx> AtomMultiMatcher::pvt_match(const MoleculeInfoData &mol0,
             break;
 
         if (map.count() > nats0)
-            throw SireError::program_bug( QObject::tr(
-                    "Should not have excess matched atoms???"), CODELOC );
+            throw SireError::program_bug(QObject::tr("Should not have excess matched atoms???"), CODELOC);
 
         if (found_1.count() > nats1)
-            throw SireError::program_bug( QObject::tr(
-                    "Should not have excess matched atoms???"), CODELOC );
+            throw SireError::program_bug(QObject::tr("Should not have excess matched atoms???"), CODELOC);
     }
 
     return map;
 }
 
-const char* AtomMultiMatcher::typeName()
+const char *AtomMultiMatcher::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomMultiMatcher>() );
+    return QMetaType::typeName(qMetaTypeId<AtomMultiMatcher>());
 }
 
 /////////
@@ -1237,11 +1181,10 @@ const char* AtomMultiMatcher::typeName()
 static const RegisterMetaType<ResIdxAtomNameMatcher> r_residxatomnamematcher;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const ResIdxAtomNameMatcher &residxatomnamematcher)
+QDataStream &operator<<(QDataStream &ds, const ResIdxAtomNameMatcher &residxatomnamematcher)
 {
     writeHeader(ds, r_residxatomnamematcher, 1);
-    ds << static_cast<const AtomMatcher&>(residxatomnamematcher);
+    ds << static_cast<const AtomMatcher &>(residxatomnamematcher);
 
     return ds;
 }
@@ -1253,7 +1196,7 @@ QDataStream &operator>>(QDataStream &ds, ResIdxAtomNameMatcher &residxatomnamema
 
     if (v == 1)
     {
-        ds >> static_cast<AtomMatcher&>(residxatomnamematcher);
+        ds >> static_cast<AtomMatcher &>(residxatomnamematcher);
     }
     else
         throw version_error(v, "1", r_residxatomnamematcher, CODELOC);
@@ -1262,20 +1205,23 @@ QDataStream &operator>>(QDataStream &ds, ResIdxAtomNameMatcher &residxatomnamema
 }
 
 /** Constructor */
-ResIdxAtomNameMatcher::ResIdxAtomNameMatcher() : ConcreteProperty<ResIdxAtomNameMatcher,AtomMatcher>()
-{}
+ResIdxAtomNameMatcher::ResIdxAtomNameMatcher() : ConcreteProperty<ResIdxAtomNameMatcher, AtomMatcher>()
+{
+}
 
 /** Copy constructor */
 ResIdxAtomNameMatcher::ResIdxAtomNameMatcher(const ResIdxAtomNameMatcher &other)
-               : ConcreteProperty<ResIdxAtomNameMatcher,AtomMatcher>(other)
-{}
+    : ConcreteProperty<ResIdxAtomNameMatcher, AtomMatcher>(other)
+{
+}
 
 /** Destructor */
 ResIdxAtomNameMatcher::~ResIdxAtomNameMatcher()
-{}
+{
+}
 
 /** Copy assignment operator */
-ResIdxAtomNameMatcher& ResIdxAtomNameMatcher::operator=(const ResIdxAtomNameMatcher &other)
+ResIdxAtomNameMatcher &ResIdxAtomNameMatcher::operator=(const ResIdxAtomNameMatcher &other)
 {
     return *this;
 }
@@ -1304,10 +1250,8 @@ QString ResIdxAtomNameMatcher::toString() const
 
     This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> ResIdxAtomNameMatcher::pvt_match(const MoleculeView &mol0,
-                                                        const PropertyMap &map0,
-                                                        const MoleculeView &mol1,
-                                                        const PropertyMap &map1) const
+QHash<AtomIdx, AtomIdx> ResIdxAtomNameMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                         const MoleculeView &mol1, const PropertyMap &map1) const
 {
     const AtomSelection sel0 = mol0.selection();
     const AtomSelection sel1 = mol1.selection();
@@ -1319,7 +1263,7 @@ QHash<AtomIdx,AtomIdx> ResIdxAtomNameMatcher::pvt_match(const MoleculeView &mol0
     else
     {
         throw SireError::unsupported(QObject::tr("ResIdxAtomNameMatcher only works with "
-            "full molecule selections."));
+                                                 "full molecule selections."));
     }
 }
 
@@ -1331,10 +1275,10 @@ QHash<AtomIdx,AtomIdx> ResIdxAtomNameMatcher::pvt_match(const MoleculeView &mol0
     This skips atoms in 'mol1' that are not in 'mol0'. Note that we only match
     the first unique atom within each residue.
 */
-QHash<AtomIdx,AtomIdx> ResIdxAtomNameMatcher::pvt_match(const MoleculeInfoData &mol0,
-                                                        const MoleculeInfoData &mol1) const
+QHash<AtomIdx, AtomIdx> ResIdxAtomNameMatcher::pvt_match(const MoleculeInfoData &mol0,
+                                                         const MoleculeInfoData &mol1) const
 {
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
     // Get the list of residue indices from the reference molecule.
     auto resIdxs = mol0.getResidues();
@@ -1376,9 +1320,9 @@ QHash<AtomIdx,AtomIdx> ResIdxAtomNameMatcher::pvt_match(const MoleculeInfoData &
     return map;
 }
 
-const char* ResIdxAtomNameMatcher::typeName()
+const char *ResIdxAtomNameMatcher::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResIdxAtomNameMatcher>() );
+    return QMetaType::typeName(qMetaTypeId<ResIdxAtomNameMatcher>());
 }
 
 /////////
@@ -1388,11 +1332,10 @@ const char* ResIdxAtomNameMatcher::typeName()
 static const RegisterMetaType<ResNumAtomNameMatcher> r_resnumatomnamematcher;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const ResNumAtomNameMatcher &resnumatomnamematcher)
+QDataStream &operator<<(QDataStream &ds, const ResNumAtomNameMatcher &resnumatomnamematcher)
 {
     writeHeader(ds, r_resnumatomnamematcher, 1);
-    ds << static_cast<const AtomMatcher&>(resnumatomnamematcher);
+    ds << static_cast<const AtomMatcher &>(resnumatomnamematcher);
 
     return ds;
 }
@@ -1404,7 +1347,7 @@ QDataStream &operator>>(QDataStream &ds, ResNumAtomNameMatcher &resnumatomnamema
 
     if (v == 1)
     {
-        ds >> static_cast<AtomMatcher&>(resnumatomnamematcher);
+        ds >> static_cast<AtomMatcher &>(resnumatomnamematcher);
     }
     else
         throw version_error(v, "1", r_resnumatomnamematcher, CODELOC);
@@ -1413,20 +1356,23 @@ QDataStream &operator>>(QDataStream &ds, ResNumAtomNameMatcher &resnumatomnamema
 }
 
 /** Constructor */
-ResNumAtomNameMatcher::ResNumAtomNameMatcher() : ConcreteProperty<ResNumAtomNameMatcher,AtomMatcher>()
-{}
+ResNumAtomNameMatcher::ResNumAtomNameMatcher() : ConcreteProperty<ResNumAtomNameMatcher, AtomMatcher>()
+{
+}
 
 /** Copy constructor */
 ResNumAtomNameMatcher::ResNumAtomNameMatcher(const ResNumAtomNameMatcher &other)
-               : ConcreteProperty<ResNumAtomNameMatcher,AtomMatcher>(other)
-{}
+    : ConcreteProperty<ResNumAtomNameMatcher, AtomMatcher>(other)
+{
+}
 
 /** Destructor */
 ResNumAtomNameMatcher::~ResNumAtomNameMatcher()
-{}
+{
+}
 
 /** Copy assignment operator */
-ResNumAtomNameMatcher& ResNumAtomNameMatcher::operator=(const ResNumAtomNameMatcher &other)
+ResNumAtomNameMatcher &ResNumAtomNameMatcher::operator=(const ResNumAtomNameMatcher &other)
 {
     return *this;
 }
@@ -1455,10 +1401,8 @@ QString ResNumAtomNameMatcher::toString() const
 
     This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> ResNumAtomNameMatcher::pvt_match(const MoleculeView &mol0,
-                                                        const PropertyMap &map0,
-                                                        const MoleculeView &mol1,
-                                                        const PropertyMap &map1) const
+QHash<AtomIdx, AtomIdx> ResNumAtomNameMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                         const MoleculeView &mol1, const PropertyMap &map1) const
 {
     const AtomSelection sel0 = mol0.selection();
     const AtomSelection sel1 = mol1.selection();
@@ -1470,7 +1414,7 @@ QHash<AtomIdx,AtomIdx> ResNumAtomNameMatcher::pvt_match(const MoleculeView &mol0
     else
     {
         throw SireError::unsupported(QObject::tr("ResNumAtomNameMatcher only works with "
-            "full molecule selections."));
+                                                 "full molecule selections."));
     }
 }
 
@@ -1482,10 +1426,10 @@ QHash<AtomIdx,AtomIdx> ResNumAtomNameMatcher::pvt_match(const MoleculeView &mol0
     This skips atoms in 'mol1' that are not in 'mol0'. Note that we only match
     the first unique atom within each residue.
 */
-QHash<AtomIdx,AtomIdx> ResNumAtomNameMatcher::pvt_match(const MoleculeInfoData &mol0,
-                                                        const MoleculeInfoData &mol1) const
+QHash<AtomIdx, AtomIdx> ResNumAtomNameMatcher::pvt_match(const MoleculeInfoData &mol0,
+                                                         const MoleculeInfoData &mol1) const
 {
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
     // Get the list of residue indices from the reference molecule.
     auto resIdxs = mol0.getResidues();
@@ -1530,9 +1474,9 @@ QHash<AtomIdx,AtomIdx> ResNumAtomNameMatcher::pvt_match(const MoleculeInfoData &
     return map;
 }
 
-const char* ResNumAtomNameMatcher::typeName()
+const char *ResNumAtomNameMatcher::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResNumAtomNameMatcher>() );
+    return QMetaType::typeName(qMetaTypeId<ResNumAtomNameMatcher>());
 }
 
 /////////
@@ -1542,16 +1486,14 @@ const char* ResNumAtomNameMatcher::typeName()
 static const RegisterMetaType<ResIdxAtomMCSMatcher> r_residxmcsmatcher;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const ResIdxAtomMCSMatcher &residxmcsmatcher)
+QDataStream &operator<<(QDataStream &ds, const ResIdxAtomMCSMatcher &residxmcsmatcher)
 {
     writeHeader(ds, r_mcsmatcher, 2);
 
     SharedDataStream sds(ds);
 
-    sds << residxmcsmatcher.prematcher << double(residxmcsmatcher.t.to(second))
-        << residxmcsmatcher.match_light << residxmcsmatcher.verbose
-        << static_cast<const AtomMatcher&>(residxmcsmatcher);
+    sds << residxmcsmatcher.prematcher << double(residxmcsmatcher.t.to(second)) << residxmcsmatcher.match_light
+        << residxmcsmatcher.verbose << static_cast<const AtomMatcher &>(residxmcsmatcher);
 
     return ds;
 }
@@ -1567,11 +1509,10 @@ QDataStream &operator>>(QDataStream &ds, ResIdxAtomMCSMatcher &residxmcsmatcher)
 
         SharedDataStream sds(ds);
 
-        sds >> residxmcsmatcher.prematcher >> timeout
-            >> residxmcsmatcher.match_light >> residxmcsmatcher.verbose
-            >> static_cast<AtomMatcher&>(residxmcsmatcher);
+        sds >> residxmcsmatcher.prematcher >> timeout >> residxmcsmatcher.match_light >> residxmcsmatcher.verbose >>
+            static_cast<AtomMatcher &>(residxmcsmatcher);
 
-        residxmcsmatcher.t = timeout*second;
+        residxmcsmatcher.t = timeout * second;
     }
     else if (v == 1)
     {
@@ -1579,9 +1520,9 @@ QDataStream &operator>>(QDataStream &ds, ResIdxAtomMCSMatcher &residxmcsmatcher)
 
         SharedDataStream sds(ds);
 
-        sds >> residxmcsmatcher.prematcher >> timeout >> static_cast<AtomMatcher&>(residxmcsmatcher);
+        sds >> residxmcsmatcher.prematcher >> timeout >> static_cast<AtomMatcher &>(residxmcsmatcher);
 
-        residxmcsmatcher.t = timeout*second;
+        residxmcsmatcher.t = timeout * second;
         residxmcsmatcher.match_light = false;
         residxmcsmatcher.verbose = false;
     }
@@ -1593,98 +1534,86 @@ QDataStream &operator>>(QDataStream &ds, ResIdxAtomMCSMatcher &residxmcsmatcher)
 
 /** Constructor */
 ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher()
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(), t(1*second),
-                 match_light(false),
-                 verbose(false)
-{}
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(), t(1 * second), match_light(false), verbose(false)
+{
+}
 
 /** Constructor */
 ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(bool verbose)
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(), t(1*second),
-                 match_light(false),
-                 verbose(verbose)
-{}
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(), t(1 * second), match_light(false), verbose(verbose)
+{
+}
 
 /** Construct specifying the timeout for the MCS match */
-ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const SireUnits::Dimension::Time &timeout,
-                                           bool verbose)
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(), t(timeout),
-                 match_light(false),
-                 verbose(verbose)
-{}
+ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const SireUnits::Dimension::Time &timeout, bool verbose)
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(), t(timeout), match_light(false), verbose(verbose)
+{
+}
 
 /** Construct specifying the prematcher for the MCS match */
-ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const AtomMatcher &matcher,
-                                           bool verbose)
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(),
-                 prematcher(matcher), t(1*second),
-                 match_light(false), verbose(verbose)
-{}
+ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const AtomMatcher &matcher, bool verbose)
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(), prematcher(matcher), t(1 * second), match_light(false),
+      verbose(verbose)
+{
+}
 
 /** Construct specifying the timeout and prematcher for the MCS match */
-ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const AtomMatcher &matcher,
-                                           const SireUnits::Dimension::Time &timeout,
+ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const AtomMatcher &matcher, const SireUnits::Dimension::Time &timeout,
                                            bool verbose)
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(),
-                 prematcher(matcher), t(timeout),
-                 match_light(false), verbose(verbose)
-{}
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(), prematcher(matcher), t(timeout), match_light(false),
+      verbose(verbose)
+{
+}
 
 /** Constructor, specifying whether or not to match light atoms */
-ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(bool match_light_atoms,
-                                           bool verbose)
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(), t(1*second),
-                 match_light(match_light_atoms),
-                 verbose(verbose)
-{}
+ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(bool match_light_atoms, bool verbose)
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(), t(1 * second), match_light(match_light_atoms),
+      verbose(verbose)
+{
+}
 
 /** Construct specifying the timeout for the MCS match, and specifying whether or not
     to match light atoms */
-ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const SireUnits::Dimension::Time &timeout,
-                                           bool match_light_atoms,
+ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const SireUnits::Dimension::Time &timeout, bool match_light_atoms,
                                            bool verbose)
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(), t(timeout),
-                 match_light(match_light_atoms),
-                 verbose(verbose)
-{}
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(), t(timeout), match_light(match_light_atoms),
+      verbose(verbose)
+{
+}
 
 /** Construct specifying the prematcher for the MCS match,
     and specifying whether or not to match light atoms
 */
-ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const AtomMatcher &matcher,
-                                           bool match_light_atoms,
-                                           bool verbose)
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(),
-                 prematcher(matcher), t(1*second),
-                 match_light(match_light_atoms), verbose(verbose)
-{}
+ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const AtomMatcher &matcher, bool match_light_atoms, bool verbose)
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(), prematcher(matcher), t(1 * second),
+      match_light(match_light_atoms), verbose(verbose)
+{
+}
 
 /** Construct specifying the timeout and prematcher for the MCS match,
     and specifying whether or not to match light atoms
 */
-ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const AtomMatcher &matcher,
-                                           const SireUnits::Dimension::Time &timeout,
-                                           bool match_light_atoms,
-                                           bool verbose)
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(),
-                 prematcher(matcher), t(timeout),
-                 match_light(match_light_atoms), verbose(verbose)
-{}
+ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const AtomMatcher &matcher, const SireUnits::Dimension::Time &timeout,
+                                           bool match_light_atoms, bool verbose)
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(), prematcher(matcher), t(timeout),
+      match_light(match_light_atoms), verbose(verbose)
+{
+}
 
 /** Copy constructor */
 ResIdxAtomMCSMatcher::ResIdxAtomMCSMatcher(const ResIdxAtomMCSMatcher &other)
-               : ConcreteProperty<ResIdxAtomMCSMatcher,AtomMatcher>(other),
-                 prematcher(other.prematcher), t(other.t),
-                 match_light(other.match_light), verbose(other.verbose)
+    : ConcreteProperty<ResIdxAtomMCSMatcher, AtomMatcher>(other), prematcher(other.prematcher), t(other.t),
+      match_light(other.match_light), verbose(other.verbose)
 {
 }
 
 /** Destructor */
 ResIdxAtomMCSMatcher::~ResIdxAtomMCSMatcher()
-{}
+{
+}
 
 /** Copy assignment operator */
-ResIdxAtomMCSMatcher& ResIdxAtomMCSMatcher::operator=(const ResIdxAtomMCSMatcher &other)
+ResIdxAtomMCSMatcher &ResIdxAtomMCSMatcher::operator=(const ResIdxAtomMCSMatcher &other)
 {
     if (this != &other)
     {
@@ -1700,7 +1629,8 @@ ResIdxAtomMCSMatcher& ResIdxAtomMCSMatcher::operator=(const ResIdxAtomMCSMatcher
 /** Comparison operator */
 bool ResIdxAtomMCSMatcher::operator==(const ResIdxAtomMCSMatcher &other) const
 {
-    return prematcher == other.prematcher and t == other.t and match_light == other.match_light and verbose == other.verbose;
+    return prematcher == other.prematcher and t == other.t and match_light == other.match_light and
+           verbose == other.verbose;
 }
 
 /** Comparison operator */
@@ -1714,23 +1644,25 @@ QString ResIdxAtomMCSMatcher::toString() const
     if (prematcher.isNull() or prematcher.read().isNull())
     {
         return QObject::tr("ResIdxAtomMCSMatcher( timeout() = %1 s, matchingLightAtoms() = %2, "
-                "isVerbose() = %3 )")
-                .arg(t.to(second)).arg(match_light).arg(verbose);
+                           "isVerbose() = %3 )")
+            .arg(t.to(second))
+            .arg(match_light)
+            .arg(verbose);
     }
     else
     {
         return QObject::tr("ResIdxAtomMCSMatcher( preMatcher() = %1, timeout() = %2 s, "
                            "matchingLightAtoms() = %3, isVerbose() = %4 )")
-                    .arg(prematcher.read().toString())
-                    .arg(t.to(second))
-                    .arg(match_light)
-                    .arg(verbose);
+            .arg(prematcher.read().toString())
+            .arg(t.to(second))
+            .arg(match_light)
+            .arg(verbose);
     }
 }
 
 /** Return the prematcher (if any) that is used to pre-match atoms
     before the MCS match */
-const AtomMatcher& ResIdxAtomMCSMatcher::preMatcher() const
+const AtomMatcher &ResIdxAtomMCSMatcher::preMatcher() const
 {
     return prematcher.read();
 }
@@ -1761,36 +1693,35 @@ bool ResIdxAtomMCSMatcher::isVerbose() const
 
     This skips atoms in 'mol1' that are not in 'mol0'
 */
-QHash<AtomIdx,AtomIdx> ResIdxAtomMCSMatcher::pvt_match(const MoleculeView &mol0,
-                                                       const PropertyMap &map0,
-                                                       const MoleculeView &mol1,
-                                                       const PropertyMap &map1) const
+QHash<AtomIdx, AtomIdx> ResIdxAtomMCSMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                        const MoleculeView &mol1, const PropertyMap &map1) const
 {
     const AtomSelection sel0 = mol0.selection();
     const AtomSelection sel1 = mol1.selection();
 
-    QHash<AtomIdx,AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> map;
 
     if (sel0.selectedAll() and sel1.selectedAll())
     {
         for (const auto &idx : mol0.data().info().getResidues())
         {
             // Perform an MCS match using the same residue in each molecule.
-            QHash<AtomIdx,AtomIdx> local_map;
+            QHash<AtomIdx, AtomIdx> local_map;
             if (prematcher.isNull() or prematcher.read().isNull())
             {
-                local_map = Evaluator(mol0[idx]).findMCS(mol1[idx], t,
-                    match_light, map0, map1, 6, this->verbose);
+                local_map = Evaluator(mol0[idx]).findMCS(mol1[idx], t, match_light, map0, map1, 6, this->verbose);
             }
             else
             {
-                local_map = Evaluator(mol0[idx]).findMCS(mol1[idx], prematcher.read(),
-                    t, match_light, map0, map1, 6, this->verbose);
+                local_map = Evaluator(mol0[idx]).findMCS(mol1[idx], prematcher.read(), t, match_light, map0, map1, 6,
+                                                         this->verbose);
             }
 
             // Update the atom index map.
-            for (auto key : local_map.keys()){
-                if (not map.contains(key)){
+            for (auto key : local_map.keys())
+            {
+                if (not map.contains(key))
+                {
                     map.insert(key, local_map[key]);
                 }
             }
@@ -1799,15 +1730,15 @@ QHash<AtomIdx,AtomIdx> ResIdxAtomMCSMatcher::pvt_match(const MoleculeView &mol0,
     else
     {
         throw SireError::unsupported(QObject::tr("ResIdxAtomMCSMatcher only works with "
-            "full molecule selections."));
+                                                 "full molecule selections."));
     }
 
     return map;
 }
 
-const char* ResIdxAtomMCSMatcher::typeName()
+const char *ResIdxAtomMCSMatcher::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResIdxAtomNameMatcher>() );
+    return QMetaType::typeName(qMetaTypeId<ResIdxAtomNameMatcher>());
 }
 
 /////////
@@ -1817,11 +1748,10 @@ const char* ResIdxAtomMCSMatcher::typeName()
 static const RegisterMetaType<ResIdxAtomCoordMatcher> r_residxatomcoordmatcher;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const ResIdxAtomCoordMatcher &residxatomcoordmatcher)
+QDataStream &operator<<(QDataStream &ds, const ResIdxAtomCoordMatcher &residxatomcoordmatcher)
 {
     writeHeader(ds, r_residxatomcoordmatcher, 1);
-    ds << static_cast<const AtomMatcher&>(residxatomcoordmatcher);
+    ds << static_cast<const AtomMatcher &>(residxatomcoordmatcher);
 
     return ds;
 }
@@ -1833,7 +1763,7 @@ QDataStream &operator>>(QDataStream &ds, ResIdxAtomCoordMatcher &residxatomcoord
 
     if (v == 1)
     {
-        ds >> static_cast<AtomMatcher&>(residxatomcoordmatcher);
+        ds >> static_cast<AtomMatcher &>(residxatomcoordmatcher);
     }
     else
         throw version_error(v, "1", r_residxatomcoordmatcher, CODELOC);
@@ -1842,31 +1772,32 @@ QDataStream &operator>>(QDataStream &ds, ResIdxAtomCoordMatcher &residxatomcoord
 }
 
 /** Constructor */
-ResIdxAtomCoordMatcher::ResIdxAtomCoordMatcher() :
-    ConcreteProperty<ResIdxAtomCoordMatcher,AtomMatcher>(),
-    res_idx_offset(ResIdx(0))
+ResIdxAtomCoordMatcher::ResIdxAtomCoordMatcher()
+    : ConcreteProperty<ResIdxAtomCoordMatcher, AtomMatcher>(), res_idx_offset(ResIdx(0))
 
-{}
+{
+}
 
 /** Constructor */
-ResIdxAtomCoordMatcher::ResIdxAtomCoordMatcher(ResIdx res_idx_offset) :
-    ConcreteProperty<ResIdxAtomCoordMatcher,AtomMatcher>(),
-    res_idx_offset(res_idx_offset)
-{}
+ResIdxAtomCoordMatcher::ResIdxAtomCoordMatcher(ResIdx res_idx_offset)
+    : ConcreteProperty<ResIdxAtomCoordMatcher, AtomMatcher>(), res_idx_offset(res_idx_offset)
+{
+}
 
 /** Copy constructor */
 ResIdxAtomCoordMatcher::ResIdxAtomCoordMatcher(const ResIdxAtomCoordMatcher &other)
-               : ConcreteProperty<ResIdxAtomCoordMatcher,AtomMatcher>(other)
+    : ConcreteProperty<ResIdxAtomCoordMatcher, AtomMatcher>(other)
 {
     this->res_idx_offset = other.res_idx_offset;
 }
 
 /** Destructor */
 ResIdxAtomCoordMatcher::~ResIdxAtomCoordMatcher()
-{}
+{
+}
 
 /** Copy assignment operator */
-ResIdxAtomCoordMatcher& ResIdxAtomCoordMatcher::operator=(const ResIdxAtomCoordMatcher &other)
+ResIdxAtomCoordMatcher &ResIdxAtomCoordMatcher::operator=(const ResIdxAtomCoordMatcher &other)
 {
     return *this;
 }
@@ -1900,10 +1831,8 @@ QString ResIdxAtomCoordMatcher::toString() const
     of 'res_idx_offset' allows us to match the section of 'mol0' that corresponds
     to 'mol1'.
 */
-QHash<AtomIdx,AtomIdx> ResIdxAtomCoordMatcher::pvt_match(const MoleculeView &mol0,
-                                                         const PropertyMap &map0,
-                                                         const MoleculeView &mol1,
-                                                         const PropertyMap &map1) const
+QHash<AtomIdx, AtomIdx> ResIdxAtomCoordMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                          const MoleculeView &mol1, const PropertyMap &map1) const
 {
     const AtomSelection sel0 = mol0.selection();
     const AtomSelection sel1 = mol1.selection();
@@ -1911,7 +1840,7 @@ QHash<AtomIdx,AtomIdx> ResIdxAtomCoordMatcher::pvt_match(const MoleculeView &mol
     if (sel0.selectedAll() and sel1.selectedAll())
     {
         // A hash of mappings between atom indices in each molecule.
-        QHash<AtomIdx,AtomIdx> matches;
+        QHash<AtomIdx, AtomIdx> matches;
 
         // Get the list of residue indices from the reference molecule.
         auto resIdxs = mol0.data().info().getResidues();
@@ -1941,7 +1870,7 @@ QHash<AtomIdx,AtomIdx> ResIdxAtomCoordMatcher::pvt_match(const MoleculeView &mol
         com0 /= nAtoms0;
 
         // mol1
-        for (int i=0; i<mol1.data().info().nAtoms(); ++i)
+        for (int i = 0; i < mol1.data().info().nAtoms(); ++i)
             com1 += mol1.atom(AtomIdx(i)).property<Vector>(map1["coordinates"]);
         com1 /= mol1.data().info().nAtoms();
 
@@ -1959,7 +1888,7 @@ QHash<AtomIdx,AtomIdx> ResIdxAtomCoordMatcher::pvt_match(const MoleculeView &mol
             // For each atom in atoms0, find the atom in atoms1 that is closest to it.
             // To account for possible coordinate frame translations, we shift the
             // coordinates of each atom by the CoM of its respective molecule.
-            for (int i=0; i<atoms0.count(); ++i)
+            for (int i = 0; i < atoms0.count(); ++i)
             {
                 // Initialise the minimium difference to a large number.
                 double min_diff = 1e6;
@@ -1969,18 +1898,16 @@ QHash<AtomIdx,AtomIdx> ResIdxAtomCoordMatcher::pvt_match(const MoleculeView &mol
                 int match = -1;
 
                 // Get the coordinates of atom0.
-                auto coord0 = mol0.atom(atoms0[i])
-                                  .property<Vector>(map0["coordinates"]);
+                auto coord0 = mol0.atom(atoms0[i]).property<Vector>(map0["coordinates"]);
 
                 // Shift by the CoM.
                 coord0 -= com0;
 
                 // Loop over all of the atoms to match against.
-                for (int j=0; j<atoms0.count(); ++j)
+                for (int j = 0; j < atoms0.count(); ++j)
                 {
                     // Get the coordinates of atom1.
-                    auto coord1 = mol1.atom(atoms1[j])
-                                      .property<Vector>(map0["coordinates"]);
+                    auto coord1 = mol1.atom(atoms1[j]).property<Vector>(map0["coordinates"]);
 
                     // Shift by the CoM.
                     coord1 -= com1;
@@ -2017,11 +1944,11 @@ QHash<AtomIdx,AtomIdx> ResIdxAtomCoordMatcher::pvt_match(const MoleculeView &mol
     else
     {
         throw SireError::unsupported(QObject::tr("ResIdxAtomCoordMatcher only works with "
-            "full molecule selections."));
+                                                 "full molecule selections."));
     }
 }
 
-const char* ResIdxAtomCoordMatcher::typeName()
+const char *ResIdxAtomCoordMatcher::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResIdxAtomCoordMatcher>() );
+    return QMetaType::typeName(qMetaTypeId<ResIdxAtomCoordMatcher>());
 }

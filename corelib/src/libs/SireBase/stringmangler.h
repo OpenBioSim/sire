@@ -34,172 +34,168 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class StringMangler;
+    class StringMangler;
 
-class NoMangling;
-class TrimString;
-class LowerCaseString;
-class UpperCaseString;
-}
+    class NoMangling;
+    class TrimString;
+    class LowerCaseString;
+    class UpperCaseString;
+} // namespace SireBase
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::StringMangler&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::StringMangler&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::StringMangler &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::StringMangler &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::NoMangling&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::NoMangling&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::NoMangling &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::NoMangling &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::TrimString&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::TrimString&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::TrimString &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::TrimString &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::LowerCaseString&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::LowerCaseString&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::LowerCaseString &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::LowerCaseString &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::UpperCaseString&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::UpperCaseString&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::UpperCaseString &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::UpperCaseString &);
 
 namespace SireBase
 {
 
-/** This is the base class of all string mangling functions.
-    A string mangler is just a simple function that performs
-    some transformations on an input string, e.g. changing its
-    case, trimming away extra spaces etc.
+    /** This is the base class of all string mangling functions.
+        A string mangler is just a simple function that performs
+        some transformations on an input string, e.g. changing its
+        case, trimming away extra spaces etc.
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT StringMangler : public Property
-{
-public:
-    StringMangler();
-    StringMangler(const StringMangler &other);
-
-    virtual ~StringMangler();
-
-    virtual StringMangler* clone() const=0;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT StringMangler : public Property
     {
-        return "SireBase::StringMangler";
-    }
+    public:
+        StringMangler();
+        StringMangler(const StringMangler &other);
 
-    QString operator()(const QString &input) const;
+        virtual ~StringMangler();
 
-    virtual QString mangle(const QString &input) const=0;
+        virtual StringMangler *clone() const = 0;
 
-    static const NoMangling& null();
-};
+        static const char *typeName()
+        {
+            return "SireBase::StringMangler";
+        }
 
-/** This mangler does absolutely nothing to the string!
+        QString operator()(const QString &input) const;
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT NoMangling
-               : public ConcreteProperty<NoMangling,StringMangler>
-{
-public:
-    NoMangling();
-    NoMangling(const NoMangling &other);
+        virtual QString mangle(const QString &input) const = 0;
 
-    ~NoMangling();
+        static const NoMangling &null();
+    };
 
-    static const char* typeName();
+    /** This mangler does absolutely nothing to the string!
 
-    NoMangling& operator=(const NoMangling &other);
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT NoMangling : public ConcreteProperty<NoMangling, StringMangler>
+    {
+    public:
+        NoMangling();
+        NoMangling(const NoMangling &other);
 
-    bool operator==(const NoMangling &other) const;
-    bool operator!=(const NoMangling &other) const;
+        ~NoMangling();
 
-    QString mangle(const QString &input) const;
-};
+        static const char *typeName();
 
-/** This mangler just trims spaces away from the beginning
-    and end of the string
+        NoMangling &operator=(const NoMangling &other);
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT TrimString
-               : public ConcreteProperty<TrimString,StringMangler>
-{
-public:
-    TrimString();
-    TrimString(const TrimString &other);
+        bool operator==(const NoMangling &other) const;
+        bool operator!=(const NoMangling &other) const;
 
-    ~TrimString();
+        QString mangle(const QString &input) const;
+    };
 
-    static const char* typeName();
+    /** This mangler just trims spaces away from the beginning
+        and end of the string
 
-    TrimString& operator=(const TrimString &other);
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT TrimString : public ConcreteProperty<TrimString, StringMangler>
+    {
+    public:
+        TrimString();
+        TrimString(const TrimString &other);
 
-    bool operator==(const TrimString &other) const;
-    bool operator!=(const TrimString &other) const;
+        ~TrimString();
 
-    QString mangle(const QString &input) const;
-};
+        static const char *typeName();
 
-/** This mangler just trims spaces away from the beginning
-    and end of the string and upper-cases the whole string
+        TrimString &operator=(const TrimString &other);
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT UpperCaseString
-            : public ConcreteProperty<UpperCaseString,StringMangler>
-{
-public:
-    UpperCaseString();
-    UpperCaseString(const UpperCaseString &other);
+        bool operator==(const TrimString &other) const;
+        bool operator!=(const TrimString &other) const;
 
-    ~UpperCaseString();
+        QString mangle(const QString &input) const;
+    };
 
-    static const char* typeName();
+    /** This mangler just trims spaces away from the beginning
+        and end of the string and upper-cases the whole string
 
-    UpperCaseString& operator=(const UpperCaseString &other);
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT UpperCaseString : public ConcreteProperty<UpperCaseString, StringMangler>
+    {
+    public:
+        UpperCaseString();
+        UpperCaseString(const UpperCaseString &other);
 
-    bool operator==(const UpperCaseString &other) const;
-    bool operator!=(const UpperCaseString &other) const;
+        ~UpperCaseString();
 
-    QString mangle(const QString &input) const;
-};
+        static const char *typeName();
 
-/** This mangler just trims spaces away from the beginning
-    and end of the string and lower-cases the whole string
+        UpperCaseString &operator=(const UpperCaseString &other);
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT LowerCaseString
-            : public ConcreteProperty<LowerCaseString,StringMangler>
-{
-public:
-    LowerCaseString();
-    LowerCaseString(const LowerCaseString &other);
+        bool operator==(const UpperCaseString &other) const;
+        bool operator!=(const UpperCaseString &other) const;
 
-    ~LowerCaseString();
+        QString mangle(const QString &input) const;
+    };
 
-    static const char* typeName();
+    /** This mangler just trims spaces away from the beginning
+        and end of the string and lower-cases the whole string
 
-    LowerCaseString& operator=(const LowerCaseString &other);
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT LowerCaseString : public ConcreteProperty<LowerCaseString, StringMangler>
+    {
+    public:
+        LowerCaseString();
+        LowerCaseString(const LowerCaseString &other);
 
-    bool operator==(const LowerCaseString &other) const;
-    bool operator!=(const LowerCaseString &other) const;
+        ~LowerCaseString();
 
-    QString mangle(const QString &input) const;
-};
+        static const char *typeName();
 
-typedef PropPtr<StringMangler> StringManglerPtr;
+        LowerCaseString &operator=(const LowerCaseString &other);
 
-}
+        bool operator==(const LowerCaseString &other) const;
+        bool operator!=(const LowerCaseString &other) const;
 
-Q_DECLARE_METATYPE( SireBase::NoMangling );
-Q_DECLARE_METATYPE( SireBase::TrimString );
-Q_DECLARE_METATYPE( SireBase::UpperCaseString );
-Q_DECLARE_METATYPE( SireBase::LowerCaseString );
+        QString mangle(const QString &input) const;
+    };
 
-SIRE_EXPOSE_CLASS( SireBase::StringMangler )
-SIRE_EXPOSE_CLASS( SireBase::NoMangling )
-SIRE_EXPOSE_CLASS( SireBase::TrimString )
-SIRE_EXPOSE_CLASS( SireBase::UpperCaseString )
-SIRE_EXPOSE_CLASS( SireBase::LowerCaseString )
+    typedef PropPtr<StringMangler> StringManglerPtr;
 
-SIRE_EXPOSE_PROPERTY( SireBase::StringManglerPtr, SireBase::StringMangler )
+} // namespace SireBase
+
+Q_DECLARE_METATYPE(SireBase::NoMangling);
+Q_DECLARE_METATYPE(SireBase::TrimString);
+Q_DECLARE_METATYPE(SireBase::UpperCaseString);
+Q_DECLARE_METATYPE(SireBase::LowerCaseString);
+
+SIRE_EXPOSE_CLASS(SireBase::StringMangler)
+SIRE_EXPOSE_CLASS(SireBase::NoMangling)
+SIRE_EXPOSE_CLASS(SireBase::TrimString)
+SIRE_EXPOSE_CLASS(SireBase::UpperCaseString)
+SIRE_EXPOSE_CLASS(SireBase::LowerCaseString)
+
+SIRE_EXPOSE_PROPERTY(SireBase::StringManglerPtr, SireBase::StringMangler)
 
 SIRE_END_HEADER
 

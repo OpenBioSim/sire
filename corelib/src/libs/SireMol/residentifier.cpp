@@ -26,10 +26,10 @@
 \*********************************************/
 
 #include "residentifier.h"
-#include "residx.h"
-#include "resnum.h"
-#include "resname.h"
 #include "molinfo.h"
+#include "residx.h"
+#include "resname.h"
+#include "resnum.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/streampolypointer.hpp"
@@ -64,33 +64,34 @@ QDataStream &operator>>(QDataStream &ds, ResIdentifier &resid)
         SireStream::loadPolyPointer(ds, resid.d);
     }
     else
-        throw version_error( v, "1", r_resid, CODELOC );
+        throw version_error(v, "1", r_resid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 ResIdentifier::ResIdentifier() : ResID()
-{}
+{
+}
 
 /** Construct from the passed ResID */
-ResIdentifier::ResIdentifier(const ResID &resid)
-              : ResID()
+ResIdentifier::ResIdentifier(const ResID &resid) : ResID()
 {
     if (resid.isA<ResIdentifier>())
         d = resid.asA<ResIdentifier>().d;
     else if (not resid.isNull())
-        d.reset( resid.clone() );
+        d.reset(resid.clone());
 }
 
 /** Copy constructor */
-ResIdentifier::ResIdentifier(const ResIdentifier &other)
-              : ResID(other), d(other.d)
-{}
+ResIdentifier::ResIdentifier(const ResIdentifier &other) : ResID(other), d(other.d)
+{
+}
 
 /** Destructor */
 ResIdentifier::~ResIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool ResIdentifier::isNull() const
@@ -117,7 +118,7 @@ QString ResIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const ResID& ResIdentifier::base() const
+const ResID &ResIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -126,14 +127,14 @@ const ResID& ResIdentifier::base() const
 }
 
 /** Copy assignment operator */
-ResIdentifier& ResIdentifier::operator=(const ResIdentifier &other)
+ResIdentifier &ResIdentifier::operator=(const ResIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-ResIdentifier& ResIdentifier::operator=(const ResID &other)
+ResIdentifier &ResIdentifier::operator=(const ResID &other)
 {
     if (other.isA<ResIdentifier>())
         d = other.asA<ResIdentifier>().d;
@@ -204,9 +205,9 @@ QList<ResIdx> ResIdentifier::map(const MolInfo &molinfo) const
         return d->map(molinfo);
 }
 
-const char* ResIdentifier::typeName()
+const char *ResIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<ResIdentifier>());
 }
 
 ///////
@@ -220,7 +221,7 @@ QDataStream &operator<<(QDataStream &ds, const ResIdx &residx)
 {
     writeHeader(ds, r_residx, 1);
 
-    ds << static_cast<const SireID::Index_T_<ResIdx>&>(residx);
+    ds << static_cast<const SireID::Index_T_<ResIdx> &>(residx);
 
     return ds;
 }
@@ -232,27 +233,29 @@ QDataStream &operator>>(QDataStream &ds, ResIdx &residx)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Index_T_<ResIdx>&>(residx);
+        ds >> static_cast<SireID::Index_T_<ResIdx> &>(residx);
     }
     else
-        throw version_error( v, "1", r_residx, CODELOC );
+        throw version_error(v, "1", r_residx, CODELOC);
 
     return ds;
 }
 
 ResIdx::ResIdx() : SireID::Index_T_<ResIdx>(), ResID()
-{}
+{
+}
 
-ResIdx::ResIdx(quint32 idx)
-          : SireID::Index_T_<ResIdx>(idx), ResID()
-{}
+ResIdx::ResIdx(quint32 idx) : SireID::Index_T_<ResIdx>(idx), ResID()
+{
+}
 
-ResIdx::ResIdx(const ResIdx &other)
-          : SireID::Index_T_<ResIdx>(other), ResID(other)
-{}
+ResIdx::ResIdx(const ResIdx &other) : SireID::Index_T_<ResIdx>(other), ResID(other)
+{
+}
 
 ResIdx::~ResIdx()
-{}
+{
+}
 
 ResIdx ResIdx::null()
 {
@@ -274,7 +277,7 @@ QString ResIdx::toString() const
     return QString("ResIdx(%1)").arg(_idx);
 }
 
-ResIdx& ResIdx::operator=(const ResIdx &other)
+ResIdx &ResIdx::operator=(const ResIdx &other)
 {
     SireID::IndexBase::operator=(other);
     ResID::operator=(other);
@@ -291,9 +294,9 @@ QList<ResIdx> ResIdx::map(const MolInfo &molinfo) const
     return molinfo.map(*this);
 }
 
-const char* ResIdx::typeName()
+const char *ResIdx::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResIdx>() );
+    return QMetaType::typeName(qMetaTypeId<ResIdx>());
 }
 
 ///////
@@ -307,7 +310,7 @@ QDataStream &operator<<(QDataStream &ds, const ResName &resname)
 {
     writeHeader(ds, r_resname, 1);
 
-    ds << static_cast<const SireID::Name&>(resname);
+    ds << static_cast<const SireID::Name &>(resname);
 
     return ds;
 }
@@ -319,29 +322,34 @@ QDataStream &operator>>(QDataStream &ds, ResName &resname)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Name&>(resname);
+        ds >> static_cast<SireID::Name &>(resname);
     }
     else
-        throw version_error( v, "1", r_resname, CODELOC );
+        throw version_error(v, "1", r_resname, CODELOC);
 
     return ds;
 }
 
 ResName::ResName() : SireID::Name(), ResID()
-{}
+{
+}
 
 ResName::ResName(const QString &name) : SireID::Name(name), ResID()
-{}
+{
+}
 
 ResName::ResName(const QString &name, SireID::CaseSensitivity case_sensitivity)
-        : SireID::Name(name, case_sensitivity), ResID()
-{}
+    : SireID::Name(name, case_sensitivity), ResID()
+{
+}
 
 ResName::ResName(const ResName &other) : SireID::Name(other), ResID(other)
-{}
+{
+}
 
 ResName::~ResName()
-{}
+{
+}
 
 bool ResName::isNull() const
 {
@@ -361,7 +369,7 @@ QString ResName::toString() const
         return QString("ResName('%1', isCaseSensitive=False)").arg(_name);
 }
 
-ResName& ResName::operator=(const ResName &other)
+ResName &ResName::operator=(const ResName &other)
 {
     SireID::Name::operator=(other);
     ResID::operator=(other);
@@ -388,9 +396,9 @@ QList<ResIdx> ResName::map(const MolInfo &molinfo) const
     return molinfo.map(*this);
 }
 
-const char* ResName::typeName()
+const char *ResName::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResName>() );
+    return QMetaType::typeName(qMetaTypeId<ResName>());
 }
 
 ///////
@@ -404,7 +412,7 @@ QDataStream &operator<<(QDataStream &ds, const ResNum &resnum)
 {
     writeHeader(ds, r_resnum, 1);
 
-    ds << static_cast<const SireID::Number&>(resnum);
+    ds << static_cast<const SireID::Number &>(resnum);
 
     return ds;
 }
@@ -416,25 +424,29 @@ QDataStream &operator>>(QDataStream &ds, ResNum &resnum)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Number&>(resnum);
+        ds >> static_cast<SireID::Number &>(resnum);
     }
     else
-        throw version_error( v, "1", r_resnum, CODELOC );
+        throw version_error(v, "1", r_resnum, CODELOC);
 
     return ds;
 }
 
 ResNum::ResNum() : SireID::Number(), ResID()
-{}
+{
+}
 
 ResNum::ResNum(quint32 num) : SireID::Number(num), ResID()
-{}
+{
+}
 
 ResNum::ResNum(const ResNum &other) : SireID::Number(other), ResID(other)
-{}
+{
+}
 
 ResNum::~ResNum()
-{}
+{
+}
 
 bool ResNum::isNull() const
 {
@@ -443,7 +455,7 @@ bool ResNum::isNull() const
 
 uint ResNum::hash() const
 {
-    return ::qHash( static_cast<const SireID::Number&>(*this) );
+    return ::qHash(static_cast<const SireID::Number &>(*this));
 }
 
 QString ResNum::toString() const
@@ -451,7 +463,7 @@ QString ResNum::toString() const
     return QString("ResNum(%1)").arg(_num);
 }
 
-ResNum& ResNum::operator=(const ResNum &other)
+ResNum &ResNum::operator=(const ResNum &other)
 {
     SireID::Number::operator=(other);
     ResID::operator=(other);
@@ -498,30 +510,27 @@ QList<ResIdx> ResNum::map(const MolInfo &molinfo) const
     return molinfo.map(*this);
 }
 
-const char* ResNum::typeName()
+const char *ResNum::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ResNum>() );
+    return QMetaType::typeName(qMetaTypeId<ResNum>());
 }
 
-ResIdentifier* ResIdentifier::clone() const
+ResIdentifier *ResIdentifier::clone() const
 {
     return new ResIdentifier(*this);
 }
 
-ResName* ResName::clone() const
+ResName *ResName::clone() const
 {
     return new ResName(*this);
 }
 
-
-ResNum* ResNum::clone() const
+ResNum *ResNum::clone() const
 {
     return new ResNum(*this);
 }
 
-
-ResIdx* ResIdx::clone() const
+ResIdx *ResIdx::clone() const
 {
     return new ResIdx(*this);
 }
-

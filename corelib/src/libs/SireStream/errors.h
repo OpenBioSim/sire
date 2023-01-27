@@ -35,40 +35,43 @@ SIRE_BEGIN_HEADER
 namespace SireStream
 {
 
-/** This exception is thrown when corrupted data is detected
+    /** This exception is thrown when corrupted data is detected
 
-    @author Christopher Woods
-*/
-class SIRESTREAM_EXPORT corrupted_data : public SireError::exception
-{
-public:
-    corrupted_data() : SireError::exception()
-    {}
-
-    corrupted_data(QString err, QString place = QString())
-              : SireError::exception(err,place)
-    {}
-
-    corrupted_data(const corrupted_data &other) : SireError::exception(other)
-    {}
-
-    ~corrupted_data() throw()
-    {}
-
-    static const char* typeName();
-
-    const char* what() const throw()
+        @author Christopher Woods
+    */
+    class SIRESTREAM_EXPORT corrupted_data : public SireError::exception
     {
-        return corrupted_data::typeName();
-    }
+    public:
+        corrupted_data() : SireError::exception()
+        {
+        }
 
-    void throwSelf() const
-    {
-        throw corrupted_data(*this);
-    }
-};
+        corrupted_data(QString err, QString place = QString()) : SireError::exception(err, place)
+        {
+        }
 
-}
+        corrupted_data(const corrupted_data &other) : SireError::exception(other)
+        {
+        }
+
+        ~corrupted_data() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return corrupted_data::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw corrupted_data(*this);
+        }
+    };
+
+} // namespace SireStream
 
 Q_DECLARE_METATYPE(SireStream::corrupted_data)
 

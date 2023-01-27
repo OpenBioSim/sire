@@ -27,12 +27,12 @@
 
 #include "specifymol.h"
 
-#include "molecules.h"
 #include "moleculegroup.h"
 #include "moleculegroups.h"
+#include "molecules.h"
 
-#include "SireMol/errors.h"
 #include "SireError/errors.h"
+#include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -64,44 +64,45 @@ QDataStream &operator>>(QDataStream &ds, SpecifyMol &specifymol)
         sds >> specifymol.molid >> specifymol.strt >> specifymol.end;
     }
     else
-        throw version_error( v, "1", r_specifymol, CODELOC );
+        throw version_error(v, "1", r_specifymol, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 SpecifyMol::SpecifyMol() : MolID(), strt(0), end(-1)
-{}
+{
+}
 
 /** Construct to match all of the molecules that match the
     ID 'molid' */
-SpecifyMol::SpecifyMol(const MolID &mol_id)
-           : MolID(), molid(mol_id), strt(0), end(-1)
-{}
+SpecifyMol::SpecifyMol(const MolID &mol_id) : MolID(), molid(mol_id), strt(0), end(-1)
+{
+}
 
 /** Construct to match the ith molecule that matches the ID 'molid' */
-SpecifyMol::SpecifyMol(const MolID &mol_id, int i)
-           : MolID(), molid(mol_id), strt(i), end(i)
-{}
+SpecifyMol::SpecifyMol(const MolID &mol_id, int i) : MolID(), molid(mol_id), strt(i), end(i)
+{
+}
 
 /** Construct to math the range of molecules from i to j that
     match the ID 'molid' */
-SpecifyMol::SpecifyMol(const MolID &mol_id, int i, int j)
-           : MolID(), molid(mol_id), strt(i), end(j)
-{}
+SpecifyMol::SpecifyMol(const MolID &mol_id, int i, int j) : MolID(), molid(mol_id), strt(i), end(j)
+{
+}
 
 /** Copy constructor */
-SpecifyMol::SpecifyMol(const SpecifyMol &other)
-           : MolID(other), molid(other.molid),
-             strt(other.strt), end(other.end)
-{}
+SpecifyMol::SpecifyMol(const SpecifyMol &other) : MolID(other), molid(other.molid), strt(other.strt), end(other.end)
+{
+}
 
 /** Destructor */
 SpecifyMol::~SpecifyMol()
-{}
+{
+}
 
 /** Copy assignment operator */
-SpecifyMol& SpecifyMol::operator=(const SpecifyMol &other)
+SpecifyMol &SpecifyMol::operator=(const SpecifyMol &other)
 {
     molid = other.molid;
     strt = other.strt;
@@ -114,15 +115,13 @@ SpecifyMol& SpecifyMol::operator=(const SpecifyMol &other)
 /** Comparison operator */
 bool SpecifyMol::operator==(const SpecifyMol &other) const
 {
-    return molid == other.molid and strt == other.strt
-                  and end == other.end;
+    return molid == other.molid and strt == other.strt and end == other.end;
 }
 
 /** Comparison operator */
 bool SpecifyMol::operator!=(const SpecifyMol &other) const
 {
-    return molid != other.molid or strt != other.strt
-                       or end != other.end;
+    return molid != other.molid or strt != other.strt or end != other.end;
 }
 
 /** Comparison operator */
@@ -149,8 +148,7 @@ QString SpecifyMol::toString() const
     if (strt == end)
         return QString("(%1)[%2]").arg(molid.toString()).arg(strt);
     else
-        return QString("(%1)[%2:%3]").arg(molid.toString())
-                                     .arg(strt).arg(end);
+        return QString("(%1)[%2:%3]").arg(molid.toString()).arg(strt).arg(end);
 }
 
 /** Return whether or not this ID is null */
@@ -159,17 +157,16 @@ bool SpecifyMol::isNull() const
     return molid.isNull() and strt == 0 and end == -1;
 }
 
-static QList<MolNum> get(const QList<MolNum> &molnums,
-                         const Index &strt, const Index &end)
+static QList<MolNum> get(const QList<MolNum> &molnums, const Index &strt, const Index &end)
 {
-    //now get the specified matches
+    // now get the specified matches
     int nmatches = molnums.count();
 
     int sane_strt = strt.map(nmatches);
     int sane_end = end.map(nmatches);
 
     if (sane_strt > sane_end)
-        qSwap(sane_strt,sane_end);
+        qSwap(sane_strt, sane_end);
 
     if (sane_end - sane_strt == nmatches)
         return molnums;
@@ -177,7 +174,7 @@ static QList<MolNum> get(const QList<MolNum> &molnums,
     {
         QList<MolNum> specified_molnums;
 
-        for (int i=strt; i<=end; ++i)
+        for (int i = strt; i <= end; ++i)
         {
             specified_molnums.append(molnums[i]);
         }
@@ -207,12 +204,12 @@ QList<MolNum> SpecifyMol::map(const MolGroupsBase &molgroups) const
     return ::get(molnums, strt, end);
 }
 
-const char* SpecifyMol::typeName()
+const char *SpecifyMol::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SpecifyMol>() );
+    return QMetaType::typeName(qMetaTypeId<SpecifyMol>());
 }
 
-SpecifyMol* SpecifyMol::clone() const
+SpecifyMol *SpecifyMol::clone() const
 {
     return new SpecifyMol(*this);
 }

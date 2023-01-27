@@ -36,102 +36,101 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class Line;
+    class Line;
 }
 
 class QDataStream;
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Line&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Line&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Line &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Line &);
 
 namespace SireMaths
 {
 
-/**
-This class represents a line in three-dimensional space. (or two points)
+    /**
+    This class represents a line in three-dimensional space. (or two points)
 
-@author Christopher Woods
-*/
-class SIREMATHS_EXPORT Line
-{
-
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const Line&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, Line&);
-
-public:
-    Line();
-    Line(const Vector &point0, const Vector &point1);
-    ~Line();
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT Line
     {
-        return Line::typeName();
-    }
 
-    QString toString() const;
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Line &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, Line &);
 
-    double length() const;
-    Vector vector() const;
+    public:
+        Line();
+        Line(const Vector &point0, const Vector &point1);
+        ~Line();
 
-    int count() const;
+        static const char *typeName();
 
-    const Vector& point(int i) const;
-    const Vector& operator[](int i) const;
-    const Vector& at(int i) const;
+        const char *what() const
+        {
+            return Line::typeName();
+        }
 
-private:
+        QString toString() const;
 
-    /** The two points that make up the line */
-    Vector points[2];
-};
+        double length() const;
+        Vector vector() const;
+
+        int count() const;
+
+        const Vector &point(int i) const;
+        const Vector &operator[](int i) const;
+        const Vector &at(int i) const;
+
+    private:
+        /** The two points that make up the line */
+        Vector points[2];
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the number of elements in this line (2) */
-SIRE_ALWAYS_INLINE int Line::count() const
-{
-    return 2;
-}
+    /** Return the number of elements in this line (2) */
+    SIRE_ALWAYS_INLINE int Line::count() const
+    {
+        return 2;
+    }
 
-/** Return the i'th point */
-SIRE_ALWAYS_INLINE const Vector& Line::point(int i) const
-{
-    return points[ i%2 ];
-}
+    /** Return the i'th point */
+    SIRE_ALWAYS_INLINE const Vector &Line::point(int i) const
+    {
+        return points[i % 2];
+    }
 
-/** Return the i'th point */
-SIRE_ALWAYS_INLINE const Vector& Line::at(int i) const
-{
-    return point(i);
-}
+    /** Return the i'th point */
+    SIRE_ALWAYS_INLINE const Vector &Line::at(int i) const
+    {
+        return point(i);
+    }
 
-/** Return the i'th point */
-SIRE_ALWAYS_INLINE const Vector& Line::operator[](int i) const
-{
-    return point(i);
-}
+    /** Return the i'th point */
+    SIRE_ALWAYS_INLINE const Vector &Line::operator[](int i) const
+    {
+        return point(i);
+    }
 
-/** Return the vector that represents this line (goes from point 0 to point 1) */
-SIRE_ALWAYS_INLINE Vector Line::vector() const
-{
-    return (points[1] - points[0]);
-}
+    /** Return the vector that represents this line (goes from point 0 to point 1) */
+    SIRE_ALWAYS_INLINE Vector Line::vector() const
+    {
+        return (points[1] - points[0]);
+    }
 
-/** Return the length of the line */
-SIRE_ALWAYS_INLINE double Line::length() const
-{
-    return vector().length();
-}
+    /** Return the length of the line */
+    SIRE_ALWAYS_INLINE double Line::length() const
+    {
+        return vector().length();
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::Line)
 Q_DECLARE_TYPEINFO(SireMaths::Line, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMaths::Line )
+SIRE_EXPOSE_CLASS(SireMaths::Line)
 
 SIRE_END_HEADER
 

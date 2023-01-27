@@ -53,9 +53,8 @@ QDataStream &operator<<(QDataStream &ds, const MTSMC &mtsmc)
 
     SharedDataStream sds(ds);
 
-    sds << mtsmc.fastmoves << mtsmc.slow_constraints
-        << mtsmc.fastcomponent << mtsmc.nfastmoves
-        << static_cast<const MonteCarlo&>(mtsmc);
+    sds << mtsmc.fastmoves << mtsmc.slow_constraints << mtsmc.fastcomponent << mtsmc.nfastmoves
+        << static_cast<const MonteCarlo &>(mtsmc);
 
     return ds;
 }
@@ -68,15 +67,13 @@ QDataStream &operator>>(QDataStream &ds, MTSMC &mtsmc)
     if (v == 2)
     {
         SharedDataStream sds(ds);
-        sds >> mtsmc.fastmoves >> mtsmc.slow_constraints
-            >> mtsmc.fastcomponent >> mtsmc.nfastmoves
-            >> static_cast<MonteCarlo&>(mtsmc);
+        sds >> mtsmc.fastmoves >> mtsmc.slow_constraints >> mtsmc.fastcomponent >> mtsmc.nfastmoves >>
+            static_cast<MonteCarlo &>(mtsmc);
     }
     else if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> mtsmc.fastmoves >> mtsmc.fastcomponent >> mtsmc.nfastmoves
-            >> static_cast<MonteCarlo&>(mtsmc);
+        sds >> mtsmc.fastmoves >> mtsmc.fastcomponent >> mtsmc.nfastmoves >> static_cast<MonteCarlo &>(mtsmc);
 
         mtsmc.slow_constraints = Constraints();
     }
@@ -87,142 +84,128 @@ QDataStream &operator>>(QDataStream &ds, MTSMC &mtsmc)
 }
 
 /** Null constructor */
-MTSMC::MTSMC(const PropertyMap &map)
-      : ConcreteProperty<MTSMC,MonteCarlo>(map), nfastmoves(0)
-{}
+MTSMC::MTSMC(const PropertyMap &map) : ConcreteProperty<MTSMC, MonteCarlo>(map), nfastmoves(0)
+{
+}
 
 /** Construct a multiple time step Monte Carlo move that performs
     1 move using 'fastmoves' for every slow move */
 MTSMC::MTSMC(const Moves &fast_moves, const PropertyMap &map)
-      : ConcreteProperty<MTSMC,MonteCarlo>(map),
-        fastmoves(fast_moves), nfastmoves(1)
+    : ConcreteProperty<MTSMC, MonteCarlo>(map), fastmoves(fast_moves), nfastmoves(1)
 {
-    fastmoves.edit().setGenerator( MonteCarlo::generator() );
-    MonteCarlo::setEnsemble( fast_moves.ensemble() );
+    fastmoves.edit().setGenerator(MonteCarlo::generator());
+    MonteCarlo::setEnsemble(fast_moves.ensemble());
 }
 
 /** Construct a multiple time step Monte Carlo move that performs
     'nfastmoves' moves using 'fastmoves' for every slow move */
 MTSMC::MTSMC(const Moves &fast_moves, int nfast_moves, const PropertyMap &map)
-      : ConcreteProperty<MTSMC,MonteCarlo>(map),
-        fastmoves(fast_moves), nfastmoves(0)
+    : ConcreteProperty<MTSMC, MonteCarlo>(map), fastmoves(fast_moves), nfastmoves(0)
 {
     if (nfast_moves > 0)
     {
         nfastmoves = quint32(nfast_moves);
     }
 
-    fastmoves.edit().setGenerator( MonteCarlo::generator() );
-    MonteCarlo::setEnsemble( fast_moves.ensemble() );
+    fastmoves.edit().setGenerator(MonteCarlo::generator());
+    MonteCarlo::setEnsemble(fast_moves.ensemble());
 }
 
 /** Construct a multiple time step Monte Carlo move that performs
     1 move using 'fastmoves', then applies the constraints
     in 'slow_constraints' for each slow move */
-MTSMC::MTSMC(const Moves &fast_moves, const Constraints &constraints,
-             const PropertyMap &map)
-      : ConcreteProperty<MTSMC,MonteCarlo>(map),
-        fastmoves(fast_moves), slow_constraints(constraints), nfastmoves(1)
+MTSMC::MTSMC(const Moves &fast_moves, const Constraints &constraints, const PropertyMap &map)
+    : ConcreteProperty<MTSMC, MonteCarlo>(map), fastmoves(fast_moves), slow_constraints(constraints), nfastmoves(1)
 {
-    fastmoves.edit().setGenerator( MonteCarlo::generator() );
-    MonteCarlo::setEnsemble( fast_moves.ensemble() );
+    fastmoves.edit().setGenerator(MonteCarlo::generator());
+    MonteCarlo::setEnsemble(fast_moves.ensemble());
 }
 
 /** Construct a multiple time step Monte Carlo move that performs
     'nfastmoves' moves using 'fastmoves', then applies the constraints
     in 'slow_constraints' for each slow move */
-MTSMC::MTSMC(const Moves &fast_moves, const Constraints &constraints,
-             int nfast_moves, const PropertyMap &map)
-      : ConcreteProperty<MTSMC,MonteCarlo>(map),
-        fastmoves(fast_moves), slow_constraints(constraints), nfastmoves(0)
+MTSMC::MTSMC(const Moves &fast_moves, const Constraints &constraints, int nfast_moves, const PropertyMap &map)
+    : ConcreteProperty<MTSMC, MonteCarlo>(map), fastmoves(fast_moves), slow_constraints(constraints), nfastmoves(0)
 {
     if (nfast_moves > 0)
     {
         nfastmoves = quint32(nfast_moves);
     }
 
-    fastmoves.edit().setGenerator( MonteCarlo::generator() );
-    MonteCarlo::setEnsemble( fast_moves.ensemble() );
+    fastmoves.edit().setGenerator(MonteCarlo::generator());
+    MonteCarlo::setEnsemble(fast_moves.ensemble());
 }
 
 /** Construct a multiple time step Monte Carlo move that performs
     1 move using 'fastmoves', using the energy component
     'fastcomponent', then applies the constraints
     in 'slow_constraints' for each slow move */
-MTSMC::MTSMC(const Moves &fast_moves, const Symbol &fast_component,
-             const Constraints &constraints, const PropertyMap &map)
-      : ConcreteProperty<MTSMC,MonteCarlo>(map),
-        fastmoves(fast_moves), slow_constraints(constraints),
-        fastcomponent(fast_component), nfastmoves(1)
+MTSMC::MTSMC(const Moves &fast_moves, const Symbol &fast_component, const Constraints &constraints,
+             const PropertyMap &map)
+    : ConcreteProperty<MTSMC, MonteCarlo>(map), fastmoves(fast_moves), slow_constraints(constraints),
+      fastcomponent(fast_component), nfastmoves(1)
 {
-    fastmoves.edit().setGenerator( MonteCarlo::generator() );
-    MonteCarlo::setEnsemble( fast_moves.ensemble() );
+    fastmoves.edit().setGenerator(MonteCarlo::generator());
+    MonteCarlo::setEnsemble(fast_moves.ensemble());
 }
 
 /** Construct a multiple time step Monte Carlo move that performs
     'nfastmoves' moves using 'fastmoves', using the energy component
     'fastcomponent', then applies the constraints
     in 'slow_constraints' for each slow move */
-MTSMC::MTSMC(const Moves &fast_moves, const Symbol &fast_component,
-             const Constraints &constraints, int nfast_moves,
+MTSMC::MTSMC(const Moves &fast_moves, const Symbol &fast_component, const Constraints &constraints, int nfast_moves,
              const PropertyMap &map)
-      : ConcreteProperty<MTSMC,MonteCarlo>(map),
-        fastmoves(fast_moves), slow_constraints(constraints),
-        fastcomponent(fast_component), nfastmoves(0)
+    : ConcreteProperty<MTSMC, MonteCarlo>(map), fastmoves(fast_moves), slow_constraints(constraints),
+      fastcomponent(fast_component), nfastmoves(0)
 {
     if (nfast_moves > 0)
     {
         nfastmoves = quint32(nfast_moves);
     }
 
-    fastmoves.edit().setGenerator( MonteCarlo::generator() );
-    MonteCarlo::setEnsemble( fast_moves.ensemble() );
+    fastmoves.edit().setGenerator(MonteCarlo::generator());
+    MonteCarlo::setEnsemble(fast_moves.ensemble());
 }
 
 /** Construct a multiple time step Monte Carlo move that performs
     1 move using 'fastmoves' operating on
     the energy component 'fastcomponent' for every slow move */
-MTSMC::MTSMC(const Moves &fast_moves, const Symbol &fast_component,
-             const PropertyMap &map)
-      : ConcreteProperty<MTSMC,MonteCarlo>(map),
-        fastmoves(fast_moves), fastcomponent(fast_component),
-        nfastmoves(1)
+MTSMC::MTSMC(const Moves &fast_moves, const Symbol &fast_component, const PropertyMap &map)
+    : ConcreteProperty<MTSMC, MonteCarlo>(map), fastmoves(fast_moves), fastcomponent(fast_component), nfastmoves(1)
 {
-    MonteCarlo::setEnsemble( fast_moves.ensemble() );
-    fastmoves.edit().setGenerator( MonteCarlo::generator() );
+    MonteCarlo::setEnsemble(fast_moves.ensemble());
+    fastmoves.edit().setGenerator(MonteCarlo::generator());
 }
 
 /** Construct a multiple time step Monte Carlo move that performs
     'nfastmoves' moves using 'fastmoves' operating on
     the energy component 'fastcomponent' for every slow move */
-MTSMC::MTSMC(const Moves &fast_moves, const Symbol &fast_component,
-             int nfast_moves, const PropertyMap &map)
-      : ConcreteProperty<MTSMC,MonteCarlo>(map),
-        fastmoves(fast_moves), fastcomponent(fast_component),
-        nfastmoves(0)
+MTSMC::MTSMC(const Moves &fast_moves, const Symbol &fast_component, int nfast_moves, const PropertyMap &map)
+    : ConcreteProperty<MTSMC, MonteCarlo>(map), fastmoves(fast_moves), fastcomponent(fast_component), nfastmoves(0)
 {
     if (nfast_moves > 0)
     {
         nfastmoves = quint32(nfast_moves);
     }
 
-    MonteCarlo::setEnsemble( fast_moves.ensemble() );
-    fastmoves.edit().setGenerator( MonteCarlo::generator() );
+    MonteCarlo::setEnsemble(fast_moves.ensemble());
+    fastmoves.edit().setGenerator(MonteCarlo::generator());
 }
 
 /** Copy constructor */
 MTSMC::MTSMC(const MTSMC &other)
-      : ConcreteProperty<MTSMC,MonteCarlo>(other),
-        fastmoves(other.fastmoves), slow_constraints(other.slow_constraints),
-        fastcomponent(other.fastcomponent), nfastmoves(other.nfastmoves)
-{}
+    : ConcreteProperty<MTSMC, MonteCarlo>(other), fastmoves(other.fastmoves), slow_constraints(other.slow_constraints),
+      fastcomponent(other.fastcomponent), nfastmoves(other.nfastmoves)
+{
+}
 
 /** Destructor */
 MTSMC::~MTSMC()
-{}
+{
+}
 
 /** Copy assignment operator */
-MTSMC& MTSMC::operator=(const MTSMC &other)
+MTSMC &MTSMC::operator=(const MTSMC &other)
 {
     if (this != &other)
     {
@@ -239,11 +222,8 @@ MTSMC& MTSMC::operator=(const MTSMC &other)
 /** Comparison operator */
 bool MTSMC::operator==(const MTSMC &other) const
 {
-    return MonteCarlo::operator==(other) and
-           nfastmoves == other.nfastmoves and
-           fastcomponent == other.fastcomponent and
-           slow_constraints == other.slow_constraints and
-           fastmoves == other.fastmoves;
+    return MonteCarlo::operator==(other) and nfastmoves == other.nfastmoves and fastcomponent == other.fastcomponent and
+           slow_constraints == other.slow_constraints and fastmoves == other.fastmoves;
 }
 
 /** Comparison operator */
@@ -264,22 +244,21 @@ QString MTSMC::toString() const
 {
     return QObject::tr("MTSMC( slow = %1, fast = %2, nFast() = %3 "
                        "nAccepted() = %4 nRejected() = %5 )")
-               .arg(this->slowEnergyComponent().toString(),
-                    this->fastEnergyComponent().toString())
-               .arg(this->nFastMoves())
-               .arg(this->nAccepted())
-               .arg(this->nRejected());
+        .arg(this->slowEnergyComponent().toString(), this->fastEnergyComponent().toString())
+        .arg(this->nFastMoves())
+        .arg(this->nAccepted())
+        .arg(this->nRejected());
 }
 
 /** Return the energy component on which the fast moves will operate */
-const Symbol& MTSMC::fastEnergyComponent() const
+const Symbol &MTSMC::fastEnergyComponent() const
 {
     return fastcomponent;
 }
 
 /** Return the energy component that will ultimately be used
     to generate the ensemble */
-const Symbol& MTSMC::slowEnergyComponent() const
+const Symbol &MTSMC::slowEnergyComponent() const
 {
     return MonteCarlo::energyComponent();
 }
@@ -294,7 +273,7 @@ void MTSMC::setFastMoves(const Moves &fast_moves)
 
     MovesPtr new_fastmoves = fast_moves;
     new_fastmoves.edit().setEnergyComponent(fastcomponent);
-    new_fastmoves.edit().setGenerator( MonteCarlo::generator() );
+    new_fastmoves.edit().setGenerator(MonteCarlo::generator());
 
     MonteCarlo::setEnsemble(new_fastmoves.read().ensemble());
 
@@ -325,7 +304,7 @@ void MTSMC::setSlowEnergyComponent(const Symbol &component)
 
 /** Return the fast moves that will be performed for every
     slow move */
-const Moves& MTSMC::fastMoves() const
+const Moves &MTSMC::fastMoves() const
 {
     return fastmoves.read();
 }
@@ -359,7 +338,7 @@ void MTSMC::removeSlowConstraints()
 
 /** Return the constraints that are applied at the end of each
     block of fast moves */
-const Constraints& MTSMC::slowConstraints() const
+const Constraints &MTSMC::slowConstraints() const
 {
     return slow_constraints;
 }
@@ -368,8 +347,8 @@ const Constraints& MTSMC::slowConstraints() const
     contained moves */
 void MTSMC::setGenerator(const RanGenerator &rangenerator)
 {
-    MonteCarlo::setGenerator( rangenerator );
-    fastmoves.edit().setGenerator( MonteCarlo::generator() );
+    MonteCarlo::setGenerator(rangenerator);
+    fastmoves.edit().setGenerator(MonteCarlo::generator());
 }
 
 /** Perform the move - this will perform nfastmoves using fastmoves,
@@ -379,7 +358,7 @@ void MTSMC::setGenerator(const RanGenerator &rangenerator)
 void MTSMC::move(System &system, int nmoves, bool record_stats)
 {
     if (nmoves == 0 or nfastmoves == 0)
-        //nothing to do
+        // nothing to do
         return;
 
     System old_system_state(system);
@@ -387,35 +366,35 @@ void MTSMC::move(System &system, int nmoves, bool record_stats)
 
     try
     {
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
-            //get the old energies
+            // get the old energies
             double old_slow_nrg = system.energy(this->slowEnergyComponent());
             double old_fast_nrg = system.energy(this->fastEnergyComponent());
 
-            //save the old system
+            // save the old system
             System old_system = system;
 
-            //now perform the moves (without recording statistics)
+            // now perform the moves (without recording statistics)
             system = fastmoves.edit().move(system, nfastmoves, false);
 
-            //apply the slow constraints
+            // apply the slow constraints
             Constraints old_slow_constraints = slow_constraints;
 
             if (not slow_constraints.isEmpty())
                 system = slow_constraints.apply(system);
 
-            //get the new energies
+            // get the new energies
             double new_fast_nrg = system.energy(this->fastEnergyComponent());
             double new_slow_nrg = system.energy(this->slowEnergyComponent());
 
-            //work out the delta
+            // work out the delta
             double new_nrg = new_slow_nrg - new_fast_nrg;
             double old_nrg = old_slow_nrg - old_fast_nrg;
 
             if (not MonteCarlo::test(new_nrg, old_nrg))
             {
-                //restore the old configuration
+                // restore the old configuration
                 system = old_system;
                 slow_constraints = old_slow_constraints;
             }
@@ -426,7 +405,7 @@ void MTSMC::move(System &system, int nmoves, bool record_stats)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         system = old_system_state;
@@ -435,7 +414,7 @@ void MTSMC::move(System &system, int nmoves, bool record_stats)
     }
 }
 
-const char* MTSMC::typeName()
+const char *MTSMC::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MTSMC>() );
+    return QMetaType::typeName(qMetaTypeId<MTSMC>());
 }

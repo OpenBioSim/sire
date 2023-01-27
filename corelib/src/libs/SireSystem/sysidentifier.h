@@ -34,80 +34,80 @@
 
 namespace SireSystem
 {
-class SysIdentifier;
+    class SysIdentifier;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::SysIdentifier&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::SysIdentifier&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::SysIdentifier &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::SysIdentifier &);
 
 namespace SireSystem
 {
 
-/** This is a generic holder for any SysID class!
+    /** This is a generic holder for any SysID class!
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT SysIdentifier : public SysID
-{
-
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const SysIdentifier&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, SysIdentifier&);
-
-public:
-    SysIdentifier();
-    SysIdentifier(const SysID &sysid);
-    SysIdentifier(const SysIdentifier &other);
-
-    ~SysIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT SysIdentifier : public SysID
     {
-        return SysIdentifier::typeName();
+
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const SysIdentifier &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, SysIdentifier &);
+
+    public:
+        SysIdentifier();
+        SysIdentifier(const SysID &sysid);
+        SysIdentifier(const SysIdentifier &other);
+
+        ~SysIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return SysIdentifier::typeName();
+        }
+
+        SysIdentifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const SysID &base() const;
+
+        SysIdentifier &operator=(const SysIdentifier &other);
+        SysIdentifier &operator=(const SysID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const SysIdentifier &other) const;
+        bool operator!=(const SysIdentifier &other) const;
+
+        bool operator==(const SysID &other) const;
+        bool operator!=(const SysID &other) const;
+
+        QList<SysIdx> map(const Systems &systems) const;
+
+    private:
+        /** Pointer to the SysID */
+        boost::shared_ptr<SysID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const SysIdentifier &sysid)
+    {
+        return sysid.hash();
     }
 
-    SysIdentifier* clone() const;
-
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const SysID& base() const;
-
-    SysIdentifier& operator=(const SysIdentifier &other);
-    SysIdentifier& operator=(const SysID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const SysIdentifier &other) const;
-    bool operator!=(const SysIdentifier &other) const;
-
-    bool operator==(const SysID &other) const;
-    bool operator!=(const SysID &other) const;
-
-    QList<SysIdx> map(const Systems &systems) const;
-
-private:
-    /** Pointer to the SysID */
-    boost::shared_ptr<SysID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const SysIdentifier &sysid)
-{
-    return sysid.hash();
-}
-
-}
+} // namespace SireSystem
 
 #include "sysidx.h"
 
-Q_DECLARE_METATYPE( SireID::Specify<SireSystem::SysID> )
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireSystem::SysID> )
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireSystem::SysID> )
+Q_DECLARE_METATYPE(SireID::Specify<SireSystem::SysID>)
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireSystem::SysID>)
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireSystem::SysID>)
 
 Q_DECLARE_METATYPE(SireSystem::SysIdentifier);
 

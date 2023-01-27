@@ -36,70 +36,70 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class SegName;
+    class SegName;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::SegName&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::SegName&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::SegName &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::SegName &);
 
 namespace SireMol
 {
 
-/** This class holds the name of a CutGroup.
+    /** This class holds the name of a CutGroup.
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT SegName : public SireID::Name, public SegID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const SegName&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SegName&);
-
-public:
-    SegName();
-
-    explicit SegName(const QString &name);
-
-    SegName(const QString &name, SireID::CaseSensitivity case_sensitivity);
-
-    SegName(const SegName &other);
-
-    ~SegName();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT SegName : public SireID::Name, public SegID
     {
-        return SegName::typeName();
-    }
 
-    SegName* clone() const
-    {
-        return new SegName(*this);
-    }
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const SegName &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, SegName &);
 
-    bool isNull() const;
+    public:
+        SegName();
 
-    uint hash() const;
+        explicit SegName(const QString &name);
 
-    QString toString() const;
+        SegName(const QString &name, SireID::CaseSensitivity case_sensitivity);
 
-    SegName& operator=(const SegName &other);
+        SegName(const SegName &other);
 
-    bool operator==(const SireID::ID &other) const;
+        ~SegName();
 
-    bool operator==(const SegName &other) const;
+        static const char *typeName();
 
-    bool operator!=(const SegName &other) const;
+        const char *what() const
+        {
+            return SegName::typeName();
+        }
 
-    QList<SegIdx> map(const MolInfo &molinfo) const;
-};
+        SegName *clone() const
+        {
+            return new SegName(*this);
+        }
 
-}
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        SegName &operator=(const SegName &other);
+
+        bool operator==(const SireID::ID &other) const;
+
+        bool operator==(const SegName &other) const;
+
+        bool operator!=(const SegName &other) const;
+
+        QList<SegIdx> map(const MolInfo &molinfo) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::SegName);
 
-SIRE_EXPOSE_CLASS( SireMol::SegName )
+SIRE_EXPOSE_CLASS(SireMol::SegName)
 
 SIRE_END_HEADER
 

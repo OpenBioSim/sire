@@ -27,9 +27,9 @@
 
 #include "fieldtable.h"
 
-#include "SireMol/moleculeview.h"
-#include "SireMol/moleculegroup.h"
 #include "SireMol/atomselection.h"
+#include "SireMol/moleculegroup.h"
+#include "SireMol/moleculeview.h"
 
 #include "SireMol/mover.hpp"
 
@@ -38,8 +38,8 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
-#include "SireMol/errors.h"
 #include "SireError/errors.h"
+#include "SireMol/errors.h"
 
 using namespace SireFF;
 using namespace SireMol;
@@ -54,15 +54,14 @@ using namespace SireStream;
 
 static const RegisterMetaType<MolFieldTable> r_moltable(NO_ROOT);
 
-QDataStream &operator<<(QDataStream &ds,
-                                      const MolFieldTable &moltable)
+QDataStream &operator<<(QDataStream &ds, const MolFieldTable &moltable)
 {
     writeHeader(ds, r_moltable, 1);
 
     SharedDataStream sds(ds);
 
-    sds << moltable.molnum << moltable.moluid << moltable.ncgroups
-        << moltable.cgidx_to_idx << static_cast<const PackedArray2D<Vector>&>(moltable);
+    sds << moltable.molnum << moltable.moluid << moltable.ncgroups << moltable.cgidx_to_idx
+        << static_cast<const PackedArray2D<Vector> &>(moltable);
 
     return ds;
 }
@@ -75,46 +74,44 @@ QDataStream &operator>>(QDataStream &ds, MolFieldTable &moltable)
     {
         SharedDataStream sds(ds);
 
-        sds >> moltable.molnum >> moltable.moluid >> moltable.ncgroups
-            >> moltable.cgidx_to_idx >> static_cast<PackedArray2D<Vector>&>(moltable);
+        sds >> moltable.molnum >> moltable.moluid >> moltable.ncgroups >> moltable.cgidx_to_idx >>
+            static_cast<PackedArray2D<Vector> &>(moltable);
     }
     else
-        throw version_error( v, "1", r_moltable, CODELOC );
+        throw version_error(v, "1", r_moltable, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 MolFieldTable::MolFieldTable() : PackedArray2D<Vector>(), molnum(0), ncgroups(0)
-{}
+{
+}
 
 /** Construct to hold the field acting at the points of all of the atoms
     of all of the cutgroups viewed in 'molview' */
 MolFieldTable::MolFieldTable(const MoleculeView &molview)
-              : PackedArray2D<Vector>(),
-                molnum(molview.data().number()),
-                moluid(molview.data().info().UID()),
-                ncgroups(molview.data().info().nCutGroups())
+    : PackedArray2D<Vector>(), molnum(molview.data().number()), moluid(molview.data().info().UID()),
+      ncgroups(molview.data().info().nCutGroups())
 {
-    //build arrays for each selected CutGroup
+    // build arrays for each selected CutGroup
     AtomSelection selected_atoms = molview.selection();
 
     if (selected_atoms.selectedAllCutGroups())
     {
-        QVector< QVector<Vector> > fields(ncgroups);
+        QVector<QVector<Vector>> fields(ncgroups);
         QVector<Vector> *fields_array = fields.data();
 
-        for (CGIdx i(0); i<ncgroups; ++i)
+        for (CGIdx i(0); i < ncgroups; ++i)
         {
-            fields_array[i] = QVector<Vector>(molview.data().info().nAtoms(i),
-                                              Vector(0));
+            fields_array[i] = QVector<Vector>(molview.data().info().nAtoms(i), Vector(0));
         }
 
         PackedArray2D<Vector>::operator=(fields);
     }
     else
     {
-        QVector< QVector<Vector> > fields(selected_atoms.nSelectedCutGroups());
+        QVector<QVector<Vector>> fields(selected_atoms.nSelectedCutGroups());
         cgidx_to_idx.reserve(selected_atoms.nSelectedCutGroups());
 
         QVector<Vector> *fields_array = fields.data();
@@ -122,8 +119,7 @@ MolFieldTable::MolFieldTable(const MoleculeView &molview)
 
         foreach (CGIdx i, selected_atoms.selectedCutGroups())
         {
-            fields_array[i] = QVector<Vector>(molview.data().info().nAtoms(i),
-                                              Vector(0));
+            fields_array[i] = QVector<Vector>(molview.data().info().nAtoms(i), Vector(0));
 
             cgidx_to_idx.insert(i, idx);
             ++idx;
@@ -135,17 +131,18 @@ MolFieldTable::MolFieldTable(const MoleculeView &molview)
 
 /** Copy constructor */
 MolFieldTable::MolFieldTable(const MolFieldTable &other)
-              : PackedArray2D<Vector>(other),
-                molnum(other.molnum), moluid(other.moluid),
-                ncgroups(other.ncgroups), cgidx_to_idx(other.cgidx_to_idx)
-{}
+    : PackedArray2D<Vector>(other), molnum(other.molnum), moluid(other.moluid), ncgroups(other.ncgroups),
+      cgidx_to_idx(other.cgidx_to_idx)
+{
+}
 
 /** Destructor */
 MolFieldTable::~MolFieldTable()
-{}
+{
+}
 
 /** Copy assignment operator */
-MolFieldTable& MolFieldTable::operator=(const MolFieldTable &other)
+MolFieldTable &MolFieldTable::operator=(const MolFieldTable &other)
 {
     if (this != &other)
     {
@@ -160,7 +157,7 @@ MolFieldTable& MolFieldTable::operator=(const MolFieldTable &other)
 }
 
 /** Set the field at all points equal to 'field' */
-MolFieldTable& MolFieldTable::operator=(const Vector &field)
+MolFieldTable &MolFieldTable::operator=(const Vector &field)
 {
     this->setAll(field);
     return *this;
@@ -169,10 +166,8 @@ MolFieldTable& MolFieldTable::operator=(const Vector &field)
 /** Comparison operator */
 bool MolFieldTable::operator==(const MolFieldTable &other) const
 {
-    return this == &other or
-           (molnum == other.molnum and moluid == other.moluid and
-            ncgroups == other.ncgroups and cgidx_to_idx == other.cgidx_to_idx and
-            PackedArray2D<Vector>::operator==(other));
+    return this == &other or (molnum == other.molnum and moluid == other.moluid and ncgroups == other.ncgroups and
+                              cgidx_to_idx == other.cgidx_to_idx and PackedArray2D<Vector>::operator==(other));
 }
 
 /** Comparison operator */
@@ -182,14 +177,14 @@ bool MolFieldTable::operator!=(const MolFieldTable &other) const
 }
 
 /** Add the fields in the passed table onto this table */
-MolFieldTable& MolFieldTable::operator+=(const MolFieldTable &other)
+MolFieldTable &MolFieldTable::operator+=(const MolFieldTable &other)
 {
     this->add(other);
     return *this;
 }
 
 /** Subtract the fields in the passed table from this table */
-MolFieldTable& MolFieldTable::operator-=(const MolFieldTable &other)
+MolFieldTable &MolFieldTable::operator-=(const MolFieldTable &other)
 {
     this->subtract(other);
     return *this;
@@ -212,14 +207,14 @@ MolFieldTable MolFieldTable::operator-(const MolFieldTable &other) const
 }
 
 /** Add 'field' to all of the points in this table */
-MolFieldTable& MolFieldTable::operator+=(const Vector &field)
+MolFieldTable &MolFieldTable::operator+=(const Vector &field)
 {
     this->add(field);
     return *this;
 }
 
 /** Subtract 'field' from all of the points in this table */
-MolFieldTable& MolFieldTable::operator-=(const Vector &field)
+MolFieldTable &MolFieldTable::operator-=(const Vector &field)
 {
     this->subtract(field);
     return *this;
@@ -247,14 +242,14 @@ MolFieldTable MolFieldTable::operator-(const Vector &field) const
 }
 
 /** Multiply the field at all points by the scalar 'value' */
-MolFieldTable& MolFieldTable::operator*=(double value)
+MolFieldTable &MolFieldTable::operator*=(double value)
 {
     this->multiply(value);
     return *this;
 }
 
 /** Divide the field at all points by the scalar 'value' */
-MolFieldTable& MolFieldTable::operator/=(double value)
+MolFieldTable &MolFieldTable::operator/=(double value)
 {
     this->divide(value);
     return *this;
@@ -290,9 +285,9 @@ MolFieldTable MolFieldTable::operator-() const
     return ret;
 }
 
-const char* MolFieldTable::typeName()
+const char *MolFieldTable::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MolFieldTable>() );
+    return QMetaType::typeName(qMetaTypeId<MolFieldTable>());
 }
 
 /** Initialise this table - this clears all of the fields, resetting them to zero */
@@ -304,7 +299,7 @@ void MolFieldTable::initialise()
     {
         Vector *vals = PackedArray2D<Vector>::valueData();
 
-        for (int i=0; i<nvals; ++i)
+        for (int i = 0; i < nvals; ++i)
         {
             vals[i] = Vector(0);
         }
@@ -316,7 +311,6 @@ QVector<Vector> MolFieldTable::toVector() const
 {
     return PackedArray2D<Vector>::toQVector();
 }
-
 
 /** Return an array of all of the fields at the location of
     the atoms selected in 'selection'
@@ -330,14 +324,14 @@ QVector<Vector> MolFieldTable::toVector(const AtomSelection &selection) const
     if (selection.selectedAll())
     {
         if (not this->selectedAll())
-            throw SireMol::missing_atom( QObject::tr(
-                "Cannot return the forces on all atoms as not all of the atoms "
-                "are selected in this forcetable."), CODELOC );
+            throw SireMol::missing_atom(QObject::tr("Cannot return the forces on all atoms as not all of the atoms "
+                                                    "are selected in this forcetable."),
+                                        CODELOC);
 
         return this->toVector();
     }
 
-    QVector<Vector> vals( selection.nSelected() );
+    QVector<Vector> vals(selection.nSelected());
     Vector *value = vals.data();
 
     if (this->selectedAll())
@@ -346,7 +340,7 @@ QVector<Vector> MolFieldTable::toVector(const AtomSelection &selection) const
         {
             const int ncg = selection.nCutGroups();
 
-            for (CGIdx i(0); i<ncg; ++i)
+            for (CGIdx i(0); i < ncg; ++i)
             {
                 const Vector *groupfields = PackedArray2D<Vector>::constData(i);
 
@@ -403,9 +397,9 @@ QVector<Vector> MolFieldTable::toVector(const AtomSelection &selection) const
     else
     {
         if (selection.selectedAllCutGroups())
-            throw SireMol::missing_atom( QObject::tr(
-                "Cannot return the forces as while all CutGroups are selected, "
-                "not all CutGroups are present in the forcetable."), CODELOC );
+            throw SireMol::missing_atom(QObject::tr("Cannot return the forces as while all CutGroups are selected, "
+                                                    "not all CutGroups are present in the forcetable."),
+                                        CODELOC);
 
         QList<CGIdx> cgidxs = selection.selectedCutGroups();
         std::sort(cgidxs.begin(), cgidxs.end());
@@ -415,10 +409,10 @@ QVector<Vector> MolFieldTable::toVector(const AtomSelection &selection) const
             int i = cgidx_to_idx.value(cgidx, -1);
 
             if (i == -1)
-                throw SireMol::missing_atom( QObject::tr(
-                    "Cannot return the forces as while atoms in CutGroup %1 "
-                    "are selected, this CutGroup is not present in the forcetable.")
-                        .arg(cgidx), CODELOC );
+                throw SireMol::missing_atom(QObject::tr("Cannot return the forces as while atoms in CutGroup %1 "
+                                                        "are selected, this CutGroup is not present in the forcetable.")
+                                                .arg(cgidx),
+                                            CODELOC);
 
             const Vector *groupfields = PackedArray2D<Vector>::constData(i);
 
@@ -453,7 +447,7 @@ QVector<Vector> MolFieldTable::toVector(const AtomSelection &selection) const
 */
 bool MolFieldTable::add(const CGAtomIdx &cgatomidx, const Vector &field)
 {
-    CGIdx cgidx( cgatomidx.cutGroup().map(this->nCutGroups()) );
+    CGIdx cgidx(cgatomidx.cutGroup().map(this->nCutGroups()));
 
     int i = -1;
 
@@ -470,7 +464,7 @@ bool MolFieldTable::add(const CGAtomIdx &cgatomidx, const Vector &field)
         return false;
     }
 
-    int j = cgatomidx.atom().map( this->nValues(i) );
+    int j = cgatomidx.atom().map(this->nValues(i));
 
     this->operator()(i, j) += field;
 
@@ -484,12 +478,12 @@ bool MolFieldTable::add(const CGAtomIdx &cgatomidx, const Vector &field)
 */
 bool MolFieldTable::subtract(const CGAtomIdx &cgatomidx, const Vector &field)
 {
-    return this->add( cgatomidx, -field );
+    return this->add(cgatomidx, -field);
 }
 
 static void addField(const Vector &field, Vector *fields, const int nats)
 {
-    for (int i=0; i<nats; ++i)
+    for (int i = 0; i < nats; ++i)
     {
         fields[i] += field;
     }
@@ -512,20 +506,20 @@ bool MolFieldTable::add(const AtomSelection &selected_atoms, const Vector &field
 
     if (selected_atoms.selectedAll())
     {
-        //this is easy - all atoms are selected for updating,
-        //so just update all of the forces in this table
+        // this is easy - all atoms are selected for updating,
+        // so just update all of the forces in this table
         ::addField(field, this->valueData(), this->nValues());
 
         changed_atoms = true;
     }
     else if (this->selectedAll())
     {
-        //easy(ish) case - all atoms are in this forcetable,
-        //so we only need to update the forces of the selected atoms
+        // easy(ish) case - all atoms are in this forcetable,
+        // so we only need to update the forces of the selected atoms
 
         if (selected_atoms.selectedAllCutGroups())
         {
-            for (CGIdx i(0); i<ncgroups; ++i)
+            for (CGIdx i(0); i < ncgroups; ++i)
             {
                 if (selected_atoms.selectedAll(i))
                 {
@@ -541,7 +535,7 @@ bool MolFieldTable::add(const AtomSelection &selected_atoms, const Vector &field
 
                     foreach (Index idx, idxs)
                     {
-                        BOOST_ASSERT( idx >= 0 and idx < nats );
+                        BOOST_ASSERT(idx >= 0 and idx < nats);
                         atomfields[idx] += field;
                     }
 
@@ -569,7 +563,7 @@ bool MolFieldTable::add(const AtomSelection &selected_atoms, const Vector &field
 
                     foreach (Index idx, idxs)
                     {
-                        BOOST_ASSERT( idx >= 0 and idx < nats );
+                        BOOST_ASSERT(idx >= 0 and idx < nats);
                         atomfields[idx] += field;
                     }
 
@@ -580,13 +574,12 @@ bool MolFieldTable::add(const AtomSelection &selected_atoms, const Vector &field
     }
     else
     {
-        //harder case - not all atoms are in this fieldtable
-        //and not all atoms are selected for updating
+        // harder case - not all atoms are in this fieldtable
+        // and not all atoms are selected for updating
 
         if (selected_atoms.selectedAllCutGroups())
         {
-            for (QHash<CGIdx,qint32>::const_iterator it = cgidx_to_idx.constBegin();
-                 it != cgidx_to_idx.constEnd();
+            for (QHash<CGIdx, qint32>::const_iterator it = cgidx_to_idx.constBegin(); it != cgidx_to_idx.constEnd();
                  ++it)
             {
                 const CGIdx cgidx = it.key();
@@ -606,7 +599,7 @@ bool MolFieldTable::add(const AtomSelection &selected_atoms, const Vector &field
 
                     foreach (Index idx, idxs)
                     {
-                        BOOST_ASSERT( idx >= 0 and idx < nats );
+                        BOOST_ASSERT(idx >= 0 and idx < nats);
                         atomfields[idx] += field;
                     }
                 }
@@ -616,8 +609,7 @@ bool MolFieldTable::add(const AtomSelection &selected_atoms, const Vector &field
         }
         else
         {
-            for (QHash<CGIdx,qint32>::const_iterator it = cgidx_to_idx.constBegin();
-                 it != cgidx_to_idx.constEnd();
+            for (QHash<CGIdx, qint32>::const_iterator it = cgidx_to_idx.constBegin(); it != cgidx_to_idx.constEnd();
                  ++it)
             {
                 const CGIdx cgidx = it.key();
@@ -637,7 +629,7 @@ bool MolFieldTable::add(const AtomSelection &selected_atoms, const Vector &field
 
                     foreach (Index idx, idxs)
                     {
-                        BOOST_ASSERT( idx >= 0 and idx < nats );
+                        BOOST_ASSERT(idx >= 0 and idx < nats);
                         atomfields[idx] += field;
                     }
 
@@ -658,7 +650,7 @@ bool MolFieldTable::add(const AtomSelection &selected_atoms, const Vector &field
 */
 bool MolFieldTable::subtract(const AtomSelection &selected_atoms, const Vector &field)
 {
-    return MolFieldTable::add( selected_atoms, -field );
+    return MolFieldTable::add(selected_atoms, -field);
 }
 
 /** Add the field 'field' onto all of the atom points in this table */
@@ -670,7 +662,7 @@ void MolFieldTable::add(const Vector &field)
     {
         Vector *vals = PackedArray2D<Vector>::valueData();
 
-        for (int i=0; i<nvals; ++i)
+        for (int i = 0; i < nvals; ++i)
         {
             vals[i] += field;
         }
@@ -680,7 +672,7 @@ void MolFieldTable::add(const Vector &field)
 /** Subtract the field 'field' from all of the atom points in this table */
 void MolFieldTable::subtract(const Vector &field)
 {
-    this->add( -field );
+    this->add(-field);
 }
 
 /** Multiply the field at all atom points by 'value' */
@@ -692,7 +684,7 @@ void MolFieldTable::multiply(double value)
     {
         Vector *vals = PackedArray2D<Vector>::valueData();
 
-        for (int i=0; i<nvals; ++i)
+        for (int i = 0; i < nvals; ++i)
         {
             vals[i] *= value;
         }
@@ -702,7 +694,7 @@ void MolFieldTable::multiply(double value)
 /** Divide the field at all atom points by 'value' */
 void MolFieldTable::divide(double value)
 {
-    this->multiply( 1.0 / value );
+    this->multiply(1.0 / value);
 }
 
 /** Set all of the fields at the atom points equal to 'field' */
@@ -714,7 +706,7 @@ void MolFieldTable::setAll(const Vector &field)
     {
         Vector *vals = PackedArray2D<Vector>::valueData();
 
-        for (int i=0; i<nvals; ++i)
+        for (int i = 0; i < nvals; ++i)
         {
             vals[i] = field;
         }
@@ -739,7 +731,7 @@ void MolFieldTable::assertCompatibleWith(const AtomSelection &selection) const
     }
     else if (this->selectedAll())
     {
-        for (CGIdx i(0); i<ncgroups; ++i)
+        for (CGIdx i(0); i < ncgroups; ++i)
         {
             if (selection.nSelected(i) != PackedArray2D<Vector>::nValues(i))
             {
@@ -750,9 +742,7 @@ void MolFieldTable::assertCompatibleWith(const AtomSelection &selection) const
     }
     else
     {
-        for (QHash<CGIdx,qint32>::const_iterator it = cgidx_to_idx.constBegin();
-             it != cgidx_to_idx.constEnd();
-             ++it)
+        for (QHash<CGIdx, qint32>::const_iterator it = cgidx_to_idx.constBegin(); it != cgidx_to_idx.constEnd(); ++it)
         {
             if (selection.nSelected(it.key()) != PackedArray2D<Vector>::nValues(it.key()))
             {
@@ -763,9 +753,8 @@ void MolFieldTable::assertCompatibleWith(const AtomSelection &selection) const
     }
 
     if (not compatible)
-        throw SireError::incompatible_error( QObject::tr(
-            "This MolForceTable is incompatible with the passed atom selection."),
-                CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("This MolForceTable is incompatible with the passed atom selection."), CODELOC);
 }
 
 /** Add the fields contained in 'other' onto this field table. This will only
@@ -774,36 +763,37 @@ void MolFieldTable::add(const MolFieldTable &other)
 {
     if (this == &other)
     {
-        //just double everything
+        // just double everything
         this->operator*=(2);
         return;
     }
 
     if (molnum != other.molnum)
-        throw SireError::incompatible_error( QObject::tr(
-                "You cannot combine the field table for molecule %1 with the "
-                "field table for molecule %2. The molecules must be the same.")
-                    .arg(molnum).arg(other.molnum), CODELOC );
+        throw SireError::incompatible_error(QObject::tr("You cannot combine the field table for molecule %1 with the "
+                                                        "field table for molecule %2. The molecules must be the same.")
+                                                .arg(molnum)
+                                                .arg(other.molnum),
+                                            CODELOC);
 
     if (moluid != other.moluid)
-        throw SireError::incompatible_error( QObject::tr(
-                "You cannot combine together the tables for molecule %1 as the "
-                "layout UIDs are different (%2 vs. %3). They must be the same.")
-                    .arg(molnum).arg(moluid.toString(), other.moluid.toString()),
-                        CODELOC );
+        throw SireError::incompatible_error(QObject::tr("You cannot combine together the tables for molecule %1 as the "
+                                                        "layout UIDs are different (%2 vs. %3). They must be the same.")
+                                                .arg(molnum)
+                                                .arg(moluid.toString(), other.moluid.toString()),
+                                            CODELOC);
 
     if (this->selectedAll() and other.selectedAll())
     {
         int nvals = PackedArray2D<Vector>::nValues();
 
-        BOOST_ASSERT( nvals == other.nValues() );
+        BOOST_ASSERT(nvals == other.nValues());
 
         if (nvals > 0)
         {
             Vector *vals = PackedArray2D<Vector>::valueData();
             const Vector *other_vals = other.constValueData();
 
-            for (int i=0; i<nvals; ++i)
+            for (int i = 0; i < nvals; ++i)
             {
                 vals[i] += other_vals[i];
             }
@@ -811,19 +801,19 @@ void MolFieldTable::add(const MolFieldTable &other)
     }
     else if (this->selectedAll())
     {
-        for (CGIdx i(0); i<ncgroups; ++i)
+        for (CGIdx i(0); i < ncgroups; ++i)
         {
             int idx = other.map(i);
 
             if (idx != -1)
             {
                 int nvals = this->nValues(i);
-                BOOST_ASSERT( nvals == other.nValues(idx) );
+                BOOST_ASSERT(nvals == other.nValues(idx));
 
                 Vector *vals = PackedArray2D<Vector>::data(i);
                 const Vector *other_vals = other.constData(idx);
 
-                for (int j=0; j<nvals; ++j)
+                for (int j = 0; j < nvals; ++j)
                 {
                     vals[j] += other_vals[j];
                 }
@@ -832,21 +822,19 @@ void MolFieldTable::add(const MolFieldTable &other)
     }
     else
     {
-        for (QHash<CGIdx,qint32>::const_iterator it = cgidx_to_idx.constBegin();
-             it != cgidx_to_idx.constEnd();
-             ++it)
+        for (QHash<CGIdx, qint32>::const_iterator it = cgidx_to_idx.constBegin(); it != cgidx_to_idx.constEnd(); ++it)
         {
             int idx = other.map(it.key());
 
             if (idx != -1)
             {
                 int nvals = this->nValues(it.value());
-                BOOST_ASSERT( nvals == other.nValues(idx) );
+                BOOST_ASSERT(nvals == other.nValues(idx));
 
                 Vector *vals = PackedArray2D<Vector>::data(it.key());
                 const Vector *other_vals = other.constData(idx);
 
-                for (int j=0; j<nvals; ++j)
+                for (int j = 0; j < nvals; ++j)
                 {
                     vals[j] += other_vals[j];
                 }
@@ -861,11 +849,11 @@ void MolFieldTable::subtract(const MolFieldTable &other)
 {
     if (this == &other)
     {
-        this->setAll( Vector(0) );
+        this->setAll(Vector(0));
         return;
     }
 
-    this->add( -other );
+    this->add(-other);
 }
 
 /////////
@@ -902,7 +890,8 @@ QDataStream &operator>>(QDataStream &ds, GridFieldTable &gridtable)
 
 /** Null constructor */
 GridFieldTable::GridFieldTable()
-{}
+{
+}
 
 /** Construct to hold the field at each of the points of the passed grid */
 GridFieldTable::GridFieldTable(const Grid &grid) : grd(grid)
@@ -915,16 +904,17 @@ GridFieldTable::GridFieldTable(const Grid &grid) : grd(grid)
 }
 
 /** Copy constructor */
-GridFieldTable::GridFieldTable(const GridFieldTable &other)
-               : grd(other.grd), fieldvals(other.fieldvals)
-{}
+GridFieldTable::GridFieldTable(const GridFieldTable &other) : grd(other.grd), fieldvals(other.fieldvals)
+{
+}
 
 /** Destructor */
 GridFieldTable::~GridFieldTable()
-{}
+{
+}
 
 /** Copy assignment operator */
-GridFieldTable& GridFieldTable::operator=(const GridFieldTable &other)
+GridFieldTable &GridFieldTable::operator=(const GridFieldTable &other)
 {
     if (this != &other)
     {
@@ -936,7 +926,7 @@ GridFieldTable& GridFieldTable::operator=(const GridFieldTable &other)
 }
 
 /** Set the field at each of the grid points equal to 'field' */
-GridFieldTable& GridFieldTable::operator=(const Vector &field)
+GridFieldTable &GridFieldTable::operator=(const Vector &field)
 {
     this->setAll(field);
     return *this;
@@ -945,8 +935,7 @@ GridFieldTable& GridFieldTable::operator=(const Vector &field)
 /** Comparison operator */
 bool GridFieldTable::operator==(const GridFieldTable &other) const
 {
-    return this == &other or
-           (grd == other.grd and fieldvals == other.fieldvals);
+    return this == &other or (grd == other.grd and fieldvals == other.fieldvals);
 }
 
 /** Comparison operator */
@@ -957,7 +946,7 @@ bool GridFieldTable::operator!=(const GridFieldTable &other) const
 
 /** Add the fields on the passed table onto this table. Note that this
     only adds the fields if both tables use the same grid points */
-GridFieldTable& GridFieldTable::operator+=(const GridFieldTable &other)
+GridFieldTable &GridFieldTable::operator+=(const GridFieldTable &other)
 {
     this->add(other);
     return *this;
@@ -965,7 +954,7 @@ GridFieldTable& GridFieldTable::operator+=(const GridFieldTable &other)
 
 /** Subtract the fields of 'other' from this table. Note that this
     only subtracts the fields if both tables use the same grid points */
-GridFieldTable& GridFieldTable::operator-=(const GridFieldTable &other)
+GridFieldTable &GridFieldTable::operator-=(const GridFieldTable &other)
 {
     this->subtract(other);
     return *this;
@@ -990,14 +979,14 @@ GridFieldTable GridFieldTable::operator-(const GridFieldTable &other) const
 }
 
 /** Add the field 'field' to all of the grid points */
-GridFieldTable& GridFieldTable::operator+=(const Vector &field)
+GridFieldTable &GridFieldTable::operator+=(const Vector &field)
 {
     this->add(field);
     return *this;
 }
 
 /** Subtract the field 'field' from all of the grid points */
-GridFieldTable& GridFieldTable::operator-=(const Vector &field)
+GridFieldTable &GridFieldTable::operator-=(const Vector &field)
 {
     this->subtract(field);
     return *this;
@@ -1020,14 +1009,14 @@ GridFieldTable GridFieldTable::operator-(const Vector &field) const
 }
 
 /** Multiply the field at all grid points by 'value' */
-GridFieldTable& GridFieldTable::operator*=(double value)
+GridFieldTable &GridFieldTable::operator*=(double value)
 {
     this->multiply(value);
     return *this;
 }
 
 /** Divide the field at all grid points by 'value' */
-GridFieldTable& GridFieldTable::operator/=(double value)
+GridFieldTable &GridFieldTable::operator/=(double value)
 {
     this->divide(value);
     return *this;
@@ -1056,9 +1045,7 @@ GridFieldTable GridFieldTable::operator-() const
 {
     GridFieldTable ret(*this);
 
-    for (QVector<Vector>::iterator it = ret.fieldvals.begin();
-         it != ret.fieldvals.end();
-         ++it)
+    for (QVector<Vector>::iterator it = ret.fieldvals.begin(); it != ret.fieldvals.end(); ++it)
     {
         *it = -(*it);
     }
@@ -1070,40 +1057,38 @@ GridFieldTable GridFieldTable::operator-() const
 
     \throw SireError::invalid_index
 */
-Vector& GridFieldTable::operator[](int i)
+Vector &GridFieldTable::operator[](int i)
 {
-    return fieldvals[ Index(i).map(fieldvals.count()) ];
+    return fieldvals[Index(i).map(fieldvals.count())];
 }
 
 /** Return the field value of the ith grid point
 
     \throw SireError::invalid_index
 */
-const Vector& GridFieldTable::operator[](int i) const
+const Vector &GridFieldTable::operator[](int i) const
 {
-    return fieldvals.at( Index(i).map(fieldvals.count()) );
+    return fieldvals.at(Index(i).map(fieldvals.count()));
 }
 
 /** Return the field value of the ith grid point
 
     \throw SireError::invalid_index
 */
-const Vector& GridFieldTable::at(int i) const
+const Vector &GridFieldTable::at(int i) const
 {
     return this->operator[](i);
 }
 
-const char* GridFieldTable::typeName()
+const char *GridFieldTable::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<GridFieldTable>() );
+    return QMetaType::typeName(qMetaTypeId<GridFieldTable>());
 }
 
 /** Initialise the field at each grid point to equal 0 */
 void GridFieldTable::initialise()
 {
-    for (QVector<Vector>::iterator it = fieldvals.begin();
-         it != fieldvals.end();
-         ++it)
+    for (QVector<Vector>::iterator it = fieldvals.begin(); it != fieldvals.end(); ++it)
     {
         *it = Vector(0);
     }
@@ -1124,7 +1109,7 @@ int GridFieldTable::count() const
 /** Return the grid that contains the points at which the field is
     evaluated - the order of points in the grid is the same as the order
     of field values in this table */
-const Grid& GridFieldTable::grid() const
+const Grid &GridFieldTable::grid() const
 {
     if (grd.constData() == 0)
         return Grid::null();
@@ -1145,7 +1130,7 @@ QVector<Vector> GridFieldTable::toVector() const
 */
 void GridFieldTable::add(int ipoint, const Vector &field)
 {
-    fieldvals[ Index(ipoint).map(fieldvals.count()) ] += field;
+    fieldvals[Index(ipoint).map(fieldvals.count())] += field;
 }
 
 /** Subtract the field 'field' from the field for the ipoint'th grid point
@@ -1154,7 +1139,7 @@ void GridFieldTable::add(int ipoint, const Vector &field)
 */
 void GridFieldTable::subtract(int ipoint, const Vector &field)
 {
-    fieldvals[ Index(ipoint).map(fieldvals.count()) ] -= field;
+    fieldvals[Index(ipoint).map(fieldvals.count())] -= field;
 }
 
 /** Add the field in 'other' onto that for this table - this only
@@ -1164,14 +1149,14 @@ void GridFieldTable::add(const GridFieldTable &other)
     if (grd == other.grd)
     {
         int nvals = fieldvals.count();
-        BOOST_ASSERT( nvals == other.fieldvals.count() );
+        BOOST_ASSERT(nvals == other.fieldvals.count());
 
         if (nvals > 0)
         {
             Vector *data = fieldvals.data();
             const Vector *other_data = other.fieldvals.constData();
 
-            for (int i=0; i<nvals; ++i)
+            for (int i = 0; i < nvals; ++i)
             {
                 data[i] += other_data[i];
             }
@@ -1186,14 +1171,14 @@ void GridFieldTable::subtract(const GridFieldTable &other)
     if (grd == other.grd)
     {
         int nvals = fieldvals.count();
-        BOOST_ASSERT( nvals == other.fieldvals.count() );
+        BOOST_ASSERT(nvals == other.fieldvals.count());
 
         if (nvals > 0)
         {
             Vector *data = fieldvals.data();
             const Vector *other_data = other.fieldvals.constData();
 
-            for (int i=0; i<nvals; ++i)
+            for (int i = 0; i < nvals; ++i)
             {
                 data[i] -= other_data[i];
             }
@@ -1204,9 +1189,7 @@ void GridFieldTable::subtract(const GridFieldTable &other)
 /** Add the field 'field' to all of the points in this table */
 void GridFieldTable::add(const Vector &field)
 {
-    for (QVector<Vector>::iterator it = fieldvals.begin();
-         it != fieldvals.end();
-         ++it)
+    for (QVector<Vector>::iterator it = fieldvals.begin(); it != fieldvals.end(); ++it)
     {
         *it += field;
     }
@@ -1215,9 +1198,7 @@ void GridFieldTable::add(const Vector &field)
 /** Subtract the field 'field' from all of the points in this table */
 void GridFieldTable::subtract(const Vector &field)
 {
-    for (QVector<Vector>::iterator it = fieldvals.begin();
-         it != fieldvals.end();
-         ++it)
+    for (QVector<Vector>::iterator it = fieldvals.begin(); it != fieldvals.end(); ++it)
     {
         *it -= field;
     }
@@ -1226,9 +1207,7 @@ void GridFieldTable::subtract(const Vector &field)
 /** Set the field at all of the points in this table equal to 'field' */
 void GridFieldTable::setAll(const Vector &field)
 {
-    for (QVector<Vector>::iterator it = fieldvals.begin();
-         it != fieldvals.end();
-         ++it)
+    for (QVector<Vector>::iterator it = fieldvals.begin(); it != fieldvals.end(); ++it)
     {
         *it = field;
     }
@@ -1237,9 +1216,7 @@ void GridFieldTable::setAll(const Vector &field)
 /** Multiply the field at all of the points in this table by 'value' */
 void GridFieldTable::multiply(double value)
 {
-    for (QVector<Vector>::iterator it = fieldvals.begin();
-         it != fieldvals.end();
-         ++it)
+    for (QVector<Vector>::iterator it = fieldvals.begin(); it != fieldvals.end(); ++it)
     {
         *it *= value;
     }
@@ -1248,23 +1225,23 @@ void GridFieldTable::multiply(double value)
 /** Divide the field at all of the points in this table by 'value' */
 void GridFieldTable::divide(double value)
 {
-    this->multiply( 1 / value );
+    this->multiply(1 / value);
 }
 
 /** Return a raw pointer to the array of field values */
-Vector* GridFieldTable::data()
+Vector *GridFieldTable::data()
 {
     return fieldvals.data();
 }
 
 /** Return a raw pointer to the array of field values */
-const Vector* GridFieldTable::data() const
+const Vector *GridFieldTable::data() const
 {
     return fieldvals.constData();
 }
 
 /** Return a raw pointer to the array of field values */
-const Vector* GridFieldTable::constData() const
+const Vector *GridFieldTable::constData() const
 {
     return fieldvals.constData();
 }
@@ -1326,31 +1303,30 @@ QDataStream &operator>>(QDataStream &ds, FieldTable &fieldtable)
 
         sds >> fieldtable.moltables_by_idx >> fieldtable.gridtables;
 
-        QHash<MolNum,qint32> molnum_to_idx;
+        QHash<MolNum, qint32> molnum_to_idx;
         molnum_to_idx.reserve(fieldtable.moltables_by_idx.count());
 
         quint32 i = 0;
 
-        for (QVector<MolFieldTable>::const_iterator
-                                    it = fieldtable.moltables_by_idx.constBegin();
-             it != fieldtable.moltables_by_idx.constEnd();
-             ++it)
+        for (QVector<MolFieldTable>::const_iterator it = fieldtable.moltables_by_idx.constBegin();
+             it != fieldtable.moltables_by_idx.constEnd(); ++it)
         {
-            molnum_to_idx.insert( it->molNum(), i );
+            molnum_to_idx.insert(it->molNum(), i);
             i += 1;
         }
 
         fieldtable.molnum_to_idx = molnum_to_idx;
     }
     else
-        throw version_error( v, "1", r_fieldtable, CODELOC );
+        throw version_error(v, "1", r_fieldtable, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 FieldTable::FieldTable()
-{}
+{
+}
 
 void FieldTable::setGroup(const MoleculeGroup &molgroup)
 {
@@ -1362,16 +1338,14 @@ void FieldTable::setGroup(const MoleculeGroup &molgroup)
     moltables_by_idx = QVector<MolFieldTable>(nmols);
     moltables_by_idx.squeeze();
 
-    molnum_to_idx = QHash<MolNum,qint32>();
+    molnum_to_idx = QHash<MolNum, qint32>();
     molnum_to_idx.reserve(nmols);
 
     MolFieldTable *moltables_by_idx_array = moltables_by_idx.data();
 
     quint32 i = 0;
 
-    for (MoleculeGroup::const_iterator it = molgroup.constBegin();
-         it != molgroup.constEnd();
-         ++it)
+    for (MoleculeGroup::const_iterator it = molgroup.constBegin(); it != molgroup.constEnd(); ++it)
     {
         moltables_by_idx_array[i] = MolFieldTable(*it);
         molnum_to_idx.insert(it->data().number(), i);
@@ -1391,7 +1365,7 @@ FieldTable::FieldTable(const MoleculeGroup &molgroup)
     in the passed grid */
 FieldTable::FieldTable(const Grid &grid)
 {
-    gridtables.append( GridFieldTable(grid) );
+    gridtables.append(GridFieldTable(grid));
     gridtables.squeeze();
 }
 
@@ -1399,14 +1373,12 @@ FieldTable::FieldTable(const Grid &grid)
     of all of the passed grids */
 FieldTable::FieldTable(const QVector<GridPtr> &grids)
 {
-    for (QVector<GridPtr>::const_iterator it = grids.constBegin();
-         it != grids.constEnd();
-         ++it)
+    for (QVector<GridPtr>::const_iterator it = grids.constBegin(); it != grids.constEnd(); ++it)
     {
         if (it->constData() != 0)
         {
             if (not this->contains(it->read()))
-                gridtables.append( GridFieldTable(it->read()) );
+                gridtables.append(GridFieldTable(it->read()));
         }
     }
 
@@ -1419,7 +1391,7 @@ FieldTable::FieldTable(const QVector<GridPtr> &grids)
 FieldTable::FieldTable(const MoleculeGroup &molgroup, const Grid &grid)
 {
     this->setGroup(molgroup);
-    gridtables.append( GridFieldTable(grid) );
+    gridtables.append(GridFieldTable(grid));
     gridtables.squeeze();
 }
 
@@ -1430,14 +1402,12 @@ FieldTable::FieldTable(const MoleculeGroup &molgroup, const QVector<GridPtr> &gr
 {
     this->setGroup(molgroup);
 
-    for (QVector<GridPtr>::const_iterator it = grids.constBegin();
-         it != grids.constEnd();
-         ++it)
+    for (QVector<GridPtr>::const_iterator it = grids.constBegin(); it != grids.constEnd(); ++it)
     {
         if (it->constData() != 0)
         {
             if (not this->contains(it->read()))
-                gridtables.append( GridFieldTable(it->read()) );
+                gridtables.append(GridFieldTable(it->read()));
         }
     }
 
@@ -1446,22 +1416,22 @@ FieldTable::FieldTable(const MoleculeGroup &molgroup, const QVector<GridPtr> &gr
 
 /** Copy constructor */
 FieldTable::FieldTable(const FieldTable &other)
-           : moltables_by_idx(other.moltables_by_idx),
-             gridtables(other.gridtables),
-             molnum_to_idx(other.molnum_to_idx)
-{}
+    : moltables_by_idx(other.moltables_by_idx), gridtables(other.gridtables), molnum_to_idx(other.molnum_to_idx)
+{
+}
 
 /** Destructor */
 FieldTable::~FieldTable()
-{}
-
-const char* FieldTable::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<FieldTable>() );
+}
+
+const char *FieldTable::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<FieldTable>());
 }
 
 /** Copy assignment operator */
-FieldTable& FieldTable::operator=(const FieldTable &other)
+FieldTable &FieldTable::operator=(const FieldTable &other)
 {
     if (this != &other)
     {
@@ -1474,7 +1444,7 @@ FieldTable& FieldTable::operator=(const FieldTable &other)
 }
 
 /** Set the field at all points in this table equal to 'field' */
-FieldTable& FieldTable::operator=(const Vector &field)
+FieldTable &FieldTable::operator=(const Vector &field)
 {
     this->setAll(field);
     return *this;
@@ -1483,9 +1453,7 @@ FieldTable& FieldTable::operator=(const Vector &field)
 /** Comparison operator */
 bool FieldTable::operator==(const FieldTable &other) const
 {
-    return this == &other or
-           (moltables_by_idx == other.moltables_by_idx and
-            gridtables == other.gridtables);
+    return this == &other or (moltables_by_idx == other.moltables_by_idx and gridtables == other.gridtables);
 }
 
 /** Comparison operator */
@@ -1496,7 +1464,7 @@ bool FieldTable::operator!=(const FieldTable &other) const
 
 /** Add the fields from 'other' onto this table. This only adds the fields
     for molecules / grids that are in both tables */
-FieldTable& FieldTable::operator+=(const FieldTable &other)
+FieldTable &FieldTable::operator+=(const FieldTable &other)
 {
     this->add(other);
     return *this;
@@ -1504,7 +1472,7 @@ FieldTable& FieldTable::operator+=(const FieldTable &other)
 
 /** Subtract the fields from 'other' from this table. This only subtracts
     the fields for molecules / grids that are in both tables */
-FieldTable& FieldTable::operator-=(const FieldTable &other)
+FieldTable &FieldTable::operator-=(const FieldTable &other)
 {
     this->subtract(other);
     return *this;
@@ -1531,7 +1499,7 @@ FieldTable FieldTable::operator-(const FieldTable &other) const
 }
 
 /** Add the field 'field' to all of the atom and grid points in this table */
-FieldTable& FieldTable::operator+=(const Vector &field)
+FieldTable &FieldTable::operator+=(const Vector &field)
 {
     this->add(field);
     return *this;
@@ -1539,7 +1507,7 @@ FieldTable& FieldTable::operator+=(const Vector &field)
 
 /** Substract the field 'field' from all of the atom and grid
     points in this table */
-FieldTable& FieldTable::operator-=(const Vector &field)
+FieldTable &FieldTable::operator-=(const Vector &field)
 {
     this->subtract(field);
     return *this;
@@ -1564,14 +1532,14 @@ FieldTable FieldTable::operator-(const Vector &field) const
 }
 
 /** Multiply the fields at all points in this table by 'value' */
-FieldTable& FieldTable::operator*=(double value)
+FieldTable &FieldTable::operator*=(double value)
 {
     this->multiply(value);
     return *this;
 }
 
 /** Divide the fields at all points in this table by 'value' */
-FieldTable& FieldTable::operator/=(double value)
+FieldTable &FieldTable::operator/=(double value)
 {
     this->divide(value);
     return *this;
@@ -1598,16 +1566,12 @@ FieldTable FieldTable::operator-() const
 {
     FieldTable ret(*this);
 
-    for (QVector<MolFieldTable>::iterator it = ret.moltables_by_idx.begin();
-         it != ret.moltables_by_idx.end();
-         ++it)
+    for (QVector<MolFieldTable>::iterator it = ret.moltables_by_idx.begin(); it != ret.moltables_by_idx.end(); ++it)
     {
         *it = -(*it);
     }
 
-    for (QVector<GridFieldTable>::iterator it = ret.gridtables.begin();
-         it != ret.gridtables.end();
-         ++it)
+    for (QVector<GridFieldTable>::iterator it = ret.gridtables.begin(); it != ret.gridtables.end(); ++it)
     {
         *it = -(*it);
     }
@@ -1618,9 +1582,7 @@ FieldTable FieldTable::operator-() const
 /** Return whether or not this contains a table for the passed grid */
 bool FieldTable::contains(const Grid &grid) const
 {
-    for (QVector<GridFieldTable>::const_iterator it = gridtables.constBegin();
-         it != gridtables.constEnd();
-         ++it)
+    for (QVector<GridFieldTable>::const_iterator it = gridtables.constBegin(); it != gridtables.constEnd(); ++it)
     {
         if (it->grid().equals(grid))
             return true;
@@ -1632,16 +1594,12 @@ bool FieldTable::contains(const Grid &grid) const
 /** Initialise all of the tables to have a zero field */
 void FieldTable::initialiseTables()
 {
-    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin();
-         it != moltables_by_idx.end();
-         ++it)
+    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin(); it != moltables_by_idx.end(); ++it)
     {
         it->initialise();
     }
 
-    for (QVector<GridFieldTable>::iterator it = gridtables.begin();
-         it != gridtables.end();
-         ++it)
+    for (QVector<GridFieldTable>::iterator it = gridtables.begin(); it != gridtables.end(); ++it)
     {
         it->initialise();
     }
@@ -1663,9 +1621,7 @@ void FieldTable::initialiseTable(const Grid &grid)
 {
     assertContainsTableFor(grid);
 
-    for (QVector<GridFieldTable>::iterator it = gridtables.begin();
-         it != gridtables.end();
-         ++it)
+    for (QVector<GridFieldTable>::iterator it = gridtables.begin(); it != gridtables.end(); ++it)
     {
         if (it->grid().equals(grid))
         {
@@ -1679,51 +1635,47 @@ void FieldTable::initialiseTable(const Grid &grid)
 
     \throw SireError::unavailable_resource
 */
-GridFieldTable& FieldTable::getTable(const Grid &grid)
+GridFieldTable &FieldTable::getTable(const Grid &grid)
 {
     this->assertContainsTableFor(grid);
 
-    for (QVector<GridFieldTable>::iterator it = gridtables.begin();
-         it != gridtables.end();
-         ++it)
+    for (QVector<GridFieldTable>::iterator it = gridtables.begin(); it != gridtables.end(); ++it)
     {
         if (it->grid().equals(grid))
             return *it;
     }
 
-    BOOST_ASSERT( false );
+    BOOST_ASSERT(false);
 
-    //this line needed to remove warning about lack of return value
-    return *( (GridFieldTable*) 0 );
+    // this line needed to remove warning about lack of return value
+    return *((GridFieldTable *)0);
 }
 
 /** Return the field table for the passed grid
 
     \throw SireError::unavailable_resource
 */
-const GridFieldTable& FieldTable::getTable(const Grid &grid) const
+const GridFieldTable &FieldTable::getTable(const Grid &grid) const
 {
     this->assertContainsTableFor(grid);
 
-    for (QVector<GridFieldTable>::const_iterator it = gridtables.constBegin();
-         it != gridtables.constEnd();
-         ++it)
+    for (QVector<GridFieldTable>::const_iterator it = gridtables.constBegin(); it != gridtables.constEnd(); ++it)
     {
         if (it->grid().equals(grid))
             return *it;
     }
 
-    BOOST_ASSERT( false );
+    BOOST_ASSERT(false);
 
-    //this line needed to remove warning about lack of return value
-    return *( (GridFieldTable*) 0 );
+    // this line needed to remove warning about lack of return value
+    return *((GridFieldTable *)0);
 }
 
 /** Return the field table for the passed grid
 
     \throw SireError::unavailable_resource
 */
-const GridFieldTable& FieldTable::constGetTable(const Grid &grid) const
+const GridFieldTable &FieldTable::constGetTable(const Grid &grid) const
 {
     return this->getTable(grid);
 }
@@ -1741,10 +1693,10 @@ bool FieldTable::isEmpty() const
 void FieldTable::assertContainsTableFor(MolNum molnum) const
 {
     if (not molnum_to_idx.contains(molnum))
-        throw SireError::unavailable_resource( QObject::tr(
-                "This FieldTable does not contain an entry for the molecule "
-                "with number %1.")
-                    .arg(molnum), CODELOC );
+        throw SireError::unavailable_resource(QObject::tr("This FieldTable does not contain an entry for the molecule "
+                                                          "with number %1.")
+                                                  .arg(molnum),
+                                              CODELOC);
 }
 
 /** Assert that this contains a table for the passed grid
@@ -1753,26 +1705,22 @@ void FieldTable::assertContainsTableFor(MolNum molnum) const
 */
 void FieldTable::assertContainsTableFor(const Grid &grid) const
 {
-    for (QVector<GridFieldTable>::const_iterator it = gridtables.constBegin();
-         it != gridtables.constEnd();
-         ++it)
+    for (QVector<GridFieldTable>::const_iterator it = gridtables.constBegin(); it != gridtables.constEnd(); ++it)
     {
         if (it->grid().equals(grid))
             return;
     }
 
-    throw SireError::unavailable_resource( QObject::tr(
-            "This field table does not contain an entry for the grid %1.")
-                .arg(grid.toString()), CODELOC );
+    throw SireError::unavailable_resource(
+        QObject::tr("This field table does not contain an entry for the grid %1.").arg(grid.toString()), CODELOC);
 }
 
 /** Add the contents of the table 'other' onto this table. This will only
     add the fields for the molecules / grids that are in both tables */
 void FieldTable::add(const FieldTable &other)
 {
-    for (QHash<MolNum,qint32>::const_iterator it = other.molnum_to_idx.constBegin();
-         it != other.molnum_to_idx.constEnd();
-         ++it)
+    for (QHash<MolNum, qint32>::const_iterator it = other.molnum_to_idx.constBegin();
+         it != other.molnum_to_idx.constEnd(); ++it)
     {
         int idx = molnum_to_idx.value(it.key(), -1);
 
@@ -1780,11 +1728,10 @@ void FieldTable::add(const FieldTable &other)
             moltables_by_idx[idx] += other.moltables_by_idx[it.value()];
     }
 
-    for (QVector<GridFieldTable>::const_iterator it = other.gridtables.constBegin();
-         it != other.gridtables.constEnd();
+    for (QVector<GridFieldTable>::const_iterator it = other.gridtables.constBegin(); it != other.gridtables.constEnd();
          ++it)
     {
-        for (int i=0; i<gridtables.count(); ++i)
+        for (int i = 0; i < gridtables.count(); ++i)
         {
             if (gridtables.at(i).grid().equals(it->grid()))
             {
@@ -1799,9 +1746,8 @@ void FieldTable::add(const FieldTable &other)
     subtract the fields for the molecules / grids that are in both tables */
 void FieldTable::subtract(const FieldTable &other)
 {
-    for (QHash<MolNum,qint32>::const_iterator it = other.molnum_to_idx.constBegin();
-         it != other.molnum_to_idx.constEnd();
-         ++it)
+    for (QHash<MolNum, qint32>::const_iterator it = other.molnum_to_idx.constBegin();
+         it != other.molnum_to_idx.constEnd(); ++it)
     {
         int idx = molnum_to_idx.value(it.key(), -1);
 
@@ -1809,11 +1755,10 @@ void FieldTable::subtract(const FieldTable &other)
             moltables_by_idx[idx] -= other.moltables_by_idx[it.value()];
     }
 
-    for (QVector<GridFieldTable>::const_iterator it = other.gridtables.constBegin();
-         it != other.gridtables.constEnd();
+    for (QVector<GridFieldTable>::const_iterator it = other.gridtables.constBegin(); it != other.gridtables.constEnd();
          ++it)
     {
-        for (int i=0; i<gridtables.count(); ++i)
+        for (int i = 0; i < gridtables.count(); ++i)
         {
             if (gridtables.at(i).grid().equals(it->grid()))
             {
@@ -1827,16 +1772,12 @@ void FieldTable::subtract(const FieldTable &other)
 /** Add the field 'field' onto all of the atom / grid points in this table */
 void FieldTable::add(const Vector &field)
 {
-    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin();
-         it != moltables_by_idx.end();
-         ++it)
+    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin(); it != moltables_by_idx.end(); ++it)
     {
         it->add(field);
     }
 
-    for (QVector<GridFieldTable>::iterator it = gridtables.begin();
-         it != gridtables.end();
-         ++it)
+    for (QVector<GridFieldTable>::iterator it = gridtables.begin(); it != gridtables.end(); ++it)
     {
         it->add(field);
     }
@@ -1845,16 +1786,12 @@ void FieldTable::add(const Vector &field)
 /** Subtract the field 'field' from all of the atom / grid points in this table */
 void FieldTable::subtract(const Vector &field)
 {
-    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin();
-         it != moltables_by_idx.end();
-         ++it)
+    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin(); it != moltables_by_idx.end(); ++it)
     {
         it->subtract(field);
     }
 
-    for (QVector<GridFieldTable>::iterator it = gridtables.begin();
-         it != gridtables.end();
-         ++it)
+    for (QVector<GridFieldTable>::iterator it = gridtables.begin(); it != gridtables.end(); ++it)
     {
         it->subtract(field);
     }
@@ -1863,16 +1800,12 @@ void FieldTable::subtract(const Vector &field)
 /** Set the field at all atom and grid points equal to 'field' */
 void FieldTable::setAll(const Vector &field)
 {
-    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin();
-         it != moltables_by_idx.end();
-         ++it)
+    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin(); it != moltables_by_idx.end(); ++it)
     {
         it->setAll(field);
     }
 
-    for (QVector<GridFieldTable>::iterator it = gridtables.begin();
-         it != gridtables.end();
-         ++it)
+    for (QVector<GridFieldTable>::iterator it = gridtables.begin(); it != gridtables.end(); ++it)
     {
         it->setAll(field);
     }
@@ -1881,16 +1814,12 @@ void FieldTable::setAll(const Vector &field)
 /** Multiply the field at all atom and grid points by 'value' */
 void FieldTable::multiply(double value)
 {
-    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin();
-         it != moltables_by_idx.end();
-         ++it)
+    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin(); it != moltables_by_idx.end(); ++it)
     {
         it->multiply(value);
     }
 
-    for (QVector<GridFieldTable>::iterator it = gridtables.begin();
-         it != gridtables.end();
-         ++it)
+    for (QVector<GridFieldTable>::iterator it = gridtables.begin(); it != gridtables.end(); ++it)
     {
         it->multiply(value);
     }
@@ -1899,16 +1828,12 @@ void FieldTable::multiply(double value)
 /** Divide the field at all atom and grid points by 'value' */
 void FieldTable::divide(double value)
 {
-    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin();
-         it != moltables_by_idx.end();
-         ++it)
+    for (QVector<MolFieldTable>::iterator it = moltables_by_idx.begin(); it != moltables_by_idx.end(); ++it)
     {
         it->divide(value);
     }
 
-    for (QVector<GridFieldTable>::iterator it = gridtables.begin();
-         it != gridtables.end();
-         ++it)
+    for (QVector<GridFieldTable>::iterator it = gridtables.begin(); it != gridtables.end(); ++it)
     {
         it->divide(value);
     }
@@ -1920,12 +1845,11 @@ void FieldTable::divide(double value)
 */
 int FieldTable::indexOf(MolNum molnum) const
 {
-    QHash<MolNum,qint32>::const_iterator it = molnum_to_idx.constFind(molnum);
+    QHash<MolNum, qint32>::const_iterator it = molnum_to_idx.constFind(molnum);
 
     if (it == molnum_to_idx.constEnd())
-        throw SireMol::missing_molecule( QObject::tr(
-            "There is no molecule with number %1 in this field table.")
-                .arg(molnum), CODELOC );
+        throw SireMol::missing_molecule(
+            QObject::tr("There is no molecule with number %1 in this field table.").arg(molnum), CODELOC);
 
     return it.value();
 }

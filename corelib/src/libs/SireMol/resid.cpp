@@ -37,19 +37,19 @@
 
 #include "molinfo.h"
 
-#include "mover.hpp"
 #include "editor.hpp"
+#include "mover.hpp"
 
-#include "partialmolecule.h"
-#include "segment.h"
-#include "chain.h"
-#include "residue.h"
-#include "cutgroup.h"
 #include "atom.h"
+#include "chain.h"
+#include "cutgroup.h"
+#include "partialmolecule.h"
+#include "residue.h"
+#include "segment.h"
 
-#include "molecules.h"
 #include "moleculegroup.h"
 #include "moleculegroups.h"
+#include "molecules.h"
 
 #include "withres.h"
 
@@ -64,15 +64,18 @@ using namespace SireID;
 
 /** Constructor */
 ResID::ResID() : ID()
-{}
+{
+}
 
 /** Copy constructor */
 ResID::ResID(const ResID &other) : ID(other)
-{}
+{
+}
 
 /** Destructor */
 ResID::~ResID()
-{}
+{
+}
 
 /** Return an ResID constructed from the passed string */
 ResIdentifier ResID::fromString(const QString &id)
@@ -153,55 +156,55 @@ ChainResID ResID::operator&(const ChainID &other) const
 }
 
 /** Combine with another ID type */
-GroupAtomID<ResID,AtomID> ResID::operator+(const AtomID &other) const
+GroupAtomID<ResID, AtomID> ResID::operator+(const AtomID &other) const
 {
-    return GroupAtomID<ResID,AtomID>(*this, other);
+    return GroupAtomID<ResID, AtomID>(*this, other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupAtomID<ResID,AtomID> ResID::operator&&(const AtomID &other) const
+GroupAtomID<ResID, AtomID> ResID::operator&&(const AtomID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupAtomID<ResID,AtomID> ResID::operator&(const AtomID &other) const
-{
-    return this->operator+(other);
-}
-
-/** Combine with another ID type */
-GroupGroupID<SegID,ResID> ResID::operator+(const SegID &other) const
-{
-    return GroupGroupID<SegID,ResID>(other, *this);
-}
-
-/** Syntactic sugar for operator+ */
-GroupGroupID<SegID,ResID> ResID::operator&&(const SegID &other) const
-{
-    return this->operator+(other);
-}
-
-/** Syntactic sugar for operator+ */
-GroupGroupID<SegID,ResID> ResID::operator&(const SegID &other) const
+GroupAtomID<ResID, AtomID> ResID::operator&(const AtomID &other) const
 {
     return this->operator+(other);
 }
 
 /** Combine with another ID type */
-GroupGroupID<CGID,ResID> ResID::operator+(const CGID &other) const
+GroupGroupID<SegID, ResID> ResID::operator+(const SegID &other) const
 {
-    return GroupGroupID<CGID,ResID>(other, *this);
+    return GroupGroupID<SegID, ResID>(other, *this);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<CGID,ResID> ResID::operator&&(const CGID &other) const
+GroupGroupID<SegID, ResID> ResID::operator&&(const SegID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<CGID,ResID> ResID::operator&(const CGID &other) const
+GroupGroupID<SegID, ResID> ResID::operator&(const SegID &other) const
+{
+    return this->operator+(other);
+}
+
+/** Combine with another ID type */
+GroupGroupID<CGID, ResID> ResID::operator+(const CGID &other) const
+{
+    return GroupGroupID<CGID, ResID>(other, *this);
+}
+
+/** Syntactic sugar for operator+ */
+GroupGroupID<CGID, ResID> ResID::operator&&(const CGID &other) const
+{
+    return this->operator+(other);
+}
+
+/** Syntactic sugar for operator+ */
+GroupGroupID<CGID, ResID> ResID::operator&(const CGID &other) const
 {
     return this->operator+(other);
 }
@@ -245,7 +248,7 @@ IDOrSet<AtomID> ResID::operator|(const AtomID &other) const
 /** Return the match for this ID or 'other' */
 IDOrSet<ResID> ResID::operator*(const ChainID &other) const
 {
-    return IDOrSet<ResID>(*this, other+ResID::any());
+    return IDOrSet<ResID>(*this, other + ResID::any());
 }
 
 /** Syntactic sugar for operator* */
@@ -291,19 +294,19 @@ ChainResID ResID::operator-(const ChainID &other) const
 }
 
 /** Return this and not other */
-GroupAtomID<ResID,AtomID> ResID::operator-(const AtomID &other) const
+GroupAtomID<ResID, AtomID> ResID::operator-(const AtomID &other) const
 {
     return this->operator+(other.invert());
 }
 
 /** Return this and not other */
-GroupGroupID<SegID,ResID> ResID::operator-(const SegID &other) const
+GroupGroupID<SegID, ResID> ResID::operator-(const SegID &other) const
 {
     return this->operator+(other.invert());
 }
 
 /** Return this and not other */
-GroupGroupID<CGID,ResID> ResID::operator-(const CGID &other) const
+GroupGroupID<CGID, ResID> ResID::operator-(const CGID &other) const
 {
     return this->operator+(other.invert());
 }
@@ -351,12 +354,11 @@ ChainsWithRes ResID::chains() const
     return ChainsWithRes(*this);
 }
 
-void ResID::processMatches(QList<ResIdx> &matches, const MolInfo&) const
+void ResID::processMatches(QList<ResIdx> &matches, const MolInfo &) const
 {
     if (matches.isEmpty())
-        throw SireMol::missing_residue( QObject::tr(
-            "There are no residues that match the ID \"%1\"")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_residue(
+            QObject::tr("There are no residues that match the ID \"%1\"").arg(this->toString()), CODELOC);
 
     std::sort(matches.begin(), matches.end());
 }
@@ -366,9 +368,9 @@ void ResID::processMatches(QList<ResIdx> &matches, const MolInfo&) const
     \throw SireMol::missing_residue
     \throw SireError::invalid_index
 */
-QList<ResIdx> ResID::map(const MoleculeView &molview, const PropertyMap&) const
+QList<ResIdx> ResID::map(const MoleculeView &molview, const PropertyMap &) const
 {
-    QList<ResIdx> residxs = this->map( molview.data().info() );
+    QList<ResIdx> residxs = this->map(molview.data().info());
 
     if (molview.selectedAll())
         return residxs;
@@ -387,9 +389,9 @@ QList<ResIdx> ResID::map(const MoleculeView &molview, const PropertyMap&) const
         }
 
         if (residxs.isEmpty())
-            throw SireMol::missing_residue( QObject::tr(
-                    "No residues matching %1 can be found in the passed molecule.")
-                        .arg(this->toString()), CODELOC );
+            throw SireMol::missing_residue(
+                QObject::tr("No residues matching %1 can be found in the passed molecule.").arg(this->toString()),
+                CODELOC);
 
         return residxs;
     }
@@ -406,10 +408,11 @@ Residue ResID::selectFrom(const MoleculeView &molview, const PropertyMap &map) c
     QList<ResIdx> residxs = this->map(molview, map);
 
     if (residxs.count() > 1)
-        throw SireMol::duplicate_residue( QObject::tr(
-                "More than one residue matches the ID %1 (number of matches is %2).")
-                    .arg(this->toString()).arg(residxs.count()),
-                        CODELOC );
+        throw SireMol::duplicate_residue(
+            QObject::tr("More than one residue matches the ID %1 (number of matches is %2).")
+                .arg(this->toString())
+                .arg(residxs.count()),
+            CODELOC);
 
     return Residue(molview.data(), residxs.at(0));
 }
@@ -420,8 +423,7 @@ Residue ResID::selectFrom(const MoleculeView &molview, const PropertyMap &map) c
     \throw SireError::invalid_index
     \throw SireMol::duplicate_residue
 */
-Selector<Residue> ResID::selectAllFrom(const MoleculeView &molview,
-                                     const PropertyMap &map) const
+Selector<Residue> ResID::selectAllFrom(const MoleculeView &molview, const PropertyMap &map) const
 {
     QList<ResIdx> residxs = this->map(molview, map);
 
@@ -433,30 +435,28 @@ Selector<Residue> ResID::selectAllFrom(const MoleculeView &molview,
 
     \throw SireMol::missing_residue
 */
-QHash< MolNum,Selector<Residue> >
-ResID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
+QHash<MolNum, Selector<Residue>> ResID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<Residue> > selected_atoms;
+    QHash<MolNum, Selector<Residue>> selected_atoms;
 
-    //loop over all molecules...
-    for (Molecules::const_iterator it = molecules.constBegin();
-         it != molecules.constEnd();
-         ++it)
+    // loop over all molecules...
+    for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
     {
         try
         {
-            //try to find this atom in this molecule
-            selected_atoms.insert( it.key(), this->selectAllFrom(*it,map) );
+            // try to find this atom in this molecule
+            selected_atoms.insert(it.key(), this->selectAllFrom(*it, map));
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (selected_atoms.isEmpty())
-        throw SireMol::missing_residue( QObject::tr(
-            "There was no atom matching the ID \"%1\" in "
-            "the set of molecules.")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_residue(QObject::tr("There was no atom matching the ID \"%1\" in "
+                                                   "the set of molecules.")
+                                           .arg(this->toString()),
+                                       CODELOC);
 
     return selected_atoms;
 }
@@ -469,24 +469,24 @@ ResID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 */
 Residue ResID::selectFrom(const Molecules &molecules, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<Residue> > mols = this->selectAllFrom(molecules, map);
+    QHash<MolNum, Selector<Residue>> mols = this->selectAllFrom(molecules, map);
 
     if (mols.count() > 1)
-        throw SireMol::duplicate_residue( QObject::tr(
-            "More than one molecule contains an atom that "
-            "matches this ID (%1). These molecules have numbers %2.")
-                .arg(this->toString()).arg(Sire::toString(mols.keys())),
-                    CODELOC );
+        throw SireMol::duplicate_residue(QObject::tr("More than one molecule contains an atom that "
+                                                     "matches this ID (%1). These molecules have numbers %2.")
+                                             .arg(this->toString())
+                                             .arg(Sire::toString(mols.keys())),
+                                         CODELOC);
 
     const Selector<Residue> &atoms = *(mols.constBegin());
 
     if (atoms.count() > 1)
-        throw SireMol::duplicate_residue( QObject::tr(
-            "While only one molecule (MolNum == %1) "
-            "contains an atom that matches this ID (%2), it contains "
-            "more than one atom that matches.")
-                .arg(atoms.data().number()).arg(this->toString()),
-                    CODELOC );
+        throw SireMol::duplicate_residue(QObject::tr("While only one molecule (MolNum == %1) "
+                                                     "contains an atom that matches this ID (%2), it contains "
+                                                     "more than one atom that matches.")
+                                             .arg(atoms.data().number())
+                                             .arg(this->toString()),
+                                         CODELOC);
 
     return atoms(0);
 }
@@ -497,8 +497,7 @@ Residue ResID::selectFrom(const Molecules &molecules, const PropertyMap &map) co
     \throw SireMol::missing_residue
     \throw SireMol::duplicate_residue
 */
-Residue ResID::selectFrom(const MoleculeGroup &molgroup,
-                        const PropertyMap &map) const
+Residue ResID::selectFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     return this->selectFrom(molgroup.molecules(), map);
 }
@@ -508,9 +507,7 @@ Residue ResID::selectFrom(const MoleculeGroup &molgroup,
 
     \throw SireMol::missing_residue
 */
-QHash< MolNum,Selector<Residue> >
-ResID::selectAllFrom(const MoleculeGroup &molgroup,
-                      const PropertyMap &map) const
+QHash<MolNum, Selector<Residue>> ResID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     return this->selectAllFrom(molgroup.molecules(), map);
 }
@@ -521,8 +518,7 @@ ResID::selectAllFrom(const MoleculeGroup &molgroup,
     \throw SireMol::missing_residue
     \throw SireMol::duplicate_residue
 */
-Residue ResID::selectFrom(const MolGroupsBase &molgroups,
-                        const PropertyMap &map) const
+Residue ResID::selectFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     return this->selectFrom(molgroups.molecules(), map);
 }
@@ -532,27 +528,25 @@ Residue ResID::selectFrom(const MolGroupsBase &molgroups,
 
     \throw SireMol::missing_residue
 */
-QHash< MolNum,Selector<Residue> >
-ResID::selectAllFrom(const MolGroupsBase &molgroups,
-                      const PropertyMap &map) const
+QHash<MolNum, Selector<Residue>> ResID::selectAllFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     return this->selectAllFrom(molgroups.molecules(), map);
 }
 
-//fully instantiate Specify<ResID> and AtomsIn<ResID>
+// fully instantiate Specify<ResID> and AtomsIn<ResID>
 namespace SireID
 {
     template class Specify<ResID>;
     template class IDAndSet<ResID>;
     template class IDOrSet<ResID>;
-}
+} // namespace SireID
 
 namespace SireMol
 {
     template class AtomsIn<ResID>;
 }
 
-static const RegisterMetaType< Specify<ResID> > r_specify_resid;
-static const RegisterMetaType< AtomsIn<ResID> > r_atomsin_resid;
-static const RegisterMetaType< IDAndSet<ResID> > r_idandset_resid;
-static const RegisterMetaType< IDOrSet<ResID> > r_idorset_resid;
+static const RegisterMetaType<Specify<ResID>> r_specify_resid;
+static const RegisterMetaType<AtomsIn<ResID>> r_atomsin_resid;
+static const RegisterMetaType<IDAndSet<ResID>> r_idandset_resid;
+static const RegisterMetaType<IDOrSet<ResID>> r_idorset_resid;

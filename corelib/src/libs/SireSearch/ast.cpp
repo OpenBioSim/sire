@@ -38,12 +38,12 @@ namespace AST
 {
     QString expression_to_string(const ExpressionVariant &expression)
     {
-        return boost::apply_visitor( qstring_visitor(), expression );
+        return boost::apply_visitor(qstring_visitor(), expression);
     }
 
     QString idobject_to_string(IDObject obj)
     {
-        switch(obj)
+        switch (obj)
         {
         case ID_UNKNOWN:
             return "unknown";
@@ -68,7 +68,7 @@ namespace AST
 
     QString idnumtype_to_string(IDNumType typ)
     {
-        switch(typ)
+        switch (typ)
         {
         case ID_NUMBER:
             return "number";
@@ -81,7 +81,7 @@ namespace AST
 
     QString idoperation_to_string(IDOperation op)
     {
-        switch(op)
+        switch (op)
         {
         case ID_AND:
             return "and";
@@ -94,7 +94,7 @@ namespace AST
 
     QString idcomparison_to_string(IDComparison cmp)
     {
-        switch(cmp)
+        switch (cmp)
         {
         case ID_CMP_LT:
             return "<";
@@ -117,7 +117,7 @@ namespace AST
 
     QString idbondtoken_to_string(IDBondToken token)
     {
-        switch(token)
+        switch (token)
         {
         case ID_BOND_FROM:
             return "from";
@@ -130,7 +130,7 @@ namespace AST
 
     QString idtoken_to_string(IDToken token)
     {
-        switch(token)
+        switch (token)
         {
         case ID_WHERE:
             return "where";
@@ -145,7 +145,7 @@ namespace AST
 
     QString idcoordtype_to_string(IDCoordType typ)
     {
-        switch(typ)
+        switch (typ)
         {
         case ID_COORD_CENTER:
             return "coords.center";
@@ -196,8 +196,7 @@ namespace AST
         else if (_c == 2)
             return QString("( %1, %2 )").arg(x.toString()).arg(y.toString());
         else
-            return QString("( %1, %2, %3 )")
-                        .arg(x.toString()).arg(y.toString()).arg(z.toString());
+            return QString("( %1, %2, %3 )").arg(x.toString()).arg(y.toString()).arg(z.toString());
     }
 
     QString RegExpValue::toString() const
@@ -212,8 +211,7 @@ namespace AST
 
     QString CompareValue::toString() const
     {
-        return QString("%1 %2").arg(idcomparison_to_string(compare))
-                               .arg(value);
+        return QString("%1 %2").arg(idcomparison_to_string(compare)).arg(value);
     }
 
     SireBase::Slice RangeValue::toSlice() const
@@ -274,18 +272,19 @@ namespace AST
 
     QString Expression::toString() const
     {
-        return boost::apply_visitor( qstring_visitor(), value );
+        return boost::apply_visitor(qstring_visitor(), value);
     }
 
     QString ExpressionPart::toString() const
     {
-        return boost::apply_visitor( qstring_visitor(), value );
+        return boost::apply_visitor(qstring_visitor(), value);
     }
 
     QString IDUser::toString() const
     {
-        return QString("{ %1 => %2 }").arg( QString::fromStdString(token) )
-                                      .arg( boost::apply_visitor( qstring_visitor(), value ) );
+        return QString("{ %1 => %2 }")
+            .arg(QString::fromStdString(token))
+            .arg(boost::apply_visitor(qstring_visitor(), value));
     }
 
     QString Node::toString() const
@@ -303,17 +302,15 @@ namespace AST
         QStringList lines;
         for (const auto &value : values)
         {
-            lines.append( value.toString() );
+            lines.append(value.toString());
         }
 
-        return QObject::tr("%1name %2")
-                        .arg( idobject_to_string(name) )
-                        .arg( lines.join(",") );
+        return QObject::tr("%1name %2").arg(idobject_to_string(name)).arg(lines.join(","));
     }
 
     QString IDAll::toString() const
     {
-        return QString("all %1").arg( idobject_to_string(name) );
+        return QString("all %1").arg(idobject_to_string(name));
     }
 
     QString IDWater::toString() const
@@ -331,13 +328,10 @@ namespace AST
         QStringList lines;
         for (const auto &value : values)
         {
-            lines.append( boost::apply_visitor( qstring_visitor(), value ) );
+            lines.append(boost::apply_visitor(qstring_visitor(), value));
         }
 
-        return QObject::tr("%1%2 %3")
-                    .arg( idobject_to_string(name) )
-                    .arg( idnumtype_to_string(numtype) )
-                    .arg( lines.join(",") );
+        return QObject::tr("%1%2 %3").arg(idobject_to_string(name)).arg(idnumtype_to_string(numtype)).arg(lines.join(","));
     }
 
     QString IDElement::toString() const
@@ -349,7 +343,7 @@ namespace AST
             if (element == "biological")
                 lines.append(element);
             else
-                lines.append( SireMol::Element(element).symbol() );
+                lines.append(SireMol::Element(element).symbol());
         }
 
         return QObject::tr("element %1").arg(lines.join(","));
@@ -357,10 +351,7 @@ namespace AST
 
     QString IDBinary::toString() const
     {
-        return QObject::tr("(%1 %2 %3)")
-                    .arg(part0.toString())
-                    .arg(idoperation_to_string(operation))
-                    .arg(part1.toString());
+        return QObject::tr("(%1 %2 %3)").arg(part0.toString()).arg(idoperation_to_string(operation)).arg(part1.toString());
     }
 
     QString IDProperty::toString() const
@@ -374,10 +365,10 @@ namespace AST
         }
 
         return QObject::tr("%1 property %2 %3 %4")
-                    .arg(idobject_to_string(name))
-                    .arg(p)
-                    .arg(idcomparison_to_string(compare))
-                    .arg(v);
+            .arg(idobject_to_string(name))
+            .arg(p)
+            .arg(idcomparison_to_string(compare))
+            .arg(v);
     }
 
     QString IDBond::toString() const
@@ -389,39 +380,30 @@ namespace AST
                 .arg(idbondtoken_to_string(to_token))
                 .arg(to_value.toString());
         else
-            return QObject::tr("bonds %1 %2")
-                .arg(idbondtoken_to_string(from_token))
-                .arg(from_value.toString());
+            return QObject::tr("bonds %1 %2").arg(idbondtoken_to_string(from_token)).arg(from_value.toString());
     }
 
     QString IDWith::toString() const
     {
-        return QObject::tr("(%1) %2 (%3)")
-                    .arg(value0.toString())
-                    .arg(idtoken_to_string(token))
-                    .arg(value1.toString());
+        return QObject::tr("(%1) %2 (%3)").arg(value0.toString()).arg(idtoken_to_string(token)).arg(value1.toString());
     }
 
     QString IDWhereWithin::toString() const
     {
-        return QString("is within %1 of %2")
-                    .arg(distance.toString())
-                    .arg(value1.toString());
+        return QString("is within %1 of %2").arg(distance.toString()).arg(value1.toString());
     }
 
     QString IDWhereCompare::toString() const
     {
-        return QString("%1 %2")
-                .arg(idcomparison_to_string(compare))
-                .arg(value.toString());
+        return QString("%1 %2").arg(idcomparison_to_string(compare)).arg(value.toString());
     }
 
     QString IDWhere::toString() const
     {
         return QString("%1s where %2 %3")
-                    .arg(value0.toString())
-                    .arg(idcoordtype_to_string(typ))
-                    .arg(boost::apply_visitor( qstring_visitor(), value1 ));
+            .arg(value0.toString())
+            .arg(idcoordtype_to_string(typ))
+            .arg(boost::apply_visitor(qstring_visitor(), value1));
     }
 
     QString IDJoin::toString() const
@@ -441,18 +423,12 @@ namespace AST
 
     QString IDWithin::toString() const
     {
-        return QObject::tr("%1s within %2 of %3")
-                    .arg(value0.toString())
-                    .arg(distance.toString())
-                    .arg(value1.toString());
+        return QObject::tr("%1s within %2 of %3").arg(value0.toString()).arg(distance.toString()).arg(value1.toString());
     }
 
     QString IDWithinVector::toString() const
     {
-        return QObject::tr("%1s within %2 of %3")
-                    .arg(value0.toString())
-                    .arg(distance.toString())
-                    .arg(value1.toString());
+        return QObject::tr("%1s within %2 of %3").arg(value0.toString()).arg(distance.toString()).arg(value1.toString());
     }
 
     SelectEnginePtr Node::toEngine() const
@@ -462,22 +438,22 @@ namespace AST
 
     SelectEnginePtr Expression::toEngine() const
     {
-        return boost::apply_visitor( engine_visitor(), value );
+        return boost::apply_visitor(engine_visitor(), value);
     }
 
     SelectEnginePtr ExpressionPart::toEngine() const
     {
-        return boost::apply_visitor( engine_visitor(), value );
+        return boost::apply_visitor(engine_visitor(), value);
     }
 
     SelectEnginePtr IDUser::toEngine() const
     {
-        return boost::apply_visitor( engine_visitor(), value );
+        return boost::apply_visitor(engine_visitor(), value);
     }
 
     SelectEnginePtr IDName::toEngine() const
     {
-        return IDNameEngine::construct(name,values);
+        return IDNameEngine::construct(name, values);
     }
 
     SelectEnginePtr IDNull::toEngine() const
@@ -492,12 +468,12 @@ namespace AST
 
     SelectEnginePtr IDNumber::toEngine() const
     {
-        switch(numtype)
+        switch (numtype)
         {
         case ID_NUMBER:
-            return IDNumberEngine::construct(name,values);
+            return IDNumberEngine::construct(name, values);
         case ID_INDEX:
-            return IDIndexEngine::construct(name,values);
+            return IDIndexEngine::construct(name, values);
         default:
             return SelectEnginePtr();
         }
@@ -520,12 +496,12 @@ namespace AST
 
     SelectEnginePtr IDBinary::toEngine() const
     {
-        switch(operation)
+        switch (operation)
         {
         case ID_AND:
-            return IDAndEngine::construct(part0.toEngine(),part1.toEngine());
+            return IDAndEngine::construct(part0.toEngine(), part1.toEngine());
         case ID_OR:
-            return IDOrEngine::construct(part0.toEngine(),part1.toEngine());
+            return IDOrEngine::construct(part0.toEngine(), part1.toEngine());
         default:
             return SelectEnginePtr();
         }
@@ -533,8 +509,7 @@ namespace AST
 
     SelectEnginePtr IDWith::toEngine() const
     {
-        return IDWithEngine::construct(value0.toEngine(),
-                                       token, value1.toEngine());
+        return IDWithEngine::construct(value0.toEngine(), token, value1.toEngine());
     }
 
     SelectEnginePtr IDProperty::toEngine() const
@@ -550,23 +525,17 @@ namespace AST
             v = "True";
         }
 
-        return IDPropertyEngine::construct(this->name,
-                                           QString::fromStdString(this->property),
-                                           this->compare,
-                                           v);
+        return IDPropertyEngine::construct(this->name, QString::fromStdString(this->property), this->compare, v);
     }
 
     SelectEnginePtr IDBond::toEngine() const
     {
-        return IDBondEngine::construct(from_token, from_value.toEngine(),
-                                       to_token, to_value.toEngine());
+        return IDBondEngine::construct(from_token, from_value.toEngine(), to_token, to_value.toEngine());
     }
 
     SelectEnginePtr IDWhereWithin::toEngine(Expression value0, IDCoordType typ) const
     {
-        return IDDistanceEngine::construct(value0.toEngine(),
-                                           typ, distance.value * distance.unit,
-                                           value1.toEngine());
+        return IDDistanceEngine::construct(value0.toEngine(), typ, distance.value * distance.unit, value1.toEngine());
     }
 
     SelectEnginePtr IDWhereCompare::toEngine(Expression value0, IDCoordType typ) const
@@ -578,23 +547,23 @@ namespace AST
     class where_engine_visitor : public boost::static_visitor<SelectEnginePtr>
     {
     public:
-        where_engine_visitor(Expression o, IDCoordType t)
-            : boost::static_visitor<SelectEnginePtr>(), obj(o), typ(t)
-        {}
+        where_engine_visitor(Expression o, IDCoordType t) : boost::static_visitor<SelectEnginePtr>(), obj(o), typ(t)
+        {
+        }
 
         Expression obj;
         IDCoordType typ;
 
-        template<class T>
+        template <class T>
         SelectEnginePtr operator()(const T &value) const
         {
-            return value.toEngine(obj,typ);
+            return value.toEngine(obj, typ);
         }
     };
 
     SelectEnginePtr IDWhere::toEngine() const
     {
-        return boost::apply_visitor( where_engine_visitor(value0,typ), value1 );
+        return boost::apply_visitor(where_engine_visitor(value0, typ), value1);
     }
 
     SelectEnginePtr IDJoin::toEngine() const
@@ -609,20 +578,16 @@ namespace AST
 
     SelectEnginePtr IDSubscript::toEngine() const
     {
-        return IDSubScriptEngine::construct(value.toEngine(),range);
+        return IDSubScriptEngine::construct(value.toEngine(), range);
     }
 
     SelectEnginePtr IDWithin::toEngine() const
     {
-        return IDDistanceEngine::construct(value0.toEngine(),
-                                           distance.value * distance.unit,
-                                           value1.toEngine());
+        return IDDistanceEngine::construct(value0.toEngine(), distance.value * distance.unit, value1.toEngine());
     }
 
     SelectEnginePtr IDWithinVector::toEngine() const
     {
-        return IDDistanceVectorEngine::construct(value0.toEngine(),
-                                                 distance.value * distance.unit,
-                                                 value1);
+        return IDDistanceVectorEngine::construct(value0.toEngine(), distance.value * distance.unit, value1);
     }
-}
+} // namespace AST

@@ -31,9 +31,9 @@
 
 #include "SireCAS/expression.h"
 
-#include "SireMol/errors.h"
-#include "SireError/errors.h"
 #include "SireBase/errors.h"
+#include "SireError/errors.h"
+#include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -53,7 +53,7 @@ SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const SelectorMAngle &ang
 
     SharedDataStream sds(ds);
 
-    sds << angs.angs << static_cast<const Property&>(angs);
+    sds << angs.angs << static_cast<const Property &>(angs);
 
     return ds;
 }
@@ -66,7 +66,7 @@ SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, SelectorMAngle &angs)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> angs.angs >> static_cast<Property&>(angs);
+        sds >> angs.angs >> static_cast<Property &>(angs);
     }
     else
         throw version_error(v, "1", r_sang, CODELOC);
@@ -74,33 +74,29 @@ SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, SelectorMAngle &angs)
     return ds;
 }
 
-SelectorMAngle::SelectorMAngle()
-               : ConcreteProperty<SelectorMAngle, Property>()
-{}
+SelectorMAngle::SelectorMAngle() : ConcreteProperty<SelectorMAngle, Property>()
+{
+}
 
-SelectorMAngle::SelectorMAngle(const Angle &view)
-               : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const Angle &view) : ConcreteProperty<SelectorMAngle, Property>()
 {
     if (not view.isEmpty())
         angs.append(SelectorAngle(view));
 }
 
-SelectorMAngle::SelectorMAngle(const Molecules &mols,
-                               const PropertyMap &map)
-               : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const Molecules &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMAngle, Property>()
 {
     if (not mols.isEmpty())
     {
         auto toList = [](const QSet<MolNum> &molnums)
-        {
-            return molnums.values();
-        };
+        { return molnums.values(); };
 
         auto molnums = toList(mols.molNums());
 
-        //sort them, as this is also likely the order the molecules
-        //were read in from a file, and so more likely to be the
-        //order the user would expect
+        // sort them, as this is also likely the order the molecules
+        // were read in from a file, and so more likely to be the
+        // order the user would expect
         std::sort(molnums.begin(), molnums.end());
 
         this->angs.reserve(molnums.count());
@@ -115,9 +111,8 @@ SelectorMAngle::SelectorMAngle(const Molecules &mols,
     }
 }
 
-SelectorMAngle::SelectorMAngle(const MoleculeGroup &mols,
-                               const PropertyMap &map)
-               : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const MoleculeGroup &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMAngle, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -134,9 +129,8 @@ SelectorMAngle::SelectorMAngle(const MoleculeGroup &mols,
     }
 }
 
-SelectorMAngle::SelectorMAngle(const MolGroupsBase &mols,
-                               const PropertyMap &map)
-               : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const MolGroupsBase &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMAngle, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -153,9 +147,8 @@ SelectorMAngle::SelectorMAngle(const MolGroupsBase &mols,
     }
 }
 
-SelectorMAngle::SelectorMAngle(const SelectResult &mols,
-                               const PropertyMap &map)
-               : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const SelectResult &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMAngle, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -176,10 +169,8 @@ SelectorMAngle::SelectorMAngle(const SelectResult &mols,
     }
 }
 
-SelectorMAngle::SelectorMAngle(const SelectResult &mols,
-                               const AngleID &angle,
-                               const PropertyMap &map)
-              : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const SelectResult &mols, const AngleID &angle, const PropertyMap &map)
+    : ConcreteProperty<SelectorMAngle, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -194,22 +185,21 @@ SelectorMAngle::SelectorMAngle(const SelectResult &mols,
                 if (not a.isEmpty())
                     this->angs.append(a);
             }
-            catch(...)
-            {}
+            catch (...)
+            {
+            }
         }
     }
 }
 
-SelectorMAngle::SelectorMAngle(const SelectorAngle &angles)
-              : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const SelectorAngle &angles) : ConcreteProperty<SelectorMAngle, Property>()
 {
     if (not angles.isEmpty())
         angs.append(angles);
 }
 
-SelectorMAngle::SelectorMAngle(const SelectorMol &mols,
-                               const PropertyMap &map)
-              : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const SelectorMol &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMAngle, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -234,7 +224,7 @@ void SelectorMAngle::_append(const SelectorAngle &angles)
         this->angs.append(angles);
     else
     {
-        for (int i=0; i<angles.count(); ++i)
+        for (int i = 0; i < angles.count(); ++i)
         {
             this->_append(angles(i));
         }
@@ -259,20 +249,17 @@ void SelectorMAngle::_append(const Angle &angle)
     }
 }
 
-SelectorMAngle::SelectorMAngle(const SelectorMAngle &angles,
-                               const SireBase::Slice &slice)
-               : SireBase::ConcreteProperty<SelectorMAngle,Property>()
+SelectorMAngle::SelectorMAngle(const SelectorMAngle &angles, const SireBase::Slice &slice)
+    : SireBase::ConcreteProperty<SelectorMAngle, Property>()
 {
-    for (auto it = slice.begin(angles.count());
-         not it.atEnd(); it.next())
+    for (auto it = slice.begin(angles.count()); not it.atEnd(); it.next())
     {
         this->_append(angles[it.value()]);
     }
 }
 
-SelectorMAngle::SelectorMAngle(const SelectorMAngle &angles,
-                               const QList<qint64> &idxs)
-               : SireBase::ConcreteProperty<SelectorMAngle,Property>()
+SelectorMAngle::SelectorMAngle(const SelectorMAngle &angles, const QList<qint64> &idxs)
+    : SireBase::ConcreteProperty<SelectorMAngle, Property>()
 {
     for (const auto &idx : idxs)
     {
@@ -280,9 +267,8 @@ SelectorMAngle::SelectorMAngle(const SelectorMAngle &angles,
     }
 }
 
-SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms,
-                               const PropertyMap &map)
-               : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms, const PropertyMap &map)
+    : ConcreteProperty<SelectorMAngle, Property>()
 {
     for (const auto &mol_atoms : atoms)
     {
@@ -291,10 +277,8 @@ SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms,
     }
 }
 
-SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms0,
-                               const SelectorM<Atom> &atoms1,
-                               const PropertyMap &map)
-              : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms0, const SelectorM<Atom> &atoms1, const PropertyMap &map)
+    : ConcreteProperty<SelectorMAngle, Property>()
 {
     for (const auto &mol_atoms0 : atoms0)
     {
@@ -309,11 +293,9 @@ SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms0,
     }
 }
 
-SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms0,
-                               const SelectorM<Atom> &atoms1,
-                               const SelectorM<Atom> &atoms2,
-                               const PropertyMap &map)
-              : ConcreteProperty<SelectorMAngle, Property>()
+SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms0, const SelectorM<Atom> &atoms1,
+                               const SelectorM<Atom> &atoms2, const PropertyMap &map)
+    : ConcreteProperty<SelectorMAngle, Property>()
 {
     for (const auto &mol_atoms0 : atoms0)
     {
@@ -325,9 +307,7 @@ SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms0,
                 {
                     if (mol_atoms0.isSameMolecule(mol_atoms2))
                     {
-                        const auto angles = SelectorAngle(mol_atoms0,
-                                                          mol_atoms1,
-                                                          mol_atoms2, map);
+                        const auto angles = SelectorAngle(mol_atoms0, mol_atoms1, mol_atoms2, map);
 
                         this->_append(angles);
                     }
@@ -338,18 +318,20 @@ SelectorMAngle::SelectorMAngle(const SelectorM<Atom> &atoms0,
 }
 
 SelectorMAngle::SelectorMAngle(const SelectorMAngle &other)
-               : ConcreteProperty<SelectorMAngle, Property>(), angs(other.angs)
-{}
+    : ConcreteProperty<SelectorMAngle, Property>(), angs(other.angs)
+{
+}
 
 SelectorMAngle::~SelectorMAngle()
-{}
+{
+}
 
-const char* SelectorMAngle::typeName()
+const char *SelectorMAngle::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<SelectorMAngle>());
 }
 
-SelectorMAngle& SelectorMAngle::operator=(const SelectorMAngle &other)
+SelectorMAngle &SelectorMAngle::operator=(const SelectorMAngle &other)
 {
     if (this != &other)
     {
@@ -416,8 +398,9 @@ SelectorMAngle SelectorMAngle::operator[](const AngleID &id) const
                 ret.angs.append(r);
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     return ret;
@@ -525,7 +508,6 @@ MoleculeGroup SelectorMAngle::toMoleculeGroup() const
     }
 
     return grp;
-
 }
 
 SelectResult SelectorMAngle::toSelectResult() const
@@ -669,7 +651,7 @@ CutGroup SelectorMAngle::cutGroup(const CGID &cgid, const PropertyMap &map) cons
 
 SelectorM<Atom> SelectorMAngle::atoms() const
 {
-    QList< Selector<Atom> > ret;
+    QList<Selector<Atom>> ret;
 
     for (const auto &a : this->angs)
     {
@@ -706,7 +688,7 @@ SelectorM<Atom> SelectorMAngle::atoms(const AtomID &atomid, const PropertyMap &m
 
 SelectorM<Residue> SelectorMAngle::residues() const
 {
-    QList< Selector<Residue> > ret;
+    QList<Selector<Residue>> ret;
 
     for (const auto &a : this->angs)
     {
@@ -743,7 +725,7 @@ SelectorM<Residue> SelectorMAngle::residues(const ResID &resid, const PropertyMa
 
 SelectorM<Chain> SelectorMAngle::chains() const
 {
-    QList< Selector<Chain> > ret;
+    QList<Selector<Chain>> ret;
 
     for (const auto &a : this->angs)
     {
@@ -780,7 +762,7 @@ SelectorM<Chain> SelectorMAngle::chains(const ChainID &chainid, const PropertyMa
 
 SelectorM<Segment> SelectorMAngle::segments() const
 {
-    QList< Selector<Segment> > ret;
+    QList<Selector<Segment>> ret;
 
     for (const auto &a : this->angs)
     {
@@ -817,7 +799,7 @@ SelectorM<Segment> SelectorMAngle::segments(const SegID &segid, const PropertyMa
 
 SelectorM<CutGroup> SelectorMAngle::cutGroups() const
 {
-    QList< Selector<CutGroup> > ret;
+    QList<Selector<CutGroup>> ret;
 
     for (const auto &a : this->angs)
     {
@@ -858,8 +840,7 @@ SelectResult SelectorMAngle::search(const QString &search_string) const
     return search(this->toSelectResult());
 }
 
-SelectResult SelectorMAngle::search(const QString &search_string,
-                                    const PropertyMap &map) const
+SelectResult SelectorMAngle::search(const QString &search_string, const PropertyMap &map) const
 {
     Select search(search_string);
     return search(this->toSelectResult(), map);
@@ -1031,41 +1012,33 @@ QString SelectorMAngle::toString() const
 
         if (n <= 10)
         {
-            for (int i=0; i<n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 const auto view = this->operator[](i);
 
-                parts.append(QString("%1: %2 %3")
-                    .arg(i).arg(view.data().number().toString())
-                    .arg(view.toString()));
+                parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
             }
         }
         else
         {
-            for (int i=0; i<5; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 const auto view = this->operator[](i);
 
-                parts.append(QString("%1: %2 %3")
-                    .arg(i).arg(view.data().number().toString())
-                    .arg(view.toString()));
+                parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
             }
 
             parts.append("...");
 
-            for (int i=n-5; i<n; ++i)
+            for (int i = n - 5; i < n; ++i)
             {
                 const auto view = this->operator[](i);
 
-                parts.append(QString("%1: %2 %3")
-                    .arg(i).arg(view.data().number().toString())
-                    .arg(view.toString()));
+                parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
             }
         }
 
-        return QObject::tr("SelectorMAngle( size=%2\n%3\n)")
-                    .arg(n)
-                    .arg(parts.join("\n"));
+        return QObject::tr("SelectorMAngle( size=%2\n%3\n)").arg(n).arg(parts.join("\n"));
     }
 }
 
@@ -1081,7 +1054,7 @@ SelectorMAngle SelectorMAngle::add(const SelectorMAngle &other) const
         }
         else if (ret.angs.last().isSameMolecule(value))
         {
-            for (int i=0; i<value.count(); ++i)
+            for (int i = 0; i < value.count(); ++i)
             {
                 ret._append(value(i));
             }
@@ -1162,8 +1135,7 @@ bool SelectorMAngle::hasMetadata(const SireBase::PropertyName &key) const
     return false;
 }
 
-bool SelectorMAngle::hasMetadata(const SireBase::PropertyName &key,
-                                 const SireBase::PropertyName &metakey) const
+bool SelectorMAngle::hasMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey) const
 {
     for (const auto &val : angs)
     {
@@ -1174,14 +1146,14 @@ bool SelectorMAngle::hasMetadata(const SireBase::PropertyName &key,
     return false;
 }
 
-template<class T>
+template <class T>
 inline QSet<T> _to_set(const QList<T> &l)
 {
-    #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-        return l.toSet();
-    #else
-        return QSet<T>(l.constBegin(), l.constEnd());
-    #endif
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    return l.toSet();
+#else
+    return QSet<T>(l.constBegin(), l.constEnd());
+#endif
 }
 
 QStringList SelectorMAngle::propertyKeys() const
@@ -1245,11 +1217,11 @@ QList<SireBase::PropertyPtr> SelectorMAngle::property(const SireBase::PropertyNa
             props += val.property(key);
             has_prop = true;
         }
-        catch(const SireError::exception&)
+        catch (const SireError::exception &)
         {
             PropertyPtr null(new NullProperty());
 
-            for (int i=0; i<val.count(); ++i)
+            for (int i = 0; i < val.count(); ++i)
             {
                 props.append(null);
             }
@@ -1257,9 +1229,8 @@ QList<SireBase::PropertyPtr> SelectorMAngle::property(const SireBase::PropertyNa
     }
 
     if (not has_prop)
-        throw SireBase::missing_property(QObject::tr(
-            "None of the angles in this container have a property called %1.")
-                .arg(key.source()), CODELOC);
+        throw SireBase::missing_property(
+            QObject::tr("None of the angles in this container have a property called %1.").arg(key.source()), CODELOC);
 
     return props;
 }
@@ -1326,8 +1297,7 @@ QList<SireUnits::Dimension::GeneralUnit> SelectorMAngle::energies() const
     return this->energies(PropertyMap());
 }
 
-QList<SireUnits::Dimension::GeneralUnit> SelectorMAngle::energies(
-                                    const SireBase::PropertyMap &map) const
+QList<SireUnits::Dimension::GeneralUnit> SelectorMAngle::energies(const SireBase::PropertyMap &map) const
 {
     QList<SireUnits::Dimension::GeneralUnit> e;
 
@@ -1344,8 +1314,7 @@ SireUnits::Dimension::GeneralUnit SelectorMAngle::energy() const
     return this->energy(PropertyMap());
 }
 
-SireUnits::Dimension::GeneralUnit SelectorMAngle::energy(
-                                const SireBase::PropertyMap &map) const
+SireUnits::Dimension::GeneralUnit SelectorMAngle::energy(const SireBase::PropertyMap &map) const
 {
     SireUnits::Dimension::GeneralUnit nrg(0);
 

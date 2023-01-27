@@ -28,12 +28,12 @@
 #include "SireSystem/freeenergymonitor.h"
 #include "SireSystem/system.h"
 
-#include "SireMol/partialmolecule.h"
-#include "SireMol/atomcoords.h"
-#include "SireMol/atomcharges.h"
 #include "SireMM/atomljs.h"
 #include "SireMM/ljpair.h"
+#include "SireMol/atomcharges.h"
+#include "SireMol/atomcoords.h"
 #include "SireMol/mgname.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireMM/cljatoms.h"
 #include "SireMM/cljshiftfunction.h"
@@ -93,29 +93,31 @@ QDataStream &operator>>(QDataStream &ds, AssignerGroup &group)
 
 /** Constructor */
 AssignerGroup::AssignerGroup()
-{}
+{
+}
 
 /** Construct as a holder for a MoleculeGroup */
-AssignerGroup::AssignerGroup(const MoleculeGroup &group)
-              : molgroup(group)
-{}
+AssignerGroup::AssignerGroup(const MoleculeGroup &group) : molgroup(group)
+{
+}
 
 /** Construct as a holder for an IDAssigner */
-AssignerGroup::AssignerGroup(const IDAssigner &assigner)
-              : assgnr(assigner)
-{}
+AssignerGroup::AssignerGroup(const IDAssigner &assigner) : assgnr(assigner)
+{
+}
 
 /** Copy constructor */
-AssignerGroup::AssignerGroup(const AssignerGroup &other)
-              : molgroup(other.molgroup), assgnr(other.assgnr)
-{}
+AssignerGroup::AssignerGroup(const AssignerGroup &other) : molgroup(other.molgroup), assgnr(other.assgnr)
+{
+}
 
 /** Destructor */
 AssignerGroup::~AssignerGroup()
-{}
+{
+}
 
 /** Copy assignment operator */
-AssignerGroup& AssignerGroup::operator=(const AssignerGroup &other)
+AssignerGroup &AssignerGroup::operator=(const AssignerGroup &other)
 {
     molgroup = other.molgroup;
     assgnr = other.assgnr;
@@ -134,12 +136,12 @@ bool AssignerGroup::operator!=(const AssignerGroup &other) const
     return not AssignerGroup::operator==(other);
 }
 
-const char* AssignerGroup::typeName()
+const char *AssignerGroup::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AssignerGroup>() );
+    return QMetaType::typeName(qMetaTypeId<AssignerGroup>());
 }
 
-const char* AssignerGroup::what() const
+const char *AssignerGroup::what() const
 {
     return AssignerGroup::typeName();
 }
@@ -175,23 +177,23 @@ bool AssignerGroup::isAssigner() const
 }
 
 /** Return the molecule group */
-const MoleculeGroup& AssignerGroup::group() const
+const MoleculeGroup &AssignerGroup::group() const
 {
     if (molgroup.isNull())
-        throw SireError::invalid_state( QObject::tr(
-                "Cannot return a MoleculeGroup from an AssignerGroup that does not "
-                "hold a MoleculeGroup object."), CODELOC );
+        throw SireError::invalid_state(QObject::tr("Cannot return a MoleculeGroup from an AssignerGroup that does not "
+                                                   "hold a MoleculeGroup object."),
+                                       CODELOC);
 
     return molgroup.read();
 }
 
 /** Return the IDAssigner */
-const IDAssigner& AssignerGroup::assigner() const
+const IDAssigner &AssignerGroup::assigner() const
 {
     if (assgnr.isNull())
-        throw SireError::invalid_state( QObject::tr(
-                "Cannot return an IDAssigner from an AssignerGroup that does not "
-                "hold an IDAssigner object."), CODELOC );
+        throw SireError::invalid_state(QObject::tr("Cannot return an IDAssigner from an AssignerGroup that does not "
+                                                   "hold an IDAssigner object."),
+                                       CODELOC);
 
     return assgnr.read().asA<IDAssigner>();
 }
@@ -211,7 +213,7 @@ QVector<PartialMolecule> AssignerGroup::views() const
 
         QVector<PartialMolecule> views(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             views[i] = group.viewAt(i);
         }
@@ -254,10 +256,9 @@ bool AssignerGroup::isCompatible(const AssignerGroup &other) const
         if (molgroup.isNull())
             return other.molgroup.isNull();
 
-        //check that the molecule group number is the same and the number
-        //of views is the same
-        return this->group().number() == other.group().number() and
-               this->group().nViews() == other.group().nViews();
+        // check that the molecule group number is the same and the number
+        // of views is the same
+        return this->group().number() == other.group().number() and this->group().nViews() == other.group().nViews();
     }
     else
     {
@@ -276,30 +277,21 @@ bool AssignerGroup::isCompatible(const AssignerGroup &other) const
 
 static const RegisterMetaType<FreeEnergyMonitor> r_nrgmonitor;
 
-QDataStream &operator<<(QDataStream &ds,
-                                          const FreeEnergyMonitor &nrgmonitor)
+QDataStream &operator<<(QDataStream &ds, const FreeEnergyMonitor &nrgmonitor)
 {
     writeHeader(ds, r_nrgmonitor, 1);
 
     SharedDataStream sds(ds);
 
-    sds << nrgmonitor.refgroup
-        << nrgmonitor.group_a << nrgmonitor.group_b
-        << nrgmonitor.total_nrgs
-        << nrgmonitor.coul_nrgs << nrgmonitor.lj_nrgs
-        << nrgmonitor.nrg_template
-        << nrgmonitor.lambda_symbol
-        << nrgmonitor.shift_delta
-        << nrgmonitor.lamval
-        << nrgmonitor.delta_lambda
-        << nrgmonitor.coulomb_power
-        << static_cast<const SystemMonitor&>(nrgmonitor);
+    sds << nrgmonitor.refgroup << nrgmonitor.group_a << nrgmonitor.group_b << nrgmonitor.total_nrgs
+        << nrgmonitor.coul_nrgs << nrgmonitor.lj_nrgs << nrgmonitor.nrg_template << nrgmonitor.lambda_symbol
+        << nrgmonitor.shift_delta << nrgmonitor.lamval << nrgmonitor.delta_lambda << nrgmonitor.coulomb_power
+        << static_cast<const SystemMonitor &>(nrgmonitor);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                          FreeEnergyMonitor &nrgmonitor)
+QDataStream &operator>>(QDataStream &ds, FreeEnergyMonitor &nrgmonitor)
 {
     VersionID v = readHeader(ds, r_nrgmonitor);
 
@@ -307,17 +299,10 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> nrgmonitor.refgroup
-            >> nrgmonitor.group_a >> nrgmonitor.group_b
-            >> nrgmonitor.total_nrgs
-            >> nrgmonitor.coul_nrgs >> nrgmonitor.lj_nrgs
-            >> nrgmonitor.nrg_template
-            >> nrgmonitor.lambda_symbol
-            >> nrgmonitor.shift_delta
-            >> nrgmonitor.lamval
-            >> nrgmonitor.delta_lambda
-            >> nrgmonitor.coulomb_power
-            >> static_cast<SystemMonitor&>(nrgmonitor);
+        sds >> nrgmonitor.refgroup >> nrgmonitor.group_a >> nrgmonitor.group_b >> nrgmonitor.total_nrgs >>
+            nrgmonitor.coul_nrgs >> nrgmonitor.lj_nrgs >> nrgmonitor.nrg_template >> nrgmonitor.lambda_symbol >>
+            nrgmonitor.shift_delta >> nrgmonitor.lamval >> nrgmonitor.delta_lambda >> nrgmonitor.coulomb_power >>
+            static_cast<SystemMonitor &>(nrgmonitor);
     }
     else
         throw version_error(v, "1", r_nrgmonitor, CODELOC);
@@ -328,46 +313,39 @@ QDataStream &operator>>(QDataStream &ds,
 /** Null constructor. By default, we don't collect a histogram of each of
     the components energies as this is too memory hungry */
 FreeEnergyMonitor::FreeEnergyMonitor()
-                  : ConcreteProperty<FreeEnergyMonitor,SystemMonitor>(),
-                    nrg_template( FreeEnergyAverage(25*celsius, MolarEnergy(0)) ),
-                    lambda_symbol("lambda"), shift_delta(0),
-                    lamval(0), delta_lambda(0.001), coulomb_power(0)
-{}
+    : ConcreteProperty<FreeEnergyMonitor, SystemMonitor>(),
+      nrg_template(FreeEnergyAverage(25 * celsius, MolarEnergy(0))), lambda_symbol("lambda"), shift_delta(0), lamval(0),
+      delta_lambda(0.001), coulomb_power(0)
+{
+}
 
 /** Construct to monitor the free energy difference of the reference group
     interacting with group A as it is perturbed into group B. By default,
     we don't collect a histogram of each of the components energies as this
     is too memory hungry */
-FreeEnergyMonitor::FreeEnergyMonitor(const AssignerGroup &ref,
-                                     const AssignerGroup &ga,
-                                     const AssignerGroup &gb)
-              : ConcreteProperty<FreeEnergyMonitor,SystemMonitor>(),
-                refgroup(ref), group_a(ga), group_b(gb),
-                nrg_template( FreeEnergyAverage(25*celsius, MolarEnergy(0)) ),
-                lambda_symbol("lambda"), shift_delta(0), lamval(0), delta_lambda(0.001),
-                coulomb_power(0)
-{}
+FreeEnergyMonitor::FreeEnergyMonitor(const AssignerGroup &ref, const AssignerGroup &ga, const AssignerGroup &gb)
+    : ConcreteProperty<FreeEnergyMonitor, SystemMonitor>(), refgroup(ref), group_a(ga), group_b(gb),
+      nrg_template(FreeEnergyAverage(25 * celsius, MolarEnergy(0))), lambda_symbol("lambda"), shift_delta(0), lamval(0),
+      delta_lambda(0.001), coulomb_power(0)
+{
+}
 
 /** Copy constructor */
 FreeEnergyMonitor::FreeEnergyMonitor(const FreeEnergyMonitor &other)
-                  : ConcreteProperty<FreeEnergyMonitor,SystemMonitor>(other),
-                    refgroup(other.refgroup), group_a(other.group_a), group_b(other.group_b),
-                    total_nrgs(other.total_nrgs),
-                    coul_nrgs(other.coul_nrgs), lj_nrgs(other.lj_nrgs),
-                    nrg_template(other.nrg_template),
-                    lambda_symbol(other.lambda_symbol),
-                    shift_delta(other.shift_delta),
-                    lamval(other.lamval),
-                    delta_lambda(other.delta_lambda),
-                    coulomb_power(other.coulomb_power)
-{}
+    : ConcreteProperty<FreeEnergyMonitor, SystemMonitor>(other), refgroup(other.refgroup), group_a(other.group_a),
+      group_b(other.group_b), total_nrgs(other.total_nrgs), coul_nrgs(other.coul_nrgs), lj_nrgs(other.lj_nrgs),
+      nrg_template(other.nrg_template), lambda_symbol(other.lambda_symbol), shift_delta(other.shift_delta),
+      lamval(other.lamval), delta_lambda(other.delta_lambda), coulomb_power(other.coulomb_power)
+{
+}
 
 /** Destructor */
 FreeEnergyMonitor::~FreeEnergyMonitor()
-{}
+{
+}
 
 /** Copy assignment operator */
-FreeEnergyMonitor& FreeEnergyMonitor::operator=(const FreeEnergyMonitor &other)
+FreeEnergyMonitor &FreeEnergyMonitor::operator=(const FreeEnergyMonitor &other)
 {
     if (this != &other)
     {
@@ -393,18 +371,11 @@ FreeEnergyMonitor& FreeEnergyMonitor::operator=(const FreeEnergyMonitor &other)
 bool FreeEnergyMonitor::operator==(const FreeEnergyMonitor &other) const
 {
     return this == &other or
-           (refgroup == other.refgroup and
-            group_a == other.group_a and group_b == other.group_b and
-            total_nrgs == other.total_nrgs and
-            coul_nrgs == other.coul_nrgs and
-            lj_nrgs == other.lj_nrgs and
-            nrg_template == other.nrg_template and
-            lambda_symbol == other.lambda_symbol and
-            shift_delta == other.shift_delta and
-            lamval == other.lamval and
-            delta_lambda == other.delta_lambda and
-            coulomb_power == other.coulomb_power and
-            SystemMonitor::operator==(other));
+           (refgroup == other.refgroup and group_a == other.group_a and group_b == other.group_b and
+            total_nrgs == other.total_nrgs and coul_nrgs == other.coul_nrgs and lj_nrgs == other.lj_nrgs and
+            nrg_template == other.nrg_template and lambda_symbol == other.lambda_symbol and
+            shift_delta == other.shift_delta and lamval == other.lamval and delta_lambda == other.delta_lambda and
+            coulomb_power == other.coulomb_power and SystemMonitor::operator==(other));
 }
 
 /** Comparison operator */
@@ -414,9 +385,9 @@ bool FreeEnergyMonitor::operator!=(const FreeEnergyMonitor &other) const
 }
 
 /** Return the typename of the class */
-const char* FreeEnergyMonitor::typeName()
+const char *FreeEnergyMonitor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<FreeEnergyMonitor>() );
+    return QMetaType::typeName(qMetaTypeId<FreeEnergyMonitor>());
 }
 
 /** Return the array of all accumulated total free energies */
@@ -445,19 +416,19 @@ QVector<PartialMolecule> FreeEnergyMonitor::referenceViews() const
 }
 
 /** Return the reference group */
-const AssignerGroup& FreeEnergyMonitor::referenceGroup() const
+const AssignerGroup &FreeEnergyMonitor::referenceGroup() const
 {
     return refgroup;
 }
 
 /** Return group A (the group interacting with the reference group at lambda = 0) */
-const AssignerGroup& FreeEnergyMonitor::groupA() const
+const AssignerGroup &FreeEnergyMonitor::groupA() const
 {
     return group_a;
 }
 
 /** Return group B (the group interacting with the reference group at lambda = 1) */
-const AssignerGroup& FreeEnergyMonitor::groupB() const
+const AssignerGroup &FreeEnergyMonitor::groupB() const
 {
     return group_b;
 }
@@ -465,8 +436,7 @@ const AssignerGroup& FreeEnergyMonitor::groupB() const
 /** Set the temperature at which the free energies are accumulated */
 void FreeEnergyMonitor::setTemperature(const SireUnits::Dimension::Temperature &temperature)
 {
-    nrg_template = FreeEnergyAverage(temperature,
-                                     MolarEnergy(nrg_template.histogram().binWidth()));
+    nrg_template = FreeEnergyAverage(temperature, MolarEnergy(nrg_template.histogram().binWidth()));
 }
 
 /** Set the bin width for the histogram of recorded free energies.
@@ -510,14 +480,12 @@ void FreeEnergyMonitor::clearStatistics()
     lj_nrgs = QVector<FreeEnergyAverage>();
 }
 
-SIRE_ALWAYS_INLINE pair<double,double> getCLJEnergy(
-                const QVector<Vector> &coords, const QVector<Charge> &chgs,
-                const QVector<LJParameter> &ljs,
-                const QVector<Vector> &coords_a, const QVector<Charge> &chgs_a,
-                const QVector<LJParameter> &ljs_a,
-                const QVector<Vector> &coords_b, const QVector<Charge> &chgs_b,
-                const QVector<LJParameter> &ljs_b,
-                double lamval, double delta_lambda)
+SIRE_ALWAYS_INLINE pair<double, double> getCLJEnergy(const QVector<Vector> &coords, const QVector<Charge> &chgs,
+                                                     const QVector<LJParameter> &ljs, const QVector<Vector> &coords_a,
+                                                     const QVector<Charge> &chgs_a, const QVector<LJParameter> &ljs_a,
+                                                     const QVector<Vector> &coords_b, const QVector<Charge> &chgs_b,
+                                                     const QVector<LJParameter> &ljs_b, double lamval,
+                                                     double delta_lambda)
 {
     const int nats = coords.count();
     const int nats_a = coords_a.count();
@@ -531,7 +499,7 @@ SIRE_ALWAYS_INLINE pair<double,double> getCLJEnergy(
     if (lamval < 0)
         lamval = 0;
 
-    if (lamval+delta_lambda > 1)
+    if (lamval + delta_lambda > 1)
         lamval = 1 - delta_lambda;
 
     bool arithmetic_combining_rules = true;
@@ -539,7 +507,7 @@ SIRE_ALWAYS_INLINE pair<double,double> getCLJEnergy(
     // total_nrg(lam) = (1-lam) * group:group_A + lam * group:group_B
     // delta_nrg = total_nrg(lam+delta_lambda) - total_nrg(lam)
 
-    for (int i=0; i<nats; ++i)
+    for (int i = 0; i < nats; ++i)
     {
         const Vector &coord0 = coords.at(i);
         const Charge &chg0 = chgs.at(i);
@@ -548,7 +516,7 @@ SIRE_ALWAYS_INLINE pair<double,double> getCLJEnergy(
         double icnrg = 0;
         double iljnrg = 0;
 
-        for (int j=0; j<nats_a; ++j)
+        for (int j = 0; j < nats_a; ++j)
         {
             const Vector &coord1 = coords_a.at(j);
             const Charge &chg1 = chgs_a.at(j);
@@ -568,19 +536,18 @@ SIRE_ALWAYS_INLINE pair<double,double> getCLJEnergy(
 
             iljnrg += ljpair.A() * one_over_r12 - ljpair.B() * one_over_r6;
 
-            icnrg += chg0.value() * chg1.value() * one_over_r
-                                  * one_over_four_pi_eps0;
+            icnrg += chg0.value() * chg1.value() * one_over_r * one_over_four_pi_eps0;
         }
 
-        cnrg += (1-lamval) * icnrg;
-        cnrg_f += (1-lamval-delta_lambda) * icnrg;
-        ljnrg += (1-lamval) * iljnrg;
-        ljnrg_f += (1-lamval-delta_lambda) * iljnrg;
+        cnrg += (1 - lamval) * icnrg;
+        cnrg_f += (1 - lamval - delta_lambda) * icnrg;
+        ljnrg += (1 - lamval) * iljnrg;
+        ljnrg_f += (1 - lamval - delta_lambda) * iljnrg;
 
         icnrg = 0;
         iljnrg = 0;
 
-        for (int j=0; j<nats_b; ++j)
+        for (int j = 0; j < nats_b; ++j)
         {
             const Vector &coord1 = coords_b.at(j);
             const Charge &chg1 = chgs_b.at(j);
@@ -600,28 +567,26 @@ SIRE_ALWAYS_INLINE pair<double,double> getCLJEnergy(
 
             iljnrg += ljpair.A() * one_over_r12 - ljpair.B() * one_over_r6;
 
-            icnrg += chg0.value() * chg1.value() * one_over_r
-                                  * one_over_four_pi_eps0;
+            icnrg += chg0.value() * chg1.value() * one_over_r * one_over_four_pi_eps0;
         }
 
-        cnrg += (lamval) * icnrg;
-        cnrg_f += (lamval+delta_lambda) * icnrg;
-        ljnrg += (lamval) * iljnrg;
-        ljnrg_f += (lamval+delta_lambda) * iljnrg;
+        cnrg += (lamval)*icnrg;
+        cnrg_f += (lamval + delta_lambda) * icnrg;
+        ljnrg += (lamval)*iljnrg;
+        ljnrg_f += (lamval + delta_lambda) * iljnrg;
     }
 
-    return pair<double,double>(cnrg_f-cnrg,ljnrg_f-ljnrg);
+    return pair<double, double>(cnrg_f - cnrg, ljnrg_f - ljnrg);
 }
 
-SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
-                const CLJAtoms &refatoms,
-                const CLJAtoms &atoms_a, const CLJAtoms &atoms_b,
-                double lamval, double delta_lambda, double shift_delta, int coulomb_power)
+SIRE_ALWAYS_INLINE pair<double, double> getSoftCLJEnergy(const CLJAtoms &refatoms, const CLJAtoms &atoms_a,
+                                                         const CLJAtoms &atoms_b, double lamval, double delta_lambda,
+                                                         double shift_delta, int coulomb_power)
 {
     if (lamval < 0)
         lamval = 0;
 
-    if (lamval+delta_lambda > 1)
+    if (lamval + delta_lambda > 1)
         lamval = 1 - delta_lambda;
 
     bool arithmetic_combining_rules = true;
@@ -680,40 +645,38 @@ SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
     cnrg_a_f *= (1 - lamval - delta_lambda) * one_minus_alpha_a_to_n_f;
     ljnrg_a_f *= (1 - lamval - delta_lambda) * one_minus_alpha_a_to_n_f;
 
-    cnrg_b *= (lamval) * one_minus_alpha_b_to_n;
-    ljnrg_b *= (lamval) * one_minus_alpha_b_to_n;
+    cnrg_b *= (lamval)*one_minus_alpha_b_to_n;
+    ljnrg_b *= (lamval)*one_minus_alpha_b_to_n;
 
-    cnrg_b_f *= (lamval+delta_lambda) * one_minus_alpha_b_to_n_f;
-    ljnrg_b_f *= (lamval+delta_lambda) * one_minus_alpha_b_to_n_f;
+    cnrg_b_f *= (lamval + delta_lambda) * one_minus_alpha_b_to_n_f;
+    ljnrg_b_f *= (lamval + delta_lambda) * one_minus_alpha_b_to_n_f;
 
-    return pair<double,double>(cnrg_a_f+cnrg_b_f-cnrg_a-cnrg_b,
-                               ljnrg_a_f+ljnrg_b_f-ljnrg_a-ljnrg_b);
+    return pair<double, double>(cnrg_a_f + cnrg_b_f - cnrg_a - cnrg_b, ljnrg_a_f + ljnrg_b_f - ljnrg_a - ljnrg_b);
 }
 
-SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
-                const QVector<Vector> &coords, const QVector<Charge> &chgs,
-                const QVector<LJParameter> &ljs,
-                const QVector<Vector> &coords_a, const QVector<Charge> &chgs_a,
-                const QVector<LJParameter> &ljs_a,
-                const QVector<Vector> &coords_b, const QVector<Charge> &chgs_b,
-                const QVector<LJParameter> &ljs_b,
-                double lamval, double delta_lambda, double shift_delta, int coulomb_power)
+SIRE_ALWAYS_INLINE pair<double, double> getSoftCLJEnergy(const QVector<Vector> &coords, const QVector<Charge> &chgs,
+                                                         const QVector<LJParameter> &ljs,
+                                                         const QVector<Vector> &coords_a, const QVector<Charge> &chgs_a,
+                                                         const QVector<LJParameter> &ljs_a,
+                                                         const QVector<Vector> &coords_b, const QVector<Charge> &chgs_b,
+                                                         const QVector<LJParameter> &ljs_b, double lamval,
+                                                         double delta_lambda, double shift_delta, int coulomb_power)
 {
-    //this uses the following potentials
-    //           Zacharias and McCammon, J. Chem. Phys., 1994, and also,
-    //           Michel et al., JCTC, 2007
+    // this uses the following potentials
+    //            Zacharias and McCammon, J. Chem. Phys., 1994, and also,
+    //            Michel et al., JCTC, 2007
     //
-    //  V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
-    //                          ( sigma^6  / (delta*sigma + r^2)^3 ) ]
+    //   V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
+    //                           ( sigma^6  / (delta*sigma + r^2)^3 ) ]
     //
-    //  delta = shift_delta * alpha
+    //   delta = shift_delta * alpha
     //
-    //  V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (alpha+r^2)^(1/2)
+    //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (alpha+r^2)^(1/2)
     //
-    // This contrasts to Rich T's LJ softcore function, which was;
+    //  This contrasts to Rich T's LJ softcore function, which was;
     //
-    //  V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
-    //                          (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
+    //   V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
+    //                           (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
 
     const int nats = coords.count();
     const int nats_a = coords_a.count();
@@ -727,7 +690,7 @@ SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
     if (lamval < 0)
         lamval = 0;
 
-    if (lamval+delta_lambda > 1)
+    if (lamval + delta_lambda > 1)
         lamval = 1 - delta_lambda;
 
     bool arithmetic_combining_rules = true;
@@ -757,7 +720,7 @@ SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
     // total_nrg(lam) = (1-lam) * group:group_A + lam * group:group_B
     // delta_nrg = total_nrg(lam+delta_lambda) - total_nrg(lam)
 
-    for (int i=0; i<nats; ++i)
+    for (int i = 0; i < nats; ++i)
     {
         const Vector &coord0 = coords.at(i);
         const Charge &chg0 = chgs.at(i);
@@ -768,7 +731,7 @@ SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
         double icnrg_f = 0;
         double iljnrg_f = 0;
 
-        for (int j=0; j<nats_a; ++j)
+        for (int j = 0; j < nats_a; ++j)
         {
             const Vector &coord1 = coords_a.at(j);
             const Charge &chg1 = chgs_a.at(j);
@@ -796,34 +759,30 @@ SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
 
             const double sig6_over_denom = sig6 / lj_denom;
             const double sig6_over_denom_f = sig6 / lj_denom_f;
-            const double sig12_over_denom2 = sig6_over_denom *
-                                             sig6_over_denom;
-            const double sig12_over_denom2_f = sig6_over_denom_f *
-                                               sig6_over_denom_f;
+            const double sig12_over_denom2 = sig6_over_denom * sig6_over_denom;
+            const double sig12_over_denom2_f = sig6_over_denom_f * sig6_over_denom_f;
 
             iljnrg += 4 * ljpair.epsilon() * (sig12_over_denom2 - sig6_over_denom);
             iljnrg_f += 4 * ljpair.epsilon() * (sig12_over_denom2_f - sig6_over_denom_f);
 
-            icnrg += one_minus_alpha_a_to_n *
-                        chg0.value() * chg1.value() * one_over_four_pi_eps0 /
-                           std::sqrt(alpha_a + r2);
+            icnrg +=
+                one_minus_alpha_a_to_n * chg0.value() * chg1.value() * one_over_four_pi_eps0 / std::sqrt(alpha_a + r2);
 
-            icnrg_f += one_minus_alpha_a_to_n_f *
-                        chg0.value() * chg1.value() * one_over_four_pi_eps0 /
-                           std::sqrt(alpha_a_f + r2);
+            icnrg_f += one_minus_alpha_a_to_n_f * chg0.value() * chg1.value() * one_over_four_pi_eps0 /
+                       std::sqrt(alpha_a_f + r2);
         }
 
-        cnrg += (1-lamval) * icnrg;
-        cnrg_f += (1-lamval-delta_lambda) * icnrg_f;
-        ljnrg += (1-lamval) * iljnrg;
-        ljnrg_f += (1-lamval-delta_lambda) * iljnrg_f;
+        cnrg += (1 - lamval) * icnrg;
+        cnrg_f += (1 - lamval - delta_lambda) * icnrg_f;
+        ljnrg += (1 - lamval) * iljnrg;
+        ljnrg_f += (1 - lamval - delta_lambda) * iljnrg_f;
 
         icnrg = 0;
         iljnrg = 0;
         icnrg_f = 0;
         iljnrg_f = 0;
 
-        for (int j=0; j<nats_b; ++j)
+        for (int j = 0; j < nats_b; ++j)
         {
             const Vector &coord1 = coords_b.at(j);
             const Charge &chg1 = chgs_b.at(j);
@@ -851,30 +810,26 @@ SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
 
             const double sig6_over_denom = sig6 / lj_denom;
             const double sig6_over_denom_f = sig6 / lj_denom_f;
-            const double sig12_over_denom2 = sig6_over_denom *
-                                             sig6_over_denom;
-            const double sig12_over_denom2_f = sig6_over_denom_f *
-                                               sig6_over_denom_f;
+            const double sig12_over_denom2 = sig6_over_denom * sig6_over_denom;
+            const double sig12_over_denom2_f = sig6_over_denom_f * sig6_over_denom_f;
 
             iljnrg += 4 * ljpair.epsilon() * (sig12_over_denom2 - sig6_over_denom);
             iljnrg_f += 4 * ljpair.epsilon() * (sig12_over_denom2_f - sig6_over_denom_f);
 
-            icnrg += one_minus_alpha_b_to_n *
-                        chg0.value() * chg1.value() * one_over_four_pi_eps0 /
-                           std::sqrt(alpha_b + r2);
+            icnrg +=
+                one_minus_alpha_b_to_n * chg0.value() * chg1.value() * one_over_four_pi_eps0 / std::sqrt(alpha_b + r2);
 
-            icnrg_f += one_minus_alpha_b_to_n_f *
-                        chg0.value() * chg1.value() * one_over_four_pi_eps0 /
-                           std::sqrt(alpha_b_f + r2);
+            icnrg_f += one_minus_alpha_b_to_n_f * chg0.value() * chg1.value() * one_over_four_pi_eps0 /
+                       std::sqrt(alpha_b_f + r2);
         }
 
-        cnrg += (lamval) * icnrg;
-        cnrg_f += (lamval+delta_lambda) * icnrg_f;
-        ljnrg += (lamval) * iljnrg;
-        ljnrg_f += (lamval+delta_lambda) * iljnrg_f;
+        cnrg += (lamval)*icnrg;
+        cnrg_f += (lamval + delta_lambda) * icnrg_f;
+        ljnrg += (lamval)*iljnrg;
+        ljnrg_f += (lamval + delta_lambda) * iljnrg_f;
     }
 
-    return pair<double,double>(cnrg_f-cnrg,ljnrg_f-ljnrg);
+    return pair<double, double>(cnrg_f - cnrg, ljnrg_f - ljnrg);
 }
 
 /** Return whether or not this monitor uses a soft-core potential to
@@ -951,16 +906,11 @@ void FreeEnergyMonitor::conserveMemory(const FreeEnergyMonitor &other)
     (have the same groups, soft-core parameters, delta lambda, temperature etc.) */
 bool FreeEnergyMonitor::isCompatible(const FreeEnergyMonitor &other) const
 {
-    return this->lambdaValue() == other.lambdaValue() and
-           this->lambdaComponent() == other.lambdaComponent() and
-           this->usesSoftCore() == other.usesSoftCore() and
-           this->shiftDelta() == other.shiftDelta() and
-           this->coulombPower() == other.coulombPower() and
-           this->temperature() == other.temperature() and
-           this->binWidth() == other.binWidth() and
-           refgroup.isCompatible(other.refgroup) and
-           group_a.isCompatible(other.group_a) and
-           group_b.isCompatible(other.group_b);
+    return this->lambdaValue() == other.lambdaValue() and this->lambdaComponent() == other.lambdaComponent() and
+           this->usesSoftCore() == other.usesSoftCore() and this->shiftDelta() == other.shiftDelta() and
+           this->coulombPower() == other.coulombPower() and this->temperature() == other.temperature() and
+           this->binWidth() == other.binWidth() and refgroup.isCompatible(other.refgroup) and
+           group_a.isCompatible(other.group_a) and group_b.isCompatible(other.group_b);
 }
 
 /** Return whether or not this monitor is compatible with other, ignoring that
@@ -968,14 +918,10 @@ bool FreeEnergyMonitor::isCompatible(const FreeEnergyMonitor &other) const
     to construct PMFs from a combination of these monitors */
 bool FreeEnergyMonitor::isCompatibleExceptLambda(const FreeEnergyMonitor &other) const
 {
-    return this->lambdaComponent() == other.lambdaComponent() and
-           this->usesSoftCore() == other.usesSoftCore() and
-           this->shiftDelta() == other.shiftDelta() and
-           this->coulombPower() == other.coulombPower() and
-           this->temperature() == other.temperature() and
-           this->binWidth() == other.binWidth() and
-           refgroup.isCompatible(other.refgroup) and
-           group_a.isCompatible(other.group_a) and
+    return this->lambdaComponent() == other.lambdaComponent() and this->usesSoftCore() == other.usesSoftCore() and
+           this->shiftDelta() == other.shiftDelta() and this->coulombPower() == other.coulombPower() and
+           this->temperature() == other.temperature() and this->binWidth() == other.binWidth() and
+           refgroup.isCompatible(other.refgroup) and group_a.isCompatible(other.group_a) and
            group_b.isCompatible(other.group_b);
 }
 
@@ -984,19 +930,20 @@ bool FreeEnergyMonitor::isCompatibleExceptLambda(const FreeEnergyMonitor &other)
 
     \throw SireError::incompatible_error
 */
-FreeEnergyMonitor& FreeEnergyMonitor::operator+=(const FreeEnergyMonitor &other)
+FreeEnergyMonitor &FreeEnergyMonitor::operator+=(const FreeEnergyMonitor &other)
 {
     if (this == &other)
     {
-        this->operator+=( FreeEnergyMonitor(other) );
+        this->operator+=(FreeEnergyMonitor(other));
         return *this;
     }
 
     if (not this->isCompatible(other))
     {
-        throw SireError::incompatible_error( QObject::tr(
-                "Cannot add together two FreeEnergyMonitors as they are in some "
-                "way incompatible."), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot add together two FreeEnergyMonitors as they are in some "
+                        "way incompatible."),
+            CODELOC);
     }
 
     if (total_nrgs.isEmpty())
@@ -1008,23 +955,24 @@ FreeEnergyMonitor& FreeEnergyMonitor::operator+=(const FreeEnergyMonitor &other)
     else if (not other.total_nrgs.isEmpty())
     {
         if (total_nrgs.count() != other.total_nrgs.count())
-            throw SireError::program_bug( QObject::tr(
-                    "It should not be possible for two FreeEnergyMonitors to be compatible "
-                    "but have different numbers of free energies (%1 vs. %2)")
-                        .arg(total_nrgs.count())
-                        .arg(other.total_nrgs.count()), CODELOC );
+            throw SireError::program_bug(
+                QObject::tr("It should not be possible for two FreeEnergyMonitors to be compatible "
+                            "but have different numbers of free energies (%1 vs. %2)")
+                    .arg(total_nrgs.count())
+                    .arg(other.total_nrgs.count()),
+                CODELOC);
 
-        for (int i=0; i<total_nrgs.count(); ++i)
+        for (int i = 0; i < total_nrgs.count(); ++i)
         {
             total_nrgs[i] += other.total_nrgs[i];
         }
 
-        for (int i=0; i<coul_nrgs.count(); ++i)
+        for (int i = 0; i < coul_nrgs.count(); ++i)
         {
             coul_nrgs[i] += other.coul_nrgs[i];
         }
 
-        for (int i=0; i<lj_nrgs.count(); ++i)
+        for (int i = 0; i < lj_nrgs.count(); ++i)
         {
             lj_nrgs[i] += other.lj_nrgs[i];
         }
@@ -1058,7 +1006,7 @@ FreeEnergyMonitor FreeEnergyMonitor::merge(const QList<FreeEnergyMonitor> &monit
 
     FreeEnergyMonitor ret = monitors.at(0);
 
-    for (int i=1; i<monitors.count(); ++i)
+    for (int i = 1; i < monitors.count(); ++i)
     {
         ret += monitors.at(i);
     }
@@ -1072,7 +1020,7 @@ int FreeEnergyMonitor::nSamples() const
 {
     int nsamples = 0;
 
-    for (int i=0; i<total_nrgs.count(); ++i)
+    for (int i = 0; i < total_nrgs.count(); ++i)
     {
         nsamples += total_nrgs.at(i).nSamples();
     }
@@ -1091,7 +1039,7 @@ void FreeEnergyMonitor::monitor(System &system)
         group_a.update(system);
         group_b.update(system);
 
-        //see if we need to update the lambda value
+        // see if we need to update the lambda value
         if (not lambda_symbol.isNull())
         {
             double new_lamval = system.componentValue(lambda_symbol);
@@ -1110,8 +1058,7 @@ void FreeEnergyMonitor::monitor(System &system)
         QVector<PartialMolecule> views_b = group_b.views();
 
         if (group_a.isAssigner() or group_b.isAssigner())
-            throw SireError::unsupported( QObject::tr(
-                    "This is not supported"), CODELOC );
+            throw SireError::unsupported(QObject::tr("This is not supported"), CODELOC);
 
         QVector<CLJAtoms> refcljatoms;
         CLJAtoms cljatoms_a(group_a.group());
@@ -1119,7 +1066,7 @@ void FreeEnergyMonitor::monitor(System &system)
 
         for (const PartialMolecule &view : refviews)
         {
-            refcljatoms.append( CLJAtoms(view) );
+            refcljatoms.append(CLJAtoms(view));
         }
 
         // extract the charge, LJ and coordinates of all of the views
@@ -1136,7 +1083,7 @@ void FreeEnergyMonitor::monitor(System &system)
         }
         else if (total_nrgs.isEmpty())
         {
-            //this is the first time we are calculating energies
+            // this is the first time we are calculating energies
             total_nrgs = QVector<FreeEnergyAverage>(nref, nrg_template);
             coul_nrgs = total_nrgs;
             lj_nrgs = total_nrgs;
@@ -1149,10 +1096,10 @@ void FreeEnergyMonitor::monitor(System &system)
             lj_nrgs = total_nrgs;
         }
 
-        //now get all of the coordinates and charges / LJ parameters of the groups
-        QVector< QVector<Vector> > ref_coords(nref);
-        QVector< QVector<Charge> > ref_chgs(nref);
-        QVector< QVector<LJParameter> > ref_ljs(nref);
+        // now get all of the coordinates and charges / LJ parameters of the groups
+        QVector<QVector<Vector>> ref_coords(nref);
+        QVector<QVector<Charge>> ref_chgs(nref);
+        QVector<QVector<LJParameter>> ref_ljs(nref);
 
         QVector<Vector> a_coords = cljatoms_a.coordinates();
         QVector<Charge> a_chgs = cljatoms_a.charges();
@@ -1162,7 +1109,7 @@ void FreeEnergyMonitor::monitor(System &system)
         QVector<Charge> b_chgs = cljatoms_b.charges();
         QVector<LJParameter> b_ljs = cljatoms_b.ljParameters();
 
-        for (int i=0; i<nref; ++i)
+        for (int i = 0; i < nref; ++i)
         {
             ref_coords[i] = refcljatoms[i].coordinates();
             ref_chgs[i] = refcljatoms[i].charges();
@@ -1171,19 +1118,16 @@ void FreeEnergyMonitor::monitor(System &system)
 
         if (this->usesSoftCore())
         {
-            //calculate the energy difference for each view against group_a and group_b
-            for (int i=0; i<nref; ++i)
+            // calculate the energy difference for each view against group_a and group_b
+            for (int i = 0; i < nref; ++i)
             {
                 const QVector<Vector> &mol_coords = ref_coords.at(i);
                 const QVector<Charge> &mol_chgs = ref_chgs.at(i);
                 const QVector<LJParameter> &mol_ljs = ref_ljs.at(i);
 
-                pair<double,double> delta_cljnrg = getSoftCLJEnergy(
-                            mol_coords, mol_chgs, mol_ljs,
-                            a_coords, a_chgs, a_ljs,
-                            b_coords, b_chgs, b_ljs,
-                            lamval, delta_lambda,
-                            shift_delta, coulomb_power);
+                pair<double, double> delta_cljnrg =
+                    getSoftCLJEnergy(mol_coords, mol_chgs, mol_ljs, a_coords, a_chgs, a_ljs, b_coords, b_chgs, b_ljs,
+                                     lamval, delta_lambda, shift_delta, coulomb_power);
 
                 total_nrgs[i].accumulate(delta_cljnrg.first + delta_cljnrg.second);
                 coul_nrgs[i].accumulate(delta_cljnrg.first);
@@ -1192,18 +1136,15 @@ void FreeEnergyMonitor::monitor(System &system)
         }
         else
         {
-            //calculate the energy difference for each view against group_a and group_b
-            for (int i=0; i<nref; ++i)
+            // calculate the energy difference for each view against group_a and group_b
+            for (int i = 0; i < nref; ++i)
             {
                 const QVector<Vector> &mol_coords = ref_coords.at(i);
                 const QVector<Charge> &mol_chgs = ref_chgs.at(i);
                 const QVector<LJParameter> &mol_ljs = ref_ljs.at(i);
 
-                pair<double,double> delta_cljnrg = getCLJEnergy(
-                            mol_coords, mol_chgs, mol_ljs,
-                            a_coords, a_chgs, a_ljs,
-                            b_coords, b_chgs, b_ljs,
-                            lamval, delta_lambda);
+                pair<double, double> delta_cljnrg = getCLJEnergy(mol_coords, mol_chgs, mol_ljs, a_coords, a_chgs, a_ljs,
+                                                                 b_coords, b_chgs, b_ljs, lamval, delta_lambda);
 
                 total_nrgs[i].accumulate(delta_cljnrg.first + delta_cljnrg.second);
                 coul_nrgs[i].accumulate(delta_cljnrg.first);
@@ -1211,7 +1152,7 @@ void FreeEnergyMonitor::monitor(System &system)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         FreeEnergyMonitor::operator=(old_state);
         throw;

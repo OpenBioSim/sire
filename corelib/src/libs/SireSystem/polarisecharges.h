@@ -42,220 +42,208 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class PolariseCharges;
-class PolariseChargesFF;
-}
+    class PolariseCharges;
+    class PolariseChargesFF;
+} // namespace SireSystem
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::PolariseCharges&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::PolariseCharges&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::PolariseCharges &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::PolariseCharges &);
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::PolariseChargesFF&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::PolariseChargesFF&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::PolariseChargesFF &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::PolariseChargesFF &);
 
 namespace SireSystem
 {
 
-namespace detail
-{
-class PolariseChargesData;
-}
+    namespace detail
+    {
+        class PolariseChargesData;
+    }
 
-using SireFF::SingleComponent;
+    using SireFF::SingleComponent;
 
-using SireMol::ViewsOfMol;
-using SireMol::PartialMolecule;
+    using SireMol::PartialMolecule;
+    using SireMol::ViewsOfMol;
 
-using SireBase::Properties;
+    using SireBase::Properties;
 
-/** This charge constraint adjusts the partial charges of contained
-    molecules to give the impression that the molecule contains
-    polarisable dipoles. This is based on the method developed
-    by Reynolds et al. (see ...)
+    /** This charge constraint adjusts the partial charges of contained
+        molecules to give the impression that the molecule contains
+        polarisable dipoles. This is based on the method developed
+        by Reynolds et al. (see ...)
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT PolariseCharges
-         : public SireBase::ConcreteProperty<PolariseCharges,ChargeConstraint>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT PolariseCharges : public SireBase::ConcreteProperty<PolariseCharges, ChargeConstraint>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const PolariseCharges&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, PolariseCharges&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const PolariseCharges &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, PolariseCharges &);
 
-public:
-    PolariseCharges();
-    PolariseCharges(const MoleculeGroup &molgroup,
-                    const PropertyMap &map = PropertyMap());
-    PolariseCharges(const MoleculeGroup &molgroup,
-                    const SireFF::Probe &probe,
-                    const PropertyMap &map = PropertyMap());
+    public:
+        PolariseCharges();
+        PolariseCharges(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
+        PolariseCharges(const MoleculeGroup &molgroup, const SireFF::Probe &probe, const PropertyMap &map = PropertyMap());
 
-    PolariseCharges(const MoleculeGroup &molgroup,
-                    const SireCAS::Symbol &field_component,
-                    const PropertyMap &map = PropertyMap());
-    PolariseCharges(const MoleculeGroup &molgroup,
-                    const SireCAS::Symbol &field_component,
-                    const SireFF::Probe &probe,
-                    const PropertyMap &map = PropertyMap());
+        PolariseCharges(const MoleculeGroup &molgroup, const SireCAS::Symbol &field_component,
+                        const PropertyMap &map = PropertyMap());
+        PolariseCharges(const MoleculeGroup &molgroup, const SireCAS::Symbol &field_component, const SireFF::Probe &probe,
+                        const PropertyMap &map = PropertyMap());
 
-    PolariseCharges(const PolariseCharges &other);
+        PolariseCharges(const PolariseCharges &other);
 
-    ~PolariseCharges();
+        ~PolariseCharges();
 
-    PolariseCharges& operator=(const PolariseCharges &other);
+        PolariseCharges &operator=(const PolariseCharges &other);
 
-    bool operator==(const PolariseCharges &other) const;
-    bool operator!=(const PolariseCharges &other) const;
+        bool operator==(const PolariseCharges &other) const;
+        bool operator!=(const PolariseCharges &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    PolariseCharges* clone() const;
+        PolariseCharges *clone() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    void setConvergenceLimit(double limit);
+        void setConvergenceLimit(double limit);
 
-    double convergenceLimit() const;
+        double convergenceLimit() const;
 
-    const SireCAS::Symbol& fieldComponent() const;
+        const SireCAS::Symbol &fieldComponent() const;
 
-    const SireMM::CoulombProbe& probe() const;
+        const SireMM::CoulombProbe &probe() const;
 
-    PolariseChargesFF selfEnergyFF() const;
+        PolariseChargesFF selfEnergyFF() const;
 
-protected:
-    void setSystem(const System &system);
+    protected:
+        void setSystem(const System &system);
 
-    bool mayChange(const Delta &delta, quint32 last_subversion) const;
+        bool mayChange(const Delta &delta, quint32 last_subversion) const;
 
-    bool fullApply(Delta &delta);
-    bool deltaApply(Delta &delta, quint32 last_subversion);
+        bool fullApply(Delta &delta);
+        bool deltaApply(Delta &delta, quint32 last_subversion);
 
-private:
-    void setProbe(const SireFF::Probe &probe);
+    private:
+        void setProbe(const SireFF::Probe &probe);
 
-    /** The forcefield component that is used to calculate
-        the potential on the atoms to be polarised */
-    SireCAS::Symbol field_component;
+        /** The forcefield component that is used to calculate
+            the potential on the atoms to be polarised */
+        SireCAS::Symbol field_component;
 
-    /** The probe used to calculate the potential on the atoms */
-    SireMM::CoulombProbe field_probe;
+        /** The probe used to calculate the potential on the atoms */
+        SireMM::CoulombProbe field_probe;
 
-    /** The information about each molecule that is needed
-        to calculate the polarisability */
-    QHash<SireMol::MolNum,
-            SireBase::SharedDataPointer<detail::PolariseChargesData> > moldata;
+        /** The information about each molecule that is needed
+            to calculate the polarisability */
+        QHash<SireMol::MolNum, SireBase::SharedDataPointer<detail::PolariseChargesData>> moldata;
 
-    /** The collection of molecules that have been changed by this constraint */
-    Molecules changed_mols;
+        /** The collection of molecules that have been changed by this constraint */
+        Molecules changed_mols;
 
-    /** The convergence limit - charges are only updated if
-        they change by more than this limit */
-    double convergence_limit;
-};
+        /** The convergence limit - charges are only updated if
+            they change by more than this limit */
+        double convergence_limit;
+    };
 
-/** This class implements the forcefield that is used to calculate
-    the self-energy of polarising the charges. This is a companion
-    forcefield to the PolariseCharges constraint and is not
-    designed to be used on its own
+    /** This class implements the forcefield that is used to calculate
+        the self-energy of polarising the charges. This is a companion
+        forcefield to the PolariseCharges constraint and is not
+        designed to be used on its own
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT PolariseChargesFF
-            : public SireBase::ConcreteProperty<PolariseChargesFF,SireFF::G1FF>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT PolariseChargesFF : public SireBase::ConcreteProperty<PolariseChargesFF, SireFF::G1FF>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const PolariseChargesFF&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, PolariseChargesFF&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const PolariseChargesFF &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, PolariseChargesFF &);
 
-public:
-    PolariseChargesFF();
-    PolariseChargesFF(const PolariseCharges &constraint);
-    PolariseChargesFF(const QString &name, const PolariseCharges &constraint);
+    public:
+        PolariseChargesFF();
+        PolariseChargesFF(const PolariseCharges &constraint);
+        PolariseChargesFF(const QString &name, const PolariseCharges &constraint);
 
-    PolariseChargesFF(const PolariseChargesFF &other);
+        PolariseChargesFF(const PolariseChargesFF &other);
 
-    ~PolariseChargesFF();
+        ~PolariseChargesFF();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    PolariseChargesFF& operator=(const PolariseChargesFF &other);
+        PolariseChargesFF &operator=(const PolariseChargesFF &other);
 
-    bool operator==(const PolariseChargesFF &other) const;
-    bool operator!=(const PolariseChargesFF &other) const;
+        bool operator==(const PolariseChargesFF &other) const;
+        bool operator!=(const PolariseChargesFF &other) const;
 
-    PolariseChargesFF* clone() const;
+        PolariseChargesFF *clone() const;
 
-    const SingleComponent& components() const;
+        const SingleComponent &components() const;
 
-    bool setProperty(const QString &name, const Property &property);
-    const Property& property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
-    const Properties& properties() const;
+        bool setProperty(const QString &name, const Property &property);
+        const Property &property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
+        const Properties &properties() const;
 
-    using G1FF::add;
-    using G1FF::remove;
-    using G1FF::contains;
+        using G1FF::add;
+        using G1FF::contains;
+        using G1FF::remove;
 
-    void mustNowRecalculateFromScratch();
+        void mustNowRecalculateFromScratch();
 
-protected:
+    protected:
+        ////
+        //// Virtual functions from SireFF::FF
+        ////
 
-    ////
-    //// Virtual functions from SireFF::FF
-    ////
+        const SingleComponent &_pvt_components() const;
 
-    const SingleComponent& _pvt_components() const;
+        void recalculateEnergy();
 
-    void recalculateEnergy();
+        void _pvt_updateName();
 
-    void _pvt_updateName();
+        ////
+        //// Virtual functions from SireFF::G1FF
+        ////
 
-    ////
-    //// Virtual functions from SireFF::G1FF
-    ////
+        void _pvt_added(const SireMol::PartialMolecule &mol, const SireBase::PropertyMap &);
 
-    void _pvt_added(const SireMol::PartialMolecule &mol,
-                    const SireBase::PropertyMap&);
+        void _pvt_removed(const SireMol::PartialMolecule &mol);
 
-    void _pvt_removed(const SireMol::PartialMolecule &mol);
+        void _pvt_changed(const SireMol::Molecule &mol, bool auto_update);
 
-    void _pvt_changed(const SireMol::Molecule &mol, bool auto_update);
+        void _pvt_changed(const QList<SireMol::Molecule> &mols, bool auto_update);
 
-    void _pvt_changed(const QList<SireMol::Molecule> &mols, bool auto_update);
+        void _pvt_removedAll();
 
-    void _pvt_removedAll();
+        bool _pvt_wouldChangeProperties(SireMol::MolNum molnum, const SireBase::PropertyMap &map) const;
 
-    bool _pvt_wouldChangeProperties(SireMol::MolNum molnum,
-                                    const SireBase::PropertyMap &map) const;
+        void _pvt_added(const ViewsOfMol &mol, const PropertyMap &map);
 
-    void _pvt_added(const ViewsOfMol &mol, const PropertyMap &map);
+        void _pvt_removed(const ViewsOfMol &mol);
 
-    void _pvt_removed(const ViewsOfMol &mol);
+        void _pvt_removedAll(const PartialMolecule &mol);
+        void _pvt_removedAll(const ViewsOfMol &mol);
 
-    void _pvt_removedAll(const PartialMolecule &mol);
-    void _pvt_removedAll(const ViewsOfMol &mol);
+    private:
+        /** The symbol for the single component of the energy */
+        SingleComponent ffcomponent;
 
-private:
-    /** The symbol for the single component of the energy */
-    SingleComponent ffcomponent;
+        /** The location of the self polarisation energy property - the
+            constraint adds this energy as a property of the polarised molecules
+            so that this forcefield can then extract the property to calculate
+            the total self-polarisation energy */
+        PropertyName energy_property;
 
-    /** The location of the self polarisation energy property - the
-        constraint adds this energy as a property of the polarised molecules
-        so that this forcefield can then extract the property to calculate
-        the total self-polarisation energy */
-    PropertyName energy_property;
+        /** The cache of the energy for each molecule in the forcefield */
+        QHash<MolNum, SireUnits::Dimension::MolarEnergy> molnrg;
+    };
 
-    /** The cache of the energy for each molecule in the forcefield */
-    QHash<MolNum,SireUnits::Dimension::MolarEnergy> molnrg;
-};
+} // namespace SireSystem
 
-}
+Q_DECLARE_METATYPE(SireSystem::PolariseCharges)
+Q_DECLARE_METATYPE(SireSystem::PolariseChargesFF)
 
-Q_DECLARE_METATYPE( SireSystem::PolariseCharges )
-Q_DECLARE_METATYPE( SireSystem::PolariseChargesFF )
-
-SIRE_EXPOSE_CLASS( SireSystem::PolariseCharges )
-SIRE_EXPOSE_CLASS( SireSystem::PolariseChargesFF )
+SIRE_EXPOSE_CLASS(SireSystem::PolariseCharges)
+SIRE_EXPOSE_CLASS(SireSystem::PolariseChargesFF)
 
 SIRE_END_HEADER
 

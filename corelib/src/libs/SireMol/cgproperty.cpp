@@ -36,7 +36,7 @@ namespace SireMol
     template class CGProperty<double>;
     template class CGProperty<QVariant>;
     template class CGProperty<SireBase::PropertyPtr>;
-}
+} // namespace SireMol
 
 static const RegisterMetaType<CGStringProperty> r_cgstring;
 static const RegisterMetaType<CGIntProperty> r_cgint;

@@ -27,14 +27,14 @@
 
 #include "chain.h"
 
-#include "molecule.h"
-#include "residue.h"
 #include "atom.h"
 #include "chaineditor.h"
+#include "molecule.h"
+#include "residue.h"
 
+#include "evaluator.h"
 #include "mover.hpp"
 #include "selector.hpp"
-#include "evaluator.h"
 
 #include "chainresid.h"
 #include "groupatomids.h"
@@ -53,14 +53,12 @@ using namespace SireStream;
 /////// Implementation of ChainProp
 ///////
 
-static const RegisterMetaType<ChainProp> r_chainprop(MAGIC_ONLY,
-                                                   "SireMol::ChainProp");
+static const RegisterMetaType<ChainProp> r_chainprop(MAGIC_ONLY, "SireMol::ChainProp");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const ChainProp &chainprop)
 {
-    writeHeader(ds, r_chainprop, 1)
-         << static_cast<const MolViewProperty&>(chainprop);
+    writeHeader(ds, r_chainprop, 1) << static_cast<const MolViewProperty &>(chainprop);
 
     return ds;
 }
@@ -72,7 +70,7 @@ QDataStream &operator>>(QDataStream &ds, ChainProp &chainprop)
 
     if (v == 1)
     {
-        ds >> static_cast<MolViewProperty&>(chainprop);
+        ds >> static_cast<MolViewProperty &>(chainprop);
     }
     else
         throw version_error(v, "1", r_chainprop, CODELOC);
@@ -81,13 +79,16 @@ QDataStream &operator>>(QDataStream &ds, ChainProp &chainprop)
 }
 
 ChainProp::ChainProp() : MolViewProperty()
-{}
+{
+}
 
 ChainProp::ChainProp(const ChainProp &other) : MolViewProperty(other)
-{}
+{
+}
 
 ChainProp::~ChainProp()
-{}
+{
+}
 
 ///////
 /////// Implementation of Chain
@@ -102,7 +103,7 @@ QDataStream &operator<<(QDataStream &ds, const Chain &chain)
 
     SharedDataStream sds(ds);
 
-    sds << chain.chainidx << static_cast<const MoleculeView&>(chain);
+    sds << chain.chainidx << static_cast<const MoleculeView &>(chain);
 
     return ds;
 }
@@ -116,7 +117,7 @@ QDataStream &operator>>(QDataStream &ds, Chain &chain)
     {
         SharedDataStream sds(ds);
 
-        sds >> chain.chainidx >> static_cast<MoleculeView&>(chain);
+        sds >> chain.chainidx >> static_cast<MoleculeView &>(chain);
 
         chain.selected_atoms = AtomSelection(chain.data());
         chain.selected_atoms.selectOnly(chain.chainidx);
@@ -128,8 +129,9 @@ QDataStream &operator>>(QDataStream &ds, Chain &chain)
 }
 
 /** Null constructor */
-Chain::Chain() : ConcreteProperty<Chain,MoleculeView>(), chainidx( ChainIdx::null() )
-{}
+Chain::Chain() : ConcreteProperty<Chain, MoleculeView>(), chainidx(ChainIdx::null())
+{
+}
 
 /** Construct the chain at ID 'chainid' in the molecule whose data
     is in 'moldata'
@@ -139,8 +141,7 @@ Chain::Chain() : ConcreteProperty<Chain,MoleculeView>(), chainidx( ChainIdx::nul
     \throw SireError::invalid_index
 */
 Chain::Chain(const MoleculeData &moldata, const ChainID &chainid)
-      : ConcreteProperty<Chain,MoleculeView>(moldata),
-        chainidx( moldata.info().chainIdx(chainid) )
+    : ConcreteProperty<Chain, MoleculeView>(moldata), chainidx(moldata.info().chainIdx(chainid))
 {
     selected_atoms = AtomSelection(moldata);
     selected_atoms.selectOnly(chainidx);
@@ -148,16 +149,17 @@ Chain::Chain(const MoleculeData &moldata, const ChainID &chainid)
 
 /** Copy constructor */
 Chain::Chain(const Chain &other)
-      : ConcreteProperty<Chain,MoleculeView>(other), chainidx(other.chainidx),
-        selected_atoms(other.selected_atoms)
-{}
+    : ConcreteProperty<Chain, MoleculeView>(other), chainidx(other.chainidx), selected_atoms(other.selected_atoms)
+{
+}
 
 /** Destructor */
 Chain::~Chain()
-{}
+{
+}
 
 /** Copy assignment operator */
-Chain& Chain::operator=(const Chain &other)
+Chain &Chain::operator=(const Chain &other)
 {
     MoleculeView::operator=(other);
     chainidx = other.chainidx;
@@ -168,15 +170,13 @@ Chain& Chain::operator=(const Chain &other)
 /** Comparison operator */
 bool Chain::operator==(const Chain &other) const
 {
-    return chainidx == other.chainidx and
-           MoleculeView::operator==(other);
+    return chainidx == other.chainidx and MoleculeView::operator==(other);
 }
 
 /** Comparison operator */
 bool Chain::operator!=(const Chain &other) const
 {
-    return chainidx != other.chainidx or
-           MoleculeView::operator!=(other);
+    return chainidx != other.chainidx or MoleculeView::operator!=(other);
 }
 
 MolViewPtr Chain::operator[](int i) const
@@ -202,10 +202,10 @@ MolViewPtr Chain::operator[](const SireBase::Slice &slice) const
 /** Return a string representation of this chain */
 QString Chain::toString() const
 {
-    return QObject::tr( "Chain( %1 num_residues=%2 num_atoms=%3)" )
-                .arg( this->name() )
-                .arg( this->nResidues() )
-                .arg( this->nAtoms() );
+    return QObject::tr("Chain( %1 num_residues=%2 num_atoms=%3)")
+        .arg(this->name())
+        .arg(this->nResidues())
+        .arg(this->nAtoms());
 }
 
 /** Is this chain empty? */
@@ -216,7 +216,7 @@ bool Chain::isEmpty() const
 
 MolViewPtr Chain::toSelector() const
 {
-    return MolViewPtr( Selector<Chain>(*this) );
+    return MolViewPtr(Selector<Chain>(*this));
 }
 
 /** Is this chain the entire molecule? */
@@ -237,20 +237,21 @@ AtomSelection Chain::selection() const
 */
 void Chain::update(const MoleculeData &moldata)
 {
-    //check that the new data is compatible (has same molecule
-    //number and info ID number)
-    if (d->number() != moldata.number() or
-        d->info().UID() != moldata.info().UID())
+    // check that the new data is compatible (has same molecule
+    // number and info ID number)
+    if (d->number() != moldata.number() or d->info().UID() != moldata.info().UID())
     {
-        throw SireError::incompatible_error( QObject::tr(
-            "You can only update a chain with the molecule data "
-            "for the same molecule (same molecule number) and that "
-            "has a .info() object that has the same UID. You are "
-            "trying to update chain %1 in molecule %2 with UID %3 "
-            "with molecule %4 with UID %5.")
-                .arg(chainidx).arg(d->number()).arg(d->info().UID().toString())
-                .arg(moldata.number()).arg(moldata.info().UID().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("You can only update a chain with the molecule data "
+                                                        "for the same molecule (same molecule number) and that "
+                                                        "has a .info() object that has the same UID. You are "
+                                                        "trying to update chain %1 in molecule %2 with UID %3 "
+                                                        "with molecule %4 with UID %5.")
+                                                .arg(chainidx)
+                                                .arg(d->number())
+                                                .arg(d->info().UID().toString())
+                                                .arg(moldata.number())
+                                                .arg(moldata.info().UID().toString()),
+                                            CODELOC);
     }
 
     d = moldata;
@@ -347,7 +348,7 @@ int Chain::nResidues() const
 
 /** Return the list of indicies of residues that are
     in this chain, in the order they appear in this chain */
-const QList<ResIdx>& Chain::resIdxs() const
+const QList<ResIdx> &Chain::resIdxs() const
 {
     return d->info().getResiduesIn(chainidx);
 }
@@ -404,8 +405,7 @@ bool Chain::hasMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-bool Chain::hasMetadata(const PropertyName &key,
-                       const PropertyName &metakey) const
+bool Chain::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return d->hasMetadataOfType<ChainProp>(key, metakey);
 }
@@ -439,9 +439,8 @@ QStringList Chain::metadataKeys(const PropertyName &key) const
 void Chain::assertContainsProperty(const PropertyName &key) const
 {
     if (not this->hasProperty(key))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no ChainProperty at key '%1' for this chain.")
-                .arg(key.toString()), CODELOC );
+        throw SireBase::missing_property(
+            QObject::tr("There is no ChainProperty at key '%1' for this chain.").arg(key.toString()), CODELOC);
 }
 
 /** Assert that this chain has an ChainProperty piece of metadata
@@ -452,10 +451,10 @@ void Chain::assertContainsProperty(const PropertyName &key) const
 void Chain::assertContainsMetadata(const PropertyName &metakey) const
 {
     if (not this->hasMetadata(metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no ChainProperty metadata at metakey '%1' for "
-            "this chain.")
-                .arg(metakey.toString()), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no ChainProperty metadata at metakey '%1' for "
+                                                     "this chain.")
+                                             .arg(metakey.toString()),
+                                         CODELOC);
 }
 
 /** Assert that the property at key 'key' has an ChainProperty
@@ -463,45 +462,41 @@ void Chain::assertContainsMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-void Chain::assertContainsMetadata(const PropertyName &key,
-                                  const PropertyName &metakey) const
+void Chain::assertContainsMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     if (not this->hasMetadata(key, metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no ChainProperty metadata at metakey '%1' "
-            "for the property at key '%2' for this chain.")
-                .arg(metakey.toString(), key.toString()), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no ChainProperty metadata at metakey '%1' "
+                                                     "for the property at key '%2' for this chain.")
+                                             .arg(metakey.toString(), key.toString()),
+                                         CODELOC);
 }
 
-const char* Chain::typeName()
+const char *Chain::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Chain>() );
+    return QMetaType::typeName(qMetaTypeId<Chain>());
 }
 
 namespace SireMol
 {
-namespace detail
-{
+    namespace detail
+    {
 
-bool has_property(const Chain*, const MoleculeData &moldata,
-                                 const PropertyName &key)
-{
-    return moldata.hasPropertyOfType<ChainProp>(key);
-}
+        bool has_property(const Chain *, const MoleculeData &moldata, const PropertyName &key)
+        {
+            return moldata.hasPropertyOfType<ChainProp>(key);
+        }
 
-bool has_metadata(const Chain*, const MoleculeData &moldata,
-                                 const PropertyName &metakey)
-{
-    return moldata.hasMetadataOfType<ChainProp>(metakey);
-}
+        bool has_metadata(const Chain *, const MoleculeData &moldata, const PropertyName &metakey)
+        {
+            return moldata.hasMetadataOfType<ChainProp>(metakey);
+        }
 
-bool has_metadata(const Chain*, const MoleculeData &moldata,
-                                 const PropertyName &key, const PropertyName &metakey)
-{
-    return moldata.hasMetadataOfType<ChainProp>(key, metakey);
-}
+        bool has_metadata(const Chain *, const MoleculeData &moldata, const PropertyName &key, const PropertyName &metakey)
+        {
+            return moldata.hasMetadataOfType<ChainProp>(key, metakey);
+        }
 
-} // end of namespace detail
+    } // end of namespace detail
 } // end of namespace SireMol
 
 namespace SireMol
@@ -510,10 +505,10 @@ namespace SireMol
     template class Selector<Chain>;
     template class Mover<Chain>;
 
-    template class Mover< Selector<Chain> >;
-}
+    template class Mover<Selector<Chain>>;
+} // namespace SireMol
 
-Chain* Chain::clone() const
+Chain *Chain::clone() const
 {
     return new Chain(*this);
 }

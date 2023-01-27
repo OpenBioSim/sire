@@ -37,58 +37,62 @@ SIRE_BEGIN_HEADER
 namespace SireStream
 {
 
-using SireError::exception;
+    using SireError::exception;
 
-/** This exception is thrown whenever there is an error with the magic number of
-    the binary data streaming protocol.
+    /** This exception is thrown whenever there is an error with the magic number of
+        the binary data streaming protocol.
 
-    @author Christopher Woods
-*/
-class SIRESTREAM_EXPORT magic_error : public SireError::exception
-{
-public:
-    magic_error() : exception()
-    {}
-
-    magic_error(QString err, QString place = QString())
-                  : exception(err,place)
-    {}
-
-    magic_error(MagicID wrongid,
-                const RegisterMetaTypeBase &info,
-                QString place=QString())
-            : exception(QObject::tr(
-                    "Magic error for \"%1\". Got %2, but expected %3.")
-                        .arg(info.typeName()).arg(wrongid).arg(info.magicID()), place)
-    {}
-
-    magic_error(MagicID wrongid, MagicID rightid, const char *type_name,
-                QString place=QString())
-            : exception(QObject::tr(
-                    "Magic error for \"%1\". Got %2, but expected %3.")
-                        .arg(type_name).arg(wrongid).arg(rightid), place)
-    {}
-
-    magic_error(const magic_error &other) : exception(other)
-    {}
-
-    ~magic_error() throw()
-    {}
-
-    static const char* typeName();
-
-    const char* what() const throw()
+        @author Christopher Woods
+    */
+    class SIRESTREAM_EXPORT magic_error : public SireError::exception
     {
-        return magic_error::typeName();
-    }
+    public:
+        magic_error() : exception()
+        {
+        }
 
-    void throwSelf() const
-    {
-        throw magic_error(*this);
-    }
-};
+        magic_error(QString err, QString place = QString()) : exception(err, place)
+        {
+        }
 
-}
+        magic_error(MagicID wrongid, const RegisterMetaTypeBase &info, QString place = QString())
+            : exception(QObject::tr("Magic error for \"%1\". Got %2, but expected %3.")
+                            .arg(info.typeName())
+                            .arg(wrongid)
+                            .arg(info.magicID()),
+                        place)
+        {
+        }
+
+        magic_error(MagicID wrongid, MagicID rightid, const char *type_name, QString place = QString())
+            : exception(
+                  QObject::tr("Magic error for \"%1\". Got %2, but expected %3.").arg(type_name).arg(wrongid).arg(rightid),
+                  place)
+        {
+        }
+
+        magic_error(const magic_error &other) : exception(other)
+        {
+        }
+
+        ~magic_error() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return magic_error::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw magic_error(*this);
+        }
+    };
+
+} // namespace SireStream
 
 Q_DECLARE_METATYPE(SireStream::magic_error);
 

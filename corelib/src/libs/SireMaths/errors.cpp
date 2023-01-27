@@ -29,14 +29,14 @@
 
 using namespace SireMaths;
 
-const char* math_error::typeName()
+const char *math_error::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<math_error>() );
+    return QMetaType::typeName(qMetaTypeId<math_error>());
 }
 
-const char* domain_error::typeName()
+const char *domain_error::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<domain_error>() );
+    return QMetaType::typeName(qMetaTypeId<domain_error>());
 }
 
 static const RegisterMetaType<math_error> r_math;

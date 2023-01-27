@@ -38,121 +38,102 @@ SIRE_BEGIN_HEADER
 namespace SireMove
 {
 
-using SireCluster::Node;
+    using SireCluster::Node;
 
-/** This class is used start and manage an active
-    simulation. A simulation consists of a collection
-    of moves that are being applied to a System
+    /** This class is used start and manage an active
+        simulation. A simulation consists of a collection
+        of moves that are being applied to a System
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT Simulation
-{
-public:
-    Simulation();
-    Simulation(const Simulation &other);
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT Simulation
+    {
+    public:
+        Simulation();
+        Simulation(const Simulation &other);
 
-    ~Simulation();
+        ~Simulation();
 
-    Simulation& operator=(const Simulation &other);
+        Simulation &operator=(const Simulation &other);
 
-    bool operator==(const Simulation &other) const;
-    bool operator!=(const Simulation &other) const;
+        bool operator==(const Simulation &other) const;
+        bool operator!=(const Simulation &other) const;
 
-    static Simulation run( const System &system, const Moves &moves,
-                           int nmoves, bool record_stats=true );
+        static Simulation run(const System &system, const Moves &moves, int nmoves, bool record_stats = true);
 
-    static Simulation run( const System &system, const Moves &moves,
-                           int nmoves, int nmoves_per_chunk,
-                           bool record_stats=true );
+        static Simulation run(const System &system, const Moves &moves, int nmoves, int nmoves_per_chunk,
+                              bool record_stats = true);
 
-    static Simulation run( const System &system, const Move &move,
-                           int nmoves, bool record_stats=true );
+        static Simulation run(const System &system, const Move &move, int nmoves, bool record_stats = true);
 
-    static Simulation run( const System &system, const Move &move,
-                           int nmoves, int nmoves_per_chunk,
-                           bool record_stats=true );
+        static Simulation run(const System &system, const Move &move, int nmoves, int nmoves_per_chunk,
+                              bool record_stats = true);
 
-    static Simulation run( const SimStore &simstore,
-                           int nmoves, bool record_stats=true );
+        static Simulation run(const SimStore &simstore, int nmoves, bool record_stats = true);
 
-    static Simulation run( const SimStore &simstore,
-                           int nmoves, int nmoves_per_chunk,
-                           bool record_stats=true );
+        static Simulation run(const SimStore &simstore, int nmoves, int nmoves_per_chunk, bool record_stats = true);
 
-    static Simulation run( const SimPacket &simpacket );
+        static Simulation run(const SimPacket &simpacket);
 
-    static Simulation run( Node &node,
-                           const System &system, const Moves &moves,
-                           int nmoves, bool record_stats=true );
+        static Simulation run(Node &node, const System &system, const Moves &moves, int nmoves, bool record_stats = true);
 
-    static Simulation run( Node &node,
-                           const System &system, const Moves &moves,
-                           int nmoves, int nmoves_per_chunk,
-                           bool record_stats=true );
+        static Simulation run(Node &node, const System &system, const Moves &moves, int nmoves, int nmoves_per_chunk,
+                              bool record_stats = true);
 
-    static Simulation run( Node &node,
-                           const System &system, const Move &move,
-                           int nmoves, bool record_stats=true );
+        static Simulation run(Node &node, const System &system, const Move &move, int nmoves, bool record_stats = true);
 
-    static Simulation run( Node &node,
-                           const System &system, const Move &move,
-                           int nmoves, int nmoves_per_chunk,
-                           bool record_stats=true );
+        static Simulation run(Node &node, const System &system, const Move &move, int nmoves, int nmoves_per_chunk,
+                              bool record_stats = true);
 
-    static Simulation run( Node &node,
-                           const SimStore &simstore,
-                           int nmoves, bool record_stats=true );
+        static Simulation run(Node &node, const SimStore &simstore, int nmoves, bool record_stats = true);
 
-    static Simulation run( Node &node,
-                           const SimStore &simstore,
-                           int nmoves, int nmoves_per_chunk,
-                           bool record_stats=true );
+        static Simulation run(Node &node, const SimStore &simstore, int nmoves, int nmoves_per_chunk,
+                              bool record_stats = true);
 
-    static Simulation run( Node &node, const SimPacket &simpacket );
+        static Simulation run(Node &node, const SimPacket &simpacket);
 
-    void abort();
-    void stop();
+        void abort();
+        void stop();
 
-    void wait();
-    bool wait(int timeout);
+        void wait();
+        bool wait(int timeout);
 
-    bool isRunning();
+        bool isRunning();
 
-    bool isError();
-    void throwError();
+        bool isError();
+        void throwError();
 
-    bool wasStopped();
+        bool wasStopped();
 
-    bool wasAborted();
+        bool wasAborted();
 
-    bool hasFinished();
+        bool hasFinished();
 
-    float progress();
+        float progress();
 
-    SimPacket input();
-    SimPacket interimResult();
-    SimPacket result();
+        SimPacket input();
+        SimPacket interimResult();
+        SimPacket result();
 
-    System initialSystem();
-    MovesPtr initialMoves();
+        System initialSystem();
+        MovesPtr initialMoves();
 
-    System interimSystem();
-    MovesPtr interimMoves();
+        System interimSystem();
+        MovesPtr interimMoves();
 
-    System system();
-    MovesPtr moves();
+        System system();
+        MovesPtr moves();
 
-private:
-    Simulation(const SireCluster::Promise &promise);
+    private:
+        Simulation(const SireCluster::Promise &promise);
 
-    /** The promise holding the running simulation */
-    SireCluster::Promise sim_promise;
-};
+        /** The promise holding the running simulation */
+        SireCluster::Promise sim_promise;
+    };
 
-}
+} // namespace SireMove
 
-SIRE_EXPOSE_CLASS( SireMove::Simulation )
+SIRE_EXPOSE_CLASS(SireMove::Simulation)
 
 SIRE_END_HEADER
 

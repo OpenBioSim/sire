@@ -65,31 +65,33 @@ QDataStream &operator>>(QDataStream &ds, PointCharge &q)
 
 /** Constructor */
 PointCharge::PointCharge() : q(0)
-{}
+{
+}
 
 /** Construct a point charge at the specified location with the
     specified charge */
-PointCharge::PointCharge(const Vector &coords, const Charge &charge)
-            : cent(coords), q(charge.to(mod_electron))
-{}
+PointCharge::PointCharge(const Vector &coords, const Charge &charge) : cent(coords), q(charge.to(mod_electron))
+{
+}
 
 /** Construct a point charge at the specified location with the
     specified charge */
-PointCharge::PointCharge(const Charge &charge, const Vector &coords)
-            : cent(coords), q(charge.to(mod_electron))
-{}
+PointCharge::PointCharge(const Charge &charge, const Vector &coords) : cent(coords), q(charge.to(mod_electron))
+{
+}
 
 /** Copy constructor */
-PointCharge::PointCharge(const PointCharge &other)
-            : cent(other.cent), q(other.q)
-{}
+PointCharge::PointCharge(const PointCharge &other) : cent(other.cent), q(other.q)
+{
+}
 
 /** Destructor */
 PointCharge::~PointCharge()
-{}
+{
+}
 
 /** Copy assignment operator */
-PointCharge& PointCharge::operator=(const PointCharge &other)
+PointCharge &PointCharge::operator=(const PointCharge &other)
 {
     cent = other.cent;
     q = other.q;
@@ -109,7 +111,7 @@ bool PointCharge::operator!=(const PointCharge &other) const
 }
 
 /** Return the location of this point charge */
-const Vector& PointCharge::center() const
+const Vector &PointCharge::center() const
 {
     return cent;
 }
@@ -120,7 +122,7 @@ double PointCharge::charge() const
     return q;
 }
 
-const char* PointCharge::typeName()
+const char *PointCharge::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<PointCharge>() );
+    return QMetaType::typeName(qMetaTypeId<PointCharge>());
 }

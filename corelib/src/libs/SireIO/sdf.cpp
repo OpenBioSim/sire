@@ -25,7 +25,6 @@
   *
 \*********************************************/
 
-
 #include "SireIO/sdf.h"
 
 #include "SireSystem/system.h"
@@ -44,18 +43,18 @@
 #include "SireMol/atomcoords.h"
 #include "SireMol/atomelements.h"
 #include "SireMol/atommasses.h"
-#include "SireMol/atomradicals.h"
 #include "SireMol/atompropertylist.h"
+#include "SireMol/atomradicals.h"
+#include "SireMol/bondid.h"
+#include "SireMol/bondtype.h"
+#include "SireMol/connectivity.h"
+#include "SireMol/core.h"
 #include "SireMol/errors.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleditor.h"
-#include "SireMol/connectivity.h"
-#include "SireMol/bondid.h"
-#include "SireMol/bondtype.h"
-#include "SireMol/stereoscopy.h"
 #include "SireMol/radical.h"
+#include "SireMol/stereoscopy.h"
 #include "SireMol/trajectory.h"
-#include "SireMol/core.h"
 
 #include "SireBase/propertylist.h"
 
@@ -73,500 +72,501 @@ using namespace SireStream;
 using namespace SireSystem;
 using namespace SireUnits;
 
-namespace SireIO { namespace detail {
-
-class SDFAtom
+namespace SireIO
 {
-public:
-    SDFAtom() : x(0), y(0), z(0), mass_difference(0), chg_difference(0)
-    {}
-
-    ~SDFAtom()
-    {}
-
-    QString toString() const
+    namespace detail
     {
-        return QString("%1  %2 %3 %4  %5 %6  %7")
-                .arg(name).arg(x).arg(y).arg(z)
-                .arg(mass_difference).arg(chg_difference)
-                .arg(fields.join(":"));
-    }
 
-    void completeFields()
-    {
-        while (fields.count() < 10)
+        class SDFAtom
         {
-            fields.append("0");
-        }
-    }
+        public:
+            SDFAtom() : x(0), y(0), z(0), mass_difference(0), chg_difference(0)
+            {
+            }
 
-    bool isDoubletRadical() const
-    {
-        return chg_difference == 4;
-    }
+            ~SDFAtom()
+            {
+            }
 
-    QString name;
-    double x;
-    double y;
-    double z;
-    qint32 mass_difference;
-    qint32 chg_difference;
-    QStringList fields;
-};
-
-class SDFBond
-{
-public:
-    SDFBond() : atom0(0), atom1(0), typ(0), stereoscopy(0)
-    {}
-
-    ~SDFBond()
-    {}
-
-    QString toString() const
-    {
-        return QString("%1-%2  %3  %4  %5")
-                    .arg(atom0).arg(atom1)
-                    .arg(typ).arg(stereoscopy)
+            QString toString() const
+            {
+                return QString("%1  %2 %3 %4  %5 %6  %7")
+                    .arg(name)
+                    .arg(x)
+                    .arg(y)
+                    .arg(z)
+                    .arg(mass_difference)
+                    .arg(chg_difference)
                     .arg(fields.join(":"));
-    }
-
-    void completeFields()
-    {
-        while (fields.count() < 3)
-        {
-            fields.append("0");
-        }
-    }
-
-    qint32 atom0;
-    qint32 atom1;
-    qint32 typ;
-    qint32 stereoscopy;
-    QStringList fields;
-};
-
-class SDFMolecule
-{
-public:
-    SDFMolecule()
-    {}
-
-    ~SDFMolecule()
-    {}
-
-    bool isValid() const
-    {
-        return atoms.count() > 0;
-    }
-
-    QString toString() const
-    {
-        QStringList lines;
-
-        lines.append(QString("name = %1").arg(name));
-        lines.append(QString("software = %1").arg(software));
-        lines.append(QString("comment = %1").arg(comment));
-
-        lines.append(QString("counts: %1").arg(counts.join(" ")));
-
-        lines.append(QString("nAtoms == %1").arg(atoms.count()));
-
-        for (auto atom : atoms)
-        {
-            lines.append(atom.toString());
-        }
-
-        lines.append(QString("nBonds == %1").arg(bonds.count()));
-
-        for (auto bond : bonds)
-        {
-            lines.append(bond.toString());
-        }
-
-        for (auto key : properties.keys())
-        {
-            lines.append(QString("property %1").arg(key));
-
-            for (auto s : properties[key])
-            {
-                lines.append(s);
             }
-        }
 
-        for (auto key : data.keys())
-        {
-            lines.append(QString("data %1").arg(key));
-
-            for (auto s : data[key])
+            void completeFields()
             {
-                lines.append(s);
-            }
-        }
-
-        return lines.join("\n");
-    }
-
-    int getCharge(int i) const
-    {
-        // NEED TO LOOK FOR THE M  CHG PROPERTIES FIRST!
-        parseProperties("CHG");
-
-        if (parsed_properties["CHG"].contains(i))
-        {
-            bool ok;
-            int chg = parsed_properties["CHG"][i].toInt(&ok);
-
-            if (ok)
-                return chg;
-        }
-
-        switch(atoms[i].chg_difference)
-        {
-            case 0:
-                return 0;
-            case 1:
-                return 1;
-            case 2:
-                return 2;
-            case 3:
-                return 3;
-            case 4:
-                return 0;
-            case 5:
-                return -1;
-            case 6:
-                return -2;
-            case 7:
-                return -3;
-            default:
-                throw SireError::program_bug(
-                    QObject::tr("Strange charge? %1").arg(atoms[i].chg_difference)
-                );
-        }
-    }
-
-    Element getElement(int i) const
-    {
-        return Element(atoms[i].name);
-    }
-
-    double getMass(int i) const
-    {
-        // NEED TO LOOK FOR THE M  CHG PROPERTIES FIRST!
-        parseProperties("ISO");
-
-        auto mass = int(getElement(i).mass().to(g_per_mol) + 0.5);
-
-        if (parsed_properties["ISO"].contains(i))
-        {
-            bool ok;
-            double m = parsed_properties["ISO"][i].toDouble(&ok);
-
-            if (ok)
-                return mass + m;
-        }
-
-        return mass + atoms[i].mass_difference;
-    }
-
-    void completeCounts()
-    {
-        while (counts.count() < 10)
-        {
-            counts.append("0");
-        }
-    }
-
-    void addProperty(const QString &id, int index, const QString &value)
-    {
-        if (not properties.contains(id))
-        {
-            properties.insert(id, QStringList());
-        }
-
-        auto v = value.trimmed();
-        v.truncate(4);
-
-        properties[id].append(QString("  1%1%2")
-                                .arg(index, 4)
-                                .arg(v, 4));
-    }
-
-    void parseProperties(const QString &key) const
-    {
-        if (parsed_properties.contains(key))
-            return;
-
-        if (properties.contains(key))
-        {
-            QHash<qint32, QString> props;
-
-            for (const auto &line : properties[key])
-            {
-                if (line.length() < 3)
-                    continue;
-
-                bool ok;
-                int nvals = line.midRef(0, 3).toInt(&ok);
-
-                if (not ok)
-                    continue;
-
-                if (nvals <= 0)
-                    continue;
-
-                if (line.length() < 3 + (nvals*8))
-                    continue;
-
-                for (int i=0; i<nvals; ++i)
+                while (fields.count() < 10)
                 {
-                    int idx = line.midRef(3+(i*8),4).toInt(&ok);
+                    fields.append("0");
+                }
+            }
 
-                    if (not ok)
+            bool isDoubletRadical() const
+            {
+                return chg_difference == 4;
+            }
+
+            QString name;
+            double x;
+            double y;
+            double z;
+            qint32 mass_difference;
+            qint32 chg_difference;
+            QStringList fields;
+        };
+
+        class SDFBond
+        {
+        public:
+            SDFBond() : atom0(0), atom1(0), typ(0), stereoscopy(0)
+            {
+            }
+
+            ~SDFBond()
+            {
+            }
+
+            QString toString() const
+            {
+                return QString("%1-%2  %3  %4  %5").arg(atom0).arg(atom1).arg(typ).arg(stereoscopy).arg(fields.join(":"));
+            }
+
+            void completeFields()
+            {
+                while (fields.count() < 3)
+                {
+                    fields.append("0");
+                }
+            }
+
+            qint32 atom0;
+            qint32 atom1;
+            qint32 typ;
+            qint32 stereoscopy;
+            QStringList fields;
+        };
+
+        class SDFMolecule
+        {
+        public:
+            SDFMolecule()
+            {
+            }
+
+            ~SDFMolecule()
+            {
+            }
+
+            bool isValid() const
+            {
+                return atoms.count() > 0;
+            }
+
+            QString toString() const
+            {
+                QStringList lines;
+
+                lines.append(QString("name = %1").arg(name));
+                lines.append(QString("software = %1").arg(software));
+                lines.append(QString("comment = %1").arg(comment));
+
+                lines.append(QString("counts: %1").arg(counts.join(" ")));
+
+                lines.append(QString("nAtoms == %1").arg(atoms.count()));
+
+                for (auto atom : atoms)
+                {
+                    lines.append(atom.toString());
+                }
+
+                lines.append(QString("nBonds == %1").arg(bonds.count()));
+
+                for (auto bond : bonds)
+                {
+                    lines.append(bond.toString());
+                }
+
+                for (auto key : properties.keys())
+                {
+                    lines.append(QString("property %1").arg(key));
+
+                    for (auto s : properties[key])
+                    {
+                        lines.append(s);
+                    }
+                }
+
+                for (auto key : data.keys())
+                {
+                    lines.append(QString("data %1").arg(key));
+
+                    for (auto s : data[key])
+                    {
+                        lines.append(s);
+                    }
+                }
+
+                return lines.join("\n");
+            }
+
+            int getCharge(int i) const
+            {
+                // NEED TO LOOK FOR THE M  CHG PROPERTIES FIRST!
+                parseProperties("CHG");
+
+                if (parsed_properties["CHG"].contains(i))
+                {
+                    bool ok;
+                    int chg = parsed_properties["CHG"][i].toInt(&ok);
+
+                    if (ok)
+                        return chg;
+                }
+
+                switch (atoms[i].chg_difference)
+                {
+                case 0:
+                    return 0;
+                case 1:
+                    return 1;
+                case 2:
+                    return 2;
+                case 3:
+                    return 3;
+                case 4:
+                    return 0;
+                case 5:
+                    return -1;
+                case 6:
+                    return -2;
+                case 7:
+                    return -3;
+                default:
+                    throw SireError::program_bug(QObject::tr("Strange charge? %1").arg(atoms[i].chg_difference));
+                }
+            }
+
+            Element getElement(int i) const
+            {
+                return Element(atoms[i].name);
+            }
+
+            double getMass(int i) const
+            {
+                // NEED TO LOOK FOR THE M  CHG PROPERTIES FIRST!
+                parseProperties("ISO");
+
+                auto mass = int(getElement(i).mass().to(g_per_mol) + 0.5);
+
+                if (parsed_properties["ISO"].contains(i))
+                {
+                    bool ok;
+                    double m = parsed_properties["ISO"][i].toDouble(&ok);
+
+                    if (ok)
+                        return mass + m;
+                }
+
+                return mass + atoms[i].mass_difference;
+            }
+
+            void completeCounts()
+            {
+                while (counts.count() < 10)
+                {
+                    counts.append("0");
+                }
+            }
+
+            void addProperty(const QString &id, int index, const QString &value)
+            {
+                if (not properties.contains(id))
+                {
+                    properties.insert(id, QStringList());
+                }
+
+                auto v = value.trimmed();
+                v.truncate(4);
+
+                properties[id].append(QString("  1%1%2").arg(index, 4).arg(v, 4));
+            }
+
+            void parseProperties(const QString &key) const
+            {
+                if (parsed_properties.contains(key))
+                    return;
+
+                if (properties.contains(key))
+                {
+                    QHash<qint32, QString> props;
+
+                    for (const auto &line : properties[key])
+                    {
+                        if (line.length() < 3)
+                            continue;
+
+                        bool ok;
+                        int nvals = line.midRef(0, 3).toInt(&ok);
+
+                        if (not ok)
+                            continue;
+
+                        if (nvals <= 0)
+                            continue;
+
+                        if (line.length() < 3 + (nvals * 8))
+                            continue;
+
+                        for (int i = 0; i < nvals; ++i)
+                        {
+                            int idx = line.midRef(3 + (i * 8), 4).toInt(&ok);
+
+                            if (not ok)
+                                continue;
+
+                            props.insert(idx - 1, line.mid(7 + (i * 8), 4));
+                        }
+                    }
+
+                    const_cast<SDFMolecule *>(this)->parsed_properties.insert(key, props);
+                }
+            }
+
+            bool hasID() const
+            {
+                return data.contains("ID");
+            }
+
+            QString getID() const
+            {
+                return data["ID"][0];
+            }
+
+            void setID(const QString &ID)
+            {
+                if (not data.contains("ID"))
+                {
+                    data.insert("ID", QStringList(ID));
+                }
+                else if (data["ID"].count() == 0)
+                {
+                    data["ID"].append(ID);
+                }
+                else
+                {
+                    data["ID"][0] = ID;
+                }
+            }
+
+            Properties getData() const
+            {
+                Properties props;
+
+                for (const auto &id : data.keys())
+                {
+                    if (data[id].count() == 1)
+                    {
+                        props.setProperty(id, SireBase::wrap(data[id][0]));
+                    }
+                    else if (data[id].count() > 1)
+                    {
+                        props.setProperty(id, SireBase::wrap(data[id]));
+                    }
+                }
+
+                return props;
+            }
+
+            void setData(const Properties &props)
+            {
+                data.clear();
+
+                for (const auto &key : props.propertyKeys())
+                {
+                    auto k = key.trimmed();
+                    k.truncate(195);
+                    if (k.count() == 0)
+
+                        if (not data.contains(k))
+                        {
+                            data.insert(k, QStringList());
+                        }
+
+                    auto all_props = props.property(key).asAnArray();
+
+                    for (int i = 0; i < all_props.count(); ++i)
+                    {
+                        const auto &v = all_props[i];
+                        auto l = v.asAString().trimmed().replace("\n", " ");
+                        l.truncate(200);
+                        data[k].append(l);
+                    }
+                }
+            }
+
+            Properties getProperties() const
+            {
+                Properties props;
+
+                for (const auto &id : properties.keys())
+                {
+                    if (id == "ISO" or id == "CHG")
                         continue;
 
-                    props.insert(idx-1, line.mid(7+(i*8), 4));
+                    if (properties[id].count() == 1)
+                    {
+                        props.setProperty(id, SireBase::wrap(properties[id][0]));
+                    }
+                    else if (properties[id].count() > 1)
+                    {
+                        props.setProperty(id, SireBase::wrap(properties[id]));
+                    }
                 }
+
+                return props;
             }
 
-            const_cast<SDFMolecule*>(this)->parsed_properties.insert(key, props);
-        }
-    }
-
-    bool hasID() const
-    {
-        return data.contains("ID");
-    }
-
-    QString getID() const
-    {
-        return data["ID"][0];
-    }
-
-    void setID(const QString &ID)
-    {
-        if (not data.contains("ID"))
-        {
-            data.insert("ID", QStringList(ID));
-        }
-        else if (data["ID"].count() == 0)
-        {
-            data["ID"].append(ID);
-        }
-        else
-        {
-            data["ID"][0] = ID;
-        }
-    }
-
-    Properties getData() const
-    {
-        Properties props;
-
-        for (const auto &id : data.keys())
-        {
-            if (data[id].count() == 1)
+            void setProperties(const Properties &props)
             {
-                props.setProperty(id, SireBase::wrap(data[id][0]));
-            }
-            else if (data[id].count() > 1)
-            {
-                props.setProperty(id, SireBase::wrap(data[id]));
-            }
-        }
+                properties.clear();
 
-        return props;
-    }
-
-    void setData(const Properties &props)
-    {
-        data.clear();
-
-        for (const auto &key : props.propertyKeys())
-        {
-            auto k = key.trimmed();
-            k.truncate(195);
-            if (k.count() == 0)
-
-            if (not data.contains(k))
-            {
-                data.insert(k, QStringList());
-            }
-
-            auto all_props = props.property(key).asAnArray();
-
-            for (int i=0; i<all_props.count(); ++i)
-            {
-                const auto &v = all_props[i];
-                auto l = v.asAString().trimmed().replace("\n", " ");
-                l.truncate(200);
-                data[k].append(l);
-            }
-        }
-    }
-
-    Properties getProperties() const
-    {
-        Properties props;
-
-        for (const auto &id : properties.keys())
-        {
-            if (id == "ISO" or id == "CHG")
-                continue;
-
-            if (properties[id].count() == 1)
-            {
-                props.setProperty(id, SireBase::wrap(properties[id][0]));
-            }
-            else if (properties[id].count() > 1)
-            {
-                props.setProperty(id, SireBase::wrap(properties[id]));
-            }
-        }
-
-        return props;
-    }
-
-    void setProperties(const Properties &props)
-    {
-        properties.clear();
-
-        for (const auto &id : props.propertyKeys())
-        {
-            auto k = id.trimmed();
-            k.truncate(3);
-
-            if (not properties.contains(k))
-            {
-                properties.insert(k, QStringList());
-            }
-
-            auto all_props = props.property(id).asAnArray();
-
-            for (int i=0; i<all_props.count(); ++i)
-            {
-                const auto &v = all_props[i];
-                auto l = v.asAString().trimmed().replace("\n", " ");
-                l.truncate(200);
-
-                // should really do some validation that this is correct...
-                QStringList parts = l.split(" ", Qt::SkipEmptyParts);
-
-                if (parts.count() == 0)
-                    continue;
-
-                bool ok;
-                int nvals = parts[0].toInt(&ok);
-
-                if (not ok)
-                    continue;
-
-                if (nvals > 999)
-                    nvals = 999;
-                else if (nvals < 0)
-                    nvals = 0;
-
-                parts[0] = QString("%1").arg(nvals, 3);
-
-                for (int j=1; j<parts.count(); ++j)
+                for (const auto &id : props.propertyKeys())
                 {
-                    int val = parts[j].toInt(&ok);
+                    auto k = id.trimmed();
+                    k.truncate(3);
 
-                    if (not ok)
-                        val = 0;
+                    if (not properties.contains(k))
+                    {
+                        properties.insert(k, QStringList());
+                    }
 
-                    if (val > 9999)
-                        val = 9999;
-                    else if (val < -999)
-                        val = -999;
+                    auto all_props = props.property(id).asAnArray();
 
-                    parts[j] = QString("%1").arg(val, 4);
+                    for (int i = 0; i < all_props.count(); ++i)
+                    {
+                        const auto &v = all_props[i];
+                        auto l = v.asAString().trimmed().replace("\n", " ");
+                        l.truncate(200);
+
+                        // should really do some validation that this is correct...
+                        QStringList parts = l.split(" ", Qt::SkipEmptyParts);
+
+                        if (parts.count() == 0)
+                            continue;
+
+                        bool ok;
+                        int nvals = parts[0].toInt(&ok);
+
+                        if (not ok)
+                            continue;
+
+                        if (nvals > 999)
+                            nvals = 999;
+                        else if (nvals < 0)
+                            nvals = 0;
+
+                        parts[0] = QString("%1").arg(nvals, 3);
+
+                        for (int j = 1; j < parts.count(); ++j)
+                        {
+                            int val = parts[j].toInt(&ok);
+
+                            if (not ok)
+                                val = 0;
+
+                            if (val > 9999)
+                                val = 9999;
+                            else if (val < -999)
+                                val = -999;
+
+                            parts[j] = QString("%1").arg(val, 4);
+                        }
+
+                        properties[k].append(parts.join(""));
+                    }
                 }
-
-                properties[k].append(parts.join(""));
             }
-        }
-    }
 
-    QStringList getCounts() const
-    {
-        return counts;
-    }
-
-    void setCounts(const Property &vals)
-    {
-        auto values = vals.asAnArray();
-
-        counts.clear();
-
-        for (int i=0; i<values.count(); ++i)
-        {
-            auto value = values[i].asAString().trimmed();
-
-            if (i < 9)
+            QStringList getCounts() const
             {
-                value.truncate(3);
-                counts.append(QString("%1").arg(value, -3));
+                return counts;
             }
-            else if (i == 9)
+
+            void setCounts(const Property &vals)
             {
-                value.truncate(6);
-                counts.append(QString("%1").arg(value, -6));
+                auto values = vals.asAnArray();
+
+                counts.clear();
+
+                for (int i = 0; i < values.count(); ++i)
+                {
+                    auto value = values[i].asAString().trimmed();
+
+                    if (i < 9)
+                    {
+                        value.truncate(3);
+                        counts.append(QString("%1").arg(value, -3));
+                    }
+                    else if (i == 9)
+                    {
+                        value.truncate(6);
+                        counts.append(QString("%1").arg(value, -6));
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
             }
-            else
-            {
-                break;
-            }
-        }
-    }
 
-    QString name;
-    QString software;
-    QString comment;
-    QStringList counts;
+            QString name;
+            QString software;
+            QString comment;
+            QStringList counts;
 
-    QVector<SDFAtom> atoms;
-    QVector<SDFBond> bonds;
+            QVector<SDFAtom> atoms;
+            QVector<SDFBond> bonds;
 
-    QHash<QString, QStringList> properties;
-    QHash<QString, QStringList> data;
+            QHash<QString, QStringList> properties;
+            QHash<QString, QStringList> data;
 
-    QHash< QString, QHash<qint32,QString> > parsed_properties;
-};
+            QHash<QString, QHash<qint32, QString>> parsed_properties;
+        };
 
-}} // end of namespace SireIO::detail
+    } // namespace detail
+} // namespace SireIO
 
 QDataStream &operator<<(QDataStream &ds, const SireIO::detail::SDFAtom &atom)
 {
-    ds << atom.name << atom.x << atom.y << atom.z
-       << atom.chg_difference << atom.mass_difference
-       << atom.fields;
+    ds << atom.name << atom.x << atom.y << atom.z << atom.chg_difference << atom.mass_difference << atom.fields;
 
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, SireIO::detail::SDFAtom &atom)
 {
-    ds >> atom.name >> atom.x >> atom.y >> atom.z
-       >> atom.chg_difference >> atom.mass_difference
-       >> atom.fields;
+    ds >> atom.name >> atom.x >> atom.y >> atom.z >> atom.chg_difference >> atom.mass_difference >> atom.fields;
 
     return ds;
 }
 
 QDataStream &operator<<(QDataStream &ds, const SireIO::detail::SDFBond &bond)
 {
-    ds << bond.atom0 << bond.atom1 << bond.typ
-       << bond.stereoscopy << bond.fields;
+    ds << bond.atom0 << bond.atom1 << bond.typ << bond.stereoscopy << bond.fields;
 
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, SireIO::detail::SDFBond &bond)
 {
-    ds >> bond.atom0 >> bond.atom1 >> bond.typ
-       >> bond.stereoscopy >> bond.fields;
+    ds >> bond.atom0 >> bond.atom1 >> bond.typ >> bond.stereoscopy >> bond.fields;
 
     return ds;
 }
@@ -594,8 +594,7 @@ QDataStream &operator<<(QDataStream &ds, const SDF &sdf)
 
     SharedDataStream sds(ds);
 
-    sds << sdf.molecules << sdf.parse_warnings
-        << static_cast<const MoleculeParser&>(sdf);
+    sds << sdf.molecules << sdf.parse_warnings << static_cast<const MoleculeParser &>(sdf);
 
     return ds;
 }
@@ -608,8 +607,7 @@ QDataStream &operator>>(QDataStream &ds, SDF &sdf)
     {
         SharedDataStream sds(ds);
 
-        sds >> sdf.molecules >> sdf.parse_warnings
-            >> static_cast<MoleculeParser&>(sdf);
+        sds >> sdf.molecules >> sdf.parse_warnings >> static_cast<MoleculeParser &>(sdf);
     }
     else
         throw version_error(v, "1", r_sdf, CODELOC);
@@ -618,46 +616,45 @@ QDataStream &operator>>(QDataStream &ds, SDF &sdf)
 }
 
 /** Constructor */
-SDF::SDF() : ConcreteProperty<SDF,MoleculeParser>()
-{}
+SDF::SDF() : ConcreteProperty<SDF, MoleculeParser>()
+{
+}
 
 /** Construct to read in the data from the file called 'filename'. The
     passed property map can be used to pass extra parameters to control
     the parsing */
-SDF::SDF(const QString &filename, const PropertyMap &map) :
-    ConcreteProperty<SDF,MoleculeParser>(filename,map)
+SDF::SDF(const QString &filename, const PropertyMap &map) : ConcreteProperty<SDF, MoleculeParser>(filename, map)
 {
-    //the file has been read into memory and is available via
-    //the MoleculeParser::lines() function.
+    // the file has been read into memory and is available via
+    // the MoleculeParser::lines() function.
 
-    //a parameter has also been read in MoleculeParser to say whether
-    //we are allowed to use multiple cores to parse the file, e.g.
-    //MoleculeParser::usesParallel() will be true
+    // a parameter has also been read in MoleculeParser to say whether
+    // we are allowed to use multiple cores to parse the file, e.g.
+    // MoleculeParser::usesParallel() will be true
 
-    //parse the data in the parse function
+    // parse the data in the parse function
     this->parseLines(map);
 
-    //now make sure that everything is correct with this object
+    // now make sure that everything is correct with this object
     this->assertSane();
 }
 
 /** Construct to read in the data from the passed text lines. The
     passed property map can be used to pass extra parameters to control
     the parsing */
-SDF::SDF(const QStringList &lines, const PropertyMap &map) :
-    ConcreteProperty<SDF,MoleculeParser>(lines,map)
+SDF::SDF(const QStringList &lines, const PropertyMap &map) : ConcreteProperty<SDF, MoleculeParser>(lines, map)
 {
-    //the file has been read into memory and is available via
-    //the MoleculeParser::lines() function.
+    // the file has been read into memory and is available via
+    // the MoleculeParser::lines() function.
 
-    //a parameter has also been read in MoleculeParser to say whether
-    //we are allowed to use multiple cores to parse the file, e.g.
-    //MoleculeParser::usesParallel() will be true
+    // a parameter has also been read in MoleculeParser to say whether
+    // we are allowed to use multiple cores to parse the file, e.g.
+    // MoleculeParser::usesParallel() will be true
 
-    //parse the data in the parse function
+    // parse the data in the parse function
     this->parseLines(map);
 
-    //now make sure that everything is correct with this object
+    // now make sure that everything is correct with this object
     this->assertSane();
 }
 
@@ -671,16 +668,13 @@ QStringList toLines(const SDFMolecule &molecule)
 
     if (molecule.counts.size() != 10)
     {
-        throw SireError::program_bug(
-            QObject::tr("Problem with the counts line! %1")
-                    .arg(molecule.counts.join(",")), CODELOC);
+        throw SireError::program_bug(QObject::tr("Problem with the counts line! %1").arg(molecule.counts.join(",")),
+                                     CODELOC);
     }
 
-    QString count_line = QString("%1%2")
-                            .arg(molecule.atoms.count(), 3)
-                            .arg(molecule.bonds.count(), 3);
+    QString count_line = QString("%1%2").arg(molecule.atoms.count(), 3).arg(molecule.bonds.count(), 3);
 
-    for (int i=0; i<9; ++i)
+    for (int i = 0; i < 9; ++i)
     {
         QString count = molecule.counts[i].trimmed();
         count.truncate(3);
@@ -709,12 +703,11 @@ QStringList toLines(const SDFMolecule &molecule)
 
         if (atom.fields.count() != 10)
         {
-            throw SireError::program_bug(
-                QObject::tr("Problem with the atom line! %1")
-                        .arg(atom.fields.join(",")), CODELOC);
+            throw SireError::program_bug(QObject::tr("Problem with the atom line! %1").arg(atom.fields.join(",")),
+                                         CODELOC);
         }
 
-        for (int i=0; i<10; ++i)
+        for (int i = 0; i < 10; ++i)
         {
             QString f = atom.fields[i].trimmed();
             f.truncate(3);
@@ -726,20 +719,16 @@ QStringList toLines(const SDFMolecule &molecule)
 
     for (const auto &bond : molecule.bonds)
     {
-        QString bond_line = QString("%1%2%3%4")
-                                .arg(bond.atom0, 3)
-                                .arg(bond.atom1, 3)
-                                .arg(bond.typ, 3)
-                                .arg(bond.stereoscopy, 3);
+        QString bond_line =
+            QString("%1%2%3%4").arg(bond.atom0, 3).arg(bond.atom1, 3).arg(bond.typ, 3).arg(bond.stereoscopy, 3);
 
         if (bond.fields.count() != 3)
         {
-            throw SireError::program_bug(
-                QObject::tr("Problem with the bond line! %1")
-                        .arg(bond.fields.join(",")), CODELOC);
+            throw SireError::program_bug(QObject::tr("Problem with the bond line! %1").arg(bond.fields.join(",")),
+                                         CODELOC);
         }
 
-        for (int i=0; i<3; ++i)
+        for (int i = 0; i < 3; ++i)
         {
             QString f = bond.fields[i].trimmed();
             f.truncate(3);
@@ -786,8 +775,7 @@ QStringList toLines(const SDFMolecule &molecule)
     return lines;
 }
 
-QStringList toLines(const QList<SDFMolecule> &molecules,
-                    bool uses_parallel=false)
+QStringList toLines(const QList<SDFMolecule> &molecules, bool uses_parallel = false)
 {
     QStringList lines;
 
@@ -796,14 +784,12 @@ QStringList toLines(const QList<SDFMolecule> &molecules,
         QVector<QStringList> molecule_lines(molecules.count());
         QStringList *mollines_ptr = molecule_lines.data();
 
-        tbb::parallel_for(tbb::blocked_range<int>(0, molecules.count()),
-                          [&](const tbb::blocked_range<int> r)
-        {
-            for (int i=r.begin(); i<r.end(); ++i)
+        tbb::parallel_for(tbb::blocked_range<int>(0, molecules.count()), [&](const tbb::blocked_range<int> r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
             {
                 mollines_ptr[i] = ::toLines(molecules[i]);
-            }
-        });
+            } });
 
         for (const auto &l : molecule_lines)
         {
@@ -821,21 +807,21 @@ QStringList toLines(const QList<SDFMolecule> &molecules,
     return lines;
 }
 
-SDFMolecule parseMolecule(const Molecule &molecule,
-                          QStringList &errors,
-                          const PropertyMap &map)
+SDFMolecule parseMolecule(const Molecule &molecule, QStringList &errors, const PropertyMap &map)
 {
     // Store the number of atoms in the molecule.
     int num_atoms = molecule.nAtoms();
 
     // Early exit.
-    if (num_atoms == 0) return SDFMolecule();
+    if (num_atoms == 0)
+        return SDFMolecule();
 
     // TODO: Do we want a hard limit on the number of atoms?
     if (num_atoms > 999)
     {
         errors.append(QObject::tr("The number of atoms (%1) exceeds "
-            " the SDF file format limit (999)!").arg(num_atoms));
+                                  " the SDF file format limit (999)!")
+                          .arg(num_atoms));
 
         return SDFMolecule();
     }
@@ -844,8 +830,7 @@ SDFMolecule parseMolecule(const Molecule &molecule,
 
     if (molecule.hasProperty(map["connectivity"]))
     {
-        connectivity = molecule.property(
-                        map["connectivity"]).asA<Connectivity>();
+        connectivity = molecule.property(map["connectivity"]).asA<Connectivity>();
     }
 
     int num_bonds = connectivity.nConnections();
@@ -853,13 +838,14 @@ SDFMolecule parseMolecule(const Molecule &molecule,
     if (num_bonds > 999)
     {
         errors.append(QObject::tr("The number of bonds (%1) exceeds "
-            " the SDF file format limit (999)!").arg(num_bonds));
+                                  " the SDF file format limit (999)!")
+                          .arg(num_bonds));
     }
 
     if (not molecule.hasProperty(map["coordinates"]))
     {
         errors.append(QObject::tr("The molecule is missing a coordinates "
-              "property. This is needed for the SDF file!"));
+                                  "property. This is needed for the SDF file!"));
         return SDFMolecule();
     }
 
@@ -901,7 +887,7 @@ SDFMolecule parseMolecule(const Molecule &molecule,
         sdfmol.setCounts(molecule.property(map["sdf_counts"]));
     }
 
-    for (int i=0; i<num_atoms; ++i)
+    for (int i = 0; i < num_atoms; ++i)
     {
         const auto atom = molecule.atom(AtomIdx(i));
 
@@ -946,7 +932,7 @@ SDFMolecule parseMolecule(const Molecule &molecule,
 
                 if (diff > 4 or diff < -3)
                 {
-                    sdfmol.addProperty("ISO", i+1, QString::number(diff));
+                    sdfmol.addProperty("ISO", i + 1, QString::number(diff));
                     diff = 0;
                 }
 
@@ -966,27 +952,26 @@ SDFMolecule parseMolecule(const Molecule &molecule,
 
         if (atom.hasProperty(map["formal_charge"]))
         {
-            int charge = int(atom.property<SireUnits::Dimension::Charge>(
-                                                map["formal_charge"]).value());
+            int charge = int(atom.property<SireUnits::Dimension::Charge>(map["formal_charge"]).value());
 
             if (charge >= 4 or charge < -3)
             {
-                sdfmol.addProperty("CHG", i+1, QString::number(charge));
+                sdfmol.addProperty("CHG", i + 1, QString::number(charge));
                 charge = 0;
             }
             else if (charge < 0)
             {
-                switch(charge)
+                switch (charge)
                 {
-                    case -1:
-                        charge = 5;
-                        break;
-                    case -2:
-                        charge = 6;
-                        break;
-                    case -3:
-                        charge = 7;
-                        break;
+                case -1:
+                    charge = 5;
+                    break;
+                case -2:
+                    charge = 6;
+                    break;
+                case -3:
+                    charge = 7;
+                    break;
                 }
             }
 
@@ -1001,7 +986,7 @@ SDFMolecule parseMolecule(const Molecule &molecule,
             {
                 if (sdf_atom.chg_difference != 0)
                 {
-                    sdfmol.addProperty("CHG", i+1, QString::number(sdf_atom.chg_difference));
+                    sdfmol.addProperty("CHG", i + 1, QString::number(sdf_atom.chg_difference));
                 }
 
                 sdf_atom.chg_difference = 4;
@@ -1014,7 +999,7 @@ SDFMolecule parseMolecule(const Molecule &molecule,
 
             QStringList f;
 
-            for (int i=0; i<fields.count(); ++i)
+            for (int i = 0; i < fields.count(); ++i)
             {
                 auto af = fields[i].asAString().trimmed();
                 af.truncate(3);
@@ -1044,8 +1029,7 @@ SDFMolecule parseMolecule(const Molecule &molecule,
 
         if (connectivity.hasProperty(bond, map["type"]))
         {
-            auto bond_type = connectivity.property(bond,
-                                                   map["type"]).asA<BondType>();
+            auto bond_type = connectivity.property(bond, map["type"]).asA<BondType>();
 
             sdfbond.typ = bond_type.sdfValue();
         }
@@ -1056,8 +1040,7 @@ SDFMolecule parseMolecule(const Molecule &molecule,
 
         if (connectivity.hasProperty(bond, map["stereoscopy"]))
         {
-            auto stereo = connectivity.property(bond,
-                                                map["stereoscopy"]).asA<Stereoscopy>();
+            auto stereo = connectivity.property(bond, map["stereoscopy"]).asA<Stereoscopy>();
 
             sdfbond.stereoscopy = stereo.sdfValue();
         }
@@ -1068,12 +1051,11 @@ SDFMolecule parseMolecule(const Molecule &molecule,
 
         if (connectivity.hasProperty(bond, map["sdf_fields"]))
         {
-            auto fields = connectivity.property(bond,
-                                                map["sdf_fields"]).asAnArray();
+            auto fields = connectivity.property(bond, map["sdf_fields"]).asAnArray();
 
             QStringList f;
 
-            for (int i=0; i<fields.count(); ++i)
+            for (int i = 0; i < fields.count(); ++i)
             {
                 auto bf = fields[i].asAString().trimmed();
                 bf.truncate(3);
@@ -1100,8 +1082,7 @@ SDFMolecule parseMolecule(const Molecule &molecule,
 /** Construct this parser by extracting all necessary information from the
     passed SireSystem::System, looking for the properties that are specified
     in the passed property map */
-SDF::SDF(const SireSystem::System &system, const PropertyMap &map) :
-    ConcreteProperty<SDF,MoleculeParser>(map)
+SDF::SDF(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<SDF, MoleculeParser>(map)
 {
     // Get the MolNums of each molecule in the System - this returns the
     // numbers in MolIdx order.
@@ -1125,17 +1106,15 @@ SDF::SDF(const SireSystem::System &system, const PropertyMap &map) :
     {
         QMutex mutex;
 
-        tbb::parallel_for(tbb::blocked_range<int>(0, nmols),
-                          [&](const tbb::blocked_range<int> r)
-        {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](const tbb::blocked_range<int> r)
+                          {
             // Create local data objects.
             QStringList local_errors;
 
-            for (int i=r.begin(); i<r.end(); ++i)
+            for (int i = r.begin(); i < r.end(); ++i)
             {
                 // Now parse the rest of the molecular data, i.e. atoms, residues, etc.
-                mols_ptr[i] = parseMolecule(system[molnums[i]].molecule(),
-                                            local_errors, map);
+                mols_ptr[i] = parseMolecule(system[molnums[i]].molecule(), local_errors, map);
             }
 
             if (not local_errors.isEmpty())
@@ -1145,22 +1124,20 @@ SDF::SDF(const SireSystem::System &system, const PropertyMap &map) :
 
                 // Update the warning messages.
                 parse_warnings += local_errors;
-            }
-        });
+            } });
     }
     else
     {
-        for (int i=0; i<nmols; ++i)
+        for (int i = 0; i < nmols; ++i)
         {
             // Now parse the rest of the molecular data, i.e. atoms, residues, etc.
-            mols_ptr[i] = parseMolecule(system[molnums[i]].molecule(),
-                                        parse_warnings, map);
+            mols_ptr[i] = parseMolecule(system[molnums[i]].molecule(), parse_warnings, map);
         }
     }
 
     QList<SDFMolecule> checked_mols;
 
-    for (int i=0; i<nmols; ++i)
+    for (int i = 0; i < nmols; ++i)
     {
         if (mols_ptr[i].isValid())
         {
@@ -1185,18 +1162,18 @@ SDF::SDF(const SireSystem::System &system, const PropertyMap &map) :
 }
 
 /** Copy constructor */
-SDF::SDF(const SDF &other) :
-    ConcreteProperty<SDF,MoleculeParser>(other),
-    molecules(other.molecules),
-    parse_warnings(other.parse_warnings)
-{}
+SDF::SDF(const SDF &other)
+    : ConcreteProperty<SDF, MoleculeParser>(other), molecules(other.molecules), parse_warnings(other.parse_warnings)
+{
+}
 
 /** Destructor */
 SDF::~SDF()
-{}
+{
+}
 
 /** Copy assignment operator */
-SDF& SDF::operator=(const SDF &other)
+SDF &SDF::operator=(const SDF &other)
 {
     if (this != &other)
     {
@@ -1222,13 +1199,13 @@ bool SDF::operator!=(const SDF &other) const
 }
 
 /** Return the C++ name for this class */
-const char* SDF::typeName()
+const char *SDF::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SDF>() );
+    return QMetaType::typeName(qMetaTypeId<SDF>());
 }
 
 /** Return the C++ name for this class */
-const char* SDF::what() const
+const char *SDF::what() const
 {
     return SDF::typeName();
 }
@@ -1257,26 +1234,23 @@ Frame SDF::getFrame(int i) const
 
 /** Return the parser that has been constructed by reading in the passed
     file using the passed properties */
-MoleculeParserPtr SDF::construct(const QString &filename,
-                                 const PropertyMap &map) const
+MoleculeParserPtr SDF::construct(const QString &filename, const PropertyMap &map) const
 {
-    return SDF(filename,map);
+    return SDF(filename, map);
 }
 
 /** Return the parser that has been constructed by reading in the passed
     text lines using the passed properties */
-MoleculeParserPtr SDF::construct(const QStringList &lines,
-                                 const PropertyMap &map) const
+MoleculeParserPtr SDF::construct(const QStringList &lines, const PropertyMap &map) const
 {
-    return SDF(lines,map);
+    return SDF(lines, map);
 }
 
 /** Return the parser that has been constructed by extract all necessary
     data from the passed SireSystem::System using the specified properties */
-MoleculeParserPtr SDF::construct(const SireSystem::System &system,
-                                 const PropertyMap &map) const
+MoleculeParserPtr SDF::construct(const SireSystem::System &system, const PropertyMap &map) const
 {
-    return SDF(system,map);
+    return SDF(system, map);
 }
 
 /** Return a string representation of this parser */
@@ -1286,8 +1260,7 @@ QString SDF::toString() const
         return QObject::tr("SDF::null");
     else
     {
-        return QObject::tr("SDF( nMolecules() == %1 )")
-                        .arg(this->nMolecules());
+        return QObject::tr("SDF( nMolecules() == %1 )").arg(this->nMolecules());
     }
 }
 
@@ -1336,7 +1309,7 @@ QString SDF::formatDescription() const
 /** Return the suffixes that these files are normally associated with */
 QStringList SDF::formatSuffix() const
 {
-    static const QStringList suffixes = { "sdf", "mol" };
+    static const QStringList suffixes = {"sdf", "mol"};
     return suffixes;
 }
 
@@ -1350,17 +1323,17 @@ void SDF::assertSane() const
 
         if (not errors.isEmpty())
         {
-            throw SireIO::parse_error(QObject::tr(
-                "There were errors reading the SDF format "
-                "file:\n%1").arg(errors.join("\n\n")), CODELOC);
+            throw SireIO::parse_error(QObject::tr("There were errors reading the SDF format "
+                                                  "file:\n%1")
+                                          .arg(errors.join("\n\n")),
+                                      CODELOC);
         }
     }
 }
 
 /** Internal function that is used to parse a single molecule's set
     of lines from the SDF file */
-void SDF::parseMoleculeLines(const PropertyMap &map,
-                             const QStringList &l)
+void SDF::parseMoleculeLines(const PropertyMap &map, const QStringList &l)
 {
     /* File format is decribed here:
         https://www.herongyang.com/Molecule/SDF-Format-Specification.html
@@ -1371,10 +1344,8 @@ void SDF::parseMoleculeLines(const PropertyMap &map,
     if (l.count() < 4)
     {
         // this is not a valid SDF file
-        this->parse_warnings.append(
-            QObject::tr("There are no enough lines for this "
-                        "to be a valid SDF-formatted file.")
-        );
+        this->parse_warnings.append(QObject::tr("There are no enough lines for this "
+                                                "to be a valid SDF-formatted file."));
         return;
     }
 
@@ -1391,19 +1362,18 @@ void SDF::parseMoleculeLines(const PropertyMap &map,
 
     if (counts_line.size() < 39)
     {
-        this->parse_warnings.append(
-            QObject::tr("The counts line in this SDF file does not "
-                        "have enough characters! '%1'. It should be "
-                        "at least 39 characters wide.").arg(counts_line)
-        );
+        this->parse_warnings.append(QObject::tr("The counts line in this SDF file does not "
+                                                "have enough characters! '%1'. It should be "
+                                                "at least 39 characters wide.")
+                                        .arg(counts_line));
         return;
     }
 
     QStringList counts;
 
-    for (int i=0; i<11; ++i)
+    for (int i = 0; i < 11; ++i)
     {
-        counts.append(counts_line.mid(i*3, 3));
+        counts.append(counts_line.mid(i * 3, 3));
     }
 
     // the last counts line item can also be a string!
@@ -1416,9 +1386,9 @@ void SDF::parseMoleculeLines(const PropertyMap &map,
 
     if (not ok)
     {
-        this->parse_warnings.append(
-            QObject::tr("Cannot interpret the number of atoms from the "
-                        "counts line: %1").arg(counts_line));
+        this->parse_warnings.append(QObject::tr("Cannot interpret the number of atoms from the "
+                                                "counts line: %1")
+                                        .arg(counts_line));
     }
 
     // Bonds counter
@@ -1426,40 +1396,36 @@ void SDF::parseMoleculeLines(const PropertyMap &map,
 
     if (not ok)
     {
-        this->parse_warnings.append(
-            QObject::tr("Cannot interpret the number of bonds from the "
-                        "counts line: %1").arg(counts_line));
+        this->parse_warnings.append(QObject::tr("Cannot interpret the number of bonds from the "
+                                                "counts line: %1")
+                                        .arg(counts_line));
     }
 
     if (natoms == 0)
     {
         // nothing to read?
-        this->parse_warnings.append(
-            QObject::tr("The number of atoms to read is set to zero?")
-        );
+        this->parse_warnings.append(QObject::tr("The number of atoms to read is set to zero?"));
         return;
     }
 
     // next, read in the atoms
     if (l.count() < 4 + natoms + nbonds)
     {
-        this->parse_warnings.append(
-            QObject::tr("There aren't enough lines in this file to "
-                        "contain all of the atoms and bonds. File is "
-                        "corrupted?")
-        );
+        this->parse_warnings.append(QObject::tr("There aren't enough lines in this file to "
+                                                "contain all of the atoms and bonds. File is "
+                                                "corrupted?"));
         return;
     }
 
     QVector<SDFAtom> atoms(natoms);
 
-    for (int i=0; i<natoms; ++i)
+    for (int i = 0; i < natoms; ++i)
     {
-        QString line = l[i+4];
+        QString line = l[i + 4];
 
-        //000000000011111111112222222222333333333344444444445555555555666666666
-        //012345678901234567890123456789012345678901234567890123456789012345678
-        //    0.5369    0.9749    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
+        // 000000000011111111112222222222333333333344444444445555555555666666666
+        // 012345678901234567890123456789012345678901234567890123456789012345678
+        //     0.5369    0.9749    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
         while (line.size() < 69)
         {
             line.append(" ");
@@ -1467,89 +1433,86 @@ void SDF::parseMoleculeLines(const PropertyMap &map,
 
         SDFAtom &atom = atoms[i];
 
-        auto assert_ok = [&](bool is_ok, int line_num,
-                             const QString &line, const QString &field)
-                        {
-                            if (not is_ok)
-                            {
-                                this->parse_warnings.append(
-                                    QObject::tr("Atom line %1 has a problem "
-                                      "with field '%2'. '%3'")
-                                        .arg(line_num)
-                                        .arg(field)
-                                        .arg(line)
-                                );
+        auto assert_ok = [&](bool is_ok, int line_num, const QString &line, const QString &field)
+        {
+            if (not is_ok)
+            {
+                this->parse_warnings.append(QObject::tr("Atom line %1 has a problem "
+                                                        "with field '%2'. '%3'")
+                                                .arg(line_num)
+                                                .arg(field)
+                                                .arg(line));
 
-                                return false;
-                            }
+                return false;
+            }
 
-                            return true;
-                        };
+            return true;
+        };
 
-        atom.x = line.midRef(0,10).toDouble(&ok);
+        atom.x = line.midRef(0, 10).toDouble(&ok);
 
-        if (not assert_ok(ok, i+1, line, "x"))
+        if (not assert_ok(ok, i + 1, line, "x"))
             return;
 
         atom.y = line.midRef(10, 10).toDouble(&ok);
 
-        if (not assert_ok(ok, i+1, line, "y"))
+        if (not assert_ok(ok, i + 1, line, "y"))
             return;
 
         atom.z = line.midRef(20, 10).toDouble(&ok);
 
-        if (not assert_ok(ok, i+1, line, "z"))
+        if (not assert_ok(ok, i + 1, line, "z"))
             return;
 
-        atom.name = line.mid(31,3);
+        atom.name = line.mid(31, 3);
 
         atom.mass_difference = line.midRef(34, 2).toInt(&ok);
 
-        if (not assert_ok(ok, i+1, line, "mass difference"))
+        if (not assert_ok(ok, i + 1, line, "mass difference"))
             return;
 
         if (atom.mass_difference < -3 or atom.mass_difference > 4)
         {
-            this->parse_warnings.append(QObject::tr(
-                "Only mass differences between -3 and 4 are supported. "
-                "Cannot have a difference of %1 on line %2. '%3'")
-                    .arg(atom.mass_difference)
-                    .arg(i+1).arg(line));
+            this->parse_warnings.append(QObject::tr("Only mass differences between -3 and 4 are supported. "
+                                                    "Cannot have a difference of %1 on line %2. '%3'")
+                                            .arg(atom.mass_difference)
+                                            .arg(i + 1)
+                                            .arg(line));
             return;
         }
 
         atom.chg_difference = line.midRef(36, 3).toInt(&ok);
 
-        if (not assert_ok(ok, i+1, line, "charge difference"))
+        if (not assert_ok(ok, i + 1, line, "charge difference"))
             return;
 
         if (atom.chg_difference < 0 or atom.chg_difference > 7)
         {
-            this->parse_warnings.append(QObject::tr(
-                "Only charge differences between 0 and 7 are supported. "
-                "Cannot have a difference of %1 on line %2. '%3'")
-                    .arg(atom.chg_difference)
-                    .arg(i+1).arg(line));
+            this->parse_warnings.append(QObject::tr("Only charge differences between 0 and 7 are supported. "
+                                                    "Cannot have a difference of %1 on line %2. '%3'")
+                                            .arg(atom.chg_difference)
+                                            .arg(i + 1)
+                                            .arg(line));
             return;
         }
 
         // ten more fields of 3 characters each. We won't convert these
         // to numbers - just leave as strings
-        for (int j=0; j<10; ++j)
+        for (int j = 0; j < 10; ++j)
         {
-            atom.fields.append(line.mid(39+(3*j), 3));
+            atom.fields.append(line.mid(39 + (3 * j), 3));
         }
     }
 
     QVector<SDFBond> bonds(nbonds);
 
-    for (int i=0; i<nbonds; ++i)
+    for (int i = 0; i < nbonds; ++i)
     {
         QString line = l[4 + natoms + i];
 
-        //000000000011111111112
-        //012345678901234567890
-        //  1  2  1  0  0  0  0
+        // 000000000011111111112
+        // 012345678901234567890
+        //   1  2  1  0  0  0  0
         while (line.size() < 20)
         {
             line.append(" ");
@@ -1557,49 +1520,46 @@ void SDF::parseMoleculeLines(const PropertyMap &map,
 
         SDFBond &bond = bonds[i];
 
-        auto assert_ok = [&](bool is_ok, int line_num,
-                             const QString &line, const QString &field)
-                        {
-                            if (not is_ok)
-                            {
-                                this->parse_warnings.append(
-                                    QObject::tr("Bond line %1 has a problem "
-                                      "with field '%2'. '%3'")
-                                        .arg(line_num)
-                                        .arg(field)
-                                        .arg(line)
-                                );
+        auto assert_ok = [&](bool is_ok, int line_num, const QString &line, const QString &field)
+        {
+            if (not is_ok)
+            {
+                this->parse_warnings.append(QObject::tr("Bond line %1 has a problem "
+                                                        "with field '%2'. '%3'")
+                                                .arg(line_num)
+                                                .arg(field)
+                                                .arg(line));
 
-                                return false;
-                            }
+                return false;
+            }
 
-                            return true;
-                        };
+            return true;
+        };
 
         bond.atom0 = line.midRef(0, 3).toInt(&ok);
 
-        if (not assert_ok(ok, i+1, line, "atom0"))
+        if (not assert_ok(ok, i + 1, line, "atom0"))
             return;
 
         bond.atom1 = line.midRef(3, 3).toInt(&ok);
 
-        if (not assert_ok(ok, i+1, line, "atom1"))
+        if (not assert_ok(ok, i + 1, line, "atom1"))
             return;
 
         bond.typ = line.midRef(6, 3).toInt(&ok);
 
-        if (not assert_ok(ok, i+1, line, "bond type"))
+        if (not assert_ok(ok, i + 1, line, "bond type"))
             return;
 
         bond.stereoscopy = line.midRef(9, 3).toInt(&ok);
 
-        if (not assert_ok(ok, i+1, line, "stereoscopy"))
+        if (not assert_ok(ok, i + 1, line, "stereoscopy"))
             return;
 
         // now add on the three fields, which we will leave as strings
-        for (int j=0; j<3; ++j)
+        for (int j = 0; j < 3; ++j)
         {
-            bond.fields.append(line.mid(12+(3*j), 3));
+            bond.fields.append(line.mid(12 + (3 * j), 3));
         }
     }
 
@@ -1652,7 +1612,7 @@ void SDF::parseMoleculeLines(const PropertyMap &map,
 
             if (start_idx >= 0 and end_idx >= 0)
             {
-                key = line.mid(start_idx+1, end_idx-start_idx-1);
+                key = line.mid(start_idx + 1, end_idx - start_idx - 1);
             }
             else
             {
@@ -1742,18 +1702,16 @@ System SDF::startSystem(const PropertyMap &map) const
 
     if (usesParallel())
     {
-        tbb::parallel_for(tbb::blocked_range<int>(0, nmols),
-                           [&](tbb::blocked_range<int> r)
-        {
-            for (int i=r.begin(); i<r.end(); ++i)
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
             {
                 mols_array[i] = this->getMolecule(i, map);
-            }
-        });
+            } });
     }
     else
     {
-        for (int i=0; i<nmols; ++i)
+        for (int i = 0; i < nmols; ++i)
         {
             mols_array[i] = this->getMolecule(i, map);
         }
@@ -1774,16 +1732,14 @@ System SDF::startSystem(const PropertyMap &map) const
 }
 
 /** Internal function used to get the molecule structure for molecule 'imol'. */
-MolStructureEditor SDF::getMolStructure(const SDFMolecule &sdfmol,
-                                        const PropertyName &cutting,
+MolStructureEditor SDF::getMolStructure(const SDFMolecule &sdfmol, const PropertyName &cutting,
                                         const QString &resname) const
 {
     // Make sure that there are atoms in the molecule.
     if (sdfmol.atoms.count() == 0)
     {
-        throw SireError::program_bug(QObject::tr(
-            "Strange - there are no atoms in molecule %1?")
-                .arg(sdfmol.toString()), CODELOC);
+        throw SireError::program_bug(QObject::tr("Strange - there are no atoms in molecule %1?").arg(sdfmol.toString()),
+                                     CODELOC);
     }
 
     // First step is to build the structure of the molecule, i.e.
@@ -1797,11 +1753,11 @@ MolStructureEditor SDF::getMolStructure(const SDFMolecule &sdfmol,
     res.rename(ResName(resname));
 
     // Add each atom in the residue to the molecule.
-    for (int i=0; i<sdfmol.atoms.count(); ++i)
+    for (int i = 0; i < sdfmol.atoms.count(); ++i)
     {
         const auto &sdfatom = sdfmol.atoms.at(i);
 
-        auto atom = cutgroup.add(AtomNum(i+1));
+        auto atom = cutgroup.add(AtomNum(i + 1));
         atom.rename(AtomName(sdfatom.name.trimmed()));
         // Reparent the atom to its residue.
         atom.reparent(ResIdx(0));
@@ -1831,9 +1787,7 @@ MolEditor SDF::getMolecule(int imol, const PropertyMap &map) const
     // Make sure that there are atoms in the molecule.
     if (sdfmol.atoms.count() == 0)
     {
-        throw SireError::program_bug(QObject::tr(
-            "Strange - there are no atoms in molecule %1?")
-                .arg(imol), CODELOC);
+        throw SireError::program_bug(QObject::tr("Strange - there are no atoms in molecule %1?").arg(imol), CODELOC);
     }
 
     QString resname = "MOL";
@@ -1844,28 +1798,27 @@ MolEditor SDF::getMolecule(int imol, const PropertyMap &map) const
     }
 
     // First, construct the layout of the molecule (sorting of atoms into residues and cutgroups).
-    auto mol = this->getMolStructure(sdfmol, map["cutting"],
-                                     resname).commit().edit();
+    auto mol = this->getMolStructure(sdfmol, map["cutting"], resname).commit().edit();
 
     // Get the info object that can map between AtomNum to AtomIdx etc.
     const auto molinfo = mol.info();
 
     // Atom property objects.
-    AtomCoords              coords(molinfo);
-    AtomCharges             charges(molinfo);
-    AtomElements            elements(molinfo);
-    AtomMasses              masses(molinfo);
-    AtomRadicals            radicals(molinfo);
+    AtomCoords coords(molinfo);
+    AtomCharges charges(molinfo);
+    AtomElements elements(molinfo);
+    AtomMasses masses(molinfo);
+    AtomRadicals radicals(molinfo);
     AtomStringArrayProperty atomfields(molinfo);
 
     // Now loop through the atoms in the molecule and set each property.
-    for (int i=0; i<sdfmol.atoms.count(); ++i)
+    for (int i = 0; i < sdfmol.atoms.count(); ++i)
     {
         // Store a reference to the current atom.
         const auto &atom = sdfmol.atoms.at(i);
 
         // Determine the CGAtomIdx for this atom.
-        auto cgatomidx = molinfo.cgAtomIdx(AtomNum(i+1));
+        auto cgatomidx = molinfo.cgAtomIdx(AtomNum(i + 1));
 
         // Set the properties.
         coords.set(cgatomidx, Vector(atom.x, atom.y, atom.z));
@@ -1893,12 +1846,9 @@ MolEditor SDF::getMolecule(int imol, const PropertyMap &map) const
 
             connectivity.connect(atom0, atom1);
 
-            connectivity.setProperty(bondid, map["type"].source(),
-                                     BondType(bond.typ));
-            connectivity.setProperty(bondid, map["stereoscopy"].source(),
-                                     Stereoscopy(bond.stereoscopy));
-            connectivity.setProperty(bondid, map["sdf_fields"].source(),
-                                     SireBase::wrap(bond.fields));
+            connectivity.setProperty(bondid, map["type"].source(), BondType(bond.typ));
+            connectivity.setProperty(bondid, map["stereoscopy"].source(), Stereoscopy(bond.stereoscopy));
+            connectivity.setProperty(bondid, map["sdf_fields"].source(), SireBase::wrap(bond.fields));
         }
 
         mol.setProperty(map["connectivity"], connectivity.commit());
@@ -1910,7 +1860,7 @@ MolEditor SDF::getMolecule(int imol, const PropertyMap &map) const
         mol.setProperty(map["ID"], SireBase::wrap(sdfmol.getID()));
     }
 
-    //now add in any other data fields as 'sdf_data'
+    // now add in any other data fields as 'sdf_data'
     auto sdf_data = sdfmol.getData();
 
     if (not sdf_data.isEmpty())
@@ -1932,12 +1882,12 @@ MolEditor SDF::getMolecule(int imol, const PropertyMap &map) const
     }
 
     return mol.setProperty(map["coordinates"], coords)
-              .setProperty(map["formal_charge"], charges)
-              .setProperty(map["element"], elements)
-              .setProperty(map["mass"], masses)
-              .setProperty(map["radical"], radicals)
-              .setProperty(map["sdf_fields"], atomfields)
-              .setProperty(map["software"], SireBase::wrap(sdfmol.software))
-              .setProperty(map["name"], SireBase::wrap(sdfmol.name))
-              .commit();
+        .setProperty(map["formal_charge"], charges)
+        .setProperty(map["element"], elements)
+        .setProperty(map["mass"], masses)
+        .setProperty(map["radical"], radicals)
+        .setProperty(map["sdf_fields"], atomfields)
+        .setProperty(map["software"], SireBase::wrap(sdfmol.software))
+        .setProperty(map["name"], SireBase::wrap(sdfmol.name))
+        .commit();
 }

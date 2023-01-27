@@ -34,75 +34,75 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class NumberProperty;
+    class NumberProperty;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::NumberProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::NumberProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::NumberProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::NumberProperty &);
 
 namespace SireBase
 {
 
-/** This class provides a thin Property wrapper around numbers (doubles and ints)
+    /** This class provides a thin Property wrapper around numbers (doubles and ints)
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT NumberProperty : public ConcreteProperty<NumberProperty,Property>
-{
-
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const NumberProperty&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, NumberProperty&);
-
-public:
-    NumberProperty();
-    NumberProperty(double value);
-    NumberProperty(qint64 value);
-    NumberProperty(const QString &value);
-
-    NumberProperty(const Property &other);
-    NumberProperty(const NumberProperty &other);
-
-    ~NumberProperty();
-
-    static const char* typeName();
-
-    NumberProperty& operator=(const NumberProperty &other);
-
-    bool operator==(const NumberProperty &other) const;
-    bool operator!=(const NumberProperty &other) const;
-
-    qint64 toInt() const;
-    double toDouble() const;
-
-    double value() const;
-
-    QString toString() const;
-
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
-
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
-
-private:
-    union
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT NumberProperty : public ConcreteProperty<NumberProperty, Property>
     {
-        double dval;
-        qint64 ival;
-    } val;
 
-    bool is_int;
-};
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const NumberProperty &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, NumberProperty &);
 
-}
+    public:
+        NumberProperty();
+        NumberProperty(double value);
+        NumberProperty(qint64 value);
+        NumberProperty(const QString &value);
 
-Q_DECLARE_METATYPE( SireBase::NumberProperty )
+        NumberProperty(const Property &other);
+        NumberProperty(const NumberProperty &other);
 
-SIRE_EXPOSE_CLASS( SireBase::NumberProperty )
+        ~NumberProperty();
+
+        static const char *typeName();
+
+        NumberProperty &operator=(const NumberProperty &other);
+
+        bool operator==(const NumberProperty &other) const;
+        bool operator!=(const NumberProperty &other) const;
+
+        qint64 toInt() const;
+        double toDouble() const;
+
+        double value() const;
+
+        QString toString() const;
+
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
+
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
+
+    private:
+        union
+        {
+            double dval;
+            qint64 ival;
+        } val;
+
+        bool is_int;
+    };
+
+} // namespace SireBase
+
+Q_DECLARE_METATYPE(SireBase::NumberProperty)
+
+SIRE_EXPOSE_CLASS(SireBase::NumberProperty)
 
 SIRE_END_HEADER
 

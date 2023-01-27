@@ -46,8 +46,7 @@ using namespace SireStream;
 ///////////// Implementation of Patching
 /////////////
 
-static const RegisterMetaType<Patching> r_patching( MAGIC_ONLY,
-                                                    Patching::typeName() );
+static const RegisterMetaType<Patching> r_patching(MAGIC_ONLY, Patching::typeName());
 
 QDataStream &operator<<(QDataStream &ds, const Patching &patching)
 {
@@ -55,7 +54,7 @@ QDataStream &operator<<(QDataStream &ds, const Patching &patching)
 
     SharedDataStream sds(ds);
 
-    sds << patching.spce << static_cast<const Property&>(patching);
+    sds << patching.spce << static_cast<const Property &>(patching);
 
     return ds;
 }
@@ -68,7 +67,7 @@ QDataStream &operator>>(QDataStream &ds, Patching &patching)
     {
         SharedDataStream sds(ds);
 
-        sds >> patching.spce >> static_cast<Property&>(patching);
+        sds >> patching.spce >> static_cast<Property &>(patching);
     }
     else
         throw version_error(v, "1", r_patching, CODELOC);
@@ -78,23 +77,26 @@ QDataStream &operator>>(QDataStream &ds, Patching &patching)
 
 /** Null constructor */
 Patching::Patching() : Property()
-{}
+{
+}
 
 /** Internal constructor used to set the space */
 Patching::Patching(const Space &space) : Property(), spce(space)
-{}
+{
+}
 
 /** Copy constructor */
-Patching::Patching(const Patching &other)
-         : Property(other), spce(other.spce)
-{}
+Patching::Patching(const Patching &other) : Property(other), spce(other.spce)
+{
+}
 
 /** Destructor */
 Patching::~Patching()
-{}
+{
+}
 
 /** Copy assignment operator */
-Patching& Patching::operator=(const Patching &other)
+Patching &Patching::operator=(const Patching &other)
 {
     if (this != &other)
     {
@@ -117,21 +119,20 @@ bool Patching::operator!=(const Patching &other) const
     return not Patching::operator==(other);
 }
 
-const char* Patching::typeName()
+const char *Patching::typeName()
 {
     return "SireVol::Patching";
 }
 
 /** Return the space used to create this patching scheme */
-const Space& Patching::space() const
+const Space &Patching::space() const
 {
     return spce.read();
 }
 
 /** Rebalance the patching so that the patches for the passed space contain
     roughly equal numbers of CoordGroups */
-PatchingPtr Patching::rebalance(const Space &space,
-                                const QVector<CoordGroupArray> &patchcoords) const
+PatchingPtr Patching::rebalance(const Space &space, const QVector<CoordGroupArray> &patchcoords) const
 {
     return PatchingPtr(*this);
 }
@@ -152,7 +153,7 @@ QDataStream &operator<<(QDataStream &ds, const NullPatching &nullpatching)
 {
     writeHeader(ds, r_nullpatching, 1);
 
-    ds << static_cast<const Patching&>(nullpatching);
+    ds << static_cast<const Patching &>(nullpatching);
 
     return ds;
 }
@@ -163,7 +164,7 @@ QDataStream &operator>>(QDataStream &ds, NullPatching &nullpatching)
 
     if (v == 1)
     {
-        ds >> static_cast<Patching&>(nullpatching);
+        ds >> static_cast<Patching &>(nullpatching);
     }
     else
         throw version_error(v, "1", r_nullpatching, CODELOC);
@@ -172,30 +173,32 @@ QDataStream &operator>>(QDataStream &ds, NullPatching &nullpatching)
 }
 
 /** Constructor */
-NullPatching::NullPatching() : ConcreteProperty<NullPatching,Patching>()
-{}
+NullPatching::NullPatching() : ConcreteProperty<NullPatching, Patching>()
+{
+}
 
 /** Construct with the passed space */
-NullPatching::NullPatching(const Space &space)
-             : ConcreteProperty<NullPatching,Patching>(space)
-{}
+NullPatching::NullPatching(const Space &space) : ConcreteProperty<NullPatching, Patching>(space)
+{
+}
 
 /** Copy constructor */
-NullPatching::NullPatching(const NullPatching &other)
-             : ConcreteProperty<NullPatching,Patching>(other)
-{}
+NullPatching::NullPatching(const NullPatching &other) : ConcreteProperty<NullPatching, Patching>(other)
+{
+}
 
 /** Destructor */
 NullPatching::~NullPatching()
-{}
-
-const char* NullPatching::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullPatching>() );
+}
+
+const char *NullPatching::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullPatching>());
 }
 
 /** Copy assignment operator */
-NullPatching& NullPatching::operator=(const NullPatching &other)
+NullPatching &NullPatching::operator=(const NullPatching &other)
 {
     Patching::operator=(other);
     return *this;
@@ -226,9 +229,9 @@ int NullPatching::patchIndex(const Vector &point) const
 }
 
 /** Return the patch index and the center of the patch */
-QPair<int,Vector> NullPatching::patchIndexAndCenter(const Vector &point) const
+QPair<int, Vector> NullPatching::patchIndexAndCenter(const Vector &point) const
 {
-    return QPair<int,Vector>(0, Vector(0));
+    return QPair<int, Vector>(0, Vector(0));
 }
 
 /** Repatch this patching for the passed space */
@@ -249,10 +252,8 @@ QDataStream &operator<<(QDataStream &ds, const BoxPatching &boxpatching)
 
     SharedDataStream sds(ds);
 
-    sds << boxpatching.patch_size.to(angstrom)
-        << boxpatching.orgn << boxpatching.inv_gridvec
-        << boxpatching.nx << boxpatching.ny << boxpatching.nz
-        << static_cast<const Patching&>(boxpatching);
+    sds << boxpatching.patch_size.to(angstrom) << boxpatching.orgn << boxpatching.inv_gridvec << boxpatching.nx
+        << boxpatching.ny << boxpatching.nz << static_cast<const Patching &>(boxpatching);
 
     return ds;
 }
@@ -267,11 +268,10 @@ QDataStream &operator>>(QDataStream &ds, BoxPatching &boxpatching)
 
         double patch_size;
 
-        sds >> patch_size >> boxpatching.orgn >> boxpatching.inv_gridvec
-            >> boxpatching.nx >> boxpatching.ny >> boxpatching.nz
-            >> static_cast<Patching&>(boxpatching);
+        sds >> patch_size >> boxpatching.orgn >> boxpatching.inv_gridvec >> boxpatching.nx >> boxpatching.ny >>
+            boxpatching.nz >> static_cast<Patching &>(boxpatching);
 
-        boxpatching.patch_size = patch_size*angstrom;
+        boxpatching.patch_size = patch_size * angstrom;
 
         return ds;
     }
@@ -283,9 +283,9 @@ QDataStream &operator>>(QDataStream &ds, BoxPatching &boxpatching)
 
 /** Constructor */
 BoxPatching::BoxPatching()
-            : ConcreteProperty<BoxPatching,Patching>(),
-              patch_size(0), orgn(0), inv_gridvec(0), nx(0), ny(0), nz(0)
-{}
+    : ConcreteProperty<BoxPatching, Patching>(), patch_size(0), orgn(0), inv_gridvec(0), nx(0), ny(0), nz(0)
+{
+}
 
 /** Construct for the passed space, placing the center of the grid at "center",
     trying to construct a grid that divides space using a patch size of
@@ -296,27 +296,26 @@ BoxPatching::BoxPatching()
     \throw SireError::incompatible_error
 */
 BoxPatching::BoxPatching(const Space &space, Length size, const Vector &center)
-            : ConcreteProperty<BoxPatching,Patching>(space),
-              patch_size(size), orgn(0), inv_gridvec(0), nx(0), ny(0), nz(0)
+    : ConcreteProperty<BoxPatching, Patching>(space), patch_size(size), orgn(0), inv_gridvec(0), nx(0), ny(0), nz(0)
 {
     if (not space.isCartesian())
-        throw SireError::incompatible_error( QObject::tr(
-                "BoxPatching is only compatible with cartesian spaces "
-                "(spaces for which space.isCartesian() is true). The passed "
-                "space (%1) is not a cartesian space.")
-                    .arg(space.toString()), CODELOC );
+        throw SireError::incompatible_error(QObject::tr("BoxPatching is only compatible with cartesian spaces "
+                                                        "(spaces for which space.isCartesian() is true). The passed "
+                                                        "space (%1) is not a cartesian space.")
+                                                .arg(space.toString()),
+                                            CODELOC);
 
     if (space.isPeriodic())
     {
-        //need a virtual function call here - as at the moment it
-        //depends on all cartesian periodic spaces being PeriodicBox...
+        // need a virtual function call here - as at the moment it
+        // depends on all cartesian periodic spaces being PeriodicBox...
         Vector dimensions = space.asA<PeriodicBox>().dimensions();
 
-        nx = int( dimensions.x() / size.value() ) + 1;
-        ny = int( dimensions.y() / size.value() ) + 1;
-        nz = int( dimensions.z() / size.value() ) + 1;
+        nx = int(dimensions.x() / size.value()) + 1;
+        ny = int(dimensions.y() / size.value()) + 1;
+        nz = int(dimensions.z() / size.value()) + 1;
 
-        BOOST_ASSERT( nx > 0 and ny > 0 and nz > 0 );
+        BOOST_ASSERT(nx > 0 and ny > 0 and nz > 0);
 
         if (nx > 64)
         {
@@ -336,20 +335,18 @@ BoxPatching::BoxPatching(const Space &space, Length size, const Vector &center)
             nz = 64;
         }
 
-        inv_gridvec = Vector( nx / dimensions.x(),
-                              ny / dimensions.y(),
-                              nz / dimensions.z() );
+        inv_gridvec = Vector(nx / dimensions.x(), ny / dimensions.y(), nz / dimensions.z());
 
-        orgn = center - 0.5*dimensions;
+        orgn = center - 0.5 * dimensions;
     }
     else
     {
-        //we will limit ourselves ot a 16*16*16 box (that is 4096 patches!)
+        // we will limit ourselves ot a 16*16*16 box (that is 4096 patches!)
         nx = 16;
         ny = 16;
         nz = 16;
 
-        inv_gridvec = Vector( 1 / patch_size.value() );
+        inv_gridvec = Vector(1 / patch_size.value());
 
         orgn = center - Vector(8 * patch_size.value());
     }
@@ -358,49 +355,46 @@ BoxPatching::BoxPatching(const Space &space, Length size, const Vector &center)
 /** Construct for the passed space, placing the center of the grid at "center".
     This tries to divide space using a patch size of 8 A */
 BoxPatching::BoxPatching(const Space &space, const Vector &center)
-            : ConcreteProperty<BoxPatching,Patching>(space),
-              patch_size(0), orgn(0), inv_gridvec(0), nx(0), ny(0), nz(0)
+    : ConcreteProperty<BoxPatching, Patching>(space), patch_size(0), orgn(0), inv_gridvec(0), nx(0), ny(0), nz(0)
 {
-    this->operator=( BoxPatching(space, 8*angstrom, center) );
+    this->operator=(BoxPatching(space, 8 * angstrom, center));
 }
 
 /** Construct for the passed space, using the passed patch size. This will try
     to build a cubic grid of patches where the grid dimension is approximately
     'patch_size', with the center of the grid at (0,0,0) */
 BoxPatching::BoxPatching(const Space &space, Length patch_size)
-            : ConcreteProperty<BoxPatching,Patching>(space),
-              patch_size(0), orgn(0), inv_gridvec(0), nx(0), ny(0), nz(0)
+    : ConcreteProperty<BoxPatching, Patching>(space), patch_size(0), orgn(0), inv_gridvec(0), nx(0), ny(0), nz(0)
 {
-    this->operator=( BoxPatching(space, patch_size, Vector(0)) );
+    this->operator=(BoxPatching(space, patch_size, Vector(0)));
 }
 
 /** Construct for the passed space - this tries to divide the space
     using a patch size of 8 A, placing the center of the grid at (0,0,0) */
-BoxPatching::BoxPatching(const Space &space)
-            : ConcreteProperty<BoxPatching,Patching>()
+BoxPatching::BoxPatching(const Space &space) : ConcreteProperty<BoxPatching, Patching>()
 {
-    this->operator=( BoxPatching(space, 8*angstrom, Vector(0)) );
+    this->operator=(BoxPatching(space, 8 * angstrom, Vector(0)));
 }
 
 /** Copy constructor */
 BoxPatching::BoxPatching(const BoxPatching &other)
-            : ConcreteProperty<BoxPatching,Patching>(other),
-              patch_size(other.patch_size), orgn(other.orgn),
-              inv_gridvec(other.inv_gridvec),
-              nx(other.nx), ny(other.ny), nz(other.nz)
-{}
+    : ConcreteProperty<BoxPatching, Patching>(other), patch_size(other.patch_size), orgn(other.orgn),
+      inv_gridvec(other.inv_gridvec), nx(other.nx), ny(other.ny), nz(other.nz)
+{
+}
 
 /** Destructor */
 BoxPatching::~BoxPatching()
-{}
-
-const char* BoxPatching::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<BoxPatching>() );
+}
+
+const char *BoxPatching::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<BoxPatching>());
 }
 
 /** Copy assignment operator */
-BoxPatching& BoxPatching::operator=(const BoxPatching &other)
+BoxPatching &BoxPatching::operator=(const BoxPatching &other)
 {
     if (this != &other)
     {
@@ -419,11 +413,8 @@ BoxPatching& BoxPatching::operator=(const BoxPatching &other)
 /** Comparison operator */
 bool BoxPatching::operator==(const BoxPatching &other) const
 {
-    return patch_size == other.patch_size and
-           orgn == other.orgn and
-           inv_gridvec == other.inv_gridvec and
-           nx == other.nx and ny == other.ny and nz == other.nz and
-           Patching::operator==(other);
+    return patch_size == other.patch_size and orgn == other.orgn and inv_gridvec == other.inv_gridvec and
+           nx == other.nx and ny == other.ny and nz == other.nz and Patching::operator==(other);
 }
 
 /** Comparison operator */
@@ -445,9 +436,7 @@ Vector BoxPatching::center() const
         return Vector(0);
 
     else
-        return orgn + 0.5*Vector( nx / inv_gridvec.x(),
-                                  ny / inv_gridvec.y(),
-                                  nz / inv_gridvec.z() );
+        return orgn + 0.5 * Vector(nx / inv_gridvec.x(), ny / inv_gridvec.y(), nz / inv_gridvec.z());
 }
 
 /** Return the dimensions of each path (the lengths of each side of the box) */
@@ -457,9 +446,7 @@ Vector BoxPatching::patchDimension() const
         return Vector(0);
 
     else
-        return Vector( 1.0 / inv_gridvec.x(),
-                       1.0 / inv_gridvec.y(),
-                       1.0 / inv_gridvec.z() );
+        return Vector(1.0 / inv_gridvec.x(), 1.0 / inv_gridvec.y(), 1.0 / inv_gridvec.z());
 }
 
 /** Return a string representation of the patching */
@@ -469,96 +456,95 @@ QString BoxPatching::toString() const
         return QObject::tr("BoxPatching::null");
     else
         return QObject::tr("BoxPatching( nPatches()=[%1,%2,%3]=%4, center()=%5, "
-                                        "patchDimension()=%6 )")
-                    .arg(nx).arg(ny).arg(nz).arg(nx*ny*nz+1)
-                    .arg(center().toString()).arg(patchDimension().toString());
+                           "patchDimension()=%6 )")
+            .arg(nx)
+            .arg(ny)
+            .arg(nz)
+            .arg(nx * ny * nz + 1)
+            .arg(center().toString())
+            .arg(patchDimension().toString());
 }
 
 /** Return the number of patches */
 int BoxPatching::nPatches() const
 {
-    //there is one patch for each box in the grid, plus one
-    //patch for all points that are outside the grid
-    return nx*ny*nz + 1;
+    // there is one patch for each box in the grid, plus one
+    // patch for all points that are outside the grid
+    return nx * ny * nz + 1;
 }
 
 /** Return the index of the passed point - this assumes that the
     point has already been mapped into the correct space */
 int BoxPatching::getIndex(const Vector &point) const
 {
-    //get the (i,j,k) indicies of the patch that contains the point
+    // get the (i,j,k) indicies of the patch that contains the point
     //(each will space from -(n?/2) to (n?/2)-1
 
-    //translate the point so that it is relative to the origin of the grid
+    // translate the point so that it is relative to the origin of the grid
     Vector p = (point - orgn);
 
-    p = Vector( p.x() * inv_gridvec.x(),
-                p.y() * inv_gridvec.y(),
-                p.z() * inv_gridvec.z() );
+    p = Vector(p.x() * inv_gridvec.x(), p.y() * inv_gridvec.y(), p.z() * inv_gridvec.z());
 
     int i = int(p.x());
     int j = int(p.y());
     int k = int(p.z());
 
     if (i < 0 or i >= nx or j < 0 or j >= ny or k < 0 or k >= nz)
-        //this point is outside of the grid
-        return nx*ny*nz;
+        // this point is outside of the grid
+        return nx * ny * nz;
     else
-        return i + j*nx + k*nx*ny;
+        return i + j * nx + k * nx * ny;
 }
 
 /** Return the AABox that completely encloses the ith patch box */
 AABox BoxPatching::patchBox(int ith) const
 {
-    if (ith < 0 or ith >= nx*ny*nz)
+    if (ith < 0 or ith >= nx * ny * nz)
         return AABox(Vector(0), Vector(1.0e50));
 
     else
     {
-        //decompose this back into i,j,k
-        int k = ith / (nx*ny);
-        ith -= k*nx*ny;
+        // decompose this back into i,j,k
+        int k = ith / (nx * ny);
+        ith -= k * nx * ny;
 
         int j = ith / nx;
-        int i = ith - j*nx;
+        int i = ith - j * nx;
 
-        return AABox( Vector( orgn.x() + (i+0.5) / inv_gridvec.x(),
-                              orgn.y() + (j+0.5) / inv_gridvec.y(),
-                              orgn.z() + (k+0.5) / inv_gridvec.z() ),
-                      Vector( 0.5 / inv_gridvec.x(),
-                              0.5 / inv_gridvec.y(),
-                              0.5 / inv_gridvec.z() ) );
+        return AABox(Vector(orgn.x() + (i + 0.5) / inv_gridvec.x(), orgn.y() + (j + 0.5) / inv_gridvec.y(),
+                            orgn.z() + (k + 0.5) / inv_gridvec.z()),
+                     Vector(0.5 / inv_gridvec.x(), 0.5 / inv_gridvec.y(), 0.5 / inv_gridvec.z()));
     }
 }
 
 /** Return the index of the patch that contains the passed point */
 int BoxPatching::patchIndex(const Vector &point) const
 {
-    if ( space().isPeriodic() )
-        return BoxPatching::getIndex( space().getMinimumImage(point, Vector(0)) );
+    if (space().isPeriodic())
+        return BoxPatching::getIndex(space().getMinimumImage(point, Vector(0)));
     else
-        return BoxPatching::getIndex( point );
+        return BoxPatching::getIndex(point);
 }
 
 /** Return the AABox of that completely encloses the patch that contains the
     point 'point' */
 AABox BoxPatching::patchBox(const Vector &point) const
 {
-    return patchBox( patchIndex(point) );
+    return patchBox(patchIndex(point));
 }
 
 /** Return the index of the patch that contains the passed point, together
     with the point mapped into that patch (if the space is periodic) */
-QPair<int,Vector> BoxPatching::patchIndexAndCenter(const Vector &point) const
+QPair<int, Vector> BoxPatching::patchIndexAndCenter(const Vector &point) const
 {
-    if ( space().isPeriodic() )
+    if (space().isPeriodic())
     {
         Vector mapped_point = space().getMinimumImage(point, Vector(0));
 
-        return QPair<int,Vector>( BoxPatching::getIndex(mapped_point), mapped_point );
+        return QPair<int, Vector>(BoxPatching::getIndex(mapped_point), mapped_point);
     }
     else
-        return QPair<int,Vector>( BoxPatching::getIndex(point), point );
+        return QPair<int, Vector>(BoxPatching::getIndex(point), point);
 }
 
 /** Recreate the patching for the passed space */

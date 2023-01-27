@@ -30,8 +30,6 @@
 
 #include <QVariant>
 
-Q_DECLARE_METATYPE( QVariant )
+Q_DECLARE_METATYPE(QVariant)
 
 #endif
-
-

@@ -37,22 +37,22 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-typedef AtomProperty< SireBase::PropertyList > AtomPropertyList;
-typedef AtomProperty< SireBase::DoubleArrayProperty > AtomDoubleArrayProperty;
-typedef AtomProperty< SireBase::IntegerArrayProperty > AtomIntegerArrayProperty;
-typedef AtomProperty< SireBase::StringArrayProperty > AtomStringArrayProperty;
+    typedef AtomProperty<SireBase::PropertyList> AtomPropertyList;
+    typedef AtomProperty<SireBase::DoubleArrayProperty> AtomDoubleArrayProperty;
+    typedef AtomProperty<SireBase::IntegerArrayProperty> AtomIntegerArrayProperty;
+    typedef AtomProperty<SireBase::StringArrayProperty> AtomStringArrayProperty;
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::AtomPropertyList );
-Q_DECLARE_METATYPE( SireMol::AtomDoubleArrayProperty );
-Q_DECLARE_METATYPE( SireMol::AtomIntegerArrayProperty );
-Q_DECLARE_METATYPE( SireMol::AtomStringArrayProperty );
+Q_DECLARE_METATYPE(SireMol::AtomPropertyList);
+Q_DECLARE_METATYPE(SireMol::AtomDoubleArrayProperty);
+Q_DECLARE_METATYPE(SireMol::AtomIntegerArrayProperty);
+Q_DECLARE_METATYPE(SireMol::AtomStringArrayProperty);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireBase::PropertyList, SireMol::AtomPropertyList )
-SIRE_EXPOSE_ATOM_PROPERTY( SireBase::DoubleArrayProperty, SireMol::AtomDoubleArrayProperty )
-SIRE_EXPOSE_ATOM_PROPERTY( SireBase::IntegerArrayProperty, SireMol::AtomIntegerArrayProperty )
-SIRE_EXPOSE_ATOM_PROPERTY( SireBase::StringArrayProperty, SireMol::AtomStringArrayProperty )
+SIRE_EXPOSE_ATOM_PROPERTY(SireBase::PropertyList, SireMol::AtomPropertyList)
+SIRE_EXPOSE_ATOM_PROPERTY(SireBase::DoubleArrayProperty, SireMol::AtomDoubleArrayProperty)
+SIRE_EXPOSE_ATOM_PROPERTY(SireBase::IntegerArrayProperty, SireMol::AtomIntegerArrayProperty)
+SIRE_EXPOSE_ATOM_PROPERTY(SireBase::StringArrayProperty, SireMol::AtomStringArrayProperty)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireMol::AtomProperty<SireBase::PropertyList>;

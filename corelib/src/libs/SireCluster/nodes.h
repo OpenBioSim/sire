@@ -40,153 +40,153 @@ SIRE_BEGIN_HEADER
 namespace SireCluster
 {
 
-class Frontend;
-class Node;
-class NodesPtr;
+    class Frontend;
+    class Node;
+    class NodesPtr;
 
-class ThisThread;
+    class ThisThread;
 
-namespace detail
-{
-class NodePvt;
-class NodesPvt;
-class ThisThreadPvt;
-}
+    namespace detail
+    {
+        class NodePvt;
+        class NodesPvt;
+        class ThisThreadPvt;
+    } // namespace detail
 
-/** This class holds, and schedules, a collection of Node objects.
+    /** This class holds, and schedules, a collection of Node objects.
 
-    @author Christopher Woods
-*/
-class SIRECLUSTER_EXPORT Nodes
-{
+        @author Christopher Woods
+    */
+    class SIRECLUSTER_EXPORT Nodes
+    {
 
-friend class NodesPtr;
-friend class Cluster;
+        friend class NodesPtr;
+        friend class Cluster;
 
-friend class detail::ThisThreadPvt;
+        friend class detail::ThisThreadPvt;
 
-public:
-    Nodes();
+    public:
+        Nodes();
 
-    Nodes(const Nodes &other);
+        Nodes(const Nodes &other);
 
-    ~Nodes();
+        ~Nodes();
 
-    Nodes& operator=(const Nodes &other);
+        Nodes &operator=(const Nodes &other);
 
-    bool operator==(const Nodes &other) const;
-    bool operator!=(const Nodes &other) const;
+        bool operator==(const Nodes &other) const;
+        bool operator!=(const Nodes &other) const;
 
-    bool isEmpty();
+        bool isEmpty();
 
-    QString toString() const;
+        QString toString() const;
 
-    Node getNode();
-    QList<Node> getNodes(int n);
-    QList<Node> getAllNodes();
+        Node getNode();
+        QList<Node> getNodes(int n);
+        QList<Node> getAllNodes();
 
-    Node getNode(int timeout);
-    QList<Node> getNodes(int n, int timeout);
-    QList<Node> getAllNodes(int timeout);
+        Node getNode(int timeout);
+        QList<Node> getNodes(int n, int timeout);
+        QList<Node> getAllNodes(int timeout);
 
-    void waitUntilAllFree();
-    bool waitUntilAllFree(int timeout);
+        void waitUntilAllFree();
+        bool waitUntilAllFree(int timeout);
 
-    int nFree();
-    int nBusy();
-    int nNodes();
-    int count();
+        int nFree();
+        int nBusy();
+        int nNodes();
+        int count();
 
-    void add(Node node);
-    void remove(Node node);
+        void add(Node node);
+        void remove(Node node);
 
-    void add(Nodes &nodes);
+        void add(Nodes &nodes);
 
-    void addNode();
-    void addNode(int timeout);
+        void addNode();
+        void addNode(int timeout);
 
-    void addNodes(int n);
-    void addNodes(int n, int timeout);
+        void addNodes(int n);
+        void addNodes(int n, int timeout);
 
-    void removeAll();
+        void removeAll();
 
-    ThisThread borrowThisThread();
+        ThisThread borrowThisThread();
 
-protected:
-    Nodes(const boost::shared_ptr<detail::NodesPvt> &ptr); // called by NodesPvt
+    protected:
+        Nodes(const boost::shared_ptr<detail::NodesPvt> &ptr); // called by NodesPvt
 
-    Nodes(Frontend frontend);                // called by Cluster
-    Nodes(const QList<Frontend> &frontends); // called by Cluster
+        Nodes(Frontend frontend);                // called by Cluster
+        Nodes(const QList<Frontend> &frontends); // called by Cluster
 
-    QUuid createThisThread();                  // called by ThisThreadPvt
-    void reclaimThisThread(const QUuid &uid);  // called by ThisThreadPvt
+        QUuid createThisThread();                 // called by ThisThreadPvt
+        void reclaimThisThread(const QUuid &uid); // called by ThisThreadPvt
 
-private:
-    Node _pvt_getNode();
+    private:
+        Node _pvt_getNode();
 
-    /** Private implementation of the Nodes */
-    boost::shared_ptr<detail::NodesPvt> d;
-};
+        /** Private implementation of the Nodes */
+        boost::shared_ptr<detail::NodesPvt> d;
+    };
 
-/** This class holds a weak pointer to the Nodes */
-class NodesPtr
-{
+    /** This class holds a weak pointer to the Nodes */
+    class NodesPtr
+    {
 
-friend class detail::NodePvt;
+        friend class detail::NodePvt;
 
-public:
-    NodesPtr();
-    NodesPtr(const Nodes &nodes);
+    public:
+        NodesPtr();
+        NodesPtr(const Nodes &nodes);
 
-    NodesPtr(const NodesPtr &other);
+        NodesPtr(const NodesPtr &other);
 
-    ~NodesPtr();
+        ~NodesPtr();
 
-    NodesPtr& operator=(const NodesPtr &other);
+        NodesPtr &operator=(const NodesPtr &other);
 
-    Nodes lock() const;
-    Nodes operator*() const;
+        Nodes lock() const;
+        Nodes operator*() const;
 
-    bool expired() const;
+        bool expired() const;
 
-    void reset();
+        void reset();
 
-protected:
-    void returnFrontend(Frontend frontend);  // called by NodePvt
+    protected:
+        void returnFrontend(Frontend frontend); // called by NodePvt
 
-private:
-    /** Weak pointer to the nodes */
-    boost::weak_ptr<detail::NodesPvt> d;
-};
+    private:
+        /** Weak pointer to the nodes */
+        boost::weak_ptr<detail::NodesPvt> d;
+    };
 
-/** This simple class is used to allow the current thread
-    to be made available to a Nodes object
+    /** This simple class is used to allow the current thread
+        to be made available to a Nodes object
 
-    @author Christopher Woods
-*/
-class SIRECLUSTER_EXPORT ThisThread
-{
-public:
-    ThisThread();
-    ThisThread(const ThisThread &other);
+        @author Christopher Woods
+    */
+    class SIRECLUSTER_EXPORT ThisThread
+    {
+    public:
+        ThisThread();
+        ThisThread(const ThisThread &other);
 
-    ThisThread(const Nodes &nodes);
+        ThisThread(const Nodes &nodes);
 
-    ThisThread& operator=(const ThisThread &other);
+        ThisThread &operator=(const ThisThread &other);
 
-    ~ThisThread();
+        ~ThisThread();
 
-    void reclaim();
+        void reclaim();
 
-private:
-    /** Pointer to the implementation */
-    boost::shared_ptr<detail::ThisThreadPvt> d;
-};
+    private:
+        /** Pointer to the implementation */
+        boost::shared_ptr<detail::ThisThreadPvt> d;
+    };
 
-}
+} // namespace SireCluster
 
-SIRE_EXPOSE_CLASS( SireCluster::Nodes )
-SIRE_EXPOSE_CLASS( SireCluster::ThisThread )
+SIRE_EXPOSE_CLASS(SireCluster::Nodes)
+SIRE_EXPOSE_CLASS(SireCluster::ThisThread)
 
 SIRE_END_HEADER
 

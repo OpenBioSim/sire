@@ -31,10 +31,10 @@
 #include "molinfo.h"
 
 #include "atom.h"
-#include "selector.hpp"
-#include "molecules.h"
 #include "moleculegroup.h"
 #include "moleculegroups.h"
+#include "molecules.h"
+#include "selector.hpp"
 
 #include "SireError/errors.h"
 
@@ -52,8 +52,7 @@ using namespace SireStream;
 static const RegisterMetaType<AtomIdentifier> r_atomid;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AtomIdentifier &atomid)
+QDataStream &operator<<(QDataStream &ds, const AtomIdentifier &atomid)
 {
     writeHeader(ds, r_atomid, 1);
 
@@ -63,8 +62,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       AtomIdentifier &atomid)
+QDataStream &operator>>(QDataStream &ds, AtomIdentifier &atomid)
 {
     VersionID v = readHeader(ds, r_atomid);
 
@@ -73,33 +71,34 @@ QDataStream &operator>>(QDataStream &ds,
         SireStream::loadPolyPointer(ds, atomid.d);
     }
     else
-        throw version_error( v, "1", r_atomid, CODELOC );
+        throw version_error(v, "1", r_atomid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 AtomIdentifier::AtomIdentifier() : AtomID()
-{}
+{
+}
 
 /** Construct from the passed AtomID */
-AtomIdentifier::AtomIdentifier(const AtomID &atomid)
-               : AtomID()
+AtomIdentifier::AtomIdentifier(const AtomID &atomid) : AtomID()
 {
     if (atomid.isA<AtomIdentifier>())
         d = atomid.asA<AtomIdentifier>().d;
     else if (not atomid.isNull())
-        d.reset( atomid.clone() );
+        d.reset(atomid.clone());
 }
 
 /** Copy constructor */
-AtomIdentifier::AtomIdentifier(const AtomIdentifier &other)
-               : AtomID(other), d(other.d)
-{}
+AtomIdentifier::AtomIdentifier(const AtomIdentifier &other) : AtomID(other), d(other.d)
+{
+}
 
 /** Destructor */
 AtomIdentifier::~AtomIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool AtomIdentifier::isNull() const
@@ -126,7 +125,7 @@ QString AtomIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const AtomID& AtomIdentifier::base() const
+const AtomID &AtomIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -135,14 +134,14 @@ const AtomID& AtomIdentifier::base() const
 }
 
 /** Copy assignment operator */
-AtomIdentifier& AtomIdentifier::operator=(const AtomIdentifier &other)
+AtomIdentifier &AtomIdentifier::operator=(const AtomIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-AtomIdentifier& AtomIdentifier::operator=(const AtomID &other)
+AtomIdentifier &AtomIdentifier::operator=(const AtomID &other)
 {
     if (other.isA<AtomIdentifier>())
         d = other.asA<AtomIdentifier>().d;
@@ -213,12 +212,12 @@ QList<AtomIdx> AtomIdentifier::map(const MolInfo &molinfo) const
         return d->map(molinfo);
 }
 
-const char* AtomIdentifier::typeName()
+const char *AtomIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AtomIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<AtomIdentifier>());
 }
 
-AtomIdentifier* AtomIdentifier::clone() const
+AtomIdentifier *AtomIdentifier::clone() const
 {
     return new AtomIdentifier(*this);
 }

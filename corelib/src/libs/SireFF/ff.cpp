@@ -31,41 +31,41 @@
 
 #include "tostring.h"
 
-#include "SireMol/mgnum.h"
 #include "SireMol/mgidx.h"
 #include "SireMol/mgname.h"
+#include "SireMol/mgnum.h"
 #include "SireMol/molecule.h"
+#include "SireMol/moleculegroup.h"
+#include "SireMol/molecules.h"
 #include "SireMol/partialmolecule.h"
 #include "SireMol/viewsofmol.h"
-#include "SireMol/molecules.h"
-#include "SireMol/moleculegroup.h"
 
 #include "SireMol/mover.hpp"
 
-#include "SireFF/errors.h"
 #include "SireError/errors.h"
+#include "SireFF/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
-#include <QElapsedTimer>
 #include <QDebug>
+#include <QElapsedTimer>
 
 using namespace SireFF;
 using namespace SireMol;
 using namespace SireBase;
 using namespace SireStream;
 
-void SireFF::detail::throwForceFieldRestoreBug(const char *this_what,
-                                                             const char *ffield_what)
+void SireFF::detail::throwForceFieldRestoreBug(const char *this_what, const char *ffield_what)
 {
-    throw SireError::program_bug( QObject::tr(
-        "Something went wrong, as we are trying to restore a forcefield "
-        "of type %1 using a saved state forcefield of type %2...??")
-            .arg(this_what).arg(ffield_what), CODELOC );
+    throw SireError::program_bug(QObject::tr("Something went wrong, as we are trying to restore a forcefield "
+                                             "of type %1 using a saved state forcefield of type %2...??")
+                                     .arg(this_what)
+                                     .arg(ffield_what),
+                                 CODELOC);
 }
 
-static const RegisterMetaType<FF> r_ff( MAGIC_ONLY, FF::typeName() );
+static const RegisterMetaType<FF> r_ff(MAGIC_ONLY, FF::typeName());
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const FF &ff)
@@ -74,9 +74,7 @@ QDataStream &operator<<(QDataStream &ds, const FF &ff)
 
     SharedDataStream sds(ds);
 
-    sds << ff.uid << ff.versn << ff.ffname << ff.nrg_components
-        << ff.isdirty
-        << static_cast<const MolGroupsBase&>(ff);
+    sds << ff.uid << ff.versn << ff.ffname << ff.nrg_components << ff.isdirty << static_cast<const MolGroupsBase &>(ff);
 
     return ds;
 }
@@ -89,9 +87,7 @@ QDataStream &operator>>(QDataStream &ds, FF &ff)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> ff.uid >> ff.versn >> ff.ffname >> ff.nrg_components
-            >> ff.isdirty
-            >> static_cast<MolGroupsBase&>(ff);
+        sds >> ff.uid >> ff.versn >> ff.ffname >> ff.nrg_components >> ff.isdirty >> static_cast<MolGroupsBase &>(ff);
     }
     else
         throw version_error(v, "1", r_ff, CODELOC);
@@ -100,39 +96,31 @@ QDataStream &operator>>(QDataStream &ds, FF &ff)
 }
 
 /** Constructor */
-FF::FF() : MolGroupsBase(), versn(0),
-                            version_ptr( new Incremint(0) ),
-                            ffname( QObject::tr("unnamed") ),
-                            isdirty(true)
+FF::FF() : MolGroupsBase(), versn(0), version_ptr(new Incremint(0)), ffname(QObject::tr("unnamed")), isdirty(true)
 {
     uid = QUuid::createUuid();
 }
 
 /** Construct a forcefield, and also give it a name */
-FF::FF(const QString &name) : MolGroupsBase(),
-                              versn(0),
-                              version_ptr( new Incremint(0) ),
-                              ffname(name),
-                              isdirty(true)
+FF::FF(const QString &name) : MolGroupsBase(), versn(0), version_ptr(new Incremint(0)), ffname(name), isdirty(true)
 {
     uid = QUuid::createUuid();
 }
 
 /** Copy constructor */
-FF::FF(const FF &other) : MolGroupsBase(other),
-                          uid(other.uid), versn(other.versn),
-                          version_ptr(other.version_ptr),
-                          ffname(other.ffname),
-                          nrg_components(other.nrg_components),
-                          isdirty(other.isdirty)
-{}
+FF::FF(const FF &other)
+    : MolGroupsBase(other), uid(other.uid), versn(other.versn), version_ptr(other.version_ptr), ffname(other.ffname),
+      nrg_components(other.nrg_components), isdirty(other.isdirty)
+{
+}
 
 /** Destructor */
 FF::~FF()
-{}
+{
+}
 
 /** Copy assignment operator */
-FF& FF::operator=(const FF &other)
+FF &FF::operator=(const FF &other)
 {
     if (this != &other)
     {
@@ -165,13 +153,13 @@ bool FF::operator!=(const FF &other) const
 
 /** Return the current values of the energy components - note that
     these will be invalid if this->isDirty() is true */
-const Values& FF::currentEnergies() const
+const Values &FF::currentEnergies() const
 {
     return nrg_components;
 }
 
 /** Return the unique ID for this forcefield */
-const QUuid& FF::UID() const
+const QUuid &FF::UID() const
 {
     return uid;
 }
@@ -185,10 +173,7 @@ quint64 FF::version() const
 /** Return a string representation of this forcefield */
 QString FF::toString() const
 {
-    return QObject::tr("%1(\"%2\", version=%3)")
-                    .arg(this->what())
-                    .arg(this->name())
-                    .arg(this->version());
+    return QObject::tr("%1(\"%2\", version=%3)").arg(this->what()).arg(this->name()).arg(this->version());
 }
 
 /** Increment the version number of this forcefield */
@@ -198,7 +183,7 @@ void FF::incrementVersion()
 }
 
 /** Return the name of this forcefield */
-const FFName& FF::name() const
+const FFName &FF::name() const
 {
     return ffname;
 }
@@ -215,14 +200,14 @@ void FF::setName(const QString &name)
             ffname = FFName(name);
 
             uid = QUuid::createUuid();
-            version_ptr.reset( new Incremint() );
+            version_ptr.reset(new Incremint());
 
             this->_pvt_updateName();
 
             this->incrementVersion();
         }
     }
-    catch(...)
+    catch (...)
     {
         ffname = old_name;
         throw;
@@ -263,19 +248,19 @@ SireUnits::Dimension::MolarEnergy FF::energy(const Symbol &component)
     }
 
     if (not nrg_components.values().contains(component.ID()))
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component in this forcefield represented by "
-            "the symbol %1. Available components are %2.")
-                .arg(component.toString())
-                .arg( Sire::toString(this->components().symbols()) ), CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component in this forcefield represented by "
+                                                    "the symbol %1. Available components are %2.")
+                                            .arg(component.toString())
+                                            .arg(Sire::toString(this->components().symbols())),
+                                        CODELOC);
 
-    return SireUnits::Dimension::MolarEnergy( nrg_components.value(component) );
+    return SireUnits::Dimension::MolarEnergy(nrg_components.value(component));
 }
 
 /** Return the energy of this forcefield in its current state */
 SireUnits::Dimension::MolarEnergy FF::energy()
 {
-    return this->energy( this->components().total() );
+    return this->energy(this->components().total());
 }
 
 /** Return the values of the specified energy components */
@@ -289,13 +274,13 @@ Values FF::energies(const QSet<Symbol> &components)
     foreach (const Symbol &component, components)
     {
         if (not nrg_components.values().contains(component.ID()))
-            throw SireFF::missing_component( QObject::tr(
-                "There is no component in this forcefield represented by "
-                "the symbol %1. Available components are %2.")
-                    .arg(component.toString())
-                    .arg( Sire::toString( nrg_components.values().keys() ) ), CODELOC );
+            throw SireFF::missing_component(QObject::tr("There is no component in this forcefield represented by "
+                                                        "the symbol %1. Available components are %2.")
+                                                .arg(component.toString())
+                                                .arg(Sire::toString(nrg_components.values().keys())),
+                                            CODELOC);
 
-        vals.set( component, nrg_components.value(component) );
+        vals.set(component, nrg_components.value(component));
     }
 
     return vals;
@@ -323,38 +308,37 @@ Values FF::energies()
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::add(const MoleculeView &molview, const MGID &mgid,
-             const PropertyMap &map)
+void FF::add(const MoleculeView &molview, const MGID &mgid, const PropertyMap &map)
 {
-    //get the numbers of the forcefield groups...
+    // get the numbers of the forcefield groups...
     QList<MGNum> mgnums = mgid.map(*this);
 
     if (mgnums.isEmpty())
         return;
 
-    //update the molecule so that it is at the same version as
-    //any existing copies
+    // update the molecule so that it is at the same version as
+    // any existing copies
     PartialMolecule view(molview);
-    view.update( this->matchToExistingVersion(view.data()) );
+    view.update(this->matchToExistingVersion(view.data()));
 
     if (mgnums.count() == 1)
     {
-        //no need to checkpoint as the order of operations can
-        //be used to preserve state
-        MGIdx mgidx = this->mgIdx( *(mgnums.constBegin()) );
+        // no need to checkpoint as the order of operations can
+        // be used to preserve state
+        MGIdx mgidx = this->mgIdx(*(mgnums.constBegin()));
 
         this->group_add(mgidx, view, map);
-        this->addToIndex( *(mgnums.constBegin()), view.number() );
+        this->addToIndex(*(mgnums.constBegin()), view.number());
     }
     else
     {
-        //we need to save state as an exception could be thrown
-        //when adding to the nth group
-        boost::shared_ptr<FF> old_state( this->clone() );
+        // we need to save state as an exception could be thrown
+        // when adding to the nth group
+        boost::shared_ptr<FF> old_state(this->clone());
 
         try
         {
-            //add the molecule to each group in turn...
+            // add the molecule to each group in turn...
             foreach (MGNum mgnum, mgnums)
             {
                 MGIdx mgidx = this->mgIdx(mgnum);
@@ -363,9 +347,9 @@ void FF::add(const MoleculeView &molview, const MGID &mgid,
                 this->addToIndex(mgnum, view.number());
             }
         }
-        catch(...)
+        catch (...)
         {
-            //restore the old state of the forcefield
+            // restore the old state of the forcefield
             this->copy(*old_state);
             throw;
         }
@@ -385,8 +369,7 @@ void FF::add(const MoleculeView &molview, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::add(const ViewsOfMol &molviews, const MGID &mgid,
-             const PropertyMap &map)
+void FF::add(const ViewsOfMol &molviews, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
@@ -394,7 +377,7 @@ void FF::add(const ViewsOfMol &molviews, const MGID &mgid,
         return;
 
     ViewsOfMol views(molviews);
-    views.update( this->matchToExistingVersion(views.data()) );
+    views.update(this->matchToExistingVersion(views.data()));
 
     if (mgnums.count() == 1)
     {
@@ -406,7 +389,7 @@ void FF::add(const ViewsOfMol &molviews, const MGID &mgid,
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -417,7 +400,7 @@ void FF::add(const ViewsOfMol &molviews, const MGID &mgid,
                 this->addToIndex(mgnum, views.number());
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -438,8 +421,7 @@ void FF::add(const ViewsOfMol &molviews, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::add(const Molecules &molecules, const MGID &mgid,
-             const PropertyMap &map)
+void FF::add(const Molecules &molecules, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
@@ -459,7 +441,7 @@ void FF::add(const Molecules &molecules, const MGID &mgid,
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -471,7 +453,7 @@ void FF::add(const Molecules &molecules, const MGID &mgid,
                 this->addToIndex(mgnum, molnums);
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -492,8 +474,7 @@ void FF::add(const Molecules &molecules, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::add(const MoleculeGroup &molgroup, const MGID &mgid,
-             const PropertyMap &map)
+void FF::add(const MoleculeGroup &molgroup, const MGID &mgid, const PropertyMap &map)
 {
     this->add(molgroup.molecules(), mgid, map);
 }
@@ -513,8 +494,7 @@ void FF::add(const MoleculeGroup &molgroup, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid,
-                     const PropertyMap &map)
+void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
@@ -522,7 +502,7 @@ void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid,
         return;
 
     PartialMolecule view(molview);
-    view.update( this->matchToExistingVersion(view.data()) );
+    view.update(this->matchToExistingVersion(view.data()));
 
     if (mgnums.count() == 1)
     {
@@ -534,7 +514,7 @@ void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid,
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -546,7 +526,7 @@ void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid,
                 this->addToIndex(mgnum, view.number());
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -569,8 +549,7 @@ void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
-                     const PropertyMap &map)
+void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
@@ -578,7 +557,7 @@ void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
         return;
 
     ViewsOfMol views(molviews);
-    views.update( this->matchToExistingVersion(views.data()) );
+    views.update(this->matchToExistingVersion(views.data()));
 
     if (mgnums.count() == 1)
     {
@@ -590,7 +569,7 @@ void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -602,7 +581,7 @@ void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
                 this->addToIndex(mgnum, views.number());
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -625,8 +604,7 @@ void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::addIfUnique(const Molecules &molecules, const MGID &mgid,
-                     const PropertyMap &map)
+void FF::addIfUnique(const Molecules &molecules, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
@@ -646,7 +624,7 @@ void FF::addIfUnique(const Molecules &molecules, const MGID &mgid,
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -658,7 +636,7 @@ void FF::addIfUnique(const Molecules &molecules, const MGID &mgid,
                 this->addToIndex(mgnum, molnums);
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -681,8 +659,7 @@ void FF::addIfUnique(const Molecules &molecules, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::addIfUnique(const MoleculeGroup &molgroup, const MGID &mgid,
-                     const PropertyMap &map)
+void FF::addIfUnique(const MoleculeGroup &molgroup, const MGID &mgid, const PropertyMap &map)
 {
     this->addIfUnique(molgroup.molecules(), mgid, map);
 }
@@ -706,7 +683,7 @@ bool FF::removeAll(const MGID &mgid)
                 mols_removed = true;
         }
 
-        this->group_removeAll( this->mgIdx(mgnum) );
+        this->group_removeAll(this->mgIdx(mgnum));
         this->clearIndex(mgnum);
     }
 
@@ -745,7 +722,7 @@ bool FF::remove(const MoleculeView &molview, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         bool removed_mol = false;
 
@@ -764,7 +741,7 @@ bool FF::remove(const MoleculeView &molview, const MGID &mgid)
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -808,7 +785,7 @@ bool FF::remove(const ViewsOfMol &molviews, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         bool removed_mol = false;
 
@@ -829,7 +806,7 @@ bool FF::remove(const ViewsOfMol &molviews, const MGID &mgid)
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -880,7 +857,7 @@ bool FF::remove(const Molecules &molecules, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -908,7 +885,7 @@ bool FF::remove(const Molecules &molecules, const MGID &mgid)
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -963,7 +940,7 @@ bool FF::removeAll(const MoleculeView &molview, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -982,7 +959,7 @@ bool FF::removeAll(const MoleculeView &molview, const MGID &mgid)
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -1026,7 +1003,7 @@ bool FF::removeAll(const ViewsOfMol &molviews, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -1047,7 +1024,7 @@ bool FF::removeAll(const ViewsOfMol &molviews, const MGID &mgid)
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -1098,7 +1075,7 @@ bool FF::removeAll(const Molecules &molecules, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -1126,7 +1103,7 @@ bool FF::removeAll(const Molecules &molecules, const MGID &mgid)
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -1178,7 +1155,7 @@ bool FF::remove(MolNum molnum, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -1197,7 +1174,7 @@ bool FF::remove(MolNum molnum, const MGID &mgid)
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -1230,7 +1207,7 @@ bool FF::remove(const QSet<MolNum> &molnums, const MGID &mgid)
 
         foreach (const ViewsOfMol &removed_mol, removed_mols)
         {
-            removed_molnums.insert( removed_mol.number() );
+            removed_molnums.insert(removed_mol.number());
         }
 
         if (not removed_molnums.isEmpty())
@@ -1243,7 +1220,7 @@ bool FF::remove(const QSet<MolNum> &molnums, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -1269,7 +1246,7 @@ bool FF::remove(const QSet<MolNum> &molnums, const MGID &mgid)
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -1304,14 +1281,13 @@ void FF::update(const MoleculeData &moldata, bool auto_commit)
 
     if (mgnums.count() == 1)
     {
-        this->group_update( this->mgIdx(*(mgnums.constBegin())),
-                            moldata, auto_commit );
+        this->group_update(this->mgIdx(*(mgnums.constBegin())), moldata, auto_commit);
     }
     else
     {
         foreach (MGNum mgnum, mgnums)
         {
-            this->group_update( this->mgIdx(mgnum), moldata, auto_commit );
+            this->group_update(this->mgIdx(mgnum), moldata, auto_commit);
         }
     }
 
@@ -1343,14 +1319,14 @@ void FF::update(const Molecules &molecules, bool auto_commit)
 
     else if (molecules.count() == 1)
     {
-        this->update( molecules.constBegin()->data(), auto_commit );
+        this->update(molecules.constBegin()->data(), auto_commit);
         return;
     }
 
     if (auto_commit and this->needsAccepting())
         this->accept();
 
-    //get the numbers of the groups that contain these molecules...
+    // get the numbers of the groups that contain these molecules...
     int ngroups = this->nGroups();
 
     if (ngroups == 1)
@@ -1361,9 +1337,7 @@ void FF::update(const Molecules &molecules, bool auto_commit)
     {
         QSet<MGNum> mgnums;
 
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd();
-             ++it)
+        for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
             if (this->contains(it->number()))
             {
@@ -1381,7 +1355,7 @@ void FF::update(const Molecules &molecules, bool auto_commit)
 
         if (mgnums.count() == 1)
         {
-            //only one group needs to be updated
+            // only one group needs to be updated
             MGNum mgnum = *(mgnums.constBegin());
             MGIdx mgidx = this->mgIdx(mgnum);
 
@@ -1426,8 +1400,7 @@ void FF::update(const MoleculeGroup &molgroup, bool auto_commit)
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::setContents(const MGID &mgid, const MoleculeView &molview,
-                     const PropertyMap &map)
+void FF::setContents(const MGID &mgid, const MoleculeView &molview, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
@@ -1436,7 +1409,7 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview,
 
     if (this->nGroups() == 1)
     {
-        //there is only one group and it is being updated
+        // there is only one group and it is being updated
         MGNum mgnum = *(mgnums.constBegin());
 
         if (this->group_setContents(0, molview, map))
@@ -1447,20 +1420,20 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview,
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         try
         {
-            //first clear any existing molecules
+            // first clear any existing molecules
             foreach (MGNum mgnum, mgnums)
             {
                 this->group_removeAll(this->mgIdx(mgnum));
                 this->clearIndex(mgnum);
             }
 
-            //now get the current version of the molecule
+            // now get the current version of the molecule
             PartialMolecule view(molview);
-            view.update( this->matchToExistingVersion(view.data()) );
+            view.update(this->matchToExistingVersion(view.data()));
 
             foreach (MGNum mgnum, mgnums)
             {
@@ -1470,7 +1443,7 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview,
                 this->addToIndex(mgnum, view.number());
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -1491,8 +1464,7 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
-                     const PropertyMap &map)
+void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
@@ -1501,7 +1473,7 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
 
     if (this->nGroups() == 1)
     {
-        //there is only one group and it is being updated
+        // there is only one group and it is being updated
         MGNum mgnum = *(mgnums.constBegin());
 
         if (this->group_setContents(0, molviews, map))
@@ -1512,20 +1484,20 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         try
         {
-            //first clear any existing molecules
+            // first clear any existing molecules
             foreach (MGNum mgnum, mgnums)
             {
                 this->group_removeAll(this->mgIdx(mgnum));
                 this->clearIndex(mgnum);
             }
 
-            //now get the current version of the molecule
+            // now get the current version of the molecule
             ViewsOfMol views(molviews);
-            views.update( this->matchToExistingVersion(views.data()) );
+            views.update(this->matchToExistingVersion(views.data()));
 
             foreach (MGNum mgnum, mgnums)
             {
@@ -1535,7 +1507,7 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
                 this->addToIndex(mgnum, views.number());
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -1556,8 +1528,7 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::setContents(const MGID &mgid, const Molecules &molecules,
-                     const PropertyMap &map)
+void FF::setContents(const MGID &mgid, const Molecules &molecules, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
@@ -1566,7 +1537,7 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules,
 
     if (this->nGroups() == 1)
     {
-        //there is only one group and it is being updated
+        // there is only one group and it is being updated
         MGNum mgnum = *(mgnums.constBegin());
 
         if (this->group_setContents(0, molecules, map))
@@ -1577,18 +1548,18 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules,
     }
     else
     {
-        boost::shared_ptr<FF> old_state( this->clone() );
+        boost::shared_ptr<FF> old_state(this->clone());
 
         try
         {
-            //first clear any existing molecules
+            // first clear any existing molecules
             foreach (MGNum mgnum, mgnums)
             {
                 this->group_removeAll(this->mgIdx(mgnum));
                 this->clearIndex(mgnum);
             }
 
-            //now get the current version of the molecules
+            // now get the current version of the molecules
             Molecules mols = this->matchToExistingVersion(molecules);
 
             QSet<MolNum> molnums = mols.molNums();
@@ -1601,7 +1572,7 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules,
                 this->addToIndex(mgnum, molnums);
             }
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -1622,8 +1593,7 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void FF::setContents(const MGID &mgid, const MoleculeGroup &molgroup,
-                     const PropertyMap &map)
+void FF::setContents(const MGID &mgid, const MoleculeGroup &molgroup, const PropertyMap &map)
 {
     this->setContents(mgid, molgroup.molecules(), map);
 }

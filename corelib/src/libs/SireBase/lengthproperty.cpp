@@ -62,43 +62,45 @@ QDataStream &operator>>(QDataStream &ds, LengthProperty &prop)
 }
 
 /** Constructor - this constructs the integer "0" */
-LengthProperty::LengthProperty() : ConcreteProperty<LengthProperty,Property>(), val(0)
-{}
+LengthProperty::LengthProperty() : ConcreteProperty<LengthProperty, Property>(), val(0)
+{
+}
 
 /** Construct from the passed length */
-LengthProperty::LengthProperty(Length value)
-               : ConcreteProperty<LengthProperty,Property>(), val(value)
-{}
+LengthProperty::LengthProperty(Length value) : ConcreteProperty<LengthProperty, Property>(), val(value)
+{
+}
 
 /** Construct from a VariantProperty */
-LengthProperty::LengthProperty(const Property &other)
-               : ConcreteProperty<LengthProperty,Property>(other)
+LengthProperty::LengthProperty(const Property &other) : ConcreteProperty<LengthProperty, Property>(other)
 {
     if (other.isA<VariantProperty>())
     {
         val = other.asA<VariantProperty>().convertTo<Length>();
     }
     else
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast a %1 into a LengthProperty").arg(other.toString()), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot cast a %1 into a LengthProperty").arg(other.toString()),
+                                      CODELOC);
 }
 
 /** Copy constructor */
 LengthProperty::LengthProperty(const LengthProperty &other)
-               : ConcreteProperty<LengthProperty,Property>(other), val(other.val)
-{}
+    : ConcreteProperty<LengthProperty, Property>(other), val(other.val)
+{
+}
 
 /** Destructor */
 LengthProperty::~LengthProperty()
-{}
-
-const char* LengthProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<LengthProperty>() );
+}
+
+const char *LengthProperty::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<LengthProperty>());
 }
 
 /** Copy assignment operator */
-LengthProperty& LengthProperty::operator=(const LengthProperty &other)
+LengthProperty &LengthProperty::operator=(const LengthProperty &other)
 {
     if (this != &other)
     {

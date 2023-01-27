@@ -40,98 +40,96 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class AxisSet;
+    class AxisSet;
 }
 
 class QDataStream;
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::AxisSet&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::AxisSet&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::AxisSet &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::AxisSet &);
 
 namespace SireMaths
 {
 
-/**
-This class provides a complete set of orthonormal axes that provide a
-frame of reference (origin+axes) for a coordinate system.
+    /**
+    This class provides a complete set of orthonormal axes that provide a
+    frame of reference (origin+axes) for a coordinate system.
 
-@author Christopher Woods
-*/
-class SIREMATHS_EXPORT AxisSet
-{
-
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const AxisSet&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, AxisSet&);
-
-public:
-    AxisSet();
-    AxisSet(const Matrix &matrx, Vector orign = Vector());
-    AxisSet(const AxisSet &other);
-    ~AxisSet();
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT AxisSet
     {
-        return AxisSet::typeName();
-    }
 
-    QString toString() const;
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const AxisSet &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, AxisSet &);
 
-    const Matrix& matrix() const;
-    const Matrix& invMatrix() const;
-    const Vector& origin() const;
+    public:
+        AxisSet();
+        AxisSet(const Matrix &matrx, Vector orign = Vector());
+        AxisSet(const AxisSet &other);
+        ~AxisSet();
 
-    Vector fromIdentity(const Vector &vec) const;
-    QVector<Vector> fromIdentity(const QVector<Vector> &vec) const;
+        static const char *typeName();
 
-    Vector toIdentity(const Vector &vec) const;
-    Vector toFrame(const AxisSet &frame, const Vector &vec) const;
-    Vector fromFrame(const AxisSet &frame, const Vector &vec) const;
+        const char *what() const
+        {
+            return AxisSet::typeName();
+        }
 
-    Vector fromIdentity(const Vector &vec, const Vector &delta) const;
-    QVector<Vector> fromIdentity(const QVector<Vector> &vecs, const Vector &delta) const;
+        QString toString() const;
 
-protected:
+        const Matrix &matrix() const;
+        const Matrix &invMatrix() const;
+        const Vector &origin() const;
 
-    /** The matrix that represents the coordinate frame */
-    Matrix mat;
+        Vector fromIdentity(const Vector &vec) const;
+        QVector<Vector> fromIdentity(const QVector<Vector> &vec) const;
 
-    /** The inverse of 'mat' */
-    Matrix invmat;
+        Vector toIdentity(const Vector &vec) const;
+        Vector toFrame(const AxisSet &frame, const Vector &vec) const;
+        Vector fromFrame(const AxisSet &frame, const Vector &vec) const;
 
-    /** The origin of this AxisSet */
-    Vector orgn;
+        Vector fromIdentity(const Vector &vec, const Vector &delta) const;
+        QVector<Vector> fromIdentity(const QVector<Vector> &vecs, const Vector &delta) const;
 
-};
+    protected:
+        /** The matrix that represents the coordinate frame */
+        Matrix mat;
+
+        /** The inverse of 'mat' */
+        Matrix invmat;
+
+        /** The origin of this AxisSet */
+        Vector orgn;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Returns a reference to the matrix representing this AxisSet */
-SIRE_ALWAYS_INLINE const Matrix& AxisSet::matrix() const
-{
-    return mat;
-}
+    /** Returns a reference to the matrix representing this AxisSet */
+    SIRE_ALWAYS_INLINE const Matrix &AxisSet::matrix() const
+    {
+        return mat;
+    }
 
-/** Returns a reference to the inverse of the matrix representing this AxisSet */
-SIRE_ALWAYS_INLINE const Matrix& AxisSet::invMatrix() const
-{
-    return invmat;
-}
+    /** Returns a reference to the inverse of the matrix representing this AxisSet */
+    SIRE_ALWAYS_INLINE const Matrix &AxisSet::invMatrix() const
+    {
+        return invmat;
+    }
 
-/** Returns a reference to the vector representing the origin of this AxisSet */
-SIRE_ALWAYS_INLINE const Vector& AxisSet::origin() const
-{
-    return orgn;
-}
+    /** Returns a reference to the vector representing the origin of this AxisSet */
+    SIRE_ALWAYS_INLINE const Vector &AxisSet::origin() const
+    {
+        return orgn;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::AxisSet);
 Q_DECLARE_TYPEINFO(SireMaths::AxisSet, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireMaths::AxisSet )
+SIRE_EXPOSE_CLASS(SireMaths::AxisSet)
 
 SIRE_END_HEADER
 

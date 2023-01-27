@@ -32,89 +32,90 @@
 
 #include "SireID/id.h"
 
-#include "SireID/specify.hpp"
 #include "SireID/idandset.hpp"
 #include "SireID/idorset.hpp"
+#include "SireID/specify.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
 
-class SysID;
-class SysIdx;
-class SysIdentifier;
-class SysName;
+    class SysID;
+    class SysIdx;
+    class SysIdentifier;
+    class SysName;
 
-using SireID::Specify;
-using SireID::IDAndSet;
-using SireID::IDOrSet;
+    using SireID::IDAndSet;
+    using SireID::IDOrSet;
+    using SireID::Specify;
 
-/** Dummy set */
-class SIRESYSTEM_EXPORT Systems
-{
-public:
-    Systems()
-    {}
-
-    ~Systems()
-    {}
-
-    QList<SysIdx> getSystems() const;
-
-    QList<SysIdx> map(const SysID &sysid) const;
-};
-
-/** The base class of all system identifiers
-
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT SysID : public SireID::ID
-{
-public:
-    typedef SysIdx Index;
-    typedef SysIdentifier Identifier;
-    typedef Systems SearchObject;
-
-    SysID();
-    SysID(const SysID &other);
-
-    virtual ~SysID();
-
-    static const char* typeName()
+    /** Dummy set */
+    class SIRESYSTEM_EXPORT Systems
     {
-        return "SireSystem::SysID";
-    }
+    public:
+        Systems()
+        {
+        }
 
-    virtual SysID* clone() const=0;
+        ~Systems()
+        {
+        }
 
-    Specify<SysID> operator[](int i) const;
-    Specify<SysID> operator()(int i) const;
-    Specify<SysID> operator()(int i, int j) const;
+        QList<SysIdx> getSystems() const;
 
-    IDAndSet<SysID> operator+(const SysID &other) const;
-    IDAndSet<SysID> operator&&(const SysID &other) const;
-    IDAndSet<SysID> operator&(const SysID &other) const;
+        QList<SysIdx> map(const SysID &sysid) const;
+    };
 
-    IDOrSet<SysID> operator*(const SysID &other) const;
-    IDOrSet<SysID> operator||(const SysID &other) const;
-    IDOrSet<SysID> operator|(const SysID &other) const;
+    /** The base class of all system identifiers
 
-    virtual QList<SysIdx> map(const Systems &systems) const=0;
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT SysID : public SireID::ID
+    {
+    public:
+        typedef SysIdx Index;
+        typedef SysIdentifier Identifier;
+        typedef Systems SearchObject;
 
-protected:
-    QList<SysIdx> processMatches(QList<SysIdx> &matches,
-                                 const Systems &systems) const;
-};
+        SysID();
+        SysID(const SysID &other);
 
-}
+        virtual ~SysID();
+
+        static const char *typeName()
+        {
+            return "SireSystem::SysID";
+        }
+
+        virtual SysID *clone() const = 0;
+
+        Specify<SysID> operator[](int i) const;
+        Specify<SysID> operator()(int i) const;
+        Specify<SysID> operator()(int i, int j) const;
+
+        IDAndSet<SysID> operator+(const SysID &other) const;
+        IDAndSet<SysID> operator&&(const SysID &other) const;
+        IDAndSet<SysID> operator&(const SysID &other) const;
+
+        IDOrSet<SysID> operator*(const SysID &other) const;
+        IDOrSet<SysID> operator||(const SysID &other) const;
+        IDOrSet<SysID> operator|(const SysID &other) const;
+
+        virtual QList<SysIdx> map(const Systems &systems) const = 0;
+
+    protected:
+        QList<SysIdx> processMatches(QList<SysIdx> &matches, const Systems &systems) const;
+    };
+
+} // namespace SireSystem
 
 #include "sysidentifier.h"
 
-SIRE_EXPOSE_CLASS( SireSystem::SysID )
-SIRE_EXPOSE_ALIAS( SireID::Specify<SireSystem::SysID>, SireSystem::Specify_SysID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDAndSet<SireSystem::SysID>, SireSystem::IDAndSet_SysID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDOrSet<SireSystem::SysID>, SireSystem::IDOrSet_SysID_ )
+SIRE_EXPOSE_CLASS(SireSystem::SysID)
+SIRE_EXPOSE_ALIAS(SireID::Specify<SireSystem::SysID>, SireSystem::Specify_SysID_)
+SIRE_EXPOSE_ALIAS(SireID::IDAndSet<SireSystem::SysID>, SireSystem::IDAndSet_SysID_)
+SIRE_EXPOSE_ALIAS(SireID::IDOrSet<SireSystem::SysID>, SireSystem::IDOrSet_SysID_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireID::Specify<SireSystem::SysID>;

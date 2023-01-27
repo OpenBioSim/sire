@@ -34,71 +34,69 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class StringProperty;
-class VariantProperty;
-}
+    class StringProperty;
+    class VariantProperty;
+} // namespace SireBase
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::StringProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::StringProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::StringProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::StringProperty &);
 
 namespace SireBase
 {
 
-/** This class provides a thin Property wrapper around a QString
+    /** This class provides a thin Property wrapper around a QString
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT StringProperty : public ConcreteProperty<StringProperty,Property>
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT StringProperty : public ConcreteProperty<StringProperty, Property>
+    {
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const StringProperty&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, StringProperty&);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const StringProperty &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, StringProperty &);
 
-public:
-    StringProperty();
+    public:
+        StringProperty();
 
-    StringProperty(const QString &s);
-    StringProperty(double value);
+        StringProperty(const QString &s);
+        StringProperty(double value);
 
-    StringProperty(const Property &other);
-    StringProperty(const StringProperty &other);
+        StringProperty(const Property &other);
+        StringProperty(const StringProperty &other);
 
-    ~StringProperty();
+        ~StringProperty();
 
-    StringProperty& operator=(const StringProperty &other);
+        StringProperty &operator=(const StringProperty &other);
 
-    bool operator==(const StringProperty &other) const;
-    bool operator!=(const StringProperty &other) const;
+        bool operator==(const StringProperty &other) const;
+        bool operator!=(const StringProperty &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    QString value() const;
+        QString value() const;
 
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
 
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
 
-private:
-    /** The actual string */
-    QString s;
-};
+    private:
+        /** The actual string */
+        QString s;
+    };
 
-}
+} // namespace SireBase
 
-Q_DECLARE_METATYPE( SireBase::StringProperty )
+Q_DECLARE_METATYPE(SireBase::StringProperty)
 
-SIRE_EXPOSE_CLASS( SireBase::StringProperty )
+SIRE_EXPOSE_CLASS(SireBase::StringProperty)
 
 SIRE_END_HEADER
 
 #endif
-
-

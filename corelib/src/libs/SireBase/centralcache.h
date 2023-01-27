@@ -30,10 +30,10 @@
 
 #include "sireglobal.h"
 
-#include <QVariant>
-#include <QHash>
 #include <QDateTime>
+#include <QHash>
 #include <QMutex>
+#include <QVariant>
 
 #include <memory>
 
@@ -44,69 +44,68 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-class CentralCache;
+    class CentralCache;
 
-/** This is an item of cached data. Note that you
- *  must hold the QMutex in this data whenever you
- *  try to access or use this data
- */
-class SIREBASE_EXPORT CachedData : public boost::noncopyable
-{
-public:
-    CachedData();
-    ~CachedData();
+    /** This is an item of cached data. Note that you
+     *  must hold the QMutex in this data whenever you
+     *  try to access or use this data
+     */
+    class SIREBASE_EXPORT CachedData : public boost::noncopyable
+    {
+    public:
+        CachedData();
+        ~CachedData();
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    QMutex* mutex();
+        QMutex *mutex();
 
-    const QVariant& data() const;
+        const QVariant &data() const;
 
-    int nBytes() const;
+        int nBytes() const;
 
-    void setData(const QVariant &data, int num_bytes);
+        void setData(const QVariant &data, int num_bytes);
 
-private:
-    QVariant d;
-    QMutex m;
-    int num_bytes;
-};
+    private:
+        QVariant d;
+        QMutex m;
+        int num_bytes;
+    };
 
+    /** This provides a centralised cache, which evicts items
+     *  in reverse order of last accessed
+     */
+    class SIREBASE_EXPORT CentralCache : public boost::noncopyable
+    {
+    public:
+        CentralCache();
+        ~CentralCache();
 
-/** This provides a centralised cache, which evicts items
- *  in reverse order of last accessed
- */
-class SIREBASE_EXPORT CentralCache : public boost::noncopyable
-{
-public:
-    CentralCache();
-    ~CentralCache();
+        static std::shared_ptr<CachedData> get(const QString &key);
 
-    static std::shared_ptr<CachedData> get(const QString &key);
+        static void setMaxCacheSize(qint64 size_in_bytes);
+        static qint64 getMaxCacheSize();
 
-    static void setMaxCacheSize(qint64 size_in_bytes);
-    static qint64 getMaxCacheSize();
+        static qint64 getCacheSize();
 
-    static qint64 getCacheSize();
+        static void empty();
 
-    static void empty();
+    private:
+        void clean();
 
-private:
-    void clean();
+        static CentralCache global_cache;
 
-    static CentralCache global_cache;
+        QMutex mutex;
+        QHash<QString, std::shared_ptr<CachedData>> cache;
+        QHash<QString, qint64> last_access_times;
 
-    QMutex mutex;
-    QHash<QString, std::shared_ptr<CachedData>> cache;
-    QHash<QString,qint64> last_access_times;
+        qint64 last_clean_time;
 
-    qint64 last_clean_time;
+        qint64 current_cache_size;
+        qint64 max_cache_size;
+    };
 
-    qint64 current_cache_size;
-    qint64 max_cache_size;
-};
-
-}
+} // namespace SireBase
 
 SIRE_END_HEADER
 

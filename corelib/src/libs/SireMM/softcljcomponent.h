@@ -34,188 +34,188 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class SoftCLJComponent;
-class SoftCLJEnergy;
-}
+    class SoftCLJComponent;
+    class SoftCLJEnergy;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::SoftCLJComponent&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::SoftCLJComponent&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::SoftCLJComponent &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::SoftCLJComponent &);
 
 namespace SireMM
 {
 
-namespace detail
-{
-/** This is the maximum number of different alpha values that a single
-    SoftCLJPotential may use */
-const int MAX_ALPHA_VALUES = 6;
-}
-
-/** This represents the sum of the coulomb and LJ components
-    for a soft-core forcefield, in which multiple soft-core
-    alpha values are used (and so multiple coulomb and LJ
-    components are available). This combined component gives
-    access to each of the individual components, and also
-    to the sum of them all
-
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT SoftCLJComponent : public CLJComponent
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const SoftCLJComponent&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, SoftCLJComponent&);
-
-public:
-    SoftCLJComponent();
-    SoftCLJComponent(const FFName &name);
-    SoftCLJComponent(const SireCAS::Symbol &symbol);
-
-    SoftCLJComponent(const SoftCLJComponent &other);
-
-    ~SoftCLJComponent();
-
-    SoftCLJComponent& operator=(const SoftCLJComponent &other);
-
-    static const char* typeName();
-
-    const char* what() const
+    namespace detail
     {
-        return SoftCLJComponent::typeName();
-    }
+        /** This is the maximum number of different alpha values that a single
+            SoftCLJPotential may use */
+        const int MAX_ALPHA_VALUES = 6;
+    } // namespace detail
 
-    SoftCLJComponent* clone() const
+    /** This represents the sum of the coulomb and LJ components
+        for a soft-core forcefield, in which multiple soft-core
+        alpha values are used (and so multiple coulomb and LJ
+        components are available). This combined component gives
+        access to each of the individual components, and also
+        to the sum of them all
+
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT SoftCLJComponent : public CLJComponent
     {
-        return new SoftCLJComponent(*this);
-    }
 
-    static int nAlphaValues()
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const SoftCLJComponent &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, SoftCLJComponent &);
+
+    public:
+        SoftCLJComponent();
+        SoftCLJComponent(const FFName &name);
+        SoftCLJComponent(const SireCAS::Symbol &symbol);
+
+        SoftCLJComponent(const SoftCLJComponent &other);
+
+        ~SoftCLJComponent();
+
+        SoftCLJComponent &operator=(const SoftCLJComponent &other);
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return SoftCLJComponent::typeName();
+        }
+
+        SoftCLJComponent *clone() const
+        {
+            return new SoftCLJComponent(*this);
+        }
+
+        static int nAlphaValues()
+        {
+            return detail::MAX_ALPHA_VALUES;
+        }
+
+        const CoulombComponent &coulomb() const;
+        const LJComponent &lj() const;
+        const CLJComponent &total() const;
+
+        const CoulombComponent &coulomb(int i) const;
+        const LJComponent &lj(int i) const;
+        const CLJComponent &total(int i) const;
+
+        void setEnergy(FF &ff, const CLJEnergy &value) const;
+        void changeEnergy(FF &ff, const CLJEnergy &delta) const;
+
+        void setEnergy(FF &ff, const SoftCLJEnergy &value) const;
+        void changeEnergy(FF &ff, const SoftCLJEnergy &delta) const;
+
+        SireCAS::Symbols symbols() const;
+
+    protected:
+        void rebuildComponents();
+
+        // the coulomb and LJ components on CLJComponent represent the
+        // total energy of all of the soft core components
+
+        /** The individual components for each alpha value in the same
+            order as the corresponding alpha values */
+        QVector<CLJComponent> alpha_components;
+    };
+
+    /** This class holds all of the energy component values of
+        a multi-alpha SoftCLJPotential-derived forcefield
+
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT SoftCLJEnergy
     {
-        return detail::MAX_ALPHA_VALUES;
-    }
+    public:
+        typedef SoftCLJComponent Components;
 
-    const CoulombComponent& coulomb() const;
-    const LJComponent& lj() const;
-    const CLJComponent& total() const;
+        SoftCLJEnergy();
 
-    const CoulombComponent& coulomb(int i) const;
-    const LJComponent& lj(int i) const;
-    const CLJComponent& total(int i) const;
+        SoftCLJEnergy(const SoftCLJEnergy &other);
 
-    void setEnergy(FF &ff, const CLJEnergy &value) const;
-    void changeEnergy(FF &ff, const CLJEnergy &delta) const;
+        ~SoftCLJEnergy();
 
-    void setEnergy(FF &ff, const SoftCLJEnergy &value) const;
-    void changeEnergy(FF &ff, const SoftCLJEnergy &delta) const;
+        static const char *typeName()
+        {
+            return "SireMM::SoftCLJEnergy";
+        }
 
-    SireCAS::Symbols symbols() const;
+        const char *what() const
+        {
+            return SoftCLJEnergy::typeName();
+        }
 
-protected:
-    void rebuildComponents();
+        SoftCLJEnergy &operator=(const SoftCLJEnergy &other);
 
-    //the coulomb and LJ components on CLJComponent represent the
-    //total energy of all of the soft core components
+        SoftCLJEnergy &operator+=(const SoftCLJEnergy &other);
+        SoftCLJEnergy &operator-=(const SoftCLJEnergy &other);
 
-    /** The individual components for each alpha value in the same
-        order as the corresponding alpha values */
-    QVector<CLJComponent> alpha_components;
-};
+        SoftCLJEnergy operator+(const SoftCLJEnergy &other) const;
+        SoftCLJEnergy operator-(const SoftCLJEnergy &other) const;
 
-/** This class holds all of the energy component values of
-    a multi-alpha SoftCLJPotential-derived forcefield
+        Components components() const
+        {
+            return Components();
+        }
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT SoftCLJEnergy
-{
-public:
-    typedef SoftCLJComponent Components;
+        int count() const
+        {
+            return detail::MAX_ALPHA_VALUES;
+        }
 
-    SoftCLJEnergy();
+        int size() const
+        {
+            return this->count();
+        }
 
-    SoftCLJEnergy(const SoftCLJEnergy &other);
+        void setEnergy(int i, double cnrg, double ljnrg);
 
-    ~SoftCLJEnergy();
+        double coulomb() const;
+        double lj() const;
 
-    static const char* typeName()
-    {
-        return "SireMM::SoftCLJEnergy";
-    }
+        double coulomb(int i) const;
+        double lj(int i) const;
 
-    const char* what() const
-    {
-        return SoftCLJEnergy::typeName();
-    }
+        double total() const;
+        double total(int i) const;
 
-    SoftCLJEnergy& operator=(const SoftCLJEnergy &other);
+        double component(const CoulombComponent &) const;
+        double component(const LJComponent &) const;
 
-    SoftCLJEnergy& operator+=(const SoftCLJEnergy &other);
-    SoftCLJEnergy& operator-=(const SoftCLJEnergy &other);
+        double component(const CoulombComponent &, int i) const;
+        double component(const LJComponent &, int i) const;
 
-    SoftCLJEnergy operator+(const SoftCLJEnergy &other) const;
-    SoftCLJEnergy operator-(const SoftCLJEnergy &other) const;
+        operator double() const
+        {
+            return total();
+        }
 
-    Components components() const
-    {
-        return Components();
-    }
+        operator SireUnits::Dimension::Energy() const
+        {
+            return SireUnits::Dimension::Energy(total());
+        }
 
-    int count() const
-    {
-        return detail::MAX_ALPHA_VALUES;
-    }
+        operator CoulombEnergy() const
+        {
+            return CoulombEnergy(coulomb());
+        }
 
-    int size() const
-    {
-        return this->count();
-    }
+        operator LJEnergy() const
+        {
+            return LJEnergy(lj());
+        }
 
-    void setEnergy(int i, double cnrg, double ljnrg);
+    private:
+        double nrgs[detail::MAX_ALPHA_VALUES][2];
+    };
 
-    double coulomb() const;
-    double lj() const;
+} // namespace SireMM
 
-    double coulomb(int i) const;
-    double lj(int i) const;
+SIRE_EXPOSE_CLASS(SireMM::SoftCLJComponent)
 
-    double total() const;
-    double total(int i) const;
-
-    double component(const CoulombComponent&) const;
-    double component(const LJComponent&) const;
-
-    double component(const CoulombComponent&, int i) const;
-    double component(const LJComponent&, int i) const;
-
-    operator double() const
-    {
-        return total();
-    }
-
-    operator SireUnits::Dimension::Energy() const
-    {
-        return SireUnits::Dimension::Energy(total());
-    }
-
-    operator CoulombEnergy() const
-    {
-        return CoulombEnergy(coulomb());
-    }
-
-    operator LJEnergy() const
-    {
-        return LJEnergy(lj());
-    }
-
-private:
-    double nrgs[detail::MAX_ALPHA_VALUES][2];
-};
-
-}
-
-SIRE_EXPOSE_CLASS( SireMM::SoftCLJComponent )
-
-Q_DECLARE_METATYPE( SireMM::SoftCLJComponent )
+Q_DECLARE_METATYPE(SireMM::SoftCLJComponent)
 
 SIRE_END_HEADER
 

@@ -36,66 +36,66 @@ SIRE_BEGIN_HEADER
 
 namespace SireFF
 {
-class FFName;
+    class FFName;
 }
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::FFName&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::FFName&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::FFName &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::FFName &);
 
 namespace SireFF
 {
 
-/** This class holds the name of a forcefield
+    /** This class holds the name of a forcefield
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFName : public SireID::Name, public FFID
-{
-
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const FFName&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFName&);
-
-public:
-    FFName();
-    explicit FFName(const QString &name);
-
-    FFName(const QString &name, SireID::CaseSensitivity case_sensitivity);
-
-    FFName(const FFName &other);
-
-    ~FFName();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFName : public SireID::Name, public FFID
     {
-        return FFName::typeName();
-    }
 
-    FFName* clone() const;
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const FFName &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, FFName &);
 
-    bool isNull() const;
+    public:
+        FFName();
+        explicit FFName(const QString &name);
 
-    uint hash() const;
+        FFName(const QString &name, SireID::CaseSensitivity case_sensitivity);
 
-    QString toString() const;
+        FFName(const FFName &other);
 
-    FFName& operator=(const FFName &other);
+        ~FFName();
 
-    bool operator==(const SireID::ID &other) const;
+        static const char *typeName();
 
-    bool operator==(const FFName &other) const;
+        const char *what() const
+        {
+            return FFName::typeName();
+        }
 
-    bool operator!=(const FFName &other) const;
+        FFName *clone() const;
 
-    QList<FFIdx> map(const ForceFields &ffields) const;
-};
+        bool isNull() const;
 
-}
+        uint hash() const;
+
+        QString toString() const;
+
+        FFName &operator=(const FFName &other);
+
+        bool operator==(const SireID::ID &other) const;
+
+        bool operator==(const FFName &other) const;
+
+        bool operator!=(const FFName &other) const;
+
+        QList<FFIdx> map(const ForceFields &ffields) const;
+    };
+
+} // namespace SireFF
 
 Q_DECLARE_METATYPE(SireFF::FFName);
 
-SIRE_EXPOSE_CLASS( SireFF::FFName )
+SIRE_EXPOSE_CLASS(SireFF::FFName)
 
 SIRE_END_HEADER
 

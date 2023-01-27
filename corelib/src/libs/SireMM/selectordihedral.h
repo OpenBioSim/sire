@@ -36,201 +36,178 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class SelectorDihedral;
+    class SelectorDihedral;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::SelectorDihedral&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::SelectorDihedral&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::SelectorDihedral &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::SelectorDihedral &);
 
 namespace SireMM
 {
 
-/** This provides a Selector<T>-style interface for multiple dihedrals */
-class SIREMM_EXPORT SelectorDihedral :
-    public SireBase::ConcreteProperty<SelectorDihedral, SireMol::MoleculeView>
-{
-
-friend QDataStream& ::operator<<(QDataStream&, const SelectorDihedral&);
-friend QDataStream& ::operator>>(QDataStream&, SelectorDihedral&);
-
-public:
-    SelectorDihedral();
-
-    SelectorDihedral(const Dihedral &dihedral);
-
-    SelectorDihedral(const SireMol::MoleculeData &molecule,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const MoleculeView &molecule,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeData &molecule,
-                     const SireMol::AtomID &atom,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeData &molecule,
-                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeData &molecule,
-                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-                     const SireMol::AtomID &atom2,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeData &molecule,
-                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-                     const SireMol::AtomID &atom2, const SireMol::AtomID &atom3,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeView &molecule,
-                     const SireMol::AtomID &atom,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeView &molecule,
-                     const SireMol::DihedralID &dihedral,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeView &molecule,
-                     const QList<SireMol::DihedralID> &dihedrals,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeView &molecule,
-                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeView &molecule,
-                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-                     const SireMol::AtomID &atom2,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::MoleculeView &molecule,
-                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-                     const SireMol::AtomID &atom2, const SireMol::AtomID &atom3,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SireMol::Selector<SireMol::Atom> &atoms,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-    SelectorDihedral(const SireMol::Selector<SireMol::Atom> &atoms0,
-                     const SireMol::Selector<SireMol::Atom> &atoms1,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-    SelectorDihedral(const SireMol::Selector<SireMol::Atom> &atoms0,
-                     const SireMol::Selector<SireMol::Atom> &atoms1,
-                     const SireMol::Selector<SireMol::Atom> &atoms2,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-    SelectorDihedral(const SireMol::Selector<SireMol::Atom> &atoms0,
-                     const SireMol::Selector<SireMol::Atom> &atoms1,
-                     const SireMol::Selector<SireMol::Atom> &atoms2,
-                     const SireMol::Selector<SireMol::Atom> &atoms3,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-    SelectorDihedral(const SelectorDihedral &other);
-
-    virtual ~SelectorDihedral();
-
-    static const char* typeName();
-
-    virtual const char* what() const
+    /** This provides a Selector<T>-style interface for multiple dihedrals */
+    class SIREMM_EXPORT SelectorDihedral : public SireBase::ConcreteProperty<SelectorDihedral, SireMol::MoleculeView>
     {
-        return SelectorDihedral::typeName();
-    }
 
-    virtual SelectorDihedral* clone() const
-    {
-        return new SelectorDihedral(*this);
-    }
+        friend QDataStream & ::operator<<(QDataStream &, const SelectorDihedral &);
+        friend QDataStream & ::operator>>(QDataStream &, SelectorDihedral &);
 
-    SelectorDihedral& operator=(const SelectorDihedral &dihedral);
+    public:
+        SelectorDihedral();
 
-    bool operator==(const SelectorDihedral &other) const;
-    bool operator!=(const SelectorDihedral &other) const;
+        SelectorDihedral(const Dihedral &dihedral);
 
-    QString toString() const;
+        SelectorDihedral(const SireMol::MoleculeData &molecule, const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SireMol::MolViewPtr operator[](int i) const;
-    SireMol::MolViewPtr operator[](const SireBase::Slice &slice) const;
-    SireMol::MolViewPtr operator[](const QList<qint64> &idxs) const;
-    SireMol::MolViewPtr operator[](const SireMol::DihedralID &dihedral) const;
+        SelectorDihedral(const MoleculeView &molecule, const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    Dihedral operator()(int i) const;
-    SelectorDihedral operator()(int i, int j) const;
-    SelectorDihedral operator()(const SireBase::Slice &slice) const;
-    SelectorDihedral operator()(const QList<qint64> &idxs) const;
-    SelectorDihedral operator()(const SireMol::DihedralID &dihedral) const;
+        SelectorDihedral(const SireMol::MoleculeData &molecule, const SireMol::AtomID &atom,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    QList<SireMol::MolViewPtr> toList() const;
+        SelectorDihedral(const SireMol::MoleculeData &molecule, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    QList<SireMol::DihedralID> IDs() const;
+        SelectorDihedral(const SireMol::MoleculeData &molecule, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                         const SireMol::AtomID &atom2, const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SelectorDihedral add(const Dihedral &dihedral) const;
+        SelectorDihedral(const SireMol::MoleculeData &molecule, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                         const SireMol::AtomID &atom2, const SireMol::AtomID &atom3,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    int count() const;
-    int size() const;
-    int nViews() const;
+        SelectorDihedral(const SireMol::MoleculeView &molecule, const SireMol::AtomID &atom,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    bool isEmpty() const;
-    bool selectedAll() const;
+        SelectorDihedral(const SireMol::MoleculeView &molecule, const SireMol::DihedralID &dihedral,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    bool isSelector() const;
+        SelectorDihedral(const SireMol::MoleculeView &molecule, const QList<SireMol::DihedralID> &dihedrals,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SireMol::MolViewPtr toSelector() const;
+        SelectorDihedral(const SireMol::MoleculeView &molecule, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SireMol::AtomSelection selection() const;
+        SelectorDihedral(const SireMol::MoleculeView &molecule, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                         const SireMol::AtomID &atom2, const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SelectorDihedral add(const SelectorDihedral &other) const;
+        SelectorDihedral(const SireMol::MoleculeView &molecule, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                         const SireMol::AtomID &atom2, const SireMol::AtomID &atom3,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SelectorDihedral intersection(const SelectorDihedral &other) const;
+        SelectorDihedral(const SireMol::Selector<SireMol::Atom> &atoms,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        SelectorDihedral(const SireMol::Selector<SireMol::Atom> &atoms0, const SireMol::Selector<SireMol::Atom> &atoms1,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        SelectorDihedral(const SireMol::Selector<SireMol::Atom> &atoms0, const SireMol::Selector<SireMol::Atom> &atoms1,
+                         const SireMol::Selector<SireMol::Atom> &atoms2,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        SelectorDihedral(const SireMol::Selector<SireMol::Atom> &atoms0, const SireMol::Selector<SireMol::Atom> &atoms1,
+                         const SireMol::Selector<SireMol::Atom> &atoms2, const SireMol::Selector<SireMol::Atom> &atoms3,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-    SelectorDihedral invert(const SireBase::PropertyMap &map) const;
-    SelectorDihedral invert() const;
+        SelectorDihedral(const SelectorDihedral &other);
 
-    bool hasProperty(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key,
-                     const SireBase::PropertyName &metakey) const;
+        virtual ~SelectorDihedral();
 
-    QStringList propertyKeys() const;
-    QStringList metadataKeys() const;
-    QStringList metadataKeys(const SireBase::PropertyName &key) const;
+        static const char *typeName();
 
-    QList<SireBase::Properties> properties() const;
+        virtual const char *what() const
+        {
+            return SelectorDihedral::typeName();
+        }
 
-    SireMol::Mover<SelectorDihedral> move() const;
-    SireMol::Evaluator evaluate() const;
+        virtual SelectorDihedral *clone() const
+        {
+            return new SelectorDihedral(*this);
+        }
 
-    QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key) const;
-    QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key,
-                                          const Property &default_value) const;
+        SelectorDihedral &operator=(const SelectorDihedral &dihedral);
 
-    QList<SireUnits::Dimension::Angle> sizes() const;
-    QList<SireUnits::Dimension::Angle> sizes(const SireBase::PropertyMap &map) const;
+        bool operator==(const SelectorDihedral &other) const;
+        bool operator!=(const SelectorDihedral &other) const;
 
-    QList<SireUnits::Dimension::Angle> measures() const;
-    QList<SireUnits::Dimension::Angle> measures(const SireBase::PropertyMap &map) const;
+        QString toString() const;
 
-    QList<SireCAS::Expression> potentials() const;
-    QList<SireCAS::Expression> potentials(const SireBase::PropertyMap &map) const;
+        SireMol::MolViewPtr operator[](int i) const;
+        SireMol::MolViewPtr operator[](const SireBase::Slice &slice) const;
+        SireMol::MolViewPtr operator[](const QList<qint64> &idxs) const;
+        SireMol::MolViewPtr operator[](const SireMol::DihedralID &dihedral) const;
 
-    QList<SireUnits::Dimension::GeneralUnit> energies() const;
-    QList<SireUnits::Dimension::GeneralUnit> energies(
-                            const SireBase::PropertyMap &map) const;
+        Dihedral operator()(int i) const;
+        SelectorDihedral operator()(int i, int j) const;
+        SelectorDihedral operator()(const SireBase::Slice &slice) const;
+        SelectorDihedral operator()(const QList<qint64> &idxs) const;
+        SelectorDihedral operator()(const SireMol::DihedralID &dihedral) const;
 
-    SireUnits::Dimension::GeneralUnit energy() const;
-    SireUnits::Dimension::GeneralUnit energy(
-                            const SireBase::PropertyMap &map) const;
+        QList<SireMol::MolViewPtr> toList() const;
 
-protected:
-    /** The IDs of the Dihedrals (holding AtomIdx IDs) */
-    QList<SireMol::DihedralID> dihs;
-};
+        QList<SireMol::DihedralID> IDs() const;
+
+        SelectorDihedral add(const Dihedral &dihedral) const;
+
+        int count() const;
+        int size() const;
+        int nViews() const;
+
+        bool isEmpty() const;
+        bool selectedAll() const;
+
+        bool isSelector() const;
+
+        SireMol::MolViewPtr toSelector() const;
+
+        SireMol::AtomSelection selection() const;
+
+        SelectorDihedral add(const SelectorDihedral &other) const;
+
+        SelectorDihedral intersection(const SelectorDihedral &other) const;
+
+        SelectorDihedral invert(const SireBase::PropertyMap &map) const;
+        SelectorDihedral invert() const;
+
+        bool hasProperty(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey) const;
+
+        QStringList propertyKeys() const;
+        QStringList metadataKeys() const;
+        QStringList metadataKeys(const SireBase::PropertyName &key) const;
+
+        QList<SireBase::Properties> properties() const;
+
+        SireMol::Mover<SelectorDihedral> move() const;
+        SireMol::Evaluator evaluate() const;
+
+        QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key) const;
+        QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key, const Property &default_value) const;
+
+        QList<SireUnits::Dimension::Angle> sizes() const;
+        QList<SireUnits::Dimension::Angle> sizes(const SireBase::PropertyMap &map) const;
+
+        QList<SireUnits::Dimension::Angle> measures() const;
+        QList<SireUnits::Dimension::Angle> measures(const SireBase::PropertyMap &map) const;
+
+        QList<SireCAS::Expression> potentials() const;
+        QList<SireCAS::Expression> potentials(const SireBase::PropertyMap &map) const;
+
+        QList<SireUnits::Dimension::GeneralUnit> energies() const;
+        QList<SireUnits::Dimension::GeneralUnit> energies(const SireBase::PropertyMap &map) const;
+
+        SireUnits::Dimension::GeneralUnit energy() const;
+        SireUnits::Dimension::GeneralUnit energy(const SireBase::PropertyMap &map) const;
+
+    protected:
+        /** The IDs of the Dihedrals (holding AtomIdx IDs) */
+        QList<SireMol::DihedralID> dihs;
+    };
 
 } // end of namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::SelectorDihedral )
-Q_DECLARE_METATYPE( SireMol::Mover<SireMM::SelectorDihedral> )
+Q_DECLARE_METATYPE(SireMM::SelectorDihedral)
+Q_DECLARE_METATYPE(SireMol::Mover<SireMM::SelectorDihedral>)
 
-SIRE_EXPOSE_CLASS( SireMM::SelectorDihedral )
+SIRE_EXPOSE_CLASS(SireMM::SelectorDihedral)
 
-SIRE_EXPOSE_ALIAS( SireMol::Mover<SireMM::SelectorDihedral>, SireMol::Mover_SelectorDihedral_ )
+SIRE_EXPOSE_ALIAS(SireMol::Mover<SireMM::SelectorDihedral>, SireMol::Mover_SelectorDihedral_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 

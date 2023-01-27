@@ -41,189 +41,193 @@ SIRE_BEGIN_HEADER
 
 namespace SireFF
 {
-class FFComponent;
-class SingleComponent;
-}
+    class FFComponent;
+    class SingleComponent;
+} // namespace SireFF
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::FFComponent&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::FFComponent&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::FFComponent &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::FFComponent &);
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::SingleComponent&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::SingleComponent&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::SingleComponent &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::SingleComponent &);
 
 namespace SireFF
 {
 
-class FF;
+    class FF;
 
-/** This is the base class of all Symbols that represent forcefield
-    components.
+    /** This is the base class of all Symbols that represent forcefield
+        components.
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFComponent : public SireCAS::Symbol
-{
-public:
-    virtual ~FFComponent();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFComponent : public SireCAS::Symbol
     {
-        return "SireFF::FFComponent";
-    }
+    public:
+        virtual ~FFComponent();
 
-    virtual const char* what() const=0;
+        static const char *typeName()
+        {
+            return "SireFF::FFComponent";
+        }
 
-    virtual FFComponent* clone() const=0;
+        virtual const char *what() const = 0;
 
-    FFName forceFieldName() const;
+        virtual FFComponent *clone() const = 0;
 
-    QString componentName() const;
+        FFName forceFieldName() const;
 
-    virtual const FFComponent& total() const=0;
+        QString componentName() const;
 
-    virtual SireCAS::Symbols symbols() const=0;
+        virtual const FFComponent &total() const = 0;
 
-protected:
-    FFComponent(const FFName &ffname, const QString &name);
-    FFComponent(const SireCAS::Symbol &symbol, const QString &name);
+        virtual SireCAS::Symbols symbols() const = 0;
 
-    FFComponent(const FFComponent &other);
+    protected:
+        FFComponent(const FFName &ffname, const QString &name);
+        FFComponent(const SireCAS::Symbol &symbol, const QString &name);
 
-    void setEnergy(FF &ff, const Symbol &symbol, double value) const;
-    void changeEnergy(FF &ff, const Symbol &symbol, double delta) const;
+        FFComponent(const FFComponent &other);
 
-    static QString symbolName(const FFName &ffname, const QString &name)
+        void setEnergy(FF &ff, const Symbol &symbol, double value) const;
+        void changeEnergy(FF &ff, const Symbol &symbol, double delta) const;
+
+        static QString symbolName(const FFName &ffname, const QString &name)
+        {
+            return QString("E_{%1}^{%2}").arg(ffname).arg(name);
+        }
+    };
+
+    /** This class holds the energy for the component of type T
+
+        @author Christopher Woods
+    */
+    template <class T>
+    class ComponentEnergy
     {
-        return QString("E_{%1}^{%2}").arg(ffname).arg(name);
-    }
-};
+    public:
+        typedef T Components;
 
-/** This class holds the energy for the component of type T
+        ComponentEnergy() : nrg(0)
+        {
+        }
 
-    @author Christopher Woods
-*/
-template<class T>
-class ComponentEnergy
-{
-public:
-    typedef T Components;
+        explicit ComponentEnergy(double inrg) : nrg(inrg)
+        {
+        }
 
-    ComponentEnergy() : nrg(0)
-    {}
+        ComponentEnergy(const ComponentEnergy<T> &other) : nrg(other.nrg)
+        {
+        }
 
-    explicit ComponentEnergy(double inrg) : nrg(inrg)
-    {}
+        ~ComponentEnergy()
+        {
+        }
 
-    ComponentEnergy(const ComponentEnergy<T> &other) : nrg(other.nrg)
-    {}
+        ComponentEnergy<T> &operator+=(const ComponentEnergy<T> &other)
+        {
+            nrg += other.nrg;
+            return *this;
+        }
 
-    ~ComponentEnergy()
-    {}
+        ComponentEnergy<T> &operator-=(const ComponentEnergy<T> &other)
+        {
+            nrg -= other.nrg;
+            return *this;
+        }
 
-    ComponentEnergy<T>& operator+=(const ComponentEnergy<T> &other)
+        ComponentEnergy<T> operator+(const ComponentEnergy<T> &other) const
+        {
+            return ComponentEnergy<T>(nrg + other.nrg);
+        }
+
+        ComponentEnergy<T> operator-(const ComponentEnergy<T> &other) const
+        {
+            return ComponentEnergy<T>(nrg - other.nrg);
+        }
+
+        Components components() const
+        {
+            return Components();
+        }
+
+        double component(const T &) const
+        {
+            return nrg;
+        }
+
+        double total() const
+        {
+            return nrg;
+        }
+
+        operator double() const
+        {
+            return nrg;
+        }
+
+        operator SireUnits::Dimension::MolarEnergy() const
+        {
+            return SireUnits::Dimension::MolarEnergy(nrg);
+        }
+
+    private:
+        /** The component of the energy */
+        double nrg;
+    };
+
+    typedef ComponentEnergy<SingleComponent> SingleEnergy;
+
+    /** This class represents the single component of a single component forcefield.
+        This is provides a simple default class for simple, single-component
+        forcefields
+
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT SingleComponent : public FFComponent
     {
-        nrg += other.nrg;
-        return *this;
-    }
+    public:
+        SingleComponent(const FFName &ffname = FFName());
+        SingleComponent(const FFName &ffname, const QString &suffix);
 
-    ComponentEnergy<T>& operator-=(const ComponentEnergy<T> &other)
-    {
-        nrg -= other.nrg;
-        return *this;
-    }
+        SingleComponent(const SireCAS::Symbol &symbol);
 
-    ComponentEnergy<T> operator+(const ComponentEnergy<T> &other) const
-    {
-        return ComponentEnergy<T>(nrg + other.nrg);
-    }
+        SingleComponent(const SingleComponent &other);
 
-    ComponentEnergy<T> operator-(const ComponentEnergy<T> &other) const
-    {
-        return ComponentEnergy<T>(nrg - other.nrg);
-    }
+        ~SingleComponent();
 
-    Components components() const
-    {
-        return Components();
-    }
+        static const char *typeName();
 
-    double component(const T&) const
-    {
-        return nrg;
-    }
+        const char *what() const
+        {
+            return SingleComponent::typeName();
+        }
 
-    double total() const
-    {
-        return nrg;
-    }
+        SingleComponent *clone() const
+        {
+            return new SingleComponent(*this);
+        }
 
-    operator double() const
-    {
-        return nrg;
-    }
+        const SingleComponent &total() const
+        {
+            return *this;
+        }
 
-    operator SireUnits::Dimension::MolarEnergy() const
-    {
-        return SireUnits::Dimension::MolarEnergy(nrg);
-    }
+        void setEnergy(FF &ff, const SingleEnergy &nrg) const;
+        void changeEnergy(FF &ff, const SingleEnergy &nrg) const;
 
-private:
-    /** The component of the energy */
-    double nrg;
-};
-
-typedef ComponentEnergy<SingleComponent> SingleEnergy;
-
-/** This class represents the single component of a single component forcefield.
-    This is provides a simple default class for simple, single-component
-    forcefields
-
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT SingleComponent : public FFComponent
-{
-public:
-    SingleComponent(const FFName &ffname = FFName());
-    SingleComponent(const FFName &ffname, const QString &suffix);
-
-    SingleComponent(const SireCAS::Symbol &symbol);
-
-    SingleComponent(const SingleComponent &other);
-
-    ~SingleComponent();
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return SingleComponent::typeName();
-    }
-
-    SingleComponent* clone() const
-    {
-        return new SingleComponent(*this);
-    }
-
-    const SingleComponent& total() const
-    {
-        return *this;
-    }
-
-    void setEnergy(FF &ff, const SingleEnergy &nrg) const;
-    void changeEnergy(FF &ff, const SingleEnergy &nrg) const;
-
-    SireCAS::Symbols symbols() const
-    {
-        return *this;
-    }
-};
+        SireCAS::Symbols symbols() const
+        {
+            return *this;
+        }
+    };
 
 } // end of namespace SireFF
 
-Q_DECLARE_METATYPE( SireFF::SingleComponent )
+Q_DECLARE_METATYPE(SireFF::SingleComponent)
 
-SIRE_EXPOSE_CLASS( SireFF::FFComponent )
-SIRE_EXPOSE_CLASS( SireFF::SingleComponent )
+SIRE_EXPOSE_CLASS(SireFF::FFComponent)
+SIRE_EXPOSE_CLASS(SireFF::SingleComponent)
 
 SIRE_END_HEADER
 

@@ -36,67 +36,67 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class BeadNum;
+    class BeadNum;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::BeadNum&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::BeadNum&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::BeadNum &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::BeadNum &);
 
 namespace SireMol
 {
 
-/** This ID number is used to identify a Bead by the user-supplied
-    number
+    /** This ID number is used to identify a Bead by the user-supplied
+        number
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT BeadNum : public SireID::Number, public BeadID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const BeadNum&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, BeadNum&);
-
-public:
-    BeadNum();
-
-    explicit BeadNum(quint32 num);
-
-    BeadNum(const BeadNum &other);
-
-    ~BeadNum();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT BeadNum : public SireID::Number, public BeadID
     {
-        return BeadNum::typeName();
-    }
 
-    BeadNum* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const BeadNum &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, BeadNum &);
 
-    bool isNull() const;
+    public:
+        BeadNum();
 
-    uint hash() const;
+        explicit BeadNum(quint32 num);
 
-    QString toString() const;
+        BeadNum(const BeadNum &other);
 
-    BeadNum& operator=(const BeadNum &other);
+        ~BeadNum();
 
-    bool operator==(const SireID::ID &other) const;
-    bool operator==(const BeadNum &other) const;
-    bool operator!=(const BeadNum &other) const;
+        static const char *typeName();
 
-    bool operator<(const BeadNum &other) const;
-    bool operator<=(const BeadNum &other) const;
-    bool operator>(const BeadNum &other) const;
-    bool operator>=(const BeadNum &other) const;
-};
+        const char *what() const
+        {
+            return BeadNum::typeName();
+        }
 
-}
+        BeadNum *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        BeadNum &operator=(const BeadNum &other);
+
+        bool operator==(const SireID::ID &other) const;
+        bool operator==(const BeadNum &other) const;
+        bool operator!=(const BeadNum &other) const;
+
+        bool operator<(const BeadNum &other) const;
+        bool operator<=(const BeadNum &other) const;
+        bool operator>(const BeadNum &other) const;
+        bool operator>=(const BeadNum &other) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::BeadNum);
 
-SIRE_EXPOSE_CLASS( SireMol::BeadNum )
+SIRE_EXPOSE_CLASS(SireMol::BeadNum)
 
 SIRE_END_HEADER
 

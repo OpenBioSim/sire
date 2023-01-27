@@ -29,19 +29,19 @@
 
 using namespace SireMM;
 
-const char* missing_bond::typeName()
+const char *missing_bond::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_bond>() );
+    return QMetaType::typeName(qMetaTypeId<missing_bond>());
 }
 
-const char* missing_angle::typeName()
+const char *missing_angle::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_angle>() );
+    return QMetaType::typeName(qMetaTypeId<missing_angle>());
 }
 
-const char* missing_dihedral::typeName()
+const char *missing_dihedral::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_dihedral>() );
+    return QMetaType::typeName(qMetaTypeId<missing_dihedral>());
 }
 
 static const RegisterMetaType<missing_bond> r_mbond;

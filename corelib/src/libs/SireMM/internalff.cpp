@@ -28,20 +28,20 @@
 #include "internalff.h"
 
 #include "SireMaths/line.h"
-#include "SireMaths/triangle.h"
 #include "SireMaths/torsion.h"
+#include "SireMaths/triangle.h"
 
 #include "SireBase/property.h"
-#include "SireBase/stringproperty.h"
 #include "SireBase/propertylist.h"
+#include "SireBase/stringproperty.h"
 
 #include "SireMol/mover.hpp"
 
 #include "SireFF/detail/atomiccoords3d.h"
 
-#include "SireFF/errors.h"
 #include "SireBase/errors.h"
 #include "SireError/errors.h"
+#include "SireFF/errors.h"
 
 #include "SireUnits/dimensions.h"
 #include "SireUnits/units.h"
@@ -76,23 +76,20 @@ namespace SireFF
         template class FFMolecule<InternalPotential>;
         template class FFMolecules<InternalPotential>;
         template class ChangedMolecule<InternalPotential::Molecule>;
-    }
-}
+    } // namespace detail
+} // namespace SireFF
 
 //////// Parameter names
 
-PropertyName BondParameterName::bond_param( "bond", Property::null() );
-PropertyName AngleParameterName::angle_param( "angle", Property::null() );
-PropertyName DihedralParameterName::dihedral_param( "dihedral", Property::null() );
-PropertyName ImproperParameterName::improper_param( "improper", Property::null() );
-PropertyName UreyBradleyParameterName::ub_param( "Urey-Bradley", Property::null() );
-PropertyName StretchStretchParameterName::ss_param( "stretch-stretch",
-                                                    Property::null() );
-PropertyName StretchBendParameterName::sb_param( "stretch-bend",
-                                                 Property::null() );
-PropertyName BendBendParameterName::bb_param( "bend-bend", Property::null() );
-PropertyName StretchBendTorsionParameterName::sbt_param( "stretch-bend-torsion",
-                                                         Property::null() );
+PropertyName BondParameterName::bond_param("bond", Property::null());
+PropertyName AngleParameterName::angle_param("angle", Property::null());
+PropertyName DihedralParameterName::dihedral_param("dihedral", Property::null());
+PropertyName ImproperParameterName::improper_param("improper", Property::null());
+PropertyName UreyBradleyParameterName::ub_param("Urey-Bradley", Property::null());
+PropertyName StretchStretchParameterName::ss_param("stretch-stretch", Property::null());
+PropertyName StretchBendParameterName::sb_param("stretch-bend", Property::null());
+PropertyName BendBendParameterName::bb_param("bend-bend", Property::null());
+PropertyName StretchBendTorsionParameterName::sbt_param("stretch-bend-torsion", Property::null());
 
 ////////
 //////// Implementation of InternalPotential
@@ -103,19 +100,21 @@ PropertyName StretchBendTorsionParameterName::sbt_param( "stretch-bend-torsion",
     atoms. If 'isstrict' is false, then parameters that involve
     at least one selected atom are used. */
 InternalPotential::InternalPotential(bool strict) : isstrict(strict)
-{}
+{
+}
 
 /** Copy constructor */
-InternalPotential::InternalPotential(const InternalPotential &other)
-                  : isstrict(other.isstrict)
-{}
+InternalPotential::InternalPotential(const InternalPotential &other) : isstrict(other.isstrict)
+{
+}
 
 /** Destructor */
 InternalPotential::~InternalPotential()
-{}
+{
+}
 
 /** Copy assignment operator */
-InternalPotential& InternalPotential::operator=(const InternalPotential &other)
+InternalPotential &InternalPotential::operator=(const InternalPotential &other)
 {
     isstrict = other.isstrict;
     return *this;
@@ -125,14 +124,14 @@ InternalPotential::ParameterNames InternalPotential::param_names;
 InternalSymbols InternalPotential::internal_symbols;
 
 /** Return all of the symbols used in the internal energy functions */
-const InternalSymbols& InternalPotential::symbols()
+const InternalSymbols &InternalPotential::symbols()
 {
     return internal_symbols;
 }
 
 /** Return the names of all of the properties used to store the
     parameters for this potential */
-const InternalPotential::ParameterNames& InternalPotential::parameters()
+const InternalPotential::ParameterNames &InternalPotential::parameters()
 {
     return param_names;
 }
@@ -144,27 +143,18 @@ const InternalPotential::ParameterNames& InternalPotential::parameters()
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-InternalPotential::Parameters
-InternalPotential::getParameters(const PartialMolecule &molecule,
-                                 const PropertyMap &map) const
+InternalPotential::Parameters InternalPotential::getParameters(const PartialMolecule &molecule,
+                                                               const PropertyMap &map) const
 {
-    return InternalPotential::Parameters(molecule,
-                                         map[parameters().coordinates()],
-                                         map[parameters().bond()],
-                                         map[parameters().angle()],
-                                         map[parameters().dihedral()],
-                                         map[parameters().improper()],
-                                         map[parameters().ureyBradley()],
-                                         map[parameters().stretchStretch()],
-                                         map[parameters().stretchBend()],
-                                         map[parameters().bendBend()],
-                                         map[parameters().stretchBendTorsion()],
-                                         isstrict);
+    return InternalPotential::Parameters(
+        molecule, map[parameters().coordinates()], map[parameters().bond()], map[parameters().angle()],
+        map[parameters().dihedral()], map[parameters().improper()], map[parameters().ureyBradley()],
+        map[parameters().stretchStretch()], map[parameters().stretchBend()], map[parameters().bendBend()],
+        map[parameters().stretchBendTorsion()], isstrict);
 }
 
-static SIRE_ALWAYS_INLINE bool changed(const PartialMolecule &old_molecule,
-                           const PartialMolecule &new_molecule,
-                           const PropertyName &property)
+static SIRE_ALWAYS_INLINE bool changed(const PartialMolecule &old_molecule, const PartialMolecule &new_molecule,
+                                       const PropertyName &property)
 {
     return old_molecule.version(property) != new_molecule.version(property);
 }
@@ -177,57 +167,51 @@ static SIRE_ALWAYS_INLINE bool changed(const PartialMolecule &old_molecule,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-InternalPotential::Parameters
-InternalPotential::updateParameters(const InternalPotential::Parameters &old_params,
-                                    const PartialMolecule &old_molecule,
-                                    const PartialMolecule &new_molecule,
-                                    const PropertyMap &map) const
+InternalPotential::Parameters InternalPotential::updateParameters(const InternalPotential::Parameters &old_params,
+                                                                  const PartialMolecule &old_molecule,
+                                                                  const PartialMolecule &new_molecule,
+                                                                  const PropertyMap &map) const
 {
     if (old_molecule.selection() != new_molecule.selection())
-        //the selection has changed - just return completely
-        //new parameters
+        // the selection has changed - just return completely
+        // new parameters
         return this->getParameters(new_molecule, map);
 
-    //we can only update things if just the coordinates have changed
-    if ( changed(old_molecule, new_molecule, map[parameters().bond()]) or
-         changed(old_molecule, new_molecule, map[parameters().angle()]) or
-         changed(old_molecule, new_molecule, map[parameters().dihedral()]) or
-         changed(old_molecule, new_molecule, map[parameters().improper()]) or
-         changed(old_molecule, new_molecule, map[parameters().ureyBradley()]) or
-         changed(old_molecule, new_molecule, map[parameters().stretchStretch()]) or
-         changed(old_molecule, new_molecule, map[parameters().stretchBend()]) or
-         changed(old_molecule, new_molecule, map[parameters().bendBend()]) or
-         changed(old_molecule, new_molecule, map[parameters().stretchBendTorsion()]) )
+    // we can only update things if just the coordinates have changed
+    if (changed(old_molecule, new_molecule, map[parameters().bond()]) or
+        changed(old_molecule, new_molecule, map[parameters().angle()]) or
+        changed(old_molecule, new_molecule, map[parameters().dihedral()]) or
+        changed(old_molecule, new_molecule, map[parameters().improper()]) or
+        changed(old_molecule, new_molecule, map[parameters().ureyBradley()]) or
+        changed(old_molecule, new_molecule, map[parameters().stretchStretch()]) or
+        changed(old_molecule, new_molecule, map[parameters().stretchBend()]) or
+        changed(old_molecule, new_molecule, map[parameters().bendBend()]) or
+        changed(old_molecule, new_molecule, map[parameters().stretchBendTorsion()]))
     {
-        //the internal parameters have changed, so we need to update
-        //everything
+        // the internal parameters have changed, so we need to update
+        // everything
         return this->getParameters(new_molecule, map);
     }
 
     const PropertyName &coords_property = map[parameters().coordinates()];
 
-    if ( changed(old_molecule, new_molecule, coords_property) )
+    if (changed(old_molecule, new_molecule, coords_property))
     {
-        //just the coordinates have changed - just update these
+        // just the coordinates have changed - just update these
         Parameters new_params = old_params;
-        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule.molecule(),
-                                                        coords_property) );
+        new_params.setAtomicCoordinates(AtomicCoords3D(new_molecule.molecule(), coords_property));
 
         return new_params;
     }
     else
-        //nothing important has changed
+        // nothing important has changed
         return old_params;
 }
 
-static SIRE_ALWAYS_INLINE bool changed(const PartialMolecule &old_molecule,
-                           const PartialMolecule &new_molecule,
-                           const PropertyName &old_property,
-                           const PropertyName &new_property)
+static SIRE_ALWAYS_INLINE bool changed(const PartialMolecule &old_molecule, const PartialMolecule &new_molecule,
+                                       const PropertyName &old_property, const PropertyName &new_property)
 {
-    return old_property != new_property or
-           old_molecule.version(old_property) !=
-                                    new_molecule.version(new_property);
+    return old_property != new_property or old_molecule.version(old_property) != new_molecule.version(new_property);
 }
 
 /** Return updated parameters for the molecule that has changed from
@@ -239,56 +223,42 @@ static SIRE_ALWAYS_INLINE bool changed(const PartialMolecule &old_molecule,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-InternalPotential::Parameters
-InternalPotential::updateParameters(const InternalPotential::Parameters &old_params,
-                                    const PartialMolecule &old_molecule,
-                                    const PartialMolecule &new_molecule,
-                                    const PropertyMap &old_map,
-                                    const PropertyMap &new_map) const
+InternalPotential::Parameters InternalPotential::updateParameters(const InternalPotential::Parameters &old_params,
+                                                                  const PartialMolecule &old_molecule,
+                                                                  const PartialMolecule &new_molecule,
+                                                                  const PropertyMap &old_map,
+                                                                  const PropertyMap &new_map) const
 {
     if (old_molecule.selection() != new_molecule.selection())
-        //we need to rebuild the parameters from scratch
+        // we need to rebuild the parameters from scratch
         return this->getParameters(new_molecule, new_map);
 
-    if ( changed(old_molecule, new_molecule,
-                 old_map[parameters().bond()], new_map[parameters().bond()]) or
-         changed(old_molecule, new_molecule,
-                 old_map[parameters().angle()], new_map[parameters().angle()]) or
-         changed(old_molecule, new_molecule,
-                 old_map[parameters().dihedral()], new_map[parameters().dihedral()]) or
-         changed(old_molecule, new_molecule,
-                 old_map[parameters().improper()], new_map[parameters().improper()]) or
-         changed(old_molecule, new_molecule,
-                 old_map[parameters().ureyBradley()],
-                 new_map[parameters().ureyBradley()]) or
-         changed(old_molecule, new_molecule,
-                 old_map[parameters().stretchStretch()],
-                 new_map[parameters().stretchStretch()]) or
-         changed(old_molecule, new_molecule,
-                 old_map[parameters().stretchBend()],
-                 new_map[parameters().stretchBend()]) or
-         changed(old_molecule, new_molecule,
-                 old_map[parameters().stretchBendTorsion()],
-                 new_map[parameters().stretchBendTorsion()]) )
+    if (changed(old_molecule, new_molecule, old_map[parameters().bond()], new_map[parameters().bond()]) or
+        changed(old_molecule, new_molecule, old_map[parameters().angle()], new_map[parameters().angle()]) or
+        changed(old_molecule, new_molecule, old_map[parameters().dihedral()], new_map[parameters().dihedral()]) or
+        changed(old_molecule, new_molecule, old_map[parameters().improper()], new_map[parameters().improper()]) or
+        changed(old_molecule, new_molecule, old_map[parameters().ureyBradley()], new_map[parameters().ureyBradley()]) or
+        changed(old_molecule, new_molecule, old_map[parameters().stretchStretch()],
+                new_map[parameters().stretchStretch()]) or
+        changed(old_molecule, new_molecule, old_map[parameters().stretchBend()], new_map[parameters().stretchBend()]) or
+        changed(old_molecule, new_molecule, old_map[parameters().stretchBendTorsion()],
+                new_map[parameters().stretchBendTorsion()]))
     {
-        //some of the parameters have changed - we have to rebuild from scratch
+        // some of the parameters have changed - we have to rebuild from scratch
         return this->getParameters(new_molecule, new_map);
     }
 
-    if ( changed(old_molecule, new_molecule,
-                 old_map[parameters().coordinates()],
-                 new_map[parameters().coordinates()]) )
+    if (changed(old_molecule, new_molecule, old_map[parameters().coordinates()], new_map[parameters().coordinates()]))
     {
-        //only the coordinates have changed
+        // only the coordinates have changed
         Parameters new_params = old_params;
 
-        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule.molecule(),
-                                              new_map[parameters().coordinates()]) );
+        new_params.setAtomicCoordinates(AtomicCoords3D(new_molecule.molecule(), new_map[parameters().coordinates()]));
 
         return new_params;
     }
     else
-        //nothing relavant has changed
+        // nothing relavant has changed
         return old_params;
 }
 
@@ -300,15 +270,12 @@ InternalPotential::updateParameters(const InternalPotential::Parameters &old_par
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-InternalPotential::Molecule
-InternalPotential::parameterise(const PartialMolecule &molecule,
-                                const PropertyMap &map) const
+InternalPotential::Molecule InternalPotential::parameterise(const PartialMolecule &molecule,
+                                                            const PropertyMap &map) const
 {
-    //honestly, this is const, but the interface in FFMolecule
-    //requires non-const...
-    return InternalPotential::Molecule(molecule,
-                                       const_cast<InternalPotential&>(*this),
-                                       map);
+    // honestly, this is const, but the interface in FFMolecule
+    // requires non-const...
+    return InternalPotential::Molecule(molecule, const_cast<InternalPotential &>(*this), map);
 }
 
 /** Return the fully parameterised set of molecules from 'molecules',
@@ -319,34 +286,28 @@ InternalPotential::parameterise(const PartialMolecule &molecule,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-InternalPotential::Molecules
-InternalPotential::parameterise(const MoleculeGroup &molecules,
-                                const PropertyMap &map) const
+InternalPotential::Molecules InternalPotential::parameterise(const MoleculeGroup &molecules,
+                                                             const PropertyMap &map) const
 {
-    //honestly, this is const, but the interface in FFMolecules
-    //requires non-const...
-    return InternalPotential::Molecules(molecules,
-                                        const_cast<InternalPotential&>(*this),
-                                        map);
+    // honestly, this is const, but the interface in FFMolecules
+    // requires non-const...
+    return InternalPotential::Molecules(molecules, const_cast<InternalPotential &>(*this), map);
 }
 
 /** Return the coordinates of the atom 'atom' using the coordinates in 'cgroup_array' */
-static const Vector& getCoords(const CGAtomIdx &atom,
-                               const CoordGroup *cgroup_array)
+static const Vector &getCoords(const CGAtomIdx &atom, const CoordGroup *cgroup_array)
 {
-    return cgroup_array[ atom.cutGroup() ].constData()[ atom.atom() ];
+    return cgroup_array[atom.cutGroup()].constData()[atom.atom()];
 }
 
 /** Calculate the energy caused by the physical terms (bond, angle, dihedral) */
-void InternalPotential::calculatePhysicalEnergy(
-                                         const GroupInternalParameters &group_params,
-                                         const CoordGroup *cgroup_array,
-                                         InternalPotential::Energy &energy,
-                                         double scale_energy) const
+void InternalPotential::calculatePhysicalEnergy(const GroupInternalParameters &group_params,
+                                                const CoordGroup *cgroup_array, InternalPotential::Energy &energy,
+                                                double scale_energy) const
 {
     if (not group_params.bondPotential().isEmpty())
     {
-        //bonds only use the symbol 'r', representing the bond length
+        // bonds only use the symbol 'r', representing the bond length
         Values vals;
         const Symbol &r = InternalPotential::symbols().bond().r();
 
@@ -355,91 +316,85 @@ void InternalPotential::calculatePhysicalEnergy(
 
         double bndnrg = 0;
 
-        for (int i=0; i<nbonds; ++i)
+        for (int i = 0; i < nbonds; ++i)
         {
             const TwoAtomFunction &bond = bonds_array[i];
 
-            //get the coordinates of the two atoms in the bond
+            // get the coordinates of the two atoms in the bond
             const Vector &atom0 = getCoords(bond.atom0(), cgroup_array);
             const Vector &atom1 = getCoords(bond.atom1(), cgroup_array);
 
-            //calculate the interatomic distance, r
+            // calculate the interatomic distance, r
             double dist = Vector::distance(atom0, atom1);
 
-            //substitute this distance into 'vals'
-            vals.set( r, dist );
+            // substitute this distance into 'vals'
+            vals.set(r, dist);
 
-            //calculate the energy
+            // calculate the energy
             bndnrg += bond.function().evaluate(vals);
         }
 
-        energy += BondEnergy( scale_energy * bndnrg );
+        energy += BondEnergy(scale_energy * bndnrg);
     }
 
     if (not group_params.anglePotential().isEmpty())
     {
-        //angles use the symbol 'theta', representing the angle size
+        // angles use the symbol 'theta', representing the angle size
         Values vals;
         const Symbol &theta = InternalPotential::symbols().angle().theta();
 
         int nangles = group_params.anglePotential().count();
-        const ThreeAtomFunction *angles_array
-                                    = group_params.anglePotential().constData();
+        const ThreeAtomFunction *angles_array = group_params.anglePotential().constData();
 
         double angnrg = 0;
 
-        for (int i=0; i<nangles; ++i)
+        for (int i = 0; i < nangles; ++i)
         {
             const ThreeAtomFunction &angle = angles_array[i];
 
-            Angle ang = Vector::angle( getCoords(angle.atom0(), cgroup_array),
-                                       getCoords(angle.atom1(), cgroup_array),
-                                       getCoords(angle.atom2(), cgroup_array) );
+            Angle ang = Vector::angle(getCoords(angle.atom0(), cgroup_array), getCoords(angle.atom1(), cgroup_array),
+                                      getCoords(angle.atom2(), cgroup_array));
 
             vals.set(theta, ang.to(radians));
 
             angnrg += angle.function().evaluate(vals);
         }
 
-        energy += AngleEnergy( scale_energy * angnrg );
+        energy += AngleEnergy(scale_energy * angnrg);
     }
 
     if (not group_params.dihedralPotential().isEmpty())
     {
-        //angles use the symbol 'phi', representing the torsion angle
+        // angles use the symbol 'phi', representing the torsion angle
         Values vals;
         const Symbol &phi = InternalPotential::symbols().dihedral().phi();
 
         int ndihedrals = group_params.dihedralPotential().count();
-        const FourAtomFunction *dihedrals_array
-                                    = group_params.dihedralPotential().constData();
+        const FourAtomFunction *dihedrals_array = group_params.dihedralPotential().constData();
 
         double dihnrg = 0;
 
-        for (int i=0; i<ndihedrals; ++i)
+        for (int i = 0; i < ndihedrals; ++i)
         {
             const FourAtomFunction &dihedral = dihedrals_array[i];
 
-            Angle ang = Vector::dihedral( getCoords(dihedral.atom0(), cgroup_array),
-                                          getCoords(dihedral.atom1(), cgroup_array),
-                                          getCoords(dihedral.atom2(), cgroup_array),
-                                          getCoords(dihedral.atom3(), cgroup_array) );
+            Angle ang =
+                Vector::dihedral(getCoords(dihedral.atom0(), cgroup_array), getCoords(dihedral.atom1(), cgroup_array),
+                                 getCoords(dihedral.atom2(), cgroup_array), getCoords(dihedral.atom3(), cgroup_array));
 
             vals.set(phi, ang.to(radians));
 
             dihnrg += dihedral.function().evaluate(vals);
         }
 
-        energy += DihedralEnergy( scale_energy * dihnrg );
+        energy += DihedralEnergy(scale_energy * dihnrg);
     }
 }
 
 /** Calculate the energy caused by the non-physical terms (improper, Urey-Bradley) */
-void InternalPotential::calculateNonPhysicalEnergy(
-                                         const GroupInternalParameters &group_params,
-                                         const CoordGroup *cgroup_array,
-                                         InternalPotential::Energy &energy,
-                                         double scale_energy) const
+void InternalPotential::calculateNonPhysicalEnergy(const GroupInternalParameters &group_params,
+                                                   const CoordGroup *cgroup_array, InternalPotential::Energy &energy,
+                                                   double scale_energy) const
 {
     if (not group_params.improperPotential().isEmpty())
     {
@@ -448,19 +403,16 @@ void InternalPotential::calculateNonPhysicalEnergy(
         const Symbol &phi = InternalPotential::symbols().improper().phi();
 
         int nimpropers = group_params.improperPotential().count();
-        const FourAtomFunction *impropers_array
-                                    = group_params.improperPotential().constData();
+        const FourAtomFunction *impropers_array = group_params.improperPotential().constData();
 
         double impnrg = 0;
 
-        for (int i=0; i<nimpropers; ++i)
+        for (int i = 0; i < nimpropers; ++i)
         {
             const FourAtomFunction &improper = impropers_array[i];
 
-            Torsion torsion( getCoords(improper.atom0(), cgroup_array),
-                             getCoords(improper.atom1(), cgroup_array),
-                             getCoords(improper.atom2(), cgroup_array),
-                             getCoords(improper.atom3(), cgroup_array) );
+            Torsion torsion(getCoords(improper.atom0(), cgroup_array), getCoords(improper.atom1(), cgroup_array),
+                            getCoords(improper.atom2(), cgroup_array), getCoords(improper.atom3(), cgroup_array));
 
             Angle theta_angle = torsion.improperAngle();
             Angle phi_angle = torsion.angle();
@@ -471,7 +423,7 @@ void InternalPotential::calculateNonPhysicalEnergy(
             impnrg += improper.function().evaluate(vals);
         }
 
-        energy += ImproperEnergy( scale_energy * impnrg );
+        energy += ImproperEnergy(scale_energy * impnrg);
     }
 
     if (not group_params.ureyBradleyPotential().isEmpty())
@@ -480,33 +432,29 @@ void InternalPotential::calculateNonPhysicalEnergy(
         const Symbol &r = InternalPotential::symbols().ureyBradley().r();
 
         int nubs = group_params.ureyBradleyPotential().count();
-        const TwoAtomFunction *ub_array
-                                = group_params.ureyBradleyPotential().constData();
+        const TwoAtomFunction *ub_array = group_params.ureyBradleyPotential().constData();
 
         double ubnrg = 0;
 
-        for (int i=0; i<nubs; ++i)
+        for (int i = 0; i < nubs; ++i)
         {
             const TwoAtomFunction &ub = ub_array[i];
 
-            double dist = Vector::distance( getCoords(ub.atom0(), cgroup_array),
-                                            getCoords(ub.atom1(), cgroup_array) );
+            double dist = Vector::distance(getCoords(ub.atom0(), cgroup_array), getCoords(ub.atom1(), cgroup_array));
 
-            vals.set( r, dist );
+            vals.set(r, dist);
 
             ubnrg += ub.function().evaluate(vals);
         }
 
-        energy += UreyBradleyEnergy( scale_energy * ubnrg );
+        energy += UreyBradleyEnergy(scale_energy * ubnrg);
     }
 }
 
 /** Calculate the energy caused by the cross terms (improper, Urey-Bradley) */
-void InternalPotential::calculateCrossEnergy(
-                                         const GroupInternalParameters &group_params,
-                                         const CoordGroup *cgroup_array,
-                                         InternalPotential::Energy &energy,
-                                         double scale_energy) const
+void InternalPotential::calculateCrossEnergy(const GroupInternalParameters &group_params,
+                                             const CoordGroup *cgroup_array, InternalPotential::Energy &energy,
+                                             double scale_energy) const
 {
     if (not group_params.stretchStretchPotential().isEmpty())
     {
@@ -515,12 +463,11 @@ void InternalPotential::calculateCrossEnergy(
         const Symbol &r21 = InternalPotential::symbols().stretchStretch().r21();
 
         int nss = group_params.stretchStretchPotential().count();
-        const ThreeAtomFunction *ss_array
-                              = group_params.stretchStretchPotential().constData();
+        const ThreeAtomFunction *ss_array = group_params.stretchStretchPotential().constData();
 
         double ssnrg = 0;
 
-        for (int i=0; i<nss; ++i)
+        for (int i = 0; i < nss; ++i)
         {
             const ThreeAtomFunction &ss = ss_array[i];
 
@@ -528,13 +475,13 @@ void InternalPotential::calculateCrossEnergy(
             const Vector &atom1 = getCoords(ss.atom1(), cgroup_array);
             const Vector &atom2 = getCoords(ss.atom2(), cgroup_array);
 
-            vals.set( r01, Vector::distance(atom0, atom1) );
-            vals.set( r21, Vector::distance(atom2, atom1) );
+            vals.set(r01, Vector::distance(atom0, atom1));
+            vals.set(r21, Vector::distance(atom2, atom1));
 
             ssnrg += ss.function().evaluate(vals);
         }
 
-        energy += StretchStretchEnergy( scale_energy * ssnrg );
+        energy += StretchStretchEnergy(scale_energy * ssnrg);
     }
 
     if (not group_params.stretchBendPotential().isEmpty())
@@ -545,12 +492,11 @@ void InternalPotential::calculateCrossEnergy(
         const Symbol &theta = InternalPotential::symbols().stretchBend().theta();
 
         int nsb = group_params.stretchBendPotential().count();
-        const ThreeAtomFunction *sb_array
-                              = group_params.stretchBendPotential().constData();
+        const ThreeAtomFunction *sb_array = group_params.stretchBendPotential().constData();
 
         double sbnrg = 0;
 
-        for (int i=0; i<nsb; ++i)
+        for (int i = 0; i < nsb; ++i)
         {
             const ThreeAtomFunction &sb = sb_array[i];
 
@@ -558,15 +504,15 @@ void InternalPotential::calculateCrossEnergy(
             const Vector &atom1 = getCoords(sb.atom1(), cgroup_array);
             const Vector &atom2 = getCoords(sb.atom2(), cgroup_array);
 
-            vals.set( r01, Vector::distance(atom0, atom1) );
-            vals.set( r21, Vector::distance(atom2, atom1) );
+            vals.set(r01, Vector::distance(atom0, atom1));
+            vals.set(r21, Vector::distance(atom2, atom1));
 
-            vals.set( theta, Vector::angle(atom0, atom1, atom2) );
+            vals.set(theta, Vector::angle(atom0, atom1, atom2));
 
             sbnrg += sb.function().evaluate(vals);
         }
 
-        energy += StretchBendEnergy( scale_energy * sbnrg );
+        energy += StretchBendEnergy(scale_energy * sbnrg);
     }
 
     if (not group_params.bendBendPotential().isEmpty())
@@ -577,12 +523,11 @@ void InternalPotential::calculateCrossEnergy(
         const Symbol &theta310 = InternalPotential::symbols().bendBend().theta310();
 
         int nbb = group_params.bendBendPotential().count();
-        const FourAtomFunction *bb_array
-                              = group_params.bendBendPotential().constData();
+        const FourAtomFunction *bb_array = group_params.bendBendPotential().constData();
 
         double bbnrg = 0;
 
-        for (int i=0; i<nbb; ++i)
+        for (int i = 0; i < nbb; ++i)
         {
             const FourAtomFunction &bb = bb_array[i];
 
@@ -595,14 +540,14 @@ void InternalPotential::calculateCrossEnergy(
             Vector v12 = atom2 - atom1;
             Vector v13 = atom3 - atom1;
 
-            vals.set( theta012, Vector::angle(v12,v10) );
-            vals.set( theta213, Vector::angle(v13,v12) );
-            vals.set( theta310, Vector::angle(v10,v13) );
+            vals.set(theta012, Vector::angle(v12, v10));
+            vals.set(theta213, Vector::angle(v13, v12));
+            vals.set(theta310, Vector::angle(v10, v13));
 
             bbnrg += bb.function().evaluate(vals);
         }
 
-        energy += BendBendEnergy( scale_energy * bbnrg );
+        energy += BendBendEnergy(scale_energy * bbnrg);
     }
 
     if (not group_params.stretchBendTorsionPotential().isEmpty())
@@ -614,18 +559,15 @@ void InternalPotential::calculateCrossEnergy(
         const Symbol &r12 = InternalPotential::symbols().stretchBendTorsion().r12();
         const Symbol &r32 = InternalPotential::symbols().stretchBendTorsion().r32();
         const Symbol &r03 = InternalPotential::symbols().stretchBendTorsion().r03();
-        const Symbol &theta012
-                = InternalPotential::symbols().stretchBendTorsion().theta012();
-        const Symbol &theta321
-                = InternalPotential::symbols().stretchBendTorsion().theta321();
+        const Symbol &theta012 = InternalPotential::symbols().stretchBendTorsion().theta012();
+        const Symbol &theta321 = InternalPotential::symbols().stretchBendTorsion().theta321();
 
         int nsbt = group_params.stretchBendTorsionPotential().count();
-        const FourAtomFunction *sbt_array
-                          = group_params.stretchBendTorsionPotential().constData();
+        const FourAtomFunction *sbt_array = group_params.stretchBendTorsionPotential().constData();
 
         double sbtnrg = 0;
 
-        for (int i=0; i<nsbt; ++i)
+        for (int i = 0; i < nsbt; ++i)
         {
             const FourAtomFunction &sbt = sbt_array[i];
 
@@ -634,62 +576,55 @@ void InternalPotential::calculateCrossEnergy(
             const Vector &atom2 = getCoords(sbt.atom2(), cgroup_array);
             const Vector &atom3 = getCoords(sbt.atom3(), cgroup_array);
 
-            vals.set( phi, Vector::dihedral(atom0, atom1, atom2, atom3) );
+            vals.set(phi, Vector::dihedral(atom0, atom1, atom2, atom3));
 
-            vals.set( r01, Vector::distance(atom0, atom1) );
-            vals.set( r12, Vector::distance(atom1, atom2) );
-            vals.set( r32, Vector::distance(atom2, atom3) );
-            vals.set( r03, Vector::distance(atom0, atom3) );
+            vals.set(r01, Vector::distance(atom0, atom1));
+            vals.set(r12, Vector::distance(atom1, atom2));
+            vals.set(r32, Vector::distance(atom2, atom3));
+            vals.set(r03, Vector::distance(atom0, atom3));
 
-            vals.set( theta012, Vector::angle(atom0, atom1, atom2) );
-            vals.set( theta321, Vector::angle(atom3, atom2, atom1) );
+            vals.set(theta012, Vector::angle(atom0, atom1, atom2));
+            vals.set(theta321, Vector::angle(atom3, atom2, atom1));
 
             sbtnrg += sbt.function().evaluate(vals);
         }
 
-        energy += StretchBendTorsionEnergy( scale_energy * sbtnrg );
+        energy += StretchBendTorsionEnergy(scale_energy * sbtnrg);
     }
 }
 
 /** Calculate the total intramolecular energy of 'molecule' and
     add it onto 'energy', optionally mutiplying it by a scale factor */
-void InternalPotential::calculateEnergy(const InternalPotential::Molecule &molecule,
-                                        InternalPotential::Energy &energy,
+void InternalPotential::calculateEnergy(const InternalPotential::Molecule &molecule, InternalPotential::Energy &energy,
                                         double scale_energy) const
 {
     if (scale_energy == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
         if (group_params.hasPhysicalParameters())
-            this->calculatePhysicalEnergy(group_params, cgroup_array,
-                                          energy, scale_energy);
+            this->calculatePhysicalEnergy(group_params, cgroup_array, energy, scale_energy);
 
         if (group_params.hasNonPhysicalParameters())
-            this->calculateNonPhysicalEnergy(group_params, cgroup_array,
-                                             energy, scale_energy);
+            this->calculateNonPhysicalEnergy(group_params, cgroup_array, energy, scale_energy);
 
         if (group_params.hasCrossTerms())
-            this->calculateCrossEnergy(group_params, cgroup_array,
-                                       energy, scale_energy);
+            this->calculateCrossEnergy(group_params, cgroup_array, energy, scale_energy);
     }
 }
 
-static void addForce(const Vector &force, const CGAtomIdx &atom,
-                     MolForceTable &forces)
+static void addForce(const Vector &force, const CGAtomIdx &atom, MolForceTable &forces)
 {
     int idx = forces.map(atom.cutGroup());
 
@@ -701,35 +636,30 @@ static void addForce(const Vector &force, const CGAtomIdx &atom,
 
 /** Calculate the total bond force acting on the molecule 'molecule', and add it
     to the forces in 'forces', optionally scaled by 'scale_force' */
-void InternalPotential::calculateBondForce(const InternalPotential::Molecule &molecule,
-                                           MolForceTable &forces,
+void InternalPotential::calculateBondForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
                                            double scale_force) const
 {
-    if (not molecule.parameters().hasBondParameters() or
-            scale_force == 0)
+    if (not molecule.parameters().hasBondParameters() or scale_force == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
     Values vals;
     const Symbol &r = InternalPotential::symbols().bond().r();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
-        //Is this group in the force table, and does this group have any bonds?
-        if ( group_params.bondForces().isEmpty() or
-             not (forces.selected(group_params.cgIdx0()) or
-                  forces.selected(group_params.cgIdx1())) )
+        // Is this group in the force table, and does this group have any bonds?
+        if (group_params.bondForces().isEmpty() or
+            not(forces.selected(group_params.cgIdx0()) or forces.selected(group_params.cgIdx1())))
         {
             continue;
         }
@@ -737,7 +667,7 @@ void InternalPotential::calculateBondForce(const InternalPotential::Molecule &mo
         int nbonds = group_params.bondForces().count();
         const TwoAtomFunction *bonds_array = group_params.bondForces().constData();
 
-        for (int j=0; j<nbonds; ++j)
+        for (int j = 0; j < nbonds; ++j)
         {
             const TwoAtomFunction &bond = bonds_array[j];
 
@@ -748,16 +678,16 @@ void InternalPotential::calculateBondForce(const InternalPotential::Molecule &mo
             double dist = v01.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v01 /= dist;
-            vals.set( r, dist );
+            vals.set(r, dist);
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = -scale_force * bond.function().evaluate(vals) * v01;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(-force, bond.atom0(), forces);
             addForce(force, bond.atom1(), forces);
         }
@@ -767,11 +697,9 @@ void InternalPotential::calculateBondForce(const InternalPotential::Molecule &mo
 /** Calculate d theta / d r_i, d theta / d r_j and d theta / d r_k for
     the passed r_i, r_j and r_k  (three points that make up an angle)
 */
-static void d_theta_by_dr(const Vector &ri, const Vector &rj,
-                          const Vector &rk,
+static void d_theta_by_dr(const Vector &ri, const Vector &rj, const Vector &rk,
 
-                          Vector &dtheta_by_dri, Vector &dtheta_by_drj,
-                          Vector &dtheta_by_drk,
+                          Vector &dtheta_by_dri, Vector &dtheta_by_drj, Vector &dtheta_by_drk,
 
                           Angle &theta, double &dist_ij, double &dist_kj)
 {
@@ -786,7 +714,7 @@ static void d_theta_by_dr(const Vector &ri, const Vector &rj,
 
     if (rA * rB == 0)
     {
-        //one of the bonds has zero length - cannot calculate angle force
+        // one of the bonds has zero length - cannot calculate angle force
         dtheta_by_dri = Vector(0);
         dtheta_by_drj = Vector(0);
         dtheta_by_drk = Vector(0);
@@ -798,15 +726,15 @@ static void d_theta_by_dr(const Vector &ri, const Vector &rj,
     rA = 1 / rA;
     rB = 1 / rB;
 
-    //work with normalised vectors to prevent numerical error
+    // work with normalised vectors to prevent numerical error
     A *= rA;
     B *= rB;
 
-    const double A_B = Vector::dot(A,B);
+    const double A_B = Vector::dot(A, B);
 
     if (A_B == 0)
     {
-        //bonds are parallel - cannot calculate an angle force
+        // bonds are parallel - cannot calculate an angle force
         dtheta_by_dri = Vector(0);
         dtheta_by_drj = Vector(0);
         dtheta_by_drk = Vector(0);
@@ -815,12 +743,12 @@ static void d_theta_by_dr(const Vector &ri, const Vector &rj,
         return;
     }
 
-    dtheta_by_dri = rA * (B + A_B*A);
-    dtheta_by_drk = rB * (A + A_B*B);
+    dtheta_by_dri = rA * (B + A_B * A);
+    dtheta_by_drk = rB * (A + A_B * B);
 
-    dtheta_by_drj = -(dtheta_by_dri+dtheta_by_drk);
+    dtheta_by_drj = -(dtheta_by_dri + dtheta_by_drk);
 
-    theta = Angle( std::acos(A_B) );
+    theta = Angle(std::acos(A_B));
 
     return;
 }
@@ -829,36 +757,31 @@ static void d_theta_by_dr(const Vector &ri, const Vector &rj,
     to the forces in 'forces', optionally scaled by 'scale_force'
 
 */
-void InternalPotential::calculateAngleForce(const InternalPotential::Molecule &molecule,
-                                            MolForceTable &forces,
+void InternalPotential::calculateAngleForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
                                             double scale_force) const
 {
-    if (not molecule.parameters().hasAngleParameters() or
-            scale_force == 0)
+    if (not molecule.parameters().hasAngleParameters() or scale_force == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
     Values vals;
     const Symbol &theta = InternalPotential::symbols().angle().theta();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
-        //Is this group in the force table, and does this group have any angles?
-        if ( group_params.angleForces().isEmpty() or
-             not (forces.selected(group_params.cgIdx0()) or
-                  forces.selected(group_params.cgIdx1()) or
-                  forces.selected(group_params.cgIdx2())) )
+        // Is this group in the force table, and does this group have any angles?
+        if (group_params.angleForces().isEmpty() or
+            not(forces.selected(group_params.cgIdx0()) or forces.selected(group_params.cgIdx1()) or
+                forces.selected(group_params.cgIdx2())))
         {
             continue;
         }
@@ -866,7 +789,7 @@ void InternalPotential::calculateAngleForce(const InternalPotential::Molecule &m
         int nangles = group_params.angleForces().count();
         const ThreeAtomFunction *angles_array = group_params.angleForces().constData();
 
-        for (int j=0; j<nangles; ++j)
+        for (int j = 0; j < nangles; ++j)
         {
             const ThreeAtomFunction &angle = angles_array[j];
 
@@ -876,20 +799,18 @@ void InternalPotential::calculateAngleForce(const InternalPotential::Molecule &m
 
             //-d V(theta) / dr  = -d V(theta) / dtheta  *  dtheta / dr
 
-            //so first calculate d theta / dr
+            // so first calculate d theta / dr
             Vector dtheta_by_d0, dtheta_by_d1, dtheta_by_d2;
             Angle t;
             double r01, r21;
 
-            d_theta_by_dr(atom0, atom1, atom2,
-                          dtheta_by_d0, dtheta_by_d1, dtheta_by_d2,
-                          t, r01, r21);
+            d_theta_by_dr(atom0, atom1, atom2, dtheta_by_d0, dtheta_by_d1, dtheta_by_d2, t, r01, r21);
 
-            //now calcualte -d V(theta) / d theta
+            // now calcualte -d V(theta) / d theta
             vals.set(theta, t);
             const double dv_by_dtheta = -scale_force * angle.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dtheta * dtheta_by_d0, angle.atom0(), forces);
             addForce(dv_by_dtheta * dtheta_by_d1, angle.atom1(), forces);
             addForce(dv_by_dtheta * dtheta_by_d2, angle.atom2(), forces);
@@ -899,9 +820,8 @@ void InternalPotential::calculateAngleForce(const InternalPotential::Molecule &m
 
 static Vector cross(const Vector &v0, const Vector &v1)
 {
-    return Vector( v0.y()*v1.z() - v0.z()*v1.y(),
-                   v0.z()*v1.x() - v0.x()*v1.z(),
-                   v0.x()*v1.y() - v0.y()*v1.x() );
+    return Vector(v0.y() * v1.z() - v0.z() * v1.y(), v0.z() * v1.x() - v0.x() * v1.z(),
+                  v0.x() * v1.y() - v0.y() * v1.x());
 }
 
 /** Calculate d phi / d r_i, d phi / d r_j, d phi / d r_k and d phi / d r_l.
@@ -911,11 +831,9 @@ static Vector cross(const Vector &v0, const Vector &v1)
     avoiding the singularity at phi = 0 (where sin(phi) = 0, so 1 / sin(phi) is
     undefined).
 */
-static void d_phi_by_dr(const Vector &ri, const Vector &rj,
-                        const Vector &rk, const Vector &rl,
+static void d_phi_by_dr(const Vector &ri, const Vector &rj, const Vector &rk, const Vector &rl,
 
-                        Vector &dphi_by_dri, Vector &dphi_by_drj,
-                        Vector &dphi_by_drk, Vector &dphi_by_drl)
+                        Vector &dphi_by_dri, Vector &dphi_by_drj, Vector &dphi_by_drk, Vector &dphi_by_drl)
 {
     Vector F = ri - rj;
     Vector G = rj - rk;
@@ -927,8 +845,8 @@ static void d_phi_by_dr(const Vector &ri, const Vector &rj,
 
     if (rF * rG * rH == 0)
     {
-        //one of the bonds has zero length - cannot calculate
-        //the dihedral force
+        // one of the bonds has zero length - cannot calculate
+        // the dihedral force
         dphi_by_dri = Vector(0);
         dphi_by_drj = Vector(0);
         dphi_by_drk = Vector(0);
@@ -936,7 +854,7 @@ static void d_phi_by_dr(const Vector &ri, const Vector &rj,
         return;
     }
 
-    //work with normalised vectors to prevent build-up of numerical error
+    // work with normalised vectors to prevent build-up of numerical error
     rF = 1 / rF;
     rG = 1 / rG;
     rH = 1 / rH;
@@ -945,8 +863,8 @@ static void d_phi_by_dr(const Vector &ri, const Vector &rj,
     G *= rG;
     H *= rH;
 
-    const double F_G = Vector::dot(F,G);
-    const double H_G = Vector::dot(H,G);
+    const double F_G = Vector::dot(F, G);
+    const double H_G = Vector::dot(H, G);
 
     Vector A = ::cross(F, G);
     Vector B = ::cross(H, G);
@@ -956,7 +874,7 @@ static void d_phi_by_dr(const Vector &ri, const Vector &rj,
 
     if (rA * rB == 0)
     {
-        //atoms lie in a plane - cannot calculate the dihedral
+        // atoms lie in a plane - cannot calculate the dihedral
         dphi_by_dri = Vector(0);
         dphi_by_drj = Vector(0);
         dphi_by_drk = Vector(0);
@@ -964,8 +882,8 @@ static void d_phi_by_dr(const Vector &ri, const Vector &rj,
         return;
     }
 
-    A *= (1/rA);
-    B *= (1/rB);
+    A *= (1 / rA);
+    B *= (1 / rB);
 
     const Vector dphi_by_dF = -rF * A;
     const Vector dphi_by_dH = rH * B;
@@ -989,61 +907,49 @@ static void d_phi_by_dr(const Vector &ri, const Vector &rj,
     The theta angle is that between the vector ri-rj and the
     vector perpendicular to the plane rj, rk, rl
 */
-static void d_theta_by_dr(const Vector &ri, const Vector &rj,
-                          const Vector &rk, const Vector &rl,
-                          Vector &dtheta_by_dri, Vector &dtheta_by_drj,
-                          Vector &dtheta_by_drk, Vector &dtheta_by_drl)
+static void d_theta_by_dr(const Vector &ri, const Vector &rj, const Vector &rk, const Vector &rl, Vector &dtheta_by_dri,
+                          Vector &dtheta_by_drj, Vector &dtheta_by_drk, Vector &dtheta_by_drl)
 {
-    throw SireError::incomplete_code( QObject::tr(
-        "Haven't yet implemented improper theta forces!"),
-            CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Haven't yet implemented improper theta forces!"), CODELOC);
 }
 
 /** Calculate the total dihedral force acting on the molecule 'molecule', and add it
     to the forces in 'forces', optionally scaled by 'scale_force'
 
 */
-void InternalPotential::calculateDihedralForce(
-                                    const InternalPotential::Molecule &molecule,
-                                    MolForceTable &forces,
-                                    double scale_force) const
+void InternalPotential::calculateDihedralForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                                               double scale_force) const
 {
-    if (not molecule.parameters().hasDihedralParameters() or
-            scale_force == 0)
+    if (not molecule.parameters().hasDihedralParameters() or scale_force == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
     Values vals;
     const Symbol &phi = InternalPotential::symbols().dihedral().phi();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
-        //Is this group in the force table, and does this group have any angles?
-        if ( group_params.dihedralForces().isEmpty() or
-             not (forces.selected(group_params.cgIdx0()) or
-                  forces.selected(group_params.cgIdx1()) or
-                  forces.selected(group_params.cgIdx2()) or
-                  forces.selected(group_params.cgIdx3()) ) )
+        // Is this group in the force table, and does this group have any angles?
+        if (group_params.dihedralForces().isEmpty() or
+            not(forces.selected(group_params.cgIdx0()) or forces.selected(group_params.cgIdx1()) or
+                forces.selected(group_params.cgIdx2()) or forces.selected(group_params.cgIdx3())))
         {
             continue;
         }
 
         int ndihedrals = group_params.dihedralForces().count();
-        const FourAtomFunction *dihedrals_array
-                                    = group_params.dihedralForces().constData();
+        const FourAtomFunction *dihedrals_array = group_params.dihedralForces().constData();
 
-        for (int j=0; j<ndihedrals; ++j)
+        for (int j = 0; j < ndihedrals; ++j)
         {
             const FourAtomFunction &dihedral = dihedrals_array[j];
 
@@ -1054,17 +960,16 @@ void InternalPotential::calculateDihedralForce(
 
             //-d V(phi) / dr  = -d V(phi) / dphi  *  dphi / dr
 
-            //so first calculate d phi / dr
+            // so first calculate d phi / dr
             Vector dphi_by_d0, dphi_by_d1, dphi_by_d2, dphi_by_d3;
 
-            d_phi_by_dr(atom0, atom1, atom2, atom3,
-                        dphi_by_d0, dphi_by_d1, dphi_by_d2, dphi_by_d3);
+            d_phi_by_dr(atom0, atom1, atom2, atom3, dphi_by_d0, dphi_by_d1, dphi_by_d2, dphi_by_d3);
 
-            //now calcualte -d V(phi) / d phi
-            vals.set(phi, Vector::dihedral(atom0,atom1,atom2,atom3).to(radians));
+            // now calcualte -d V(phi) / d phi
+            vals.set(phi, Vector::dihedral(atom0, atom1, atom2, atom3).to(radians));
             double dv_by_dphi = -scale_force * dihedral.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dphi * dphi_by_d0, dihedral.atom0(), forces);
             addForce(dv_by_dphi * dphi_by_d1, dihedral.atom1(), forces);
             addForce(dv_by_dphi * dphi_by_d2, dihedral.atom2(), forces);
@@ -1077,50 +982,41 @@ void InternalPotential::calculateDihedralForce(
     to the forces in 'forces', optionally scaled by 'scale_force'
 
 */
-void InternalPotential::calculateImproperForce(
-                                    const InternalPotential::Molecule &molecule,
-                                    MolForceTable &forces,
-                                    double scale_force) const
+void InternalPotential::calculateImproperForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                                               double scale_force) const
 {
-    if (not molecule.parameters().hasImproperParameters() or
-            scale_force == 0)
+    if (not molecule.parameters().hasImproperParameters() or scale_force == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
     Values vals;
     const Symbol &phi = InternalPotential::symbols().improper().phi();
     const Symbol &theta = InternalPotential::symbols().improper().theta();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
-        //Is this group in the force table, and does this group have any angles?
-        if ( (group_params.improper_Theta_Forces().isEmpty() and
-              group_params.improper_Phi_Forces().isEmpty()) or
-             not (forces.selected(group_params.cgIdx0()) or
-                  forces.selected(group_params.cgIdx1()) or
-                  forces.selected(group_params.cgIdx2()) or
-                  forces.selected(group_params.cgIdx3()) ) )
+        // Is this group in the force table, and does this group have any angles?
+        if ((group_params.improper_Theta_Forces().isEmpty() and group_params.improper_Phi_Forces().isEmpty()) or
+            not(forces.selected(group_params.cgIdx0()) or forces.selected(group_params.cgIdx1()) or
+                forces.selected(group_params.cgIdx2()) or forces.selected(group_params.cgIdx3())))
         {
             continue;
         }
 
-        //do the theta forces first...
+        // do the theta forces first...
         int nimpropers = group_params.improper_Theta_Forces().count();
-        const FourAtomFunction *impropers_array
-                                 = group_params.improper_Theta_Forces().constData();
+        const FourAtomFunction *impropers_array = group_params.improper_Theta_Forces().constData();
 
-        for (int j=0; j<nimpropers; ++j)
+        for (int j = 0; j < nimpropers; ++j)
         {
             const FourAtomFunction &improper = impropers_array[j];
 
@@ -1129,15 +1025,14 @@ void InternalPotential::calculateImproperForce(
             const Vector &atom2 = getCoords(improper.atom2(), cgroup_array);
             const Vector &atom3 = getCoords(improper.atom3(), cgroup_array);
 
-            //d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
+            // d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
 
-            //so first calculate d theta / dr
+            // so first calculate d theta / dr
             Vector dtheta_by_d0, dtheta_by_d1, dtheta_by_d2, dtheta_by_d3;
 
-            d_theta_by_dr(atom0, atom1, atom2, atom3,
-                          dtheta_by_d0, dtheta_by_d1, dtheta_by_d2, dtheta_by_d3);
+            d_theta_by_dr(atom0, atom1, atom2, atom3, dtheta_by_d0, dtheta_by_d1, dtheta_by_d2, dtheta_by_d3);
 
-            //now calculate d V(phi,theta) / d theta
+            // now calculate d V(phi,theta) / d theta
             Torsion torsion(atom0, atom1, atom2, atom3);
 
             vals.set(theta, torsion.improperAngle());
@@ -1145,18 +1040,18 @@ void InternalPotential::calculateImproperForce(
 
             double dv_by_dtheta = scale_force * improper.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dtheta * dtheta_by_d0, improper.atom0(), forces);
             addForce(dv_by_dtheta * dtheta_by_d1, improper.atom1(), forces);
             addForce(dv_by_dtheta * dtheta_by_d2, improper.atom2(), forces);
             addForce(dv_by_dtheta * dtheta_by_d3, improper.atom3(), forces);
         }
 
-        //now do the phi forces
+        // now do the phi forces
         nimpropers = group_params.improper_Phi_Forces().count();
         impropers_array = group_params.improper_Phi_Forces().constData();
 
-        for (int j=0; j<nimpropers; ++j)
+        for (int j = 0; j < nimpropers; ++j)
         {
             const FourAtomFunction &improper = impropers_array[j];
 
@@ -1165,15 +1060,14 @@ void InternalPotential::calculateImproperForce(
             const Vector &atom2 = getCoords(improper.atom2(), cgroup_array);
             const Vector &atom3 = getCoords(improper.atom3(), cgroup_array);
 
-            //d V(phi) / dr  = d V(phi) / dphi  *  dphi / dr
+            // d V(phi) / dr  = d V(phi) / dphi  *  dphi / dr
 
-            //so first calculate d phi / dr
+            // so first calculate d phi / dr
             Vector dphi_by_d0, dphi_by_d1, dphi_by_d2, dphi_by_d3;
 
-            d_phi_by_dr(atom0, atom1, atom2, atom3,
-                        dphi_by_d0, dphi_by_d1, dphi_by_d2, dphi_by_d3);
+            d_phi_by_dr(atom0, atom1, atom2, atom3, dphi_by_d0, dphi_by_d1, dphi_by_d2, dphi_by_d3);
 
-            //now calculate d V(phi,theta) / d phi
+            // now calculate d V(phi,theta) / d phi
             Torsion torsion(atom0, atom1, atom2, atom3);
 
             vals.set(theta, torsion.improperAngle());
@@ -1181,7 +1075,7 @@ void InternalPotential::calculateImproperForce(
 
             double dv_by_dphi = scale_force * improper.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dphi * dphi_by_d0, improper.atom0(), forces);
             addForce(dv_by_dphi * dphi_by_d1, improper.atom1(), forces);
             addForce(dv_by_dphi * dphi_by_d2, improper.atom2(), forces);
@@ -1192,35 +1086,30 @@ void InternalPotential::calculateImproperForce(
 
 /** Calculate the total Urey-Bradley force acting on the molecule 'molecule',
     and add it to the forces in 'forces', optionally scaled by 'scale_force' */
-void InternalPotential::calculateUBForce(const InternalPotential::Molecule &molecule,
-                                         MolForceTable &forces,
+void InternalPotential::calculateUBForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
                                          double scale_force) const
 {
-    if (not molecule.parameters().hasUreyBradleyParameters() or
-            scale_force == 0)
+    if (not molecule.parameters().hasUreyBradleyParameters() or scale_force == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
     Values vals;
     const Symbol &r = InternalPotential::symbols().ureyBradley().r();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
-        //Is this group in the force table, and does this group have any Urey Bradleys?
-        if ( group_params.ureyBradleyForces().isEmpty() or
-             not (forces.selected(group_params.cgIdx0()) or
-                  forces.selected(group_params.cgIdx1())) )
+        // Is this group in the force table, and does this group have any Urey Bradleys?
+        if (group_params.ureyBradleyForces().isEmpty() or
+            not(forces.selected(group_params.cgIdx0()) or forces.selected(group_params.cgIdx1())))
         {
             continue;
         }
@@ -1228,7 +1117,7 @@ void InternalPotential::calculateUBForce(const InternalPotential::Molecule &mole
         int nubs = group_params.ureyBradleyForces().count();
         const TwoAtomFunction *ubs_array = group_params.ureyBradleyForces().constData();
 
-        for (int j=0; j<nubs; ++j)
+        for (int j = 0; j < nubs; ++j)
         {
             const TwoAtomFunction &ub = ubs_array[j];
 
@@ -1239,16 +1128,16 @@ void InternalPotential::calculateUBForce(const InternalPotential::Molecule &mole
             double dist = v01.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v01 /= dist;
-            vals.set( r, dist );
+            vals.set(r, dist);
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = scale_force * ub.function().evaluate(vals) * v01;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(force, ub.atom0(), forces);
             addForce(-force, ub.atom1(), forces);
         }
@@ -1257,49 +1146,43 @@ void InternalPotential::calculateUBForce(const InternalPotential::Molecule &mole
 
 /** Calculate the total stretch-stretch force acting on the molecule 'molecule',
     and add it to the forces in 'forces', optionally scaled by 'scale_force' */
-void InternalPotential::calculateSSForce(const InternalPotential::Molecule &molecule,
-                                         MolForceTable &forces,
+void InternalPotential::calculateSSForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
                                          double scale_force) const
 {
-    if (not molecule.parameters().hasStretchStretchParameters() or
-            scale_force == 0)
+    if (not molecule.parameters().hasStretchStretchParameters() or scale_force == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
     Values vals;
     const Symbol &r01 = InternalPotential::symbols().stretchStretch().r01();
     const Symbol &r21 = InternalPotential::symbols().stretchStretch().r21();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
-        //Is this group in the force table, and does this group
-        //have any stretch-stretch forces?
-        if ( (group_params.stretchStretch_R01_Forces().isEmpty() and
-              group_params.stretchStretch_R21_Forces().isEmpty()) or
-             not (forces.selected(group_params.cgIdx0()) or
-                  forces.selected(group_params.cgIdx1()) or
-                  forces.selected(group_params.cgIdx2())) )
+        // Is this group in the force table, and does this group
+        // have any stretch-stretch forces?
+        if ((group_params.stretchStretch_R01_Forces().isEmpty() and
+             group_params.stretchStretch_R21_Forces().isEmpty()) or
+            not(forces.selected(group_params.cgIdx0()) or forces.selected(group_params.cgIdx1()) or
+                forces.selected(group_params.cgIdx2())))
         {
             continue;
         }
 
-        //calculate the forces along r01
+        // calculate the forces along r01
         int nss = group_params.stretchStretch_R01_Forces().count();
-        const ThreeAtomFunction *ss_array
-                            = group_params.stretchStretch_R01_Forces().constData();
+        const ThreeAtomFunction *ss_array = group_params.stretchStretch_R01_Forces().constData();
 
-        for (int j=0; j<nss; ++j)
+        for (int j = 0; j < nss; ++j)
         {
             const ThreeAtomFunction &ss = ss_array[j];
 
@@ -1311,27 +1194,27 @@ void InternalPotential::calculateSSForce(const InternalPotential::Molecule &mole
             double dist = v.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v /= dist;
 
-            vals.set( r01, dist );
-            vals.set( r21, Vector::distance(atom1, atom2) );
+            vals.set(r01, dist);
+            vals.set(r21, Vector::distance(atom1, atom2));
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = scale_force * ss.function().evaluate(vals) * v;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(force, ss.atom0(), forces);
             addForce(-force, ss.atom1(), forces);
         }
 
-        //now calculate the forces along r21
+        // now calculate the forces along r21
         nss = group_params.stretchStretch_R21_Forces().count();
         ss_array = group_params.stretchStretch_R21_Forces().constData();
 
-        for (int j=0; j<nss; ++j)
+        for (int j = 0; j < nss; ++j)
         {
             const ThreeAtomFunction &ss = ss_array[j];
 
@@ -1343,18 +1226,18 @@ void InternalPotential::calculateSSForce(const InternalPotential::Molecule &mole
             double dist = v.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v /= dist;
 
-            vals.set( r21, dist );
-            vals.set( r01, Vector::distance(atom1, atom0) );
+            vals.set(r21, dist);
+            vals.set(r01, Vector::distance(atom1, atom0));
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = scale_force * ss.function().evaluate(vals) * v;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(force, ss.atom2(), forces);
             addForce(-force, ss.atom1(), forces);
         }
@@ -1364,50 +1247,43 @@ void InternalPotential::calculateSSForce(const InternalPotential::Molecule &mole
 /** Calculate all of the stretch-bend forces acting on the passed molecule,
     adding the forces onto the passed force table, optionally scaled
     by 'scale_force' */
-void InternalPotential::calculateSBForce(const InternalPotential::Molecule &molecule,
-                                         MolForceTable &forces,
+void InternalPotential::calculateSBForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
                                          double scale_force) const
 {
-    if (not molecule.parameters().hasStretchBendParameters() or
-            scale_force == 0)
+    if (not molecule.parameters().hasStretchBendParameters() or scale_force == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
     Values vals;
     const Symbol &theta = InternalPotential::symbols().stretchBend().theta();
     const Symbol &r01 = InternalPotential::symbols().stretchBend().r01();
     const Symbol &r21 = InternalPotential::symbols().stretchBend().r21();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
-        //Is this group in the force table, and does this group have any forces?
-        if ( (group_params.stretchBend_Theta_Forces().isEmpty() and
-              group_params.stretchBend_R01_Forces().isEmpty() and
-              group_params.stretchBend_R21_Forces().isEmpty()) or
-             not (forces.selected(group_params.cgIdx0()) or
-                  forces.selected(group_params.cgIdx1()) or
-                  forces.selected(group_params.cgIdx2())) )
+        // Is this group in the force table, and does this group have any forces?
+        if ((group_params.stretchBend_Theta_Forces().isEmpty() and group_params.stretchBend_R01_Forces().isEmpty() and
+             group_params.stretchBend_R21_Forces().isEmpty()) or
+            not(forces.selected(group_params.cgIdx0()) or forces.selected(group_params.cgIdx1()) or
+                forces.selected(group_params.cgIdx2())))
         {
             continue;
         }
 
-        //do the angle forces first
+        // do the angle forces first
         int nsbs = group_params.stretchBend_Theta_Forces().count();
-        const ThreeAtomFunction *sbs_array
-                            = group_params.stretchBend_Theta_Forces().constData();
+        const ThreeAtomFunction *sbs_array = group_params.stretchBend_Theta_Forces().constData();
 
-        for (int j=0; j<nsbs; ++j)
+        for (int j = 0; j < nsbs; ++j)
         {
             const ThreeAtomFunction &sb = sbs_array[j];
 
@@ -1415,34 +1291,32 @@ void InternalPotential::calculateSBForce(const InternalPotential::Molecule &mole
             const Vector &atom1 = getCoords(sb.atom1(), cgroup_array);
             const Vector &atom2 = getCoords(sb.atom2(), cgroup_array);
 
-            //d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
+            // d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
 
-            //so first calculate d theta / dr
+            // so first calculate d theta / dr
             Vector dtheta_by_d0, dtheta_by_d1, dtheta_by_d2;
             Angle t;
             double dist01, dist21;
 
-            d_theta_by_dr(atom0, atom1, atom2,
-                          dtheta_by_d0, dtheta_by_d1, dtheta_by_d2,
-                          t, dist01, dist21);
+            d_theta_by_dr(atom0, atom1, atom2, dtheta_by_d0, dtheta_by_d1, dtheta_by_d2, t, dist01, dist21);
 
-            //now calcualte d V(theta) / d theta
+            // now calcualte d V(theta) / d theta
             vals.set(theta, t);
             vals.set(r01, dist01);
             vals.set(r21, dist21);
             double dv_by_dtheta = scale_force * sb.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dtheta * dtheta_by_d0, sb.atom0(), forces);
             addForce(dv_by_dtheta * dtheta_by_d1, sb.atom1(), forces);
             addForce(dv_by_dtheta * dtheta_by_d2, sb.atom2(), forces);
         }
 
-        //now the r01 forces
+        // now the r01 forces
         nsbs = group_params.stretchBend_R01_Forces().count();
         sbs_array = group_params.stretchBend_R01_Forces().constData();
 
-        for (int j=0; j<nsbs; ++j)
+        for (int j = 0; j < nsbs; ++j)
         {
             const ThreeAtomFunction &sb = sbs_array[j];
 
@@ -1454,28 +1328,28 @@ void InternalPotential::calculateSBForce(const InternalPotential::Molecule &mole
             double dist = v.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v /= dist;
 
-            vals.set( theta, Vector::angle(atom0, atom1, atom2) );
-            vals.set( r01, dist );
-            vals.set( r21, Vector::distance(atom1, atom2) );
+            vals.set(theta, Vector::angle(atom0, atom1, atom2));
+            vals.set(r01, dist);
+            vals.set(r21, Vector::distance(atom1, atom2));
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = scale_force * sb.function().evaluate(vals) * v;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(force, sb.atom0(), forces);
             addForce(-force, sb.atom1(), forces);
         }
 
-        //now the r21 forces
+        // now the r21 forces
         nsbs = group_params.stretchBend_R21_Forces().count();
         sbs_array = group_params.stretchBend_R21_Forces().constData();
 
-        for (int j=0; j<nsbs; ++j)
+        for (int j = 0; j < nsbs; ++j)
         {
             const ThreeAtomFunction &sb = sbs_array[j];
 
@@ -1487,19 +1361,19 @@ void InternalPotential::calculateSBForce(const InternalPotential::Molecule &mole
             double dist = v.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v /= dist;
 
-            vals.set( theta, Vector::angle(atom0, atom1, atom2) );
-            vals.set( r21, dist );
-            vals.set( r01, Vector::distance(atom1, atom0) );
+            vals.set(theta, Vector::angle(atom0, atom1, atom2));
+            vals.set(r21, dist);
+            vals.set(r01, Vector::distance(atom1, atom0));
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = scale_force * sb.function().evaluate(vals) * v;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(force, sb.atom2(), forces);
             addForce(-force, sb.atom1(), forces);
         }
@@ -1509,50 +1383,43 @@ void InternalPotential::calculateSBForce(const InternalPotential::Molecule &mole
 /** Calculate all of the bend-bend forces acting on the passed molecule,
     adding the forces onto the passed force table, optionally scaled
     by 'scale_force' */
-void InternalPotential::calculateBBForce(const InternalPotential::Molecule &molecule,
-                                         MolForceTable &forces,
+void InternalPotential::calculateBBForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
                                          double scale_force) const
 {
-    if (not molecule.parameters().hasBendBendParameters() or
-            scale_force == 0)
+    if (not molecule.parameters().hasBendBendParameters() or scale_force == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
     Values vals;
     const Symbol &theta012 = InternalPotential::symbols().bendBend().theta012();
     const Symbol &theta213 = InternalPotential::symbols().bendBend().theta213();
     const Symbol &theta310 = InternalPotential::symbols().bendBend().theta310();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
-        //Is this group in the force table, and does this group have any forces?
-        if ( (group_params.bendBend_Theta012_Forces().isEmpty() and
-              group_params.bendBend_Theta213_Forces().isEmpty() and
-              group_params.bendBend_Theta310_Forces().isEmpty()) or
-             not (forces.selected(group_params.cgIdx0()) or
-                  forces.selected(group_params.cgIdx1()) or
-                  forces.selected(group_params.cgIdx2())) )
+        // Is this group in the force table, and does this group have any forces?
+        if ((group_params.bendBend_Theta012_Forces().isEmpty() and group_params.bendBend_Theta213_Forces().isEmpty() and
+             group_params.bendBend_Theta310_Forces().isEmpty()) or
+            not(forces.selected(group_params.cgIdx0()) or forces.selected(group_params.cgIdx1()) or
+                forces.selected(group_params.cgIdx2())))
         {
             continue;
         }
 
-        //do the theta012 forces first
+        // do the theta012 forces first
         int nbbs = group_params.bendBend_Theta012_Forces().count();
-        const FourAtomFunction *bbs_array
-                            = group_params.bendBend_Theta012_Forces().constData();
+        const FourAtomFunction *bbs_array = group_params.bendBend_Theta012_Forces().constData();
 
-        for (int j=0; j<nbbs; ++j)
+        for (int j = 0; j < nbbs; ++j)
         {
             const FourAtomFunction &bb = bbs_array[j];
 
@@ -1561,35 +1428,33 @@ void InternalPotential::calculateBBForce(const InternalPotential::Molecule &mole
             const Vector &atom2 = getCoords(bb.atom2(), cgroup_array);
             const Vector &atom3 = getCoords(bb.atom3(), cgroup_array);
 
-            //d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
+            // d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
 
-            //so first calculate d theta / dr
+            // so first calculate d theta / dr
             Vector dtheta_by_d0, dtheta_by_d1, dtheta_by_d2;
             Angle t;
             double dist01, dist21;
 
-            d_theta_by_dr(atom0, atom1, atom2,
-                          dtheta_by_d0, dtheta_by_d1, dtheta_by_d2,
-                          t, dist01, dist21);
+            d_theta_by_dr(atom0, atom1, atom2, dtheta_by_d0, dtheta_by_d1, dtheta_by_d2, t, dist01, dist21);
 
-            //now calcualte d V(theta) / d theta
+            // now calcualte d V(theta) / d theta
             vals.set(theta012, t);
             vals.set(theta213, Vector::angle(atom2, atom1, atom3));
             vals.set(theta310, Vector::angle(atom3, atom1, atom0));
 
             double dv_by_dtheta = scale_force * bb.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dtheta * dtheta_by_d0, bb.atom0(), forces);
             addForce(dv_by_dtheta * dtheta_by_d1, bb.atom1(), forces);
             addForce(dv_by_dtheta * dtheta_by_d2, bb.atom2(), forces);
         }
 
-        //now the theta213 forces first
+        // now the theta213 forces first
         nbbs = group_params.bendBend_Theta213_Forces().count();
         bbs_array = group_params.bendBend_Theta213_Forces().constData();
 
-        for (int j=0; j<nbbs; ++j)
+        for (int j = 0; j < nbbs; ++j)
         {
             const FourAtomFunction &bb = bbs_array[j];
 
@@ -1598,35 +1463,33 @@ void InternalPotential::calculateBBForce(const InternalPotential::Molecule &mole
             const Vector &atom2 = getCoords(bb.atom2(), cgroup_array);
             const Vector &atom3 = getCoords(bb.atom3(), cgroup_array);
 
-            //d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
+            // d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
 
-            //so first calculate d theta / dr
+            // so first calculate d theta / dr
             Vector dtheta_by_d2, dtheta_by_d1, dtheta_by_d3;
             Angle t;
             double dist21, dist31;
 
-            d_theta_by_dr(atom2, atom1, atom3,
-                          dtheta_by_d2, dtheta_by_d1, dtheta_by_d3,
-                          t, dist21, dist31);
+            d_theta_by_dr(atom2, atom1, atom3, dtheta_by_d2, dtheta_by_d1, dtheta_by_d3, t, dist21, dist31);
 
-            //now calcualte d V(theta) / d theta
+            // now calcualte d V(theta) / d theta
             vals.set(theta012, Vector::angle(atom0, atom1, atom2));
             vals.set(theta213, t);
             vals.set(theta310, Vector::angle(atom3, atom1, atom0));
 
             double dv_by_dtheta = scale_force * bb.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dtheta * dtheta_by_d2, bb.atom2(), forces);
             addForce(dv_by_dtheta * dtheta_by_d1, bb.atom1(), forces);
             addForce(dv_by_dtheta * dtheta_by_d3, bb.atom3(), forces);
         }
 
-        //finally the theta310 forces
+        // finally the theta310 forces
         nbbs = group_params.bendBend_Theta310_Forces().count();
         bbs_array = group_params.bendBend_Theta310_Forces().constData();
 
-        for (int j=0; j<nbbs; ++j)
+        for (int j = 0; j < nbbs; ++j)
         {
             const FourAtomFunction &bb = bbs_array[j];
 
@@ -1635,25 +1498,23 @@ void InternalPotential::calculateBBForce(const InternalPotential::Molecule &mole
             const Vector &atom2 = getCoords(bb.atom2(), cgroup_array);
             const Vector &atom3 = getCoords(bb.atom3(), cgroup_array);
 
-            //d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
+            // d V(theta) / dr  = d V(theta) / dtheta  *  dtheta / dr
 
-            //so first calculate d theta / dr
+            // so first calculate d theta / dr
             Vector dtheta_by_d3, dtheta_by_d1, dtheta_by_d0;
             Angle t;
             double dist31, dist01;
 
-            d_theta_by_dr(atom3, atom1, atom0,
-                          dtheta_by_d3, dtheta_by_d1, dtheta_by_d0,
-                          t, dist31, dist01);
+            d_theta_by_dr(atom3, atom1, atom0, dtheta_by_d3, dtheta_by_d1, dtheta_by_d0, t, dist31, dist01);
 
-            //now calcualte d V(theta) / d theta
+            // now calcualte d V(theta) / d theta
             vals.set(theta012, Vector::angle(atom0, atom1, atom2));
             vals.set(theta213, Vector::angle(atom2, atom1, atom3));
             vals.set(theta310, t);
 
             double dv_by_dtheta = scale_force * bb.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dtheta * dtheta_by_d3, bb.atom3(), forces);
             addForce(dv_by_dtheta * dtheta_by_d1, bb.atom1(), forces);
             addForce(dv_by_dtheta * dtheta_by_d0, bb.atom0(), forces);
@@ -1664,23 +1525,19 @@ void InternalPotential::calculateBBForce(const InternalPotential::Molecule &mole
 /** Calculate all of the stretch-bend-torsion forces acting on the passed molecule,
     adding the forces onto the passed force table, optionally scaled
     by 'scale_force' */
-void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &molecule,
-                                          MolForceTable &forces,
+void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
                                           double scale_force) const
 {
-    if (not molecule.parameters().hasStretchBendTorsionParameters() or
-            scale_force == 0)
+    if (not molecule.parameters().hasStretchBendTorsionParameters() or scale_force == 0)
         return;
 
-    //get the array of all parameters for each group...
-    const GroupInternalParameters *params_array
-                             = molecule.parameters().groupParameters().constData();
+    // get the array of all parameters for each group...
+    const GroupInternalParameters *params_array = molecule.parameters().groupParameters().constData();
 
     int ngroups = molecule.parameters().groupParameters().count();
 
-    //get the array of CoordGroups
-    const CoordGroup *cgroup_array
-                             = molecule.parameters().atomicCoordinates().constData();
+    // get the array of CoordGroups
+    const CoordGroup *cgroup_array = molecule.parameters().atomicCoordinates().constData();
 
     Values vals;
     const Symbol &phi = InternalPotential::symbols().stretchBendTorsion().phi();
@@ -1690,36 +1547,32 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
     const Symbol &r32 = InternalPotential::symbols().stretchBendTorsion().r32();
     const Symbol &r03 = InternalPotential::symbols().stretchBendTorsion().r03();
 
-    const Symbol &theta012
-                = InternalPotential::symbols().stretchBendTorsion().theta012();
-    const Symbol &theta321
-                = InternalPotential::symbols().stretchBendTorsion().theta321();
+    const Symbol &theta012 = InternalPotential::symbols().stretchBendTorsion().theta012();
+    const Symbol &theta321 = InternalPotential::symbols().stretchBendTorsion().theta321();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const GroupInternalParameters &group_params = params_array[i];
 
-        //Is this group in the force table, and does this group have any forces?
-        if ( (group_params.stretchBendTorsion_Phi_Forces().isEmpty() and
-              group_params.stretchBendTorsion_R01_Forces().isEmpty() and
-              group_params.stretchBendTorsion_R12_Forces().isEmpty() and
-              group_params.stretchBendTorsion_R32_Forces().isEmpty() and
-              group_params.stretchBendTorsion_R03_Forces().isEmpty() and
-              group_params.stretchBendTorsion_Theta012_Forces().isEmpty() and
-              group_params.stretchBendTorsion_Theta321_Forces().isEmpty()) or
-             not (forces.selected(group_params.cgIdx0()) or
-                  forces.selected(group_params.cgIdx1()) or
-                  forces.selected(group_params.cgIdx2())) )
+        // Is this group in the force table, and does this group have any forces?
+        if ((group_params.stretchBendTorsion_Phi_Forces().isEmpty() and
+             group_params.stretchBendTorsion_R01_Forces().isEmpty() and
+             group_params.stretchBendTorsion_R12_Forces().isEmpty() and
+             group_params.stretchBendTorsion_R32_Forces().isEmpty() and
+             group_params.stretchBendTorsion_R03_Forces().isEmpty() and
+             group_params.stretchBendTorsion_Theta012_Forces().isEmpty() and
+             group_params.stretchBendTorsion_Theta321_Forces().isEmpty()) or
+            not(forces.selected(group_params.cgIdx0()) or forces.selected(group_params.cgIdx1()) or
+                forces.selected(group_params.cgIdx2())))
         {
             continue;
         }
 
-        //do the angle forces first
+        // do the angle forces first
         int nsbts = group_params.stretchBendTorsion_Phi_Forces().count();
-        const FourAtomFunction *sbts_array
-                        = group_params.stretchBendTorsion_Phi_Forces().constData();
+        const FourAtomFunction *sbts_array = group_params.stretchBendTorsion_Phi_Forces().constData();
 
-        for (int j=0; j<nsbts; ++j)
+        for (int j = 0; j < nsbts; ++j)
         {
             const FourAtomFunction &sbt = sbts_array[j];
 
@@ -1728,15 +1581,14 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             const Vector &atom2 = getCoords(sbt.atom2(), cgroup_array);
             const Vector &atom3 = getCoords(sbt.atom3(), cgroup_array);
 
-            //d V(phi) / dr  = d V(phi) / dphi  *  dphi / dr
+            // d V(phi) / dr  = d V(phi) / dphi  *  dphi / dr
 
-            //so first calculate d phi / dr
+            // so first calculate d phi / dr
             Vector dphi_by_d0, dphi_by_d1, dphi_by_d2, dphi_by_d3;
 
-            d_phi_by_dr(atom0, atom1, atom2, atom3,
-                        dphi_by_d0, dphi_by_d1, dphi_by_d2, dphi_by_d3);
+            d_phi_by_dr(atom0, atom1, atom2, atom3, dphi_by_d0, dphi_by_d1, dphi_by_d2, dphi_by_d3);
 
-            //now calculate d V(phi,theta) / d phi
+            // now calculate d V(phi,theta) / d phi
             Torsion torsion(atom0, atom1, atom2, atom3);
 
             vals.set(phi, torsion.angle());
@@ -1749,18 +1601,18 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
 
             double dv_by_dphi = scale_force * sbt.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dphi * dphi_by_d0, sbt.atom0(), forces);
             addForce(dv_by_dphi * dphi_by_d1, sbt.atom1(), forces);
             addForce(dv_by_dphi * dphi_by_d2, sbt.atom2(), forces);
             addForce(dv_by_dphi * dphi_by_d3, sbt.atom3(), forces);
         }
 
-        //now the r01 forces
+        // now the r01 forces
         nsbts = group_params.stretchBendTorsion_R01_Forces().count();
         sbts_array = group_params.stretchBendTorsion_R01_Forces().constData();
 
-        for (int j=0; j<nsbts; ++j)
+        for (int j = 0; j < nsbts; ++j)
         {
             const FourAtomFunction &sbt = sbts_array[j];
 
@@ -1773,7 +1625,7 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             double dist = v.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v /= dist;
@@ -1788,19 +1640,19 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             vals.set(theta012, Vector::angle(atom0, atom1, atom2));
             vals.set(theta321, Vector::angle(atom3, atom2, atom1));
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = scale_force * sbt.function().evaluate(vals) * v;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(force, sbt.atom0(), forces);
             addForce(-force, sbt.atom1(), forces);
         }
 
-        //now the r12 forces
+        // now the r12 forces
         nsbts = group_params.stretchBendTorsion_R12_Forces().count();
         sbts_array = group_params.stretchBendTorsion_R12_Forces().constData();
 
-        for (int j=0; j<nsbts; ++j)
+        for (int j = 0; j < nsbts; ++j)
         {
             const FourAtomFunction &sbt = sbts_array[j];
 
@@ -1813,7 +1665,7 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             double dist = v.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v /= dist;
@@ -1828,19 +1680,19 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             vals.set(theta012, Vector::angle(atom0, atom1, atom2));
             vals.set(theta321, Vector::angle(atom3, atom2, atom1));
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = scale_force * sbt.function().evaluate(vals) * v;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(force, sbt.atom1(), forces);
             addForce(-force, sbt.atom2(), forces);
         }
 
-        //now the r32 forces
+        // now the r32 forces
         nsbts = group_params.stretchBendTorsion_R32_Forces().count();
         sbts_array = group_params.stretchBendTorsion_R32_Forces().constData();
 
-        for (int j=0; j<nsbts; ++j)
+        for (int j = 0; j < nsbts; ++j)
         {
             const FourAtomFunction &sbt = sbts_array[j];
 
@@ -1853,7 +1705,7 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             double dist = v.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v /= dist;
@@ -1868,19 +1720,19 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             vals.set(theta012, Vector::angle(atom0, atom1, atom2));
             vals.set(theta321, Vector::angle(atom3, atom2, atom1));
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = scale_force * sbt.function().evaluate(vals) * v;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(force, sbt.atom3(), forces);
             addForce(-force, sbt.atom2(), forces);
         }
 
-        //now the r03 forces
+        // now the r03 forces
         nsbts = group_params.stretchBendTorsion_R03_Forces().count();
         sbts_array = group_params.stretchBendTorsion_R03_Forces().constData();
 
-        for (int j=0; j<nsbts; ++j)
+        for (int j = 0; j < nsbts; ++j)
         {
             const FourAtomFunction &sbt = sbts_array[j];
 
@@ -1893,7 +1745,7 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             double dist = v.length();
 
             if (dist == 0)
-                //cannot calculate forces of overlapping atoms!
+                // cannot calculate forces of overlapping atoms!
                 continue;
 
             v /= dist;
@@ -1908,19 +1760,19 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             vals.set(theta012, Vector::angle(atom0, atom1, atom2));
             vals.set(theta321, Vector::angle(atom3, atom2, atom1));
 
-            //evaluate the force vector
+            // evaluate the force vector
             Vector force = scale_force * sbt.function().evaluate(vals) * v;
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(force, sbt.atom0(), forces);
             addForce(-force, sbt.atom3(), forces);
         }
 
-        //now the theta012 forces
+        // now the theta012 forces
         nsbts = group_params.stretchBendTorsion_Theta012_Forces().count();
         sbts_array = group_params.stretchBendTorsion_Theta012_Forces().constData();
 
-        for (int j=0; j<nsbts; ++j)
+        for (int j = 0; j < nsbts; ++j)
         {
             const FourAtomFunction &sbt = sbts_array[j];
 
@@ -1933,9 +1785,7 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             Angle t;
             double dist01, dist21;
 
-            d_theta_by_dr(atom0, atom1, atom2,
-                          dtheta_by_d0, dtheta_by_d1, dtheta_by_d2,
-                          t, dist01, dist21);
+            d_theta_by_dr(atom0, atom1, atom2, dtheta_by_d0, dtheta_by_d1, dtheta_by_d2, t, dist01, dist21);
 
             Torsion torsion(atom0, atom1, atom2, atom3);
 
@@ -1947,20 +1797,20 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             vals.set(theta012, t);
             vals.set(theta321, Vector::angle(atom3, atom2, atom1));
 
-            //evaluate the force vector
+            // evaluate the force vector
             double dv_by_dtheta = scale_force * sbt.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dtheta * dtheta_by_d0, sbt.atom0(), forces);
             addForce(dv_by_dtheta * dtheta_by_d1, sbt.atom1(), forces);
             addForce(dv_by_dtheta * dtheta_by_d2, sbt.atom2(), forces);
         }
 
-        //now the theta321 forces
+        // now the theta321 forces
         nsbts = group_params.stretchBendTorsion_Theta321_Forces().count();
         sbts_array = group_params.stretchBendTorsion_Theta321_Forces().constData();
 
-        for (int j=0; j<nsbts; ++j)
+        for (int j = 0; j < nsbts; ++j)
         {
             const FourAtomFunction &sbt = sbts_array[j];
 
@@ -1973,9 +1823,7 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             Angle t;
             double dist32, dist12;
 
-            d_theta_by_dr(atom3, atom2, atom1,
-                          dtheta_by_d3, dtheta_by_d2, dtheta_by_d1,
-                          t, dist32, dist12);
+            d_theta_by_dr(atom3, atom2, atom1, dtheta_by_d3, dtheta_by_d2, dtheta_by_d1, t, dist32, dist12);
 
             Torsion torsion(atom0, atom1, atom2, atom3);
 
@@ -1987,10 +1835,10 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
             vals.set(theta012, Vector::angle(atom0, atom1, atom2));
             vals.set(theta321, t);
 
-            //evaluate the force vector
+            // evaluate the force vector
             double dv_by_dtheta = scale_force * sbt.function().evaluate(vals);
 
-            //add the force onto the forces array
+            // add the force onto the forces array
             addForce(dv_by_dtheta * dtheta_by_d3, sbt.atom3(), forces);
             addForce(dv_by_dtheta * dtheta_by_d2, sbt.atom2(), forces);
             addForce(dv_by_dtheta * dtheta_by_d1, sbt.atom1(), forces);
@@ -2000,8 +1848,7 @@ void InternalPotential::calculateSBTForce(const InternalPotential::Molecule &mol
 
 /** Calculate the total force acting on the molecule 'molecule', and add it
     to the forces in 'forces', optionally scaled by 'scale_force' */
-void InternalPotential::calculateForce(const InternalPotential::Molecule &molecule,
-                                       MolForceTable &forces,
+void InternalPotential::calculateForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
                                        double scale_force) const
 {
     if (scale_force == 0)
@@ -2035,11 +1882,8 @@ void InternalPotential::calculateForce(const InternalPotential::Molecule &molecu
 
     \throw SireFF::missing_component
 */
-void InternalPotential::calculateForce(const InternalPotential::Molecule &molecule,
-                                       MolForceTable &forces,
-                                       const Symbol &symbol,
-                                       const Components &components,
-                                       double scale_force) const
+void InternalPotential::calculateForce(const InternalPotential::Molecule &molecule, MolForceTable &forces,
+                                       const Symbol &symbol, const Components &components, double scale_force) const
 {
     if (symbol == components.total())
         calculateForce(molecule, forces, scale_force);
@@ -2072,11 +1916,10 @@ void InternalPotential::calculateForce(const InternalPotential::Molecule &molecu
         calculateSBTForce(molecule, forces, scale_force);
 
     else
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component %1 in this potential. Available "
-            "components are %2.")
-                .arg(symbol.toString(), Sire::toString(components.symbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component %1 in this potential. Available "
+                                                    "components are %2.")
+                                            .arg(symbol.toString(), Sire::toString(components.symbols())),
+                                        CODELOC);
 }
 
 ////////
@@ -2086,25 +1929,20 @@ void InternalPotential::calculateForce(const InternalPotential::Molecule &molecu
 static const RegisterMetaType<InternalFF> r_internalff;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const InternalFF &internalff)
+QDataStream &operator<<(QDataStream &ds, const InternalFF &internalff)
 {
     writeHeader(ds, r_internalff, 2);
 
     SharedDataStream sds(ds);
 
-    sds << internalff.mols << internalff.changed_mols
-        << internalff.props
-        << internalff.cljgroups
-        << internalff.propmaps
-        << static_cast<const G1FF&>(internalff);
+    sds << internalff.mols << internalff.changed_mols << internalff.props << internalff.cljgroups << internalff.propmaps
+        << static_cast<const G1FF &>(internalff);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                      InternalFF &internalff)
+QDataStream &operator>>(QDataStream &ds, InternalFF &internalff)
 {
     VersionID v = readHeader(ds, r_internalff);
 
@@ -2112,33 +1950,25 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> internalff.mols >> internalff.changed_mols
-            >> internalff.props
-            >> internalff.cljgroups
-            >> internalff.propmaps
-            >> static_cast<G1FF&>(internalff);
+        sds >> internalff.mols >> internalff.changed_mols >> internalff.props >> internalff.cljgroups >>
+            internalff.propmaps >> static_cast<G1FF &>(internalff);
 
         internalff._pvt_updateName();
-        internalff.isstrict = internalff.props.property("strict")
-                                              .asABoolean();
+        internalff.isstrict = internalff.props.property("strict").asABoolean();
 
-        internalff.calc_14_nrgs = internalff.props.property("calculate14")
-                                                  .asABoolean();
+        internalff.calc_14_nrgs = internalff.props.property("calculate14").asABoolean();
     }
     else if (v == 1)
     {
         SharedDataStream sds(ds);
 
-        sds >> internalff.mols >> internalff.changed_mols
-            >> internalff.props
-            >> static_cast<G1FF&>(internalff);
+        sds >> internalff.mols >> internalff.changed_mols >> internalff.props >> static_cast<G1FF &>(internalff);
 
         internalff.cljgroups.clear();
         internalff.propmaps.clear();
 
         internalff._pvt_updateName();
-        internalff.isstrict = internalff.props.property("strict")
-                                              .asABoolean();
+        internalff.isstrict = internalff.props.property("strict").asABoolean();
 
         internalff.calc_14_nrgs = false;
     }
@@ -2149,9 +1979,7 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Constructor */
-InternalFF::InternalFF()
-           : ConcreteProperty<InternalFF,G1FF>(),
-             FF3D(), InternalPotential(), calc_14_nrgs(false)
+InternalFF::InternalFF() : ConcreteProperty<InternalFF, G1FF>(), FF3D(), InternalPotential(), calc_14_nrgs(false)
 {
     props.setProperty("strict", wrap(true));
     props.setProperty("calculate14", wrap(calc_14_nrgs));
@@ -2160,8 +1988,7 @@ InternalFF::InternalFF()
 
 /** Construct a named internal forcefield */
 InternalFF::InternalFF(const QString &name)
-           : ConcreteProperty<InternalFF,G1FF>(),
-             FF3D(), InternalPotential(), calc_14_nrgs(false)
+    : ConcreteProperty<InternalFF, G1FF>(), FF3D(), InternalPotential(), calc_14_nrgs(false)
 {
     G1FF::setName(name);
     props.setProperty("strict", wrap(true));
@@ -2171,22 +1998,19 @@ InternalFF::InternalFF(const QString &name)
 
 /** Copy constructor */
 InternalFF::InternalFF(const InternalFF &other)
-           : ConcreteProperty<InternalFF,G1FF>(other),
-             FF3D(other), InternalPotential(other),
-             mols(other.mols), changed_mols(other.changed_mols),
-             cljgroups(other.cljgroups),
-             propmaps(other.propmaps),
-             ffcomponents(other.ffcomponents),
-             props(other.props),
-             calc_14_nrgs(other.calc_14_nrgs)
-{}
+    : ConcreteProperty<InternalFF, G1FF>(other), FF3D(other), InternalPotential(other), mols(other.mols),
+      changed_mols(other.changed_mols), cljgroups(other.cljgroups), propmaps(other.propmaps),
+      ffcomponents(other.ffcomponents), props(other.props), calc_14_nrgs(other.calc_14_nrgs)
+{
+}
 
 /** Destructor */
 InternalFF::~InternalFF()
-{}
+{
+}
 
 /** Copy assignment operator */
-InternalFF& InternalFF::operator=(const InternalFF &other)
+InternalFF &InternalFF::operator=(const InternalFF &other)
 {
     if (this != &other)
     {
@@ -2210,8 +2034,8 @@ InternalFF& InternalFF::operator=(const InternalFF &other)
 /** Comparison operator */
 bool InternalFF::operator==(const InternalFF &other) const
 {
-    return G1FF::operator==(other) and cljgroups == other.cljgroups and
-           propmaps == other.propmaps and calc_14_nrgs == other.calc_14_nrgs;
+    return G1FF::operator==(other) and cljgroups == other.cljgroups and propmaps == other.propmaps and
+           calc_14_nrgs == other.calc_14_nrgs;
 }
 
 /** Comparison operator */
@@ -2224,14 +2048,14 @@ bool InternalFF::operator!=(const InternalFF &other) const
     forcefield - this renames the component symbols and the molecule group */
 void InternalFF::_pvt_updateName()
 {
-    ffcomponents = Components( this->name() );
+    ffcomponents = Components(this->name());
     G1FF::_pvt_updateName();
 }
 
 /** Are we recording changes? */
 bool InternalFF::recordingChanges() const
 {
-    return not (G1FF::isDirty() and changed_mols.isEmpty());
+    return not(G1FF::isDirty() and changed_mols.isEmpty());
 }
 
 /** Record the change described in 'change' */
@@ -2248,20 +2072,20 @@ void InternalFF::recordChange(const InternalFF::ChangedMolecule &change)
 
         if (old_change.oldMolecule() == change.newMolecule())
         {
-            //we have reverted the change!
+            // we have reverted the change!
             changed_mols.remove(molnum);
 
             if (changed_mols.isEmpty())
-                //there are no changes left, so this forcefield
-                //must now be clean
+                // there are no changes left, so this forcefield
+                // must now be clean
                 G1FF::setClean();
 
             return;
         }
         else
         {
-            //this is yet another change
-            changed_mols[molnum].change( change.newMolecule() );
+            // this is yet another change
+            changed_mols[molnum].change(change.newMolecule());
         }
     }
     else
@@ -2280,8 +2104,8 @@ bool InternalFF::setStrict(bool strict)
     if (isstrict == strict)
         return false;
 
-    //change - this requires completely reparameterising all
-    //partial molecules...
+    // change - this requires completely reparameterising all
+    // partial molecules...
     try
     {
         isstrict = strict;
@@ -2293,29 +2117,26 @@ bool InternalFF::setStrict(bool strict)
 
         InternalFF::Molecules new_mols;
 
-        for (int i=0; i<nmols; ++i)
+        for (int i = 0; i < nmols; ++i)
         {
-            new_mols.add( mols_array[i].molecule(),
-                          property_array[i], *this, false );
+            new_mols.add(mols_array[i].molecule(), property_array[i], *this, false);
         }
 
         mols = new_mols;
         this->mustNowRecalculateFromScratch();
 
-        for (QHash<MolNum,CLJ14Group>::iterator it = cljgroups.begin();
-             it != cljgroups.end();
-             ++it)
+        for (QHash<MolNum, CLJ14Group>::iterator it = cljgroups.begin(); it != cljgroups.end(); ++it)
         {
             it.value().setStrict(isstrict);
         }
     }
-    catch(...)
+    catch (...)
     {
         isstrict = not isstrict;
         throw;
     }
 
-    props.setProperty( "strict", wrap(isstrict) );
+    props.setProperty("strict", wrap(isstrict));
 
     return true;
 }
@@ -2331,12 +2152,10 @@ void InternalFF::enable14Calculation()
 
         const ChunkedVector<InternalPotential::Molecule> &mols_array = mols.moleculesByIndex();
 
-        for (int i=0; i<mols.count(); ++i)
+        for (int i = 0; i < mols.count(); ++i)
         {
-            cljgroups.insert( mols_array[i].number(),
-                              CLJ14Group(mols_array[i].molecule(), combining_rules, is_strict,
-                                         propmaps.value(mols_array[i].number(),
-                                                        PropertyMap())) );
+            cljgroups.insert(mols_array[i].number(), CLJ14Group(mols_array[i].molecule(), combining_rules, is_strict,
+                                                                propmaps.value(mols_array[i].number(), PropertyMap())));
         }
 
         props.setProperty("calculate14", wrap(true));
@@ -2360,9 +2179,9 @@ void InternalFF::disable14Calculation()
 void InternalFF::setArithmeticCombiningRules(bool on)
 {
     if (on)
-        this->setCombiningRules( CLJFunction::ARITHMETIC );
+        this->setCombiningRules(CLJFunction::ARITHMETIC);
     else
-        this->setCombiningRules( CLJFunction::GEOMETRIC );
+        this->setCombiningRules(CLJFunction::GEOMETRIC);
 }
 
 /** Turn on or off use of geometric combining rules when calculating
@@ -2370,9 +2189,9 @@ void InternalFF::setArithmeticCombiningRules(bool on)
 void InternalFF::setGeometricCombiningRules(bool on)
 {
     if (on)
-        this->setCombiningRules( CLJFunction::GEOMETRIC );
+        this->setCombiningRules(CLJFunction::GEOMETRIC);
     else
-        this->setCombiningRules( CLJFunction::ARITHMETIC );
+        this->setCombiningRules(CLJFunction::ARITHMETIC);
 }
 
 /** Return the type of combining rules used when calculating the 1-4
@@ -2387,8 +2206,8 @@ CLJFunction::COMBINING_RULES InternalFF::combiningRules() const
         return CLJFunction::GEOMETRIC;
     else
     {
-        qDebug() << "WARNING: COULD NOT INTERPRET COMBINING RULES FROM STRING"
-                 << rules << ". USING ARITHMETIC COMBINING RULES";
+        qDebug() << "WARNING: COULD NOT INTERPRET COMBINING RULES FROM STRING" << rules
+                 << ". USING ARITHMETIC COMBINING RULES";
         return CLJFunction::ARITHMETIC;
     }
 }
@@ -2401,14 +2220,12 @@ bool InternalFF::setCombiningRules(CLJFunction::COMBINING_RULES rules)
 
     if (rules != old_rules)
     {
-        for (QHash<MolNum,CLJ14Group>::iterator it = cljgroups.begin();
-             it != cljgroups.end();
-             ++it)
+        for (QHash<MolNum, CLJ14Group>::iterator it = cljgroups.begin(); it != cljgroups.end(); ++it)
         {
             it.value().setCombiningRules(rules);
         }
 
-        switch(rules)
+        switch (rules)
         {
         case CLJFunction::ARITHMETIC:
             props.setProperty("combiningRules", wrap("arithmetic"));
@@ -2471,7 +2288,7 @@ bool InternalFF::setProperty(const QString &name, const Property &value)
 {
     if (name == QLatin1String("strict"))
     {
-        return this->setStrict( value.asABoolean() );
+        return this->setStrict(value.asABoolean());
     }
     else if (name == QLatin1String("combiningRules"))
     {
@@ -2484,29 +2301,29 @@ bool InternalFF::setProperty(const QString &name, const Property &value)
         else if (rules == QLatin1String("geometric"))
             new_rules = CLJFunction::GEOMETRIC;
         else
-            throw SireError::invalid_arg( QObject::tr(
-                    "Cannot recognise combining rules type from string '%1'. "
-                    "Available rules are 'arithmetic' and 'geometric'.")
-                        .arg(rules), CODELOC );
+            throw SireError::invalid_arg(QObject::tr("Cannot recognise combining rules type from string '%1'. "
+                                                     "Available rules are 'arithmetic' and 'geometric'.")
+                                             .arg(rules),
+                                         CODELOC);
 
         return this->setCombiningRules(new_rules);
     }
     else if (name == QLatin1String("calculate14"))
     {
-        return this->setUse14Calculation( value.asABoolean() );
+        return this->setUse14Calculation(value.asABoolean());
     }
     else
-        throw SireBase::missing_property( QObject::tr(
-            "InternalFF does not have a property called \"%1\" that "
-            "can be changed. Available properties are [ strict ].")
-                .arg(name), CODELOC );
+        throw SireBase::missing_property(QObject::tr("InternalFF does not have a property called \"%1\" that "
+                                                     "can be changed. Available properties are [ strict ].")
+                                             .arg(name),
+                                         CODELOC);
 }
 
 /** Return the property with name 'name'
 
     \throw SireBase::missing_property
 */
-const Property& InternalFF::property(const QString &name) const
+const Property &InternalFF::property(const QString &name) const
 {
     return props.property(name);
 }
@@ -2518,7 +2335,7 @@ bool InternalFF::containsProperty(const QString &name) const
 }
 
 /** Return the values of all of the properties of this forcefield */
-const Properties& InternalFF::properties() const
+const Properties &InternalFF::properties() const
 {
     return props;
 }
@@ -2528,19 +2345,16 @@ const Properties& InternalFF::properties() const
     in the energy table (optionally scaled by 'scale_energy') */
 void InternalFF::energy(EnergyTable &energytable, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "InternalFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("InternalFF does not yet support energy calculations!"), CODELOC);
 }
 
 /** Calculate the energies of molecules in the passed energies table
     caused by the component of this potential represented by
     'symbol', and add them onto the energies already
     in the energy table (optionally scaled by 'scale_energy') */
-void InternalFF::energy(EnergyTable &energytable, const Symbol &symbol,
-			double scale_energy)
+void InternalFF::energy(EnergyTable &energytable, const Symbol &symbol, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "InternalFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("InternalFF does not yet support energy calculations!"), CODELOC);
 }
 
 /** Calculate the forces acting on molecules in the passed force table
@@ -2556,7 +2370,7 @@ void InternalFF::force(ForceTable &forcetable, double scale_force)
 
     const ChunkedVector<InternalFF::Molecule> &mols_array = mols.moleculesByIndex();
 
-    for (int i=0; i<nforcemols; ++i)
+    for (int i = 0; i < nforcemols; ++i)
     {
         MolForceTable &moltable = forcetable_array[i];
 
@@ -2564,8 +2378,7 @@ void InternalFF::force(ForceTable &forcetable, double scale_force)
 
         if (mols.contains(molnum))
         {
-            InternalPotential::calculateForce(mols_array[mols.indexOf(molnum)],
-                                              moltable, scale_force);
+            InternalPotential::calculateForce(mols_array[mols.indexOf(molnum)], moltable, scale_force);
         }
     }
 }
@@ -2574,8 +2387,7 @@ void InternalFF::force(ForceTable &forcetable, double scale_force)
     caused by the component of this potential represented by
     'symbol', and add them onto the forces already
     in the force table (optionally scaled by 'scale_force') */
-void InternalFF::force(ForceTable &forcetable, const Symbol &symbol,
-                       double scale_force)
+void InternalFF::force(ForceTable &forcetable, const Symbol &symbol, double scale_force)
 {
     if (scale_force == 0)
         return;
@@ -2585,7 +2397,7 @@ void InternalFF::force(ForceTable &forcetable, const Symbol &symbol,
 
     const ChunkedVector<InternalFF::Molecule> &mols_array = mols.moleculesByIndex();
 
-    for (int i=0; i<nforcemols; ++i)
+    for (int i = 0; i < nforcemols; ++i)
     {
         MolForceTable &moltable = forcetable_array[i];
 
@@ -2593,9 +2405,8 @@ void InternalFF::force(ForceTable &forcetable, const Symbol &symbol,
 
         if (mols.contains(molnum))
         {
-            InternalPotential::calculateForce(mols_array[mols.indexOf(molnum)],
-                                              moltable, symbol,
-                                              components(), scale_force);
+            InternalPotential::calculateForce(mols_array[mols.indexOf(molnum)], moltable, symbol, components(),
+                                              scale_force);
         }
     }
 }
@@ -2603,22 +2414,20 @@ void InternalFF::force(ForceTable &forcetable, const Symbol &symbol,
 /** Set it that the forcefield must now be recalculate from scratch */
 void InternalFF::mustNowRecalculateFromScratch()
 {
-    //record that the forcefield is dirty
+    // record that the forcefield is dirty
     G1FF::setDirty();
 
-    //clear any delta information
+    // clear any delta information
     changed_mols.clear();
 
-    for (QHash<MolNum,CLJ14Group>::iterator it = cljgroups.begin();
-         it != cljgroups.end();
-         ++it)
+    for (QHash<MolNum, CLJ14Group>::iterator it = cljgroups.begin(); it != cljgroups.end(); ++it)
     {
         it.value().mustNowRecalculateFromScratch();
     }
 }
 
 /** Internal function used to get a handle on the forcefield components */
-const FFComponent& InternalFF::_pvt_components() const
+const FFComponent &InternalFF::_pvt_components() const
 {
     return ffcomponents;
 }
@@ -2631,17 +2440,16 @@ void InternalFF::recalculateEnergy()
 {
     if (changed_mols.isEmpty())
     {
-        //nothing appears to have changed, so lets recalculate
-        //everything from scratch
+        // nothing appears to have changed, so lets recalculate
+        // everything from scratch
         int nmols = mols.count();
-        const ChunkedVector<InternalPotential::Molecule> &mols_array
-                                            = mols.moleculesByIndex();
+        const ChunkedVector<InternalPotential::Molecule> &mols_array = mols.moleculesByIndex();
 
         Energy total_nrg;
 
-        for (int i=0; i<nmols; ++i)
+        for (int i = 0; i < nmols; ++i)
         {
-            InternalPotential::calculateEnergy( mols_array[i], total_nrg );
+            InternalPotential::calculateEnergy(mols_array[i], total_nrg);
         }
 
         if (calc_14_nrgs)
@@ -2649,11 +2457,9 @@ void InternalFF::recalculateEnergy()
             double cnrg = 0;
             double ljnrg = 0;
 
-            for (QHash<MolNum,CLJ14Group>::iterator it = cljgroups.begin();
-                 it != cljgroups.end();
-                 ++it)
+            for (QHash<MolNum, CLJ14Group>::iterator it = cljgroups.begin(); it != cljgroups.end(); ++it)
             {
-                boost::tuple<double,double> nrg = it.value().energy();
+                boost::tuple<double, double> nrg = it.value().energy();
                 cnrg += nrg.get<0>();
                 ljnrg += nrg.get<1>();
             }
@@ -2665,14 +2471,14 @@ void InternalFF::recalculateEnergy()
     }
     else
     {
-        //only some of the molecules have changed - calculate the
-        //change in energy
+        // only some of the molecules have changed - calculate the
+        // change in energy
         Energy old_nrg;
         Energy new_nrg;
 
         if (calc_14_nrgs)
         {
-            //need to set clean so that we can get the old CLJ energy
+            // need to set clean so that we can get the old CLJ energy
             this->setClean();
             double old_cnrg = FF::energy(this->components().intra14Coulomb());
             double old_ljnrg = FF::energy(this->components().intra14LJ());
@@ -2681,22 +2487,20 @@ void InternalFF::recalculateEnergy()
             old_nrg += Intra14Energy(old_cnrg, old_ljnrg);
         }
 
-        for (QHash<MolNum,ChangedMolecule>::const_iterator
-                                        it = changed_mols.constBegin();
-             it != changed_mols.constEnd();
-             ++it)
+        for (QHash<MolNum, ChangedMolecule>::const_iterator it = changed_mols.constBegin();
+             it != changed_mols.constEnd(); ++it)
         {
             if (it->changedAll())
             {
-                //must recalculate the total change in energy
-                InternalPotential::calculateEnergy( it->oldMolecule(), old_nrg );
-                InternalPotential::calculateEnergy( it->newMolecule(), new_nrg );
+                // must recalculate the total change in energy
+                InternalPotential::calculateEnergy(it->oldMolecule(), old_nrg);
+                InternalPotential::calculateEnergy(it->newMolecule(), new_nrg);
             }
             else
             {
-                //can just calculte the change in energy of the changed parts
-                InternalPotential::calculateEnergy( it->oldParts(), old_nrg );
-                InternalPotential::calculateEnergy( it->newParts(), new_nrg );
+                // can just calculte the change in energy of the changed parts
+                InternalPotential::calculateEnergy(it->oldParts(), old_nrg);
+                InternalPotential::calculateEnergy(it->newParts(), new_nrg);
             }
         }
 
@@ -2705,11 +2509,9 @@ void InternalFF::recalculateEnergy()
             double cnrg(0);
             double ljnrg(0);
 
-            for (QHash<MolNum,CLJ14Group>::iterator it = cljgroups.begin();
-                 it != cljgroups.end();
-                 ++it)
+            for (QHash<MolNum, CLJ14Group>::iterator it = cljgroups.begin(); it != cljgroups.end(); ++it)
             {
-                boost::tuple<double,double> nrg = it.value().energy();
+                boost::tuple<double, double> nrg = it.value().energy();
                 cnrg += nrg.get<0>();
                 ljnrg += nrg.get<1>();
             }
@@ -2719,7 +2521,7 @@ void InternalFF::recalculateEnergy()
 
         this->components().changeEnergy(*this, new_nrg - old_nrg);
 
-        //can now forget about the changes :-)
+        // can now forget about the changes :-)
         changed_mols.clear();
     }
 
@@ -2758,8 +2560,7 @@ void InternalFF::_pvt_added(const PartialMolecule &molecule, const PropertyMap &
         }
         else
         {
-            cljgroups.insert(molecule.number(),
-                             CLJ14Group(molecule, combiningRules(), isStrict(), map));
+            cljgroups.insert(molecule.number(), CLJ14Group(molecule, combiningRules(), isStrict(), map));
         }
     }
 }
@@ -2832,8 +2633,8 @@ void InternalFF::_pvt_changed(const SireMol::Molecule &molecule, bool auto_updat
 void InternalFF::_pvt_changed(const QList<SireMol::Molecule> &molecules, bool auto_update)
 {
     InternalFF::Molecules old_mols = mols;
-    QHash<MolNum,ChangedMolecule> old_changed_mols = changed_mols;
-    QHash<MolNum,CLJ14Group> old_cljgroups = cljgroups;
+    QHash<MolNum, ChangedMolecule> old_changed_mols = changed_mols;
+    QHash<MolNum, CLJ14Group> old_cljgroups = cljgroups;
 
     try
     {
@@ -2864,7 +2665,7 @@ void InternalFF::_pvt_changed(const QList<SireMol::Molecule> &molecules, bool au
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         mols = old_mols;
         changed_mols = old_changed_mols;
@@ -2883,8 +2684,7 @@ void InternalFF::_pvt_removedAll()
 
 /** Return whether or not the supplied property map contains different
     properties for the molecule with number 'molnum' */
-bool InternalFF::_pvt_wouldChangeProperties(MolNum molnum,
-                                            const PropertyMap &map) const
+bool InternalFF::_pvt_wouldChangeProperties(MolNum molnum, const PropertyMap &map) const
 {
     if (mols.wouldChangeProperties(molnum, map))
         return true;
@@ -2896,73 +2696,69 @@ bool InternalFF::_pvt_wouldChangeProperties(MolNum molnum,
         return false;
 }
 
-const char* InternalFF::typeName()
+const char *InternalFF::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<InternalFF>() );
+    return QMetaType::typeName(qMetaTypeId<InternalFF>());
 }
 
-InternalFF* InternalFF::clone() const
+InternalFF *InternalFF::clone() const
 {
     return new InternalFF(*this);
 }
 
 void InternalFF::field(FieldTable &fieldtable, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
-void InternalFF::field(FieldTable &fieldtable, const Symbol &component,
-                       double scale_field)
+void InternalFF::field(FieldTable &fieldtable, const Symbol &component, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
 void InternalFF::potential(PotentialTable &potentialtable, double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
-void InternalFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                          double scale_potential)
+void InternalFF::potential(PotentialTable &potentialtable, const Symbol &component, double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
 void InternalFF::field(FieldTable &fieldtable, const Probe &probe, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
-void InternalFF::field(FieldTable &fieldtable, const Symbol &component,
-                       const Probe &probe, double scale_field)
+void InternalFF::field(FieldTable &fieldtable, const Symbol &component, const Probe &probe, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }
 
-void InternalFF::potential(PotentialTable &potentialtable, const Probe &probe,
+void InternalFF::potential(PotentialTable &potentialtable, const Probe &probe, double scale_potential)
+{
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
+}
+
+void InternalFF::potential(PotentialTable &potentialtable, const Symbol &component, const Probe &probe,
                            double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalFF has yet to "
-                "be implemented."), CODELOC );
-}
-
-void InternalFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                           const Probe &probe, double scale_potential)
-{
-    throw SireError::incomplete_code( QObject::tr(
-                "Calculating the field of an InternalFF has yet to "
-                "be implemented."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("Calculating the field of an InternalFF has yet to "
+                                                 "be implemented."),
+                                     CODELOC);
 }

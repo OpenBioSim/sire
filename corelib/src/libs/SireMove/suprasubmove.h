@@ -34,106 +34,102 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class SupraSubMove;
-class NullSupraSubMove;
-}
+    class SupraSubMove;
+    class NullSupraSubMove;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SupraSubMove&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SupraSubMove&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SupraSubMove &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SupraSubMove &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::NullSupraSubMove&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::NullSupraSubMove&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::NullSupraSubMove &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::NullSupraSubMove &);
 
 namespace SireMove
 {
 
-class SupraSubSystem;
+    class SupraSubSystem;
 
-/** This is the base class of the controller for the sub-moves
-    that are performed on the sub-systems of each SupraSystem
-    as part of a SupraMove
+    /** This is the base class of the controller for the sub-moves
+        that are performed on the sub-systems of each SupraSystem
+        as part of a SupraMove
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SupraSubMove : public SireBase::Property
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SupraSubMove&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SupraSubMove&);
-
-public:
-    SupraSubMove();
-
-    SupraSubMove(const SupraSubMove &other);
-
-    virtual ~SupraSubMove();
-
-    virtual SupraSubMove* clone() const=0;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SupraSubMove : public SireBase::Property
     {
-        return "SireMove::SupraSubMove";
-    }
 
-    virtual QString toString() const=0;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SupraSubMove &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SupraSubMove &);
 
-    virtual void clearStatistics();
+    public:
+        SupraSubMove();
 
-    virtual void move(SupraSubSystem &system, int n_supra_moves,
-                      int n_supra_moves_per_block,
-                      bool record_stats=true)=0;
+        SupraSubMove(const SupraSubMove &other);
 
-    static const NullSupraSubMove& null();
+        virtual ~SupraSubMove();
 
-protected:
-    SupraSubMove& operator=(const SupraSubMove &other);
+        virtual SupraSubMove *clone() const = 0;
 
-    bool operator==(const SupraSubMove &other) const;
-    bool operator!=(const SupraSubMove &other) const;
+        static const char *typeName()
+        {
+            return "SireMove::SupraSubMove";
+        }
 
-};
+        virtual QString toString() const = 0;
 
-/** This is a null move that doesn't move a SupraSubSystem...
+        virtual void clearStatistics();
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT NullSupraSubMove
-        : public SireBase::ConcreteProperty<NullSupraSubMove,SupraSubMove>
-{
+        virtual void move(SupraSubSystem &system, int n_supra_moves, int n_supra_moves_per_block,
+                          bool record_stats = true) = 0;
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const NullSupraSubMove&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullSupraSubMove&);
+        static const NullSupraSubMove &null();
 
-public:
-    NullSupraSubMove();
+    protected:
+        SupraSubMove &operator=(const SupraSubMove &other);
 
-    NullSupraSubMove(const NullSupraSubMove &other);
+        bool operator==(const SupraSubMove &other) const;
+        bool operator!=(const SupraSubMove &other) const;
+    };
 
-    ~NullSupraSubMove();
+    /** This is a null move that doesn't move a SupraSubSystem...
 
-    NullSupraSubMove& operator=(const NullSupraSubMove &other);
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT NullSupraSubMove : public SireBase::ConcreteProperty<NullSupraSubMove, SupraSubMove>
+    {
 
-    bool operator==(const NullSupraSubMove &other) const;
-    bool operator!=(const NullSupraSubMove &other) const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const NullSupraSubMove &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, NullSupraSubMove &);
 
-    static const char* typeName();
+    public:
+        NullSupraSubMove();
 
-    QString toString() const;
+        NullSupraSubMove(const NullSupraSubMove &other);
 
-    void move(SupraSubSystem &system, int n_supra_moves,
-              int n_supra_moves_per_block, bool record_stats);
-};
+        ~NullSupraSubMove();
 
-typedef SireBase::PropPtr<SupraSubMove> SupraSubMovePtr;
+        NullSupraSubMove &operator=(const NullSupraSubMove &other);
 
-}
+        bool operator==(const NullSupraSubMove &other) const;
+        bool operator!=(const NullSupraSubMove &other) const;
 
-Q_DECLARE_METATYPE( SireMove::NullSupraSubMove )
+        static const char *typeName();
 
-SIRE_EXPOSE_CLASS( SireMove::SupraSubMove )
-SIRE_EXPOSE_CLASS( SireMove::NullSupraSubMove )
+        QString toString() const;
 
-SIRE_EXPOSE_PROPERTY( SireMove::SupraSubMovePtr, SireMove::SupraSubMove )
+        void move(SupraSubSystem &system, int n_supra_moves, int n_supra_moves_per_block, bool record_stats);
+    };
+
+    typedef SireBase::PropPtr<SupraSubMove> SupraSubMovePtr;
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::NullSupraSubMove)
+
+SIRE_EXPOSE_CLASS(SireMove::SupraSubMove)
+SIRE_EXPOSE_CLASS(SireMove::NullSupraSubMove)
+
+SIRE_EXPOSE_PROPERTY(SireMove::SupraSubMovePtr, SireMove::SupraSubMove)
 
 SIRE_END_HEADER
 

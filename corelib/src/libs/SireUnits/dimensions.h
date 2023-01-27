@@ -28,8 +28,8 @@
 #ifndef SIREUNITS_DIMENSIONS_H
 #define SIREUNITS_DIMENSIONS_H
 
-#include <QString>
 #include <QDataStream>
+#include <QString>
 
 #include "SireMaths/constants.h"
 
@@ -43,8 +43,8 @@ namespace SireUnits
     {
         class Unit;
         class GeneralUnit;
-    }
-}
+    } // namespace Dimension
+} // namespace SireUnits
 
 QDataStream &operator<<(QDataStream &, const SireUnits::Dimension::Unit &);
 QDataStream &operator>>(QDataStream &, SireUnits::Dimension::Unit &);
@@ -117,8 +117,7 @@ namespace SireUnits
             double sclfac;
         };
 
-        SIREUNITS_EXPORT QPair<double, QString> getUnitString(
-            int M, int L, int T, int C, int t, int Q, int A);
+        SIREUNITS_EXPORT QPair<double, QString> getUnitString(int M, int L, int T, int C, int t, int Q, int A);
 
         /** Construct a physical unit with the specified
             Mass, Length, Time, Charge, temperature,
@@ -126,8 +125,7 @@ namespace SireUnits
 
             @author Christopher Woods
         */
-        template <int M, int L, int T,
-                  int C, int t, int Q, int A>
+        template <int M, int L, int T, int C, int t, int Q, int A>
         class PhysUnit : public Unit
         {
         public:
@@ -135,8 +133,7 @@ namespace SireUnits
             {
             }
 
-            explicit PhysUnit(double scale_factor)
-                : Unit(scale_factor)
+            explicit PhysUnit(double scale_factor) : Unit(scale_factor)
             {
             }
 
@@ -149,8 +146,7 @@ namespace SireUnits
 
             PhysUnit(const GeneralUnit &other);
 
-            PhysUnit(const PhysUnit<M, L, T, C, t, Q, A> &other)
-                : Unit(other)
+            PhysUnit(const PhysUnit<M, L, T, C, t, Q, A> &other) : Unit(other)
             {
             }
 
@@ -168,15 +164,13 @@ namespace SireUnits
                 return PhysUnit<M, L, T, C, t, Q, A>::typeName();
             }
 
-            PhysUnit<M, L, T, C, t, Q, A> &
-            operator=(const PhysUnit<M, L, T, C, t, Q, A> &other)
+            PhysUnit<M, L, T, C, t, Q, A> &operator=(const PhysUnit<M, L, T, C, t, Q, A> &other)
             {
                 Unit::setScale(other.scaleFactor());
                 return *this;
             }
 
-            PhysUnit<M, L, T, C, t, Q, A> &
-            operator=(const GeneralUnit &other);
+            PhysUnit<M, L, T, C, t, Q, A> &operator=(const GeneralUnit &other);
 
             bool operator==(const PhysUnit<M, L, T, C, t, Q, A> &other) const
             {
@@ -193,29 +187,23 @@ namespace SireUnits
                 return PhysUnit<M, L, T, C, t, Q, A>(-scaleFactor());
             }
 
-            PhysUnit<M, L, T, C, t, Q, A>
-            operator+(const PhysUnit<M, L, T, C, t, Q, A> &other) const
+            PhysUnit<M, L, T, C, t, Q, A> operator+(const PhysUnit<M, L, T, C, t, Q, A> &other) const
             {
-                return PhysUnit<M, L, T, C, t, Q, A>(
-                    scaleFactor() + other.scaleFactor());
+                return PhysUnit<M, L, T, C, t, Q, A>(scaleFactor() + other.scaleFactor());
             }
 
-            PhysUnit<M, L, T, C, t, Q, A>
-            operator-(const PhysUnit<M, L, T, C, t, Q, A> &other) const
+            PhysUnit<M, L, T, C, t, Q, A> operator-(const PhysUnit<M, L, T, C, t, Q, A> &other) const
             {
-                return PhysUnit<M, L, T, C, t, Q, A>(
-                    scaleFactor() - other.scaleFactor());
+                return PhysUnit<M, L, T, C, t, Q, A>(scaleFactor() - other.scaleFactor());
             }
 
-            PhysUnit<M, L, T, C, t, Q, A> &
-            operator+=(const PhysUnit<M, L, T, C, t, Q, A> &other)
+            PhysUnit<M, L, T, C, t, Q, A> &operator+=(const PhysUnit<M, L, T, C, t, Q, A> &other)
             {
                 Unit::setScale(scaleFactor() + other.scaleFactor());
                 return *this;
             }
 
-            PhysUnit<M, L, T, C, t, Q, A> &
-            operator-=(const PhysUnit<M, L, T, C, t, Q, A> &other)
+            PhysUnit<M, L, T, C, t, Q, A> &operator-=(const PhysUnit<M, L, T, C, t, Q, A> &other)
             {
                 Unit::setScale(scaleFactor() - other.scaleFactor());
                 return *this;
@@ -265,22 +253,18 @@ namespace SireUnits
                 return PhysUnit<M, L, T, C, t, Q, A>(scaleFactor() / val);
             }
 
-            template <int _M, int _L, int _T,
-                      int _C, int _t, int _Q, int _A>
-            PhysUnit<M + _M, L + _L, T + _T, C + _C, t + _t, Q + _Q, A + _A>
-            operator*(const PhysUnit<_M, _L, _T, _C, _t, _Q, _A> &other) const
+            template <int _M, int _L, int _T, int _C, int _t, int _Q, int _A>
+            PhysUnit<M + _M, L + _L, T + _T, C + _C, t + _t, Q + _Q, A + _A> operator*(
+                const PhysUnit<_M, _L, _T, _C, _t, _Q, _A> &other) const
             {
-                return PhysUnit<M + _M, L + _L, T + _T, C + _C, t + _t, Q + _Q, A + _A>(
-                    scaleFactor() * other.scaleFactor());
+                return PhysUnit<M + _M, L + _L, T + _T, C + _C, t + _t, Q + _Q, A + _A>(scaleFactor() * other.scaleFactor());
             }
 
-            template <int _M, int _L, int _T,
-                      int _C, int _t, int _Q, int _A>
-            PhysUnit<M - _M, L - _L, T - _T, C - _C, t - _t, Q - _Q, A - _A>
-            operator/(const PhysUnit<_M, _L, _T, _C, _t, _Q, _A> &other) const
+            template <int _M, int _L, int _T, int _C, int _t, int _Q, int _A>
+            PhysUnit<M - _M, L - _L, T - _T, C - _C, t - _t, Q - _Q, A - _A> operator/(
+                const PhysUnit<_M, _L, _T, _C, _t, _Q, _A> &other) const
             {
-                return PhysUnit<M - _M, L - _L, T - _T, C - _C, t - _t, Q - _Q, A - _A>(
-                    scaleFactor() / other.scaleFactor());
+                return PhysUnit<M - _M, L - _L, T - _T, C - _C, t - _t, Q - _Q, A - _A>(scaleFactor() / other.scaleFactor());
             }
 
             PhysUnit<-M, -L, -T, -C, -t, -Q, -A> invert() const
@@ -352,29 +336,25 @@ namespace SireUnits
         };
 
         template <int M, int L, int T, int C, int t, int Q, int A>
-        PhysUnit<M, L, T, C, t, Q, A>
-        operator*(double val, const PhysUnit<M, L, T, C, t, Q, A> &unit)
+        PhysUnit<M, L, T, C, t, Q, A> operator*(double val, const PhysUnit<M, L, T, C, t, Q, A> &unit)
         {
             return PhysUnit<M, L, T, C, t, Q, A>(val * unit.scaleFactor());
         }
 
         template <int M, int L, int T, int C, int t, int Q, int A>
-        PhysUnit<M, L, T, C, t, Q, A>
-        operator*(int val, const PhysUnit<M, L, T, C, t, Q, A> &unit)
+        PhysUnit<M, L, T, C, t, Q, A> operator*(int val, const PhysUnit<M, L, T, C, t, Q, A> &unit)
         {
             return PhysUnit<M, L, T, C, t, Q, A>(val * unit.scaleFactor());
         }
 
         template <int M, int L, int T, int C, int t, int Q, int A>
-        PhysUnit<-M, -L, -T, -C, -t, -Q, -A>
-        operator/(double val, const PhysUnit<M, L, T, C, t, Q, A> &unit)
+        PhysUnit<-M, -L, -T, -C, -t, -Q, -A> operator/(double val, const PhysUnit<M, L, T, C, t, Q, A> &unit)
         {
             return PhysUnit<-M, -L, -T, -C, -t, -Q, -A>(val / unit.scaleFactor());
         }
 
         template <int M, int L, int T, int C, int t, int Q, int A>
-        PhysUnit<-M, -L, -T, -C, -t, -Q, -A>
-        operator/(int val, const PhysUnit<M, L, T, C, t, Q, A> &unit)
+        PhysUnit<-M, -L, -T, -C, -t, -Q, -A> operator/(int val, const PhysUnit<M, L, T, C, t, Q, A> &unit)
         {
             return PhysUnit<-M, -L, -T, -C, -t, -Q, -A>(val / unit.scaleFactor());
         }
@@ -480,12 +460,11 @@ namespace SireUnits
 
     } // end of namespace Dimension
 
-}
+} // namespace SireUnits
 
 /** Serialise a unit to a binary datastream (this does not check
     the type of unit!) */
-SIRE_ALWAYS_INLINE QDataStream &operator<<(QDataStream &ds,
-                                           const SireUnits::Dimension::Unit &unit)
+SIRE_ALWAYS_INLINE QDataStream &operator<<(QDataStream &ds, const SireUnits::Dimension::Unit &unit)
 {
     ds << unit.sclfac;
     return ds;
@@ -493,8 +472,7 @@ SIRE_ALWAYS_INLINE QDataStream &operator<<(QDataStream &ds,
 
 /** Extract from a binary datastream (this does not check the type
     of unit!) */
-SIRE_ALWAYS_INLINE QDataStream &operator>>(QDataStream &ds,
-                                           SireUnits::Dimension::Unit &unit)
+SIRE_ALWAYS_INLINE QDataStream &operator>>(QDataStream &ds, SireUnits::Dimension::Unit &unit)
 {
     ds >> unit.sclfac;
     return ds;

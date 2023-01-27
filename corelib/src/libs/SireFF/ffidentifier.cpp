@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "ffidentifier.h"
-#include "forcefields.h"
 #include "ffidx.h"
 #include "ffname.h"
+#include "forcefields.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/streampolypointer.hpp"
@@ -59,33 +59,34 @@ QDataStream &operator>>(QDataStream &ds, FFIdentifier &ffid)
         SireStream::loadPolyPointer(ds, ffid.d);
     }
     else
-        throw version_error( v, "1", r_ffid, CODELOC );
+        throw version_error(v, "1", r_ffid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 FFIdentifier::FFIdentifier() : FFID()
-{}
+{
+}
 
 /** Construct from the passed FFID */
-FFIdentifier::FFIdentifier(const FFID &ffid)
-             : FFID()
+FFIdentifier::FFIdentifier(const FFID &ffid) : FFID()
 {
     if (ffid.isA<FFIdentifier>())
         d = ffid.asA<FFIdentifier>().d;
     else if (not ffid.isNull())
-        d.reset( ffid.clone() );
+        d.reset(ffid.clone());
 }
 
 /** Copy constructor */
-FFIdentifier::FFIdentifier(const FFIdentifier &other)
-             : FFID(other), d(other.d)
-{}
+FFIdentifier::FFIdentifier(const FFIdentifier &other) : FFID(other), d(other.d)
+{
+}
 
 /** Destructor */
 FFIdentifier::~FFIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool FFIdentifier::isNull() const
@@ -112,7 +113,7 @@ QString FFIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const FFID& FFIdentifier::base() const
+const FFID &FFIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -121,14 +122,14 @@ const FFID& FFIdentifier::base() const
 }
 
 /** Copy assignment operator */
-FFIdentifier& FFIdentifier::operator=(const FFIdentifier &other)
+FFIdentifier &FFIdentifier::operator=(const FFIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-FFIdentifier& FFIdentifier::operator=(const FFID &other)
+FFIdentifier &FFIdentifier::operator=(const FFID &other)
 {
     if (other.isA<FFIdentifier>())
         d = other.asA<FFIdentifier>().d;
@@ -190,9 +191,9 @@ static QList<FFIdx> allFFIdxs(int n)
 {
     QList<FFIdx> ffidxs;
 
-    for (int i=0; i<n; ++i)
+    for (int i = 0; i < n; ++i)
     {
-        ffidxs.append( FFIdx(i) );
+        ffidxs.append(FFIdx(i));
     }
 
     return ffidxs;
@@ -240,13 +241,12 @@ QList<FFIdx> FFIdentifier::map(const ForceFields &ffields) const
         return d->map(ffields);
 }
 
-const char* FFIdentifier::typeName()
+const char *FFIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<FFIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<FFIdentifier>());
 }
 
-FFIdentifier* FFIdentifier::clone() const
+FFIdentifier *FFIdentifier::clone() const
 {
     return new FFIdentifier(*this);
 }
-

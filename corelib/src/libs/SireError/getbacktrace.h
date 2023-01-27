@@ -37,11 +37,11 @@ SIRE_BEGIN_HEADER
 namespace SireError
 {
 
-SIREERROR_EXPORT QStringList getBackTrace();
+    SIREERROR_EXPORT QStringList getBackTrace();
 
 };
 
-SIRE_EXPOSE_FUNCTION( SireError::getBackTrace )
+SIRE_EXPOSE_FUNCTION(SireError::getBackTrace)
 
 SIRE_END_HEADER
 

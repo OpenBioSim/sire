@@ -37,53 +37,53 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-namespace detail
-{
-class MemInfoPvt;
-}
+    namespace detail
+    {
+        class MemInfoPvt;
+    }
 
-/** This class holds information about the current memory usage
-    of the process
+    /** This class holds information about the current memory usage
+        of the process
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT MemInfo
-{
-public:
-    MemInfo();
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT MemInfo
+    {
+    public:
+        MemInfo();
 
-    MemInfo(const MemInfo &other);
+        MemInfo(const MemInfo &other);
 
-    ~MemInfo();
+        ~MemInfo();
 
-    MemInfo& operator=(const MemInfo &other);
+        MemInfo &operator=(const MemInfo &other);
 
-    QString toString() const;
+        QString toString() const;
 
-    quint64 allocatedBytes() const;
-    quint64 mMappedBytes() const;
+        quint64 allocatedBytes() const;
+        quint64 mMappedBytes() const;
 
-    quint64 usedBytes() const;
+        quint64 usedBytes() const;
 
-    quint64 totalSystemMemory() const;
-    quint64 totalVirtualMemory() const;
+        quint64 totalSystemMemory() const;
+        quint64 totalVirtualMemory() const;
 
-    quint64 usedSystemMemory() const;
-    quint64 usedVirtualMemory() const;
+        quint64 usedSystemMemory() const;
+        quint64 usedVirtualMemory() const;
 
-    static MemInfo takeMeasurement();
+        static MemInfo takeMeasurement();
 
-    static void startMonitoring(int ms=1000);
-    static void startMonitoring(const QString &filename, int ms=1000);
+        static void startMonitoring(int ms = 1000);
+        static void startMonitoring(const QString &filename, int ms = 1000);
 
-    static void stopMonitoring();
+        static void stopMonitoring();
 
-private:
-    /** PIMPL pointer */
-    boost::shared_ptr<detail::MemInfoPvt> d;
-};
+    private:
+        /** PIMPL pointer */
+        boost::shared_ptr<detail::MemInfoPvt> d;
+    };
 
-}
+} // namespace SireBase
 
 SIRE_EXPOSE_CLASS(SireBase::MemInfo)
 

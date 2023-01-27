@@ -25,16 +25,16 @@
   *
 \*********************************************/
 
-#include <QWaitCondition>
 #include <QMutex>
+#include <QWaitCondition>
 
 #include <QUuid>
 
-#include "node.h"
 #include "frontend.h"
+#include "node.h"
 #include "nodes.h"
-#include "workpacket.h"
 #include "promise.h"
+#include "workpacket.h"
 
 #include "SireError/errors.h"
 
@@ -44,86 +44,91 @@ using boost::shared_ptr;
 
 namespace SireCluster
 {
-namespace detail
-{
-
-/** Private implementation of Node */
-class NodePvt
-{
-public:
-    NodePvt(const Frontend &f, const NodesPtr &n)
-          : frontend(f), nodes(n)
-    {}
-
-    ~NodePvt()
+    namespace detail
     {
-        //abort any running jobs
-        frontend.abortJob();
-        frontend.wait();
 
-        //grab any results - this clears the frontend
-        try
+        /** Private implementation of Node */
+        class NodePvt
         {
-            frontend.result();
-        }
-        catch(...)
-        {}
+        public:
+            NodePvt(const Frontend &f, const NodesPtr &n) : frontend(f), nodes(n)
+            {
+            }
 
-        //now return the frontend back home
-        nodes.returnFrontend(frontend);
-    }
+            ~NodePvt()
+            {
+                // abort any running jobs
+                frontend.abortJob();
+                frontend.wait();
 
-    void forceRelease()
-    {
-        Frontend old_frontend = frontend;
-        NodesPtr old_nodes = nodes;
+                // grab any results - this clears the frontend
+                try
+                {
+                    frontend.result();
+                }
+                catch (...)
+                {
+                }
 
-        frontend = Frontend();
-        nodes = NodesPtr();
+                // now return the frontend back home
+                nodes.returnFrontend(frontend);
+            }
 
-        //abort any running jobs
-        old_frontend.abortJob();
-        old_frontend.wait();
+            void forceRelease()
+            {
+                Frontend old_frontend = frontend;
+                NodesPtr old_nodes = nodes;
 
-        //grab any results - this clears the frontend
-        try
-        {
-            old_frontend.result();
-        }
-        catch(...)
-        {}
+                frontend = Frontend();
+                nodes = NodesPtr();
 
-        //return the frontend home
-        old_nodes.returnFrontend(old_frontend);
-    }
+                // abort any running jobs
+                old_frontend.abortJob();
+                old_frontend.wait();
 
-    Frontend frontend;
-    NodesPtr nodes;
-};
+                // grab any results - this clears the frontend
+                try
+                {
+                    old_frontend.result();
+                }
+                catch (...)
+                {
+                }
 
-} //end of namespace detail
-} //end of namespace SireCluster
+                // return the frontend home
+                old_nodes.returnFrontend(old_frontend);
+            }
+
+            Frontend frontend;
+            NodesPtr nodes;
+        };
+
+    } // end of namespace detail
+} // end of namespace SireCluster
 
 using namespace SireCluster::detail;
 
 /** Null constructor */
 Node::Node()
-{}
+{
+}
 
 /** Copy constructor */
 Node::Node(const Node &other) : d(other.d)
-{}
+{
+}
 
 /** Destructor */
 Node::~Node()
-{}
+{
+}
 
 /** Internal function called by 'Nodes' that is used to create a Node
     that is part of 'Nodes' and uses the Frontend 'frontend' */
 Node Node::create(const Nodes &nodes, const Frontend &frontend)
 {
     Node node;
-    node.d.reset( new NodePvt(frontend, nodes) );
+    node.d.reset(new NodePvt(frontend, nodes));
 
     return node;
 }
@@ -170,7 +175,7 @@ Frontend Node::frontend()
 }
 
 /** Copy assignment operator */
-Node& Node::operator=(const Node &other)
+Node &Node::operator=(const Node &other)
 {
     d = other.d;
     return *this;
@@ -191,18 +196,18 @@ bool Node::operator!=(const Node &other) const
 /** Return a string representation of this node */
 QString Node::toString() const
 {
-    Node *nonconst_this = const_cast<Node*>(this);
+    Node *nonconst_this = const_cast<Node *>(this);
 
     QUuid uid = nonconst_this->UID();
 
     if (uid.isNull())
-        return QObject::tr( "Node::null" );
+        return QObject::tr("Node::null");
 
     else if (nonconst_this->isHomeless())
-        return QObject::tr( "Node( %1  **HOMELESS** )" ).arg(uid.toString());
+        return QObject::tr("Node( %1  **HOMELESS** )").arg(uid.toString());
 
     else
-        return QObject::tr( "Node( %1 )" ).arg(uid.toString());
+        return QObject::tr("Node( %1 )").arg(uid.toString());
 }
 
 /** Return whether or not this node is null */
@@ -240,13 +245,12 @@ void Node::forceRelease()
 
     if (my_d.unique())
     {
-        //just reset this pointer, and we are ok
+        // just reset this pointer, and we are ok
         my_d.reset();
     }
     else
     {
-        //we need to go in and release the node manually
-
+        // we need to go in and release the node manually
     }
 }
 
@@ -304,23 +308,22 @@ Nodes Node::nodes()
 Promise Node::startJob(const WorkPacket &workpacket, bool autodelete)
 {
     if (this->isNull())
-        throw SireError::unavailable_resource( QObject::tr(
-            "You cannot start a job on a null Node."), CODELOC );
+        throw SireError::unavailable_resource(QObject::tr("You cannot start a job on a null Node."), CODELOC);
 
     if (this->isHomeless())
-        throw SireError::unavailable_resource( QObject::tr(
-            "You cannot start a new job on a homeless Node (%1). "
-            "Add this node to a Nodes scheduler object before you "
-            "try to run this job again.")
-                .arg(this->UID().toString()), CODELOC );
+        throw SireError::unavailable_resource(QObject::tr("You cannot start a new job on a homeless Node (%1). "
+                                                          "Add this node to a Nodes scheduler object before you "
+                                                          "try to run this job again.")
+                                                  .arg(this->UID().toString()),
+                                              CODELOC);
 
-    //start the job
+    // start the job
     d->frontend.startJob(workpacket);
 
-    //now return the promise
+    // now return the promise
     Promise promise(*this, workpacket);
 
-    //autodelete the node?
+    // autodelete the node?
     if (autodelete)
         d.reset();
 

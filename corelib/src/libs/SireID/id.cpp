@@ -38,13 +38,16 @@ using namespace SireID;
 ///////////
 
 ID::ID()
-{}
+{
+}
 
-ID::ID(const ID&)
-{}
+ID::ID(const ID &)
+{
+}
 
 ID::~ID()
-{}
+{
+}
 
 ///////////
 /////////// Implementation of Name
@@ -68,28 +71,28 @@ QDataStream &operator>>(QDataStream &ds, SireID::Name &name)
     return ds;
 }
 
-Name::Name(const QString &name, CaseSensitivity case_sensitivity)
-     : _name(name)
+Name::Name(const QString &name, CaseSensitivity case_sensitivity) : _name(name)
 {
     switch (case_sensitivity)
     {
-        case CaseSensitive:
-            case_sensitive = true;
-            break;
-        case CaseInsensitive:
-            case_sensitive = false;
-            break;
+    case CaseSensitive:
+        case_sensitive = true;
+        break;
+    case CaseInsensitive:
+        case_sensitive = false;
+        break;
     }
 }
 
-Name::Name(const Name &other)
-     : _name(other._name), case_sensitive(other.case_sensitive)
-{}
+Name::Name(const Name &other) : _name(other._name), case_sensitive(other.case_sensitive)
+{
+}
 
 Name::~Name()
-{}
+{
+}
 
-Name& Name::operator=(const Name &other)
+Name &Name::operator=(const Name &other)
 {
     _name = other._name;
     case_sensitive = other.case_sensitive;
@@ -132,7 +135,7 @@ bool Name::isEmpty() const
     return _name.isEmpty();
 }
 
-const QString& Name::value() const
+const QString &Name::value() const
 {
     return _name;
 }
@@ -140,7 +143,6 @@ const QString& Name::value() const
 ///////////
 /////////// Implementation of Number
 ///////////
-
 
 /** Serialise a Number class */
 QDataStream &operator<<(QDataStream &ds, const SireID::Number &number)
@@ -157,13 +159,16 @@ QDataStream &operator>>(QDataStream &ds, SireID::Number &number)
 }
 
 Number::Number(qint32 num) : _num(num)
-{}
+{
+}
 
 Number::Number(const Number &other) : _num(other._num)
-{}
+{
+}
 
 Number::~Number()
-{}
+{
+}
 
 Number::operator qint32() const
 {

@@ -27,9 +27,9 @@
 
 #include "molinserter.h"
 
+#include "SireMol/core.h"
 #include "SireMol/molecule.h"
 #include "SireMol/partialmolecule.h"
-#include "SireMol/core.h"
 
 #include "SireVol/space.h"
 
@@ -57,19 +57,16 @@ using namespace SireStream;
 ////////// Implementation of MolInserter
 //////////
 
-static const RegisterMetaType<MolInserter> r_molinserter( MAGIC_ONLY,
-                                                          MolInserter::typeName() );
+static const RegisterMetaType<MolInserter> r_molinserter(MAGIC_ONLY, MolInserter::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const MolInserter &molinserter)
+QDataStream &operator<<(QDataStream &ds, const MolInserter &molinserter)
 {
     writeHeader(ds, r_molinserter, 1);
 
     SharedDataStream sds(ds);
 
-    sds << molinserter.rangen << molinserter.mgids
-        << static_cast<const Property&>(molinserter);
+    sds << molinserter.rangen << molinserter.mgids << static_cast<const Property &>(molinserter);
 
     return ds;
 }
@@ -83,8 +80,7 @@ QDataStream &operator>>(QDataStream &ds, MolInserter &molinserter)
     {
         SharedDataStream sds(ds);
 
-        sds >> molinserter.rangen >> molinserter.mgids
-            >> static_cast<Property&>(molinserter);
+        sds >> molinserter.rangen >> molinserter.mgids >> static_cast<Property &>(molinserter);
 
         molinserter.rebuildCoordsProperties();
     }
@@ -96,21 +92,22 @@ QDataStream &operator>>(QDataStream &ds, MolInserter &molinserter)
 
 /** Constructor */
 MolInserter::MolInserter() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 MolInserter::MolInserter(const MolInserter &other)
-            : Property(other),
-              rangen(other.rangen), mgids(other.mgids),
-              coords_properties(other.coords_properties)
-{}
+    : Property(other), rangen(other.rangen), mgids(other.mgids), coords_properties(other.coords_properties)
+{
+}
 
 /** Destructor */
 MolInserter::~MolInserter()
-{}
+{
+}
 
 /** Copy assignment operator */
-MolInserter& MolInserter::operator=(const MolInserter &other)
+MolInserter &MolInserter::operator=(const MolInserter &other)
 {
     if (this != &other)
     {
@@ -136,7 +133,7 @@ bool MolInserter::operator!=(const MolInserter &other) const
     return not MolInserter::operator==(other);
 }
 
-const char* MolInserter::typeName()
+const char *MolInserter::typeName()
 {
     return "SireMove::MolInserter";
 }
@@ -150,12 +147,12 @@ void MolInserter::rebuildCoordsProperties()
 
     QSet<QString> coords_set;
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         const PropertyName &coords_property = maps_array[i]["coordinates"];
 
         if (coords_property.hasSource())
-            coords_set.insert( coords_property.source() );
+            coords_set.insert(coords_property.source());
     }
 
     coords_properties = coords_set.values();
@@ -163,7 +160,7 @@ void MolInserter::rebuildCoordsProperties()
 
 /** Internal function used to return the different coordinates
     properties needed for the insert */
-const QStringList& MolInserter::coordsProperties() const
+const QStringList &MolInserter::coordsProperties() const
 {
     return coords_properties;
 }
@@ -185,20 +182,20 @@ void MolInserter::setGroups(const MGIDsAndMaps &group_ids)
 
 /** Return the random number generator used to generate the random
     numbers used when inserting the molecule */
-const RanGenerator& MolInserter::generator() const
+const RanGenerator &MolInserter::generator() const
 {
     return rangen;
 }
 
 /** Return the group IDs (and associated) properties to which
     the molecule will be inserted */
-const MGIDsAndMaps& MolInserter::groups() const
+const MGIDsAndMaps &MolInserter::groups() const
 {
     return mgids;
 }
 
 /** Return the global null MolInserter */
-const NullInserter& MolInserter::null()
+const NullInserter &MolInserter::null()
 {
     return *(create_shared_null<NullInserter>());
 }
@@ -210,12 +207,11 @@ const NullInserter& MolInserter::null()
 static const RegisterMetaType<NullInserter> r_nullinserter;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const NullInserter &nullinserter)
+QDataStream &operator<<(QDataStream &ds, const NullInserter &nullinserter)
 {
     writeHeader(ds, r_nullinserter, 1);
 
-    ds << static_cast<const MolInserter&>(nullinserter);
+    ds << static_cast<const MolInserter &>(nullinserter);
 
     return ds;
 }
@@ -227,7 +223,7 @@ QDataStream &operator>>(QDataStream &ds, NullInserter &nullinserter)
 
     if (v == 1)
     {
-        ds >> static_cast<MolInserter&>(nullinserter);
+        ds >> static_cast<MolInserter &>(nullinserter);
     }
     else
         throw version_error(v, "1", r_nullinserter, CODELOC);
@@ -236,25 +232,27 @@ QDataStream &operator>>(QDataStream &ds, NullInserter &nullinserter)
 }
 
 /** Constructor */
-NullInserter::NullInserter() : ConcreteProperty<NullInserter,MolInserter>()
-{}
+NullInserter::NullInserter() : ConcreteProperty<NullInserter, MolInserter>()
+{
+}
 
 /** Copy constructor */
-NullInserter::NullInserter(const NullInserter &other)
-             : ConcreteProperty<NullInserter,MolInserter>(other)
-{}
+NullInserter::NullInserter(const NullInserter &other) : ConcreteProperty<NullInserter, MolInserter>(other)
+{
+}
 
 /** Destructor */
 NullInserter::~NullInserter()
-{}
-
-const char* NullInserter::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullInserter>() );
+}
+
+const char *NullInserter::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullInserter>());
 }
 
 /** Copy assignment operator */
-NullInserter& NullInserter::operator=(const NullInserter &other)
+NullInserter &NullInserter::operator=(const NullInserter &other)
 {
     MolInserter::operator=(other);
     return *this;
@@ -273,13 +271,13 @@ bool NullInserter::operator!=(const NullInserter &other) const
 }
 
 /** This does nothing! */
-double NullInserter::insert(const Molecule&, System&, const Space&)
+double NullInserter::insert(const Molecule &, System &, const Space &)
 {
     return 0;
 }
 
 /** This does nothing! */
-double NullInserter::insert(const PartialMolecule&, System&, const Space&)
+double NullInserter::insert(const PartialMolecule &, System &, const Space &)
 {
     return 0;
 }
@@ -291,25 +289,23 @@ double NullInserter::insert(const PartialMolecule&, System&, const Space&)
 static const RegisterMetaType<UniformInserter> r_uniforminserter;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const UniformInserter &uniforminserter)
+QDataStream &operator<<(QDataStream &ds, const UniformInserter &uniforminserter)
 {
     writeHeader(ds, r_uniforminserter, 1);
 
-    ds << static_cast<const MolInserter&>(uniforminserter);
+    ds << static_cast<const MolInserter &>(uniforminserter);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                        UniformInserter &uniforminserter)
+QDataStream &operator>>(QDataStream &ds, UniformInserter &uniforminserter)
 {
     VersionID v = readHeader(ds, r_uniforminserter);
 
     if (v == 1)
     {
-        ds >> static_cast<MolInserter&>(uniforminserter);
+        ds >> static_cast<MolInserter &>(uniforminserter);
     }
     else
         throw version_error(v, "1", r_uniforminserter, CODELOC);
@@ -318,35 +314,35 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Constructor */
-UniformInserter::UniformInserter()
-                : ConcreteProperty<UniformInserter,MolInserter>()
-{}
+UniformInserter::UniformInserter() : ConcreteProperty<UniformInserter, MolInserter>()
+{
+}
 
 /** Construct to insert molecules into the groups identified in 'mgids'
     (using the associated property maps to find the properties needed
     for those insertions) */
-UniformInserter::UniformInserter(const MGIDsAndMaps &mgids)
-                : ConcreteProperty<UniformInserter,MolInserter>()
+UniformInserter::UniformInserter(const MGIDsAndMaps &mgids) : ConcreteProperty<UniformInserter, MolInserter>()
 {
     UniformInserter::setGroups(mgids);
 }
 
 /** Copy constructor */
-UniformInserter::UniformInserter(const UniformInserter &other)
-                : ConcreteProperty<UniformInserter,MolInserter>(other)
-{}
+UniformInserter::UniformInserter(const UniformInserter &other) : ConcreteProperty<UniformInserter, MolInserter>(other)
+{
+}
 
 /** Destructor */
 UniformInserter::~UniformInserter()
-{}
-
-const char* UniformInserter::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<UniformInserter>() );
+}
+
+const char *UniformInserter::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<UniformInserter>());
 }
 
 /** Copy assignment operator */
-UniformInserter& UniformInserter::operator=(const UniformInserter &other)
+UniformInserter &UniformInserter::operator=(const UniformInserter &other)
 {
     MolInserter::operator=(other);
     return *this;
@@ -364,22 +360,21 @@ bool UniformInserter::operator!=(const UniformInserter &other) const
     return MolInserter::operator!=(other);
 }
 
-template<class T>
-void UniformInserter::uniform_insert(const T &molecule, System &system,
-                                     const Space &space) const
+template <class T>
+void UniformInserter::uniform_insert(const T &molecule, System &system, const Space &space) const
 {
-    //pick a random point in the space
-    Vector insertion_point = space.getRandomPoint( generator() );
+    // pick a random point in the space
+    Vector insertion_point = space.getRandomPoint(generator());
 
-    //now pick a random orientation - this is a random vector and
-    //random angle around which to rotate the molecule
+    // now pick a random orientation - this is a random vector and
+    // random angle around which to rotate the molecule
     Vector orientation_vector = generator().vectorOnSphere();
     Angle orientation_angle = generator().rand(-two_pi, two_pi) * radians;
 
-    //we now need to move the molecule to this point. This may
-    //have to be done multiple times, as there may be multiple
-    //coordinates properties (different coordinates properties
-    //for different molecule groups)
+    // we now need to move the molecule to this point. This may
+    // have to be done multiple times, as there may be multiple
+    // coordinates properties (different coordinates properties
+    // for different molecule groups)
 
     PropertyMap map;
 
@@ -389,35 +384,33 @@ void UniformInserter::uniform_insert(const T &molecule, System &system,
     {
         map.set("coordinates", coords_property);
 
-        //we need to know the center of the molecule as we will
-        //rotate around that, and also as we need to translate
-        //the molecule so that its center is at the insertion point
+        // we need to know the center of the molecule as we will
+        // rotate around that, and also as we need to translate
+        // the molecule so that its center is at the insertion point
         Vector mol_center = moved_mol.evaluate().center(map);
 
         moved_mol = moved_mol.move()
-                             .rotate( Quaternion(orientation_angle, orientation_vector),
-                                      mol_center, map )
-                             .translate( insertion_point - mol_center, map )
-                             .commit();
+                        .rotate(Quaternion(orientation_angle, orientation_vector), mol_center, map)
+                        .translate(insertion_point - mol_center, map)
+                        .commit();
     }
 
-    //ok - the molecule now has all of the necessary coordinate properties
-    // - lets add it to the required molecule groups
+    // ok - the molecule now has all of the necessary coordinate properties
+    //  - lets add it to the required molecule groups
     int ngroups = groups().count();
 
     const MGIdentifier *mgids_array = groups().mgIDs().constData();
     const PropertyMap *maps_array = groups().propertyMaps().constData();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
-        system.add( moved_mol, mgids_array[i], maps_array[i] );
+        system.add(moved_mol, mgids_array[i], maps_array[i]);
     }
 }
 
 /** This funciton inserts the molecule 'molecule' into 'system' at
     a random orientation and position within the space 'space' */
-double UniformInserter::insert(const Molecule &molecule, System &system,
-                               const Space &space)
+double UniformInserter::insert(const Molecule &molecule, System &system, const Space &space)
 {
     this->uniform_insert<Molecule>(molecule, system, space);
 
@@ -426,8 +419,7 @@ double UniformInserter::insert(const Molecule &molecule, System &system,
 
 /** This funciton inserts the molecule 'molecule' into 'system' at
     a random orientation and position within the space 'space' */
-double UniformInserter::insert(const PartialMolecule &molecule, System &system,
-                               const Space &space)
+double UniformInserter::insert(const PartialMolecule &molecule, System &system, const Space &space)
 {
     this->uniform_insert<PartialMolecule>(molecule, system, space);
 

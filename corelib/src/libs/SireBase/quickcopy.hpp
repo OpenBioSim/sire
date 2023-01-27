@@ -37,31 +37,30 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-/** This function copies 'nvalues' from 'source' to 'destination'. */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T* quickCopy(T *destination, const T *source, int nvalues)
-{
-    //if (QTypeInfo<T>::isComplex)
-    //{
-        //we need to copy the values
-        for (int i=0; i<nvalues; ++i)
+    /** This function copies 'nvalues' from 'source' to 'destination'. */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T *quickCopy(T *destination, const T *source, int nvalues)
+    {
+        // if (QTypeInfo<T>::isComplex)
+        //{
+        // we need to copy the values
+        for (int i = 0; i < nvalues; ++i)
         {
             destination[i] = source[i];
         }
 
         return destination;
-    //}
-    //else
-    //{
-    //    //we can use memcpy
-    //    void *output = std::memcpy(destination, source, nvalues*sizeof(T));
-    //
-    //    return static_cast<T*>(output);
-    //}
-}
+        //}
+        // else
+        //{
+        //    //we can use memcpy
+        //    void *output = std::memcpy(destination, source, nvalues*sizeof(T));
+        //
+        //    return static_cast<T*>(output);
+        //}
+    }
 
-}
+} // namespace SireBase
 
 SIRE_END_HEADER
 

@@ -37,80 +37,79 @@ namespace SireBase
     class VariantProperty;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::VariantProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::VariantProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::VariantProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::VariantProperty &);
 
 namespace SireBase
 {
 
-/** This is a simple property that holds any value as a QVariant. This
- is designed to be used for metadata that doesn't need any tight
- checking (e.g. the author of the molecule file, the source of
- the coordinates, the 'header' lines etc.)
+    /** This is a simple property that holds any value as a QVariant. This
+     is designed to be used for metadata that doesn't need any tight
+     checking (e.g. the author of the molecule file, the source of
+     the coordinates, the 'header' lines etc.)
 
- @author Christopher Woods
- */
-class SIREBASE_EXPORT VariantProperty
-            : public ConcreteProperty<VariantProperty,Property>, public QVariant
-{
-public:
-    VariantProperty();
-
-    VariantProperty(const QVariant &value);
-
-    VariantProperty(const Property &other);
-
-    VariantProperty(const QString &value);
-
-    VariantProperty(double value);
-
-    VariantProperty(const VariantProperty &other);
-
-    virtual ~VariantProperty();
-
-    VariantProperty& operator=(const QVariant &value);
-    VariantProperty& operator=(const VariantProperty &other);
-
-    bool operator==(const VariantProperty &other) const;
-    bool operator!=(const VariantProperty &other) const;
-
-    static const char* typeName();
-
-    QString toString() const;
-
-    double convertToDouble() const;
-    int convertToInt() const;
-    QString convertToString() const;
-    bool convertToBool() const;
-
-    template<class T>
-    T convertTo() const
+     @author Christopher Woods
+     */
+    class SIREBASE_EXPORT VariantProperty : public ConcreteProperty<VariantProperty, Property>, public QVariant
     {
-        if (not this->canConvert<T>())
-            this->throwInvalidCast( QMetaType::typeName( qMetaTypeId<T>() ) );
+    public:
+        VariantProperty();
 
-        return this->value<T>();
-    }
+        VariantProperty(const QVariant &value);
 
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
+        VariantProperty(const Property &other);
 
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
+        VariantProperty(const QString &value);
 
-private:
-    void throwInvalidCast(const QString &typname) const;
-};
+        VariantProperty(double value);
 
-}
+        VariantProperty(const VariantProperty &other);
 
-Q_DECLARE_METATYPE( SireBase::VariantProperty )
+        virtual ~VariantProperty();
 
-SIRE_EXPOSE_CLASS( SireBase::VariantProperty )
+        VariantProperty &operator=(const QVariant &value);
+        VariantProperty &operator=(const VariantProperty &other);
+
+        bool operator==(const VariantProperty &other) const;
+        bool operator!=(const VariantProperty &other) const;
+
+        static const char *typeName();
+
+        QString toString() const;
+
+        double convertToDouble() const;
+        int convertToInt() const;
+        QString convertToString() const;
+        bool convertToBool() const;
+
+        template <class T>
+        T convertTo() const
+        {
+            if (not this->canConvert<T>())
+                this->throwInvalidCast(QMetaType::typeName(qMetaTypeId<T>()));
+
+            return this->value<T>();
+        }
+
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
+
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
+
+    private:
+        void throwInvalidCast(const QString &typname) const;
+    };
+
+} // namespace SireBase
+
+Q_DECLARE_METATYPE(SireBase::VariantProperty)
+
+SIRE_EXPOSE_CLASS(SireBase::VariantProperty)
 
 SIRE_END_HEADER
 

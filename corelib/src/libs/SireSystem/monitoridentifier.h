@@ -34,80 +34,80 @@
 
 namespace SireSystem
 {
-class MonitorIdentifier;
+    class MonitorIdentifier;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::MonitorIdentifier&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::MonitorIdentifier&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::MonitorIdentifier &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::MonitorIdentifier &);
 
 namespace SireSystem
 {
 
-/** This is a generic holder for any MonitorID class!
+    /** This is a generic holder for any MonitorID class!
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT MonitorIdentifier : public MonitorID
-{
-
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const MonitorIdentifier&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, MonitorIdentifier&);
-
-public:
-    MonitorIdentifier();
-    MonitorIdentifier(const MonitorID &monid);
-    MonitorIdentifier(const MonitorIdentifier &other);
-
-    ~MonitorIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT MonitorIdentifier : public MonitorID
     {
-        return MonitorIdentifier::typeName();
+
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const MonitorIdentifier &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, MonitorIdentifier &);
+
+    public:
+        MonitorIdentifier();
+        MonitorIdentifier(const MonitorID &monid);
+        MonitorIdentifier(const MonitorIdentifier &other);
+
+        ~MonitorIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return MonitorIdentifier::typeName();
+        }
+
+        bool isNull() const;
+
+        MonitorIdentifier *clone() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const MonitorID &base() const;
+
+        MonitorIdentifier &operator=(const MonitorIdentifier &other);
+        MonitorIdentifier &operator=(const MonitorID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const MonitorIdentifier &other) const;
+        bool operator!=(const MonitorIdentifier &other) const;
+
+        bool operator==(const MonitorID &other) const;
+        bool operator!=(const MonitorID &other) const;
+
+        QList<MonitorName> map(const SystemMonitors &monitors) const;
+
+    private:
+        /** Pointer to the MonitorID */
+        boost::shared_ptr<MonitorID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const MonitorIdentifier &monid)
+    {
+        return monid.hash();
     }
 
-    bool isNull() const;
-
-    MonitorIdentifier* clone() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const MonitorID& base() const;
-
-    MonitorIdentifier& operator=(const MonitorIdentifier &other);
-    MonitorIdentifier& operator=(const MonitorID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const MonitorIdentifier &other) const;
-    bool operator!=(const MonitorIdentifier &other) const;
-
-    bool operator==(const MonitorID &other) const;
-    bool operator!=(const MonitorID &other) const;
-
-    QList<MonitorName> map(const SystemMonitors &monitors) const;
-
-private:
-    /** Pointer to the MonitorID */
-    boost::shared_ptr<MonitorID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const MonitorIdentifier &monid)
-{
-    return monid.hash();
-}
-
-}
+} // namespace SireSystem
 
 #include "monitorname.h"
 
-Q_DECLARE_METATYPE( SireID::Specify<SireSystem::MonitorID> )
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireSystem::MonitorID> )
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireSystem::MonitorID> )
+Q_DECLARE_METATYPE(SireID::Specify<SireSystem::MonitorID>)
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireSystem::MonitorID>)
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireSystem::MonitorID>)
 
 Q_DECLARE_METATYPE(SireSystem::MonitorIdentifier);
 

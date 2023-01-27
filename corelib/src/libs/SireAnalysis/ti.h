@@ -34,282 +34,274 @@ SIRE_BEGIN_HEADER
 
 namespace SireAnalysis
 {
-class TI;
-class Gradients;
-class TIPMF;
-}
+    class TI;
+    class Gradients;
+    class TIPMF;
+} // namespace SireAnalysis
 
-SIREANALYSIS_EXPORT QDataStream& operator<<(QDataStream&, const SireAnalysis::TI&);
-SIREANALYSIS_EXPORT QDataStream& operator>>(QDataStream&, SireAnalysis::TI&);
+SIREANALYSIS_EXPORT QDataStream &operator<<(QDataStream &, const SireAnalysis::TI &);
+SIREANALYSIS_EXPORT QDataStream &operator>>(QDataStream &, SireAnalysis::TI &);
 
-SIREANALYSIS_EXPORT QDataStream& operator<<(QDataStream&, const SireAnalysis::Gradients&);
-SIREANALYSIS_EXPORT QDataStream& operator>>(QDataStream&, SireAnalysis::Gradients&);
+SIREANALYSIS_EXPORT QDataStream &operator<<(QDataStream &, const SireAnalysis::Gradients &);
+SIREANALYSIS_EXPORT QDataStream &operator>>(QDataStream &, SireAnalysis::Gradients &);
 
-SIREANALYSIS_EXPORT QDataStream& operator<<(QDataStream&, const SireAnalysis::TIPMF&);
-SIREANALYSIS_EXPORT QDataStream& operator>>(QDataStream&, SireAnalysis::TIPMF&);
+SIREANALYSIS_EXPORT QDataStream &operator<<(QDataStream &, const SireAnalysis::TIPMF &);
+SIREANALYSIS_EXPORT QDataStream &operator>>(QDataStream &, SireAnalysis::TIPMF &);
 
 namespace SireAnalysis
 {
 
-using SireMaths::AverageAndStddev;
-using SireMaths::FreeEnergyAverage;
-using SireUnits::Dimension::MolarEnergy;
+    using SireMaths::AverageAndStddev;
+    using SireMaths::FreeEnergyAverage;
+    using SireUnits::Dimension::MolarEnergy;
 
-/** This class contains the complete potential of mean force
-    that has been created by integrating the TI gradients
+    /** This class contains the complete potential of mean force
+        that has been created by integrating the TI gradients
 
-    @author Christopher Woods
-*/
-class SIREANALYSIS_EXPORT TIPMF : public SireBase::ConcreteProperty<TIPMF,PMF>
-{
+        @author Christopher Woods
+    */
+    class SIREANALYSIS_EXPORT TIPMF : public SireBase::ConcreteProperty<TIPMF, PMF>
+    {
 
-friend SIREANALYSIS_EXPORT QDataStream& ::operator<<(QDataStream&, const TIPMF&);
-friend SIREANALYSIS_EXPORT QDataStream& ::operator>>(QDataStream&, TIPMF&);
+        friend SIREANALYSIS_EXPORT QDataStream & ::operator<<(QDataStream &, const TIPMF &);
+        friend SIREANALYSIS_EXPORT QDataStream & ::operator>>(QDataStream &, TIPMF &);
 
-public:
-    TIPMF();
-    TIPMF(int order);
+    public:
+        TIPMF();
+        TIPMF(int order);
 
-    TIPMF(double min_x, double max_x);
-    TIPMF(double min_x, double max_x, int order);
+        TIPMF(double min_x, double max_x);
+        TIPMF(double min_x, double max_x, int order);
 
-    TIPMF(const TIPMF &other);
+        TIPMF(const TIPMF &other);
 
-    ~TIPMF();
+        ~TIPMF();
 
-    TIPMF& operator=(const TIPMF &other);
+        TIPMF &operator=(const TIPMF &other);
 
-    bool operator==(const TIPMF &other) const;
-    bool operator!=(const TIPMF &other) const;
+        bool operator==(const TIPMF &other) const;
+        bool operator!=(const TIPMF &other) const;
 
-    const char* what() const;
-    static const char* typeName();
+        const char *what() const;
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    QVector<DataPoint> gradients() const;
-    QVector<DataPoint> smoothedGradients() const;
+        QVector<DataPoint> gradients() const;
+        QVector<DataPoint> smoothedGradients() const;
 
-    void setOrder(qint32 order);
-    void setRange(double min_x, double max_x);
+        void setOrder(qint32 order);
+        void setRange(double min_x, double max_x);
 
-    void setGradients(const QVector<DataPoint> &gradients);
+        void setGradients(const QVector<DataPoint> &gradients);
 
-    int order() const;
+        int order() const;
 
-    double rangeMin() const;
-    double rangeMax() const;
+        double rangeMin() const;
+        double rangeMax() const;
 
-    double integral() const;
-    double quadrature() const;
+        double integral() const;
+        double quadrature() const;
 
-    TIPMF dropEndPoints() const;
+        TIPMF dropEndPoints() const;
 
-private:
-    void recalculate();
+    private:
+        void recalculate();
 
-    /** The raw x,y points of the PMF gradients, complete with errors */
-    QVector<DataPoint> grads;
+        /** The raw x,y points of the PMF gradients, complete with errors */
+        QVector<DataPoint> grads;
 
-    /** The smoothed x,y gradients, with errors */
-    QVector<DataPoint> smoothed_grads;
+        /** The smoothed x,y gradients, with errors */
+        QVector<DataPoint> smoothed_grads;
 
-    /** The minimum value of the range of the PMF */
-    double range_min;
+        /** The minimum value of the range of the PMF */
+        double range_min;
 
-    /** The maximum value of the range of the PMF */
-    double range_max;
+        /** The maximum value of the range of the PMF */
+        double range_max;
 
-    /** The free energy from quadrature */
-    double quad_value;
+        /** The free energy from quadrature */
+        double quad_value;
 
-    /** The number of polynomials to use to fit the gradients */
-    qint32 npoly;
-};
+        /** The number of polynomials to use to fit the gradients */
+        qint32 npoly;
+    };
 
-/** This class contains the free energy gradients from a TI simulation
+    /** This class contains the free energy gradients from a TI simulation
 
-    @author Christopher Woods
-*/
-class SIREANALYSIS_EXPORT Gradients
-        : public SireBase::ConcreteProperty<Gradients,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREANALYSIS_EXPORT Gradients : public SireBase::ConcreteProperty<Gradients, SireBase::Property>
+    {
 
-friend SIREANALYSIS_EXPORT QDataStream& ::operator<<(QDataStream&, const Gradients&);
-friend SIREANALYSIS_EXPORT QDataStream& ::operator>>(QDataStream&, Gradients&);
+        friend SIREANALYSIS_EXPORT QDataStream & ::operator<<(QDataStream &, const Gradients &);
+        friend SIREANALYSIS_EXPORT QDataStream & ::operator>>(QDataStream &, Gradients &);
 
-public:
-    Gradients();
-    Gradients(const QMap<double,AverageAndStddev> &gradients);
-    Gradients(const QMap<double,FreeEnergyAverage> &gradients);
-    Gradients(const QMap<double,FreeEnergyAverage> &gradients,
-              double delta_lambda);
-    Gradients(const QMap<double,FreeEnergyAverage> &forwards,
-              const QMap<double,FreeEnergyAverage> &backwards,
-              double delta_lambda);
+    public:
+        Gradients();
+        Gradients(const QMap<double, AverageAndStddev> &gradients);
+        Gradients(const QMap<double, FreeEnergyAverage> &gradients);
+        Gradients(const QMap<double, FreeEnergyAverage> &gradients, double delta_lambda);
+        Gradients(const QMap<double, FreeEnergyAverage> &forwards, const QMap<double, FreeEnergyAverage> &backwards,
+                  double delta_lambda);
 
-    Gradients(const Gradients &other);
+        Gradients(const Gradients &other);
 
-    ~Gradients();
+        ~Gradients();
 
-    Gradients& operator=(const Gradients &other);
+        Gradients &operator=(const Gradients &other);
 
-    bool operator==(const Gradients &other) const;
-    bool operator!=(const Gradients &other) const;
+        bool operator==(const Gradients &other) const;
+        bool operator!=(const Gradients &other) const;
 
-    MolarEnergy operator[](double lam) const;
+        MolarEnergy operator[](double lam) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    Gradients& operator+=(const Gradients &other);
-    Gradients operator+(const Gradients &other) const;
+        Gradients &operator+=(const Gradients &other);
+        Gradients operator+(const Gradients &other) const;
 
-    static Gradients merge(const QList<Gradients> &gradients);
+        static Gradients merge(const QList<Gradients> &gradients);
 
-    SireUnits::Dimension::Temperature temperature() const;
+        SireUnits::Dimension::Temperature temperature() const;
 
-    QList<double> lambdaValues() const;
-    QList<double> keys() const;
+        QList<double> lambdaValues() const;
+        QList<double> keys() const;
 
-    int nLambdaValues() const;
-    qint64 nSamples() const;
+        int nLambdaValues() const;
+        qint64 nSamples() const;
 
-    double deltaLambda() const;
+        double deltaLambda() const;
 
-    QVector<DataPoint> values() const;
+        QVector<DataPoint> values() const;
 
-    QVector<DataPoint> forwardsValues() const;
-    QVector<DataPoint> backwardsValues() const;
+        QVector<DataPoint> forwardsValues() const;
+        QVector<DataPoint> backwardsValues() const;
 
-    QMap<double,AverageAndStddev> analyticData() const;
+        QMap<double, AverageAndStddev> analyticData() const;
 
-    QMap<double,FreeEnergyAverage> forwardsData() const;
-    QMap<double,FreeEnergyAverage> backwardsData() const;
+        QMap<double, FreeEnergyAverage> forwardsData() const;
+        QMap<double, FreeEnergyAverage> backwardsData() const;
 
-    MolarEnergy forwards(double lam) const;
-    MolarEnergy backwards(double lam) const;
-    MolarEnergy gradient(double lam) const;
+        MolarEnergy forwards(double lam) const;
+        MolarEnergy backwards(double lam) const;
+        MolarEnergy gradient(double lam) const;
 
-    TIPMF integrate() const;
-    TIPMF integrate(int order) const;
+        TIPMF integrate() const;
+        TIPMF integrate(int order) const;
 
-    TIPMF integrate(double range_min, double range_max) const;
-    TIPMF integrate(double range_min, double range_max, int order) const;
+        TIPMF integrate(double range_min, double range_max) const;
+        TIPMF integrate(double range_min, double range_max, int order) const;
 
-private:
-    void checkSane() const;
+    private:
+        void checkSane() const;
 
-    /** The analytic gradient data (from analytic TI) */
-    QMap<double,AverageAndStddev> analytic;
+        /** The analytic gradient data (from analytic TI) */
+        QMap<double, AverageAndStddev> analytic;
 
-    /** The forwards values (from finite difference TI) */
-    QMap<double,FreeEnergyAverage> fwds;
+        /** The forwards values (from finite difference TI) */
+        QMap<double, FreeEnergyAverage> fwds;
 
-    /** The backwards values */
-    QMap<double,FreeEnergyAverage> bwds;
+        /** The backwards values */
+        QMap<double, FreeEnergyAverage> bwds;
 
-    /** The value of delta lambda */
-    double delta_lam;
-};
+        /** The value of delta lambda */
+        double delta_lam;
+    };
 
-/** This class is used to analyse the free energies that are
-    calculated during a thermodynamic integration simulation
+    /** This class is used to analyse the free energies that are
+        calculated during a thermodynamic integration simulation
 
-    @author Christopher Woods
-*/
-class SIREANALYSIS_EXPORT TI : public SireBase::ConcreteProperty<TI,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREANALYSIS_EXPORT TI : public SireBase::ConcreteProperty<TI, SireBase::Property>
+    {
 
-friend SIREANALYSIS_EXPORT QDataStream& ::operator<<(QDataStream&, const TI&);
-friend SIREANALYSIS_EXPORT QDataStream& ::operator>>(QDataStream&, TI&);
+        friend SIREANALYSIS_EXPORT QDataStream & ::operator<<(QDataStream &, const TI &);
+        friend SIREANALYSIS_EXPORT QDataStream & ::operator>>(QDataStream &, TI &);
 
-public:
-    TI();
-    TI(const Gradients &gradients);
-    TI(const QList<Gradients> &gradients);
+    public:
+        TI();
+        TI(const Gradients &gradients);
+        TI(const QList<Gradients> &gradients);
 
-    TI(const TI &other);
+        TI(const TI &other);
 
-    ~TI();
+        ~TI();
 
-    TI& operator=(const TI &other);
+        TI &operator=(const TI &other);
 
-    bool operator==(const TI &other) const;
-    bool operator!=(const TI &other) const;
+        bool operator==(const TI &other) const;
+        bool operator!=(const TI &other) const;
 
-    const char* what() const;
-    static const char* typeName();
+        const char *what() const;
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    void add(const QMap<double,AverageAndStddev> &gradients);
-    void add(const QMap<double,FreeEnergyAverage> &gradients);
-    void add(const QMap<double,FreeEnergyAverage> &gradients,
-             double delta_lambda);
+        void add(const QMap<double, AverageAndStddev> &gradients);
+        void add(const QMap<double, FreeEnergyAverage> &gradients);
+        void add(const QMap<double, FreeEnergyAverage> &gradients, double delta_lambda);
 
-    void add(const QMap<double,FreeEnergyAverage> &forwards,
-             const QMap<double,FreeEnergyAverage> &backwards,
-             double delta_lambda);
+        void add(const QMap<double, FreeEnergyAverage> &forwards, const QMap<double, FreeEnergyAverage> &backwards,
+                 double delta_lambda);
 
-    void add(const Gradients &gradients);
+        void add(const Gradients &gradients);
 
-    int nIterations() const;
-    int nLambdaValues() const;
-    qint64 nSamples() const;
+        int nIterations() const;
+        int nLambdaValues() const;
+        qint64 nSamples() const;
 
-    int count() const;
-    int size() const;
+        int count() const;
+        int size() const;
 
-    QList<double> lambdaValues() const;
+        QList<double> lambdaValues() const;
 
-    Gradients operator[](int i) const;
-    Gradients at(int i) const;
+        Gradients operator[](int i) const;
+        Gradients at(int i) const;
 
-    QList<Gradients> gradients() const;
+        QList<Gradients> gradients() const;
 
-    void set(int i, const QMap<double,AverageAndStddev> &gradients);
-    void set(int i, const QMap<double,FreeEnergyAverage> &gradients);
-    void set(int i, const QMap<double,FreeEnergyAverage> &gradients,
-             double delta_lambda);
+        void set(int i, const QMap<double, AverageAndStddev> &gradients);
+        void set(int i, const QMap<double, FreeEnergyAverage> &gradients);
+        void set(int i, const QMap<double, FreeEnergyAverage> &gradients, double delta_lambda);
 
-    void set(int i, const QMap<double,FreeEnergyAverage> &forwards,
-                    const QMap<double,FreeEnergyAverage> &backwards,
-                    double delta_lambda);
+        void set(int i, const QMap<double, FreeEnergyAverage> &forwards, const QMap<double, FreeEnergyAverage> &backwards,
+                 double delta_lambda);
 
-    void set(int i, const Gradients &gradients);
+        void set(int i, const Gradients &gradients);
 
-    Gradients merge(int start, int end) const;
-    Gradients merge(QList<int> indicies) const;
+        Gradients merge(int start, int end) const;
+        Gradients merge(QList<int> indicies) const;
 
-    QList<Gradients> rollingAverage(int niterations) const;
+        QList<Gradients> rollingAverage(int niterations) const;
 
-    void removeAt(int i);
-    void removeRange(int start, int end);
+        void removeAt(int i);
+        void removeRange(int start, int end);
 
-    void clear();
+        void clear();
 
-private:
-    /** The set of gradients for each iteration */
-    QList<Gradients> grads;
-};
+    private:
+        /** The set of gradients for each iteration */
+        QList<Gradients> grads;
+    };
 
-}
+} // namespace SireAnalysis
 
-Q_DECLARE_METATYPE( SireAnalysis::Gradients )
-Q_DECLARE_METATYPE( SireAnalysis::TI )
-Q_DECLARE_METATYPE( SireAnalysis::TIPMF )
+Q_DECLARE_METATYPE(SireAnalysis::Gradients)
+Q_DECLARE_METATYPE(SireAnalysis::TI)
+Q_DECLARE_METATYPE(SireAnalysis::TIPMF)
 
-SIRE_EXPOSE_CLASS( SireAnalysis::Gradients )
-SIRE_EXPOSE_CLASS( SireAnalysis::TI )
-SIRE_EXPOSE_CLASS( SireAnalysis::TIPMF )
+SIRE_EXPOSE_CLASS(SireAnalysis::Gradients)
+SIRE_EXPOSE_CLASS(SireAnalysis::TI)
+SIRE_EXPOSE_CLASS(SireAnalysis::TIPMF)
 
 SIRE_END_HEADER
 
 #endif
-

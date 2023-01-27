@@ -167,8 +167,7 @@ namespace SireUnits
         };
 
         /** Construct a Unit from a TempBase */
-        SIRE_ALWAYS_INLINE Unit::Unit(const TempBase &temperature)
-            : sclfac(temperature)
+        SIRE_ALWAYS_INLINE Unit::Unit(const TempBase &temperature) : sclfac(temperature)
         {
         }
 
@@ -195,8 +194,7 @@ namespace SireUnits
         {
         }
 
-        Celsius(const Celsius &other)
-            : Dimension::TempBase(other)
+        Celsius(const Celsius &other) : Dimension::TempBase(other)
         {
         }
 
@@ -353,8 +351,7 @@ namespace SireUnits
         {
         }
 
-        Fahrenheit(const Fahrenheit &other)
-            : Dimension::TempBase(other)
+        Fahrenheit(const Fahrenheit &other) : Dimension::TempBase(other)
         {
         }
 
@@ -495,7 +492,7 @@ namespace SireUnits
     const Celsius celsius(1);
     const Fahrenheit fahrenheit(1);
 
-}
+} // namespace SireUnits
 
 SIRE_EXPOSE_CLASS(SireUnits::Dimension::TempBase)
 SIRE_EXPOSE_CLASS(SireUnits::Celsius)

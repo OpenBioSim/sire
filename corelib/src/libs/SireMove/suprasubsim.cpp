@@ -37,24 +37,26 @@ using namespace SireCluster;
 
 /** Null constructor */
 SupraSubSim::SupraSubSim()
-{}
+{
+}
 
 /** Internal constructor used to connect to a running simulation */
-SupraSubSim::SupraSubSim(const SireCluster::Promise &promise)
-            : sim_promise(promise)
-{}
+SupraSubSim::SupraSubSim(const SireCluster::Promise &promise) : sim_promise(promise)
+{
+}
 
 /** Copy constructor */
-SupraSubSim::SupraSubSim(const SupraSubSim &other)
-            : sim_promise(other.sim_promise)
-{}
+SupraSubSim::SupraSubSim(const SupraSubSim &other) : sim_promise(other.sim_promise)
+{
+}
 
 /** Destructor */
 SupraSubSim::~SupraSubSim()
-{}
+{
+}
 
 /** Copy assignment operator */
-SupraSubSim& SupraSubSim::operator=(const SupraSubSim &other)
+SupraSubSim &SupraSubSim::operator=(const SupraSubSim &other)
 {
     sim_promise = other.sim_promise;
     return *this;
@@ -76,7 +78,7 @@ bool SupraSubSim::operator!=(const SupraSubSim &other) const
     and return a handle to the running simulation */
 SupraSubSim SupraSubSim::run(Node &node, const SupraSubSimPacket &simpacket)
 {
-    return SupraSubSim( node.startJob(simpacket) );
+    return SupraSubSim(node.startJob(simpacket));
 }
 
 /** Run the sub-system simulation described
@@ -88,9 +90,10 @@ SupraSubSim SupraSubSim::run(const SupraSubSimPacket &simpacket)
     ThisThread this_thread = nodes.borrowThisThread();
 
     if (nodes.isEmpty())
-        throw SireError::unavailable_resource( QObject::tr(
-            "This thread is unavailable for running a simulation. It is already "
-            "busy doing something else!"), CODELOC );
+        throw SireError::unavailable_resource(
+            QObject::tr("This thread is unavailable for running a simulation. It is already "
+                        "busy doing something else!"),
+            CODELOC);
 
     Node node = nodes.getNode();
 
@@ -104,43 +107,37 @@ SupraSubSim SupraSubSim::run(const SupraSubSimPacket &simpacket)
 /** Run the sub-system simulation consisting of 'nmoves' moves from 'moves'
     on the sub-system 'system', recording statistics if 'record_stats'
     is true. Run the simulation in the current thread */
-SupraSubSim SupraSubSim::run(const SupraSubSystem &system, const SupraSubMoves &moves,
-                             int nmoves, bool record_stats)
+SupraSubSim SupraSubSim::run(const SupraSubSystem &system, const SupraSubMoves &moves, int nmoves, bool record_stats)
 {
-    return SupraSubSim::run( SupraSubSimPacket(system, moves, nmoves, record_stats) );
+    return SupraSubSim::run(SupraSubSimPacket(system, moves, nmoves, record_stats));
 }
 
 /** Run the sub-system simulation consisting of 'nmoves' moves of 'move'
     on the sub-system 'system', recording statistics if 'record_stats'
     is true. Run the simulation in the current thread */
-SupraSubSim SupraSubSim::run(const SupraSubSystem &system, const SupraSubMove &move,
-                             int nmoves, bool record_stats)
+SupraSubSim SupraSubSim::run(const SupraSubSystem &system, const SupraSubMove &move, int nmoves, bool record_stats)
 {
-    return SupraSubSim::run( SupraSubSimPacket(system, SameSupraSubMoves(move),
-                                               nmoves, record_stats) );
+    return SupraSubSim::run(SupraSubSimPacket(system, SameSupraSubMoves(move), nmoves, record_stats));
 }
 
 /** Run the sub-system simulation consisting of 'nmoves' moves from 'moves'
     on the sub-system 'system', recording statistics if 'record_stats'
     is true. Run the simulation on the node 'node', returning a handle to
     the running simulation */
-SupraSubSim SupraSubSim::run(Node &node,
-                             const SupraSubSystem &system, const SupraSubMoves &moves,
-                             int nmoves, bool record_stats)
+SupraSubSim SupraSubSim::run(Node &node, const SupraSubSystem &system, const SupraSubMoves &moves, int nmoves,
+                             bool record_stats)
 {
-    return SupraSubSim::run(node, SupraSubSimPacket(system,moves,nmoves,record_stats) );
+    return SupraSubSim::run(node, SupraSubSimPacket(system, moves, nmoves, record_stats));
 }
 
 /** Run the sub-system simulation consisting of 'nmoves' moves of the move 'move'
     on the sub-system 'system', recording statistics if 'record_stats'
     is true. Run the simulation on the node 'node', returning a handle to
     the running simulation */
-SupraSubSim SupraSubSim::run(Node &node,
-                             const SupraSubSystem &system, const SupraSubMove &move,
-                             int nmoves, bool record_stats)
+SupraSubSim SupraSubSim::run(Node &node, const SupraSubSystem &system, const SupraSubMove &move, int nmoves,
+                             bool record_stats)
 {
-    return SupraSubSim::run(node, SupraSubSimPacket(system, SameSupraSubMoves(move),
-                                                    nmoves, record_stats) );
+    return SupraSubSim::run(node, SupraSubSimPacket(system, SameSupraSubMoves(move), nmoves, record_stats));
 }
 
 /** Abort the running simulation */
@@ -209,7 +206,7 @@ bool SupraSubSim::hasFinished()
 
     else
     {
-        //we aren't running any more - lets see what happened
+        // we aren't running any more - lets see what happened
         if (this->isError() or this->wasAborted())
             return false;
 
@@ -219,7 +216,7 @@ bool SupraSubSim::hasFinished()
 
             return sim.nSubCompleted() == sim.nSubMoves();
         }
-        catch(...)
+        catch (...)
         {
             return false;
         }
@@ -244,17 +241,17 @@ SupraSubSimPacket SupraSubSim::input()
 
         if (initial_packet.isNull())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the input simulation WorkPacket? How has "
-                "it become null?"), CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the input simulation WorkPacket? How has "
+                                                     "it become null?"),
+                                         CODELOC);
         }
 
         if (not initial_packet.isA<SupraSubSimPacket>())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the input simulation WorkPacket? How has "
-                "it turned into a %1?").arg(initial_packet.base().what()),
-                    CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the input simulation WorkPacket? How has "
+                                                     "it turned into a %1?")
+                                             .arg(initial_packet.base().what()),
+                                         CODELOC);
         }
 
         return initial_packet.asA<SupraSubSimPacket>();
@@ -285,17 +282,17 @@ SupraSubSimPacket SupraSubSim::interimResult()
 
         if (interim_packet.isNull())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the interim simulation WorkPacket? How has "
-                "it become null?"), CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the interim simulation WorkPacket? How has "
+                                                     "it become null?"),
+                                         CODELOC);
         }
 
         if (not interim_packet.isA<SupraSubSimPacket>())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the interim simulation WorkPacket? How has "
-                "it turned into a %1?").arg(interim_packet.base().what()),
-                    CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the interim simulation WorkPacket? How has "
+                                                     "it turned into a %1?")
+                                             .arg(interim_packet.base().what()),
+                                         CODELOC);
         }
 
         return interim_packet.asA<SupraSubSimPacket>();
@@ -326,17 +323,17 @@ SupraSubSimPacket SupraSubSim::result()
 
         if (result_packet.isNull())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the simulation result WorkPacket? How has "
-                "it become null?"), CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the simulation result WorkPacket? How has "
+                                                     "it become null?"),
+                                         CODELOC);
         }
 
         if (not result_packet.isA<SupraSubSimPacket>())
         {
-            throw SireError::program_bug( QObject::tr(
-                "How could we lose the simulation result WorkPacket? How has "
-                "it turned into a %1?").arg(result_packet.base().what()),
-                    CODELOC );
+            throw SireError::program_bug(QObject::tr("How could we lose the simulation result WorkPacket? How has "
+                                                     "it turned into a %1?")
+                                             .arg(result_packet.base().what()),
+                                         CODELOC);
         }
 
         return result_packet.asA<SupraSubSimPacket>();

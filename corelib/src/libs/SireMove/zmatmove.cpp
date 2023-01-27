@@ -27,17 +27,17 @@
 
 #include "zmatmove.h"
 
-#include "zmatrix.h"
 #include "ensemble.h"
+#include "zmatrix.h"
 
 #include "SireSystem/system.h"
 
-#include "SireMol/partialmolecule.h"
+#include "SireMol/atomidx.h"
+#include "SireMol/core.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/mover.hpp"
-#include "SireMol/atomidx.h"
-#include "SireMol/core.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireUnits/dimensions.h"
 #include "SireUnits/temperature.h"
@@ -64,10 +64,8 @@ QDataStream &operator<<(QDataStream &ds, const ZMatMove &zmatmove)
 
     SharedDataStream sds(ds);
 
-    sds << zmatmove.smplr << zmatmove.zmatrix_property
-        << zmatmove.sync_bonds << zmatmove.sync_angles
-        << zmatmove.sync_dihedrals
-        << static_cast<const MonteCarlo&>(zmatmove);
+    sds << zmatmove.smplr << zmatmove.zmatrix_property << zmatmove.sync_bonds << zmatmove.sync_angles
+        << zmatmove.sync_dihedrals << static_cast<const MonteCarlo &>(zmatmove);
 
     return ds;
 }
@@ -81,17 +79,14 @@ QDataStream &operator>>(QDataStream &ds, ZMatMove &zmatmove)
     {
         SharedDataStream sds(ds);
 
-        sds >> zmatmove.smplr >> zmatmove.zmatrix_property
-            >> zmatmove.sync_bonds >> zmatmove.sync_angles
-            >> zmatmove.sync_dihedrals
-            >> static_cast<MonteCarlo&>(zmatmove);
+        sds >> zmatmove.smplr >> zmatmove.zmatrix_property >> zmatmove.sync_bonds >> zmatmove.sync_angles >>
+            zmatmove.sync_dihedrals >> static_cast<MonteCarlo &>(zmatmove);
     }
     else if (v == 1)
     {
         SharedDataStream sds(ds);
 
-        sds >> zmatmove.smplr >> zmatmove.zmatrix_property
-            >> static_cast<MonteCarlo&>(zmatmove);
+        sds >> zmatmove.smplr >> zmatmove.zmatrix_property >> static_cast<MonteCarlo &>(zmatmove);
 
         zmatmove.sync_bonds = false;
         zmatmove.sync_angles = false;
@@ -105,54 +100,47 @@ QDataStream &operator>>(QDataStream &ds, ZMatMove &zmatmove)
 
 /** Null constructor */
 ZMatMove::ZMatMove(const PropertyMap &map)
-         : ConcreteProperty<ZMatMove,MonteCarlo>(map),
-           sync_bonds(false), sync_angles(false),
-           sync_dihedrals(false)
+    : ConcreteProperty<ZMatMove, MonteCarlo>(map), sync_bonds(false), sync_angles(false), sync_dihedrals(false)
 {
     zmatrix_property = map["z-matrix"];
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
 }
 
 /** Construct the z-matrix move for the passed group of molecules */
 ZMatMove::ZMatMove(const MoleculeGroup &molgroup, const PropertyMap &map)
-         : ConcreteProperty<ZMatMove,MonteCarlo>(),
-           smplr( UniformSampler(molgroup) ),
-           sync_bonds(false), sync_angles(false),
-           sync_dihedrals(false)
+    : ConcreteProperty<ZMatMove, MonteCarlo>(), smplr(UniformSampler(molgroup)), sync_bonds(false), sync_angles(false),
+      sync_dihedrals(false)
 {
     zmatrix_property = map["z-matrix"];
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
-    smplr.edit().setGenerator( this->generator() );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
+    smplr.edit().setGenerator(this->generator());
 }
 
 /** Construct the z-matrix move that samples molecules from the
     passed sampler */
 ZMatMove::ZMatMove(const Sampler &sampler, const PropertyMap &map)
-         : ConcreteProperty<ZMatMove,MonteCarlo>(),
-           smplr(sampler),
-           sync_bonds(false), sync_angles(false),
-           sync_dihedrals(false)
+    : ConcreteProperty<ZMatMove, MonteCarlo>(), smplr(sampler), sync_bonds(false), sync_angles(false),
+      sync_dihedrals(false)
 {
     zmatrix_property = map["z-matrix"];
-    MonteCarlo::setEnsemble( Ensemble::NVT(25*celsius) );
-    smplr.edit().setGenerator( this->generator() );
+    MonteCarlo::setEnsemble(Ensemble::NVT(25 * celsius));
+    smplr.edit().setGenerator(this->generator());
 }
 
 /** Copy constructor */
 ZMatMove::ZMatMove(const ZMatMove &other)
-         : ConcreteProperty<ZMatMove,MonteCarlo>(other),
-           smplr(other.smplr),
-           zmatrix_property(other.zmatrix_property),
-           sync_bonds(other.sync_bonds), sync_angles(other.sync_angles),
-           sync_dihedrals(other.sync_dihedrals)
-{}
+    : ConcreteProperty<ZMatMove, MonteCarlo>(other), smplr(other.smplr), zmatrix_property(other.zmatrix_property),
+      sync_bonds(other.sync_bonds), sync_angles(other.sync_angles), sync_dihedrals(other.sync_dihedrals)
+{
+}
 
 /** Destructor */
 ZMatMove::~ZMatMove()
-{}
+{
+}
 
 /** Copy assignment operator */
-ZMatMove& ZMatMove::operator=(const ZMatMove &other)
+ZMatMove &ZMatMove::operator=(const ZMatMove &other)
 {
     if (this != &other)
     {
@@ -170,9 +158,8 @@ ZMatMove& ZMatMove::operator=(const ZMatMove &other)
 /** Comparison operator */
 bool ZMatMove::operator==(const ZMatMove &other) const
 {
-    return MonteCarlo::operator==(other) and smplr == other.smplr and
-           sync_bonds == other.sync_bonds and sync_angles == other.sync_angles and
-           sync_dihedrals == other.sync_dihedrals and
+    return MonteCarlo::operator==(other) and smplr == other.smplr and sync_bonds == other.sync_bonds and
+           sync_angles == other.sync_angles and sync_dihedrals == other.sync_dihedrals and
            zmatrix_property == other.zmatrix_property;
 }
 
@@ -185,39 +172,37 @@ bool ZMatMove::operator!=(const ZMatMove &other) const
 /** Return a string representation of this move */
 QString ZMatMove::toString() const
 {
-    return QObject::tr("ZMatMove( nAccepted() = %1 nRejected() == %2 )")
-                .arg( this->nAccepted() )
-                .arg( this->nRejected() );
+    return QObject::tr("ZMatMove( nAccepted() = %1 nRejected() == %2 )").arg(this->nAccepted()).arg(this->nRejected());
 }
 
 /** Set the sampler used to sample molecules for this move */
 void ZMatMove::setSampler(const Sampler &sampler)
 {
     smplr = sampler;
-    smplr.edit().setGenerator( this->generator() );
+    smplr.edit().setGenerator(this->generator());
 }
 
 /** Set the sampler so that it draws molecules uniformly from the
     molecule group 'molgroup' */
 void ZMatMove::setSampler(const MoleculeGroup &molgroup)
 {
-    this->setSampler( UniformSampler(molgroup) );
+    this->setSampler(UniformSampler(molgroup));
 }
 
 /** Return the sampler used to sample molecules to move */
-const Sampler& ZMatMove::sampler() const
+const Sampler &ZMatMove::sampler() const
 {
     return smplr;
 }
 
 /** Return the molecule group that is sampled for this move */
-const MoleculeGroup& ZMatMove::moleculeGroup() const
+const MoleculeGroup &ZMatMove::moleculeGroup() const
 {
     return smplr->group();
 }
 
 /** Return the property used to find the z-matrix of each molecule */
-const PropertyName& ZMatMove::zmatrixProperty() const
+const PropertyName &ZMatMove::zmatrixProperty() const
 {
     return zmatrix_property;
 }
@@ -295,23 +280,22 @@ void ZMatMove::setGenerator(const RanGenerator &rangenerator)
     passed temperature */
 void ZMatMove::_pvt_setTemperature(const Temperature &temperature)
 {
-    MonteCarlo::setEnsemble( Ensemble::NVT(temperature) );
+    MonteCarlo::setEnsemble(Ensemble::NVT(temperature));
 }
 
 /** Internal function used to move the bond, angle and dihedral
     that is used to build the atom 'atom' in the z-matrix 'zmatrix' */
-void ZMatMove::move(AtomIdx atom, ZMatrixCoords &zmatrix,
-                    QHash< AtomIdx, tuple<Length,Angle,Angle> > &saved_deltas)
+void ZMatMove::move(AtomIdx atom, ZMatrixCoords &zmatrix, QHash<AtomIdx, tuple<Length, Angle, Angle>> &saved_deltas)
 {
     // first generate the amounts by which to change the
     // bond, angle and dihedral values
     Length bonddelta;
     Angle angledelta, dihedraldelta;
 
-    if ( sync_bonds or sync_angles or sync_dihedrals )
+    if (sync_bonds or sync_angles or sync_dihedrals)
     {
-        //we are synchronising bonds, angles or dihedrals, so
-        //we may need to look up previous values for previous molecules
+        // we are synchronising bonds, angles or dihedrals, so
+        // we may need to look up previous values for previous molecules
 
         if (saved_deltas.contains(atom))
         {
@@ -321,20 +305,17 @@ void ZMatMove::move(AtomIdx atom, ZMatrixCoords &zmatrix,
 
             if ((not sync_bonds) and bonddelta.value() != 0)
             {
-                bonddelta = Length( this->generator().rand(-bonddelta.value(),
-                                                            bonddelta.value() ) );
+                bonddelta = Length(this->generator().rand(-bonddelta.value(), bonddelta.value()));
             }
 
             if ((not sync_angles) and angledelta.value() != 0)
             {
-                angledelta = Angle( this->generator().rand(-angledelta.value(),
-                                                            angledelta.value() ) );
+                angledelta = Angle(this->generator().rand(-angledelta.value(), angledelta.value()));
             }
 
             if ((not sync_dihedrals) and dihedraldelta.value() != 0)
             {
-                dihedraldelta = Angle( this->generator().rand(-dihedraldelta.value(),
-                                                                dihedraldelta.value() ) );
+                dihedraldelta = Angle(this->generator().rand(-dihedraldelta.value(), dihedraldelta.value()));
             }
         }
         else
@@ -345,24 +326,20 @@ void ZMatMove::move(AtomIdx atom, ZMatrixCoords &zmatrix,
 
             if (sync_bonds and bonddelta.value() != 0)
             {
-                bonddelta = Length( this->generator().rand(-bonddelta.value(),
-                                                            bonddelta.value() ) );
+                bonddelta = Length(this->generator().rand(-bonddelta.value(), bonddelta.value()));
             }
 
             if (sync_angles and angledelta.value() != 0)
             {
-                angledelta = Angle( this->generator().rand(-angledelta.value(),
-                                                            angledelta.value() ) );
+                angledelta = Angle(this->generator().rand(-angledelta.value(), angledelta.value()));
             }
 
             if (sync_dihedrals and dihedraldelta.value() != 0)
             {
-                dihedraldelta = Angle( this->generator().rand(-dihedraldelta.value(),
-                                                                dihedraldelta.value() ) );
+                dihedraldelta = Angle(this->generator().rand(-dihedraldelta.value(), dihedraldelta.value()));
             }
 
-            saved_deltas[atom] = tuple<Length,Angle,Angle>(bonddelta, angledelta,
-                                                           dihedraldelta);
+            saved_deltas[atom] = tuple<Length, Angle, Angle>(bonddelta, angledelta, dihedraldelta);
         }
     }
     else
@@ -373,20 +350,17 @@ void ZMatMove::move(AtomIdx atom, ZMatrixCoords &zmatrix,
 
         if (bonddelta.value() != 0)
         {
-            bonddelta = Length( this->generator().rand(-bonddelta.value(),
-                                                        bonddelta.value() ) );
+            bonddelta = Length(this->generator().rand(-bonddelta.value(), bonddelta.value()));
         }
 
         if (angledelta.value() != 0)
         {
-            angledelta = Angle( this->generator().rand(-angledelta.value(),
-                                                        angledelta.value() ) );
+            angledelta = Angle(this->generator().rand(-angledelta.value(), angledelta.value()));
         }
 
         if (dihedraldelta.value() != 0)
         {
-            dihedraldelta = Angle( this->generator().rand(-dihedraldelta.value(),
-                                                              dihedraldelta.value() ) );
+            dihedraldelta = Angle(this->generator().rand(-dihedraldelta.value(), dihedraldelta.value()));
         }
     }
 
@@ -416,7 +390,7 @@ void ZMatMove::move(System &system, int nmoves, bool record_stats)
     if (nmoves <= 0)
         return;
 
-    //save our, and the system's, current state
+    // save our, and the system's, current state
     ZMatMove old_state(*this);
 
     System old_system_state(system);
@@ -425,104 +399,93 @@ void ZMatMove::move(System &system, int nmoves, bool record_stats)
     {
         const PropertyMap &map = Move::propertyMap();
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
-            //get the old energy of the system
-            double old_nrg = system.energy( this->energyComponent() );
+            // get the old energy of the system
+            double old_nrg = system.energy(this->energyComponent());
 
-            //save the old system and sampler
+            // save the old system and sampler
             System old_system(system);
             SamplerPtr old_sampler(smplr);
 
-            QHash< AtomIdx,tuple<Length,Angle,Angle> > saved_deltas;
+            QHash<AtomIdx, tuple<Length, Angle, Angle>> saved_deltas;
 
             double old_bias = 1;
             double new_bias = 1;
 
             if (sync_bonds and sync_angles and sync_dihedrals)
             {
-                //move all of everything!
+                // move all of everything!
                 const Molecules &molecules = smplr.read().group().molecules();
 
                 Molecules new_molecules = molecules;
 
-                for (Molecules::const_iterator it = molecules.constBegin();
-                     it != molecules.constEnd();
-                     ++it)
+                for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
                 {
-                    ZMatrixCoords zmatrix( *it, map );
+                    ZMatrixCoords zmatrix(*it, map);
 
-                    //move the internal coordinates of selected atoms in the
-                    //z-matrix
+                    // move the internal coordinates of selected atoms in the
+                    // z-matrix
                     AtomSelection selected_atoms = it->selection();
 
                     if (selected_atoms.selectedAll())
                     {
-                        //move everything
-                        for (QHash<AtomIdx,int>::const_iterator
-                                                    it2 = zmatrix.index().constBegin();
-                             it2 != zmatrix.index().constEnd();
-                             ++it2)
+                        // move everything
+                        for (QHash<AtomIdx, int>::const_iterator it2 = zmatrix.index().constBegin();
+                             it2 != zmatrix.index().constEnd(); ++it2)
                         {
                             this->move(it2.key(), zmatrix, saved_deltas);
                         }
                     }
                     else
                     {
-                        //move only the selected atoms
-                        for (QHash<AtomIdx,int>::const_iterator
-                                                    it2 = zmatrix.index().constBegin();
-                             it2 != zmatrix.index().constEnd();
-                             ++it2)
+                        // move only the selected atoms
+                        for (QHash<AtomIdx, int>::const_iterator it2 = zmatrix.index().constBegin();
+                             it2 != zmatrix.index().constEnd(); ++it2)
                         {
                             if (selected_atoms.selected(it2.key()))
                                 this->move(it2.key(), zmatrix, saved_deltas);
                         }
                     }
 
-                    new_molecules.update( it->molecule().edit()
-                                            .setProperty( map["coordinates"],
-                                                          zmatrix.toCartesian() )
-                                            .commit() );
+                    new_molecules.update(
+                        it->molecule().edit().setProperty(map["coordinates"], zmatrix.toCartesian()).commit());
                 }
 
                 system.update(new_molecules);
             }
             else if (sync_bonds or sync_angles or sync_dihedrals)
             {
-                //move some of everything, and all of just one molecule
-                throw SireError::incomplete_code( QObject::tr(
-                        "This code needs to be written!!!"), CODELOC );
+                // move some of everything, and all of just one molecule
+                throw SireError::incomplete_code(QObject::tr("This code needs to be written!!!"), CODELOC);
             }
             else
             {
-                //move all of just one molecule
+                // move all of just one molecule
 
-                //update the sampler with the latest version of the molecules
+                // update the sampler with the latest version of the molecules
                 smplr.edit().updateFrom(system);
 
-                //randomly select a molecule to move
-                tuple<PartialMolecule,double> mol_and_bias = smplr.read().sample();
+                // randomly select a molecule to move
+                tuple<PartialMolecule, double> mol_and_bias = smplr.read().sample();
 
                 const PartialMolecule &oldmol = mol_and_bias.get<0>();
 
                 if (smplr.read().isBiased())
                     old_bias = mol_and_bias.get<1>();
 
-                ZMatrixCoords zmatrix( oldmol.molecule(), map );
+                ZMatrixCoords zmatrix(oldmol.molecule(), map);
 
-                //move the internal coordinates of selected atoms in the
-                //z-matrix
+                // move the internal coordinates of selected atoms in the
+                // z-matrix
                 AtomSelection selected_atoms = oldmol.selection();
                 AtomCoords coords;
 
                 if (selected_atoms.selectedAll())
                 {
-                    //move everything
-                    for (QHash<AtomIdx,int>::const_iterator
-                                                    it = zmatrix.index().constBegin();
-                         it != zmatrix.index().constEnd();
-                         ++it)
+                    // move everything
+                    for (QHash<AtomIdx, int>::const_iterator it = zmatrix.index().constBegin();
+                         it != zmatrix.index().constEnd(); ++it)
                     {
                         this->move(it.key(), zmatrix, saved_deltas);
                     }
@@ -531,11 +494,9 @@ void ZMatMove::move(System &system, int nmoves, bool record_stats)
                 }
                 else
                 {
-                    //move only the selected atoms
-                    for (QHash<AtomIdx,int>::const_iterator
-                                                it = zmatrix.index().constBegin();
-                         it != zmatrix.index().constEnd();
-                         ++it)
+                    // move only the selected atoms
+                    for (QHash<AtomIdx, int>::const_iterator it = zmatrix.index().constBegin();
+                         it != zmatrix.index().constEnd(); ++it)
                     {
                         if (selected_atoms.selected(it.key()))
                         {
@@ -556,7 +517,7 @@ void ZMatMove::move(System &system, int nmoves, bool record_stats)
                         {
                             foreach (Index i, selected_atoms.selectedAtoms(cgidx))
                             {
-                                CGAtomIdx cgatomidx(cgidx,i);
+                                CGAtomIdx cgatomidx(cgidx, i);
                                 oldcoords = oldcoords.set(cgatomidx, newcoords[cgatomidx]);
                             }
                         }
@@ -565,29 +526,26 @@ void ZMatMove::move(System &system, int nmoves, bool record_stats)
                     coords = oldcoords;
                 }
 
-                Molecule newmol = oldmol.molecule().edit()
-                                        .setProperty( map["coordinates"], coords )
-                                        .commit();
+                Molecule newmol = oldmol.molecule().edit().setProperty(map["coordinates"], coords).commit();
 
-                //update the system with the new coordinates
+                // update the system with the new coordinates
                 system.update(newmol);
 
-                //get the new bias on this molecule
+                // get the new bias on this molecule
                 smplr.edit().updateFrom(system);
 
                 if (smplr.read().isBiased())
-                    new_bias = smplr.read().probabilityOf( PartialMolecule(newmol,
-                                                           oldmol.selection()) );
+                    new_bias = smplr.read().probabilityOf(PartialMolecule(newmol, oldmol.selection()));
             }
 
-            //calculate the energy of the system
-            double new_nrg = system.energy( this->energyComponent() );
+            // calculate the energy of the system
+            double new_nrg = system.energy(this->energyComponent());
 
-            //accept or reject the move based on the change of energy
-            //and the biasing factors
+            // accept or reject the move based on the change of energy
+            // and the biasing factors
             if (not this->test(new_nrg, old_nrg, new_bias, old_bias))
             {
-                //the move has been rejected - reset the state
+                // the move has been rejected - reset the state
                 smplr = old_sampler;
                 system = old_system;
             }
@@ -598,7 +556,7 @@ void ZMatMove::move(System &system, int nmoves, bool record_stats)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         system = old_system_state;
         this->operator=(old_state);
@@ -606,7 +564,7 @@ void ZMatMove::move(System &system, int nmoves, bool record_stats)
     }
 }
 
-const char* ZMatMove::typeName()
+const char *ZMatMove::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ZMatMove>() );
+    return QMetaType::typeName(qMetaTypeId<ZMatMove>());
 }

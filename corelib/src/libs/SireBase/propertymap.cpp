@@ -42,8 +42,7 @@ using namespace SireStream;
 static const RegisterMetaType<PropertyName> r_propname(NO_ROOT);
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const PropertyName &propname)
+QDataStream &operator<<(QDataStream &ds, const PropertyName &propname)
 {
     writeHeader(ds, r_propname, 1);
 
@@ -65,7 +64,7 @@ QDataStream &operator>>(QDataStream &ds, PropertyName &propname)
         sds >> propname.src >> propname.val >> propname.value_is_default;
 
         if (propname.src.isEmpty())
-        	propname.src = QString();
+            propname.src = QString();
     }
     else
         throw version_error(v, "1", r_propname, CODELOC);
@@ -75,48 +74,50 @@ QDataStream &operator>>(QDataStream &ds, PropertyName &propname)
 
 /** Null constructor */
 PropertyName::PropertyName() : value_is_default(false)
-{}
+{
+}
 
 /** Construct a PropertyName that searches for the
     property using the source 'source' */
-PropertyName::PropertyName(const char *source)
-             : src(source), value_is_default(false)
-{}
+PropertyName::PropertyName(const char *source) : src(source), value_is_default(false)
+{
+}
 
 /** Construct a PropertyName that searches for the
     property using the source 'source' */
-PropertyName::PropertyName(const QString &source)
-             : src(source), value_is_default(false)
-{}
+PropertyName::PropertyName(const QString &source) : src(source), value_is_default(false)
+{
+}
 
 /** Construct a PropertyName that uses the supplied
     value, rather than searching for the property */
-PropertyName::PropertyName(const Property &value)
-             : val(value)
-{}
+PropertyName::PropertyName(const Property &value) : val(value)
+{
+}
 
 /** Construct a PropertyName that searches for the property
     using the source 'source', but only if that source is
     specifically provided - otherwise the supplied default
     value of the property is used instead */
-PropertyName::PropertyName(const QString &source,
-                           const Property &default_value)
-             : src(source), val(default_value), value_is_default(true)
+PropertyName::PropertyName(const QString &source, const Property &default_value)
+    : src(source), val(default_value), value_is_default(true)
 {
     BOOST_ASSERT(not source.isEmpty());
 }
 
 /** Copy constructor */
 PropertyName::PropertyName(const PropertyName &other)
-             : src(other.src), val(other.val), value_is_default(other.value_is_default)
-{}
+    : src(other.src), val(other.val), value_is_default(other.value_is_default)
+{
+}
 
 /** Destructor */
 PropertyName::~PropertyName()
-{}
+{
+}
 
 /** Copy assignment operator */
-PropertyName& PropertyName::operator=(const PropertyName &other)
+PropertyName &PropertyName::operator=(const PropertyName &other)
 {
     src = other.src;
     val = other.val;
@@ -128,20 +129,18 @@ PropertyName& PropertyName::operator=(const PropertyName &other)
 /** Comparison operator */
 bool PropertyName::operator==(const PropertyName &other) const
 {
-    return src == other.src and val == other.val and
-           value_is_default == other.value_is_default;
+    return src == other.src and val == other.val and value_is_default == other.value_is_default;
 }
 
 /** Comparison operator */
 bool PropertyName::operator!=(const PropertyName &other) const
 {
-    return src != other.src or val != other.val or
-           value_is_default != other.value_is_default;
+    return src != other.src or val != other.val or value_is_default != other.value_is_default;
 }
 
-const char* PropertyName::typeName()
+const char *PropertyName::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<PropertyName>() );
+    return QMetaType::typeName(qMetaTypeId<PropertyName>());
 }
 
 /** Return a PropertyName that says that this property is not set */
@@ -176,14 +175,14 @@ bool PropertyName::isNull() const
 
 /** Return the source of the property - this is only valid
     if .hasSource() is true */
-const QString& PropertyName::source() const
+const QString &PropertyName::source() const
 {
     return src;
 }
 
 /** Return the value of the property - this is only valid
     if .hasValue() is true */
-const Property& PropertyName::value() const
+const Property &PropertyName::value() const
 {
     return val;
 }
@@ -211,8 +210,7 @@ QString PropertyName::toString() const
 static const RegisterMetaType<PropertyMap> r_propmap(NO_ROOT);
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const PropertyMap &propmap)
+QDataStream &operator<<(QDataStream &ds, const PropertyMap &propmap)
 {
     writeHeader(ds, r_propmap, 1);
 
@@ -223,8 +221,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                      PropertyMap &propmap)
+QDataStream &operator>>(QDataStream &ds, PropertyMap &propmap)
 {
     VersionID v = readHeader(ds, r_propmap);
 
@@ -241,7 +238,8 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 PropertyMap::PropertyMap()
-{}
+{
+}
 
 /** Construct a map that holds just a single PropertyName */
 PropertyMap::PropertyMap(const QString &property, const PropertyName &propname)
@@ -250,21 +248,22 @@ PropertyMap::PropertyMap(const QString &property, const PropertyName &propname)
 }
 
 /** Construct a map that holds lots of PropertyNames */
-PropertyMap::PropertyMap(const QHash<QString,PropertyName> &propnames)
-            : propmap(propnames)
-{}
+PropertyMap::PropertyMap(const QHash<QString, PropertyName> &propnames) : propmap(propnames)
+{
+}
 
 /** Copy constructor */
-PropertyMap::PropertyMap(const PropertyMap &other)
-            : propmap(other.propmap)
-{}
+PropertyMap::PropertyMap(const PropertyMap &other) : propmap(other.propmap)
+{
+}
 
 /** Destructor */
 PropertyMap::~PropertyMap()
-{}
+{
+}
 
 /** Copy assignment operator */
-PropertyMap& PropertyMap::operator=(const PropertyMap &other)
+PropertyMap &PropertyMap::operator=(const PropertyMap &other)
 {
     propmap = other.propmap;
     return *this;
@@ -277,9 +276,7 @@ PropertyMap PropertyMap::operator+(const PropertyMap &other) const
 {
     PropertyMap ret(*this);
 
-    for (QHash<QString,PropertyName>::const_iterator it = other.propmap.begin();
-         it != other.propmap.end();
-         ++it)
+    for (QHash<QString, PropertyName>::const_iterator it = other.propmap.begin(); it != other.propmap.end(); ++it)
     {
         ret.propmap.insert(it.key(), it.value());
     }
@@ -303,8 +300,7 @@ bool PropertyMap::operator!=(const PropertyMap &other) const
     that property */
 PropertyName PropertyMap::operator[](const QString &name) const
 {
-    QHash<QString,PropertyName>::const_iterator
-                                    it = propmap.constFind(name);
+    QHash<QString, PropertyName>::const_iterator it = propmap.constFind(name);
 
     if (it == propmap.constEnd())
     {
@@ -329,8 +325,7 @@ PropertyName PropertyMap::operator[](const PropertyName &propname) const
 {
     if (propname.hasSource())
     {
-        QHash<QString,PropertyName>::const_iterator
-                                        it = propmap.constFind(propname.source());
+        QHash<QString, PropertyName>::const_iterator it = propmap.constFind(propname.source());
 
         if (it != propmap.constEnd())
             return it.value();
@@ -341,9 +336,9 @@ PropertyName PropertyMap::operator[](const PropertyName &propname) const
         return propname;
 }
 
-const char* PropertyMap::typeName()
+const char *PropertyMap::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<PropertyMap>() );
+    return QMetaType::typeName(qMetaTypeId<PropertyMap>());
 }
 
 /** Return whether or not this map is default - if it is,
@@ -401,25 +396,23 @@ QString PropertyMap::toString() const
 {
     QStringList items;
 
-    for (QHash<QString,PropertyName>::const_iterator it = propmap.constBegin();
-         it != propmap.constEnd();
-         ++it)
+    for (QHash<QString, PropertyName>::const_iterator it = propmap.constBegin(); it != propmap.constEnd(); ++it)
     {
-        items.append( QString("%1 == %2").arg( it.key(), it.value().toString() ) );
+        items.append(QString("%1 == %2").arg(it.key(), it.value().toString()));
     }
 
-    return QString("[ %1 ]").arg( items.join(", ") );
+    return QString("[ %1 ]").arg(items.join(", "));
 }
 
 /** Return the raw underlying dictionary of the map */
-const QHash<QString,PropertyName> PropertyMap::toDict() const
+const QHash<QString, PropertyName> PropertyMap::toDict() const
 {
     return this->propmap;
 }
 
 /** Return a PropertyMap that is the combination of this and other.
  *  Keys set in other take precedence over keys in this.
-*/
+ */
 PropertyMap PropertyMap::merge(const PropertyMap &other) const
 {
     if (this->propmap.isEmpty())
@@ -431,8 +424,7 @@ PropertyMap PropertyMap::merge(const PropertyMap &other) const
 
     PropertyMap ret(*this);
 
-    for (auto it = other.propmap.constBegin();
-         it != other.propmap.constEnd(); ++it)
+    for (auto it = other.propmap.constBegin(); it != other.propmap.constEnd(); ++it)
     {
         ret.propmap[it.key()] = it.value();
     }

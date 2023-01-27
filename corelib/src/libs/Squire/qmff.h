@@ -30,182 +30,171 @@
 
 #include "qmpotential.h"
 
-#include "SireFF/g1ff.h"
 #include "SireFF/ff3d.h"
+#include "SireFF/g1ff.h"
 
 SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class QMFF;
+    class QMFF;
 }
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::QMFF&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::QMFF&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::QMFF &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::QMFF &);
 
 namespace Squire
 {
 
-using SireBase::Property;
-using SireBase::Properties;
+    using SireBase::Properties;
+    using SireBase::Property;
 
-using SireFF::EnergyTable;
-using SireFF::ForceTable;
-using SireFF::FieldTable;
-using SireFF::PotentialTable;
-using SireFF::Probe;
+    using SireFF::EnergyTable;
+    using SireFF::FieldTable;
+    using SireFF::ForceTable;
+    using SireFF::PotentialTable;
+    using SireFF::Probe;
 
-using SireCAS::Symbol;
+    using SireCAS::Symbol;
 
-/** This is a forcefield that uses an external Quantum Chemical program
-    to calculate the quantum mechanics energy and / or force on the
-    contained molecules.
+    /** This is a forcefield that uses an external Quantum Chemical program
+        to calculate the quantum mechanics energy and / or force on the
+        contained molecules.
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT QMFF : public SireBase::ConcreteProperty<QMFF,SireFF::G1FF>,
-                           public SireFF::FF3D,
-                           protected QMPotential
-{
-
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const QMFF&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, QMFF&);
-
-public:
-    typedef QMPotential::Parameters Parameters;
-
-    QMFF();
-    QMFF(const QString &name);
-
-    QMFF(const QMFF &other);
-
-    ~QMFF();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT QMFF : public SireBase::ConcreteProperty<QMFF, SireFF::G1FF>,
+                               public SireFF::FF3D,
+                               protected QMPotential
     {
-        return QMFF::typeName();
-    }
 
-    QMFF& operator=(const QMFF &other);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const QMFF &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, QMFF &);
 
-    bool operator==(const QMFF &other) const;
-    bool operator!=(const QMFF &other) const;
+    public:
+        typedef QMPotential::Parameters Parameters;
 
-    const Components& components() const;
+        QMFF();
+        QMFF(const QString &name);
 
-    Parameters parameters() const
-    {
-        return Parameters();
-    }
+        QMFF(const QMFF &other);
 
-    const Space& space() const;
-    const QMProgram& quantumProgram() const;
-    SireUnits::Dimension::MolarEnergy zeroEnergy() const;
+        ~QMFF();
 
-    bool setSpace(const Space &space);
-    bool setQuantumProgram(const QMProgram &qmprog);
-    bool setZeroEnergy(SireUnits::Dimension::MolarEnergy zero_energy);
+        static const char *typeName();
 
-    bool setProperty(const QString &name, const Property &property);
-    const Property& property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
-    const Properties& properties() const;
+        const char *what() const
+        {
+            return QMFF::typeName();
+        }
 
-    void mustNowRecalculateFromScratch();
+        QMFF &operator=(const QMFF &other);
 
-    void energy(EnergyTable &energytable, double scale_energy=1);
+        bool operator==(const QMFF &other) const;
+        bool operator!=(const QMFF &other) const;
 
-    void energy(EnergyTable &energytable, const Symbol &symbol,
-		double scale_energy=1);
+        const Components &components() const;
 
-    void force(ForceTable &forcetable, double scale_force=1);
+        Parameters parameters() const
+        {
+            return Parameters();
+        }
 
-    void force(ForceTable &forcetable, const Symbol &symbol,
-               double scale_force=1);
+        const Space &space() const;
+        const QMProgram &quantumProgram() const;
+        SireUnits::Dimension::MolarEnergy zeroEnergy() const;
 
-    void field(FieldTable &fieldtable, double scale_field=1);
+        bool setSpace(const Space &space);
+        bool setQuantumProgram(const QMProgram &qmprog);
+        bool setZeroEnergy(SireUnits::Dimension::MolarEnergy zero_energy);
 
-    void field(FieldTable &fieldtable, const Symbol &component,
-               double scale_field=1);
+        bool setProperty(const QString &name, const Property &property);
+        const Property &property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
+        const Properties &properties() const;
 
-    void potential(PotentialTable &potentialtable, double scale_potential=1);
+        void mustNowRecalculateFromScratch();
 
-    void potential(PotentialTable &potentialtable, const Symbol &component,
-                   double scale_potential=1);
+        void energy(EnergyTable &energytable, double scale_energy = 1);
 
-    void field(FieldTable &fieldtable, const SireFF::Probe &probe, double scale_field=1);
+        void energy(EnergyTable &energytable, const Symbol &symbol, double scale_energy = 1);
 
-    void field(FieldTable &fieldtable, const Symbol &component,
-               const SireFF::Probe &probe, double scale_field=1);
+        void force(ForceTable &forcetable, double scale_force = 1);
 
-    void potential(PotentialTable &potentialtable, const SireFF::Probe &probe,
-                   double scale_potential=1);
+        void force(ForceTable &forcetable, const Symbol &symbol, double scale_force = 1);
 
-    void potential(PotentialTable &potentialtable, const Symbol &component,
-                   const SireFF::Probe &probe, double scale_potential=1);
+        void field(FieldTable &fieldtable, double scale_field = 1);
 
-    QString energyCommandFile() const;
-    QString forceCommandFile(const ForceTable &forcetable) const;
+        void field(FieldTable &fieldtable, const Symbol &component, double scale_field = 1);
 
-    QString fieldCommandFile(const FieldTable &fieldtable) const;
-    QString fieldCommandFile(const FieldTable &fieldtable,
-                             const SireFF::Probe &probe) const;
+        void potential(PotentialTable &potentialtable, double scale_potential = 1);
 
-    QString potentialCommandFile(const PotentialTable &pottable) const;
-    QString potentialCommandFile(const PotentialTable &pottable,
-                                 const SireFF::Probe &probe) const;
+        void potential(PotentialTable &potentialtable, const Symbol &component, double scale_potential = 1);
 
-protected:
+        void field(FieldTable &fieldtable, const SireFF::Probe &probe, double scale_field = 1);
 
-    ////
-    //// Virtual functions from SireFF::FF
-    ////
+        void field(FieldTable &fieldtable, const Symbol &component, const SireFF::Probe &probe, double scale_field = 1);
 
-    const Components& _pvt_components() const;
+        void potential(PotentialTable &potentialtable, const SireFF::Probe &probe, double scale_potential = 1);
 
-    void recalculateEnergy();
+        void potential(PotentialTable &potentialtable, const Symbol &component, const SireFF::Probe &probe,
+                       double scale_potential = 1);
 
-    void _pvt_updateName();
+        QString energyCommandFile() const;
+        QString forceCommandFile(const ForceTable &forcetable) const;
 
-    ////
-    //// Virtual functions from SireFF::G1FF
-    ////
+        QString fieldCommandFile(const FieldTable &fieldtable) const;
+        QString fieldCommandFile(const FieldTable &fieldtable, const SireFF::Probe &probe) const;
 
-    void _pvt_added(const SireMol::PartialMolecule &mol,
-                    const SireBase::PropertyMap&);
+        QString potentialCommandFile(const PotentialTable &pottable) const;
+        QString potentialCommandFile(const PotentialTable &pottable, const SireFF::Probe &probe) const;
 
-    void _pvt_removed(const SireMol::PartialMolecule &mol);
+    protected:
+        ////
+        //// Virtual functions from SireFF::FF
+        ////
 
-    void _pvt_changed(const SireMol::Molecule &mol, bool auto_update);
+        const Components &_pvt_components() const;
 
-    void _pvt_changed(const QList<SireMol::Molecule> &mols, bool auto_update);
+        void recalculateEnergy();
 
-    void _pvt_removedAll();
+        void _pvt_updateName();
 
-    bool _pvt_wouldChangeProperties(SireMol::MolNum molnum,
-                                    const SireBase::PropertyMap &map) const;
+        ////
+        //// Virtual functions from SireFF::G1FF
+        ////
 
-    ////
-    //// Virtual functions of QMFF
-    ////
+        void _pvt_added(const SireMol::PartialMolecule &mol, const SireBase::PropertyMap &);
 
-    void changedPotential();
+        void _pvt_removed(const SireMol::PartialMolecule &mol);
 
-private:
-    /** The components of the energy */
-    Components ffcomponents;
+        void _pvt_changed(const SireMol::Molecule &mol, bool auto_update);
 
-    /** All of the molecules in this forcefield */
-    QMPotential::Molecules qmmols;
-};
+        void _pvt_changed(const QList<SireMol::Molecule> &mols, bool auto_update);
+
+        void _pvt_removedAll();
+
+        bool _pvt_wouldChangeProperties(SireMol::MolNum molnum, const SireBase::PropertyMap &map) const;
+
+        ////
+        //// Virtual functions of QMFF
+        ////
+
+        void changedPotential();
+
+    private:
+        /** The components of the energy */
+        Components ffcomponents;
+
+        /** All of the molecules in this forcefield */
+        QMPotential::Molecules qmmols;
+    };
 
 } // end of namespace Squire
 
-Q_DECLARE_METATYPE( Squire::QMFF )
+Q_DECLARE_METATYPE(Squire::QMFF)
 
-SIRE_EXPOSE_CLASS( Squire::QMFF )
+SIRE_EXPOSE_CLASS(Squire::QMFF)
 
 SIRE_END_HEADER
 

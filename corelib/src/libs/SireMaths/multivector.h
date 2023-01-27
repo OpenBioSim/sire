@@ -28,11 +28,11 @@
 #ifndef SIREMATHS_MULTIVECTOR_H
 #define SIREMATHS_MULTIVECTOR_H
 
-#include "SireMaths/vector.h"
 #include "SireMaths/multidouble.h"
+#include "SireMaths/vector.h"
 
 #ifdef SIRE_HAS_CPP_11
-    #include <functional>
+#include <functional>
 #endif
 
 SIRE_BEGIN_HEADER
@@ -40,182 +40,180 @@ SIRE_BEGIN_HEADER
 namespace SireMaths
 {
 
-class MultiVector;
-class MultiQuaternion;
+    class MultiVector;
+    class MultiQuaternion;
 
-SIREMATHS_EXPORT MultiVector operator+(const MultiVector &p1, const MultiVector &p2);
-SIREMATHS_EXPORT MultiVector operator-(const MultiVector &p1, const MultiVector &p2);
-SIREMATHS_EXPORT MultiVector operator*(const MultiVector &p1, const MultiDouble &c);
-SIREMATHS_EXPORT MultiVector operator*(const MultiDouble &c, const MultiVector &p1);
-SIREMATHS_EXPORT MultiVector operator/(const MultiVector &p1, const MultiDouble &c);
-SIREMATHS_EXPORT MultiQuaternion operator*(const MultiVector &p1, const MultiQuaternion &p2);
-SIREMATHS_EXPORT MultiQuaternion operator*(const MultiQuaternion &p1, const MultiVector &p2);
+    SIREMATHS_EXPORT MultiVector operator+(const MultiVector &p1, const MultiVector &p2);
+    SIREMATHS_EXPORT MultiVector operator-(const MultiVector &p1, const MultiVector &p2);
+    SIREMATHS_EXPORT MultiVector operator*(const MultiVector &p1, const MultiDouble &c);
+    SIREMATHS_EXPORT MultiVector operator*(const MultiDouble &c, const MultiVector &p1);
+    SIREMATHS_EXPORT MultiVector operator/(const MultiVector &p1, const MultiDouble &c);
+    SIREMATHS_EXPORT MultiQuaternion operator*(const MultiVector &p1, const MultiQuaternion &p2);
+    SIREMATHS_EXPORT MultiQuaternion operator*(const MultiQuaternion &p1, const MultiVector &p2);
 
-/**
-This is a vectorised version of Vector, e.g. x, y, and z
-are held as MultiDouble objects, meaning that this is a
-packed vector of vectors
+    /**
+    This is a vectorised version of Vector, e.g. x, y, and z
+    are held as MultiDouble objects, meaning that this is a
+    packed vector of vectors
 
-@author Christopher Woods
-*/
-class SIREMATHS_EXPORT MultiVector
-{
-public:
-    typedef MultiDouble value_type;
-
-    MultiVector();
-    MultiVector(const MultiDouble &value);
-    MultiVector(const MultiDouble &x, const MultiDouble &y, const MultiDouble &z);
-
-    MultiVector(const Vector *array, int size);
-    MultiVector(const QVector<Vector> &array);
-
-    #ifdef SIRE_HAS_CPP_11
-        MultiVector(const std::function<double ()> &func);
-        MultiVector(const std::function<Vector ()> &func);
-    #endif
-
-    MultiVector(const MultiVector &other);
-
-    ~MultiVector();
-
-    static QVector<MultiVector> fromArray(const Vector *array, int size);
-    static QVector<MultiVector> fromArray(const QVector<Vector> &array);
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT MultiVector
     {
-        return MultiVector::typeName();
-    }
+    public:
+        typedef MultiDouble value_type;
 
-    static int size();
-    static int count();
+        MultiVector();
+        MultiVector(const MultiDouble &value);
+        MultiVector(const MultiDouble &x, const MultiDouble &y, const MultiDouble &z);
 
-    MultiDouble* data();
-    const MultiDouble* data() const;
-    const MultiDouble* constData() const;
+        MultiVector(const Vector *array, int size);
+        MultiVector(const QVector<Vector> &array);
 
-    MultiDouble bearing() const;
-    MultiDouble bearingXY(const MultiVector &v) const;
-    MultiDouble bearingXZ(const MultiVector &v) const;
-    MultiDouble bearingYZ(const MultiVector &v) const;
+#ifdef SIRE_HAS_CPP_11
+        MultiVector(const std::function<double()> &func);
+        MultiVector(const std::function<Vector()> &func);
+#endif
 
-    const MultiDouble& x() const;
-    const MultiDouble& y() const;
-    const MultiDouble& z() const;
+        MultiVector(const MultiVector &other);
 
-    MultiDouble r() const;
-    MultiDouble g() const;
-    MultiDouble b() const;
+        ~MultiVector();
 
-    MultiVector direction() const;
-    MultiDouble magnitude() const;
+        static QVector<MultiVector> fromArray(const Vector *array, int size);
+        static QVector<MultiVector> fromArray(const QVector<Vector> &array);
 
-    static MultiDouble angle(const MultiVector &v0, const MultiVector &v1);
-    static MultiDouble angle(const MultiVector &v0, const MultiVector &v1,
-                             const MultiVector &v2);
+        static const char *typeName();
 
-    static MultiDouble dihedral(const MultiVector &v0, const MultiVector &v1,
-                                const MultiVector &v2, const MultiVector &v3);
+        const char *what() const
+        {
+            return MultiVector::typeName();
+        }
 
-    static MultiVector generate(const MultiDouble &dst, const MultiVector &v1,
-                                const MultiDouble &ang,
-                                const MultiVector &v2, const MultiDouble &dih,
-                                const MultiVector &v3);
+        static int size();
+        static int count();
 
-    MultiVector& operator=(const MultiVector &other);
+        MultiDouble *data();
+        const MultiDouble *data() const;
+        const MultiDouble *constData() const;
 
-    bool operator==(const MultiVector &p1) const;
-    bool operator!=(const MultiVector &p1) const;
+        MultiDouble bearing() const;
+        MultiDouble bearingXY(const MultiVector &v) const;
+        MultiDouble bearingXZ(const MultiVector &v) const;
+        MultiDouble bearingYZ(const MultiVector &v) const;
 
-    MultiVector& operator+=(const MultiVector &other);
-    MultiVector& operator-=(const MultiVector &other);
-    MultiVector& operator*=(const MultiDouble &other);
-    MultiVector& operator/=(const MultiDouble &other);
-    MultiVector operator-() const;
+        const MultiDouble &x() const;
+        const MultiDouble &y() const;
+        const MultiDouble &z() const;
 
-    void set(const MultiDouble &x, const MultiDouble &y, const MultiDouble &z);
-    void setX(const MultiDouble &val);
-    void setY(const MultiDouble &val);
-    void setZ(const MultiDouble &val);
-    void setR(const MultiDouble &val);
-    void setG(const MultiDouble &val);
-    void setB(const MultiDouble &val);
+        MultiDouble r() const;
+        MultiDouble g() const;
+        MultiDouble b() const;
 
-    void set(int i, const Vector &val);
-    void quickSet(int i, const Vector &val);
+        MultiVector direction() const;
+        MultiDouble magnitude() const;
 
-    Vector operator[](int i) const;
-    Vector at(int i) const;
-    Vector getitem(int i) const;
+        static MultiDouble angle(const MultiVector &v0, const MultiVector &v1);
+        static MultiDouble angle(const MultiVector &v0, const MultiVector &v1, const MultiVector &v2);
 
-    MultiDouble manhattanLength() const;
+        static MultiDouble dihedral(const MultiVector &v0, const MultiVector &v1, const MultiVector &v2,
+                                    const MultiVector &v3);
 
-    MultiDouble length() const;
-    MultiDouble length2() const;
+        static MultiVector generate(const MultiDouble &dst, const MultiVector &v1, const MultiDouble &ang,
+                                    const MultiVector &v2, const MultiDouble &dih, const MultiVector &v3);
 
-    MultiDouble invLength() const;
-    MultiDouble invLength2() const;
+        MultiVector &operator=(const MultiVector &other);
 
-    MultiVector normalise() const;
+        bool operator==(const MultiVector &p1) const;
+        bool operator!=(const MultiVector &p1) const;
 
-    QString toString() const;
+        MultiVector &operator+=(const MultiVector &other);
+        MultiVector &operator-=(const MultiVector &other);
+        MultiVector &operator*=(const MultiDouble &other);
+        MultiVector &operator/=(const MultiDouble &other);
+        MultiVector operator-() const;
 
-    static MultiDouble dot(const MultiVector &v0, const MultiVector &v1);
-    static MultiVector cross(const MultiVector &v0, const MultiVector &v1);
+        void set(const MultiDouble &x, const MultiDouble &y, const MultiDouble &z);
+        void setX(const MultiDouble &val);
+        void setY(const MultiDouble &val);
+        void setZ(const MultiDouble &val);
+        void setR(const MultiDouble &val);
+        void setG(const MultiDouble &val);
+        void setB(const MultiDouble &val);
 
-    void setMax(const MultiVector &other);
-    void setMin(const MultiVector &other);
+        void set(int i, const Vector &val);
+        void quickSet(int i, const Vector &val);
 
-    MultiVector max(const MultiVector &other) const;
-    MultiVector min(const MultiVector &other) const;
+        Vector operator[](int i) const;
+        Vector at(int i) const;
+        Vector getitem(int i) const;
 
-    static MultiDouble distance2(const MultiVector &v1, const MultiVector &v2);
-    static MultiDouble distance(const MultiVector &v1, const MultiVector &v2);
+        MultiDouble manhattanLength() const;
 
-    static MultiDouble invDistance(const MultiVector &v1, const MultiVector &v2);
-    static MultiDouble invDistance2(const MultiVector &v1, const MultiVector &v2);
+        MultiDouble length() const;
+        MultiDouble length2() const;
 
-    friend SIREMATHS_EXPORT MultiVector operator+(const MultiVector &p1, const MultiVector &p2);
-    friend SIREMATHS_EXPORT MultiVector operator-(const MultiVector &p1, const MultiVector &p2);
-    friend SIREMATHS_EXPORT MultiVector operator*(const MultiVector &p1, const MultiDouble &c);
-    friend SIREMATHS_EXPORT MultiVector operator*(const MultiDouble &c, const MultiVector &p1);
-    friend SIREMATHS_EXPORT MultiVector operator/(const MultiVector &p1, const MultiDouble &c);
-    friend SIREMATHS_EXPORT MultiQuaternion operator*(const MultiVector &p1, const MultiQuaternion &p2);
-    friend SIREMATHS_EXPORT MultiQuaternion operator*(const MultiQuaternion &p1, const MultiVector &p2);
+        MultiDouble invLength() const;
+        MultiDouble invLength2() const;
 
-    static void swap(MultiVector &v0, int idx0, MultiVector &v1, int idx1);
+        MultiVector normalise() const;
 
-protected:
-    /** The three values, representing the vectorised x, y and z components */
-    MultiDouble sc[3];
-};
+        QString toString() const;
+
+        static MultiDouble dot(const MultiVector &v0, const MultiVector &v1);
+        static MultiVector cross(const MultiVector &v0, const MultiVector &v1);
+
+        void setMax(const MultiVector &other);
+        void setMin(const MultiVector &other);
+
+        MultiVector max(const MultiVector &other) const;
+        MultiVector min(const MultiVector &other) const;
+
+        static MultiDouble distance2(const MultiVector &v1, const MultiVector &v2);
+        static MultiDouble distance(const MultiVector &v1, const MultiVector &v2);
+
+        static MultiDouble invDistance(const MultiVector &v1, const MultiVector &v2);
+        static MultiDouble invDistance2(const MultiVector &v1, const MultiVector &v2);
+
+        friend SIREMATHS_EXPORT MultiVector operator+(const MultiVector &p1, const MultiVector &p2);
+        friend SIREMATHS_EXPORT MultiVector operator-(const MultiVector &p1, const MultiVector &p2);
+        friend SIREMATHS_EXPORT MultiVector operator*(const MultiVector &p1, const MultiDouble &c);
+        friend SIREMATHS_EXPORT MultiVector operator*(const MultiDouble &c, const MultiVector &p1);
+        friend SIREMATHS_EXPORT MultiVector operator/(const MultiVector &p1, const MultiDouble &c);
+        friend SIREMATHS_EXPORT MultiQuaternion operator*(const MultiVector &p1, const MultiQuaternion &p2);
+        friend SIREMATHS_EXPORT MultiQuaternion operator*(const MultiQuaternion &p1, const MultiVector &p2);
+
+        static void swap(MultiVector &v0, int idx0, MultiVector &v1, int idx1);
+
+    protected:
+        /** The three values, representing the vectorised x, y and z components */
+        MultiDouble sc[3];
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Construct an empty vector */
-SIRE_ALWAYS_INLINE MultiVector::MultiVector()
-{}
+    /** Construct an empty vector */
+    SIRE_ALWAYS_INLINE MultiVector::MultiVector()
+    {
+    }
 
-/** Create the vector (val,val,val) */
-SIRE_ALWAYS_INLINE MultiVector::MultiVector(const MultiDouble &val)
-{
-    for (int i=0; i<3; i++)
-        sc[i] = val;
-}
+    /** Create the vector (val,val,val) */
+    SIRE_ALWAYS_INLINE MultiVector::MultiVector(const MultiDouble &val)
+    {
+        for (int i = 0; i < 3; i++)
+            sc[i] = val;
+    }
 
-/** Create the vector (xpos,ypos,zpos) */
-SIRE_ALWAYS_INLINE MultiVector::MultiVector(const MultiDouble &x, const MultiDouble &y, const MultiDouble &z)
-{
-    sc[0] = x;
-    sc[1] = y;
-    sc[2] = z;
-}
+    /** Create the vector (xpos,ypos,zpos) */
+    SIRE_ALWAYS_INLINE MultiVector::MultiVector(const MultiDouble &x, const MultiDouble &y, const MultiDouble &z)
+    {
+        sc[0] = x;
+        sc[1] = y;
+        sc[2] = z;
+    }
 
 #ifdef SIRE_HAS_CPP_11
     /** Construct a MultiVector from the passed function */
-    SIRE_ALWAYS_INLINE MultiVector::MultiVector(const std::function<double ()> &generator)
+    SIRE_ALWAYS_INLINE MultiVector::MultiVector(const std::function<double()> &generator)
     {
         sc[0] = MultiDouble(generator);
         sc[1] = MultiDouble(generator);
@@ -223,9 +221,9 @@ SIRE_ALWAYS_INLINE MultiVector::MultiVector(const MultiDouble &x, const MultiDou
     }
 
     /** Construct a MultiVector from the passed function */
-    SIRE_ALWAYS_INLINE MultiVector::MultiVector(const std::function<Vector ()> &generator)
+    SIRE_ALWAYS_INLINE MultiVector::MultiVector(const std::function<Vector()> &generator)
     {
-        for (int i=0; i<MultiDouble::count(); ++i)
+        for (int i = 0; i < MultiDouble::count(); ++i)
         {
             Vector v = generator();
             sc[0].set(i, v.x());
@@ -235,153 +233,151 @@ SIRE_ALWAYS_INLINE MultiVector::MultiVector(const MultiDouble &x, const MultiDou
     }
 #endif
 
-/** Copy assignment operator */
-SIRE_ALWAYS_INLINE MultiVector& MultiVector::operator=(const MultiVector &other)
-{
-    for (int i=0; i<3; ++i)
-        sc[i] = other.sc[i];
+    /** Copy assignment operator */
+    SIRE_ALWAYS_INLINE MultiVector &MultiVector::operator=(const MultiVector &other)
+    {
+        for (int i = 0; i < 3; ++i)
+            sc[i] = other.sc[i];
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Comparison operator */
-SIRE_ALWAYS_INLINE bool MultiVector::operator==(const MultiVector &other) const
-{
-    return &other == this or
-           (sc[0] == other.sc[0] and sc[1] == other.sc[1] and
-            sc[2] == other.sc[2]);
-}
+    /** Comparison operator */
+    SIRE_ALWAYS_INLINE bool MultiVector::operator==(const MultiVector &other) const
+    {
+        return &other == this or (sc[0] == other.sc[0] and sc[1] == other.sc[1] and sc[2] == other.sc[2]);
+    }
 
-/** Comparison operator */
-SIRE_ALWAYS_INLINE bool MultiVector::operator!=(const MultiVector &other) const
-{
-    return not operator==(other);
-}
+    /** Comparison operator */
+    SIRE_ALWAYS_INLINE bool MultiVector::operator!=(const MultiVector &other) const
+    {
+        return not operator==(other);
+    }
 
-/** Return a raw pointer to the array of coordinates */
-SIRE_ALWAYS_INLINE MultiDouble* MultiVector::data()
-{
-    return &(sc[0]);
-}
+    /** Return a raw pointer to the array of coordinates */
+    SIRE_ALWAYS_INLINE MultiDouble *MultiVector::data()
+    {
+        return &(sc[0]);
+    }
 
-/** Return a raw pointer to the array of coordinates */
-SIRE_ALWAYS_INLINE const MultiDouble* MultiVector::data() const
-{
-    return &(sc[0]);
-}
+    /** Return a raw pointer to the array of coordinates */
+    SIRE_ALWAYS_INLINE const MultiDouble *MultiVector::data() const
+    {
+        return &(sc[0]);
+    }
 
-/** Return a raw pointer to the array of coordinates */
-SIRE_ALWAYS_INLINE const MultiDouble* MultiVector::constData() const
-{
-    return &(sc[0]);
-}
+    /** Return a raw pointer to the array of coordinates */
+    SIRE_ALWAYS_INLINE const MultiDouble *MultiVector::constData() const
+    {
+        return &(sc[0]);
+    }
 
-/** Return the x component of the vector */
-SIRE_ALWAYS_INLINE const MultiDouble& MultiVector::x() const
-{
-    return sc[0];
-}
+    /** Return the x component of the vector */
+    SIRE_ALWAYS_INLINE const MultiDouble &MultiVector::x() const
+    {
+        return sc[0];
+    }
 
-/** Return the y component of the vector */
-SIRE_ALWAYS_INLINE const MultiDouble& MultiVector::y() const
-{
-    return sc[1];
-}
+    /** Return the y component of the vector */
+    SIRE_ALWAYS_INLINE const MultiDouble &MultiVector::y() const
+    {
+        return sc[1];
+    }
 
-/** Return the z component of the vector */
-SIRE_ALWAYS_INLINE const MultiDouble& MultiVector::z() const
-{
-    return sc[2];
-}
+    /** Return the z component of the vector */
+    SIRE_ALWAYS_INLINE const MultiDouble &MultiVector::z() const
+    {
+        return sc[2];
+    }
 
-/** Return the length of the vector */
-SIRE_ALWAYS_INLINE MultiDouble MultiVector::length() const
-{
-    MultiDouble lgth2(sc[0]);
-    lgth2 *= sc[0];
-    lgth2.multiplyAdd( sc[1], sc[1] );
-    lgth2.multiplyAdd( sc[2], sc[2] );
-    return lgth2.sqrt();
-}
+    /** Return the length of the vector */
+    SIRE_ALWAYS_INLINE MultiDouble MultiVector::length() const
+    {
+        MultiDouble lgth2(sc[0]);
+        lgth2 *= sc[0];
+        lgth2.multiplyAdd(sc[1], sc[1]);
+        lgth2.multiplyAdd(sc[2], sc[2]);
+        return lgth2.sqrt();
+    }
 
-/** Return the length^2 of the vector */
-SIRE_ALWAYS_INLINE MultiDouble MultiVector::length2() const
-{
-    MultiDouble lgth2(sc[0]);
-    lgth2 *= sc[0];
-    lgth2.multiplyAdd( sc[1], sc[1] );
-    lgth2.multiplyAdd( sc[2], sc[2] );
-    return lgth2;
-}
+    /** Return the length^2 of the vector */
+    SIRE_ALWAYS_INLINE MultiDouble MultiVector::length2() const
+    {
+        MultiDouble lgth2(sc[0]);
+        lgth2 *= sc[0];
+        lgth2.multiplyAdd(sc[1], sc[1]);
+        lgth2.multiplyAdd(sc[2], sc[2]);
+        return lgth2;
+    }
 
-/** Return the inverse of the length of the vector */
-SIRE_ALWAYS_INLINE MultiDouble MultiVector::invLength() const
-{
-    return length().reciprocal();
-}
+    /** Return the inverse of the length of the vector */
+    SIRE_ALWAYS_INLINE MultiDouble MultiVector::invLength() const
+    {
+        return length().reciprocal();
+    }
 
-/** Increment, decrement, negate etc. */
-SIRE_ALWAYS_INLINE MultiVector& MultiVector::operator+=(const MultiVector &other)
-{
-    for (int i=0; i<3; i++)
-        sc[i] += other.sc[i];
+    /** Increment, decrement, negate etc. */
+    SIRE_ALWAYS_INLINE MultiVector &MultiVector::operator+=(const MultiVector &other)
+    {
+        for (int i = 0; i < 3; i++)
+            sc[i] += other.sc[i];
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Increment, decrement, negate etc. */
-SIRE_ALWAYS_INLINE MultiVector& MultiVector::operator-=(const MultiVector &other)
-{
-    for (int i=0; i<3; i++)
-        sc[i] -= other.sc[i];
+    /** Increment, decrement, negate etc. */
+    SIRE_ALWAYS_INLINE MultiVector &MultiVector::operator-=(const MultiVector &other)
+    {
+        for (int i = 0; i < 3; i++)
+            sc[i] -= other.sc[i];
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Increment, decrement, negate etc. */
-SIRE_ALWAYS_INLINE MultiVector& MultiVector::operator*=(const MultiDouble &val)
-{
-    for (int i=0; i<3; i++)
-        sc[i] *= val;
+    /** Increment, decrement, negate etc. */
+    SIRE_ALWAYS_INLINE MultiVector &MultiVector::operator*=(const MultiDouble &val)
+    {
+        for (int i = 0; i < 3; i++)
+            sc[i] *= val;
 
-    return *this;
-}
+        return *this;
+    }
 
-/** Increment, decrement, negate etc. */
-SIRE_ALWAYS_INLINE MultiVector MultiVector::operator-() const
-{
-    return MultiVector(-sc[0],-sc[1],-sc[2]);
-}
+    /** Increment, decrement, negate etc. */
+    SIRE_ALWAYS_INLINE MultiVector MultiVector::operator-() const
+    {
+        return MultiVector(-sc[0], -sc[1], -sc[2]);
+    }
 
-/** Increment, decrement, negate etc. */
-SIRE_ALWAYS_INLINE MultiVector operator+(const MultiVector &p1, const MultiVector &p2)
-{
-    return MultiVector(p1.sc[0]+p2.sc[0], p1.sc[1]+p2.sc[1], p1.sc[2]+p2.sc[2]);
-}
+    /** Increment, decrement, negate etc. */
+    SIRE_ALWAYS_INLINE MultiVector operator+(const MultiVector &p1, const MultiVector &p2)
+    {
+        return MultiVector(p1.sc[0] + p2.sc[0], p1.sc[1] + p2.sc[1], p1.sc[2] + p2.sc[2]);
+    }
 
-/** Increment, decrement, negate etc. */
-SIRE_ALWAYS_INLINE MultiVector operator-(const MultiVector &p1, const MultiVector &p2)
-{
-    return MultiVector(p1.sc[0]-p2.sc[0], p1.sc[1]-p2.sc[1], p1.sc[2]-p2.sc[2]);
-}
+    /** Increment, decrement, negate etc. */
+    SIRE_ALWAYS_INLINE MultiVector operator-(const MultiVector &p1, const MultiVector &p2)
+    {
+        return MultiVector(p1.sc[0] - p2.sc[0], p1.sc[1] - p2.sc[1], p1.sc[2] - p2.sc[2]);
+    }
 
-/** Increment, decrement, negate etc. */
-SIRE_ALWAYS_INLINE MultiVector operator*(const MultiVector &p1, const MultiDouble &c)
-{
-    return MultiVector(p1.sc[0]*c, p1.sc[1]*c, p1.sc[2]*c);
-}
+    /** Increment, decrement, negate etc. */
+    SIRE_ALWAYS_INLINE MultiVector operator*(const MultiVector &p1, const MultiDouble &c)
+    {
+        return MultiVector(p1.sc[0] * c, p1.sc[1] * c, p1.sc[2] * c);
+    }
 
-/** Increment, decrement, negate etc. */
-SIRE_ALWAYS_INLINE MultiVector operator*(const MultiDouble &c, const MultiVector &p1)
-{
-    return MultiVector(p1.sc[0]*c, p1.sc[1]*c, p1.sc[2]*c);
-}
+    /** Increment, decrement, negate etc. */
+    SIRE_ALWAYS_INLINE MultiVector operator*(const MultiDouble &c, const MultiVector &p1)
+    {
+        return MultiVector(p1.sc[0] * c, p1.sc[1] * c, p1.sc[2] * c);
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMaths
 
-SIRE_EXPOSE_CLASS( SireMaths::MultiVector )
+SIRE_EXPOSE_CLASS(SireMaths::MultiVector)
 
 SIRE_END_HEADER
 

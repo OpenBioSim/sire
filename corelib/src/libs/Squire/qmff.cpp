@@ -28,12 +28,12 @@
 #include "qmff.h"
 #include "qmprogram.h"
 
-#include "SireMol/partialmolecule.h"
 #include "SireMol/moleculegroup.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireFF/energytable.h"
-#include "SireFF/forcetable.h"
 #include "SireFF/fieldtable.h"
+#include "SireFF/forcetable.h"
 #include "SireFF/potentialtable.h"
 
 #include "SireMM/cljprobe.h"
@@ -59,9 +59,7 @@ QDataStream &operator<<(QDataStream &ds, const QMFF &qmff)
 
     SharedDataStream sds(ds);
 
-    sds << static_cast<const G1FF&>(qmff)
-        << static_cast<const QMPotential&>(qmff)
-        << qmff.qmmols;
+    sds << static_cast<const G1FF &>(qmff) << static_cast<const QMPotential &>(qmff) << qmff.qmmols;
 
     return ds;
 }
@@ -75,9 +73,7 @@ QDataStream &operator>>(QDataStream &ds, QMFF &qmff)
     {
         SharedDataStream sds(ds);
 
-        sds >> static_cast<G1FF&>(qmff)
-            >> static_cast<QMPotential&>(qmff)
-            >> qmff.qmmols;
+        sds >> static_cast<G1FF &>(qmff) >> static_cast<QMPotential &>(qmff) >> qmff.qmmols;
 
         qmff._pvt_updateName();
     }
@@ -88,31 +84,31 @@ QDataStream &operator>>(QDataStream &ds, QMFF &qmff)
 }
 
 /** Construct an empty, unnamed QM forcefield */
-QMFF::QMFF() : ConcreteProperty<QMFF,G1FF>(), FF3D(), QMPotential()
+QMFF::QMFF() : ConcreteProperty<QMFF, G1FF>(), FF3D(), QMPotential()
 {
     this->_pvt_updateName();
 }
 
 /** Construct an empty QM forcefield called 'name' */
-QMFF::QMFF(const QString &name)
-     : ConcreteProperty<QMFF,G1FF>(), FF3D(), QMPotential()
+QMFF::QMFF(const QString &name) : ConcreteProperty<QMFF, G1FF>(), FF3D(), QMPotential()
 {
     FF::setName(name);
 }
 
 /** Copy constructor */
 QMFF::QMFF(const QMFF &other)
-     : ConcreteProperty<QMFF,G1FF>(other), FF3D(other), QMPotential(other),
-       ffcomponents(other.ffcomponents),
-       qmmols(other.qmmols)
-{}
+    : ConcreteProperty<QMFF, G1FF>(other), FF3D(other), QMPotential(other), ffcomponents(other.ffcomponents),
+      qmmols(other.qmmols)
+{
+}
 
 /** Destructor */
 QMFF::~QMFF()
-{}
+{
+}
 
 /** Copy assignment operator */
-QMFF& QMFF::operator=(const QMFF &other)
+QMFF &QMFF::operator=(const QMFF &other)
 {
     if (this != &other)
     {
@@ -140,14 +136,14 @@ bool QMFF::operator!=(const QMFF &other) const
 }
 
 /** Return the space within which the QM molecules exist */
-const Space& QMFF::space() const
+const Space &QMFF::space() const
 {
     return QMPotential::space();
 }
 
 /** Return the QM program that will be used to calculate the
     energies and forces on the molecules */
-const QMProgram& QMFF::quantumProgram() const
+const QMProgram &QMFF::quantumProgram() const
 {
     return QMPotential::quantumProgram();
 }
@@ -198,7 +194,7 @@ bool QMFF::setProperty(const QString &name, const Property &value)
 
     \throw SireBase::missing_property
 */
-const Property& QMFF::property(const QString &name) const
+const Property &QMFF::property(const QString &name) const
 {
     return QMPotential::property(name);
 }
@@ -211,13 +207,13 @@ bool QMFF::containsProperty(const QString &name) const
 }
 
 /** Return the properties available in this forcefield (and their values) */
-const Properties& QMFF::properties() const
+const Properties &QMFF::properties() const
 {
     return QMPotential::properties();
 }
 
 /** Return the energy components available to this forcefield */
-const QMFF::Components& QMFF::components() const
+const QMFF::Components &QMFF::components() const
 {
     return ffcomponents;
 }
@@ -225,7 +221,7 @@ const QMFF::Components& QMFF::components() const
 /** Trigger a complete recalculation of the QM energy */
 void QMFF::mustNowRecalculateFromScratch()
 {
-    //QM energies are always recalculated from scratch
+    // QM energies are always recalculated from scratch
     this->setDirty();
 }
 
@@ -239,15 +235,12 @@ void QMFF::changedPotential()
 
 void QMFF::energy(EnergyTable &energytable, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "QMFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("QMFF does not yet support energy calculations!"), CODELOC);
 }
 
-void QMFF::energy(EnergyTable &energytable, const Symbol &symbol,
-		  double scale_energy)
+void QMFF::energy(EnergyTable &energytable, const Symbol &symbol, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "QMFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("QMFF does not yet support energy calculations!"), CODELOC);
 }
 
 /** Calculate the QM forces on the molecules in this forcefield
@@ -263,12 +256,9 @@ void QMFF::force(ForceTable &forcetable, double scale_force)
     and add the results to the forces for the molecules contained
     in the table 'forcetable' - this scales the forces by
     the optional 'scale_force' */
-void QMFF::force(ForceTable &forcetable, const Symbol &symbol,
-                 double scale_force)
+void QMFF::force(ForceTable &forcetable, const Symbol &symbol, double scale_force)
 {
-    QMPotential::calculateForce(qmmols, forcetable,
-                                symbol, this->components(),
-                                scale_force);
+    QMPotential::calculateForce(qmmols, forcetable, symbol, this->components(), scale_force);
 }
 
 ////
@@ -278,7 +268,7 @@ void QMFF::force(ForceTable &forcetable, const Symbol &symbol,
 /** Recalculate the QM energy */
 void QMFF::recalculateEnergy()
 {
-    //QM energies are always recalculated from scratch
+    // QM energies are always recalculated from scratch
     QMEnergy nrg(0);
     QMPotential::calculateEnergy(qmmols, nrg);
 
@@ -305,11 +295,10 @@ void QMFF::_pvt_updateName()
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void QMFF::_pvt_added(const SireMol::PartialMolecule &molecule,
-                      const SireBase::PropertyMap &map)
+void QMFF::_pvt_added(const SireMol::PartialMolecule &molecule, const SireBase::PropertyMap &map)
 {
-    //add the molecule (don't record changes as everything
-    //is recalculated from scratch)
+    // add the molecule (don't record changes as everything
+    // is recalculated from scratch)
     qmmols.add(molecule, map, *this, false);
     G1FF::setDirty();
 }
@@ -317,7 +306,7 @@ void QMFF::_pvt_added(const SireMol::PartialMolecule &molecule,
 /** Record the fact that the molecule 'mol' has been removed from this forcefield */
 void QMFF::_pvt_removed(const SireMol::PartialMolecule &molecule)
 {
-    //remove the molecule, again without recording changes
+    // remove the molecule, again without recording changes
     qmmols.remove(molecule, *this, false);
     G1FF::setDirty();
 }
@@ -330,7 +319,7 @@ void QMFF::_pvt_removed(const SireMol::PartialMolecule &molecule)
 */
 void QMFF::_pvt_changed(const SireMol::Molecule &molecule, bool auto_update)
 {
-    //change the molecule, again without recording the change
+    // change the molecule, again without recording the change
     qmmols.change(molecule, *this, false);
     G1FF::setDirty();
 }
@@ -347,18 +336,16 @@ void QMFF::_pvt_changed(const QList<SireMol::Molecule> &mols, bool auto_update)
 
     try
     {
-        for (QList<SireMol::Molecule>::const_iterator it = mols.constBegin();
-             it != mols.constEnd();
-             ++it)
+        for (QList<SireMol::Molecule>::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
         {
             qmmols.change(*it, *this, false);
         }
 
         G1FF::setDirty();
     }
-    catch(...)
+    catch (...)
     {
-        //restore the state
+        // restore the state
         qmmols = old_mols;
         throw;
     }
@@ -373,8 +360,7 @@ void QMFF::_pvt_removedAll()
 
 /** Return whether or not the supplied property map contains different
     properties for the molecule with number 'molnum' */
-bool QMFF::_pvt_wouldChangeProperties(SireMol::MolNum molnum,
-                                      const SireBase::PropertyMap &map) const
+bool QMFF::_pvt_wouldChangeProperties(SireMol::MolNum molnum, const SireBase::PropertyMap &map) const
 {
     return qmmols.wouldChangeProperties(molnum, map);
 }
@@ -395,8 +381,7 @@ QString QMFF::forceCommandFile(const ForceTable &forcetable) const
 
 /** Return the command file that would be used to calculate the potential
     of the molecules in this forcefield */
-QString QMFF::potentialCommandFile(const PotentialTable &potentialtable,
-                                   const SireFF::Probe &probe) const
+QString QMFF::potentialCommandFile(const PotentialTable &potentialtable, const SireFF::Probe &probe) const
 {
     return QMPotential::potentialCommandFile(qmmols, potentialtable, probe);
 }
@@ -410,8 +395,7 @@ QString QMFF::potentialCommandFile(const PotentialTable &potentialtable) const
 
 /** Return the command file that would be used to calculate the fields
     of the molecules in this forcefield */
-QString QMFF::fieldCommandFile(const FieldTable &fieldtable,
-                               const SireFF::Probe &probe) const
+QString QMFF::fieldCommandFile(const FieldTable &fieldtable, const SireFF::Probe &probe) const
 {
     return QMPotential::fieldCommandFile(qmmols, fieldtable, probe);
 }
@@ -431,29 +415,25 @@ void QMFF::field(FieldTable &fieldtable, const SireFF::Probe &probe, double scal
 }
 
 /** Calculate the field from this forcefield in the passed fieldtable */
-void QMFF::field(FieldTable &fieldtable, const Symbol &component,
-                 const SireFF::Probe &probe, double scale_field)
+void QMFF::field(FieldTable &fieldtable, const Symbol &component, const SireFF::Probe &probe, double scale_field)
 {
     if (scale_field != 0)
-        QMPotential::calculateField(qmmols, fieldtable, probe, component,
-                                    this->components(), scale_field);
+        QMPotential::calculateField(qmmols, fieldtable, probe, component, this->components(), scale_field);
 }
 
 /** Calculate the potential from this forcefield in the passed potentialtable */
-void QMFF::potential(PotentialTable &potentialtable, const SireFF::Probe &probe,
-                     double scale_potential)
+void QMFF::potential(PotentialTable &potentialtable, const SireFF::Probe &probe, double scale_potential)
 {
     if (scale_potential != 0)
         QMPotential::calculatePotential(qmmols, potentialtable, probe, scale_potential);
 }
 
 /** Calculate the potential from this forcefield in the passed potentialtable */
-void QMFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                     const SireFF::Probe &probe, double scale_potential)
+void QMFF::potential(PotentialTable &potentialtable, const Symbol &component, const SireFF::Probe &probe,
+                     double scale_potential)
 {
     if (scale_potential != 0)
-        QMPotential::calculatePotential(qmmols, potentialtable, probe, component,
-                                        this->components(), scale_potential);
+        QMPotential::calculatePotential(qmmols, potentialtable, probe, component, this->components(), scale_potential);
 }
 
 /** Calculate the field from this forcefield in the passed fieldtable */
@@ -463,8 +443,7 @@ void QMFF::field(FieldTable &fieldtable, double scale_field)
 }
 
 /** Calculate the field from this forcefield in the passed fieldtable */
-void QMFF::field(FieldTable &fieldtable, const Symbol &component,
-                 double scale_field)
+void QMFF::field(FieldTable &fieldtable, const Symbol &component, double scale_field)
 {
     QMFF::field(fieldtable, component, QMPotential::Probe(), scale_field);
 }
@@ -476,13 +455,12 @@ void QMFF::potential(PotentialTable &potentialtable, double scale_potential)
 }
 
 /** Calculate the potential from this forcefield in the passed potentialtable */
-void QMFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                     double scale_potential)
+void QMFF::potential(PotentialTable &potentialtable, const Symbol &component, double scale_potential)
 {
     QMFF::potential(potentialtable, component, QMPotential::Probe(), scale_potential);
 }
 
-const char* QMFF::typeName()
+const char *QMFF::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<QMFF>() );
+    return QMetaType::typeName(qMetaTypeId<QMFF>());
 }

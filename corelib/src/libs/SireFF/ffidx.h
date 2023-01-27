@@ -36,75 +36,75 @@ SIRE_BEGIN_HEADER
 
 namespace SireFF
 {
-class FFIdx;
+    class FFIdx;
 }
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::FFIdx&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::FFIdx&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::FFIdx &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::FFIdx &);
 
 namespace SireFF
 {
 
-/** This is an ID object that is used to index forcefields (e.g. index
-    in a list or array).
+    /** This is an ID object that is used to index forcefields (e.g. index
+        in a list or array).
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFIdx : public SireID::Index_T_<FFIdx>, public FFID
-{
-
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const FFIdx&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFIdx&);
-
-public:
-    FFIdx();
-    explicit FFIdx(qint32 idx);
-
-    FFIdx(const FFIdx &other);
-
-    ~FFIdx();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFIdx : public SireID::Index_T_<FFIdx>, public FFID
     {
-        return FFIdx::typeName();
-    }
 
-    FFIdx* clone() const;
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const FFIdx &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, FFIdx &);
 
-    static FFIdx null();
+    public:
+        FFIdx();
+        explicit FFIdx(qint32 idx);
 
-    bool isNull() const;
+        FFIdx(const FFIdx &other);
 
-    uint hash() const;
+        ~FFIdx();
 
-    QString toString() const;
+        static const char *typeName();
 
-    FFIdx& operator=(const FFIdx &other);
+        const char *what() const
+        {
+            return FFIdx::typeName();
+        }
 
-    bool operator==(const SireID::ID &other) const;
+        FFIdx *clone() const;
 
-    using SireID::Index_T_<FFIdx>::operator=;
+        static FFIdx null();
 
-    using SireID::Index_T_<FFIdx>::operator==;
-    using SireID::Index_T_<FFIdx>::operator!=;
+        bool isNull() const;
 
-    using SireID::Index_T_<FFIdx>::operator+=;
-    using SireID::Index_T_<FFIdx>::operator++;
-    using SireID::Index_T_<FFIdx>::operator-=;
-    using SireID::Index_T_<FFIdx>::operator--;
+        uint hash() const;
 
-    using SireID::Index_T_<FFIdx>::map;
+        QString toString() const;
 
-    QList<FFIdx> map(const ForceFields &ffields) const;
-};
+        FFIdx &operator=(const FFIdx &other);
 
-}
+        bool operator==(const SireID::ID &other) const;
+
+        using SireID::Index_T_<FFIdx>::operator=;
+
+        using SireID::Index_T_<FFIdx>::operator==;
+        using SireID::Index_T_<FFIdx>::operator!=;
+
+        using SireID::Index_T_<FFIdx>::operator+=;
+        using SireID::Index_T_<FFIdx>::operator++;
+        using SireID::Index_T_<FFIdx>::operator-=;
+        using SireID::Index_T_<FFIdx>::operator--;
+
+        using SireID::Index_T_<FFIdx>::map;
+
+        QList<FFIdx> map(const ForceFields &ffields) const;
+    };
+
+} // namespace SireFF
 
 Q_DECLARE_METATYPE(SireFF::FFIdx);
 
-SIRE_EXPOSE_CLASS( SireFF::FFIdx )
+SIRE_EXPOSE_CLASS(SireFF::FFIdx)
 
 SIRE_END_HEADER
 

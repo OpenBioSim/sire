@@ -41,66 +41,65 @@ SIRE_BEGIN_HEADER
 namespace SireFF
 {
 
-using SireID::IDAndSet;
-using SireID::IDOrSet;
-using SireID::Specify;
+    using SireID::IDAndSet;
+    using SireID::IDOrSet;
+    using SireID::Specify;
 
-class FFIdx;
-class FFIdentifier;
-class FFName;
+    class FFIdx;
+    class FFIdentifier;
+    class FFName;
 
-class ForceFields;
+    class ForceFields;
 
-/** The base class of all ForceField identifiers
+    /** The base class of all ForceField identifiers
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFID : public SireID::ID
-{
-public:
-    typedef FFIdx Index;
-    typedef FFIdentifier Identifier;
-    typedef ForceFields SearchObject;
-
-    FFID();
-    FFID(const FFID &other);
-
-    virtual ~FFID();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFID : public SireID::ID
     {
-        return "SireFF::FFID";
-    }
+    public:
+        typedef FFIdx Index;
+        typedef FFIdentifier Identifier;
+        typedef ForceFields SearchObject;
 
-    virtual FFID* clone() const=0;
+        FFID();
+        FFID(const FFID &other);
 
-    Specify<FFID> operator[](int i) const;
-    Specify<FFID> operator()(int i) const;
-    Specify<FFID> operator()(int i, int j) const;
+        virtual ~FFID();
 
-    IDAndSet<FFID> operator+(const FFID &other) const;
-    IDAndSet<FFID> operator&&(const FFID &other) const;
-    IDAndSet<FFID> operator&(const FFID &other) const;
+        static const char *typeName()
+        {
+            return "SireFF::FFID";
+        }
 
-    IDOrSet<FFID> operator*(const FFID &other) const;
-    IDOrSet<FFID> operator||(const FFID &other) const;
-    IDOrSet<FFID> operator|(const FFID &other) const;
+        virtual FFID *clone() const = 0;
 
-    virtual QList<FFIdx> map(const ForceFields &ffields) const=0;
+        Specify<FFID> operator[](int i) const;
+        Specify<FFID> operator()(int i) const;
+        Specify<FFID> operator()(int i, int j) const;
 
-protected:
-    QList<FFIdx> processMatches(QList<FFIdx> &matches,
-                                const ForceFields &ffields) const;
-};
+        IDAndSet<FFID> operator+(const FFID &other) const;
+        IDAndSet<FFID> operator&&(const FFID &other) const;
+        IDAndSet<FFID> operator&(const FFID &other) const;
 
-}
+        IDOrSet<FFID> operator*(const FFID &other) const;
+        IDOrSet<FFID> operator||(const FFID &other) const;
+        IDOrSet<FFID> operator|(const FFID &other) const;
+
+        virtual QList<FFIdx> map(const ForceFields &ffields) const = 0;
+
+    protected:
+        QList<FFIdx> processMatches(QList<FFIdx> &matches, const ForceFields &ffields) const;
+    };
+
+} // namespace SireFF
 
 #include "ffidentifier.h"
 
-SIRE_EXPOSE_CLASS( SireFF::FFID )
-SIRE_EXPOSE_ALIAS( SireID::IDAndSet<SireFF::FFID>, SireFF::IDAndSet_FFID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDOrSet<SireFF::FFID>, SireFF::IDOrSet_FFID_ )
-SIRE_EXPOSE_ALIAS( SireID::Specify<SireFF::FFID>, SireFF::Specify_FFID_ )
+SIRE_EXPOSE_CLASS(SireFF::FFID)
+SIRE_EXPOSE_ALIAS(SireID::IDAndSet<SireFF::FFID>, SireFF::IDAndSet_FFID_)
+SIRE_EXPOSE_ALIAS(SireID::IDOrSet<SireFF::FFID>, SireFF::IDOrSet_FFID_)
+SIRE_EXPOSE_ALIAS(SireID::Specify<SireFF::FFID>, SireFF::Specify_FFID_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireID::Specify<SireFF::FFID>;

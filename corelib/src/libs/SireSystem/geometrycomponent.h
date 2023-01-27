@@ -42,93 +42,92 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class GeometryComponent;
+    class GeometryComponent;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::GeometryComponent&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::GeometryComponent&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::GeometryComponent &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::GeometryComponent &);
 
 namespace SireVol
 {
-class Space;
+    class Space;
 }
 
 namespace SireSystem
 {
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-/** This is the base class of constraints that constrains the value
-    of a system component
-    to be equal to a geometric expression. For example, you could
-    use this to constrain the value of the component "r_diff" to be
-    equal to the difference between the distances between two pairs
-    of atoms
+    /** This is the base class of constraints that constrains the value
+        of a system component
+        to be equal to a geometric expression. For example, you could
+        use this to constrain the value of the component "r_diff" to be
+        equal to the difference between the distances between two pairs
+        of atoms
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT GeometryComponent : public Constraint
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT GeometryComponent : public Constraint
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const GeometryComponent&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, GeometryComponent&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const GeometryComponent &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, GeometryComponent &);
 
-public:
-    GeometryComponent(const PropertyMap &map = PropertyMap());
-    GeometryComponent(const GeometryComponent &other);
+    public:
+        GeometryComponent(const PropertyMap &map = PropertyMap());
+        GeometryComponent(const GeometryComponent &other);
 
-    ~GeometryComponent();
+        ~GeometryComponent();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const SireCAS::Symbol& component() const;
+        const SireCAS::Symbol &component() const;
 
-    const SireCAS::Expression& expression() const;
+        const SireCAS::Expression &expression() const;
 
-protected:
-    GeometryComponent(const SireCAS::Symbol &constrained_symbol,
-                      const SireCAS::Expression &geometry_expression,
-                      const PropertyMap &map = PropertyMap());
+    protected:
+        GeometryComponent(const SireCAS::Symbol &constrained_symbol, const SireCAS::Expression &geometry_expression,
+                          const PropertyMap &map = PropertyMap());
 
-    GeometryComponent& operator=(const GeometryComponent &other);
-    bool operator==(const GeometryComponent &other) const;
-    bool operator!=(const GeometryComponent &other) const;
+        GeometryComponent &operator=(const GeometryComponent &other);
+        bool operator==(const GeometryComponent &other) const;
+        bool operator!=(const GeometryComponent &other) const;
 
-    void setSystem(const System &system);
-    bool mayChange(const Delta &delta, quint32 last_subversion) const;
+        void setSystem(const System &system);
+        bool mayChange(const Delta &delta, quint32 last_subversion) const;
 
-    bool fullApply(Delta &delta);
-    bool deltaApply(Delta &delta, quint32 last_subversion);
+        bool fullApply(Delta &delta);
+        bool deltaApply(Delta &delta, quint32 last_subversion);
 
-    virtual bool wouldChange(const Delta &delta, quint32 last_subversion) const=0;
-    virtual SireCAS::Values getValues(const System &system)=0;
+        virtual bool wouldChange(const Delta &delta, quint32 last_subversion) const = 0;
+        virtual SireCAS::Values getValues(const System &system) = 0;
 
-    const SireVol::Space& space() const;
-    virtual void setSpace(const SireVol::Space &space);
+        const SireVol::Space &space() const;
+        virtual void setSpace(const SireVol::Space &space);
 
-private:
-    /** The symbol that is constrained to match the geometry expression */
-    SireCAS::Symbol constrained_symbol;
+    private:
+        /** The symbol that is constrained to match the geometry expression */
+        SireCAS::Symbol constrained_symbol;
 
-    /** The expected current value of the symbol */
-    double expected_value;
+        /** The expected current value of the symbol */
+        double expected_value;
 
-    /** The current values of the symbols used by this constraint */
-    SireCAS::Values current_values;
+        /** The current values of the symbols used by this constraint */
+        SireCAS::Values current_values;
 
-    /** The geometry expression that is used to constrain the symbol */
-    SireCAS::Expression geometry_expression;
+        /** The geometry expression that is used to constrain the symbol */
+        SireCAS::Expression geometry_expression;
 
-    /** The property used to get the space */
-    SireBase::PropertyName space_property;
+        /** The property used to get the space */
+        SireBase::PropertyName space_property;
 
-    /** The space within which the geometry is evaluated */
-    SireVol::SpacePtr spce;
-};
+        /** The space within which the geometry is evaluated */
+        SireVol::SpacePtr spce;
+    };
 
-}
+} // namespace SireSystem
 
-SIRE_EXPOSE_CLASS( SireSystem::GeometryComponent )
+SIRE_EXPOSE_CLASS(SireSystem::GeometryComponent)
 
 SIRE_END_HEADER
 

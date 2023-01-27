@@ -51,23 +51,22 @@ QDataStream &operator>>(QDataStream &ds, CLJParam &cljparam)
 
     ds >> q >> lj;
 
-    cljparam = CLJParam( q * mod_electron, lj );
+    cljparam = CLJParam(q * mod_electron, lj);
 
     return ds;
 }
 
 /** Null constructor */
 CLJParam::CLJParam() : reduced_chg(0), ljid(0)
-{}
+{
+}
 
 /** Construct with the passed charge and LJ parameter. If 'auto_lock'
     is false then the LJParameterDB is assumed to be already locked,
     so is not locked */
-CLJParam::CLJParam(const Charge &charge, const LJParameter &ljparam, bool auto_lock)
-         : reduced_chg(0), ljid(0)
+CLJParam::CLJParam(const Charge &charge, const LJParameter &ljparam, bool auto_lock) : reduced_chg(0), ljid(0)
 {
-    static const double sqrt_one_over_4pieps0
-                            = std::sqrt(SireUnits::one_over_four_pi_eps0);
+    static const double sqrt_one_over_4pieps0 = std::sqrt(SireUnits::one_over_four_pi_eps0);
 
     reduced_chg = charge * sqrt_one_over_4pieps0;
 
@@ -82,16 +81,17 @@ CLJParam::CLJParam(const Charge &charge, const LJParameter &ljparam, bool auto_l
 }
 
 /** Copy constructor */
-CLJParam::CLJParam(const CLJParam &other)
-         : reduced_chg(other.reduced_chg), ljid(other.ljid)
-{}
+CLJParam::CLJParam(const CLJParam &other) : reduced_chg(other.reduced_chg), ljid(other.ljid)
+{
+}
 
 /** Destructor */
 CLJParam::~CLJParam()
-{}
+{
+}
 
 /** Copy assignment operator */
-CLJParam& CLJParam::operator=(const CLJParam &other)
+CLJParam &CLJParam::operator=(const CLJParam &other)
 {
     reduced_chg = other.reduced_chg;
     ljid = other.ljid;
@@ -110,7 +110,7 @@ bool CLJParam::operator!=(const CLJParam &other) const
     return ljid != other.ljid or reduced_chg != other.reduced_chg;
 }
 
-const char* CLJParam::typeName()
+const char *CLJParam::typeName()
 {
     return "SireMM::CLJParam";
 }
@@ -119,7 +119,7 @@ const char* CLJParam::typeName()
 Charge CLJParam::charge() const
 {
     static const double sqrt_4pieps0 = std::sqrt(SireUnits::four_pi_eps0);
-    return Charge( reduced_chg * sqrt_4pieps0 );
+    return Charge(reduced_chg * sqrt_4pieps0);
 }
 
 /** Return the LJ parameter */

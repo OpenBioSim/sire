@@ -30,8 +30,8 @@
 
 #include <QUuid>
 
-#include "SireBase/property.h"
 #include "SireBase/majorminorversion.h"
+#include "SireBase/property.h"
 
 #include "SireFF/ffidentifier.h"
 
@@ -43,408 +43,399 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class Constraint;
-class NullConstraint;
-class PropertyConstraint;
-class ComponentConstraint;
-class WindowedComponent;
-}
+    class Constraint;
+    class NullConstraint;
+    class PropertyConstraint;
+    class ComponentConstraint;
+    class WindowedComponent;
+} // namespace SireSystem
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::Constraint&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::Constraint&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::Constraint &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::Constraint &);
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::NullConstraint&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::NullConstraint&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::NullConstraint &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::NullConstraint &);
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::PropertyConstraint&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::PropertyConstraint&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::PropertyConstraint &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::PropertyConstraint &);
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::ComponentConstraint&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::ComponentConstraint&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::ComponentConstraint &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::ComponentConstraint &);
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::WindowedComponent&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::WindowedComponent&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::WindowedComponent &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::WindowedComponent &);
 
 namespace SireMol
 {
-class MolNum;
-class Molecules;
-}
+    class MolNum;
+    class Molecules;
+} // namespace SireMol
 
 namespace SireSystem
 {
 
-class System;
-class Delta;
+    class System;
+    class Delta;
 
-/** This is the base class of all constraints. A constraint is an object
-    that is added to a System that tries to ensure that a condition is
-    enforced. For example, a constraint could be used to change
-    the geometry of molecules with respect to lambda, or to change
-    forcefield parameters with respect to alpha
+    /** This is the base class of all constraints. A constraint is an object
+        that is added to a System that tries to ensure that a condition is
+        enforced. For example, a constraint could be used to change
+        the geometry of molecules with respect to lambda, or to change
+        forcefield parameters with respect to alpha
 
-    A Constraint class does its best to enforce a constraint - if it
-    can't, then an exception is raised when a violation of the
-    constraint is detected (SireSystem::constraint_error)
+        A Constraint class does its best to enforce a constraint - if it
+        can't, then an exception is raised when a violation of the
+        constraint is detected (SireSystem::constraint_error)
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT Constraint : public SireBase::Property
-{
-
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const Constraint&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, Constraint&);
-
-public:
-    Constraint();
-    Constraint(const Constraint &other);
-
-    virtual ~Constraint();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT Constraint : public SireBase::Property
     {
-        return "SireSystem::Constraint";
-    }
 
-    virtual Constraint* clone() const=0;
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const Constraint &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, Constraint &);
 
-    System apply(const System &system);
+    public:
+        Constraint();
+        Constraint(const Constraint &other);
 
-    bool isSatisfied(const System &system) const;
+        virtual ~Constraint();
 
-    bool mayAffect(const Delta &delta) const;
+        static const char *typeName()
+        {
+            return "SireSystem::Constraint";
+        }
 
-    void assertSatisfied(const System &system) const;
+        virtual Constraint *clone() const = 0;
 
-    static const NullConstraint& null();
+        System apply(const System &system);
 
-protected:
-    Constraint& operator=(const Constraint &other);
+        bool isSatisfied(const System &system) const;
 
-    void setSatisfied(const System &system, bool is_satisfied);
+        bool mayAffect(const Delta &delta) const;
 
-    bool wasLastSystem(const System &system) const;
-    bool wasLastSubVersion(const System &system) const;
-    bool wasLastSatisfied() const;
+        void assertSatisfied(const System &system) const;
 
-    void clearLastSystem();
+        static const NullConstraint &null();
 
-    friend class Delta; // friend to call 'apply' and 'committed'
-    friend class Constraints;  // friend to call 'apply' and 'committed'
-    bool apply(Delta &delta);
-    void committed(const System &system);
+    protected:
+        Constraint &operator=(const Constraint &other);
 
-    /** Set the baseline system for the constraint - this is
-        used to pre-calculate everything for the system
-        and to check if the constraint is satisfied */
-    virtual void setSystem(const System &system)=0;
+        void setSatisfied(const System &system, bool is_satisfied);
 
-    /** Return whether or not the changes in the passed
-        delta *may* have changed the system since the last
-        subversion 'subversion' */
-    virtual bool mayChange(const Delta &delta, quint32 last_subversion) const=0;
+        bool wasLastSystem(const System &system) const;
+        bool wasLastSubVersion(const System &system) const;
+        bool wasLastSatisfied() const;
 
-    /** Fully apply this constraint on the passed delta - this returns
-        whether or not this constraint affects the delta */
-    virtual bool fullApply(Delta &delta)=0;
+        void clearLastSystem();
 
-    /** Apply this constraint based on the delta, knowing that the
-        last application of this constraint was on this system,
-        at subversion number last_subversion */
-    virtual bool deltaApply(Delta &delta, quint32 last_subversion)=0;
+        friend class Delta;       // friend to call 'apply' and 'committed'
+        friend class Constraints; // friend to call 'apply' and 'committed'
+        bool apply(Delta &delta);
+        void committed(const System &system);
 
-private:
+        /** Set the baseline system for the constraint - this is
+            used to pre-calculate everything for the system
+            and to check if the constraint is satisfied */
+        virtual void setSystem(const System &system) = 0;
 
-    /** The UID of the last system on which this constraint
-        was applied */
-    QUuid last_sysuid;
+        /** Return whether or not the changes in the passed
+            delta *may* have changed the system since the last
+            subversion 'subversion' */
+        virtual bool mayChange(const Delta &delta, quint32 last_subversion) const = 0;
 
-    /** The version of the system on which this constraint
-        was last applied */
-    SireBase::Version last_sysversion;
+        /** Fully apply this constraint on the passed delta - this returns
+            whether or not this constraint affects the delta */
+        virtual bool fullApply(Delta &delta) = 0;
 
-    /** The subversion of the system on which this constraint
-        was last applied */
-    quint32 last_subversion;
+        /** Apply this constraint based on the delta, knowing that the
+            last application of this constraint was on this system,
+            at subversion number last_subversion */
+        virtual bool deltaApply(Delta &delta, quint32 last_subversion) = 0;
 
-    /** Whether or not this constraint was satisfied for the
-        last system on which it was applied */
-    bool last_was_satisfied;
-};
+    private:
+        /** The UID of the last system on which this constraint
+            was applied */
+        QUuid last_sysuid;
 
-/** The null constraint */
-class SIRESYSTEM_EXPORT NullConstraint
-         : public SireBase::ConcreteProperty<NullConstraint,Constraint>
-{
+        /** The version of the system on which this constraint
+            was last applied */
+        SireBase::Version last_sysversion;
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const NullConstraint&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, NullConstraint&);
+        /** The subversion of the system on which this constraint
+            was last applied */
+        quint32 last_subversion;
 
-public:
-    NullConstraint();
+        /** Whether or not this constraint was satisfied for the
+            last system on which it was applied */
+        bool last_was_satisfied;
+    };
 
-    NullConstraint(const NullConstraint &other);
+    /** The null constraint */
+    class SIRESYSTEM_EXPORT NullConstraint : public SireBase::ConcreteProperty<NullConstraint, Constraint>
+    {
 
-    ~NullConstraint();
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const NullConstraint &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, NullConstraint &);
 
-    NullConstraint& operator=(const NullConstraint &other);
+    public:
+        NullConstraint();
 
-    bool operator==(const NullConstraint &other) const;
-    bool operator!=(const NullConstraint &other) const;
+        NullConstraint(const NullConstraint &other);
 
-    static const char* typeName();
+        ~NullConstraint();
 
-    NullConstraint* clone() const;
+        NullConstraint &operator=(const NullConstraint &other);
 
-    QString toString() const;
+        bool operator==(const NullConstraint &other) const;
+        bool operator!=(const NullConstraint &other) const;
 
-protected:
-    void setSystem(const System &system);
+        static const char *typeName();
 
-    bool mayChange(const Delta &delta, quint32 last_subversion) const;
+        NullConstraint *clone() const;
 
-    bool fullApply(Delta &delta);
-    bool deltaApply(Delta &delta, quint32 last_subversion);
-};
+        QString toString() const;
 
-/** This constraint is used to constrain the value of a
-    numerical property of the system (or part of the system)
-    to a specific value, or to the result of an expression.
+    protected:
+        void setSystem(const System &system);
 
-    You can use this constraint, for example, to constrain
-    the value of alpha for soft-core forcefields to map
-    to the value of lambda
+        bool mayChange(const Delta &delta, quint32 last_subversion) const;
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT PropertyConstraint
-         : public SireBase::ConcreteProperty<PropertyConstraint,Constraint>
-{
+        bool fullApply(Delta &delta);
+        bool deltaApply(Delta &delta, quint32 last_subversion);
+    };
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const PropertyConstraint&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, PropertyConstraint&);
+    /** This constraint is used to constrain the value of a
+        numerical property of the system (or part of the system)
+        to a specific value, or to the result of an expression.
 
-public:
-    PropertyConstraint();
-    PropertyConstraint(const QString &name, const SireCAS::Expression &expression);
-    PropertyConstraint(const QString &name, const SireFF::FFID &ffid,
-                       const SireCAS::Expression &expression);
+        You can use this constraint, for example, to constrain
+        the value of alpha for soft-core forcefields to map
+        to the value of lambda
 
-    PropertyConstraint(const PropertyConstraint &other);
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT PropertyConstraint : public SireBase::ConcreteProperty<PropertyConstraint, Constraint>
+    {
 
-    ~PropertyConstraint();
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const PropertyConstraint &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, PropertyConstraint &);
 
-    PropertyConstraint& operator=(const PropertyConstraint &other);
+    public:
+        PropertyConstraint();
+        PropertyConstraint(const QString &name, const SireCAS::Expression &expression);
+        PropertyConstraint(const QString &name, const SireFF::FFID &ffid, const SireCAS::Expression &expression);
 
-    bool operator==(const PropertyConstraint &other) const;
-    bool operator!=(const PropertyConstraint &other) const;
+        PropertyConstraint(const PropertyConstraint &other);
 
-    static const char* typeName();
+        ~PropertyConstraint();
 
-    QString toString() const;
+        PropertyConstraint &operator=(const PropertyConstraint &other);
 
-protected:
-    void setSystem(const System &system);
+        bool operator==(const PropertyConstraint &other) const;
+        bool operator!=(const PropertyConstraint &other) const;
 
-    bool mayChange(const Delta &delta, quint32 last_subversion) const;
+        static const char *typeName();
 
-    bool fullApply(Delta &delta);
-    bool deltaApply(Delta &delta, quint32 last_subversion);
+        QString toString() const;
 
-private:
-    /** The ID of the forcefields whose properties are being constrained */
-    SireFF::FFIdentifier ffid;
+    protected:
+        void setSystem(const System &system);
 
-    /** The indexes of the forcefields that matched this ID the last
-        time this constraint was applied to a system */
-    QList<SireFF::FFIdx> ffidxs;
+        bool mayChange(const Delta &delta, quint32 last_subversion) const;
 
-    /** The name of the property to constrain */
-    QString propname;
+        bool fullApply(Delta &delta);
+        bool deltaApply(Delta &delta, quint32 last_subversion);
 
-    /** The expression used to calculate the value of the constraint */
-    SireCAS::Expression eqn;
+    private:
+        /** The ID of the forcefields whose properties are being constrained */
+        SireFF::FFIdentifier ffid;
 
-    /** The symbols representing the constant components needed
-        by the expression */
-    QSet<SireCAS::Symbol> syms;
+        /** The indexes of the forcefields that matched this ID the last
+            time this constraint was applied to a system */
+        QList<SireFF::FFIdx> ffidxs;
 
-    /** The values of the constant components the last time
-        this constraint was applied */
-    SireCAS::Values component_vals;
+        /** The name of the property to constrain */
+        QString propname;
 
-    /** The value of the constrained property the last time
-        this constraint was applied */
-    SireBase::PropertyPtr constrained_value;
+        /** The expression used to calculate the value of the constraint */
+        SireCAS::Expression eqn;
 
-    /** The target value of the constraint the last time it
-        was applied */
-    double target_value;
-};
+        /** The symbols representing the constant components needed
+            by the expression */
+        QSet<SireCAS::Symbol> syms;
 
-/** This constraint is used to constrain the value of a
-    component of the system to a specific value, or the result
-    of an expression based on other components in the system.
+        /** The values of the constant components the last time
+            this constraint was applied */
+        SireCAS::Values component_vals;
 
-    You can use this constraint, for example, to constrain
-    the value of lambda_forwards to equal Min( 1, lambda+delta_lambda )
+        /** The value of the constrained property the last time
+            this constraint was applied */
+        SireBase::PropertyPtr constrained_value;
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT ComponentConstraint
-         : public SireBase::ConcreteProperty<ComponentConstraint,Constraint>
-{
+        /** The target value of the constraint the last time it
+            was applied */
+        double target_value;
+    };
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const ComponentConstraint&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, ComponentConstraint&);
+    /** This constraint is used to constrain the value of a
+        component of the system to a specific value, or the result
+        of an expression based on other components in the system.
 
-public:
-    ComponentConstraint();
-    ComponentConstraint(const SireCAS::Symbol &component,
-                        const SireCAS::Expression &expression);
+        You can use this constraint, for example, to constrain
+        the value of lambda_forwards to equal Min( 1, lambda+delta_lambda )
 
-    ComponentConstraint(const ComponentConstraint &other);
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT ComponentConstraint : public SireBase::ConcreteProperty<ComponentConstraint, Constraint>
+    {
 
-    ~ComponentConstraint();
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const ComponentConstraint &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, ComponentConstraint &);
 
-    ComponentConstraint& operator=(const ComponentConstraint &other);
+    public:
+        ComponentConstraint();
+        ComponentConstraint(const SireCAS::Symbol &component, const SireCAS::Expression &expression);
 
-    bool operator==(const ComponentConstraint &other) const;
-    bool operator!=(const ComponentConstraint &other) const;
+        ComponentConstraint(const ComponentConstraint &other);
 
-    static const char* typeName();
+        ~ComponentConstraint();
 
-    QString toString() const;
+        ComponentConstraint &operator=(const ComponentConstraint &other);
 
-    const SireCAS::Symbol& component() const;
+        bool operator==(const ComponentConstraint &other) const;
+        bool operator!=(const ComponentConstraint &other) const;
 
-    const SireCAS::Expression& expression() const;
+        static const char *typeName();
 
-protected:
-    void setSystem(const System &system);
+        QString toString() const;
 
-    bool mayChange(const Delta &delta, quint32 last_subversion) const;
+        const SireCAS::Symbol &component() const;
 
-    bool fullApply(Delta &delta);
-    bool deltaApply(Delta &delta, quint32 last_subversion);
+        const SireCAS::Expression &expression() const;
 
-private:
-    /** The component whose value is constrained */
-    SireCAS::Symbol constrained_component;
+    protected:
+        void setSystem(const System &system);
 
-    /** The expression used to calculate the value of the constraint */
-    SireCAS::Expression eqn;
+        bool mayChange(const Delta &delta, quint32 last_subversion) const;
 
-    /** The symbols representing the constant components that
-        are used in the constraint expression */
-    QSet<SireCAS::Symbol> syms;
+        bool fullApply(Delta &delta);
+        bool deltaApply(Delta &delta, quint32 last_subversion);
 
-    /** The values of the constant components the last time
-        this constraint was applied */
-    SireCAS::Values component_vals;
+    private:
+        /** The component whose value is constrained */
+        SireCAS::Symbol constrained_component;
 
-    /** The last value of the constrained component */
-    double constrained_value;
+        /** The expression used to calculate the value of the constraint */
+        SireCAS::Expression eqn;
 
-    /** The target value of the equation */
-    double target_value;
+        /** The symbols representing the constant components that
+            are used in the constraint expression */
+        QSet<SireCAS::Symbol> syms;
 
-    /** Whether or not the last system had the constrained component */
-    bool has_constrained_value;
-};
+        /** The values of the constant components the last time
+            this constraint was applied */
+        SireCAS::Values component_vals;
 
-/** This constraint is used to constrain a component to adopt one of the values
-    from a set - this is used to implement FEP windows, where lambda_forwards
-    can be constrained to be the next lambda value along
+        /** The last value of the constrained component */
+        double constrained_value;
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT WindowedComponent
-         : public SireBase::ConcreteProperty<WindowedComponent,Constraint>
-{
+        /** The target value of the equation */
+        double target_value;
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const WindowedComponent&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, WindowedComponent&);
+        /** Whether or not the last system had the constrained component */
+        bool has_constrained_value;
+    };
 
-public:
-    WindowedComponent();
-    WindowedComponent(const SireCAS::Symbol &component,
-                      const SireCAS::Symbol &reference,
-                      const QVector<double> &values,
-                      int step_size = 1);
+    /** This constraint is used to constrain a component to adopt one of the values
+        from a set - this is used to implement FEP windows, where lambda_forwards
+        can be constrained to be the next lambda value along
 
-    WindowedComponent(const WindowedComponent &other);
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT WindowedComponent : public SireBase::ConcreteProperty<WindowedComponent, Constraint>
+    {
 
-    ~WindowedComponent();
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const WindowedComponent &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, WindowedComponent &);
 
-    WindowedComponent& operator=(const WindowedComponent &other);
+    public:
+        WindowedComponent();
+        WindowedComponent(const SireCAS::Symbol &component, const SireCAS::Symbol &reference, const QVector<double> &values,
+                          int step_size = 1);
 
-    bool operator==(const WindowedComponent &other) const;
-    bool operator!=(const WindowedComponent &other) const;
+        WindowedComponent(const WindowedComponent &other);
 
-    static const char* typeName();
+        ~WindowedComponent();
 
-    QString toString() const;
+        WindowedComponent &operator=(const WindowedComponent &other);
 
-    const SireCAS::Symbol& component() const;
-    const SireCAS::Symbol& referenceComponent() const;
+        bool operator==(const WindowedComponent &other) const;
+        bool operator!=(const WindowedComponent &other) const;
 
-    const QVector<double>& windowValues() const;
+        static const char *typeName();
 
-    int stepSize() const;
+        QString toString() const;
 
-protected:
-    void setSystem(const System &system);
+        const SireCAS::Symbol &component() const;
+        const SireCAS::Symbol &referenceComponent() const;
 
-    bool mayChange(const Delta &delta, quint32 last_subversion) const;
+        const QVector<double> &windowValues() const;
 
-    bool fullApply(Delta &delta);
-    bool deltaApply(Delta &delta, quint32 last_subversion);
+        int stepSize() const;
 
-private:
-    /** The component whose value is being constrained */
-    SireCAS::Symbol constrained_component;
+    protected:
+        void setSystem(const System &system);
 
-    /** The component whose value provides the value of the reference window */
-    SireCAS::Symbol reference_component;
+        bool mayChange(const Delta &delta, quint32 last_subversion) const;
 
-    /** The list of values of all of the windows */
-    QVector<double> window_values;
+        bool fullApply(Delta &delta);
+        bool deltaApply(Delta &delta, quint32 last_subversion);
 
-    /** The step size - this allows us to be set to a window that
-        is 'step_size' windows away from the reference */
-    qint32 step_size;
+    private:
+        /** The component whose value is being constrained */
+        SireCAS::Symbol constrained_component;
 
-    /** The value of the constant component the last time
-        this constraint was applied */
-    double component_val;
+        /** The component whose value provides the value of the reference window */
+        SireCAS::Symbol reference_component;
 
-    /** The last value of the constrained component */
-    double constrained_value;
+        /** The list of values of all of the windows */
+        QVector<double> window_values;
 
-    /** The target value of the equation */
-    double target_value;
+        /** The step size - this allows us to be set to a window that
+            is 'step_size' windows away from the reference */
+        qint32 step_size;
 
-    /** Whether or not the last system had the constrained component */
-    bool has_constrained_value;
-};
+        /** The value of the constant component the last time
+            this constraint was applied */
+        double component_val;
 
-typedef SireBase::PropPtr<Constraint> ConstraintPtr;
+        /** The last value of the constrained component */
+        double constrained_value;
 
-}
+        /** The target value of the equation */
+        double target_value;
 
-Q_DECLARE_METATYPE( SireSystem::NullConstraint )
-Q_DECLARE_METATYPE( SireSystem::PropertyConstraint )
-Q_DECLARE_METATYPE( SireSystem::ComponentConstraint )
-Q_DECLARE_METATYPE( SireSystem::WindowedComponent )
+        /** Whether or not the last system had the constrained component */
+        bool has_constrained_value;
+    };
 
-SIRE_EXPOSE_CLASS( SireSystem::Constraint )
-SIRE_EXPOSE_CLASS( SireSystem::NullConstraint )
-SIRE_EXPOSE_CLASS( SireSystem::PropertyConstraint )
-SIRE_EXPOSE_CLASS( SireSystem::ComponentConstraint )
-SIRE_EXPOSE_CLASS( SireSystem::WindowedComponent )
+    typedef SireBase::PropPtr<Constraint> ConstraintPtr;
 
-SIRE_EXPOSE_PROPERTY( SireSystem::ConstraintPtr, SireSystem::Constraint )
+} // namespace SireSystem
+
+Q_DECLARE_METATYPE(SireSystem::NullConstraint)
+Q_DECLARE_METATYPE(SireSystem::PropertyConstraint)
+Q_DECLARE_METATYPE(SireSystem::ComponentConstraint)
+Q_DECLARE_METATYPE(SireSystem::WindowedComponent)
+
+SIRE_EXPOSE_CLASS(SireSystem::Constraint)
+SIRE_EXPOSE_CLASS(SireSystem::NullConstraint)
+SIRE_EXPOSE_CLASS(SireSystem::PropertyConstraint)
+SIRE_EXPOSE_CLASS(SireSystem::ComponentConstraint)
+SIRE_EXPOSE_CLASS(SireSystem::WindowedComponent)
+
+SIRE_EXPOSE_PROPERTY(SireSystem::ConstraintPtr, SireSystem::Constraint)
 
 SIRE_END_HEADER
 

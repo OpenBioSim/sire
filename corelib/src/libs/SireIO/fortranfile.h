@@ -37,77 +37,77 @@ SIRE_BEGIN_HEADER
 namespace SireIO
 {
 
-/** This represents a single Fortran record, from which you
- *  can extract data
- */
-class FortranRecord
-{
-public:
-    FortranRecord();
-    FortranRecord(const QByteArray &data, bool is_little_endian);
-    FortranRecord(const FortranRecord &other);
+    /** This represents a single Fortran record, from which you
+     *  can extract data
+     */
+    class FortranRecord
+    {
+    public:
+        FortranRecord();
+        FortranRecord(const QByteArray &data, bool is_little_endian);
+        FortranRecord(const FortranRecord &other);
 
-    ~FortranRecord();
+        ~FortranRecord();
 
-    FortranRecord& operator=(const FortranRecord &other);
+        FortranRecord &operator=(const FortranRecord &other);
 
-    int size() const;
+        int size() const;
 
-    QString readChar(int n);
-    QVector<double> readFloat64(int n);
-    QVector<float> readFloat32(int n);
-    QVector<qint32> readInt32(int n);
-    QVector<qint64> readInt64(int n);
+        QString readChar(int n);
+        QVector<double> readFloat64(int n);
+        QVector<float> readFloat32(int n);
+        QVector<qint32> readInt32(int n);
+        QVector<qint64> readInt64(int n);
 
-    char readCharAt(int pos) const;
-    double readFloat64At(int pos) const;
-    float readFloat32At(int pos) const;
-    qint32 readInt32At(int pos) const;
-    qint64 readInt64At(int pos) const;
+        char readCharAt(int pos) const;
+        double readFloat64At(int pos) const;
+        float readFloat32At(int pos) const;
+        qint32 readInt32At(int pos) const;
+        qint64 readInt64At(int pos) const;
 
-private:
-    void _assertPosValid(int pos, int size) const;
-    void _assertValid(int n, int size) const;
+    private:
+        void _assertPosValid(int pos, int size) const;
+        void _assertValid(int n, int size) const;
 
-    QByteArray data;
-    int cursor;
-    bool is_little_endian;
-};
+        QByteArray data;
+        int cursor;
+        bool is_little_endian;
+    };
 
-/** This class is used to read and write fortran binary
- *  unformatted files (written as record files, not
- *  streaming files).
- *
- *  This automatically detects the endianness of the file
- */
-class FortranFile
-{
-public:
-    FortranFile();
-    FortranFile(const QString &filename);
-    FortranFile(const FortranFile &other);
-    ~FortranFile();
+    /** This class is used to read and write fortran binary
+     *  unformatted files (written as record files, not
+     *  streaming files).
+     *
+     *  This automatically detects the endianness of the file
+     */
+    class FortranFile
+    {
+    public:
+        FortranFile();
+        FortranFile(const QString &filename);
+        FortranFile(const FortranFile &other);
+        ~FortranFile();
 
-    FortranFile& operator=(const FortranFile &other);
+        FortranFile &operator=(const FortranFile &other);
 
-    int nRecords() const;
+        int nRecords() const;
 
-    FortranRecord operator[](int i) const;
+        FortranRecord operator[](int i) const;
 
-private:
-    bool try_read();
+    private:
+        bool try_read();
 
-    QString abs_filename;
+        QString abs_filename;
 
-    QVector<qint64> record_pointers;
-    QVector<qint64> record_sizes;
+        QVector<qint64> record_pointers;
+        QVector<qint64> record_sizes;
 
-    int int_size;
+        int int_size;
 
-    bool is_little_endian;
-};
+        bool is_little_endian;
+    };
 
-}
+} // namespace SireIO
 
 SIRE_END_HEADER
 

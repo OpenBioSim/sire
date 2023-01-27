@@ -63,24 +63,23 @@ QDataStream &operator>>(QDataStream &ds, LJPair &ljpair)
 
 /** Construct a dummy LJPair */
 LJPair::LJPair() : sig(0), eps(0)
-{}
+{
+}
 
 /** Construct from an LJParameter */
-LJPair::LJPair(const LJParameter &ljparam)
-            : sig(ljparam.sigma()),
-              eps(ljparam.epsilon())
-{}
+LJPair::LJPair(const LJParameter &ljparam) : sig(ljparam.sigma()), eps(ljparam.epsilon())
+{
+}
 
 /** Copy constructor */
-LJPair::LJPair(const LJPair &other)
-            : sig(other.sig), eps(other.eps)
-{}
+LJPair::LJPair(const LJPair &other) : sig(other.sig), eps(other.eps)
+{
+}
 
 /** Construct a LJPair that has the specified sigma and epsilon */
-LJPair::LJPair(double sigma, double epsilon)
-            : sig( std::abs(sigma) ), eps( std::abs(epsilon) )
+LJPair::LJPair(double sigma, double epsilon) : sig(std::abs(sigma)), eps(std::abs(epsilon))
 {
-    if ( SireMaths::isZero(sig) or SireMaths::isZero(eps) )
+    if (SireMaths::isZero(sig) or SireMaths::isZero(eps))
     {
         sig = 0;
         eps = 0;
@@ -89,29 +88,29 @@ LJPair::LJPair(double sigma, double epsilon)
 
 /** Construct a LJPair that is the combination of lj0 and lj1
     using the passed specified combining rules */
-LJPair::LJPair(const LJParameter &lj0, const LJParameter &lj1,
-               LJParameterDB::CombiningRules rules) : sig(0), eps(0)
+LJPair::LJPair(const LJParameter &lj0, const LJParameter &lj1, LJParameterDB::CombiningRules rules) : sig(0), eps(0)
 {
-    switch(rules)
+    switch (rules)
     {
-        case LJParameterDB::ARITHMETIC:
-            this->operator=( LJPair::arithmetic(lj0, lj1) );
-            break;
+    case LJParameterDB::ARITHMETIC:
+        this->operator=(LJPair::arithmetic(lj0, lj1));
+        break;
 
-        case LJParameterDB::GEOMETRIC:
-            this->operator=( LJPair::geometric(lj0, lj1) );
-            break;
+    case LJParameterDB::GEOMETRIC:
+        this->operator=(LJPair::geometric(lj0, lj1));
+        break;
     }
 }
 
 /** Destructor */
 LJPair::~LJPair()
-{}
+{
+}
 
 /** Return a dummy CLJPair */
 LJPair LJPair::dummy()
 {
-    return LJPair(0,0);
+    return LJPair(0, 0);
 }
 
 /** Return whether or not two LJPairs are equal */
@@ -129,16 +128,16 @@ bool LJPair::operator!=(const LJPair &other) const
 /** Return whether or not this is a dummy LJ parameter */
 bool LJPair::isDummy() const
 {
-    //we only need to compare sigma as this will be set to zero if
-    //epsilon is zero
+    // we only need to compare sigma as this will be set to zero if
+    // epsilon is zero
     return sig == 0.0;
 }
 
 /** Return whether or not this parameter has non-zero LJ parameters */
 bool LJPair::zeroLJ() const
 {
-    //we only need to compare sigma as this will be set to zero if
-    //epsilon is zero
+    // we only need to compare sigma as this will be set to zero if
+    // epsilon is zero
     return sig == 0.0;
 }
 
@@ -157,13 +156,13 @@ double LJPair::sqrtEpsilon() const
 /** Return the LJ 'A' parameter */
 double LJPair::A() const
 {
-    return double(4) * epsilon() * SireMaths::pow_12( sigma() );
+    return double(4) * epsilon() * SireMaths::pow_12(sigma());
 }
 
 /** Return the LJ 'B' parameter */
 double LJPair::B() const
 {
-    return double(4) * epsilon() * SireMaths::pow_6( sigma() );
+    return double(4) * epsilon() * SireMaths::pow_6(sigma());
 }
 
 /** Return the LJ 'rmin' parameter - this is the location of the minimum.
@@ -188,7 +187,7 @@ QString LJPair::toString() const
 */
 LJPair LJPair::fromSigmaAndEpsilon(double sigma, double epsilon)
 {
-    return LJPair(sigma,epsilon);
+    return LJPair(sigma, epsilon);
 }
 
 /** Return a LJ parameter that corresponds to the passed LJ parameters A and B,
@@ -206,8 +205,7 @@ LJPair LJPair::fromAAndB(double a, double b)
     //           epsilon = B / (4 (A/B) )
     //                   = B^2 / 4A
 
-    return LJPair( std::pow( (a/b), (1.0/6.0) ),
-                        (b*b) / (4.0*a) );
+    return LJPair(std::pow((a / b), (1.0 / 6.0)), (b * b) / (4.0 * a));
 }
 
 /** Return a LJ parameter that corresponds to the curve that has a minimum at
@@ -219,13 +217,12 @@ LJPair LJPair::fromAAndB(double a, double b)
 */
 LJPair LJPair::fromRMinAndEpsilon(double rmin, double epsilon)
 {
-    //sigma = rmin / 2^(1/6) - 2^(1/6) = 1.122462048309372981439932526193103967671
+    // sigma = rmin / 2^(1/6) - 2^(1/6) = 1.122462048309372981439932526193103967671
 
-    return LJPair( rmin / double(1.122462048309372981439932526193103967671),
-                        epsilon );
+    return LJPair(rmin / double(1.122462048309372981439932526193103967671), epsilon);
 }
 
-const char* LJPair::typeName()
+const char *LJPair::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<LJPair>() );
+    return QMetaType::typeName(qMetaTypeId<LJPair>());
 }

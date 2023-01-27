@@ -40,124 +40,124 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class Sampler;
+    class Sampler;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::Sampler&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::Sampler&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::Sampler &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::Sampler &);
 
 namespace SireMol
 {
-class Molecule;
-class PartialMolecule;
-}
+    class Molecule;
+    class PartialMolecule;
+} // namespace SireMol
 
 namespace SireSystem
 {
-class System;
+    class System;
 }
 
 namespace SireMove
 {
 
-using boost::tuple;
+    using boost::tuple;
 
-using SireBase::Property;
+    using SireBase::Property;
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-using SireMol::Molecule;
-using SireMol::PartialMolecule;
-using SireMol::MolGroupPtr;
-using SireMol::MoleculeGroup;
+    using SireMol::Molecule;
+    using SireMol::MoleculeGroup;
+    using SireMol::MolGroupPtr;
+    using SireMol::PartialMolecule;
 
-using SireSystem::System;
+    using SireSystem::System;
 
-class UniformSampler;
+    class UniformSampler;
 
-/** This is the base class of all Samplers. A Sampler is used
-    to pick a random molecule from a MoleculeGroup
+    /** This is the base class of all Samplers. A Sampler is used
+        to pick a random molecule from a MoleculeGroup
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT Sampler : public Property
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const Sampler&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Sampler&);
-
-public:
-    Sampler();
-    Sampler(const MoleculeGroup &molgroup);
-
-    Sampler(const Sampler &other);
-
-    virtual ~Sampler();
-
-    virtual Sampler* clone() const=0;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT Sampler : public Property
     {
-        return "SireMove::Sampler";
-    }
 
-    void setGenerator(const RanGenerator &generator);
-    const RanGenerator& generator() const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const Sampler &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, Sampler &);
 
-    const MoleculeGroup& group() const;
+    public:
+        Sampler();
+        Sampler(const MoleculeGroup &molgroup);
 
-    virtual void setGroup(const MoleculeGroup &molgroup);
+        Sampler(const Sampler &other);
 
-    virtual void updateFrom(const System &system);
+        virtual ~Sampler();
 
-    virtual tuple<PartialMolecule,double> sample() const=0;
-    virtual tuple<Molecule,double> sampleMolecule() const=0;
+        virtual Sampler *clone() const = 0;
 
-    virtual double probabilityOf(const PartialMolecule &molecule) const=0;
-    virtual double probabilityOfMolecule(const Molecule &molecule) const=0;
+        static const char *typeName()
+        {
+            return "SireMove::Sampler";
+        }
 
-    virtual bool isBiased() const;
+        void setGenerator(const RanGenerator &generator);
+        const RanGenerator &generator() const;
 
-    static const UniformSampler& null();
+        const MoleculeGroup &group() const;
 
-protected:
-    Sampler& operator=(const Sampler &other);
+        virtual void setGroup(const MoleculeGroup &molgroup);
 
-    bool operator==(const Sampler &other) const;
-    bool operator!=(const Sampler &other) const;
+        virtual void updateFrom(const System &system);
 
-private:
-    /** The molecule group from which molecules are sampled */
-    MolGroupPtr molgroup;
+        virtual tuple<PartialMolecule, double> sample() const = 0;
+        virtual tuple<Molecule, double> sampleMolecule() const = 0;
 
-    /** The random number generator used by the sampler */
-    RanGenerator rangen;
-};
+        virtual double probabilityOf(const PartialMolecule &molecule) const = 0;
+        virtual double probabilityOfMolecule(const Molecule &molecule) const = 0;
+
+        virtual bool isBiased() const;
+
+        static const UniformSampler &null();
+
+    protected:
+        Sampler &operator=(const Sampler &other);
+
+        bool operator==(const Sampler &other) const;
+        bool operator!=(const Sampler &other) const;
+
+    private:
+        /** The molecule group from which molecules are sampled */
+        MolGroupPtr molgroup;
+
+        /** The random number generator used by the sampler */
+        RanGenerator rangen;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the molecule group from which a molecule will be sampled */
-SIRE_ALWAYS_INLINE const MoleculeGroup& Sampler::group() const
-{
-    return molgroup;
-}
+    /** Return the molecule group from which a molecule will be sampled */
+    SIRE_ALWAYS_INLINE const MoleculeGroup &Sampler::group() const
+    {
+        return molgroup;
+    }
 
-/** Internal function used to return a reference to the random
-    number generator used by this sampler */
-SIRE_ALWAYS_INLINE const RanGenerator& Sampler::generator() const
-{
-    return rangen;
-}
+    /** Internal function used to return a reference to the random
+        number generator used by this sampler */
+    SIRE_ALWAYS_INLINE const RanGenerator &Sampler::generator() const
+    {
+        return rangen;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-typedef SireBase::PropPtr<Sampler> SamplerPtr;
+    typedef SireBase::PropPtr<Sampler> SamplerPtr;
 
-}
+} // namespace SireMove
 
-SIRE_EXPOSE_CLASS( SireMove::Sampler )
+SIRE_EXPOSE_CLASS(SireMove::Sampler)
 
-SIRE_EXPOSE_PROPERTY( SireMove::SamplerPtr, SireMove::Sampler )
+SIRE_EXPOSE_PROPERTY(SireMove::SamplerPtr, SireMove::Sampler)
 
 SIRE_END_HEADER
 

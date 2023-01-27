@@ -44,8 +44,7 @@ using namespace SireStream;
 static const RegisterMetaType<MolIdentifier> r_molid;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const MolIdentifier &molid)
+QDataStream &operator<<(QDataStream &ds, const MolIdentifier &molid)
 {
     writeHeader(ds, r_molid, 1);
 
@@ -55,8 +54,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       MolIdentifier &molid)
+QDataStream &operator>>(QDataStream &ds, MolIdentifier &molid)
 {
     VersionID v = readHeader(ds, r_molid);
 
@@ -65,33 +63,34 @@ QDataStream &operator>>(QDataStream &ds,
         SireStream::loadPolyPointer(ds, molid.d);
     }
     else
-        throw version_error( v, "1", r_molid, CODELOC );
+        throw version_error(v, "1", r_molid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 MolIdentifier::MolIdentifier() : MolID()
-{}
+{
+}
 
 /** Construct from the passed MolID */
-MolIdentifier::MolIdentifier(const MolID &molid)
-              : MolID()
+MolIdentifier::MolIdentifier(const MolID &molid) : MolID()
 {
     if (molid.isA<MolIdentifier>())
         d = molid.asA<MolIdentifier>().d;
     else if (not molid.isNull())
-        d.reset( molid.clone() );
+        d.reset(molid.clone());
 }
 
 /** Copy constructor */
-MolIdentifier::MolIdentifier(const MolIdentifier &other)
-              : MolID(other), d(other.d)
-{}
+MolIdentifier::MolIdentifier(const MolIdentifier &other) : MolID(other), d(other.d)
+{
+}
 
 /** Destructor */
 MolIdentifier::~MolIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool MolIdentifier::isNull() const
@@ -118,7 +117,7 @@ QString MolIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const MolID& MolIdentifier::base() const
+const MolID &MolIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -127,14 +126,14 @@ const MolID& MolIdentifier::base() const
 }
 
 /** Copy assignment operator */
-MolIdentifier& MolIdentifier::operator=(const MolIdentifier &other)
+MolIdentifier &MolIdentifier::operator=(const MolIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-MolIdentifier& MolIdentifier::operator=(const MolID &other)
+MolIdentifier &MolIdentifier::operator=(const MolID &other)
 {
     if (other.isA<MolIdentifier>())
         d = other.asA<MolIdentifier>().d;
@@ -224,12 +223,12 @@ QList<MolNum> MolIdentifier::map(const MolGroupsBase &molgroups) const
         return d->map(molgroups);
 }
 
-const char* MolIdentifier::typeName()
+const char *MolIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MolIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<MolIdentifier>());
 }
 
-MolIdentifier* MolIdentifier::clone() const
+MolIdentifier *MolIdentifier::clone() const
 {
     return new MolIdentifier(*this);
 }

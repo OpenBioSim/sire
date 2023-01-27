@@ -40,226 +40,223 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class MolDeleter;
-class NullDeleter;
+    class MolDeleter;
+    class NullDeleter;
 
-class SystemWideDeleter;
-class SpecifiedGroupsDeleter;
-}
+    class SystemWideDeleter;
+    class SpecifiedGroupsDeleter;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::MolDeleter&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::MolDeleter&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::MolDeleter &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::MolDeleter &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::NullDeleter&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::NullDeleter&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::NullDeleter &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::NullDeleter &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SpecifiedGroupsDeleter&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SpecifiedGroupsDeleter&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SpecifiedGroupsDeleter &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SpecifiedGroupsDeleter &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SystemWideDeleter&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SystemWideDeleter&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SystemWideDeleter &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SystemWideDeleter &);
 
 namespace SireSystem
 {
-class System;
+    class System;
 }
 
 namespace SireMove
 {
 
-using SireMol::MGID;
-using SireMol::MGIdentifier;
+    using SireMol::MGID;
+    using SireMol::MGIdentifier;
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-using SireSystem::System;
+    using SireSystem::System;
 
-/** This is the base class of all molecule deleters. A molecule deleter
-    is a manipulator that deletes (removes) molecules from Systems
-    (or just from molecule groups within a System)
+    /** This is the base class of all molecule deleters. A molecule deleter
+        is a manipulator that deletes (removes) molecules from Systems
+        (or just from molecule groups within a System)
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT MolDeleter : public SireBase::Property
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT MolDeleter : public SireBase::Property
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const MolDeleter&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, MolDeleter&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const MolDeleter &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, MolDeleter &);
 
-public:
-    MolDeleter();
-    MolDeleter(const MolDeleter &other);
+    public:
+        MolDeleter();
+        MolDeleter(const MolDeleter &other);
 
-    virtual ~MolDeleter();
+        virtual ~MolDeleter();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual MolDeleter* clone() const=0;
+        virtual MolDeleter *clone() const = 0;
 
-    virtual void setGenerator(const RanGenerator &generator)=0;
-    virtual const RanGenerator& generator() const=0;
+        virtual void setGenerator(const RanGenerator &generator) = 0;
+        virtual const RanGenerator &generator() const = 0;
 
-    virtual tuple<Molecule,double> deleteFrom(System &system)=0;
+        virtual tuple<Molecule, double> deleteFrom(System &system) = 0;
 
-    static const NullDeleter& null();
+        static const NullDeleter &null();
 
-protected:
-    MolDeleter& operator=(const MolDeleter &other);
+    protected:
+        MolDeleter &operator=(const MolDeleter &other);
 
-    bool operator==(const MolDeleter &other) const;
-    bool operator!=(const MolDeleter &other) const;
+        bool operator==(const MolDeleter &other) const;
+        bool operator!=(const MolDeleter &other) const;
 
-private:
-    /** The random number generator used by the sampler */
-    RanGenerator rangen;
-};
+    private:
+        /** The random number generator used by the sampler */
+        RanGenerator rangen;
+    };
 
-/** This is a null deleter - this deletes nothing! */
-class SIREMOVE_EXPORT NullDeleter
-            : public SireBase::ConcreteProperty<NullDeleter,MolDeleter>
-{
+    /** This is a null deleter - this deletes nothing! */
+    class SIREMOVE_EXPORT NullDeleter : public SireBase::ConcreteProperty<NullDeleter, MolDeleter>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const NullDeleter&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, NullDeleter&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const NullDeleter &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, NullDeleter &);
 
-public:
-    NullDeleter();
-    NullDeleter(const NullDeleter &other);
+    public:
+        NullDeleter();
+        NullDeleter(const NullDeleter &other);
 
-    ~NullDeleter();
+        ~NullDeleter();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    NullDeleter& operator=(const NullDeleter &other);
+        NullDeleter &operator=(const NullDeleter &other);
 
-    bool operator==(const NullDeleter &other) const;
-    bool operator!=(const NullDeleter &other) const;
+        bool operator==(const NullDeleter &other) const;
+        bool operator!=(const NullDeleter &other) const;
 
-    void setGenerator(const RanGenerator &generator);
-    const RanGenerator& generator() const;
+        void setGenerator(const RanGenerator &generator);
+        const RanGenerator &generator() const;
 
-    tuple<Molecule,double> deleteFrom(System &system);
-};
+        tuple<Molecule, double> deleteFrom(System &system);
+    };
 
-/** This deleter selects a molecule at random from an identified
-    molecule group (using the passed sampler) and then deletes
-    that molecule completely from the system
+    /** This deleter selects a molecule at random from an identified
+        molecule group (using the passed sampler) and then deletes
+        that molecule completely from the system
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SystemWideDeleter
-        : public SireBase::ConcreteProperty<SystemWideDeleter,MolDeleter>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SystemWideDeleter : public SireBase::ConcreteProperty<SystemWideDeleter, MolDeleter>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SystemWideDeleter&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SystemWideDeleter&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SystemWideDeleter &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SystemWideDeleter &);
 
-public:
-    SystemWideDeleter();
+    public:
+        SystemWideDeleter();
 
-    SystemWideDeleter(const MoleculeGroup &molgroup);
-    SystemWideDeleter(const Sampler &sampler);
+        SystemWideDeleter(const MoleculeGroup &molgroup);
+        SystemWideDeleter(const Sampler &sampler);
 
-    SystemWideDeleter(const SystemWideDeleter &other);
+        SystemWideDeleter(const SystemWideDeleter &other);
 
-    ~SystemWideDeleter();
+        ~SystemWideDeleter();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    SystemWideDeleter& operator=(const SystemWideDeleter &other);
+        SystemWideDeleter &operator=(const SystemWideDeleter &other);
 
-    bool operator==(const SystemWideDeleter &other) const;
-    bool operator!=(const SystemWideDeleter &other) const;
+        bool operator==(const SystemWideDeleter &other) const;
+        bool operator!=(const SystemWideDeleter &other) const;
 
-    void setGenerator(const RanGenerator &generator);
-    const RanGenerator& generator() const;
+        void setGenerator(const RanGenerator &generator);
+        const RanGenerator &generator() const;
 
-    const Sampler& sampler() const;
-    const MoleculeGroup& group() const;
+        const Sampler &sampler() const;
+        const MoleculeGroup &group() const;
 
-    void setSampler(const Sampler &sampler);
-    void setSampler(const MoleculeGroup &molgroup);
+        void setSampler(const Sampler &sampler);
+        void setSampler(const MoleculeGroup &molgroup);
 
-    void setGroup(const MoleculeGroup &molgroup);
+        void setGroup(const MoleculeGroup &molgroup);
 
-    tuple<Molecule,double> deleteFrom(System &system);
+        tuple<Molecule, double> deleteFrom(System &system);
 
-private:
-    /** The sampler that is used to select a molecule to be deleted */
-    SamplerPtr smplr;
-};
+    private:
+        /** The sampler that is used to select a molecule to be deleted */
+        SamplerPtr smplr;
+    };
 
-/** This is a molecule deleter that selects a molecule at random
-    from a specified molecule group (using the contained sampler)
-    and then deletes that molecule from a specific set of
-    molecule groups in the system
+    /** This is a molecule deleter that selects a molecule at random
+        from a specified molecule group (using the contained sampler)
+        and then deletes that molecule from a specific set of
+        molecule groups in the system
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SpecifiedGroupsDeleter
-            : public SireBase::ConcreteProperty<SpecifiedGroupsDeleter,MolDeleter>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SpecifiedGroupsDeleter : public SireBase::ConcreteProperty<SpecifiedGroupsDeleter, MolDeleter>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SpecifiedGroupsDeleter&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SpecifiedGroupsDeleter&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SpecifiedGroupsDeleter &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SpecifiedGroupsDeleter &);
 
-public:
-    SpecifiedGroupsDeleter();
+    public:
+        SpecifiedGroupsDeleter();
 
-    SpecifiedGroupsDeleter(const MoleculeGroup &molgroup, const MGID &mgid);
-    SpecifiedGroupsDeleter(const Sampler &sampler, const MGID &mgid);
+        SpecifiedGroupsDeleter(const MoleculeGroup &molgroup, const MGID &mgid);
+        SpecifiedGroupsDeleter(const Sampler &sampler, const MGID &mgid);
 
-    SpecifiedGroupsDeleter(const SpecifiedGroupsDeleter &other);
+        SpecifiedGroupsDeleter(const SpecifiedGroupsDeleter &other);
 
-    ~SpecifiedGroupsDeleter();
+        ~SpecifiedGroupsDeleter();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    SpecifiedGroupsDeleter& operator=(const SpecifiedGroupsDeleter &other);
+        SpecifiedGroupsDeleter &operator=(const SpecifiedGroupsDeleter &other);
 
-    bool operator==(const SpecifiedGroupsDeleter &other) const;
-    bool operator!=(const SpecifiedGroupsDeleter &other) const;
+        bool operator==(const SpecifiedGroupsDeleter &other) const;
+        bool operator!=(const SpecifiedGroupsDeleter &other) const;
 
-    void setGenerator(const RanGenerator &generator);
-    const RanGenerator& generator() const;
+        void setGenerator(const RanGenerator &generator);
+        const RanGenerator &generator() const;
 
-    const Sampler& sampler() const;
-    const MoleculeGroup& group() const;
+        const Sampler &sampler() const;
+        const MoleculeGroup &group() const;
 
-    void setSampler(const Sampler &sampler);
-    void setSampler(const MoleculeGroup &molgroup);
+        void setSampler(const Sampler &sampler);
+        void setSampler(const MoleculeGroup &molgroup);
 
-    void setGroup(const MoleculeGroup &molgroup);
+        void setGroup(const MoleculeGroup &molgroup);
 
-    const MGID& specifiedGroups() const;
+        const MGID &specifiedGroups() const;
 
-    void setSpecifiedGroups(const MGID &mgid);
+        void setSpecifiedGroups(const MGID &mgid);
 
-    tuple<Molecule,double> deleteFrom(System &system);
+        tuple<Molecule, double> deleteFrom(System &system);
 
-private:
-    /** The sampler used to select molecules to be deleted */
-    SamplerPtr smplr;
+    private:
+        /** The sampler used to select molecules to be deleted */
+        SamplerPtr smplr;
 
-    /** The ID used to find the groups from which the molecules
-        will be deleted */
-    MGIdentifier mgid;
-};
+        /** The ID used to find the groups from which the molecules
+            will be deleted */
+        MGIdentifier mgid;
+    };
 
-typedef SireBase::PropPtr<MolDeleter> MolDeleterPtr;
+    typedef SireBase::PropPtr<MolDeleter> MolDeleterPtr;
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::NullDeleter )
-Q_DECLARE_METATYPE( SireMove::SpecifiedGroupsDeleter )
-Q_DECLARE_METATYPE( SireMove::SystemWideDeleter )
+Q_DECLARE_METATYPE(SireMove::NullDeleter)
+Q_DECLARE_METATYPE(SireMove::SpecifiedGroupsDeleter)
+Q_DECLARE_METATYPE(SireMove::SystemWideDeleter)
 
-SIRE_EXPOSE_CLASS( SireMove::MolDeleter )
-SIRE_EXPOSE_CLASS( SireMove::NullDeleter )
-SIRE_EXPOSE_CLASS( SireMove::SpecifiedGroupsDeleter )
-SIRE_EXPOSE_CLASS( SireMove::SystemWideDeleter )
+SIRE_EXPOSE_CLASS(SireMove::MolDeleter)
+SIRE_EXPOSE_CLASS(SireMove::NullDeleter)
+SIRE_EXPOSE_CLASS(SireMove::SpecifiedGroupsDeleter)
+SIRE_EXPOSE_CLASS(SireMove::SystemWideDeleter)
 
-SIRE_EXPOSE_PROPERTY( SireMove::MolDeleterPtr, SireMove::MolDeleter )
+SIRE_EXPOSE_PROPERTY(SireMove::MolDeleterPtr, SireMove::MolDeleter)
 
 SIRE_END_HEADER
 

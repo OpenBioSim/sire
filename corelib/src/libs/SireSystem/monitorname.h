@@ -36,64 +36,64 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class MonitorName;
+    class MonitorName;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::MonitorName&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::MonitorName&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::MonitorName &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::MonitorName &);
 
 namespace SireSystem
 {
 
-/** This class holds the name of a simulation system
+    /** This class holds the name of a simulation system
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT MonitorName : public SireID::Name, public MonitorID
-{
-
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const MonitorName&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, MonitorName&);
-
-public:
-    MonitorName();
-    explicit MonitorName(const QString &name);
-
-    MonitorName(const MonitorName &other);
-
-    ~MonitorName();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT MonitorName : public SireID::Name, public MonitorID
     {
-        return MonitorName::typeName();
-    }
 
-    MonitorName* clone() const;
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const MonitorName &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, MonitorName &);
 
-    bool isNull() const;
+    public:
+        MonitorName();
+        explicit MonitorName(const QString &name);
 
-    uint hash() const;
+        MonitorName(const MonitorName &other);
 
-    QString toString() const;
+        ~MonitorName();
 
-    MonitorName& operator=(const MonitorName &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return MonitorName::typeName();
+        }
 
-    bool operator==(const MonitorName &other) const;
+        MonitorName *clone() const;
 
-    bool operator!=(const MonitorName &other) const;
+        bool isNull() const;
 
-    QList<MonitorName> map(const SystemMonitors &monitors) const;
-};
+        uint hash() const;
 
-}
+        QString toString() const;
 
-Q_DECLARE_METATYPE( SireSystem::MonitorName );
+        MonitorName &operator=(const MonitorName &other);
 
-SIRE_EXPOSE_CLASS( SireSystem::MonitorName )
+        bool operator==(const SireID::ID &other) const;
+
+        bool operator==(const MonitorName &other) const;
+
+        bool operator!=(const MonitorName &other) const;
+
+        QList<MonitorName> map(const SystemMonitors &monitors) const;
+    };
+
+} // namespace SireSystem
+
+Q_DECLARE_METATYPE(SireSystem::MonitorName);
+
+SIRE_EXPOSE_CLASS(SireSystem::MonitorName)
 
 SIRE_END_HEADER
 

@@ -26,14 +26,14 @@
 \*********************************************/
 
 #include "stringproperty.h"
-#include "numberproperty.h"
 #include "booleanproperty.h"
+#include "numberproperty.h"
 
 #include "SireError/errors.h"
 
-#include "SireStream/sharestrings.h"
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
+#include "SireStream/sharestrings.h"
 
 #include <QDebug>
 
@@ -69,38 +69,40 @@ QDataStream &operator>>(QDataStream &ds, StringProperty &s)
 }
 
 /** Constructor */
-StringProperty::StringProperty() : ConcreteProperty<StringProperty,Property>()
-{}
+StringProperty::StringProperty() : ConcreteProperty<StringProperty, Property>()
+{
+}
 
 /** Construct from the passed string */
-StringProperty::StringProperty(const QString &str)
-               : ConcreteProperty<StringProperty,Property>(),
-                 s(shareString(str))
-{}
+StringProperty::StringProperty(const QString &str) : ConcreteProperty<StringProperty, Property>(), s(shareString(str))
+{
+}
 
 /** Construct from the the passed number */
 StringProperty::StringProperty(double value)
-               : ConcreteProperty<StringProperty,Property>(),
-                 s(shareString(QString::number(value)))
-{}
+    : ConcreteProperty<StringProperty, Property>(), s(shareString(QString::number(value)))
+{
+}
 
 /** Cast from the passed property */
 StringProperty::StringProperty(const Property &other)
-               : ConcreteProperty<StringProperty,Property>(other),
-                 s(shareString(other.asAString()))
-{}
+    : ConcreteProperty<StringProperty, Property>(other), s(shareString(other.asAString()))
+{
+}
 
 /** Copy constructor */
 StringProperty::StringProperty(const StringProperty &other)
-               : ConcreteProperty<StringProperty,Property>(other), s(other.s)
-{}
+    : ConcreteProperty<StringProperty, Property>(other), s(other.s)
+{
+}
 
 /** Destructor */
 StringProperty::~StringProperty()
-{}
+{
+}
 
 /** Copy assignment operator */
-StringProperty& StringProperty::operator=(const StringProperty &other)
+StringProperty &StringProperty::operator=(const StringProperty &other)
 {
     s = other.s;
     return *this;
@@ -118,9 +120,9 @@ bool StringProperty::operator!=(const StringProperty &other) const
     return s != other.s;
 }
 
-const char* StringProperty::typeName()
+const char *StringProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<StringProperty>() );
+    return QMetaType::typeName(qMetaTypeId<StringProperty>());
 }
 
 QString StringProperty::toString() const
@@ -146,7 +148,7 @@ bool StringProperty::isADouble() const
         NumberProperty n(s);
         return n.isADouble();
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -159,7 +161,7 @@ bool StringProperty::isAnInteger() const
         NumberProperty n(s);
         return n.isAnInteger();
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -171,7 +173,7 @@ bool StringProperty::isABoolean() const
     {
         BooleanProperty b(s);
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -191,12 +193,11 @@ double StringProperty::asADouble() const
         NumberProperty n(s);
         return n.asADouble();
     }
-    catch(...)
-    {}
+    catch (...)
+    {
+    }
 
-    throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast the StringProperty('%1') as a double")
-                .arg(s), CODELOC );
+    throw SireError::invalid_cast(QObject::tr("Cannot cast the StringProperty('%1') as a double").arg(s), CODELOC);
 
     return 0;
 }
@@ -208,12 +209,11 @@ int StringProperty::asAnInteger() const
         NumberProperty n(s);
         return n.asAnInteger();
     }
-    catch(...)
-    {}
+    catch (...)
+    {
+    }
 
-    throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast the StringProperty('%1') as an integer")
-                .arg(s), CODELOC );
+    throw SireError::invalid_cast(QObject::tr("Cannot cast the StringProperty('%1') as an integer").arg(s), CODELOC);
 
     return 0;
 }
@@ -225,12 +225,11 @@ bool StringProperty::asABoolean() const
         BooleanProperty n(s);
         return n.asABoolean();
     }
-    catch(...)
-    {}
+    catch (...)
+    {
+    }
 
-    throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast the StringProperty('%1') as a boolean")
-                .arg(s), CODELOC );
+    throw SireError::invalid_cast(QObject::tr("Cannot cast the StringProperty('%1') as a boolean").arg(s), CODELOC);
 
     return 0;
 }

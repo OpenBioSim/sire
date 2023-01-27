@@ -29,8 +29,8 @@
 
 #include "ensemble.h"
 
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
+#include "SireUnits/units.h"
 
 #include "SireError/errors.h"
 
@@ -76,11 +76,8 @@ QDataStream &operator<<(QDataStream &ds, const Ensemble &ensemble)
 {
     writeHeader(ds, r_ensemble, 1);
 
-    ds << double(ensemble.ensemble_temperature)
-       << double(ensemble.ensemble_pressure)
-       << double(ensemble.ensemble_fugacity)
-       << ensemble.ensemble_state
-       << static_cast<const Property &>(ensemble);
+    ds << double(ensemble.ensemble_temperature) << double(ensemble.ensemble_pressure)
+       << double(ensemble.ensemble_fugacity) << ensemble.ensemble_state << static_cast<const Property &>(ensemble);
 
     return ds;
 }
@@ -131,8 +128,7 @@ static CharArray<quint32> getDescription(quint8 n, quint8 v, quint8 t)
 
 /** Return the merged version of the passed two states */
 template <class T>
-static CharArray<T> merge(const CharArray<T> &des0,
-                          const CharArray<T> &des1)
+static CharArray<T> merge(const CharArray<T> &des0, const CharArray<T> &des1)
 {
     CharArray<T> merged;
 
@@ -145,19 +141,15 @@ static CharArray<T> merge(const CharArray<T> &des0,
 }
 
 /** Construct an NVE ensemble */
-Ensemble::Ensemble()
-    : ensemble_temperature(0), ensemble_pressure(0),
-      ensemble_fugacity(0)
+Ensemble::Ensemble() : ensemble_temperature(0), ensemble_pressure(0), ensemble_fugacity(0)
 {
     ensemble_state = getDescription(N, V, E);
 }
 
 /** Copy constructor */
 Ensemble::Ensemble(const Ensemble &other)
-    : ensemble_temperature(other.ensemble_temperature),
-      ensemble_pressure(other.ensemble_pressure),
-      ensemble_fugacity(other.ensemble_fugacity),
-      ensemble_state(other.ensemble_state)
+    : ensemble_temperature(other.ensemble_temperature), ensemble_pressure(other.ensemble_pressure),
+      ensemble_fugacity(other.ensemble_fugacity), ensemble_state(other.ensemble_state)
 {
 }
 
@@ -183,10 +175,8 @@ Ensemble &Ensemble::operator=(const Ensemble &other)
 /** Comparison operator */
 bool Ensemble::operator==(const Ensemble &other) const
 {
-    return ensemble_state == other.ensemble_state and
-           ensemble_temperature == other.ensemble_temperature and
-           ensemble_pressure == other.ensemble_pressure and
-           ensemble_fugacity == other.ensemble_fugacity;
+    return ensemble_state == other.ensemble_state and ensemble_temperature == other.ensemble_temperature and
+           ensemble_pressure == other.ensemble_pressure and ensemble_fugacity == other.ensemble_fugacity;
 }
 
 /** Comparison operator */
@@ -358,28 +348,24 @@ QString Ensemble::toString() const
 
     if (this->isConstantChemicalPotential())
     {
-        parts.append(QObject::tr("chemical potential = %1 kcal mol-1")
-                         .arg(this->chemicalPotential().to(kcal_per_mol)));
+        parts.append(QObject::tr("chemical potential = %1 kcal mol-1").arg(this->chemicalPotential().to(kcal_per_mol)));
     }
 
     if (this->isConstantPressure())
     {
-        parts.append(QObject::tr("pressure = %1 atm")
-                         .arg(this->pressure().to(atm)));
+        parts.append(QObject::tr("pressure = %1 atm").arg(this->pressure().to(atm)));
     }
 
     if (this->isConstantTemperature())
     {
-        parts.append(QObject::tr("temperature = %1 C")
-                         .arg(this->temperature().to(Celsius())));
+        parts.append(QObject::tr("temperature = %1 C").arg(this->temperature().to(Celsius())));
     }
 
     if (parts.isEmpty())
         return this->name();
 
     else
-        return QString("%1 { %2 }")
-            .arg(this->name(), Sire::toString(parts));
+        return QString("%1 { %2 }").arg(this->name(), Sire::toString(parts));
 }
 
 /** Return the temperature of this ensemble
@@ -389,10 +375,8 @@ QString Ensemble::toString() const
 Temperature Ensemble::temperature() const
 {
     if (not this->isConstantTemperature())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "The %1 ensemble does not have a constant temperature.")
-                                                .arg(this->shortHand()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("The %1 ensemble does not have a constant temperature.").arg(this->shortHand()), CODELOC);
 
     return ensemble_temperature;
 }
@@ -404,10 +388,8 @@ Temperature Ensemble::temperature() const
 Pressure Ensemble::pressure() const
 {
     if (not this->isConstantPressure())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "The %1 ensemble does not have a constant pressure.")
-                                                .arg(this->shortHand()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("The %1 ensemble does not have a constant pressure.").arg(this->shortHand()), CODELOC);
 
     return ensemble_pressure;
 }
@@ -419,10 +401,8 @@ Pressure Ensemble::pressure() const
 Pressure Ensemble::fugacity() const
 {
     if (not this->isConstantFugacity())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "The %1 ensemble does not have a constant fugacity.")
-                                                .arg(this->shortHand()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("The %1 ensemble does not have a constant fugacity.").arg(this->shortHand()), CODELOC);
 
     return ensemble_fugacity;
 }
@@ -434,10 +414,9 @@ Pressure Ensemble::fugacity() const
 MolarEnergy Ensemble::chemicalPotential() const
 {
     if (not this->isConstantChemicalPotential())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "The %1 ensemble does not have a constant chemical potential.")
-                                                .arg(this->shortHand()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("The %1 ensemble does not have a constant chemical potential.").arg(this->shortHand()),
+            CODELOC);
 
     // mu = mu_0 + RT ln ( f / P_0 )
     //
@@ -463,8 +442,7 @@ Ensemble Ensemble::merge(const Ensemble &e0, const Ensemble &e1)
     {
         if (e0.ensemble_state[0] == Mu)
         {
-            if (e1.ensemble_state[0] == Mu and
-                e0.fugacity() != e1.fugacity())
+            if (e1.ensemble_state[0] == Mu and e0.fugacity() != e1.fugacity())
             {
                 merged.ensemble_state[0] = UNKNOWN;
             }
@@ -479,8 +457,7 @@ Ensemble Ensemble::merge(const Ensemble &e0, const Ensemble &e1)
     {
         if (e0.ensemble_state[1] == P)
         {
-            if (e1.ensemble_state[1] == P and
-                e0.pressure() != e1.pressure())
+            if (e1.ensemble_state[1] == P and e0.pressure() != e1.pressure())
             {
                 merged.ensemble_state[1] = UNKNOWN;
             }
@@ -495,8 +472,7 @@ Ensemble Ensemble::merge(const Ensemble &e0, const Ensemble &e1)
     {
         if (e0.ensemble_state[2] == T)
         {
-            if (e1.ensemble_state[2] == T and
-                e0.temperature() != e1.temperature())
+            if (e1.ensemble_state[2] == T and e0.temperature() != e1.temperature())
             {
                 merged.ensemble_state[2] = UNKNOWN;
             }
@@ -537,8 +513,7 @@ Ensemble Ensemble::NVT(const Temperature &temperature)
 
 /** Return the NPT ensemble for the temperature 'temperature' and
     the pressure 'pressure' */
-Ensemble Ensemble::NPT(const Temperature &temperature,
-                       const Pressure &pressure)
+Ensemble Ensemble::NPT(const Temperature &temperature, const Pressure &pressure)
 {
     Ensemble npt;
     npt.ensemble_state = getDescription(N, P, T);
@@ -549,8 +524,7 @@ Ensemble Ensemble::NPT(const Temperature &temperature,
 
 /** Return the MuVT ensemble for the temperature 'temperature' and
     the fugacity 'fugacity' */
-Ensemble Ensemble::MuVT(const Temperature &temperature,
-                        const Pressure &fugacity)
+Ensemble Ensemble::MuVT(const Temperature &temperature, const Pressure &fugacity)
 {
     Ensemble mupt;
     mupt.ensemble_state = getDescription(Mu, V, T);
@@ -561,8 +535,7 @@ Ensemble Ensemble::MuVT(const Temperature &temperature,
 
 /** Return the MuVT ensemble for the temperature 'temperature' and
     the chemical potential 'chemical_potential' */
-Ensemble Ensemble::MuVT(const Temperature &temperature,
-                        const MolarEnergy &chemical_potential)
+Ensemble Ensemble::MuVT(const Temperature &temperature, const MolarEnergy &chemical_potential)
 {
     // mu = mu_0 + RT ln ( f / P_0 )
     //
@@ -573,8 +546,7 @@ Ensemble Ensemble::MuVT(const Temperature &temperature,
 
     // we will actually use mu - mu_0  == RT ln (f / P_0 )
     // so chemical potential = mu - mu_0
-    return Ensemble::MuVT(temperature,
-                          std::exp(chemical_potential / (gasr.value() * temperature)) * bar);
+    return Ensemble::MuVT(temperature, std::exp(chemical_potential / (gasr.value() * temperature)) * bar);
 }
 
 /** Syntactic sugar to return the NVE ensemble */
@@ -590,22 +562,19 @@ Ensemble Ensemble::canonical(const Temperature &temperature)
 }
 
 /** Syntactic sugar to return the NPT ensemble */
-Ensemble Ensemble::isothermalIsobaric(const Temperature &temperature,
-                                      const Pressure &pressure)
+Ensemble Ensemble::isothermalIsobaric(const Temperature &temperature, const Pressure &pressure)
 {
     return Ensemble::NPT(temperature, pressure);
 }
 
 /** Syntactic sugar to return the MuVT ensemble */
-Ensemble Ensemble::grandCanonical(const Temperature &temperature,
-                                  const Pressure &fugacity)
+Ensemble Ensemble::grandCanonical(const Temperature &temperature, const Pressure &fugacity)
 {
     return Ensemble::MuVT(temperature, fugacity);
 }
 
 /** Syntactic sugar to return the MuVT ensemble */
-Ensemble Ensemble::grandCanonical(const Temperature &temperature,
-                                  const MolarEnergy &chemical_potential)
+Ensemble Ensemble::grandCanonical(const Temperature &temperature, const MolarEnergy &chemical_potential)
 {
     return Ensemble::MuVT(temperature, chemical_potential);
 }

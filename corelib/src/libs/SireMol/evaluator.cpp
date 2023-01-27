@@ -26,29 +26,29 @@
 \*********************************************/
 
 #include "evaluator.h"
-#include "atomcoords.h"
-#include "atommasses.h"
+#include "angleid.h"
 #include "atomcharges.h"
+#include "atomcoords.h"
 #include "atomelements.h"
+#include "atommasses.h"
 #include "atommatcher.h"
 #include "atommatchers.h"
 #include "bondid.h"
-#include "angleid.h"
-#include "dihedralid.h"
 #include "connectivity.h"
+#include "core.h"
+#include "dihedralid.h"
+#include "editor.hpp"
 #include "molecule.h"
 #include "mover.hpp"
-#include "editor.hpp"
-#include "core.h"
 
 #include "SireVol/coordgroup.h"
 
-#include "SireMaths/sphere.h"
+#include "SireMaths/accumulator.h"
 #include "SireMaths/axisset.h"
 #include "SireMaths/line.h"
-#include "SireMaths/triangle.h"
+#include "SireMaths/sphere.h"
 #include "SireMaths/torsion.h"
-#include "SireMaths/accumulator.h"
+#include "SireMaths/triangle.h"
 
 #include "SireBase/errors.h"
 #include "SireMol/errors.h"
@@ -73,14 +73,13 @@ using namespace SireStream;
 static const RegisterMetaType<Evaluator> r_eval;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const Evaluator &eval)
+QDataStream &operator<<(QDataStream &ds, const Evaluator &eval)
 {
     writeHeader(ds, r_eval, 1);
 
     SharedDataStream sds(ds);
 
-    sds << eval.selected_atoms << static_cast<const MoleculeView&>(eval);
+    sds << eval.selected_atoms << static_cast<const MoleculeView &>(eval);
 
     return ds;
 }
@@ -94,7 +93,7 @@ QDataStream &operator>>(QDataStream &ds, Evaluator &eval)
     {
         SharedDataStream sds(ds);
 
-        sds >> eval.selected_atoms >> static_cast<MoleculeView&>(eval);
+        sds >> eval.selected_atoms >> static_cast<MoleculeView &>(eval);
     }
     else
         throw version_error(v, "1", r_eval, CODELOC);
@@ -103,51 +102,51 @@ QDataStream &operator>>(QDataStream &ds, Evaluator &eval)
 }
 
 /** Null constructor */
-Evaluator::Evaluator() : ConcreteProperty<Evaluator,MoleculeView>()
-{}
+Evaluator::Evaluator() : ConcreteProperty<Evaluator, MoleculeView>()
+{
+}
 
 /** Construct from the passed molecule view */
 Evaluator::Evaluator(const MoleculeView &molecule)
-          : ConcreteProperty<Evaluator,MoleculeView>(molecule),
-            selected_atoms(molecule.selection())
-{}
+    : ConcreteProperty<Evaluator, MoleculeView>(molecule), selected_atoms(molecule.selection())
+{
+}
 
 /** Construct to evaluate for the entire molecule in 'moldata' */
 Evaluator::Evaluator(const MoleculeData &moldata)
-          : ConcreteProperty<Evaluator,MoleculeView>(moldata),
-            selected_atoms(moldata)
-{}
+    : ConcreteProperty<Evaluator, MoleculeView>(moldata), selected_atoms(moldata)
+{
+}
 
 /** Construct to evaluate properties of the passed selected atoms
     of the molecule viewed in 'molecule' */
-Evaluator::Evaluator(const MoleculeView &molecule,
-                     const AtomSelection &atoms)
-          : ConcreteProperty<Evaluator,MoleculeView>(molecule), selected_atoms(atoms)
+Evaluator::Evaluator(const MoleculeView &molecule, const AtomSelection &atoms)
+    : ConcreteProperty<Evaluator, MoleculeView>(molecule), selected_atoms(atoms)
 {
     selected_atoms.assertCompatibleWith(this->data());
 }
 
 /** Construct to evaluate properties of the selected atoms of the
     passed molecule */
-Evaluator::Evaluator(const MoleculeData &moldata,
-                     const AtomSelection &atoms)
-          : ConcreteProperty<Evaluator,MoleculeView>(moldata), selected_atoms(atoms)
+Evaluator::Evaluator(const MoleculeData &moldata, const AtomSelection &atoms)
+    : ConcreteProperty<Evaluator, MoleculeView>(moldata), selected_atoms(atoms)
 {
     selected_atoms.assertCompatibleWith(this->data());
 }
 
 /** Copy constructor */
 Evaluator::Evaluator(const Evaluator &other)
-          : ConcreteProperty<Evaluator,MoleculeView>(other),
-            selected_atoms(other.selected_atoms)
-{}
+    : ConcreteProperty<Evaluator, MoleculeView>(other), selected_atoms(other.selected_atoms)
+{
+}
 
 /** Destructor */
 Evaluator::~Evaluator()
-{}
+{
+}
 
 /** Copy assignment from another evaluator */
-Evaluator& Evaluator::operator=(const Evaluator &other)
+Evaluator &Evaluator::operator=(const Evaluator &other)
 {
     if (this != &other)
     {
@@ -159,7 +158,7 @@ Evaluator& Evaluator::operator=(const Evaluator &other)
 }
 
 /** Copy assignment from another molecule */
-Evaluator& Evaluator::operator=(const MoleculeView &other)
+Evaluator &Evaluator::operator=(const MoleculeView &other)
 {
     MoleculeView::operator=(other);
     selected_atoms = other.selection();
@@ -170,8 +169,7 @@ Evaluator& Evaluator::operator=(const MoleculeView &other)
 /** Return a string representation of this evaluator */
 QString Evaluator::toString() const
 {
-    return QObject::tr( "Evaluator( nAtoms() == %1 )" )
-            .arg( selected_atoms.nSelected() );
+    return QObject::tr("Evaluator( nAtoms() == %1 )").arg(selected_atoms.nSelected());
 }
 
 /** Return whether or not this is empty */
@@ -200,13 +198,12 @@ MolViewPtr Evaluator::toSelector() const
 
 static void getMinMax(const CoordGroup &cgroup, Vector &min, Vector &max)
 {
-    //we can cheat by using the CoordGroup's aabox!
+    // we can cheat by using the CoordGroup's aabox!
     min.setMin(cgroup.aaBox().minCoords());
     max.setMax(cgroup.aaBox().maxCoords());
 }
 
-static void getMinMax(const CoordGroup &cgroup, const QSet<Index> &idxs,
-                      Vector &min, Vector &max)
+static void getMinMax(const CoordGroup &cgroup, const QSet<Index> &idxs, Vector &min, Vector &max)
 {
     const Vector *cgroup_array = cgroup.constData();
 
@@ -230,27 +227,27 @@ AABox Evaluator::aaBox(const PropertyMap &map) const
     if (selected_atoms.selectedNone())
         return AABox();
 
-    //get the coordinates of the atoms
+    // get the coordinates of the atoms
     const Property &prop = d->property(map["coordinates"]);
     const AtomCoords &coords = prop.asA<AtomCoords>();
 
     const CoordGroup *coords_array = coords.constData();
     int ncg = coords.nCutGroups();
 
-    //now get the minimum and maximum coordinates...
-    Vector mincoords( std::numeric_limits<double>::max() );
-    Vector maxcoords( -std::numeric_limits<double>::max() );
+    // now get the minimum and maximum coordinates...
+    Vector mincoords(std::numeric_limits<double>::max());
+    Vector maxcoords(-std::numeric_limits<double>::max());
 
     if (selected_atoms.selectedAll())
     {
-        for (int i=0; i<ncg; ++i)
+        for (int i = 0; i < ncg; ++i)
         {
             getMinMax(coords_array[i], mincoords, maxcoords);
         }
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        for (CGIdx i(0); i<ncg; ++i)
+        for (CGIdx i(0); i < ncg; ++i)
         {
             if (selected_atoms.selectedAll(i))
             {
@@ -258,8 +255,7 @@ AABox Evaluator::aaBox(const PropertyMap &map) const
             }
             else
             {
-                getMinMax(coords_array[i], selected_atoms.selectedAtoms(i),
-                          mincoords, maxcoords);
+                getMinMax(coords_array[i], selected_atoms.selectedAtoms(i), mincoords, maxcoords);
             }
         }
     }
@@ -273,8 +269,7 @@ AABox Evaluator::aaBox(const PropertyMap &map) const
             }
             else
             {
-                getMinMax(coords_array[cgidx], selected_atoms.selectedAtoms(cgidx),
-                          mincoords, maxcoords);
+                getMinMax(coords_array[cgidx], selected_atoms.selectedAtoms(cgidx), mincoords, maxcoords);
             }
         }
     }
@@ -315,8 +310,7 @@ Length Evaluator::radius(const PropertyMap &map) const
 
 /** Return the radius of the sphere that encloses all of the atoms
  *  assuming that it is centered at 'center' */
-Length Evaluator::radius(const Vector &center,
-                         const PropertyMap &map) const
+Length Evaluator::radius(const Vector &center, const PropertyMap &map) const
 {
     if (selected_atoms.selectedNone())
         return Length(0);
@@ -350,14 +344,13 @@ SIRE_ALWAYS_INLINE double getCharge(const Charge &charge)
 }
 
 /** Internal function used to calculate the center of mass of the selected atoms */
-template<class T>
-static Vector getCOM(const AtomCoords &coords, const AtomProperty<T> &masses,
-                     const AtomSelection &selected_atoms)
+template <class T>
+static Vector getCOM(const AtomCoords &coords, const AtomProperty<T> &masses, const AtomSelection &selected_atoms)
 {
     if (selected_atoms.selectedNone())
         return Vector(0);
 
-    //calculate the center of mass
+    // calculate the center of mass
     Vector com(0);
     double mass(0);
 
@@ -368,16 +361,16 @@ static Vector getCOM(const AtomCoords &coords, const AtomProperty<T> &masses,
 
         const int nats = coords.nAtoms();
 
-        for (int i=0; i<nats; ++i)
+        for (int i = 0; i < nats; ++i)
         {
             const double m = ::getMass(masses_array[i]);
-            com += m*coords_array[i];
+            com += m * coords_array[i];
             mass += m;
         }
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        for (CGIdx i(0); i<coords.nCutGroups(); ++i)
+        for (CGIdx i(0); i < coords.nCutGroups(); ++i)
         {
             const Vector *coords_array = coords.constData(i);
             const T *masses_array = masses.constData(i);
@@ -386,10 +379,10 @@ static Vector getCOM(const AtomCoords &coords, const AtomProperty<T> &masses,
             {
                 const int nats = coords.nAtoms(i);
 
-                for (int j=0; j<nats; ++j)
+                for (int j = 0; j < nats; ++j)
                 {
                     const double m = ::getMass(masses_array[j]);
-                    com += m*coords_array[j];
+                    com += m * coords_array[j];
                     mass += m;
                 }
             }
@@ -398,7 +391,7 @@ static Vector getCOM(const AtomCoords &coords, const AtomProperty<T> &masses,
                 foreach (Index j, selected_atoms.selectedAtoms(i))
                 {
                     const double m = ::getMass(masses_array[j]);
-                    com += m*coords_array[j];
+                    com += m * coords_array[j];
                     mass += m;
                 }
             }
@@ -415,10 +408,10 @@ static Vector getCOM(const AtomCoords &coords, const AtomProperty<T> &masses,
             {
                 const int nats = coords.nAtoms(i);
 
-                for (int j=0; j<nats; ++j)
+                for (int j = 0; j < nats; ++j)
                 {
                     const double m = ::getMass(masses_array[j]);
-                    com += m*coords_array[j];
+                    com += m * coords_array[j];
                     mass += m;
                 }
             }
@@ -427,7 +420,7 @@ static Vector getCOM(const AtomCoords &coords, const AtomProperty<T> &masses,
                 foreach (Index j, selected_atoms.selectedAtoms(i))
                 {
                     const double m = ::getMass(masses_array[j]);
-                    com += m*coords_array[j];
+                    com += m * coords_array[j];
                     mass += m;
                 }
             }
@@ -438,9 +431,8 @@ static Vector getCOM(const AtomCoords &coords, const AtomProperty<T> &masses,
 }
 
 /** Internal function used to calculate the total mass of the selected atoms */
-template<class T>
-static MolarMass getMass(const AtomProperty<T> &masses,
-                         const AtomSelection &selected_atoms)
+template <class T>
+static MolarMass getMass(const AtomProperty<T> &masses, const AtomSelection &selected_atoms)
 {
     if (selected_atoms.selectedNone())
         return MolarMass(0);
@@ -453,14 +445,14 @@ static MolarMass getMass(const AtomProperty<T> &masses,
 
         const int nats = masses.nAtoms();
 
-        for (int i=0; i<nats; ++i)
+        for (int i = 0; i < nats; ++i)
         {
             mass += ::getMass(masses_array[i]);
         }
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        for (CGIdx i(0); i<masses.nCutGroups(); ++i)
+        for (CGIdx i(0); i < masses.nCutGroups(); ++i)
         {
             const T *masses_array = masses.constData(i);
 
@@ -468,7 +460,7 @@ static MolarMass getMass(const AtomProperty<T> &masses,
             {
                 const int nats = masses.nAtoms(i);
 
-                for (int j=0; j<nats; ++j)
+                for (int j = 0; j < nats; ++j)
                 {
                     mass += ::getMass(masses_array[j]);
                 }
@@ -492,7 +484,7 @@ static MolarMass getMass(const AtomProperty<T> &masses,
             {
                 const int nats = masses.nAtoms(i);
 
-                for (int j=0; j<nats; ++j)
+                for (int j = 0; j < nats; ++j)
                 {
                     mass += ::getMass(masses_array[j]);
                 }
@@ -511,9 +503,8 @@ static MolarMass getMass(const AtomProperty<T> &masses,
 }
 
 /** Internal function used to calculate the total charge of the selected atoms */
-template<class T>
-static Charge getCharge(const AtomProperty<T> &charges,
-                        const AtomSelection &selected_atoms)
+template <class T>
+static Charge getCharge(const AtomProperty<T> &charges, const AtomSelection &selected_atoms)
 {
     if (selected_atoms.selectedNone())
         return Charge(0);
@@ -526,14 +517,14 @@ static Charge getCharge(const AtomProperty<T> &charges,
 
         const int nats = charges.nAtoms();
 
-        for (int i=0; i<nats; ++i)
+        for (int i = 0; i < nats; ++i)
         {
             charge += ::getCharge(charges_array[i]);
         }
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        for (CGIdx i(0); i<charges.nCutGroups(); ++i)
+        for (CGIdx i(0); i < charges.nCutGroups(); ++i)
         {
             const T *charges_array = charges.constData(i);
 
@@ -541,7 +532,7 @@ static Charge getCharge(const AtomProperty<T> &charges,
             {
                 const int nats = charges.nAtoms(i);
 
-                for (int j=0; j<nats; ++j)
+                for (int j = 0; j < nats; ++j)
                 {
                     charge += ::getCharge(charges_array[j]);
                 }
@@ -565,7 +556,7 @@ static Charge getCharge(const AtomProperty<T> &charges,
             {
                 const int nats = charges.nAtoms(i);
 
-                for (int j=0; j<nats; ++j)
+                for (int j = 0; j < nats; ++j)
                 {
                     charge += ::getCharge(charges_array[j]);
                 }
@@ -661,7 +652,7 @@ Vector Evaluator::centroid(const PropertyMap &map) const
     {
         const Vector *coords_array = coords.array().constCoordsData();
 
-        for (int i=0; i<coords.nAtoms(); ++i)
+        for (int i = 0; i < coords.nAtoms(); ++i)
         {
             cent += coords_array[i];
             ++natoms;
@@ -669,13 +660,13 @@ Vector Evaluator::centroid(const PropertyMap &map) const
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        for (CGIdx i(0); i<coords.nCutGroups(); ++i)
+        for (CGIdx i(0); i < coords.nCutGroups(); ++i)
         {
             const Vector *coords_array = coords.constData(i);
 
             if (selected_atoms.selectedAll(i))
             {
-                for (int j=0; j<coords.nAtoms(i); ++j)
+                for (int j = 0; j < coords.nAtoms(i); ++j)
                 {
                     cent += coords_array[j];
                     ++natoms;
@@ -699,7 +690,7 @@ Vector Evaluator::centroid(const PropertyMap &map) const
 
             if (selected_atoms.selectedAll(i))
             {
-                for (int j=0; j<coords.nAtoms(i); ++j)
+                for (int j = 0; j < coords.nAtoms(i); ++j)
                 {
                     cent += coords_array[j];
                     ++natoms;
@@ -736,14 +727,14 @@ Vector Evaluator::centerOfGeometry(const PropertyMap &map) const
     if (selected_atoms.selectedNone())
         return Vector(0);
 
-    Vector mincoords( std::numeric_limits<double>::max() );
-    Vector maxcoords( -std::numeric_limits<double>::max() );
+    Vector mincoords(std::numeric_limits<double>::max());
+    Vector maxcoords(-std::numeric_limits<double>::max());
 
     if (selected_atoms.selectedAll())
     {
         const Vector *coords_array = coords.array().constCoordsData();
 
-        for (int i=0; i<coords.nAtoms(); ++i)
+        for (int i = 0; i < coords.nAtoms(); ++i)
         {
             mincoords.setMin(coords_array[i]);
             maxcoords.setMax(coords_array[i]);
@@ -751,13 +742,13 @@ Vector Evaluator::centerOfGeometry(const PropertyMap &map) const
     }
     else if (selected_atoms.selectedAllCutGroups())
     {
-        for (CGIdx i(0); i<coords.nCutGroups(); ++i)
+        for (CGIdx i(0); i < coords.nCutGroups(); ++i)
         {
             const Vector *coords_array = coords.constData(i);
 
             if (selected_atoms.selectedAll(i))
             {
-                for (int j=0; j<coords.nAtoms(i); ++j)
+                for (int j = 0; j < coords.nAtoms(i); ++j)
                 {
                     mincoords.setMin(coords_array[j]);
                     maxcoords.setMax(coords_array[j]);
@@ -781,7 +772,7 @@ Vector Evaluator::centerOfGeometry(const PropertyMap &map) const
 
             if (selected_atoms.selectedAll(i))
             {
-                for (int j=0; j<coords.nAtoms(i); ++j)
+                for (int j = 0; j < coords.nAtoms(i); ++j)
                 {
                     mincoords.setMin(coords_array[j]);
                     maxcoords.setMax(coords_array[j]);
@@ -798,7 +789,7 @@ Vector Evaluator::centerOfGeometry(const PropertyMap &map) const
         }
     }
 
-    return mincoords + 0.5*(maxcoords-mincoords);
+    return mincoords + 0.5 * (maxcoords - mincoords);
 }
 
 /** Return the center of mass of this part of the molecule
@@ -826,8 +817,7 @@ Vector Evaluator::centerOfMass(const PropertyMap &map) const
     }
 }
 
-static CGAtomIdx selectOnly(const AtomID &atom, const MoleculeInfoData &molinfo,
-                            const AtomSelection &selected_atoms)
+static CGAtomIdx selectOnly(const AtomID &atom, const MoleculeInfoData &molinfo, const AtomSelection &selected_atoms)
 {
     QList<AtomIdx> atomidxs = molinfo.map(atom);
 
@@ -840,14 +830,12 @@ static CGAtomIdx selectOnly(const AtomID &atom, const MoleculeInfoData &molinfo,
     }
 
     if (atomidxs.isEmpty())
-        throw SireMol::missing_atom( QObject::tr(
-                "None of the selected atoms match the ID \"%1\".")
-                    .arg(atom.toString()), CODELOC );
+        throw SireMol::missing_atom(QObject::tr("None of the selected atoms match the ID \"%1\".").arg(atom.toString()),
+                                    CODELOC);
 
     else if (atomidxs.count() > 1)
-        throw SireMol::duplicate_atom( QObject::tr(
-                "More than one selected atom matches the ID \"%1\".")
-                    .arg(atom.toString()), CODELOC );
+        throw SireMol::duplicate_atom(
+            QObject::tr("More than one selected atom matches the ID \"%1\".").arg(atom.toString()), CODELOC);
 
     return molinfo.cgAtomIdx(atomidxs.at(0));
 }
@@ -858,16 +846,13 @@ static CGAtomIdx selectOnly(const AtomID &atom, const MoleculeInfoData &molinfo,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Length Evaluator::measure(const AtomID &atom0, const AtomID &atom1,
-                          const PropertyMap &map) const
+Length Evaluator::measure(const AtomID &atom0, const AtomID &atom1, const PropertyMap &map) const
 {
-    const AtomCoords &coords = data().property(map["coordinates"])
-                                     .asA<AtomCoords>();
+    const AtomCoords &coords = data().property(map["coordinates"]).asA<AtomCoords>();
 
-    return Length( Line( coords[::selectOnly(atom0, data().info(), selected_atoms)],
-                         coords[::selectOnly(atom1, data().info(), selected_atoms)] )
-                            .length()
-                 );
+    return Length(Line(coords[::selectOnly(atom0, data().info(), selected_atoms)],
+                       coords[::selectOnly(atom1, data().info(), selected_atoms)])
+                      .length());
 }
 
 /** Measure the angle between the atoms 'atom0', 'atom1' and 'atom2'
@@ -876,16 +861,14 @@ Length Evaluator::measure(const AtomID &atom0, const AtomID &atom1,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Angle Evaluator::measure(const AtomID &atom0, const AtomID &atom1,
-                         const AtomID &atom2, const PropertyMap &map) const
+Angle Evaluator::measure(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const PropertyMap &map) const
 {
-    const AtomCoords &coords = data().property(map["coordinates"])
-                                     .asA<AtomCoords>();
+    const AtomCoords &coords = data().property(map["coordinates"]).asA<AtomCoords>();
 
-    return Triangle( coords[::selectOnly(atom0, data().info(), selected_atoms)],
-                     coords[::selectOnly(atom1, data().info(), selected_atoms)],
-                     coords[::selectOnly(atom2, data().info(), selected_atoms)]
-                   ).angle();
+    return Triangle(coords[::selectOnly(atom0, data().info(), selected_atoms)],
+                    coords[::selectOnly(atom1, data().info(), selected_atoms)],
+                    coords[::selectOnly(atom2, data().info(), selected_atoms)])
+        .angle();
 }
 
 /** Measure the dihedral between the atoms 'atom0', 'atom1', 'atom2' and 'atom3'
@@ -894,18 +877,16 @@ Angle Evaluator::measure(const AtomID &atom0, const AtomID &atom1,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Angle Evaluator::measure(const AtomID &atom0, const AtomID &atom1,
-                         const AtomID &atom2, const AtomID &atom3,
+Angle Evaluator::measure(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3,
                          const PropertyMap &map) const
 {
-    const AtomCoords &coords = data().property(map["coordinates"])
-                                     .asA<AtomCoords>();
+    const AtomCoords &coords = data().property(map["coordinates"]).asA<AtomCoords>();
 
-    return Torsion( coords[::selectOnly(atom0, data().info(), selected_atoms)],
-                    coords[::selectOnly(atom1, data().info(), selected_atoms)],
-                    coords[::selectOnly(atom2, data().info(), selected_atoms)],
-                    coords[::selectOnly(atom3, data().info(), selected_atoms)]
-                  ).angle();
+    return Torsion(coords[::selectOnly(atom0, data().info(), selected_atoms)],
+                   coords[::selectOnly(atom1, data().info(), selected_atoms)],
+                   coords[::selectOnly(atom2, data().info(), selected_atoms)],
+                   coords[::selectOnly(atom3, data().info(), selected_atoms)])
+        .angle();
 }
 
 /** Measure the length of the bond 'bond'
@@ -938,8 +919,7 @@ Angle Evaluator::measure(const AngleID &angle, const PropertyMap &map) const
 */
 Angle Evaluator::measure(const DihedralID &dihedral, const PropertyMap &map) const
 {
-    return measure(dihedral.atom0(), dihedral.atom1(),
-                   dihedral.atom2(), dihedral.atom3(), map);
+    return measure(dihedral.atom0(), dihedral.atom1(), dihedral.atom2(), dihedral.atom3(), map);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
@@ -948,36 +928,29 @@ Angle Evaluator::measure(const DihedralID &dihedral, const PropertyMap &map) con
     connectivity and coordinates of the two molecules, with the passed 'atommatcher'
     used to pre-match atoms before the common substructure search (useful to speed
     up the search and to enforce matching sub-parts) */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const AtomMatcher &atommatcher,
-                                          const PropertyMap &map0,
-                                          const PropertyMap &map1,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                           const PropertyMap &map0, const PropertyMap &map1, bool verbose) const
 {
-    return this->findMCS(other, atommatcher, 5*second, false, map0, map1, 6, verbose);
+    return this->findMCS(other, atommatcher, 5 * second, false, map0, map1, 6, verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
     returns the mapping from this structure to 'other' for the matching parts,
     using the optionally supplied propertymap to find the elements, masses,
     connectivity and coordinates of the two molecules */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const PropertyMap &map,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const PropertyMap &map, bool verbose) const
 {
-    return this->findMCS(other, AtomMultiMatcher(), 5*second, false, map, map, 6, verbose);
+    return this->findMCS(other, AtomMultiMatcher(), 5 * second, false, map, map, 6, verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
     returns the mapping from this structure to 'other' for the matching parts,
     using map0 and map1 to find the elements, masses,
     connectivity and coordinates of the two molecules respectively */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const PropertyMap &map0,
-                                          const PropertyMap &map1,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const PropertyMap &map0, const PropertyMap &map1,
+                                           bool verbose) const
 {
-    return this->findMCS(other, AtomMultiMatcher(), 5*second, false, map0, map1, 6, verbose);
+    return this->findMCS(other, AtomMultiMatcher(), 5 * second, false, map0, map1, 6, verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
@@ -986,12 +959,10 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     connectivity and coordinates of the two molecules, with the passed 'atommatcher'
     used to pre-match atoms before the common substructure search (useful to speed
     up the search and to enforce matching sub-parts) */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const AtomMatcher &atommatcher,
-                                          const PropertyMap &map,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                           const PropertyMap &map, bool verbose) const
 {
-    return this->findMCS(other, atommatcher, 5*second, false, map, map, 6, verbose);
+    return this->findMCS(other, atommatcher, 5 * second, false, map, map, 6, verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
@@ -999,10 +970,8 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     using the optionally supplied propertymap to find the elements, masses,
     connectivity and coordinates of the two molecules. Terminate the calculation
     returning the best match found within 'timeout'. */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const Time &timeout,
-                                          const PropertyMap &map,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const Time &timeout, const PropertyMap &map,
+                                           bool verbose) const
 {
     return this->findMCS(other, AtomMultiMatcher(), timeout, false, map, map, 6, verbose);
 }
@@ -1012,11 +981,8 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     using map0 and map1 to find the elements, masses,
     connectivity and coordinates of the two molecules respectively. Terminate the calculation
     returning the best match found within 'timeout'. */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const Time &timeout,
-                                          const PropertyMap &map0,
-                                          const PropertyMap &map1,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const Time &timeout, const PropertyMap &map0,
+                                           const PropertyMap &map1, bool verbose) const
 {
     return this->findMCS(other, AtomMultiMatcher(), timeout, false, map0, map1, 6, verbose);
 }
@@ -1028,11 +994,8 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     used to pre-match atoms before the common substructure search (useful to speed
     up the search and to enforce matching sub-parts). Terminate the calculation
     returning the best match found within 'timeout'. */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const AtomMatcher &atommatcher,
-                                          const Time &timeout,
-                                          const PropertyMap &map,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                           const Time &timeout, const PropertyMap &map, bool verbose) const
 {
     return this->findMCS(other, atommatcher, timeout, false, map, map, 6, verbose);
 }
@@ -1047,15 +1010,11 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const AtomMatcher &atommatcher,
-                                          bool match_light_atoms,
-                                          const PropertyMap &map0,
-                                          const PropertyMap &map1,
-                                          int min_heavy_protons,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                           bool match_light_atoms, const PropertyMap &map0, const PropertyMap &map1,
+                                           int min_heavy_protons, bool verbose) const
 {
-    return this->findMCS(other, atommatcher, 5*second, match_light_atoms, map0, map1, min_heavy_protons, verbose);
+    return this->findMCS(other, atommatcher, 5 * second, match_light_atoms, map0, map1, min_heavy_protons, verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
@@ -1066,11 +1025,8 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          bool match_light_atoms,
-                                          const PropertyMap &map,
-                                          int min_heavy_protons,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, bool match_light_atoms, const PropertyMap &map,
+                                           int min_heavy_protons, bool verbose) const
 {
     return this->findMCS(other, AtomMultiMatcher(), match_light_atoms, map, map, min_heavy_protons, verbose);
 }
@@ -1084,12 +1040,8 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     in the match. This may make things slower...
 
 */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          bool match_light_atoms,
-                                          const PropertyMap &map0,
-                                          const PropertyMap &map1,
-                                          int min_heavy_protons,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, bool match_light_atoms, const PropertyMap &map0,
+                                           const PropertyMap &map1, int min_heavy_protons, bool verbose) const
 {
     return this->findMCS(other, AtomMultiMatcher(), match_light_atoms, map0, map1, min_heavy_protons, verbose);
 }
@@ -1104,12 +1056,9 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const AtomMatcher &atommatcher,
-                                          bool match_light_atoms,
-                                          const PropertyMap &map,
-                                          int min_heavy_protons,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                           bool match_light_atoms, const PropertyMap &map, int min_heavy_protons,
+                                           bool verbose) const
 {
     return this->findMCS(other, atommatcher, match_light_atoms, map, map, min_heavy_protons, verbose);
 }
@@ -1123,12 +1072,8 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const Time &timeout,
-                                          bool match_light_atoms,
-                                          const PropertyMap &map,
-                                          int min_heavy_protons,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const Time &timeout, bool match_light_atoms,
+                                           const PropertyMap &map, int min_heavy_protons, bool verbose) const
 {
     return this->findMCS(other, AtomMultiMatcher(), timeout, match_light_atoms, map, map, min_heavy_protons, verbose);
 }
@@ -1142,13 +1087,9 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const Time &timeout,
-                                          bool match_light_atoms,
-                                          const PropertyMap &map0,
-                                          const PropertyMap &map1,
-                                          int min_heavy_protons,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const Time &timeout, bool match_light_atoms,
+                                           const PropertyMap &map0, const PropertyMap &map1, int min_heavy_protons,
+                                           bool verbose) const
 {
     return this->findMCS(other, AtomMultiMatcher(), timeout, match_light_atoms, map0, map1, min_heavy_protons, verbose);
 }
@@ -1164,13 +1105,9 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const AtomMatcher &atommatcher,
-                                          const Time &timeout,
-                                          bool match_light_atoms,
-                                          const PropertyMap &map,
-                                          int min_heavy_protons,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                           const Time &timeout, bool match_light_atoms, const PropertyMap &map,
+                                           int min_heavy_protons, bool verbose) const
 {
     return this->findMCS(other, atommatcher, timeout, match_light_atoms, map, map, min_heavy_protons, verbose);
 }
@@ -1181,12 +1118,9 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     connectivity and coordinates of the two molecules, with the passed 'atommatcher'
     used to pre-match atoms before the common substructure search (useful to speed
     up the search and to enforce matching sub-parts) */
-QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
-                                          const AtomMatcher &atommatcher,
-                                          const Time &timeout,
-                                          const PropertyMap &map0,
-                                          const PropertyMap &map1,
-                                          bool verbose) const
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                           const Time &timeout, const PropertyMap &map0, const PropertyMap &map1,
+                                           bool verbose) const
 {
     return this->findMCS(other, atommatcher, timeout, false, map0, map1, 6, verbose);
 }
@@ -1197,36 +1131,31 @@ QHash<AtomIdx,AtomIdx> Evaluator::findMCS(const MoleculeView &other,
     connectivity and coordinates of the two molecules, with the passed 'atommatcher'
     used to pre-match atoms before the common substructure search (useful to speed
     up the search and to enforce matching sub-parts) */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const AtomMatcher &atommatcher,
-                                                           const PropertyMap &map0,
-                                                           const PropertyMap &map1,
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                                           const PropertyMap &map0, const PropertyMap &map1,
                                                            bool verbose) const
 {
-    return this->findMCSmatches(other, atommatcher, 5*second, false, map0, map1, 6, verbose);
+    return this->findMCSmatches(other, atommatcher, 5 * second, false, map0, map1, 6, verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
     returns all mappings from this structure to 'other' for the matching parts,
     using the optionally supplied propertymap to find the elements, masses,
     connectivity and coordinates of the two molecules */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const PropertyMap &map,
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const PropertyMap &map,
                                                            bool verbose) const
 {
-    return this->findMCSmatches(other, AtomMultiMatcher(), 5*second, false, map, map, 6, verbose);
+    return this->findMCSmatches(other, AtomMultiMatcher(), 5 * second, false, map, map, 6, verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
     returns all mappings from this structure to 'other' for the matching parts,
     using map0 and map1 to find the elements, masses,
     connectivity and coordinates of the two molecules respectively */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const PropertyMap &map0,
-                                                           const PropertyMap &map1,
-                                                           bool verbose) const
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const PropertyMap &map0,
+                                                           const PropertyMap &map1, bool verbose) const
 {
-    return this->findMCSmatches(other, AtomMultiMatcher(), 5*second, false, map0, map1, 6, verbose);
+    return this->findMCSmatches(other, AtomMultiMatcher(), 5 * second, false, map0, map1, 6, verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
@@ -1235,12 +1164,10 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     connectivity and coordinates of the two molecules, with the passed 'atommatcher'
     used to pre-match atoms before the common substructure search (useful to speed
     up the search and to enforce matching sub-parts) */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const AtomMatcher &atommatcher,
-                                                           const PropertyMap &map,
-                                                           bool verbose) const
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                                           const PropertyMap &map, bool verbose) const
 {
-    return this->findMCSmatches(other, atommatcher, 5*second, false, map, map, 6, verbose);
+    return this->findMCSmatches(other, atommatcher, 5 * second, false, map, map, 6, verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
@@ -1248,10 +1175,8 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     using the optionally supplied propertymap to find the elements, masses,
     connectivity and coordinates of the two molecules. Terminate the calculation
     returning the best match found within 'timeout'. */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const Time &timeout,
-                                                           const PropertyMap &map,
-                                                           bool verbose) const
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const Time &timeout,
+                                                           const PropertyMap &map, bool verbose) const
 {
     return this->findMCSmatches(other, AtomMultiMatcher(), timeout, false, map, map, 6, verbose);
 }
@@ -1261,10 +1186,8 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     using map0 and map1 to find the elements, masses,
     connectivity and coordinates of the two molecules respectively. Terminate the calculation
     returning the best match found within 'timeout'. */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const Time &timeout,
-                                                           const PropertyMap &map0,
-                                                           const PropertyMap &map1,
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const Time &timeout,
+                                                           const PropertyMap &map0, const PropertyMap &map1,
                                                            bool verbose) const
 {
     return this->findMCSmatches(other, AtomMultiMatcher(), timeout, false, map0, map1, 6, verbose);
@@ -1277,10 +1200,8 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     used to pre-match atoms before the common substructure search (useful to speed
     up the search and to enforce matching sub-parts). Terminate the calculation
     returning the best match found within 'timeout'. */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const AtomMatcher &atommatcher,
-                                                           const Time &timeout,
-                                                           const PropertyMap &map,
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                                           const Time &timeout, const PropertyMap &map,
                                                            bool verbose) const
 {
     return this->findMCSmatches(other, atommatcher, timeout, false, map, map, 6, verbose);
@@ -1296,15 +1217,13 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const AtomMatcher &atommatcher,
-                                                           bool match_light_atoms,
-                                                           const PropertyMap &map0,
-                                                           const PropertyMap &map1,
-                                                           int min_heavy_protons,
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                                           bool match_light_atoms, const PropertyMap &map0,
+                                                           const PropertyMap &map1, int min_heavy_protons,
                                                            bool verbose) const
 {
-    return this->findMCSmatches(other, atommatcher, 5*second, match_light_atoms, map0, map1, min_heavy_protons, verbose);
+    return this->findMCSmatches(other, atommatcher, 5 * second, match_light_atoms, map0, map1, min_heavy_protons,
+                                verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
@@ -1315,10 +1234,8 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           bool match_light_atoms,
-                                                           const PropertyMap &map,
-                                                           int min_heavy_protons,
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, bool match_light_atoms,
+                                                           const PropertyMap &map, int min_heavy_protons,
                                                            bool verbose) const
 {
     return this->findMCSmatches(other, AtomMultiMatcher(), match_light_atoms, map, map, min_heavy_protons, verbose);
@@ -1333,12 +1250,9 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     in the match. This may make things slower...
 
 */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           bool match_light_atoms,
-                                                           const PropertyMap &map0,
-                                                           const PropertyMap &map1,
-                                                           int min_heavy_protons,
-                                                           bool verbose) const
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, bool match_light_atoms,
+                                                           const PropertyMap &map0, const PropertyMap &map1,
+                                                           int min_heavy_protons, bool verbose) const
 {
     return this->findMCSmatches(other, AtomMultiMatcher(), match_light_atoms, map0, map1, min_heavy_protons, verbose);
 }
@@ -1353,12 +1267,9 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const AtomMatcher &atommatcher,
-                                                           bool match_light_atoms,
-                                                           const PropertyMap &map,
-                                                           int min_heavy_protons,
-                                                           bool verbose) const
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                                           bool match_light_atoms, const PropertyMap &map,
+                                                           int min_heavy_protons, bool verbose) const
 {
     return this->findMCSmatches(other, atommatcher, match_light_atoms, map, map, min_heavy_protons, verbose);
 }
@@ -1372,14 +1283,12 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const Time &timeout,
-                                                           bool match_light_atoms,
-                                                           const PropertyMap &map,
-                                                           int min_heavy_protons,
-                                                           bool verbose) const
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const Time &timeout,
+                                                           bool match_light_atoms, const PropertyMap &map,
+                                                           int min_heavy_protons, bool verbose) const
 {
-    return this->findMCSmatches(other, AtomMultiMatcher(), timeout, match_light_atoms, map, map, min_heavy_protons, verbose);
+    return this->findMCSmatches(other, AtomMultiMatcher(), timeout, match_light_atoms, map, map, min_heavy_protons,
+                                verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
@@ -1391,15 +1300,13 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const Time &timeout,
-                                                           bool match_light_atoms,
-                                                           const PropertyMap &map0,
-                                                           const PropertyMap &map1,
-                                                           int min_heavy_protons,
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const Time &timeout,
+                                                           bool match_light_atoms, const PropertyMap &map0,
+                                                           const PropertyMap &map1, int min_heavy_protons,
                                                            bool verbose) const
 {
-    return this->findMCSmatches(other, AtomMultiMatcher(), timeout, match_light_atoms, map0, map1, min_heavy_protons, verbose);
+    return this->findMCSmatches(other, AtomMultiMatcher(), timeout, match_light_atoms, map0, map1, min_heavy_protons,
+                                verbose);
 }
 
 /** Find the maximum common substructure of this molecule view with 'other'. This
@@ -1413,12 +1320,9 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     If 'match_light_atoms' is true, then include light atoms (e.g. hydrogen)
     in the match. This may make things slower...
 */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const AtomMatcher &atommatcher,
-                                                           const Time &timeout,
-                                                           bool match_light_atoms,
-                                                           const PropertyMap &map,
-                                                           int min_heavy_protons,
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                                           const Time &timeout, bool match_light_atoms,
+                                                           const PropertyMap &map, int min_heavy_protons,
                                                            bool verbose) const
 {
     return this->findMCSmatches(other, atommatcher, timeout, match_light_atoms, map, map, min_heavy_protons, verbose);
@@ -1430,12 +1334,9 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     connectivity and coordinates of the two molecules, with the passed 'atommatcher'
     used to pre-match atoms before the common substructure search (useful to speed
     up the search and to enforce matching sub-parts) */
-QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &other,
-                                                           const AtomMatcher &atommatcher,
-                                                           const Time &timeout,
-                                                           const PropertyMap &map0,
-                                                           const PropertyMap &map1,
-                                                           bool verbose) const
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                                           const Time &timeout, const PropertyMap &map0,
+                                                           const PropertyMap &map1, bool verbose) const
 {
     return this->findMCSmatches(other, atommatcher, timeout, false, map0, map1, 6, verbose);
 }
@@ -1444,45 +1345,40 @@ QVector<QHash<AtomIdx,AtomIdx> > Evaluator::findMCSmatches(const MoleculeView &o
     the atoms in 'other', using the passed AtomMatcher to match atoms in this
     view against 'other', and using the passed property maps to find the required
     properties */
-SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other,
-                                             const AtomMatcher &atommatcher,
-                                             const PropertyMap &map0,
-                                             const PropertyMap &map1) const
+SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other, const AtomMatcher &atommatcher,
+                                             const PropertyMap &map0, const PropertyMap &map1) const
 {
-    const AtomCoords &c0 = this->data().property( map0["coordinates"] ).asA<AtomCoords>();
-    const AtomCoords &c1 = other.data().property( map1["coordinates"] ).asA<AtomCoords>();
+    const AtomCoords &c0 = this->data().property(map0["coordinates"]).asA<AtomCoords>();
+    const AtomCoords &c1 = other.data().property(map1["coordinates"]).asA<AtomCoords>();
 
-    QHash<AtomIdx,AtomIdx> match = atommatcher.match(*this, map0, other, map1);
+    QHash<AtomIdx, AtomIdx> match = atommatcher.match(*this, map0, other, map1);
 
     const AtomSelection &sel0 = this->selection();
     const AtomSelection &sel1 = other.selection();
 
     Average msd;
 
-    for (QHash<AtomIdx,AtomIdx>::const_iterator it = match.constBegin();
-         it != match.constEnd();
-         ++it)
+    for (QHash<AtomIdx, AtomIdx>::const_iterator it = match.constBegin(); it != match.constEnd(); ++it)
     {
         const AtomIdx atm0 = it.key();
         const AtomIdx atm1 = it.value();
 
         if (sel0.selected(atm0) and sel1.selected(atm1))
         {
-            Vector v0 = c0.get( this->data().info().cgAtomIdx(atm0) );
-            Vector v1 = c1.get( this->data().info().cgAtomIdx(atm1) );
+            Vector v0 = c0.get(this->data().info().cgAtomIdx(atm0));
+            Vector v1 = c1.get(this->data().info().cgAtomIdx(atm1));
 
-            msd.accumulate( Vector::distance2(v0,v1) );
+            msd.accumulate(Vector::distance2(v0, v1));
         }
     }
 
-    return Length( std::sqrt( msd.average() ) );
+    return Length(std::sqrt(msd.average()));
 }
 
 /** Return the root mean square deviation (RMSD) of the atoms in this view against
     the atoms in 'other', using the passed property map to find the required
     properties */
-SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other,
-                                             const PropertyMap &map) const
+SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other, const PropertyMap &map) const
 {
     return this->rmsd(other, AtomIdxMatcher(), map, map);
 }
@@ -1490,8 +1386,7 @@ SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other,
 /** Return the root mean square deviation (RMSD) of the atoms in this view against
     the atoms in 'other', using the passed property maps to find the required
     properties */
-SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other,
-                                             const PropertyMap &map0,
+SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other, const PropertyMap &map0,
                                              const PropertyMap &map1) const
 {
     return this->rmsd(other, AtomIdxMatcher(), map0, map1);
@@ -1501,19 +1396,18 @@ SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other,
     the atoms in 'other', using the passed AtomMatcher to match atoms in this
     view against 'other', and using the passed property map to find the required
     properties */
-SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other,
-                                             const AtomMatcher &atommatcher,
+SireUnits::Dimension::Length Evaluator::rmsd(const MoleculeView &other, const AtomMatcher &atommatcher,
                                              const PropertyMap &map) const
 {
     return this->rmsd(other, atommatcher, map, map);
 }
 
-const char* Evaluator::typeName()
+const char *Evaluator::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Evaluator>() );
+    return QMetaType::typeName(qMetaTypeId<Evaluator>());
 }
 
-Evaluator* Evaluator::clone() const
+Evaluator *Evaluator::clone() const
 {
     return new Evaluator(*this);
 }

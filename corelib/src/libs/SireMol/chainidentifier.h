@@ -34,85 +34,85 @@
 
 namespace SireMol
 {
-class ChainIdentifier;
+    class ChainIdentifier;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ChainIdentifier&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ChainIdentifier&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ChainIdentifier &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ChainIdentifier &);
 
 namespace SireMol
 {
 
-class ChainIdx;
+    class ChainIdx;
 
-/** This is the polymorphic holder of all Chain IDs */
-class SIREMOL_EXPORT ChainIdentifier : public ChainID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ChainIdentifier&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ChainIdentifier&);
-
-public:
-    ChainIdentifier();
-    ChainIdentifier(const ChainID &chainid);
-    ChainIdentifier(const ChainIdentifier &other);
-
-    ~ChainIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+    /** This is the polymorphic holder of all Chain IDs */
+    class SIREMOL_EXPORT ChainIdentifier : public ChainID
     {
-        return ChainIdentifier::typeName();
+
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ChainIdentifier &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ChainIdentifier &);
+
+    public:
+        ChainIdentifier();
+        ChainIdentifier(const ChainID &chainid);
+        ChainIdentifier(const ChainIdentifier &other);
+
+        ~ChainIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return ChainIdentifier::typeName();
+        }
+
+        ChainIdentifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const ChainID &base() const;
+
+        ChainIdentifier &operator=(const ChainIdentifier &other);
+        ChainIdentifier &operator=(const ChainID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const ChainIdentifier &other) const;
+        bool operator!=(const ChainIdentifier &other) const;
+
+        bool operator==(const ChainID &other) const;
+        bool operator!=(const ChainID &other) const;
+
+        QList<ChainIdx> map(const MolInfo &molinfo) const;
+
+    private:
+        /** Pointer to the ChainID */
+        boost::shared_ptr<ChainID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const ChainIdentifier &chainid)
+    {
+        return chainid.hash();
     }
 
-    ChainIdentifier* clone() const;
+} // namespace SireMol
 
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const ChainID& base() const;
-
-    ChainIdentifier& operator=(const ChainIdentifier &other);
-    ChainIdentifier& operator=(const ChainID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const ChainIdentifier &other) const;
-    bool operator!=(const ChainIdentifier &other) const;
-
-    bool operator==(const ChainID &other) const;
-    bool operator!=(const ChainID &other) const;
-
-    QList<ChainIdx> map(const MolInfo &molinfo) const;
-
-private:
-    /** Pointer to the ChainID */
-    boost::shared_ptr<ChainID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const ChainIdentifier &chainid)
-{
-    return chainid.hash();
-}
-
-}
-
+#include "atomidx.h"
 #include "chainidx.h"
 #include "residx.h"
-#include "atomidx.h"
 
-Q_DECLARE_METATYPE( SireID::Specify<SireMol::ChainID> );
-Q_DECLARE_METATYPE( SireMol::AtomsIn<SireMol::ChainID> );
-Q_DECLARE_METATYPE( SireMol::ResIn<SireMol::ChainID> );
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireMol::ChainID> );
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireMol::ChainID> );
-Q_DECLARE_METATYPE( SireID::MatchAll<SireMol::ChainID> );
-Q_DECLARE_METATYPE( SireID::InvertMatch<SireMol::ChainID> );
+Q_DECLARE_METATYPE(SireID::Specify<SireMol::ChainID>);
+Q_DECLARE_METATYPE(SireMol::AtomsIn<SireMol::ChainID>);
+Q_DECLARE_METATYPE(SireMol::ResIn<SireMol::ChainID>);
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireMol::ChainID>);
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireMol::ChainID>);
+Q_DECLARE_METATYPE(SireID::MatchAll<SireMol::ChainID>);
+Q_DECLARE_METATYPE(SireID::InvertMatch<SireMol::ChainID>);
 
 Q_DECLARE_METATYPE(SireMol::ChainIdentifier);
 

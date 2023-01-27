@@ -26,11 +26,11 @@
 \*********************************************/
 
 #include "integrator.h"
-#include "integratorworkspace.h"
 #include "ensemble.h"
+#include "integratorworkspace.h"
 
-#include "SireFF/forcetable.h"
 #include "SireFF/forcefields.h"
+#include "SireFF/forcetable.h"
 
 #include "SireSystem/system.h"
 
@@ -55,15 +55,14 @@ using namespace SireUnits::Dimension;
 //////////// Implementation of Integrator
 ////////////
 
-static const RegisterMetaType<Integrator> r_integrator(MAGIC_ONLY,
-                                               "SireMove::Integrator");
+static const RegisterMetaType<Integrator> r_integrator(MAGIC_ONLY, "SireMove::Integrator");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Integrator &integrator)
 {
     writeHeader(ds, r_integrator, 1);
 
-    ds << static_cast<const Property&>(integrator);
+    ds << static_cast<const Property &>(integrator);
 
     return ds;
 }
@@ -75,7 +74,7 @@ QDataStream &operator>>(QDataStream &ds, Integrator &integrator)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(integrator);
+        ds >> static_cast<Property &>(integrator);
     }
     else
         throw version_error(v, "1", r_integrator, CODELOC);
@@ -85,18 +84,21 @@ QDataStream &operator>>(QDataStream &ds, Integrator &integrator)
 
 /** Constructor */
 Integrator::Integrator() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 Integrator::Integrator(const Integrator &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 Integrator::~Integrator()
-{}
+{
+}
 
 /** Copy assignment operator */
-Integrator& Integrator::operator=(const Integrator &other)
+Integrator &Integrator::operator=(const Integrator &other)
 {
     return *this;
 }
@@ -113,10 +115,10 @@ bool Integrator::operator!=(const Integrator &other) const
     return false;
 }
 
-Q_GLOBAL_STATIC( NullIntegrator, getNullIntegrator );
+Q_GLOBAL_STATIC(NullIntegrator, getNullIntegrator);
 
 /** Return a NullIntegrator */
-const NullIntegrator& Integrator::null()
+const NullIntegrator &Integrator::null()
 {
     return *(getNullIntegrator());
 }
@@ -132,7 +134,7 @@ QDataStream &operator<<(QDataStream &ds, const NullIntegrator &nullint)
 {
     writeHeader(ds, r_nullint, 1);
 
-    ds << static_cast<const Integrator&>(nullint);
+    ds << static_cast<const Integrator &>(nullint);
 
     return ds;
 }
@@ -144,7 +146,7 @@ QDataStream &operator>>(QDataStream &ds, NullIntegrator &nullint)
 
     if (v == 1)
     {
-        ds >> static_cast<Integrator&>(nullint);
+        ds >> static_cast<Integrator &>(nullint);
     }
     else
         throw version_error(v, "1", r_nullint, CODELOC);
@@ -153,20 +155,22 @@ QDataStream &operator>>(QDataStream &ds, NullIntegrator &nullint)
 }
 
 /** Constructor */
-NullIntegrator::NullIntegrator() : ConcreteProperty<NullIntegrator,Integrator>()
-{}
+NullIntegrator::NullIntegrator() : ConcreteProperty<NullIntegrator, Integrator>()
+{
+}
 
 /** Copy constructor */
-NullIntegrator::NullIntegrator(const NullIntegrator &other)
-               : ConcreteProperty<NullIntegrator,Integrator>(other)
-{}
+NullIntegrator::NullIntegrator(const NullIntegrator &other) : ConcreteProperty<NullIntegrator, Integrator>(other)
+{
+}
 
 /** Destructor */
 NullIntegrator::~NullIntegrator()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullIntegrator& NullIntegrator::operator=(const NullIntegrator &other)
+NullIntegrator &NullIntegrator::operator=(const NullIntegrator &other)
 {
     Integrator::operator=(other);
     return *this;
@@ -203,26 +207,23 @@ bool NullIntegrator::isTimeReversible() const
 }
 
 /** The null integrator does nothing */
-void NullIntegrator::integrate(IntegratorWorkspace&,
-                               const Symbol&,
-                               SireUnits::Dimension::Time,
-                               int, bool)
-{}
+void NullIntegrator::integrate(IntegratorWorkspace &, const Symbol &, SireUnits::Dimension::Time, int, bool)
+{
+}
 
 /** This returns a null workspace */
-IntegratorWorkspacePtr NullIntegrator::createWorkspace(const PropertyMap&) const
+IntegratorWorkspacePtr NullIntegrator::createWorkspace(const PropertyMap &) const
 {
     return IntegratorWorkspacePtr();
 }
 
 /** This returns a null workspace */
-IntegratorWorkspacePtr NullIntegrator::createWorkspace(const MoleculeGroup&,
-                                                       const PropertyMap&) const
+IntegratorWorkspacePtr NullIntegrator::createWorkspace(const MoleculeGroup &, const PropertyMap &) const
 {
     return IntegratorWorkspacePtr();
 }
 
-const char* NullIntegrator::typeName()
+const char *NullIntegrator::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullIntegrator>() );
+    return QMetaType::typeName(qMetaTypeId<NullIntegrator>());
 }

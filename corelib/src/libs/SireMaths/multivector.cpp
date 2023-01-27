@@ -53,11 +53,13 @@ int MultiVector::count()
 MultiVector::MultiVector(const Vector *array, int sz)
 {
     if (sz > MultiDouble::size())
-        throw SireError::unsupported( QObject::tr(
-                "Cannot fit an array of size %1 in this MultiVector, as it is only "
-                "capable of holding %2 values...").arg(sz).arg(MultiDouble::size()), CODELOC );
+        throw SireError::unsupported(QObject::tr("Cannot fit an array of size %1 in this MultiVector, as it is only "
+                                                 "capable of holding %2 values...")
+                                         .arg(sz)
+                                         .arg(MultiDouble::size()),
+                                     CODELOC);
 
-    for (int i=0; i<sz; ++i)
+    for (int i = 0; i < sz; ++i)
     {
         sc[0].set(i, array[i].x());
         sc[1].set(i, array[i].y());
@@ -72,11 +74,13 @@ MultiVector::MultiVector(const QVector<Vector> &array)
     const int sz = array.count();
 
     if (sz > MultiDouble::size())
-        throw SireError::unsupported( QObject::tr(
-                "Cannot fit an array of size %1 in this MultiVector, as it is only "
-                "capable of holding %2 values...").arg(sz).arg(MultiDouble::size()), CODELOC );
+        throw SireError::unsupported(QObject::tr("Cannot fit an array of size %1 in this MultiVector, as it is only "
+                                                 "capable of holding %2 values...")
+                                         .arg(sz)
+                                         .arg(MultiDouble::size()),
+                                     CODELOC);
 
-    for (int i=0; i<sz; ++i)
+    for (int i = 0; i < sz; ++i)
     {
         sc[0].set(i, array.constData()[i].x());
         sc[1].set(i, array.constData()[i].y());
@@ -85,7 +89,7 @@ MultiVector::MultiVector(const QVector<Vector> &array)
 }
 
 /** Copy constructor */
-MultiVector::MultiVector(const MultiVector& other)
+MultiVector::MultiVector(const MultiVector &other)
 {
     sc[0] = other.sc[0];
     sc[1] = other.sc[1];
@@ -94,7 +98,8 @@ MultiVector::MultiVector(const MultiVector& other)
 
 /** Destructor */
 MultiVector::~MultiVector()
-{}
+{
+}
 
 /** Convert the passed array of vectors into an array of MultiVectors */
 QVector<MultiVector> MultiVector::fromArray(const Vector *array, int size)
@@ -105,21 +110,21 @@ QVector<MultiVector> MultiVector::fromArray(const Vector *array, int size)
     int nvecs = size / count();
     int nremain = size % count();
 
-    QVector<MultiVector> marray(nvecs + ( (nremain > 0) ? 1 : 0 ));
+    QVector<MultiVector> marray(nvecs + ((nremain > 0) ? 1 : 0));
 
     MultiVector *ma = marray.data();
 
     int idx = 0;
 
-    for (int i=0; i<nvecs; ++i)
+    for (int i = 0; i < nvecs; ++i)
     {
-        ma[i] = MultiVector(array+idx, count());
+        ma[i] = MultiVector(array + idx, count());
         idx += count();
     }
 
     if (nremain > 0)
     {
-        ma[marray.count()-1] = MultiVector(array+idx, nremain);
+        ma[marray.count() - 1] = MultiVector(array + idx, nremain);
     }
 
     return marray;
@@ -141,13 +146,13 @@ MultiDouble MultiVector::invLength2() const
 MultiDouble MultiVector::distance2(const MultiVector &v1, const MultiVector &v2)
 {
     MultiDouble del = v1.sc[0] - v2.sc[0];
-    MultiDouble dist2( del * del );
+    MultiDouble dist2(del * del);
 
     del = v1.sc[1] - v2.sc[1];
-    dist2.multiplyAdd( del, del );
+    dist2.multiplyAdd(del, del);
 
     del = v1.sc[2] - v2.sc[2];
-    dist2.multiplyAdd( del, del );
+    dist2.multiplyAdd(del, del);
 
     return dist2;
 }
@@ -161,19 +166,19 @@ MultiDouble MultiVector::distance(const MultiVector &v1, const MultiVector &v2)
 /** Return the 1 / distance between two vectors */
 MultiDouble MultiVector::invDistance(const MultiVector &v1, const MultiVector &v2)
 {
-    return distance(v1,v2).reciprocal();
+    return distance(v1, v2).reciprocal();
 }
 
 /** Return 1 / distance2 between two vectors */
 MultiDouble MultiVector::invDistance2(const MultiVector &v1, const MultiVector &v2)
 {
-    return distance2(v1,v2).reciprocal();
+    return distance2(v1, v2).reciprocal();
 }
 
 /** Access the 'ith' vector in the MultiVector */
 Vector MultiVector::operator[](int i) const
 {
-    return Vector( sc[0].get(i), sc[1].get(i), sc[2].get(i) );
+    return Vector(sc[0].get(i), sc[1].get(i), sc[2].get(i));
 }
 
 /** Access the 'ith' vector in the MultiVector */
@@ -193,11 +198,11 @@ MultiVector MultiVector::normalise() const
 {
     MultiDouble l = length();
 
-    MultiDouble mask = l.compareEqual( MultiDouble(0) );
+    MultiDouble mask = l.compareEqual(MultiDouble(0));
 
-    l = mask.logicalAnd( l.reciprocal() );
+    l = mask.logicalAnd(l.reciprocal());
 
-    return MultiVector(sc[0]*l,sc[1]*l,sc[2]*l);
+    return MultiVector(sc[0] * l, sc[1] * l, sc[2] * l);
 }
 
 /** Return the dot product of v0 and v1 */
@@ -205,8 +210,8 @@ MultiDouble MultiVector::dot(const MultiVector &v0, const MultiVector &v1)
 {
     MultiDouble result(v0.sc[0]);
     result *= v1.sc[0];
-    result.multiplyAdd( v0.sc[1], v1.sc[1] );
-    result.multiplyAdd( v0.sc[2], v1.sc[2] );
+    result.multiplyAdd(v0.sc[1], v1.sc[1]);
+    result.multiplyAdd(v0.sc[2], v1.sc[2]);
 
     return result;
 }
@@ -215,14 +220,14 @@ MultiDouble MultiVector::dot(const MultiVector &v0, const MultiVector &v1)
     this and 'other' (e.g. this->x = max(this->x(),other.x() etc.) */
 void MultiVector::setMax(const MultiVector &other)
 {
-    for (int i=0; i<3; i++)
+    for (int i = 0; i < 3; i++)
         sc[i] = sc[i].max(other.sc[i]);
 }
 
 /** Set this Vector so that it has the minimum x/y/z components */
 void MultiVector::setMin(const MultiVector &other)
 {
-    for (int i=0; i<3; i++)
+    for (int i = 0; i < 3; i++)
         sc[i] = sc[i].min(other.sc[i]);
 }
 
@@ -248,9 +253,9 @@ QString MultiVector::toString() const
 {
     QStringList parts;
 
-    for (int i=0; i<MultiDouble::count(); ++i)
+    for (int i = 0; i < MultiDouble::count(); ++i)
     {
-        parts.append( this->at(i).toString() );
+        parts.append(this->at(i).toString());
     }
 
     return QObject::tr("{ %1 }").arg(parts.join(", "));
@@ -259,19 +264,19 @@ QString MultiVector::toString() const
 /** Return the components via rgb (limited between 0 and 1) */
 MultiDouble MultiVector::r() const
 {
-    return sc[0].max( MultiDouble(0) ).min( MultiDouble(1) );
+    return sc[0].max(MultiDouble(0)).min(MultiDouble(1));
 }
 
 /** Return the components via rgb (limited between 0 and 1) */
 MultiDouble MultiVector::g() const
 {
-    return sc[1].max( MultiDouble(0) ).min( MultiDouble(1) );
+    return sc[1].max(MultiDouble(0)).min(MultiDouble(1));
 }
 
 /** Return the components via rgb (limited between 0 and 1) */
 MultiDouble MultiVector::b() const
 {
-    return sc[2].max( MultiDouble(0) ).min( MultiDouble(1) );
+    return sc[2].max(MultiDouble(0)).min(MultiDouble(1));
 }
 
 /** Set individual values of the vector */
@@ -352,7 +357,7 @@ MultiDouble MultiVector::bearing() const
 {
     MultiDouble result;
 
-    for (int i=0; i<MultiDouble::count(); ++i)
+    for (int i = 0; i < MultiDouble::count(); ++i)
     {
         result.set(i, this->at(i).bearing());
     }
@@ -363,25 +368,25 @@ MultiDouble MultiVector::bearing() const
 /** Return the bearing of this vector against 'v' on the xy plane */
 MultiDouble MultiVector::bearingXY(const MultiVector &v) const
 {
-    MultiVector px( x(), y(), 0.0);
+    MultiVector px(x(), y(), 0.0);
     MultiVector pv(v.x(), v.y(), 0.0);
-    return angle(px,pv);
+    return angle(px, pv);
 }
 
 /** Return the bearing of this vector against 'v' on the xz plane */
 MultiDouble MultiVector::bearingXZ(const MultiVector &v) const
 {
-    MultiVector px( x(), 0.0, z());
+    MultiVector px(x(), 0.0, z());
     MultiVector pv(v.x(), 0.0, v.z());
-    return angle(px,pv);
+    return angle(px, pv);
 }
 
 /** Return the bearing of this vector against 'v' on the yz plane */
 MultiDouble MultiVector::bearingYZ(const MultiVector &v) const
 {
-    MultiVector px( 0.0, y(), z());
+    MultiVector px(0.0, y(), z());
     MultiVector pv(0.0, v.y(), v.z());
-    return angle(px,pv);
+    return angle(px, pv);
 }
 
 /** Return the angle between vectors 'v0' and 'v1' - this is the smallest
@@ -390,9 +395,9 @@ MultiDouble MultiVector::angle(const MultiVector &v0, const MultiVector &v1)
 {
     MultiDouble result;
 
-    for (int i=0; i<MultiDouble::count(); ++i)
+    for (int i = 0; i < MultiDouble::count(); ++i)
     {
-        result.set(i, Vector::angle(v0.at(i),v1.at(i)));
+        result.set(i, Vector::angle(v0.at(i), v1.at(i)));
     }
 
     return result;
@@ -401,18 +406,18 @@ MultiDouble MultiVector::angle(const MultiVector &v0, const MultiVector &v1)
 /** Return the angle between v0-v1-v2 (treating the vectors as points in space) */
 MultiDouble MultiVector::angle(const MultiVector &v0, const MultiVector &v1, const MultiVector &v2)
 {
-    return angle( v0-v1, v2-v1 );
+    return angle(v0 - v1, v2 - v1);
 }
 
 /** Return the dihedral angle between v0-v1-v2-v3 (treating the vectors as points) */
-MultiDouble MultiVector::dihedral(const MultiVector &v0, const MultiVector &v1,
-                                  const MultiVector &v2, const MultiVector &v3)
+MultiDouble MultiVector::dihedral(const MultiVector &v0, const MultiVector &v1, const MultiVector &v2,
+                                  const MultiVector &v3)
 {
     MultiDouble result;
 
-    for (int i=0; i<MultiDouble::count(); ++i)
+    for (int i = 0; i < MultiDouble::count(); ++i)
     {
-        result.set( i, Vector::dihedral(v0.at(i),v1.at(i),v2.at(i),v3.at(i)) );
+        result.set(i, Vector::dihedral(v0.at(i), v1.at(i), v2.at(i), v3.at(i)));
     }
 
     return result;
@@ -420,16 +425,14 @@ MultiDouble MultiVector::dihedral(const MultiVector &v0, const MultiVector &v1,
 
 /** Generate a vector, v0, that has distance 'dst' v0-v1, angle 'ang' v0-v1-v2,
     and dihedral 'dih' v0-v1-v2-v3 */
-MultiVector MultiVector::generate(
-                   const MultiDouble &dst, const MultiVector &v1, const MultiDouble &ang,
-                   const MultiVector &v2, const MultiDouble &dih, const MultiVector &v3)
+MultiVector MultiVector::generate(const MultiDouble &dst, const MultiVector &v1, const MultiDouble &ang,
+                                  const MultiVector &v2, const MultiDouble &dih, const MultiVector &v3)
 {
     MultiVector result;
 
-    for (int i=0; i<MultiDouble::count(); ++i)
+    for (int i = 0; i < MultiDouble::count(); ++i)
     {
-        result.set(i, Vector::generate(dst.at(i), v1.at(i), Angle(ang.at(i)),
-                   v2.at(i), Angle(dih.at(i)), v3.at(i)));
+        result.set(i, Vector::generate(dst.at(i), v1.at(i), Angle(ang.at(i)), v2.at(i), Angle(dih.at(i)), v3.at(i)));
     }
 
     return result;
@@ -440,9 +443,9 @@ MultiVector MultiVector::cross(const MultiVector &v0, const MultiVector &v1)
 {
     qDebug() << CODELOC;
 
-    MultiDouble nx = v0.sc[1]*v1.sc[2] - v0.sc[2]*v1.sc[1];
-    MultiDouble ny = v0.sc[2]*v1.sc[0] - v0.sc[0]*v1.sc[2];
-    MultiDouble nz = v0.sc[0]*v1.sc[1] - v0.sc[1]*v1.sc[0];
+    MultiDouble nx = v0.sc[1] * v1.sc[2] - v0.sc[2] * v1.sc[1];
+    MultiDouble ny = v0.sc[2] * v1.sc[0] - v0.sc[0] * v1.sc[2];
+    MultiDouble nz = v0.sc[0] * v1.sc[1] - v0.sc[1] * v1.sc[0];
 
     qDebug() << CODELOC;
 
@@ -452,20 +455,19 @@ MultiVector MultiVector::cross(const MultiVector &v0, const MultiVector &v1)
     length.multiplyAdd(nz, nz);
     length = length.sqrt();
 
-    MultiDouble near_parallel = length.compareLess( MultiDouble(0.01) );
+    MultiDouble near_parallel = length.compareLess(MultiDouble(0.01));
 
     qDebug() << CODELOC;
 
     if (near_parallel.sum() > 0)
     {
-        qDebug() << "NEAR PARALLEL" << near_parallel.toString()
-                 << length.toString();
+        qDebug() << "NEAR PARALLEL" << near_parallel.toString() << length.toString();
 
-        //at least one of the pairs of vectors is parallel (or near parallel)
-        // - manually calculate each cross product
+        // at least one of the pairs of vectors is parallel (or near parallel)
+        //  - manually calculate each cross product
         int nfixed = 0;
 
-        for (int i=0; i<MultiDouble::count(); ++i)
+        for (int i = 0; i < MultiDouble::count(); ++i)
         {
             if (near_parallel.at(i) > 0)
             {
@@ -480,15 +482,15 @@ MultiVector MultiVector::cross(const MultiVector &v0, const MultiVector &v1)
 
         if (nfixed == MultiDouble::count())
         {
-            //we have already made the vector
+            // we have already made the vector
             return MultiVector(nx, ny, nz);
         }
     }
 
     qDebug() << CODELOC;
 
-    //return the normalised vector
-    MultiDouble mask = length.compareEqual( MultiDouble(0) );
+    // return the normalised vector
+    MultiDouble mask = length.compareEqual(MultiDouble(0));
 
     qDebug() << CODELOC;
     qDebug() << length.toString();
@@ -498,11 +500,11 @@ MultiVector MultiVector::cross(const MultiVector &v0, const MultiVector &v1)
 
     qDebug() << rec.toString();
 
-    MultiDouble inv_length = mask.logicalAnd(rec); //length.reciprocal());
+    MultiDouble inv_length = mask.logicalAnd(rec); // length.reciprocal());
 
     qDebug() << CODELOC;
 
-    return MultiVector( nx*inv_length, ny*inv_length, nz*inv_length );
+    return MultiVector(nx * inv_length, ny * inv_length, nz * inv_length);
 }
 
 /** Return the manhattan length of the vector */
@@ -510,7 +512,7 @@ MultiDouble MultiVector::manhattanLength() const
 {
     MultiDouble result;
 
-    for (int i=0; i<MultiDouble::count(); ++i)
+    for (int i = 0; i < MultiDouble::count(); ++i)
     {
         result.set(i, this->at(i).manhattanLength());
     }
@@ -519,17 +521,18 @@ MultiDouble MultiVector::manhattanLength() const
 }
 
 /** Increment, decrement, negate etc. */
-MultiVector& MultiVector::operator/=(const MultiDouble &val)
+MultiVector &MultiVector::operator/=(const MultiDouble &val)
 {
-    for (int i=0; i<MultiDouble::count(); ++i)
+    for (int i = 0; i < MultiDouble::count(); ++i)
     {
         if (SireMaths::isZero(val.at(i)))
-            throw SireMaths::math_error(QObject::tr(
-                "Cannot divide a vector by zero! %1 / %2 is a error!")
-                    .arg(this->toString()).arg(val.toString()),CODELOC);
+            throw SireMaths::math_error(QObject::tr("Cannot divide a vector by zero! %1 / %2 is a error!")
+                                            .arg(this->toString())
+                                            .arg(val.toString()),
+                                        CODELOC);
     }
 
-    for (int i=0; i<3; i++)
+    for (int i = 0; i < 3; i++)
         sc[i] /= val;
 
     return *this;
@@ -544,9 +547,9 @@ namespace SireMaths
         result /= c;
         return result;
     }
-}
+} // namespace SireMaths
 
-const char* MultiVector::typeName()
+const char *MultiVector::typeName()
 {
     return "SireMaths::MultiVector";
 }

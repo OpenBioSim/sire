@@ -32,15 +32,14 @@
 using namespace SireMove;
 using namespace SireStream;
 
-static const RegisterMetaType<Dynamics> r_dynamics( MAGIC_ONLY,
-                                                    "SireMove::Dynamics" );
+static const RegisterMetaType<Dynamics> r_dynamics(MAGIC_ONLY, "SireMove::Dynamics");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Dynamics &dynamics)
 {
     writeHeader(ds, r_dynamics, 1);
 
-    ds << dynamics.ensmble << static_cast<const Move&>(dynamics);
+    ds << dynamics.ensmble << static_cast<const Move &>(dynamics);
 
     return ds;
 }
@@ -52,7 +51,7 @@ QDataStream &operator>>(QDataStream &ds, Dynamics &dynamics)
 
     if (v == 1)
     {
-        ds >> dynamics.ensmble >> static_cast<Move&>(dynamics);
+        ds >> dynamics.ensmble >> static_cast<Move &>(dynamics);
     }
     else
         throw version_error(v, "1", r_dynamics, CODELOC);
@@ -62,18 +61,21 @@ QDataStream &operator>>(QDataStream &ds, Dynamics &dynamics)
 
 /** Constructor */
 Dynamics::Dynamics(const PropertyMap &map) : Move(map)
-{}
+{
+}
 
 /** Copy constructor */
 Dynamics::Dynamics(const Dynamics &other) : Move(other), ensmble(other.ensmble)
-{}
+{
+}
 
 /** Destructor */
 Dynamics::~Dynamics()
-{}
+{
+}
 
 /** Copy assignment operator */
-Dynamics& Dynamics::operator=(const Dynamics &other)
+Dynamics &Dynamics::operator=(const Dynamics &other)
 {
     ensmble = other.ensmble;
     Move::operator=(other);

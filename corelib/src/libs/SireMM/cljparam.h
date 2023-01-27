@@ -38,75 +38,74 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class CLJParam;
+    class CLJParam;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJParam&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJParam&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJParam &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJParam &);
 
 namespace SireMM
 {
 
-/** This is a simple internal class that holds the combined CLJ parameter
-    as a reduced charge (charge / sqrt(4 pi epsilon_0)) and the LJ
-    parameter as an ID number for the LJParameterDB
+    /** This is a simple internal class that holds the combined CLJ parameter
+        as a reduced charge (charge / sqrt(4 pi epsilon_0)) and the LJ
+        parameter as an ID number for the LJParameterDB
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJParam
-{
-public:
-    CLJParam();
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJParam
+    {
+    public:
+        CLJParam();
 
-    CLJParam(const SireUnits::Dimension::Charge &charge,
-             const LJParameter &ljparam, bool auto_lock=true);
+        CLJParam(const SireUnits::Dimension::Charge &charge, const LJParameter &ljparam, bool auto_lock = true);
 
-    CLJParam(const CLJParam &other);
+        CLJParam(const CLJParam &other);
 
-    ~CLJParam();
+        ~CLJParam();
 
-    CLJParam& operator=(const CLJParam &other);
+        CLJParam &operator=(const CLJParam &other);
 
-    bool operator==(const CLJParam &other) const;
-    bool operator!=(const CLJParam &other) const;
+        bool operator==(const CLJParam &other) const;
+        bool operator!=(const CLJParam &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    double q() const;
-    SireUnits::Dimension::Charge charge() const;
+        double q() const;
+        SireUnits::Dimension::Charge charge() const;
 
-    quint32 ljID() const;
-    LJParameter lj() const;
+        quint32 ljID() const;
+        LJParameter lj() const;
 
-private:
-    /** The reduced charge (q / sqrt(4 pi epsilon_0)) */
-    double reduced_chg;
+    private:
+        /** The reduced charge (q / sqrt(4 pi epsilon_0)) */
+        double reduced_chg;
 
-    /** The ID of the LJ parameter in the global LJParameterDB */
-    quint32 ljid;
-};
+        /** The ID of the LJ parameter in the global LJParameterDB */
+        quint32 ljid;
+    };
 
-/** Return the reduced charge parameter (charge / sqrt(4 pi epsilon_0)) */
-SIRE_ALWAYS_INLINE double CLJParam::q() const
-{
-    return reduced_chg;
-}
+    /** Return the reduced charge parameter (charge / sqrt(4 pi epsilon_0)) */
+    SIRE_ALWAYS_INLINE double CLJParam::q() const
+    {
+        return reduced_chg;
+    }
 
-/** Return the LJ parameter */
-SIRE_ALWAYS_INLINE quint32 CLJParam::ljID() const
-{
-    return ljid;
-}
+    /** Return the LJ parameter */
+    SIRE_ALWAYS_INLINE quint32 CLJParam::ljID() const
+    {
+        return ljid;
+    }
 
-typedef SireFF::AtomicFFParameters<CLJParam> CLJParams;
-typedef SireFF::AtomicFFParametersArray<CLJParam> CLJParamsArray;
+    typedef SireFF::AtomicFFParameters<CLJParam> CLJParams;
+    typedef SireFF::AtomicFFParametersArray<CLJParam> CLJParamsArray;
 
-}
+} // namespace SireMM
 
-Q_DECLARE_TYPEINFO( SireMM::CLJParam, Q_MOVABLE_TYPE );
+Q_DECLARE_TYPEINFO(SireMM::CLJParam, Q_MOVABLE_TYPE);
 
-Q_DECLARE_METATYPE( SireMM::CLJParams )
-Q_DECLARE_METATYPE( SireMM::CLJParamsArray )
+Q_DECLARE_METATYPE(SireMM::CLJParams)
+Q_DECLARE_METATYPE(SireMM::CLJParamsArray)
 
 SIRE_END_HEADER
 

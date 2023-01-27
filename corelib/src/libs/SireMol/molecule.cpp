@@ -26,15 +26,15 @@
 \*********************************************/
 
 #include "molecule.h"
-#include "segment.h"
-#include "chain.h"
-#include "residue.h"
-#include "cutgroup.h"
 #include "atom.h"
+#include "chain.h"
+#include "cutgroup.h"
+#include "residue.h"
+#include "segment.h"
 
 #include "moleculeinfo.h"
-#include "molviewproperty.h"
 #include "moleditor.h"
+#include "molviewproperty.h"
 
 #include "evaluator.h"
 
@@ -55,24 +55,22 @@ using namespace SireStream;
 RegisterMetaType<Molecule> r_mol;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const Molecule &mol)
+QDataStream &operator<<(QDataStream &ds, const Molecule &mol)
 {
     writeHeader(ds, r_mol, 1);
-    ds << static_cast<const MoleculeView&>(mol);
+    ds << static_cast<const MoleculeView &>(mol);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       Molecule &mol)
+QDataStream &operator>>(QDataStream &ds, Molecule &mol)
 {
     VersionID v = readHeader(ds, r_mol);
 
     if (v == 1)
     {
-        ds >> static_cast<MoleculeView&>(mol);
+        ds >> static_cast<MoleculeView &>(mol);
     }
     else
         throw version_error(v, "1", r_mol, CODELOC);
@@ -81,31 +79,33 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-Molecule::Molecule() : ConcreteProperty<Molecule,MoleculeView>()
-{}
+Molecule::Molecule() : ConcreteProperty<Molecule, MoleculeView>()
+{
+}
 
 /** Construct a new Molecule, called 'molname' */
-Molecule::Molecule(const QString &molname) : ConcreteProperty<Molecule,MoleculeView>()
+Molecule::Molecule(const QString &molname) : ConcreteProperty<Molecule, MoleculeView>()
 {
-    this->operator=( this->edit().renumber().rename(molname).commit() );
+    this->operator=(this->edit().renumber().rename(molname).commit());
 }
 
 /** Construct from the passed MoleculeData */
-Molecule::Molecule(const MoleculeData &moldata)
-         : ConcreteProperty<Molecule,MoleculeView>(moldata)
-{}
+Molecule::Molecule(const MoleculeData &moldata) : ConcreteProperty<Molecule, MoleculeView>(moldata)
+{
+}
 
 /** Copy constructor */
-Molecule::Molecule(const Molecule &other)
-         : ConcreteProperty<Molecule,MoleculeView>(other)
-{}
+Molecule::Molecule(const Molecule &other) : ConcreteProperty<Molecule, MoleculeView>(other)
+{
+}
 
 /** Destructor */
 Molecule::~Molecule()
-{}
+{
+}
 
 /** Copy assignment operator */
-Molecule& Molecule::operator=(const Molecule &other)
+Molecule &Molecule::operator=(const Molecule &other)
 {
     d = other.d;
     return *this;
@@ -128,10 +128,10 @@ QString Molecule::toString() const
 {
     QString n = QString("%1:%2").arg(this->name()).arg(this->number());
 
-    return QObject::tr( "Molecule( %1 num_atoms=%2 num_residues=%3 )" )
-                .arg(n, -7)
-                .arg(this->nAtoms())
-                .arg(this->nResidues());
+    return QObject::tr("Molecule( %1 num_atoms=%2 num_residues=%3 )")
+        .arg(n, -7)
+        .arg(this->nAtoms())
+        .arg(this->nResidues());
 }
 
 /** Return whether or not this is empty */
@@ -160,7 +160,7 @@ AtomSelection Molecule::selection() const
 }
 
 /** Return the name of this molecule */
-const MolName& Molecule::name() const
+const MolName &Molecule::name() const
 {
     return d->name();
 }
@@ -293,23 +293,23 @@ MolEditor Molecule::edit() const
 */
 void Molecule::update(const MoleculeData &moldata)
 {
-    //check that the new data is compatible (has same molecule
-    //number)
+    // check that the new data is compatible (has same molecule
+    // number)
     if (d->number() != moldata.number())
     {
-        throw SireError::incompatible_error( QObject::tr(
-            "You can only update a molecule with the molecule data "
-            "for the same molecule (same molecule number) You are "
-            "trying to update molecule %1 with molecule %2.")
-                .arg(d->number()).arg(moldata.number()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("You can only update a molecule with the molecule data "
+                                                        "for the same molecule (same molecule number) You are "
+                                                        "trying to update molecule %1 with molecule %2.")
+                                                .arg(d->number())
+                                                .arg(moldata.number()),
+                                            CODELOC);
     }
 
     d = moldata;
 }
 
 /** Return all of the properties of this molecule */
-const Properties& Molecule::properties() const
+const Properties &Molecule::properties() const
 {
     return d->properties();
 }
@@ -318,7 +318,7 @@ const Properties& Molecule::properties() const
 
     \throw SireMol::missing_property
 */
-const Property& Molecule::property(const PropertyName &key) const
+const Property &Molecule::property(const PropertyName &key) const
 {
     return d->property(key);
 }
@@ -327,7 +327,7 @@ const Property& Molecule::property(const PropertyName &key) const
 
     \throw SireMol::missing_property
 */
-const Property& Molecule::metadata(const PropertyName &metakey) const
+const Property &Molecule::metadata(const PropertyName &metakey) const
 {
     return d->metadata(metakey);
 }
@@ -337,8 +337,7 @@ const Property& Molecule::metadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-const Property& Molecule::metadata(const PropertyName &key,
-                                   const PropertyName &metakey) const
+const Property &Molecule::metadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return d->metadata(key, metakey);
 }
@@ -355,8 +354,7 @@ void Molecule::setProperty(const QString &key, const Property &value)
     {
         if (not value.asA<MolViewProperty>().isCompatibleWith(this->data().info()))
         {
-            this->setProperty(key, value.asA<MolViewProperty>()
-                                        .makeCompatibleWith(this->data().info()));
+            this->setProperty(key, value.asA<MolViewProperty>().makeCompatibleWith(this->data().info()));
             return;
         }
     }
@@ -384,8 +382,7 @@ void Molecule::setMetadata(const QString &metakey, const Property &value)
 
     \throw SireError::incompatible_error
 */
-void Molecule::setMetadata(const QString &key, const QString &metakey,
-                           const Property &value)
+void Molecule::setMetadata(const QString &key, const QString &metakey, const Property &value)
 {
     if (value.isA<MolViewProperty>())
         value.asA<MolViewProperty>().assertCompatibleWith(d->info());
@@ -411,8 +408,7 @@ bool Molecule::hasMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-bool Molecule::hasMetadata(const PropertyName &key,
-                           const PropertyName &metakey) const
+bool Molecule::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return d->hasMetadata(key, metakey);
 }
@@ -440,8 +436,7 @@ void Molecule::assertContainsMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-void Molecule::assertContainsMetadata(const PropertyName &key,
-                                      const PropertyName &metakey) const
+void Molecule::assertContainsMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     d->properties().assertContainsMetadata(key, metakey);
 }
@@ -468,18 +463,18 @@ QStringList Molecule::metadataKeys(const PropertyName &key) const
     return d->metadataKeys(key);
 }
 
-const char* Molecule::typeName()
+const char *Molecule::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Molecule>() );
+    return QMetaType::typeName(qMetaTypeId<Molecule>());
 }
 
 namespace SireMol
 {
     ///// explicitly instantiate manipulator classes
     template class Mover<Molecule>;
-}
+} // namespace SireMol
 
-Molecule* Molecule::clone() const
+Molecule *Molecule::clone() const
 {
     return new Molecule(*this);
 }

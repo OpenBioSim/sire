@@ -34,358 +34,323 @@
 
 namespace SireMM
 {
-class CLJShiftFunction;
-class CLJIntraShiftFunction;
-class CLJSoftShiftFunction;
-class CLJSoftIntraShiftFunction;
-}
+    class CLJShiftFunction;
+    class CLJIntraShiftFunction;
+    class CLJSoftShiftFunction;
+    class CLJSoftIntraShiftFunction;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJShiftFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJShiftFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJShiftFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJShiftFunction &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJIntraShiftFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJIntraShiftFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJIntraShiftFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJIntraShiftFunction &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJSoftShiftFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJSoftShiftFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJSoftShiftFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJSoftShiftFunction &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJSoftIntraShiftFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJSoftIntraShiftFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJSoftIntraShiftFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJSoftIntraShiftFunction &);
 
 namespace SireMM
 {
 
-/** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
-    CLJAtoms using a force shifted electrostatics cutoff
+    /** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
+        CLJAtoms using a force shifted electrostatics cutoff
 
-        //we use the force shifted coulomb energy described
-        //in Fennell and Gezelter, J. Chem. Phys., 124, 234104, 2006
-        //We use alpha=0, as I have seen that a 25 A cutoff gives stable results
-        //with alpha=0, and this way we avoid changing the hamiltonian significantly
-        //by having an erfc function
+            //we use the force shifted coulomb energy described
+            //in Fennell and Gezelter, J. Chem. Phys., 124, 234104, 2006
+            //We use alpha=0, as I have seen that a 25 A cutoff gives stable results
+            //with alpha=0, and this way we avoid changing the hamiltonian significantly
+            //by having an erfc function
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJShiftFunction
-        : public SireBase::ConcreteProperty<CLJShiftFunction,CLJCutoffFunction>
-{
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJShiftFunction : public SireBase::ConcreteProperty<CLJShiftFunction, CLJCutoffFunction>
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJShiftFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJShiftFunction&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJShiftFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJShiftFunction &);
 
-public:
-    CLJShiftFunction();
-    CLJShiftFunction(Length cutoff);
-    CLJShiftFunction(Length coul_cutoff, Length lj_cutoff);
+    public:
+        CLJShiftFunction();
+        CLJShiftFunction(Length cutoff);
+        CLJShiftFunction(Length coul_cutoff, Length lj_cutoff);
 
-    CLJShiftFunction(const Space &space, Length cutoff);
-    CLJShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
+        CLJShiftFunction(const Space &space, Length cutoff);
+        CLJShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
 
-    CLJShiftFunction(Length cutoff, COMBINING_RULES combining_rules);
-    CLJShiftFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
+        CLJShiftFunction(Length cutoff, COMBINING_RULES combining_rules);
+        CLJShiftFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    CLJShiftFunction(const Space &space, COMBINING_RULES combining_rules);
-    CLJShiftFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
-    CLJShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
-                     COMBINING_RULES combining_rules);
+        CLJShiftFunction(const Space &space, COMBINING_RULES combining_rules);
+        CLJShiftFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
+        CLJShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    CLJShiftFunction(const CLJShiftFunction &other);
+        CLJShiftFunction(const CLJShiftFunction &other);
 
-    ~CLJShiftFunction();
+        ~CLJShiftFunction();
 
-    CLJShiftFunction& operator=(const CLJShiftFunction &other);
+        CLJShiftFunction &operator=(const CLJShiftFunction &other);
 
-    bool operator==(const CLJShiftFunction &other) const;
-    bool operator!=(const CLJShiftFunction &other) const;
+        bool operator==(const CLJShiftFunction &other) const;
+        bool operator!=(const CLJShiftFunction &other) const;
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    CLJShiftFunction* clone() const;
+        CLJShiftFunction *clone() const;
 
-    bool supportsGridCalculation() const;
+        bool supportsGridCalculation() const;
 
-    static CLJFunctionPtr defaultShiftFunction();
+        static CLJFunctionPtr defaultShiftFunction();
 
-protected:
-    void calcVacEnergyAri(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+    protected:
+        void calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-    void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
-
-    void calcVacEnergyGeo(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
-
-    void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
-
-    void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
-
-    void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
-
-    void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
-
-    void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
-
-    double calcVacCoulombEnergyAri(const CLJAtoms &atoms) const;
-    double calcVacCoulombEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                                   float min_distance) const;
-
-    double calcVacLJEnergyAri(const CLJAtoms &atoms) const;
-    double calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
+        void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
                               float min_distance) const;
 
-    void calcVacGrid(const CLJAtoms &atoms, const GridInfo &gridinfo,
-                     const int start, const int end, float *gridpot) const;
+        void calcVacEnergyGeo(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-    void calcBoxGrid(const CLJAtoms &atoms, const GridInfo &gridinfo,
-                     const Vector &box_dimensions,
-                     const int start, const int end, float *gridpot) const;
-};
+        void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-/** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
-    CLJAtoms using a force shifted electrostatics cutoff
+        void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJIntraShiftFunction
-        : public SireBase::ConcreteProperty<CLJIntraShiftFunction,CLJIntraFunction>
-{
+        void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJIntraShiftFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJIntraShiftFunction&);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-public:
-    CLJIntraShiftFunction();
-    CLJIntraShiftFunction(Length cutoff);
-    CLJIntraShiftFunction(Length coul_cutoff, Length lj_cutoff);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-    CLJIntraShiftFunction(const Space &space, Length cutoff);
-    CLJIntraShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
+        double calcVacCoulombEnergyAri(const CLJAtoms &atoms) const;
+        double calcVacCoulombEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, float min_distance) const;
 
-    CLJIntraShiftFunction(Length cutoff, COMBINING_RULES combining_rules);
-    CLJIntraShiftFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
+        double calcVacLJEnergyAri(const CLJAtoms &atoms) const;
+        double calcVacLJEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, float min_distance) const;
 
-    CLJIntraShiftFunction(const Space &space, COMBINING_RULES combining_rules);
-    CLJIntraShiftFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
-    CLJIntraShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
-                          COMBINING_RULES combining_rules);
+        void calcVacGrid(const CLJAtoms &atoms, const GridInfo &gridinfo, const int start, const int end,
+                         float *gridpot) const;
 
-    CLJIntraShiftFunction(const CLJIntraShiftFunction &other);
+        void calcBoxGrid(const CLJAtoms &atoms, const GridInfo &gridinfo, const Vector &box_dimensions, const int start,
+                         const int end, float *gridpot) const;
+    };
 
-    ~CLJIntraShiftFunction();
+    /** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
+        CLJAtoms using a force shifted electrostatics cutoff
 
-    CLJIntraShiftFunction& operator=(const CLJIntraShiftFunction &other);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJIntraShiftFunction : public SireBase::ConcreteProperty<CLJIntraShiftFunction, CLJIntraFunction>
+    {
 
-    bool operator==(const CLJIntraShiftFunction &other) const;
-    bool operator!=(const CLJIntraShiftFunction &other) const;
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJIntraShiftFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJIntraShiftFunction &);
 
-    static const char* typeName();
-    const char* what() const;
+    public:
+        CLJIntraShiftFunction();
+        CLJIntraShiftFunction(Length cutoff);
+        CLJIntraShiftFunction(Length coul_cutoff, Length lj_cutoff);
 
-    CLJIntraShiftFunction* clone() const;
+        CLJIntraShiftFunction(const Space &space, Length cutoff);
+        CLJIntraShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
 
-    static CLJFunctionPtr defaultShiftFunction();
+        CLJIntraShiftFunction(Length cutoff, COMBINING_RULES combining_rules);
+        CLJIntraShiftFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-protected:
-    void calcVacEnergyAri(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        CLJIntraShiftFunction(const Space &space, COMBINING_RULES combining_rules);
+        CLJIntraShiftFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
+        CLJIntraShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        CLJIntraShiftFunction(const CLJIntraShiftFunction &other);
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        ~CLJIntraShiftFunction();
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        CLJIntraShiftFunction &operator=(const CLJIntraShiftFunction &other);
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        bool operator==(const CLJIntraShiftFunction &other) const;
+        bool operator!=(const CLJIntraShiftFunction &other) const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg
-                          , float min_distance) const;
+        static const char *typeName();
+        const char *what() const;
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        CLJIntraShiftFunction *clone() const;
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
-};
+        static CLJFunctionPtr defaultShiftFunction();
 
+    protected:
+        void calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-/** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
-    CLJAtoms using a force shifted electrostatics cutoff, and provides a soft-core
-    potential that can soften molecules that are involved in free energy calculations
+        void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJSoftShiftFunction
-        : public SireBase::ConcreteProperty<CLJSoftShiftFunction,CLJSoftFunction>
-{
+        void calcVacEnergyGeo(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJSoftShiftFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJSoftShiftFunction&);
+        void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-public:
-    CLJSoftShiftFunction();
-    CLJSoftShiftFunction(Length cutoff);
-    CLJSoftShiftFunction(Length coul_cutoff, Length lj_cutoff);
+        void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-    CLJSoftShiftFunction(const Space &space, Length cutoff);
-    CLJSoftShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
+        void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-    CLJSoftShiftFunction(Length cutoff, COMBINING_RULES combining_rules);
-    CLJSoftShiftFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-    CLJSoftShiftFunction(const Space &space, COMBINING_RULES combining_rules);
-    CLJSoftShiftFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
-    CLJSoftShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
-                     COMBINING_RULES combining_rules);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
+    };
 
-    CLJSoftShiftFunction(const CLJSoftShiftFunction &other);
+    /** This CLJFunction calculates the intermolecular coulomb and LJ energy of the passed
+        CLJAtoms using a force shifted electrostatics cutoff, and provides a soft-core
+        potential that can soften molecules that are involved in free energy calculations
 
-    ~CLJSoftShiftFunction();
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJSoftShiftFunction : public SireBase::ConcreteProperty<CLJSoftShiftFunction, CLJSoftFunction>
+    {
 
-    CLJSoftShiftFunction& operator=(const CLJSoftShiftFunction &other);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJSoftShiftFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJSoftShiftFunction &);
 
-    bool operator==(const CLJSoftShiftFunction &other) const;
-    bool operator!=(const CLJSoftShiftFunction &other) const;
+    public:
+        CLJSoftShiftFunction();
+        CLJSoftShiftFunction(Length cutoff);
+        CLJSoftShiftFunction(Length coul_cutoff, Length lj_cutoff);
 
-    static const char* typeName();
-    const char* what() const;
+        CLJSoftShiftFunction(const Space &space, Length cutoff);
+        CLJSoftShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
 
-    QString toString() const;
+        CLJSoftShiftFunction(Length cutoff, COMBINING_RULES combining_rules);
+        CLJSoftShiftFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    CLJSoftShiftFunction* clone() const;
+        CLJSoftShiftFunction(const Space &space, COMBINING_RULES combining_rules);
+        CLJSoftShiftFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
+        CLJSoftShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    static CLJFunctionPtr defaultShiftFunction();
+        CLJSoftShiftFunction(const CLJSoftShiftFunction &other);
 
-protected:
-    void calcVacEnergyAri(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        ~CLJSoftShiftFunction();
 
-    void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        CLJSoftShiftFunction &operator=(const CLJSoftShiftFunction &other);
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        bool operator==(const CLJSoftShiftFunction &other) const;
+        bool operator!=(const CLJSoftShiftFunction &other) const;
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        static const char *typeName();
+        const char *what() const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        QString toString() const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
+        CLJSoftShiftFunction *clone() const;
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        static CLJFunctionPtr defaultShiftFunction();
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
-};
+    protected:
+        void calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-/** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
-    CLJAtoms using a force shifted electrostatics cutoff, and provides a soft-core
-    potential that can soften molecules that are involved in free energy calculations
+        void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJSoftIntraShiftFunction
-        : public SireBase::ConcreteProperty<CLJSoftIntraShiftFunction,CLJSoftIntraFunction>
-{
+        void calcVacEnergyGeo(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJSoftIntraShiftFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJSoftIntraShiftFunction&);
+        void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-public:
-    CLJSoftIntraShiftFunction();
-    CLJSoftIntraShiftFunction(Length cutoff);
-    CLJSoftIntraShiftFunction(Length coul_cutoff, Length lj_cutoff);
+        void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-    CLJSoftIntraShiftFunction(const Space &space, Length cutoff);
-    CLJSoftIntraShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
+        void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
 
-    CLJSoftIntraShiftFunction(Length cutoff, COMBINING_RULES combining_rules);
-    CLJSoftIntraShiftFunction(Length coul_cutoff, Length lj_cutoff,
-                              COMBINING_RULES combining_rules);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-    CLJSoftIntraShiftFunction(const Space &space, COMBINING_RULES combining_rules);
-    CLJSoftIntraShiftFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
-    CLJSoftIntraShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
-                              COMBINING_RULES combining_rules);
+        void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
+    };
 
-    CLJSoftIntraShiftFunction(const CLJSoftIntraShiftFunction &other);
+    /** This CLJFunction calculates the intramolecular coulomb and LJ energy of the passed
+        CLJAtoms using a force shifted electrostatics cutoff, and provides a soft-core
+        potential that can soften molecules that are involved in free energy calculations
 
-    ~CLJSoftIntraShiftFunction();
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJSoftIntraShiftFunction
+        : public SireBase::ConcreteProperty<CLJSoftIntraShiftFunction, CLJSoftIntraFunction>
+    {
 
-    CLJSoftIntraShiftFunction& operator=(const CLJSoftIntraShiftFunction &other);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJSoftIntraShiftFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJSoftIntraShiftFunction &);
 
-    bool operator==(const CLJSoftIntraShiftFunction &other) const;
-    bool operator!=(const CLJSoftIntraShiftFunction &other) const;
+    public:
+        CLJSoftIntraShiftFunction();
+        CLJSoftIntraShiftFunction(Length cutoff);
+        CLJSoftIntraShiftFunction(Length coul_cutoff, Length lj_cutoff);
 
-    static const char* typeName();
-    const char* what() const;
+        CLJSoftIntraShiftFunction(const Space &space, Length cutoff);
+        CLJSoftIntraShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff);
 
-    CLJSoftIntraShiftFunction* clone() const;
+        CLJSoftIntraShiftFunction(Length cutoff, COMBINING_RULES combining_rules);
+        CLJSoftIntraShiftFunction(Length coul_cutoff, Length lj_cutoff, COMBINING_RULES combining_rules);
 
-    static CLJFunctionPtr defaultShiftFunction();
+        CLJSoftIntraShiftFunction(const Space &space, COMBINING_RULES combining_rules);
+        CLJSoftIntraShiftFunction(const Space &space, Length cutoff, COMBINING_RULES combining_rules);
+        CLJSoftIntraShiftFunction(const Space &space, Length coul_cutoff, Length lj_cutoff,
+                                  COMBINING_RULES combining_rules);
 
-protected:
-    void calcVacEnergyAri(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        CLJSoftIntraShiftFunction(const CLJSoftIntraShiftFunction &other);
 
-    void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        ~CLJSoftIntraShiftFunction();
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms,
-                          double &cnrg, double &ljnrg) const;
+        CLJSoftIntraShiftFunction &operator=(const CLJSoftIntraShiftFunction &other);
 
-    void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          double &cnrg, double &ljnrg, float min_distance) const;
+        bool operator==(const CLJSoftIntraShiftFunction &other) const;
+        bool operator!=(const CLJSoftIntraShiftFunction &other) const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        static const char *typeName();
+        const char *what() const;
 
-    void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
+        CLJSoftIntraShiftFunction *clone() const;
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions,
-                          double &cnrg, double &ljnrg) const;
+        static CLJFunctionPtr defaultShiftFunction();
 
-    void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1,
-                          const Vector &box_dimensions, double &cnrg, double &ljnrg,
-                          float min_distance) const;
-};
+    protected:
+        void calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-}
+        void calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-Q_DECLARE_METATYPE( SireMM::CLJShiftFunction )
-Q_DECLARE_METATYPE( SireMM::CLJIntraShiftFunction )
+        void calcVacEnergyGeo(const CLJAtoms &atoms, double &cnrg, double &ljnrg) const;
 
-Q_DECLARE_METATYPE( SireMM::CLJSoftShiftFunction )
-Q_DECLARE_METATYPE( SireMM::CLJSoftIntraShiftFunction );
+        void calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, double &cnrg, double &ljnrg,
+                              float min_distance) const;
 
-SIRE_EXPOSE_CLASS( SireMM::CLJShiftFunction )
-SIRE_EXPOSE_CLASS( SireMM::CLJIntraShiftFunction )
+        void calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
 
-SIRE_EXPOSE_CLASS( SireMM::CLJSoftShiftFunction )
-SIRE_EXPOSE_CLASS( SireMM::CLJSoftIntraShiftFunction )
+        void calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
+
+        void calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_dimensions, double &cnrg, double &ljnrg) const;
+
+        void calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &atoms1, const Vector &box_dimensions, double &cnrg,
+                              double &ljnrg, float min_distance) const;
+    };
+
+} // namespace SireMM
+
+Q_DECLARE_METATYPE(SireMM::CLJShiftFunction)
+Q_DECLARE_METATYPE(SireMM::CLJIntraShiftFunction)
+
+Q_DECLARE_METATYPE(SireMM::CLJSoftShiftFunction)
+Q_DECLARE_METATYPE(SireMM::CLJSoftIntraShiftFunction);
+
+SIRE_EXPOSE_CLASS(SireMM::CLJShiftFunction)
+SIRE_EXPOSE_CLASS(SireMM::CLJIntraShiftFunction)
+
+SIRE_EXPOSE_CLASS(SireMM::CLJSoftShiftFunction)
+SIRE_EXPOSE_CLASS(SireMM::CLJSoftIntraShiftFunction)
 
 #endif

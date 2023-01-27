@@ -29,8 +29,8 @@
 
 #include "SireUnits/units.h"
 
-#include "SireMaths/maths.h"
 #include "SireMaths/histogram.h"
+#include "SireMaths/maths.h"
 
 #include "SireError/errors.h"
 
@@ -51,16 +51,13 @@ using namespace SireStream;
 static const RegisterMetaType<FreeEnergyAverage> r_avg;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                        const FreeEnergyAverage &avg)
+QDataStream &operator<<(QDataStream &ds, const FreeEnergyAverage &avg)
 {
     writeHeader(ds, r_avg, 3);
 
     SharedDataStream sds(ds);
 
-    sds << avg.hist
-        << avg.is_forwards_free_energy
-        << static_cast<const ExpAverage &>(avg);
+    sds << avg.hist << avg.is_forwards_free_energy << static_cast<const ExpAverage &>(avg);
 
     return ds;
 }
@@ -100,9 +97,7 @@ QDataStream &operator>>(QDataStream &ds, FreeEnergyAverage &avg)
     at room temperature (25 C) and collects statistics about the
     free energy using a histogram of bin width 0.5 kcal mol-1 */
 FreeEnergyAverage::FreeEnergyAverage()
-    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(
-          -1.0 / (k_boltz.value() * double(25 * celsius))),
-      hist(0.5)
+    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(-1.0 / (k_boltz.value() * double(25 * celsius))), hist(0.5)
 {
 }
 
@@ -111,9 +106,7 @@ FreeEnergyAverage::FreeEnergyAverage()
     free energy using a histogram of bin width 0.5 kcal mol-1, specifying
     whether or not this is a forwards free energy */
 FreeEnergyAverage::FreeEnergyAverage(bool forwards)
-    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(
-          -1.0 / (k_boltz.value() * double(25 * celsius))),
-      hist(0.5),
+    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(-1.0 / (k_boltz.value() * double(25 * celsius))), hist(0.5),
       is_forwards_free_energy(forwards)
 {
 }
@@ -122,9 +115,7 @@ FreeEnergyAverage::FreeEnergyAverage(bool forwards)
     at the specified temperature, and to collect statistics about
     the free energy using a histogram of bin width 0.5 kcal mol-1 */
 FreeEnergyAverage::FreeEnergyAverage(const Temperature &temperature, bool forwards)
-    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(
-          -1.0 / (k_boltz.value() * temperature.to(kelvin))),
-      hist(0.5),
+    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(-1.0 / (k_boltz.value() * temperature.to(kelvin))), hist(0.5),
       is_forwards_free_energy(forwards)
 {
 }
@@ -134,29 +125,23 @@ FreeEnergyAverage::FreeEnergyAverage(const Temperature &temperature, bool forwar
     free energy using a histogram of the passed bin width. If the binwidth
     is zero, then a histogram of energies is not collected */
 FreeEnergyAverage::FreeEnergyAverage(const MolarEnergy &binwidth, bool forwards)
-    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(
-          -1.0 / (k_boltz.value() * double(25 * celsius))),
-      hist(binwidth.value()),
-      is_forwards_free_energy(forwards)
+    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(-1.0 / (k_boltz.value() * double(25 * celsius))),
+      hist(binwidth.value()), is_forwards_free_energy(forwards)
 {
 }
 
 /** Construct an accumulator to accumulate the free energy average
     at the specified temperature, and to collect statistics about
     the free energy using a histogram of passed bin width */
-FreeEnergyAverage::FreeEnergyAverage(const Temperature &temperature,
-                                     const MolarEnergy &binwidth, bool forwards)
-    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(
-          -1.0 / (k_boltz.value() * temperature.to(kelvin))),
-      hist(binwidth.value()),
-      is_forwards_free_energy(forwards)
+FreeEnergyAverage::FreeEnergyAverage(const Temperature &temperature, const MolarEnergy &binwidth, bool forwards)
+    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(-1.0 / (k_boltz.value() * temperature.to(kelvin))),
+      hist(binwidth.value()), is_forwards_free_energy(forwards)
 {
 }
 
 /** Copy constructor */
 FreeEnergyAverage::FreeEnergyAverage(const FreeEnergyAverage &other)
-    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(other),
-      hist(other.hist),
+    : ConcreteProperty<FreeEnergyAverage, ExpAverage>(other), hist(other.hist),
       is_forwards_free_energy(other.is_forwards_free_energy)
 {
 }
@@ -182,10 +167,8 @@ FreeEnergyAverage &FreeEnergyAverage::operator=(const FreeEnergyAverage &other)
 /** Comparison operator */
 bool FreeEnergyAverage::operator==(const FreeEnergyAverage &other) const
 {
-    return this == &other or
-           (hist == other.hist and
-            is_forwards_free_energy == other.is_forwards_free_energy and
-            ExpAverage::operator==(other));
+    return this == &other or (hist == other.hist and is_forwards_free_energy == other.is_forwards_free_energy and
+                              ExpAverage::operator==(other));
 }
 
 /** Comparison operator */
@@ -198,12 +181,12 @@ bool FreeEnergyAverage::operator!=(const FreeEnergyAverage &other) const
 FreeEnergyAverage &FreeEnergyAverage::operator+=(const FreeEnergyAverage &other)
 {
     if (is_forwards_free_energy != other.is_forwards_free_energy)
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Cannot combine a 'forwards' free energy with a 'backwards' free energy. "
-                                                "%1 vs. %2")
-                                                .arg(this->toString())
-                                                .arg(other.toString()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot combine a 'forwards' free energy with a 'backwards' free energy. "
+                        "%1 vs. %2")
+                .arg(this->toString())
+                .arg(other.toString()),
+            CODELOC);
 
     ExpAverage::operator+=(other);
     hist += other.hist;
@@ -280,8 +263,8 @@ bool FreeEnergyAverage::isBackwardsFreeEnergy() const
 /** Return the Taylor series expansion estimate the difference in free energy */
 double FreeEnergyAverage::taylorExpansion() const
 {
-    double dg = hist.mean() - 0.5 * k_boltz.value() * temperature() *
-                                  (hist.meanOfSquares() - (hist.mean() * hist.mean()));
+    double dg =
+        hist.mean() - 0.5 * k_boltz.value() * temperature() * (hist.meanOfSquares() - (hist.mean() * hist.mean()));
 
     if (not is_forwards_free_energy)
         dg *= -1;
@@ -334,15 +317,13 @@ FreeEnergyAverage::operator double() const
 
 static const RegisterMetaType<BennettsFreeEnergyAverage> r_bennetts;
 
-QDataStream &operator<<(QDataStream &ds,
-                        const BennettsFreeEnergyAverage &bennetts)
+QDataStream &operator<<(QDataStream &ds, const BennettsFreeEnergyAverage &bennetts)
 {
     writeHeader(ds, r_bennetts, 2);
 
     SharedDataStream sds(ds);
 
-    sds << bennetts.bennetts_avg << bennetts.bennetts_avg2
-        << bennetts.const_offset
+    sds << bennetts.bennetts_avg << bennetts.bennetts_avg2 << bennetts.const_offset
         << static_cast<const FreeEnergyAverage &>(bennetts);
 
     return ds;
@@ -356,7 +337,8 @@ QDataStream &operator>>(QDataStream &ds, BennettsFreeEnergyAverage &bennetts)
     {
         SharedDataStream sds(ds);
 
-        sds >> bennetts.bennetts_avg >> bennetts.bennetts_avg2 >> bennetts.const_offset >> static_cast<FreeEnergyAverage &>(bennetts);
+        sds >> bennetts.bennetts_avg >> bennetts.bennetts_avg2 >> bennetts.const_offset >>
+            static_cast<FreeEnergyAverage &>(bennetts);
     }
     else if (v == 1)
     {
@@ -364,7 +346,8 @@ QDataStream &operator>>(QDataStream &ds, BennettsFreeEnergyAverage &bennetts)
 
         MolarEnergy tmp;
 
-        sds >> bennetts.bennetts_avg >> tmp >> bennetts.bennetts_avg2 >> tmp >> static_cast<FreeEnergyAverage &>(bennetts);
+        sds >> bennetts.bennetts_avg >> tmp >> bennetts.bennetts_avg2 >> tmp >>
+            static_cast<FreeEnergyAverage &>(bennetts);
 
         bennetts.const_offset = 0 * kcal_per_mol;
     }
@@ -376,68 +359,62 @@ QDataStream &operator>>(QDataStream &ds, BennettsFreeEnergyAverage &bennetts)
 
 /** Constructor */
 BennettsFreeEnergyAverage::BennettsFreeEnergyAverage()
-    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(),
-      bennetts_avg(0), bennetts_avg2(0), const_offset(0)
+    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(), bennetts_avg(0), bennetts_avg2(0),
+      const_offset(0)
 {
 }
 
 /** Constructor, specifying whether or not this is a forwards free energy */
 BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(bool forwards)
-    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(forwards),
-      bennetts_avg(0), bennetts_avg2(0), const_offset(0)
+    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(forwards), bennetts_avg(0), bennetts_avg2(0),
+      const_offset(0)
 {
 }
 
 /** Construct the average at the specified temperature */
-BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const Temperature &temperature,
-                                                     bool forwards)
-    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(temperature, forwards),
-      bennetts_avg(0), bennetts_avg2(0), const_offset(0)
+BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const Temperature &temperature, bool forwards)
+    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(temperature, forwards), bennetts_avg(0),
+      bennetts_avg2(0), const_offset(0)
 {
 }
 
 /** Construct, specifying the value of any constant offset for the ratio (C value)
     and the temperature */
-BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const MolarEnergy &constant,
-                                                     const Temperature &temperature,
+BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const MolarEnergy &constant, const Temperature &temperature,
                                                      bool forwards)
-    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(temperature, forwards),
-      bennetts_avg(0), bennetts_avg2(0), const_offset(constant)
+    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(temperature, forwards), bennetts_avg(0),
+      bennetts_avg2(0), const_offset(constant)
 {
 }
 
 /** Construct, specifying the constant offset for the ratio (C value) */
 BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const MolarEnergy &constant, bool forwards)
-    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(forwards),
-      bennetts_avg(0), bennetts_avg2(0), const_offset(constant)
+    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(forwards), bennetts_avg(0), bennetts_avg2(0),
+      const_offset(constant)
 {
 }
 
 /** Construct at the specified temperature, using a histogram of the specified bin width */
-BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const Temperature &temperature,
-                                                     const MolarEnergy &binwidth,
+BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const Temperature &temperature, const MolarEnergy &binwidth,
                                                      bool forwards)
-    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(temperature, binwidth, forwards),
-      bennetts_avg(0), bennetts_avg2(0), const_offset(0)
+    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(temperature, binwidth, forwards), bennetts_avg(0),
+      bennetts_avg2(0), const_offset(0)
 {
 }
 
 /** Construct at the specified temperature, using the specificed constant (C value),
     using a histogram of the specified bin width */
-BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const MolarEnergy &constant,
-                                                     const Temperature &temperature,
-                                                     const MolarEnergy &binwidth,
-                                                     bool forwards)
-    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(temperature, binwidth, forwards),
-      bennetts_avg(0), bennetts_avg2(0), const_offset(constant)
+BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const MolarEnergy &constant, const Temperature &temperature,
+                                                     const MolarEnergy &binwidth, bool forwards)
+    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(temperature, binwidth, forwards), bennetts_avg(0),
+      bennetts_avg2(0), const_offset(constant)
 {
 }
 
 /** Copy constructor */
 BennettsFreeEnergyAverage::BennettsFreeEnergyAverage(const BennettsFreeEnergyAverage &other)
-    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(other),
-      bennetts_avg(other.bennetts_avg), bennetts_avg2(other.bennetts_avg2),
-      const_offset(other.const_offset)
+    : ConcreteProperty<BennettsFreeEnergyAverage, FreeEnergyAverage>(other), bennetts_avg(other.bennetts_avg),
+      bennetts_avg2(other.bennetts_avg2), const_offset(other.const_offset)
 {
 }
 
@@ -447,8 +424,7 @@ BennettsFreeEnergyAverage::~BennettsFreeEnergyAverage()
 }
 
 /** Copy assignment operator */
-BennettsFreeEnergyAverage &
-BennettsFreeEnergyAverage::operator=(const BennettsFreeEnergyAverage &other)
+BennettsFreeEnergyAverage &BennettsFreeEnergyAverage::operator=(const BennettsFreeEnergyAverage &other)
 {
     if (this != &other)
     {
@@ -493,24 +469,23 @@ MolarEnergy BennettsFreeEnergyAverage::constant() const
 }
 
 /** Self-addition operator */
-BennettsFreeEnergyAverage &
-BennettsFreeEnergyAverage::operator+=(const BennettsFreeEnergyAverage &other)
+BennettsFreeEnergyAverage &BennettsFreeEnergyAverage::operator+=(const BennettsFreeEnergyAverage &other)
 {
     if (isForwardsRatio() != other.isForwardsRatio())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Cannot combine a 'forwards' free energy with a 'backwards' free energy. "
-                                                "%1 vs. %2")
-                                                .arg(this->toString())
-                                                .arg(other.toString()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot combine a 'forwards' free energy with a 'backwards' free energy. "
+                        "%1 vs. %2")
+                .arg(this->toString())
+                .arg(other.toString()),
+            CODELOC);
 
     if (this->constant() != other.constant())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Cannot combine Bennetts averages that have different constant offsets! "
-                                                "%1 vs. %2")
-                                                .arg(this->toString())
-                                                .arg(other.toString()),
-                                            CODELOC);
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot combine Bennetts averages that have different constant offsets! "
+                        "%1 vs. %2")
+                .arg(this->toString())
+                .arg(other.toString()),
+            CODELOC);
 
     double nsteps = nSamples() + other.nSamples();
 
@@ -526,8 +501,7 @@ BennettsFreeEnergyAverage::operator+=(const BennettsFreeEnergyAverage &other)
 }
 
 /** Addition operator */
-BennettsFreeEnergyAverage
-BennettsFreeEnergyAverage::operator+(const BennettsFreeEnergyAverage &other) const
+BennettsFreeEnergyAverage BennettsFreeEnergyAverage::operator+(const BennettsFreeEnergyAverage &other) const
 {
     BennettsFreeEnergyAverage ret(*this);
     ret += other;

@@ -33,11 +33,11 @@
 
 #include "SireError/errors.h"
 
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
+#include "SireUnits/units.h"
 
-#include "SireStream/shareddatastream.h"
 #include "SireStream/registeralternativename.h"
+#include "SireStream/shareddatastream.h"
 
 #include "tostring.h"
 
@@ -88,19 +88,18 @@ void BennettsRatios::checkSane() const
     Temperature t;
     bool have_first = false;
 
-    //make sure that there are no repeated lambda windows
-    for (int i=0; i<lamvals.count()-1; ++i)
+    // make sure that there are no repeated lambda windows
+    for (int i = 0; i < lamvals.count() - 1; ++i)
     {
-        if (lamvals[i] == lamvals[i+1])
-            throw SireError::invalid_arg( QObject::tr(
-                    "You cannot have duplicate values of Bennetts windows. %1")
-                        .arg(Sire::toString(lamvals)), CODELOC );
+        if (lamvals[i] == lamvals[i + 1])
+            throw SireError::invalid_arg(
+                QObject::tr("You cannot have duplicate values of Bennetts windows. %1").arg(Sire::toString(lamvals)),
+                CODELOC);
     }
 
-    //check that all of the deltas match up with the supplied lambda values
-    for (QMap<double,BennettsFreeEnergyAverage>::const_iterator it = fwds_ratios.constBegin();
-         it != fwds_ratios.constEnd();
-         ++it)
+    // check that all of the deltas match up with the supplied lambda values
+    for (QMap<double, BennettsFreeEnergyAverage>::const_iterator it = fwds_ratios.constBegin();
+         it != fwds_ratios.constEnd(); ++it)
     {
         if (not have_first)
         {
@@ -109,33 +108,37 @@ void BennettsRatios::checkSane() const
         }
         else if (it.value().temperature() != t)
         {
-            throw SireError::invalid_arg( QObject::tr(
-                "You cannot construct a set of Bennetts acceptance ratios using free energy "
-                "ratios collected at different temperatures. %1 vs. %2")
-                    .arg(t.toString()).arg(it.value().temperature().toString()),
-                        CODELOC );
+            throw SireError::invalid_arg(
+                QObject::tr("You cannot construct a set of Bennetts acceptance ratios using free energy "
+                            "ratios collected at different temperatures. %1 vs. %2")
+                    .arg(t.toString())
+                    .arg(it.value().temperature().toString()),
+                CODELOC);
         }
 
         int idx = lamvals.indexOf(it.key());
 
         if (idx == -1)
-            throw SireError::invalid_arg( QObject::tr(
-                    "All of the Bennetts ratios must correspond to one of the Bennetts windows. "
-                    "The forwards ratio with value %1 at window %2 is not in the list of "
-                    "windows %3")
-                        .arg(it.key()).arg(it.value().toString())
-                        .arg(Sire::toString(lamvals)), CODELOC );
+            throw SireError::invalid_arg(
+                QObject::tr("All of the Bennetts ratios must correspond to one of the Bennetts windows. "
+                            "The forwards ratio with value %1 at window %2 is not in the list of "
+                            "windows %3")
+                    .arg(it.key())
+                    .arg(it.value().toString())
+                    .arg(Sire::toString(lamvals)),
+                CODELOC);
 
         if (idx == lamvals.count())
-            //there should be no forwards delta for the last window
-            throw SireError::invalid_arg( QObject::tr(
-                    "There should be no forwards ratio (%1) for the last Bennetts window (%2).")
-                        .arg(it.value().toString()).arg(it.key()), CODELOC );
+            // there should be no forwards delta for the last window
+            throw SireError::invalid_arg(
+                QObject::tr("There should be no forwards ratio (%1) for the last Bennetts window (%2).")
+                    .arg(it.value().toString())
+                    .arg(it.key()),
+                CODELOC);
     }
 
-    for (QMap<double,BennettsFreeEnergyAverage>::const_iterator it = bwds_ratios.constBegin();
-         it != bwds_ratios.constEnd();
-         ++it)
+    for (QMap<double, BennettsFreeEnergyAverage>::const_iterator it = bwds_ratios.constBegin();
+         it != bwds_ratios.constEnd(); ++it)
     {
         if (not have_first)
         {
@@ -144,42 +147,48 @@ void BennettsRatios::checkSane() const
         }
         else if (it.value().temperature() != t)
         {
-            throw SireError::invalid_arg( QObject::tr(
-                "You cannot construct a set of Bennetts acceptance ratios using free energy "
-                "ratios collected at different temperatures. %1 vs. %2")
-                    .arg(t.toString()).arg(it.value().temperature().toString()),
-                        CODELOC );
+            throw SireError::invalid_arg(
+                QObject::tr("You cannot construct a set of Bennetts acceptance ratios using free energy "
+                            "ratios collected at different temperatures. %1 vs. %2")
+                    .arg(t.toString())
+                    .arg(it.value().temperature().toString()),
+                CODELOC);
         }
 
         int idx = lamvals.indexOf(it.key());
 
         if (idx == -1)
-            throw SireError::invalid_arg( QObject::tr(
-                    "All of the Bennetts ratios must correspond to one of the Bennetts windows. "
-                    "The backwards ratio with value %1 at window %2 is not in the list of "
-                    "windows %3")
-                        .arg(it.key()).arg(it.value().toString())
-                        .arg(Sire::toString(lamvals)), CODELOC );
+            throw SireError::invalid_arg(
+                QObject::tr("All of the Bennetts ratios must correspond to one of the Bennetts windows. "
+                            "The backwards ratio with value %1 at window %2 is not in the list of "
+                            "windows %3")
+                    .arg(it.key())
+                    .arg(it.value().toString())
+                    .arg(Sire::toString(lamvals)),
+                CODELOC);
 
         if (idx == lamvals.count())
-            //there should be no backwards delta for the first window
-            throw SireError::invalid_arg( QObject::tr(
-                    "There should be no backwards ratio (%1) for the first Bennetts window (%2).")
-                        .arg(it.value().toString()).arg(it.key()), CODELOC );
+            // there should be no backwards delta for the first window
+            throw SireError::invalid_arg(
+                QObject::tr("There should be no backwards ratio (%1) for the first Bennetts window (%2).")
+                    .arg(it.value().toString())
+                    .arg(it.key()),
+                CODELOC);
     }
 }
 
 /** Construct an empty set of deltas */
-BennettsRatios::BennettsRatios() : ConcreteProperty<BennettsRatios,Property>()
-{}
+BennettsRatios::BennettsRatios() : ConcreteProperty<BennettsRatios, Property>()
+{
+}
 
 /** Construct the ratios as the ratios between each window and the windows above
     (forwards_ratios) and windows below (backwards_ratios) */
 BennettsRatios::BennettsRatios(const QList<double> &windows,
-                               const QMap<double,BennettsFreeEnergyAverage> &forwards_ratios,
-                               const QMap<double,BennettsFreeEnergyAverage> &backwards_ratios)
-          : ConcreteProperty<BennettsRatios,Property>(),
-            lamvals(windows), fwds_ratios(forwards_ratios), bwds_ratios(backwards_ratios)
+                               const QMap<double, BennettsFreeEnergyAverage> &forwards_ratios,
+                               const QMap<double, BennettsFreeEnergyAverage> &backwards_ratios)
+    : ConcreteProperty<BennettsRatios, Property>(), lamvals(windows), fwds_ratios(forwards_ratios),
+      bwds_ratios(backwards_ratios)
 {
     std::sort(lamvals.begin(), lamvals.end());
     checkSane();
@@ -187,16 +196,18 @@ BennettsRatios::BennettsRatios(const QList<double> &windows,
 
 /** Copy constructor */
 BennettsRatios::BennettsRatios(const BennettsRatios &other)
-          : ConcreteProperty<BennettsRatios,Property>(other),
-            lamvals(other.lamvals), fwds_ratios(other.fwds_ratios), bwds_ratios(other.bwds_ratios)
-{}
+    : ConcreteProperty<BennettsRatios, Property>(other), lamvals(other.lamvals), fwds_ratios(other.fwds_ratios),
+      bwds_ratios(other.bwds_ratios)
+{
+}
 
 /** Destructor */
 BennettsRatios::~BennettsRatios()
-{}
+{
+}
 
 /** Copy assignment operator */
-BennettsRatios& BennettsRatios::operator=(const BennettsRatios &other)
+BennettsRatios &BennettsRatios::operator=(const BennettsRatios &other)
 {
     if (this != &other)
     {
@@ -211,9 +222,7 @@ BennettsRatios& BennettsRatios::operator=(const BennettsRatios &other)
 /** Comparison operator */
 bool BennettsRatios::operator==(const BennettsRatios &other) const
 {
-    return lamvals == other.lamvals and
-           fwds_ratios == other.fwds_ratios and
-           bwds_ratios == other.bwds_ratios;
+    return lamvals == other.lamvals and fwds_ratios == other.fwds_ratios and bwds_ratios == other.bwds_ratios;
 }
 
 /** Comparison operator */
@@ -222,14 +231,14 @@ bool BennettsRatios::operator!=(const BennettsRatios &other) const
     return not operator==(other);
 }
 
-const char* BennettsRatios::what() const
+const char *BennettsRatios::what() const
 {
     return BennettsRatios::typeName();
 }
 
-const char* BennettsRatios::typeName()
+const char *BennettsRatios::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<BennettsRatios>() );
+    return QMetaType::typeName(qMetaTypeId<BennettsRatios>());
 }
 
 /** Return the temperature at which the Bennetts deltas were all collected */
@@ -249,7 +258,9 @@ Temperature BennettsRatios::temperature() const
 QString BennettsRatios::toString() const
 {
     return QObject::tr("BennettsRatios( nWindows() == %1, nSamples() == %2, temperature() == %3 )")
-                .arg(nWindows()).arg(nSamples()).arg(temperature().toString());
+        .arg(nWindows())
+        .arg(nSamples())
+        .arg(temperature().toString());
 }
 
 /** Return whether or not this is empty */
@@ -259,7 +270,7 @@ bool BennettsRatios::isEmpty() const
 }
 
 /** Self-addition operator */
-BennettsRatios& BennettsRatios::operator+=(const BennettsRatios &other)
+BennettsRatios &BennettsRatios::operator+=(const BennettsRatios &other)
 {
     if (this->isEmpty())
     {
@@ -273,26 +284,26 @@ BennettsRatios& BennettsRatios::operator+=(const BennettsRatios &other)
     else
     {
         if (lamvals != other.lamvals)
-            throw SireError::incompatible_error( QObject::tr(
-                "Cannot add together these two BennettsRatios as the lambda windows are different. "
-                "%1 vs. %2.")
-                    .arg(Sire::toString(lamvals)).arg(Sire::toString(other.lamvals)),
-                        CODELOC);
+            throw SireError::incompatible_error(
+                QObject::tr("Cannot add together these two BennettsRatios as the lambda windows are different. "
+                            "%1 vs. %2.")
+                    .arg(Sire::toString(lamvals))
+                    .arg(Sire::toString(other.lamvals)),
+                CODELOC);
 
         if (temperature() != other.temperature())
-            throw SireError::incompatible_error( QObject::tr(
-                "Cannot add together these two BennettsRatios as the temperature at which they "
-                "were collected are different. %1 vs. %2")
-                    .arg(temperature().toString()).arg(other.temperature().toString()),
-                        CODELOC );
+            throw SireError::incompatible_error(
+                QObject::tr("Cannot add together these two BennettsRatios as the temperature at which they "
+                            "were collected are different. %1 vs. %2")
+                    .arg(temperature().toString())
+                    .arg(other.temperature().toString()),
+                CODELOC);
 
-        QMap<double,BennettsFreeEnergyAverage> new_fwds_ratios = fwds_ratios;
-        QMap<double,BennettsFreeEnergyAverage> new_bwds_ratios = bwds_ratios;
+        QMap<double, BennettsFreeEnergyAverage> new_fwds_ratios = fwds_ratios;
+        QMap<double, BennettsFreeEnergyAverage> new_bwds_ratios = bwds_ratios;
 
-        for (QMap<double,BennettsFreeEnergyAverage>::const_iterator
-                                    it = other.fwds_ratios.constBegin();
-             it != other.fwds_ratios.constEnd();
-             ++it)
+        for (QMap<double, BennettsFreeEnergyAverage>::const_iterator it = other.fwds_ratios.constBegin();
+             it != other.fwds_ratios.constEnd(); ++it)
         {
             if (new_fwds_ratios.contains(it.key()))
                 new_fwds_ratios[it.key()] += it.value();
@@ -300,10 +311,8 @@ BennettsRatios& BennettsRatios::operator+=(const BennettsRatios &other)
                 new_fwds_ratios.insert(it.key(), it.value());
         }
 
-        for (QMap<double,BennettsFreeEnergyAverage>::const_iterator
-                                    it = other.bwds_ratios.constBegin();
-             it != other.bwds_ratios.constEnd();
-             ++it)
+        for (QMap<double, BennettsFreeEnergyAverage>::const_iterator it = other.bwds_ratios.constBegin();
+             it != other.bwds_ratios.constEnd(); ++it)
         {
             if (new_bwds_ratios.contains(it.key()))
                 new_bwds_ratios[it.key()] += it.value();
@@ -339,7 +348,7 @@ BennettsRatios BennettsRatios::merge(const QList<BennettsRatios> &deltas)
     {
         BennettsRatios ret = deltas.at(0);
 
-        for (int i=1; i<deltas.count(); ++i)
+        for (int i = 1; i < deltas.count(); ++i)
         {
             ret += deltas.at(i);
         }
@@ -377,16 +386,14 @@ qint64 BennettsRatios::nSamples() const
 {
     quint64 n = 0;
 
-    for (QMap<double,BennettsFreeEnergyAverage>::const_iterator it = fwds_ratios.constBegin();
-         it != fwds_ratios.constEnd();
-         ++it)
+    for (QMap<double, BennettsFreeEnergyAverage>::const_iterator it = fwds_ratios.constBegin();
+         it != fwds_ratios.constEnd(); ++it)
     {
         n += it.value().nSamples();
     }
 
-    for (QMap<double,BennettsFreeEnergyAverage>::const_iterator it = bwds_ratios.constBegin();
-         it != bwds_ratios.constEnd();
-         ++it)
+    for (QMap<double, BennettsFreeEnergyAverage>::const_iterator it = bwds_ratios.constBegin();
+         it != bwds_ratios.constEnd(); ++it)
     {
         n += it.value().nSamples();
     }
@@ -394,7 +401,7 @@ qint64 BennettsRatios::nSamples() const
     return n;
 }
 
-const DataPoint& getPoint(const QVector<DataPoint> &points, double lam, bool *found)
+const DataPoint &getPoint(const QVector<DataPoint> &points, double lam, bool *found)
 {
     foreach (const DataPoint &point, points)
     {
@@ -420,7 +427,7 @@ QVector<DataPoint> BennettsRatios::values() const
 
     QVector<DataPoint> vals;
 
-    for (int i=0; i<lamvals.count(); ++i)
+    for (int i = 0; i < lamvals.count(); ++i)
     {
         double lamval = lamvals.at(i);
 
@@ -434,11 +441,11 @@ QVector<DataPoint> BennettsRatios::values() const
 
         if (found_const and found_num and found_denom)
         {
-            //we have found a matched pair - calculate the ratio, and minimum
-            //and maximum values
+            // we have found a matched pair - calculate the ratio, and minimum
+            // and maximum values
             double val = num.y() / denom.y();
-            double minerr = (num.y()+num.yMinError())/(denom.y()-denom.yMinError());
-            double maxerr = (num.y()+num.yMaxError())/(denom.y()-denom.yMaxError());
+            double minerr = (num.y() + num.yMinError()) / (denom.y() - denom.yMinError());
+            double maxerr = (num.y() + num.yMaxError()) / (denom.y() - denom.yMaxError());
 
             // ratio = e^(-beta (dG - C)) so dG = -(1/beta) ln(ratio) + C
 
@@ -446,46 +453,44 @@ QVector<DataPoint> BennettsRatios::values() const
             minerr = -(k_boltz * temperature().to(kelvin) * std::log(minerr)) + c.y();
             maxerr = -(k_boltz * temperature().to(kelvin) * std::log(maxerr)) + c.y();
 
-            vals.append( DataPoint(num.x(),val, 0, std::abs(val-minerr),
-                                                0, std::abs(val-maxerr)) );
+            vals.append(DataPoint(num.x(), val, 0, std::abs(val - minerr), 0, std::abs(val - maxerr)));
         }
         else if (found_num and found_denom)
         {
-            //there are forwards and backwards FEP values that we can use to get dG
-            //for this window
+            // there are forwards and backwards FEP values that we can use to get dG
+            // for this window
             if (not fwds_ratios.contains(lamval))
-                throw SireError::program_bug( QObject::tr(
-                        "No forwards value for lambda %1? %2")
-                            .arg(lamval).arg(Sire::toString(fwds_ratios.keys())),
-                                CODELOC );
+                throw SireError::program_bug(QObject::tr("No forwards value for lambda %1? %2")
+                                                 .arg(lamval)
+                                                 .arg(Sire::toString(fwds_ratios.keys())),
+                                             CODELOC);
 
-            if (not bwds_ratios.contains( lamvals.at(i+1) ))
-                throw SireError::program_bug( QObject::tr(
-                        "No backwards value for lambda %1? %2")
-                            .arg(lamvals.at(i+1)).arg(Sire::toString(bwds_ratios.keys())),
-                                CODELOC );
+            if (not bwds_ratios.contains(lamvals.at(i + 1)))
+                throw SireError::program_bug(QObject::tr("No backwards value for lambda %1? %2")
+                                                 .arg(lamvals.at(i + 1))
+                                                 .arg(Sire::toString(bwds_ratios.keys())),
+                                             CODELOC);
 
             const BennettsFreeEnergyAverage &fwds = *(fwds_ratios.constFind(lamval));
-            const BennettsFreeEnergyAverage &bwds = *(bwds_ratios.constFind(lamvals.at(i+1)));
+            const BennettsFreeEnergyAverage &bwds = *(bwds_ratios.constFind(lamvals.at(i + 1)));
 
             double fwdsval = fwds.fepFreeEnergy();
             double bwdsval = bwds.fepFreeEnergy();
             double val = 0.5 * (fwdsval + bwdsval);
 
             double minerr = 0.5 * std::abs(fwdsval - bwdsval);
-            double maxerr = minerr + fwds.histogram().standardError(90) +
-                                     bwds.histogram().standardError(90);
+            double maxerr = minerr + fwds.histogram().standardError(90) + bwds.histogram().standardError(90);
 
-            vals.append( DataPoint(lamval,val, 0,minerr, 0,maxerr) );
+            vals.append(DataPoint(lamval, val, 0, minerr, 0, maxerr));
         }
         else if (found_num)
         {
-            //there is a forwards FEP value available from this lambda value to the next
+            // there is a forwards FEP value available from this lambda value to the next
             if (not fwds_ratios.contains(lamval))
-                throw SireError::program_bug( QObject::tr(
-                        "No forwards value for lambda %1? %2")
-                            .arg(lamval).arg(Sire::toString(fwds_ratios.keys())),
-                                CODELOC );
+                throw SireError::program_bug(QObject::tr("No forwards value for lambda %1? %2")
+                                                 .arg(lamval)
+                                                 .arg(Sire::toString(fwds_ratios.keys())),
+                                             CODELOC);
 
             const BennettsFreeEnergyAverage &fwds = *(fwds_ratios.constFind(lamval));
 
@@ -493,29 +498,29 @@ QVector<DataPoint> BennettsRatios::values() const
 
             double err = fwds.histogram().standardError(90);
 
-            vals.append( DataPoint(lamval, val, 0, err) );
+            vals.append(DataPoint(lamval, val, 0, err));
         }
         else if (found_denom)
         {
-            //there is a backwards FEP value available from the lambda value
-            //above back down to this lambda value
-            if (not bwds_ratios.contains( lamvals.at(i+1) ))
-                throw SireError::program_bug( QObject::tr(
-                        "No backwards value for lambda %1? %2")
-                            .arg(lamvals.at(i+1)).arg(Sire::toString(bwds_ratios.keys())),
-                                CODELOC );
+            // there is a backwards FEP value available from the lambda value
+            // above back down to this lambda value
+            if (not bwds_ratios.contains(lamvals.at(i + 1)))
+                throw SireError::program_bug(QObject::tr("No backwards value for lambda %1? %2")
+                                                 .arg(lamvals.at(i + 1))
+                                                 .arg(Sire::toString(bwds_ratios.keys())),
+                                             CODELOC);
 
-            const FreeEnergyAverage &bwds = *(bwds_ratios.constFind(lamvals.at(i+1)));
+            const FreeEnergyAverage &bwds = *(bwds_ratios.constFind(lamvals.at(i + 1)));
 
             double val = bwds.average();
             double err = bwds.histogram().standardError(90);
 
-            vals.append( DataPoint(lamval, val, 0, err) );
+            vals.append(DataPoint(lamval, val, 0, err));
         }
         else
         {
-            //no value for this lambda window is available
-            vals.append( DataPoint(lamval, 0) );
+            // no value for this lambda window is available
+            vals.append(DataPoint(lamval, 0));
         }
     }
 
@@ -531,19 +536,18 @@ QVector<DataPoint> BennettsRatios::constants() const
 {
     QVector<DataPoint> points;
 
-    for (int i=1; i<lamvals.count(); ++i)
+    for (int i = 1; i < lamvals.count(); ++i)
     {
-        if (fwds_ratios.contains(lamvals[i-1]) and bwds_ratios.contains(lamvals[i]))
+        if (fwds_ratios.contains(lamvals[i - 1]) and bwds_ratios.contains(lamvals[i]))
         {
-            const BennettsFreeEnergyAverage &fwds = *(fwds_ratios.constFind(lamvals[i-1]));
+            const BennettsFreeEnergyAverage &fwds = *(fwds_ratios.constFind(lamvals[i - 1]));
             const BennettsFreeEnergyAverage &bwds = *(bwds_ratios.constFind(lamvals[i]));
 
             if (fwds.constant() == bwds.constant())
-                points.append( DataPoint(lamvals[i-1],fwds.constant().value()) );
+                points.append(DataPoint(lamvals[i - 1], fwds.constant().value()));
             else
                 qDebug() << "WARNING: Bennetts constants for numerator and denominator "
                          << "don't match!" << fwds.toString() << "vs." << bwds.toString();
-
         }
     }
 
@@ -570,7 +574,7 @@ QVector<DataPoint> BennettsRatios::numerators() const
             if (maxerr < minerr)
                 qSwap(maxerr, minerr);
 
-            points.append( DataPoint(lamval, val, 0, minerr, 0, maxerr) );
+            points.append(DataPoint(lamval, val, 0, minerr, 0, maxerr));
         }
     }
 
@@ -584,7 +588,7 @@ QVector<DataPoint> BennettsRatios::denominators() const
 {
     QVector<DataPoint> points;
 
-    for (int i=1; i<lamvals.count(); ++i)
+    for (int i = 1; i < lamvals.count(); ++i)
     {
         if (bwds_ratios.contains(lamvals[i]))
         {
@@ -597,7 +601,7 @@ QVector<DataPoint> BennettsRatios::denominators() const
             if (maxerr < minerr)
                 qSwap(maxerr, minerr);
 
-            points.append( DataPoint(lamvals[i-1], val, 0, minerr, 0, maxerr) );
+            points.append(DataPoint(lamvals[i - 1], val, 0, minerr, 0, maxerr));
         }
     }
 
@@ -605,25 +609,25 @@ QVector<DataPoint> BennettsRatios::denominators() const
 }
 
 /** Return the raw data for the fowards ratios */
-QMap<double,BennettsFreeEnergyAverage> BennettsRatios::forwardsData() const
+QMap<double, BennettsFreeEnergyAverage> BennettsRatios::forwardsData() const
 {
     return fwds_ratios;
 }
 
 /** Return the raw data for the backwards ratios */
-QMap<double,BennettsFreeEnergyAverage> BennettsRatios::backwardsData() const
+QMap<double, BennettsFreeEnergyAverage> BennettsRatios::backwardsData() const
 {
     return bwds_ratios;
 }
 
 /** Return the raw data for the fowards ratios */
-QMap<double,BennettsFreeEnergyAverage> BennettsRatios::forwardsRatios() const
+QMap<double, BennettsFreeEnergyAverage> BennettsRatios::forwardsRatios() const
 {
     return fwds_ratios;
 }
 
 /** Return the raw data for the backwards ratios */
-QMap<double,BennettsFreeEnergyAverage> BennettsRatios::backwardsRatios() const
+QMap<double, BennettsFreeEnergyAverage> BennettsRatios::backwardsRatios() const
 {
     return bwds_ratios;
 }
@@ -641,9 +645,9 @@ PMF BennettsRatios::sum() const
     double total_maxerr = 0;
 
     QVector<DataPoint> points;
-    points.append( DataPoint(lamvals.first(),0) );
+    points.append(DataPoint(lamvals.first(), 0));
 
-    for (int i=0; i<lamvals.count()-1; ++i)
+    for (int i = 0; i < lamvals.count() - 1; ++i)
     {
         foreach (const DataPoint &val, vals)
         {
@@ -657,7 +661,7 @@ PMF BennettsRatios::sum() const
             }
         }
 
-        points.append( DataPoint(lamvals[i+1], total, 0, total_minerr, 0, total_maxerr) );
+        points.append(DataPoint(lamvals[i + 1], total, 0, total_minerr, 0, total_maxerr));
     }
 
     return PMF(points);
@@ -704,38 +708,38 @@ QDataStream &operator>>(QDataStream &ds, Bennetts &bennetts)
 }
 
 /** Constructor */
-Bennetts::Bennetts() : ConcreteProperty<Bennetts,Property>()
-{}
+Bennetts::Bennetts() : ConcreteProperty<Bennetts, Property>()
+{
+}
 
 /** Construct to use the passed windows, with the free energy ratios from
     each window to the window above in 'forwards_ratios' and from the window
     below to each window in 'backwards_ratios' */
-Bennetts::Bennetts(const QList<double> &windows,
-                   const QMap<double,BennettsFreeEnergyAverage> &forwards_ratios,
-                   const QMap<double,BennettsFreeEnergyAverage> &backwards_ratios)
-    : ConcreteProperty<Bennetts,Property>()
+Bennetts::Bennetts(const QList<double> &windows, const QMap<double, BennettsFreeEnergyAverage> &forwards_ratios,
+                   const QMap<double, BennettsFreeEnergyAverage> &backwards_ratios)
+    : ConcreteProperty<Bennetts, Property>()
 {
-    this->add( BennettsRatios(windows,forwards_ratios,backwards_ratios) );
+    this->add(BennettsRatios(windows, forwards_ratios, backwards_ratios));
 }
 
 /** Construct to use the passed Bennetts ratios */
-Bennetts::Bennetts(const BennettsRatios &ratios)
-         : ConcreteProperty<Bennetts,Property>()
+Bennetts::Bennetts(const BennettsRatios &ratios) : ConcreteProperty<Bennetts, Property>()
 {
     this->add(ratios);
 }
 
 /** Copy constructor */
-Bennetts::Bennetts(const Bennetts &other)
-         : ConcreteProperty<Bennetts,Property>(other), rtios(other.rtios)
-{}
+Bennetts::Bennetts(const Bennetts &other) : ConcreteProperty<Bennetts, Property>(other), rtios(other.rtios)
+{
+}
 
 /** Destructor */
 Bennetts::~Bennetts()
-{}
+{
+}
 
 /** Copy assignment operator */
-Bennetts& Bennetts::operator=(const Bennetts &other)
+Bennetts &Bennetts::operator=(const Bennetts &other)
 {
     rtios = other.rtios;
     return *this;
@@ -753,30 +757,31 @@ bool Bennetts::operator!=(const Bennetts &other) const
     return not operator==(other);
 }
 
-const char* Bennetts::what() const
+const char *Bennetts::what() const
 {
     return Bennetts::typeName();
 }
 
-const char* Bennetts::typeName()
+const char *Bennetts::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Bennetts>() );
+    return QMetaType::typeName(qMetaTypeId<Bennetts>());
 }
 
 QString Bennetts::toString() const
 {
     return QObject::tr("Bennetts( nWindows() == %1, nIterations() == %2, nSamples() == %3 )")
-                .arg(nWindows()).arg(nIterations()).arg(nSamples());
+        .arg(nWindows())
+        .arg(nIterations())
+        .arg(nSamples());
 }
 
 /** Add the data for the next iteration, which contains the ratios for the passed windows,
     with forwards_ratios containing the free energy from each window to the next window,
     and backwards_ratios containing the free energy from the previous window to each window */
-void Bennetts::add(const QList<double> &windows,
-                   const QMap<double,BennettsFreeEnergyAverage> &forwards_ratios,
-                   const QMap<double,BennettsFreeEnergyAverage> &backwards_ratios)
+void Bennetts::add(const QList<double> &windows, const QMap<double, BennettsFreeEnergyAverage> &forwards_ratios,
+                   const QMap<double, BennettsFreeEnergyAverage> &backwards_ratios)
 {
-    this->add( BennettsRatios(windows,forwards_ratios,backwards_ratios) );
+    this->add(BennettsRatios(windows, forwards_ratios, backwards_ratios));
 }
 
 /** Add the data for the next iteration */
@@ -838,13 +843,13 @@ QList<double> Bennetts::lambdaValues() const
 /** Return the value of all windows */
 QList<double> Bennetts::windows() const
 {
-    QMap<double,int> vals;
+    QMap<double, int> vals;
 
     foreach (const BennettsRatios &ratio, rtios)
     {
         foreach (double window, ratio.windows())
         {
-            vals.insert(window,1);
+            vals.insert(window, 1);
         }
     }
 
@@ -856,7 +861,7 @@ QList<double> Bennetts::windows() const
 /** Return the deltas for the ith iteration */
 BennettsRatios Bennetts::operator[](int i) const
 {
-    return rtios.at( Index(i).map(rtios.count()) );
+    return rtios.at(Index(i).map(rtios.count()));
 }
 
 /** Return the deltas for the ith iteration */
@@ -872,11 +877,10 @@ QList<BennettsRatios> Bennetts::ratios() const
 }
 
 /** Set the deltas for the ith iteration */
-void Bennetts::set(int i, const QList<double> &windows,
-                   const QMap<double,BennettsFreeEnergyAverage> &forwards_ratios,
-                   const QMap<double,BennettsFreeEnergyAverage> &backwards_ratios)
+void Bennetts::set(int i, const QList<double> &windows, const QMap<double, BennettsFreeEnergyAverage> &forwards_ratios,
+                   const QMap<double, BennettsFreeEnergyAverage> &backwards_ratios)
 {
-    set(i, BennettsRatios(windows,forwards_ratios,backwards_ratios));
+    set(i, BennettsRatios(windows, forwards_ratios, backwards_ratios));
 }
 
 /** Set the deltas for the ith iteration */
@@ -903,10 +907,10 @@ BennettsRatios Bennetts::merge(int start, int end) const
 
     QList<BennettsRatios> set;
 
-    for (int i=start; i<=end; ++i)
+    for (int i = start; i <= end; ++i)
     {
         if (not rtios.at(i).isEmpty())
-            set.append( rtios.at(i) );
+            set.append(rtios.at(i));
     }
 
     return BennettsRatios::merge(set);
@@ -922,7 +926,7 @@ BennettsRatios Bennetts::merge(QList<int> indicies) const
         int i = Index(idx).map(rtios.count());
 
         if (not rtios.at(i).isEmpty())
-            set.append( rtios.at(i) );
+            set.append(rtios.at(i));
     }
 
     return BennettsRatios::merge(set);
@@ -941,14 +945,14 @@ QList<BennettsRatios> Bennetts::rollingAverage(int niterations) const
 
     else if (niterations >= rtios.count())
     {
-        BennettsRatios r = this->merge(0,-1);
+        BennettsRatios r = this->merge(0, -1);
 
         if (not r.isEmpty())
             merged.append(r);
     }
     else if (niterations <= 1)
     {
-        for (int i=0; i<rtios.count(); ++i)
+        for (int i = 0; i < rtios.count(); ++i)
         {
             if (not rtios.at(i).isEmpty())
                 merged.append(rtios.at(i));
@@ -958,9 +962,9 @@ QList<BennettsRatios> Bennetts::rollingAverage(int niterations) const
     {
         QList<BennettsRatios> set;
 
-        int i=0;
+        int i = 0;
 
-        for (i=0; i<rtios.count(); ++i)
+        for (i = 0; i < rtios.count(); ++i)
         {
             if (not rtios.at(i).isEmpty())
             {
@@ -970,15 +974,15 @@ QList<BennettsRatios> Bennetts::rollingAverage(int niterations) const
             }
         }
 
-        merged.append( BennettsRatios::merge(set) );
+        merged.append(BennettsRatios::merge(set));
 
-        for (i=i+1; i<rtios.count(); ++i)
+        for (i = i + 1; i < rtios.count(); ++i)
         {
             if (not rtios.at(i).isEmpty())
             {
                 set.removeFirst();
                 set.append(rtios.at(i));
-                merged.append( BennettsRatios::merge(set) );
+                merged.append(BennettsRatios::merge(set));
             }
         }
     }
@@ -1011,5 +1015,5 @@ void Bennetts::removeRange(int start, int end)
 /** Remove all values from the histogram */
 void Bennetts::clear()
 {
-    this->operator=( Bennetts() );
+    this->operator=(Bennetts());
 }

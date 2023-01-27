@@ -59,17 +59,17 @@ QDataStream &operator>>(QDataStream &ds, BooleanProperty &prop)
 }
 
 /** Constructor - this constructs the integer "0" */
-BooleanProperty::BooleanProperty() : ConcreteProperty<BooleanProperty,Property>(), val(false)
-{}
+BooleanProperty::BooleanProperty() : ConcreteProperty<BooleanProperty, Property>(), val(false)
+{
+}
 
 /** Construct from the passed boolean */
-BooleanProperty::BooleanProperty(bool value)
-               : ConcreteProperty<BooleanProperty,Property>(), val(value)
-{}
+BooleanProperty::BooleanProperty(bool value) : ConcreteProperty<BooleanProperty, Property>(), val(value)
+{
+}
 
 /** Construct from the passed string */
-BooleanProperty::BooleanProperty(const QString &value)
-                : ConcreteProperty<BooleanProperty,Property>()
+BooleanProperty::BooleanProperty(const QString &value) : ConcreteProperty<BooleanProperty, Property>()
 {
     QString v = value.toLower().simplified();
 
@@ -93,36 +93,39 @@ BooleanProperty::BooleanProperty(const QString &value)
         }
         else
         {
-            throw SireError::invalid_cast( QObject::tr(
-                    "Cannot convert the string '%1' to a boolean. Valid strings include "
-                    "true/false, yes/no, t/f, y/n, on/off, 1/0, 1.0/0.0.")
-                        .arg(value), CODELOC );
+            throw SireError::invalid_cast(
+                QObject::tr("Cannot convert the string '%1' to a boolean. Valid strings include "
+                            "true/false, yes/no, t/f, y/n, on/off, 1/0, 1.0/0.0.")
+                    .arg(value),
+                CODELOC);
         }
     }
 }
 
 /** Construct from a VariantProperty */
 BooleanProperty::BooleanProperty(const Property &other)
-                : ConcreteProperty<BooleanProperty,Property>(other),
-                  val( other.asABoolean() )
-{}
+    : ConcreteProperty<BooleanProperty, Property>(other), val(other.asABoolean())
+{
+}
 
 /** Copy constructor */
 BooleanProperty::BooleanProperty(const BooleanProperty &other)
-               : ConcreteProperty<BooleanProperty,Property>(other), val(other.val)
-{}
+    : ConcreteProperty<BooleanProperty, Property>(other), val(other.val)
+{
+}
 
 /** Destructor */
 BooleanProperty::~BooleanProperty()
-{}
-
-const char* BooleanProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<BooleanProperty>() );
+}
+
+const char *BooleanProperty::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<BooleanProperty>());
 }
 
 /** Copy assignment operator */
-BooleanProperty& BooleanProperty::operator=(const BooleanProperty &other)
+BooleanProperty &BooleanProperty::operator=(const BooleanProperty &other)
 {
     if (this != &other)
     {
@@ -197,4 +200,3 @@ bool BooleanProperty::asABoolean() const
 {
     return val;
 }
-

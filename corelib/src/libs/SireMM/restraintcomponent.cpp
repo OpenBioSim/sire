@@ -40,7 +40,7 @@ static const RegisterMetaType<RestraintComponent> r_rest;
 QDataStream &operator<<(QDataStream &ds, const RestraintComponent &rest)
 {
     writeHeader(ds, r_rest, 1);
-    ds << static_cast<const FFComponent&>(rest);
+    ds << static_cast<const FFComponent &>(rest);
     return ds;
 }
 
@@ -51,7 +51,7 @@ QDataStream &operator>>(QDataStream &ds, RestraintComponent &rest)
 
     if (v == 1)
     {
-        ds >> static_cast<FFComponent&>(rest);
+        ds >> static_cast<FFComponent &>(rest);
     }
     else
         throw version_error(v, "1", r_rest, CODELOC);
@@ -60,31 +60,33 @@ QDataStream &operator>>(QDataStream &ds, RestraintComponent &rest)
 }
 
 /** Constructor */
-RestraintComponent::RestraintComponent(const FFName &ffname)
-                   : FFComponent(ffname, QLatin1String("restraint"))
-{}
+RestraintComponent::RestraintComponent(const FFName &ffname) : FFComponent(ffname, QLatin1String("restraint"))
+{
+}
 
 /** Construct using the passed forcefield name and suffix */
 RestraintComponent::RestraintComponent(const FFName &ffname, const QString &suffix)
-                   : FFComponent(ffname, QString("restraint_{%1}").arg(suffix))
-{}
+    : FFComponent(ffname, QString("restraint_{%1}").arg(suffix))
+{
+}
 
 /** Construct from a symbol
 
     \throw SireError::incompatible_error
 */
-RestraintComponent::RestraintComponent(const SireCAS::Symbol &symbol)
-                   : FFComponent(symbol, QLatin1String("restraint"))
-{}
+RestraintComponent::RestraintComponent(const SireCAS::Symbol &symbol) : FFComponent(symbol, QLatin1String("restraint"))
+{
+}
 
 /** Copy constructor */
-RestraintComponent::RestraintComponent(const RestraintComponent &other)
-                   : FFComponent(other)
-{}
+RestraintComponent::RestraintComponent(const RestraintComponent &other) : FFComponent(other)
+{
+}
 
 /** Destructor */
 RestraintComponent::~RestraintComponent()
-{}
+{
+}
 
 /** Set the restraint component of the energy in the forcefield 'ff'
     to equal to the passed RestraintEnergy */
@@ -100,7 +102,7 @@ void RestraintComponent::changeEnergy(FF &ff, const RestraintEnergy &delta) cons
     FFComponent::changeEnergy(ff, this->total(), delta);
 }
 
-const char* RestraintComponent::typeName()
+const char *RestraintComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<RestraintComponent>() );
+    return QMetaType::typeName(qMetaTypeId<RestraintComponent>());
 }

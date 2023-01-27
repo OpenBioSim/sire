@@ -27,10 +27,10 @@
 
 #include "groupatomids.h"
 #include "atomidentifier.h"
-#include "residentifier.h"
-#include "chainidentifier.h"
-#include "segidentifier.h"
 #include "cgidentifier.h"
+#include "chainidentifier.h"
+#include "residentifier.h"
+#include "segidentifier.h"
 
 #include "SireMol/errors.h"
 
@@ -43,20 +43,21 @@ using namespace SireMol;
 //////
 
 GroupAtomIDBase::GroupAtomIDBase() : AtomID()
-{}
+{
+}
 
-GroupAtomIDBase::GroupAtomIDBase(const GroupAtomIDBase &other)
-                : AtomID(other)
-{}
+GroupAtomIDBase::GroupAtomIDBase(const GroupAtomIDBase &other) : AtomID(other)
+{
+}
 
 GroupAtomIDBase::~GroupAtomIDBase()
-{}
-
-void GroupAtomIDBase::throwMissingAtom(const MolInfo&) const
 {
-    throw SireMol::missing_atom( QObject::tr(
-        "There is no atom that matches the ID %1 in the molecule.")
-            .arg(this->toString()), CODELOC );
+}
+
+void GroupAtomIDBase::throwMissingAtom(const MolInfo &) const
+{
+    throw SireMol::missing_atom(
+        QObject::tr("There is no atom that matches the ID %1 in the molecule.").arg(this->toString()), CODELOC);
 }
 
 //////
@@ -65,13 +66,13 @@ void GroupAtomIDBase::throwMissingAtom(const MolInfo&) const
 
 namespace SireMol
 {
-    template class GroupAtomID<ResID,AtomID>;
-    template class GroupAtomID<ChainID,AtomID>;
-    template class GroupAtomID<SegID,AtomID>;
-    template class GroupAtomID<CGID,AtomID>;
-}
+    template class GroupAtomID<ResID, AtomID>;
+    template class GroupAtomID<ChainID, AtomID>;
+    template class GroupAtomID<SegID, AtomID>;
+    template class GroupAtomID<CGID, AtomID>;
+} // namespace SireMol
 
-static const RegisterMetaType< GroupAtomID<ResID,AtomID> > r_resatomid;
-static const RegisterMetaType< GroupAtomID<ChainID,AtomID> > r_chainatomid;
-static const RegisterMetaType< GroupAtomID<SegID,AtomID> > r_segatomid;
-static const RegisterMetaType< GroupAtomID<CGID,AtomID> > r_cgatomid;
+static const RegisterMetaType<GroupAtomID<ResID, AtomID>> r_resatomid;
+static const RegisterMetaType<GroupAtomID<ChainID, AtomID>> r_chainatomid;
+static const RegisterMetaType<GroupAtomID<SegID, AtomID>> r_segatomid;
+static const RegisterMetaType<GroupAtomID<CGID, AtomID>> r_cgatomid;

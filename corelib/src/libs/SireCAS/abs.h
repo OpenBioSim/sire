@@ -34,78 +34,77 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class Abs;
+    class Abs;
 }
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Abs&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Abs&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Abs &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Abs &);
 
 namespace SireCAS
 {
 
-/**
-This is the absolute value, abs.
+    /**
+    This is the absolute value, abs.
 
-abs(x) returns x if x >= 0, else -x
+    abs(x) returns x if x >= 0, else -x
 
-For complex values, this returns abs(x) + abs(y) i
+    For complex values, this returns abs(x) + abs(y) i
 
-@author Christopher Woods
-*/
-class SIRECAS_EXPORT Abs : public SingleFunc
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Abs&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Abs&);
-
-public:
-    Abs();
-    Abs(const Expression &power);
-
-    Abs(const Abs &other);
-
-    ~Abs();
-
-    bool operator==(const ExBase &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIRECAS_EXPORT Abs : public SingleFunc
     {
-        return Abs::typeName();
-    }
 
-    Abs* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Abs &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Abs &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        Abs();
+        Abs(const Expression &power);
 
-protected:
+        Abs(const Abs &other);
 
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Abs(arg));
-    }
+        ~Abs();
 
-    QString stringRep() const
-    {
-        return "abs";
-    }
+        bool operator==(const ExBase &other) const;
 
-    uint magic() const;
+        static const char *typeName();
 
-    Expression diff() const;
-    Expression integ() const;
-};
+        const char *what() const
+        {
+            return Abs::typeName();
+        }
 
-}
+        Abs *clone() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Abs(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "abs";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+} // namespace SireCAS
 
 Q_DECLARE_METATYPE(SireCAS::Abs)
 
-SIRE_EXPOSE_CLASS( SireCAS::Abs )
+SIRE_EXPOSE_CLASS(SireCAS::Abs)
 
 SIRE_END_HEADER
 

@@ -44,7 +44,7 @@ static const RegisterMetaType<CoulombComponent> r_coul;
 QDataStream &operator<<(QDataStream &ds, const CoulombComponent &coul)
 {
     writeHeader(ds, r_coul, 1);
-    ds << static_cast<const FFComponent&>(coul);
+    ds << static_cast<const FFComponent &>(coul);
     return ds;
 }
 
@@ -55,7 +55,7 @@ QDataStream &operator>>(QDataStream &ds, CoulombComponent &coul)
 
     if (v == 1)
     {
-        ds >> static_cast<FFComponent&>(coul);
+        ds >> static_cast<FFComponent &>(coul);
     }
     else
         throw version_error(v, "1", r_coul, CODELOC);
@@ -64,31 +64,33 @@ QDataStream &operator>>(QDataStream &ds, CoulombComponent &coul)
 }
 
 /** Constructor */
-CoulombComponent::CoulombComponent(const FFName &ffname)
-                 : FFComponent(ffname, QLatin1String("coulomb"))
-{}
+CoulombComponent::CoulombComponent(const FFName &ffname) : FFComponent(ffname, QLatin1String("coulomb"))
+{
+}
 
 /** Construct using the passed forcefield name and suffix */
 CoulombComponent::CoulombComponent(const FFName &ffname, const QString &suffix)
-                 : FFComponent(ffname, QString("coulomb_{%1}").arg(suffix))
-{}
+    : FFComponent(ffname, QString("coulomb_{%1}").arg(suffix))
+{
+}
 
 /** Construct from a symbol
 
     \throw SireError::incompatible_error
 */
-CoulombComponent::CoulombComponent(const SireCAS::Symbol &symbol)
-                 : FFComponent(symbol, QLatin1String("coulomb"))
-{}
+CoulombComponent::CoulombComponent(const SireCAS::Symbol &symbol) : FFComponent(symbol, QLatin1String("coulomb"))
+{
+}
 
 /** Copy constructor */
-CoulombComponent::CoulombComponent(const CoulombComponent &other)
-                 : FFComponent(other)
-{}
+CoulombComponent::CoulombComponent(const CoulombComponent &other) : FFComponent(other)
+{
+}
 
 /** Destructor */
 CoulombComponent::~CoulombComponent()
-{}
+{
+}
 
 /** Set the coulomb component of the energy in the forcefield 'ff'
     to equal to the passed CoulombEnergy */
@@ -104,9 +106,9 @@ void CoulombComponent::changeEnergy(FF &ff, const CoulombEnergy &delta) const
     FFComponent::changeEnergy(ff, this->total(), delta);
 }
 
-const char* CoulombComponent::typeName()
+const char *CoulombComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CoulombComponent>() );
+    return QMetaType::typeName(qMetaTypeId<CoulombComponent>());
 }
 
 //////
@@ -119,7 +121,7 @@ static const RegisterMetaType<LJComponent> r_lj;
 QDataStream &operator<<(QDataStream &ds, const LJComponent &lj)
 {
     writeHeader(ds, r_lj, 1);
-    ds << static_cast<const FFComponent&>(lj);
+    ds << static_cast<const FFComponent &>(lj);
     return ds;
 }
 
@@ -130,7 +132,7 @@ QDataStream &operator>>(QDataStream &ds, LJComponent &lj)
 
     if (v == 1)
     {
-        ds >> static_cast<FFComponent&>(lj);
+        ds >> static_cast<FFComponent &>(lj);
     }
     else
         throw version_error(v, "1", r_lj, CODELOC);
@@ -139,31 +141,33 @@ QDataStream &operator>>(QDataStream &ds, LJComponent &lj)
 }
 
 /** Constructor */
-LJComponent::LJComponent(const FFName &ffname)
-            : FFComponent(ffname, QLatin1String("LJ"))
-{}
+LJComponent::LJComponent(const FFName &ffname) : FFComponent(ffname, QLatin1String("LJ"))
+{
+}
 
 /** Construct using the name of the forcefield, and the passed suffix */
 LJComponent::LJComponent(const FFName &ffname, const QString &suffix)
-            : FFComponent(ffname, QString("LJ_{%1}").arg(suffix))
-{}
+    : FFComponent(ffname, QString("LJ_{%1}").arg(suffix))
+{
+}
 
 /** Construct from a symbol
 
     \throw SireError::incompatible_error
 */
-LJComponent::LJComponent(const SireCAS::Symbol &symbol)
-            : FFComponent(symbol, QLatin1String("LJ"))
-{}
+LJComponent::LJComponent(const SireCAS::Symbol &symbol) : FFComponent(symbol, QLatin1String("LJ"))
+{
+}
 
 /** Copy constructor */
-LJComponent::LJComponent(const LJComponent &other)
-            : FFComponent(other)
-{}
+LJComponent::LJComponent(const LJComponent &other) : FFComponent(other)
+{
+}
 
 /** Destructor */
 LJComponent::~LJComponent()
-{}
+{
+}
 
 /** Set the LJ component of the energy in the forcefield 'ff'
     to equal to the passed LJEnergy */
@@ -179,9 +183,9 @@ void LJComponent::changeEnergy(FF &ff, const LJEnergy &delta) const
     FFComponent::changeEnergy(ff, this->total(), delta);
 }
 
-const char* LJComponent::typeName()
+const char *LJComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<LJComponent>() );
+    return QMetaType::typeName(qMetaTypeId<LJComponent>());
 }
 
 //////
@@ -194,8 +198,7 @@ static const RegisterMetaType<CLJComponent> r_clj;
 QDataStream &operator<<(QDataStream &ds, const CLJComponent &clj)
 {
     writeHeader(ds, r_clj, 1);
-    ds << static_cast<const FFComponent&>(clj)
-       << clj.coul_component << clj.lj_component;
+    ds << static_cast<const FFComponent &>(clj) << clj.coul_component << clj.lj_component;
 
     return ds;
 }
@@ -207,8 +210,7 @@ QDataStream &operator>>(QDataStream &ds, CLJComponent &clj)
 
     if (v == 1)
     {
-        ds >> static_cast<FFComponent&>(clj)
-           >> clj.coul_component >> clj.lj_component;
+        ds >> static_cast<FFComponent &>(clj) >> clj.coul_component >> clj.lj_component;
     }
     else
         throw version_error(v, "1", r_clj, CODELOC);
@@ -218,36 +220,36 @@ QDataStream &operator>>(QDataStream &ds, CLJComponent &clj)
 
 /** Constructor */
 CLJComponent::CLJComponent(const FFName &ffname)
-            : FFComponent(ffname, QLatin1String("CLJ")),
-               coul_component(ffname), lj_component(ffname)
-{}
+    : FFComponent(ffname, QLatin1String("CLJ")), coul_component(ffname), lj_component(ffname)
+{
+}
 
 /** Construct from the passed forcefield name and suffix */
 CLJComponent::CLJComponent(const FFName &ffname, const QString &suffix)
-             : FFComponent(ffname, QString("CLJ_{%1}").arg(suffix)),
-               coul_component(ffname,suffix), lj_component(ffname,suffix)
-{}
+    : FFComponent(ffname, QString("CLJ_{%1}").arg(suffix)), coul_component(ffname, suffix), lj_component(ffname, suffix)
+{
+}
 
 /** Construct from a symbol
 
     \throw SireError::incompatible_error
 */
-CLJComponent::CLJComponent(const SireCAS::Symbol &symbol)
-            : FFComponent(symbol, QLatin1String("CLJ"))
+CLJComponent::CLJComponent(const SireCAS::Symbol &symbol) : FFComponent(symbol, QLatin1String("CLJ"))
 {
-    coul_component = CoulombComponent( this->forceFieldName() );
-    lj_component = LJComponent( this->forceFieldName() );
+    coul_component = CoulombComponent(this->forceFieldName());
+    lj_component = LJComponent(this->forceFieldName());
 }
 
 /** Copy constructor */
 CLJComponent::CLJComponent(const CLJComponent &other)
-            : FFComponent(other), coul_component(other.coul_component),
-              lj_component(other.lj_component)
-{}
+    : FFComponent(other), coul_component(other.coul_component), lj_component(other.lj_component)
+{
+}
 
 /** Destructor */
 CLJComponent::~CLJComponent()
-{}
+{
+}
 
 /** Set the CLJ components of the forcefield 'ff' to the passed values */
 void CLJComponent::setEnergy(FF &ff, const CLJEnergy &value) const
@@ -277,7 +279,7 @@ Symbols CLJComponent::symbols() const
     return symbls;
 }
 
-const char* CLJComponent::typeName()
+const char *CLJComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CLJComponent>() );
+    return QMetaType::typeName(qMetaTypeId<CLJComponent>());
 }

@@ -25,8 +25,8 @@
   *
 \*********************************************/
 
-#include <QDataStream>
 #include "majorminorversion.h"
+#include <QDataStream>
 
 #include "SireBase/refcountdata.h"
 
@@ -60,22 +60,23 @@ QDataStream &operator>>(QDataStream &ds, Version &version)
 }
 
 /** Constructor */
-Version::Version(quint64 major, quint64 minor)
-        : maj(major), min(minor)
-{}
+Version::Version(quint64 major, quint64 minor) : maj(major), min(minor)
+{
+}
 
 /** Copy constructor */
-Version::Version(const Version &other)
-        : maj(other.maj), min(other.min)
-{}
+Version::Version(const Version &other) : maj(other.maj), min(other.min)
+{
+}
 
 /** Destructor */
 Version::~Version()
-{}
-
-const char* Version::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Version>() );
+}
+
+const char *Version::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<Version>());
 }
 
 /** Return a string representation of this version number */
@@ -85,46 +86,45 @@ QString Version::toString() const
 }
 
 /** Null constructor */
-MajorMinorVersion::MajorMinorVersion()
-                  : d( create_not_refcounted_shared_null<MajorMinorVersionData>() ), v(0,0)
-{}
+MajorMinorVersion::MajorMinorVersion() : d(create_not_refcounted_shared_null<MajorMinorVersionData>()), v(0, 0)
+{
+}
 
 /** Construct from a raw data object - this should only be called by
     the registry function */
-MajorMinorVersion::MajorMinorVersion(
-                        const boost::shared_ptr<MajorMinorVersionData> &ptr)
-                  : d(ptr)
+MajorMinorVersion::MajorMinorVersion(const boost::shared_ptr<MajorMinorVersionData> &ptr) : d(ptr)
 {
-    QMutexLocker lkr( &(d->version_mutex) );
+    QMutexLocker lkr(&(d->version_mutex));
 
     v = Version(d->last_major_version, d->last_minor_version);
 }
 
 /** Construct the object for a specific version */
 MajorMinorVersion::MajorMinorVersion(quint64 vmaj, quint64 vmin)
-                  : d( new MajorMinorVersionData(vmaj, vmin) ),
-                    v(vmaj, vmin)
-{}
+    : d(new MajorMinorVersionData(vmaj, vmin)), v(vmaj, vmin)
+{
+}
 
 /** Copy constructor */
-MajorMinorVersion::MajorMinorVersion(const MajorMinorVersion &other)
-                  : d(other.d), v(other.v)
-{}
+MajorMinorVersion::MajorMinorVersion(const MajorMinorVersion &other) : d(other.d), v(other.v)
+{
+}
 
 /** Destructor */
 MajorMinorVersion::~MajorMinorVersion()
-{}
-
-const char* MajorMinorVersion::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MajorMinorVersion>() );
+}
+
+const char *MajorMinorVersion::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<MajorMinorVersion>());
 }
 
 /** Increment the major version number - this resets the
     minor version number to 0 */
 void MajorMinorVersion::incrementMajor()
 {
-    QMutexLocker lkr( &(d->version_mutex) );
+    QMutexLocker lkr(&(d->version_mutex));
 
     ++(d->last_major_version);
     d->last_minor_version = 0;
@@ -135,7 +135,7 @@ void MajorMinorVersion::incrementMajor()
 /** Increment the minor version number */
 void MajorMinorVersion::incrementMinor()
 {
-    QMutexLocker lkr( &(d->version_mutex) );
+    QMutexLocker lkr(&(d->version_mutex));
 
     ++(d->last_minor_version);
 

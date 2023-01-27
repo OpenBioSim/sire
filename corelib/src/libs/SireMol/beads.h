@@ -28,116 +28,114 @@
 #ifndef SIREMOL_BEADS_H
 #define SIREMOL_BEADS_H
 
+#include "atomselection.h"
 #include "bead.h"
 #include "beadproperty.hpp"
-#include "atomselection.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class Beads;
+    class Beads;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream &ds, const SireMol::Beads&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream &ds, SireMol::Beads&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds, const SireMol::Beads &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, SireMol::Beads &);
 
 namespace SireMol
 {
 
-/** This class is a view of all of the beads (for a specific "Beading")
-    in a molecule
+    /** This class is a view of all of the beads (for a specific "Beading")
+        in a molecule
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT Beads : public SireBase::ConcreteProperty<Beads,MoleculeView>
-{
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT Beads : public SireBase::ConcreteProperty<Beads, MoleculeView>
+    {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const Beads&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, Beads&);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Beads &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, Beads &);
 
-public:
-    Beads();
-    Beads(const MoleculeData &moldata,
-          const PropertyMap &map = PropertyMap());
+    public:
+        Beads();
+        Beads(const MoleculeData &moldata, const PropertyMap &map = PropertyMap());
 
-    Beads(const Beads &other);
+        Beads(const Beads &other);
 
-    ~Beads();
+        ~Beads();
 
-    Beads& operator=(const Beads &other);
+        Beads &operator=(const Beads &other);
 
-    bool operator==(const Beads &other) const;
-    bool operator!=(const Beads &other) const;
+        bool operator==(const Beads &other) const;
+        bool operator!=(const Beads &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    Beads* clone() const;
+        Beads *clone() const;
 
-    Bead operator[](BeadIdx beadidx) const;
+        Bead operator[](BeadIdx beadidx) const;
 
-    Bead at(BeadIdx beadidx) const;
+        Bead at(BeadIdx beadidx) const;
 
-    Bead bead(BeadIdx beadidx) const;
+        Bead bead(BeadIdx beadidx) const;
 
-    int count() const;
-    int size() const;
+        int count() const;
+        int size() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    MolViewPtr toSelector() const;
+        MolViewPtr toSelector() const;
 
-    bool isEmpty() const;
-    bool selectedAll() const;
+        bool isEmpty() const;
+        bool selectedAll() const;
 
-    AtomSelection selection() const;
+        AtomSelection selection() const;
 
-    int nBeads() const;
-    int nAtoms() const;
+        int nBeads() const;
+        int nAtoms() const;
 
-    void update(const MoleculeData &moldata);
+        void update(const MoleculeData &moldata);
 
-    Mover<Beads> move() const;
-    Evaluator evaluate() const;
+        Mover<Beads> move() const;
+        Evaluator evaluate() const;
 
-    QList<AtomIdx> atomIdxs() const;
+        QList<AtomIdx> atomIdxs() const;
 
-    const Beading& beading() const;
+        const Beading &beading() const;
 
-    bool contains(AtomIdx atomidx) const;
-    bool contains(const AtomID &atomid) const;
-    bool intersects(const AtomID &atomid) const;
+        bool contains(AtomIdx atomidx) const;
+        bool contains(const AtomID &atomid) const;
+        bool intersects(const AtomID &atomid) const;
 
-    SireBase::PropertyPtr atomProperty(const PropertyName &key) const;
+        SireBase::PropertyPtr atomProperty(const PropertyName &key) const;
 
-    bool hasProperty(const PropertyName &key) const;
-    bool hasMetadata(const PropertyName &metakey) const;
-    bool hasMetadata(const PropertyName &key,
-                     const PropertyName &metakey) const;
+        bool hasProperty(const PropertyName &key) const;
+        bool hasMetadata(const PropertyName &metakey) const;
+        bool hasMetadata(const PropertyName &key, const PropertyName &metakey) const;
 
-    QStringList propertyKeys() const;
-    QStringList metadataKeys() const;
-    QStringList metadataKeys(const PropertyName &key) const;
+        QStringList propertyKeys() const;
+        QStringList metadataKeys() const;
+        QStringList metadataKeys(const PropertyName &key) const;
 
-private:
-    /** The beading used to divide the molecule into beads */
-    BeadingPtr bdng;
+    private:
+        /** The beading used to divide the molecule into beads */
+        BeadingPtr bdng;
 
-    /** The location of the beading property */
-    PropertyName beading_property;
+        /** The location of the beading property */
+        PropertyName beading_property;
 
-    /** The atoms that are part of the beads */
-    AtomSelection selected_atoms;
-};
+        /** The atoms that are part of the beads */
+        AtomSelection selected_atoms;
+    };
 
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::Beads);
 Q_DECLARE_METATYPE(SireMol::Mover<SireMol::Beads>);
 
-SIRE_EXPOSE_CLASS( SireMol::Beads )
+SIRE_EXPOSE_CLASS(SireMol::Beads)
 
-SIRE_EXPOSE_ALIAS( SireMol::Mover<SireMol::Beads>, SireMol::Mover_Beads_ )
+SIRE_EXPOSE_ALIAS(SireMol::Mover<SireMol::Beads>, SireMol::Mover_Beads_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 
@@ -145,7 +143,7 @@ SIRE_EXPOSE_ALIAS( SireMol::Mover<SireMol::Beads>, SireMol::Mover_Beads_ )
 
 template class SireMol::Mover<SireMol::Beads>;
 
-#endif //SIRE_INSTANTIATE_TEMPLATES
+#endif // SIRE_INSTANTIATE_TEMPLATES
 
 SIRE_END_HEADER
 

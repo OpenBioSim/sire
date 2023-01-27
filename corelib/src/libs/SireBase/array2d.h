@@ -34,108 +34,108 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class Array2DBase;
+    class Array2DBase;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::Array2DBase&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::Array2DBase&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::Array2DBase &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::Array2DBase &);
 
 namespace SireBase
 {
 
-/** Base class of the Array2D<T> class
+    /** Base class of the Array2D<T> class
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT Array2DBase
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT Array2DBase
+    {
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const Array2DBase&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, Array2DBase&);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const Array2DBase &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, Array2DBase &);
 
-public:
-    ~Array2DBase();
+    public:
+        ~Array2DBase();
 
-    int nRows() const;
-    int nColumns() const;
+        int nRows() const;
+        int nColumns() const;
 
-    int offset(int i, int j) const;
-    int checkedOffset(int i, int j) const;
+        int offset(int i, int j) const;
+        int checkedOffset(int i, int j) const;
 
-    int map(int i, int j) const;
+        int map(int i, int j) const;
 
-    void assertValidIndex(int i, int j) const;
+        void assertValidIndex(int i, int j) const;
 
-protected:
-    Array2DBase();
+    protected:
+        Array2DBase();
 
-    Array2DBase(int nrows, int ncolumns);
+        Array2DBase(int nrows, int ncolumns);
 
-    Array2DBase(const Array2DBase &other);
+        Array2DBase(const Array2DBase &other);
 
-    Array2DBase& operator=(const Array2DBase &other);
+        Array2DBase &operator=(const Array2DBase &other);
 
-    bool operator==(const Array2DBase &other) const;
-    bool operator!=(const Array2DBase &other) const;
+        bool operator==(const Array2DBase &other) const;
+        bool operator!=(const Array2DBase &other) const;
 
-private:
-    void throwInvalidIndex(int i, int j) const;
+    private:
+        void throwInvalidIndex(int i, int j) const;
 
-    /** The number of rows and columns in the matrix */
-    qint32 nrows, ncolumns;
-};
+        /** The number of rows and columns in the matrix */
+        qint32 nrows, ncolumns;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the number of rows in the matrix */
-SIRE_ALWAYS_INLINE int Array2DBase::nRows() const
-{
-    return nrows;
-}
+    /** Return the number of rows in the matrix */
+    SIRE_ALWAYS_INLINE int Array2DBase::nRows() const
+    {
+        return nrows;
+    }
 
-/** Return the number of columns in the matrix */
-SIRE_ALWAYS_INLINE int Array2DBase::nColumns() const
-{
-    return ncolumns;
-}
+    /** Return the number of columns in the matrix */
+    SIRE_ALWAYS_INLINE int Array2DBase::nColumns() const
+    {
+        return ncolumns;
+    }
 
-/** Return the location in the 1D array of the item at index [i,j] */
-SIRE_ALWAYS_INLINE int Array2DBase::offset(int i, int j) const
-{
-    return (i*ncolumns) + j;
-}
+    /** Return the location in the 1D array of the item at index [i,j] */
+    SIRE_ALWAYS_INLINE int Array2DBase::offset(int i, int j) const
+    {
+        return (i * ncolumns) + j;
+    }
 
-/** Map the 2D index (i,j) into the 1D index into memory */
-SIRE_ALWAYS_INLINE int Array2DBase::map(int i, int j) const
-{
-    return Array2DBase::offset(i,j);
-}
+    /** Map the 2D index (i,j) into the 1D index into memory */
+    SIRE_ALWAYS_INLINE int Array2DBase::map(int i, int j) const
+    {
+        return Array2DBase::offset(i, j);
+    }
 
-/** Assert that the index (i,j) is valid for this matrix
+    /** Assert that the index (i,j) is valid for this matrix
 
-    \throw SireError::invalid_index
-*/
-SIRE_ALWAYS_INLINE void Array2DBase::assertValidIndex(int i, int j) const
-{
-    if (i < 0 or i >= nrows or j < 0 or j >= ncolumns)
-        throwInvalidIndex(i,j);
-}
+        \throw SireError::invalid_index
+    */
+    SIRE_ALWAYS_INLINE void Array2DBase::assertValidIndex(int i, int j) const
+    {
+        if (i < 0 or i >= nrows or j < 0 or j >= ncolumns)
+            throwInvalidIndex(i, j);
+    }
 
-/** Return the location in the 1D array of the item at index [i,j]
+    /** Return the location in the 1D array of the item at index [i,j]
 
-    \throw SireError::invalid_index
-*/
-SIRE_ALWAYS_INLINE int Array2DBase::checkedOffset(int i, int j) const
-{
-    Array2DBase::assertValidIndex(i,j);
-    return Array2DBase::offset(i,j);
-}
+        \throw SireError::invalid_index
+    */
+    SIRE_ALWAYS_INLINE int Array2DBase::checkedOffset(int i, int j) const
+    {
+        Array2DBase::assertValidIndex(i, j);
+        return Array2DBase::offset(i, j);
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireBase
 
-SIRE_EXPOSE_CLASS( SireBase::Array2DBase )
+SIRE_EXPOSE_CLASS(SireBase::Array2DBase)
 
 SIRE_END_HEADER
 

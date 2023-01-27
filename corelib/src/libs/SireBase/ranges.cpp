@@ -48,8 +48,7 @@ QDataStream &operator<<(QDataStream &ds, const SimpleRange &range)
 {
     writeHeader(ds, r_simple, 1);
 
-    ds << range.strtval << range.endval << range.incr
-       << static_cast<const Range&>(range);
+    ds << range.strtval << range.endval << range.incr << static_cast<const Range &>(range);
 
     return ds;
 }
@@ -60,8 +59,7 @@ QDataStream &operator>>(QDataStream &ds, SimpleRange &range)
 
     if (v == 1)
     {
-        ds >> range.strtval >> range.endval >> range.incr
-           >> static_cast<Range&>(range);
+        ds >> range.strtval >> range.endval >> range.incr >> static_cast<Range &>(range);
     }
     else
         throw version_error(v, "1", r_simple, CODELOC);
@@ -70,41 +68,38 @@ QDataStream &operator>>(QDataStream &ds, SimpleRange &range)
 }
 
 /** Construct a null range */
-SimpleRange::SimpleRange()
-            : ConcreteProperty<SimpleRange,Range>(),
-              strtval(-1), endval(-1), incr(0)
-{}
+SimpleRange::SimpleRange() : ConcreteProperty<SimpleRange, Range>(), strtval(-1), endval(-1), incr(0)
+{
+}
 
 /** Construct a range that represents a single value, i */
-SimpleRange::SimpleRange(qint64 i)
-            : ConcreteProperty<SimpleRange,Range>(),
-              strtval(i), endval(i+1), incr(1)
-{}
+SimpleRange::SimpleRange(qint64 i) : ConcreteProperty<SimpleRange, Range>(), strtval(i), endval(i + 1), incr(1)
+{
+}
 
 /** Construct a range from [start,end) in units of increment */
 SimpleRange::SimpleRange(qint64 start, qint64 end, qint64 increment)
-            : ConcreteProperty<SimpleRange,Range>(),
-              strtval(start), endval(end), incr(increment)
+    : ConcreteProperty<SimpleRange, Range>(), strtval(start), endval(end), incr(increment)
 {
     if (increment == 0)
     {
-        throw SireError::invalid_arg( QObject::tr(
-                "You cannot construct a range using an increment of zero!"), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("You cannot construct a range using an increment of zero!"), CODELOC);
     }
 }
 
 /** Copy constructor */
 SimpleRange::SimpleRange(const SimpleRange &other)
-            : ConcreteProperty<SimpleRange,Range>(other),
-              strtval(other.strtval), endval(other.endval), incr(other.incr)
-{}
+    : ConcreteProperty<SimpleRange, Range>(other), strtval(other.strtval), endval(other.endval), incr(other.incr)
+{
+}
 
 /** Destructor */
 SimpleRange::~SimpleRange()
-{}
+{
+}
 
 /** Copy assignment operator */
-SimpleRange& SimpleRange::operator=(const SimpleRange &other)
+SimpleRange &SimpleRange::operator=(const SimpleRange &other)
 {
     if (this != &other)
     {
@@ -120,10 +115,7 @@ SimpleRange& SimpleRange::operator=(const SimpleRange &other)
 /** Comparison operator */
 bool SimpleRange::operator==(const SimpleRange &other) const
 {
-    return strtval == other.strtval and
-           endval == other.endval and
-           incr == other.incr and
-           Range::operator==(other);
+    return strtval == other.strtval and endval == other.endval and incr == other.incr and Range::operator==(other);
 }
 
 /** Comparison operator */
@@ -154,17 +146,17 @@ QString SimpleRange::toString() const
         return QObject::tr("Range::null");
 }
 
-SimpleRange* SimpleRange::clone() const
+SimpleRange *SimpleRange::clone() const
 {
     return new SimpleRange(*this);
 }
 
-const char* SimpleRange::typeName()
+const char *SimpleRange::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SimpleRange>() );
+    return QMetaType::typeName(qMetaTypeId<SimpleRange>());
 }
 
-const char* SimpleRange::what() const
+const char *SimpleRange::what() const
 {
     return SimpleRange::typeName();
 }
@@ -202,8 +194,7 @@ qint64 SimpleRange::next()
         return val;
     }
     else
-        throw SireError::invalid_index( QObject::tr(
-                "No more iterations available for this range!"), CODELOC );
+        throw SireError::invalid_index(QObject::tr("No more iterations available for this range!"), CODELOC);
 
     return 0;
 }
@@ -213,8 +204,7 @@ RangePtr SimpleRange::populate(int nvalues) const
 {
     if (incr == 0)
     {
-        throw SireError::invalid_index( QObject::tr(
-                "Cannot populate a null range!"), CODELOC );
+        throw SireError::invalid_index(QObject::tr("Cannot populate a null range!"), CODELOC);
     }
 
     SimpleRange ret(*this);

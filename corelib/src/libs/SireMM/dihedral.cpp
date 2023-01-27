@@ -34,9 +34,9 @@
 #include "SireMol/mover.hpp"
 #include "SireMol/selector.hpp"
 
+#include "SireCAS/expression.h"
 #include "SireCAS/symbol.h"
 #include "SireCAS/values.h"
-#include "SireCAS/expression.h"
 
 #include "SireBase/errors.h"
 #include "SireMol/errors.h"
@@ -58,20 +58,20 @@ using namespace SireUnits;
 
 static const RegisterMetaType<Dihedral> r_dihedral;
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream &ds, const Dihedral &dihedral)
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const Dihedral &dihedral)
 {
     writeHeader(ds, r_dihedral, 1);
-    ds << dihedral.dih << static_cast<const MoleculeView&>(dihedral);
+    ds << dihedral.dih << static_cast<const MoleculeView &>(dihedral);
     return ds;
 }
 
-SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, Dihedral &dihedral)
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, Dihedral &dihedral)
 {
     auto v = readHeader(ds, r_dihedral);
 
     if (v == 1)
     {
-        ds >> dihedral.dih >> static_cast<MoleculeView&>(dihedral);
+        ds >> dihedral.dih >> static_cast<MoleculeView &>(dihedral);
     }
     else
         throw SireStream::version_error(v, "1", r_dihedral, CODELOC);
@@ -80,59 +80,47 @@ SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, Dihedral &dihedral)
 }
 
 Dihedral::Dihedral() : ConcreteProperty<Dihedral, MoleculeView>()
-{}
-
-
-Dihedral::Dihedral(const Atom &atom0, const Atom &atom1,
-                   const Atom &atom2, const Atom &atom3)
-     : ConcreteProperty<Dihedral, MoleculeView>()
 {
-    if ((not atom0.isSameMolecule(atom1)) or
-        (not atom0.isSameMolecule(atom2)) or
-        (not atom0.isSameMolecule(atom3)))
+}
+
+Dihedral::Dihedral(const Atom &atom0, const Atom &atom1, const Atom &atom2, const Atom &atom3)
+    : ConcreteProperty<Dihedral, MoleculeView>()
+{
+    if ((not atom0.isSameMolecule(atom1)) or (not atom0.isSameMolecule(atom2)) or (not atom0.isSameMolecule(atom3)))
     {
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create a Dihedral from four atoms in the same molecule. "
-            "%1-%2-%3-%4 are from different molecules (%5-%6-%7-%8)")
-                .arg(atom0.toString()).arg(atom1.toString())
-                .arg(atom2.toString()).arg(atom3.toString())
+        throw SireError::incompatible_error(
+            QObject::tr("You can only create a Dihedral from four atoms in the same molecule. "
+                        "%1-%2-%3-%4 are from different molecules (%5-%6-%7-%8)")
+                .arg(atom0.toString())
+                .arg(atom1.toString())
+                .arg(atom2.toString())
+                .arg(atom3.toString())
                 .arg(atom0.molecule().toString())
                 .arg(atom1.molecule().toString())
                 .arg(atom2.molecule().toString())
-                .arg(atom3.molecule().toString()), CODELOC);
+                .arg(atom3.molecule().toString()),
+            CODELOC);
     }
 
-    this->operator=(Dihedral(atom0.data(),
-                          DihedralID(atom0.index(),
-                                     atom1.index(),
-                                     atom2.index(),
-                                     atom3.index())));
+    this->operator=(Dihedral(atom0.data(), DihedralID(atom0.index(), atom1.index(), atom2.index(), atom3.index())));
 }
 
-Dihedral::Dihedral(const MoleculeView &molview,
-                   const AtomID &atom0, const AtomID &atom1,
-                   const AtomID &atom2, const AtomID &atom3)
-     : ConcreteProperty<Dihedral, MoleculeView>()
+Dihedral::Dihedral(const MoleculeView &molview, const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                   const AtomID &atom3)
+    : ConcreteProperty<Dihedral, MoleculeView>()
 {
-    this->operator=(Dihedral(molview.atom(atom0),
-                             molview.atom(atom1),
-                             molview.atom(atom2),
-                             molview.atom(atom3)));
+    this->operator=(Dihedral(molview.atom(atom0), molview.atom(atom1), molview.atom(atom2), molview.atom(atom3)));
 }
 
-Dihedral::Dihedral(const MoleculeData &moldata,
-                   const AtomID &atm0, const AtomID &atm1,
-                   const AtomID &atm2, const AtomID &atm3)
-     : ConcreteProperty<Dihedral, MoleculeView>()
+Dihedral::Dihedral(const MoleculeData &moldata, const AtomID &atm0, const AtomID &atm1, const AtomID &atm2,
+                   const AtomID &atm3)
+    : ConcreteProperty<Dihedral, MoleculeView>()
 {
-    this->operator=(Dihedral(Atom(moldata, atm0),
-                             Atom(moldata, atm1),
-                             Atom(moldata, atm2),
-                             Atom(moldata, atm3)));
+    this->operator=(Dihedral(Atom(moldata, atm0), Atom(moldata, atm1), Atom(moldata, atm2), Atom(moldata, atm3)));
 }
 
 Dihedral::Dihedral(const MoleculeData &moldata, const DihedralID &dihedral)
-         : ConcreteProperty<Dihedral, MoleculeView>(moldata)
+    : ConcreteProperty<Dihedral, MoleculeView>(moldata)
 {
     auto atomidx0 = moldata.info().atomIdx(dihedral.atom0());
     auto atomidx1 = moldata.info().atomIdx(dihedral.atom1());
@@ -144,35 +132,34 @@ Dihedral::Dihedral(const MoleculeData &moldata, const DihedralID &dihedral)
         qSwap(atomidx0, atomidx3);
         qSwap(atomidx1, atomidx2);
     }
-    else if ((atomidx0 == atomidx1) or
-             (atomidx1 == atomidx2) or
-             (atomidx2 == atomidx3))
+    else if ((atomidx0 == atomidx1) or (atomidx1 == atomidx2) or (atomidx2 == atomidx3))
     {
         // note that atomidx0 == atomidx3 in a ring
-        throw SireMol::duplicate_atom(QObject::tr(
-            "You cannot make a Dihedral out of identical atoms. %1-%2-%3-%4")
-                .arg(atomidx0.toString())
-                .arg(atomidx1.toString())
-                .arg(atomidx2.toString())
-                .arg(atomidx3.toString()), CODELOC);
+        throw SireMol::duplicate_atom(QObject::tr("You cannot make a Dihedral out of identical atoms. %1-%2-%3-%4")
+                                          .arg(atomidx0.toString())
+                                          .arg(atomidx1.toString())
+                                          .arg(atomidx2.toString())
+                                          .arg(atomidx3.toString()),
+                                      CODELOC);
     }
 
     dih = DihedralID(atomidx0, atomidx1, atomidx2, atomidx3);
 }
 
-Dihedral::Dihedral(const Dihedral &other)
-         : ConcreteProperty<Dihedral, MoleculeView>(other), dih(other.dih)
-{}
+Dihedral::Dihedral(const Dihedral &other) : ConcreteProperty<Dihedral, MoleculeView>(other), dih(other.dih)
+{
+}
 
 Dihedral::~Dihedral()
-{}
+{
+}
 
-const char* Dihedral::typeName()
+const char *Dihedral::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<Dihedral>());
 }
 
-Dihedral& Dihedral::operator=(const Dihedral &other)
+Dihedral &Dihedral::operator=(const Dihedral &other)
 {
     if (this != &other)
     {
@@ -209,10 +196,14 @@ QString Dihedral::toString() const
     auto a3 = this->atom3();
 
     return QObject::tr("Dihedral( %1:%2 <= %3:%4 = %5:%6 => %7:%8 )")
-            .arg(a0.name()).arg(a0.number())
-            .arg(a1.name()).arg(a1.number())
-            .arg(a2.name()).arg(a2.number())
-            .arg(a3.name()).arg(a3.number());
+        .arg(a0.name())
+        .arg(a0.number())
+        .arg(a1.name())
+        .arg(a1.number())
+        .arg(a2.name())
+        .arg(a2.number())
+        .arg(a3.name())
+        .arg(a3.number());
 }
 
 Atom Dihedral::atom0() const
@@ -291,7 +282,7 @@ bool Dihedral::hasConnectivity() const
     return this->data().hasProperty("connectivity");
 }
 
-const Connectivity& Dihedral::getConnectivity() const
+const Connectivity &Dihedral::getConnectivity() const
 {
     return this->data().property("connectivity").asA<Connectivity>();
 }
@@ -311,8 +302,7 @@ bool Dihedral::hasMetadata(const PropertyName &key) const
     return false;
 }
 
-bool Dihedral::hasMetadata(const PropertyName &key,
-                           const PropertyName &metakey) const
+bool Dihedral::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return false;
 }
@@ -347,7 +337,7 @@ Properties Dihedral::properties() const
     return Properties();
 }
 
-const Property& Dihedral::property(const PropertyName &key) const
+const Property &Dihedral::property(const PropertyName &key) const
 {
     if (this->hasConnectivity())
     {
@@ -357,16 +347,13 @@ const Property& Dihedral::property(const PropertyName &key) const
     if (key.hasValue())
         return key.value();
 
-    throw SireBase::missing_property(QObject::tr(
-        "Dihedral %1 has no property at key %2.")
-            .arg(this->toString()).arg(key.source()),
-                CODELOC);
+    throw SireBase::missing_property(
+        QObject::tr("Dihedral %1 has no property at key %2.").arg(this->toString()).arg(key.source()), CODELOC);
 
     return key.value();
 }
 
-const Property& Dihedral::property(const PropertyName &key,
-                                   const Property &default_value) const
+const Property &Dihedral::property(const PropertyName &key, const Property &default_value) const
 {
     if (this->hasConnectivity())
     {
@@ -411,8 +398,9 @@ Expression Dihedral::potential(const PropertyMap &map) const
         auto funcs = this->data().property(map["dihedral"]).asA<FourAtomFunctions>();
         return funcs.potential(dih);
     }
-    catch(const SireError::exception&)
-    {}
+    catch (const SireError::exception &)
+    {
+    }
 
     return Expression();
 }
@@ -428,7 +416,7 @@ SireUnits::Dimension::GeneralUnit Dihedral::energy(const PropertyMap &map) const
     auto s = this->size(map);
 
     SireUnits::Dimension::GeneralUnit value;
-    Values vals(Symbol("phi")==s.to(radians));
+    Values vals(Symbol("phi") == s.to(radians));
     value.setComponent("dihedral", pot.evaluate(vals) * kcal_per_mol);
     return value;
 }

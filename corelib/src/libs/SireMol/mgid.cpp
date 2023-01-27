@@ -26,16 +26,16 @@
 \*********************************************/
 
 #include "mgid.h"
+#include "mgidentifier.h"
 #include "mgidx.h"
 #include "mgname.h"
 #include "mgnum.h"
-#include "mgidentifier.h"
 #include "moleculegroups.h"
 
 #include "SireBase/incremint.h"
 
-#include "SireMol/errors.h"
 #include "SireError/errors.h"
+#include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -51,13 +51,16 @@ using namespace SireStream;
 ////////
 
 MGID::MGID() : SireID::ID()
-{}
+{
+}
 
 MGID::MGID(const MGID &other) : SireID::ID(other)
-{}
+{
+}
 
 MGID::~MGID()
-{}
+{
+}
 
 Specify<MGID> MGID::operator[](int i) const
 {
@@ -104,13 +107,13 @@ IDOrSet<MGID> MGID::operator|(const MGID &other) const
     return this->operator*(other);
 }
 
-void MGID::processMatches(QList<MGNum> &matches, const MolGroupsBase&) const
+void MGID::processMatches(QList<MGNum> &matches, const MolGroupsBase &) const
 {
     if (matches.isEmpty())
-        throw SireMol::missing_group( QObject::tr(
-                "There is no group in the passed groups that matches "
-                "the ID \"%1\".")
-                    .arg(this->toString()), CODELOC );
+        throw SireMol::missing_group(QObject::tr("There is no group in the passed groups that matches "
+                                                 "the ID \"%1\".")
+                                         .arg(this->toString()),
+                                     CODELOC);
 }
 
 ////////
@@ -118,16 +121,20 @@ void MGID::processMatches(QList<MGNum> &matches, const MolGroupsBase&) const
 ////////
 
 MGIdx::MGIdx() : SireID::Index_T_<MGIdx>(), MGID()
-{}
+{
+}
 
 MGIdx::MGIdx(qint32 idx) : SireID::Index_T_<MGIdx>(idx), MGID()
-{}
+{
+}
 
 MGIdx::MGIdx(const MGIdx &other) : SireID::Index_T_<MGIdx>(other), MGID(other)
-{}
+{
+}
 
 MGIdx::~MGIdx()
-{}
+{
+}
 
 MGIdx MGIdx::null()
 {
@@ -149,7 +156,7 @@ QString MGIdx::toString() const
     return QString("MGIdx(%1)").arg(_idx);
 }
 
-MGIdx& MGIdx::operator=(const MGIdx &other)
+MGIdx &MGIdx::operator=(const MGIdx &other)
 {
     SireID::IndexBase::operator=(other);
     MGID::operator=(other);
@@ -166,9 +173,9 @@ QList<MGNum> MGIdx::map(const MolGroupsBase &molgroups) const
     return molgroups.map(*this);
 }
 
-const char* MGIdx::typeName()
+const char *MGIdx::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MGIdx>() );
+    return QMetaType::typeName(qMetaTypeId<MGIdx>());
 }
 
 ////////
@@ -176,20 +183,25 @@ const char* MGIdx::typeName()
 ////////
 
 MGName::MGName() : SireID::Name(), MGID()
-{}
+{
+}
 
 MGName::MGName(const QString &name) : SireID::Name(name), MGID()
-{}
+{
+}
 
 MGName::MGName(const QString &name, SireID::CaseSensitivity case_sensitivity)
-       : SireID::Name(name, case_sensitivity), MGID()
-{}
+    : SireID::Name(name, case_sensitivity), MGID()
+{
+}
 
 MGName::MGName(const MGName &other) : SireID::Name(other), MGID(other)
-{}
+{
+}
 
 MGName::~MGName()
-{}
+{
+}
 
 bool MGName::isNull() const
 {
@@ -209,7 +221,7 @@ QString MGName::toString() const
         return QString("MGName('%1', isCaseSensitive=False)").arg(_name);
 }
 
-MGName& MGName::operator=(const MGName &other)
+MGName &MGName::operator=(const MGName &other)
 {
     SireID::Name::operator=(other);
     MGID::operator=(other);
@@ -236,9 +248,9 @@ QList<MGNum> MGName::map(const MolGroupsBase &molgroups) const
     return molgroups.map(*this);
 }
 
-const char* MGName::typeName()
+const char *MGName::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MGName>() );
+    return QMetaType::typeName(qMetaTypeId<MGName>());
 }
 
 ////////
@@ -246,16 +258,20 @@ const char* MGName::typeName()
 ////////
 
 MGNum::MGNum() : SireID::Number(), MGID()
-{}
+{
+}
 
 MGNum::MGNum(quint32 num) : SireID::Number(num), MGID()
-{}
+{
+}
 
 MGNum::MGNum(const MGNum &other) : SireID::Number(other), MGID(other)
-{}
+{
+}
 
 MGNum::~MGNum()
-{}
+{
+}
 
 bool MGNum::isNull() const
 {
@@ -264,7 +280,7 @@ bool MGNum::isNull() const
 
 uint MGNum::hash() const
 {
-    return ::qHash( static_cast<const SireID::Number&>(*this) );
+    return ::qHash(static_cast<const SireID::Number &>(*this));
 }
 
 QString MGNum::toString() const
@@ -272,7 +288,7 @@ QString MGNum::toString() const
     return QString("MGNum(%1)").arg(_num);
 }
 
-MGNum& MGNum::operator=(const MGNum &other)
+MGNum &MGNum::operator=(const MGNum &other)
 {
     SireID::Number::operator=(other);
     MGID::operator=(other);
@@ -319,9 +335,9 @@ QList<MGNum> MGNum::map(const MolGroupsBase &molgroups) const
     return molgroups.map(*this);
 }
 
-const char* MGNum::typeName()
+const char *MGNum::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MGNum>() );
+    return QMetaType::typeName(qMetaTypeId<MGNum>());
 }
 
 ///////
@@ -331,27 +347,23 @@ namespace SireID
     template class IDAndSet<MGID>;
     template class IDOrSet<MGID>;
     template class Specify<MGID>;
-}
+} // namespace SireID
 
-static const RegisterMetaType< IDAndSet<MGID> > r_idandset_mgid;
-static const RegisterMetaType< IDOrSet<MGID> > r_idorset_mgid;
-static const RegisterMetaType< Specify<MGID> > r_specify_mgid;
+static const RegisterMetaType<IDAndSet<MGID>> r_idandset_mgid;
+static const RegisterMetaType<IDOrSet<MGID>> r_idorset_mgid;
+static const RegisterMetaType<Specify<MGID>> r_specify_mgid;
 
-
-MGNum* MGNum::clone() const
+MGNum *MGNum::clone() const
 {
     return new MGNum(*this);
 }
 
-
-MGIdx* MGIdx::clone() const
+MGIdx *MGIdx::clone() const
 {
     return new MGIdx(*this);
 }
 
-
-MGName* MGName::clone() const
+MGName *MGName::clone() const
 {
     return new MGName(*this);
 }
-

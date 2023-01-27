@@ -26,8 +26,8 @@
 \*********************************************/
 
 #include <QMutex>
-#include <QVector>
 #include <QUuid>
+#include <QVector>
 
 #include <QDebug>
 
@@ -39,7 +39,7 @@
 #include "rangenerator.h"
 #include "vector.h"
 
-#include "ThirdParty/MersenneTwister.h"       // CONDITIONAL_INCLUDE
+#include "ThirdParty/MersenneTwister.h" // CONDITIONAL_INCLUDE
 
 #include "SireBase/refcountdata.h"
 
@@ -54,162 +54,165 @@ using namespace SireStream;
 
 namespace SireMaths
 {
-namespace detail
-{
-class RanGeneratorPvt;
-}
-}
+    namespace detail
+    {
+        class RanGeneratorPvt;
+    }
+} // namespace SireMaths
 
-QDataStream& operator<<(QDataStream&, const SireMaths::detail::RanGeneratorPvt&);
-QDataStream& operator>>(QDataStream&, SireMaths::detail::RanGeneratorPvt&);
+QDataStream &operator<<(QDataStream &, const SireMaths::detail::RanGeneratorPvt &);
+QDataStream &operator>>(QDataStream &, SireMaths::detail::RanGeneratorPvt &);
 
 namespace SireMaths
 {
 
-namespace detail
-{
-
-/** This class provides the private implementation of RanGenerator.
-    This class is explicitly shared by instances of RanGenerator,
-    and is therefore thread-safe.
-
-    @author Christopher Woods
-*/
-class RanGeneratorPvt
-{
-
-friend QDataStream& ::operator<<(QDataStream&, const RanGeneratorPvt&);
-friend QDataStream& ::operator>>(QDataStream&, RanGeneratorPvt&);
-
-typedef MTRand::uint32 MTUInt32;
-
-public:
-    /** Construct a generator with a random seed */
-    RanGeneratorPvt() : mutex(QMutex::NonRecursive)
-    {}
-
-    /** Construct a generator with a specified seed */
-    RanGeneratorPvt(quint32 seed) : mutex(QMutex::NonRecursive),
-                                    mersenne_generator(seed)
-    {}
-
-    /** Construct a generator with a specified seed */
-    RanGeneratorPvt(const QVector<quint32> &s) : mutex(QMutex::NonRecursive)
+    namespace detail
     {
-        this->seed(s);
-    }
 
-    /** Copy constructor */
-    RanGeneratorPvt(const RanGeneratorPvt &other) : mutex(QMutex::NonRecursive)
-    {
-        QMutexLocker lkr( const_cast<QMutex*>( &(other.mutex) ) );
+        /** This class provides the private implementation of RanGenerator.
+            This class is explicitly shared by instances of RanGenerator,
+            and is therefore thread-safe.
 
-        mersenne_generator = other.mersenne_generator;
-    }
-
-    /** Destructor */
-    ~RanGeneratorPvt()
-    {}
-
-    /** Mutex to serialise access to the generator */
-    QMutex mutex;
-
-    /** The actual generator (Mersenne Twister) */
-    MTRand mersenne_generator;
-
-    /** Randomly seed the generator */
-    void seed()
-    {
-        QMutexLocker lkr(&mutex);
-
-        mersenne_generator.seed();
-    }
-
-    /** Reseed the generator from an array of uints */
-    void seed(const QVector<quint32> &s)
-    {
-        if (s.isEmpty())
+            @author Christopher Woods
+        */
+        class RanGeneratorPvt
         {
-            this->seed();
-            return;
-        }
 
-        QMutexLocker lkr(&mutex);
+            friend QDataStream & ::operator<<(QDataStream &, const RanGeneratorPvt &);
+            friend QDataStream & ::operator>>(QDataStream &, RanGeneratorPvt &);
 
-        //we need to convert this into an array of MTRand::uint32
-        int sz = s.count();
+            typedef MTRand::uint32 MTUInt32;
 
-        boost::scoped_array<MTUInt32> array( new MTUInt32[sz] );
+        public:
+            /** Construct a generator with a random seed */
+            RanGeneratorPvt() : mutex(QMutex::NonRecursive)
+            {
+            }
 
-        for (int i=0; i<sz; ++i)
-            array[i] = s.constData()[i];
+            /** Construct a generator with a specified seed */
+            RanGeneratorPvt(quint32 seed) : mutex(QMutex::NonRecursive), mersenne_generator(seed)
+            {
+            }
 
-        mersenne_generator.seed( array.get(),  sz );
-    }
+            /** Construct a generator with a specified seed */
+            RanGeneratorPvt(const QVector<quint32> &s) : mutex(QMutex::NonRecursive)
+            {
+                this->seed(s);
+            }
 
-    /** Reseed the generator */
-    void seed(quint32 s)
-    {
-        QMutexLocker lkr(&mutex);
+            /** Copy constructor */
+            RanGeneratorPvt(const RanGeneratorPvt &other) : mutex(QMutex::NonRecursive)
+            {
+                QMutexLocker lkr(const_cast<QMutex *>(&(other.mutex)));
 
-        mersenne_generator.seed(s);
-    }
+                mersenne_generator = other.mersenne_generator;
+            }
 
-    /** Return an array containing the state of the random generator */
-    QVector<quint32> getState()
-    {
-        mutex.lock();
+            /** Destructor */
+            ~RanGeneratorPvt()
+            {
+            }
 
-        //create an array to hold the state
-        int state_size = MTRand::N + 1;
-        boost::scoped_array<MTUInt32> array( new MTUInt32[state_size] );
+            /** Mutex to serialise access to the generator */
+            QMutex mutex;
 
-        mersenne_generator.save(array.get());
+            /** The actual generator (Mersenne Twister) */
+            MTRand mersenne_generator;
 
-        mutex.unlock();
+            /** Randomly seed the generator */
+            void seed()
+            {
+                QMutexLocker lkr(&mutex);
 
-        //copy the array into a QVector<quint32>
-        QVector<quint32> ret(state_size);
+                mersenne_generator.seed();
+            }
 
-        quint32 *ret_array = ret.data();
+            /** Reseed the generator from an array of uints */
+            void seed(const QVector<quint32> &s)
+            {
+                if (s.isEmpty())
+                {
+                    this->seed();
+                    return;
+                }
 
-        for (int i=0; i<state_size; ++i)
-            ret_array[i] = array[i];
+                QMutexLocker lkr(&mutex);
 
-        return ret;
-    }
+                // we need to convert this into an array of MTRand::uint32
+                int sz = s.count();
 
-    /** Load the state from an array - the array must have size
-        MTRand::N + 1 (625)
+                boost::scoped_array<MTUInt32> array(new MTUInt32[sz]);
 
-        \throw SireError::incompatible_error
-    */
-    void loadState(const QVector<quint32> &state)
-    {
-        int state_size = MTRand::N + 1;
+                for (int i = 0; i < sz; ++i)
+                    array[i] = s.constData()[i];
 
-        //check that the array is of the right size...
-        if (state.count() != state_size)
-            throw SireError::incompatible_error( QObject::tr(
-                "Can only restore the state from an array of size %1, "
-                "while you have provided an array of size %2.")
-                    .arg(state_size).arg(state.count()), CODELOC );
+                mersenne_generator.seed(array.get(), sz);
+            }
 
-        //convert the array to the right type...
-        boost::scoped_array<MTUInt32> array( new MTUInt32[state_size] );
+            /** Reseed the generator */
+            void seed(quint32 s)
+            {
+                QMutexLocker lkr(&mutex);
 
-        const quint32 *state_array = state.constData();
+                mersenne_generator.seed(s);
+            }
 
-        for (int i=0; i<state_size; ++i)
-            array[i] = state_array[i];
+            /** Return an array containing the state of the random generator */
+            QVector<quint32> getState()
+            {
+                mutex.lock();
 
-        QMutexLocker lkr(&mutex);
+                // create an array to hold the state
+                int state_size = MTRand::N + 1;
+                boost::scoped_array<MTUInt32> array(new MTUInt32[state_size]);
 
-        mersenne_generator.load(array.get());
-    }
-};
+                mersenne_generator.save(array.get());
 
-} // end of namespace detail
+                mutex.unlock();
+
+                // copy the array into a QVector<quint32>
+                QVector<quint32> ret(state_size);
+
+                quint32 *ret_array = ret.data();
+
+                for (int i = 0; i < state_size; ++i)
+                    ret_array[i] = array[i];
+
+                return ret;
+            }
+
+            /** Load the state from an array - the array must have size
+                MTRand::N + 1 (625)
+
+                \throw SireError::incompatible_error
+            */
+            void loadState(const QVector<quint32> &state)
+            {
+                int state_size = MTRand::N + 1;
+
+                // check that the array is of the right size...
+                if (state.count() != state_size)
+                    throw SireError::incompatible_error(QObject::tr("Can only restore the state from an array of size %1, "
+                                                                    "while you have provided an array of size %2.")
+                                                            .arg(state_size)
+                                                            .arg(state.count()),
+                                                        CODELOC);
+
+                // convert the array to the right type...
+                boost::scoped_array<MTUInt32> array(new MTUInt32[state_size]);
+
+                const quint32 *state_array = state.constData();
+
+                for (int i = 0; i < state_size; ++i)
+                    array[i] = state_array[i];
+
+                QMutexLocker lkr(&mutex);
+
+                mersenne_generator.load(array.get());
+            }
+        };
+
+    } // end of namespace detail
 
 } // end of namespace SireMaths
 
@@ -217,15 +220,13 @@ public:
 //////////// Implementation of RanGeneratorPvt
 ////////////
 
-QDataStream& operator<<(QDataStream &ds,
-                        const SireMaths::detail::RanGeneratorPvt &rangen)
+QDataStream &operator<<(QDataStream &ds, const SireMaths::detail::RanGeneratorPvt &rangen)
 {
-    ds << const_cast<RanGeneratorPvt*>(&rangen)->getState();
+    ds << const_cast<RanGeneratorPvt *>(&rangen)->getState();
     return ds;
 }
 
-QDataStream& operator>>(QDataStream &ds,
-                        SireMaths::detail::RanGeneratorPvt &rangen)
+QDataStream &operator>>(QDataStream &ds, SireMaths::detail::RanGeneratorPvt &rangen)
 {
     QVector<quint32> state;
     ds >> state;
@@ -259,7 +260,7 @@ QDataStream &operator>>(QDataStream &ds, RanGenerator &rangen)
 
     if (v == 1)
     {
-        //I need to detach from shared storage
+        // I need to detach from shared storage
         rangen.d.reset(new RanGeneratorPvt());
 
         SharedDataStream sds(ds);
@@ -271,7 +272,7 @@ QDataStream &operator>>(QDataStream &ds, RanGenerator &rangen)
     return ds;
 }
 
-static RanGeneratorPvt* createSharedNull()
+static RanGeneratorPvt *createSharedNull()
 {
     auto mutex = SireBase::detail::get_shared_null_mutex();
 
@@ -282,45 +283,47 @@ static RanGeneratorPvt* createSharedNull()
     return gen;
 }
 
-static boost::shared_ptr<RanGeneratorPvt> shared_null( ::createSharedNull() );
+static boost::shared_ptr<RanGeneratorPvt> shared_null(::createSharedNull());
 
 /** Create a randomly seeded generator
     (actually a copy of the global, random generator) */
 RanGenerator::RanGenerator() : d(shared_null)
-{}
+{
+}
 
 /** Create a generator seeded with 'seed' */
-RanGenerator::RanGenerator(quint32 seed)
-             : d( new RanGeneratorPvt(seed) )
-{}
+RanGenerator::RanGenerator(quint32 seed) : d(new RanGeneratorPvt(seed))
+{
+}
 
 /** Create a generator seeded with 'seed' */
-RanGenerator::RanGenerator(const QVector<quint32> &seed)
-             : d( new RanGeneratorPvt(seed) )
-{}
+RanGenerator::RanGenerator(const QVector<quint32> &seed) : d(new RanGeneratorPvt(seed))
+{
+}
 
 /** Copy constructor - this takes an explicitly shared
     copy of 'other' (this is to prevent repeat random numbers
     from being generated by implicit copies!) */
-RanGenerator::RanGenerator(const RanGenerator &other)
-             : d( other.d )
-{}
+RanGenerator::RanGenerator(const RanGenerator &other) : d(other.d)
+{
+}
 
 /** Destructor */
 RanGenerator::~RanGenerator()
-{}
+{
+}
 
 /** Detach from shared storage */
 void RanGenerator::detach()
 {
     if (not d.unique())
     {
-        d.reset( new RanGeneratorPvt(*d) );
+        d.reset(new RanGeneratorPvt(*d));
     }
 }
 
 /** Copy assignment */
-RanGenerator& RanGenerator::operator=(const RanGenerator &other)
+RanGenerator &RanGenerator::operator=(const RanGenerator &other)
 {
     d = other.d;
     return *this;
@@ -340,9 +343,9 @@ bool RanGenerator::operator!=(const RanGenerator &other) const
     return d != other.d;
 }
 
-RanGeneratorPvt& RanGenerator::nonconst_d() const
+RanGeneratorPvt &RanGenerator::nonconst_d() const
 {
-    return const_cast<RanGeneratorPvt&>(*d);
+    return const_cast<RanGeneratorPvt &>(*d);
 }
 
 /** See the generator with a new, random seed - this will detach
@@ -352,7 +355,7 @@ void RanGenerator::seed()
     if (d.unique())
         d->seed();
     else
-        d.reset( new RanGeneratorPvt() );
+        d.reset(new RanGeneratorPvt());
 }
 
 /** Seed the generator with 's'  - this will detach
@@ -362,7 +365,7 @@ void RanGenerator::seed(quint32 s)
     if (d.unique())
         d->seed(s);
     else
-        d.reset( new RanGeneratorPvt(s) );
+        d.reset(new RanGeneratorPvt(s));
 }
 
 /** Seed the generator with 'seed' - this will detach
@@ -372,7 +375,7 @@ void RanGenerator::seed(const QVector<quint32> &s)
     if (d.unique())
         d->seed(s);
     else
-        d.reset( new RanGeneratorPvt(s) );
+        d.reset(new RanGeneratorPvt(s));
 }
 
 /** Seed the generator with another generator - this
@@ -388,14 +391,14 @@ namespace SireMaths
 {
     void seed_qrand()
     {
-        //no longer needed
+        // no longer needed
     }
-}
+} // namespace SireMaths
 
 /** Return a random real number on [0,1] */
 double RanGenerator::rand() const
 {
-    QMutexLocker lkr( &(nonconst_d().mutex) );
+    QMutexLocker lkr(&(nonconst_d().mutex));
     return nonconst_d().mersenne_generator.rand();
 }
 
@@ -411,7 +414,7 @@ double RanGenerator::rand(double minval, double maxval) const
     if (minval > maxval)
         return rand(maxval, minval);
     else
-        return minval + rand() * (maxval-minval);
+        return minval + rand() * (maxval - minval);
 }
 
 /** Take hold of the generator lock. Only you can now generate
@@ -448,7 +451,7 @@ double RanGenerator::locked_rand(double minval, double maxval) const
     if (minval > maxval)
         return locked_rand(maxval, minval);
     else
-        return minval + locked_rand() * (maxval-minval);
+        return minval + locked_rand() * (maxval - minval);
 }
 
 /** Fill the passed array of doubles with random numbers. This replaces each
@@ -459,11 +462,11 @@ void RanGenerator::nrand(QVector<double> &result) const
 
     if (n > 0)
     {
-        QMutexLocker lkr( &(nonconst_d().mutex) );
+        QMutexLocker lkr(&(nonconst_d().mutex));
 
         double *d = result.data();
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             d[i] = nonconst_d().mersenne_generator.rand();
         }
@@ -482,16 +485,16 @@ void RanGenerator::nrand(QVector<double> &result, double maxval) const
 
         if (maxval == 0)
         {
-            for (int i=0; i<n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 d[i] = 0;
             }
         }
         else
         {
-            QMutexLocker lkr( &(nonconst_d().mutex) );
+            QMutexLocker lkr(&(nonconst_d().mutex));
 
-            for (int i=0; i<n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 d[i] = maxval * nonconst_d().mersenne_generator.rand();
             }
@@ -519,16 +522,16 @@ void RanGenerator::nrand(QVector<double> &result, double minval, double maxval) 
 
         if (diff == 0)
         {
-            for (int i=0; i<n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 d[i] = 0;
             }
         }
         else
         {
-            QMutexLocker lkr( &(nonconst_d().mutex) );
+            QMutexLocker lkr(&(nonconst_d().mutex));
 
-            for (int i=0; i<n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 d[i] = minval + (diff * nonconst_d().mersenne_generator.rand());
             }
@@ -578,7 +581,7 @@ QVector<double> RanGenerator::nrand(int n, double minval, double maxval) const
 /** Return a high-precision random real number on [0,1) */
 double RanGenerator::rand53() const
 {
-    QMutexLocker lkr( &(nonconst_d().mutex) );
+    QMutexLocker lkr(&(nonconst_d().mutex));
     return nonconst_d().mersenne_generator.rand53();
 }
 
@@ -591,14 +594,14 @@ double RanGenerator::rand53(double maxval) const
 /** Return a high-precision random real number on [minval,maxval) */
 double RanGenerator::rand53(double minval, double maxval) const
 {
-    return minval + rand53()*(maxval-minval);
+    return minval + rand53() * (maxval - minval);
 }
 
 /** Return a random number from the normal distribution
     with supplied mean and variance. */
 double RanGenerator::randNorm(double mean, double variance) const
 {
-    QMutexLocker lkr( &(nonconst_d().mutex) );
+    QMutexLocker lkr(&(nonconst_d().mutex));
     return nonconst_d().mersenne_generator.randNorm(mean, variance);
 }
 
@@ -606,8 +609,8 @@ double RanGenerator::randNorm(double mean, double variance) const
     with mean 0 and standard deviation 1 */
 double RanGenerator::randNorm() const
 {
-    QMutexLocker lkr( &(nonconst_d().mutex) );
-    return nonconst_d().mersenne_generator.randNorm(1,0);
+    QMutexLocker lkr(&(nonconst_d().mutex));
+    return nonconst_d().mersenne_generator.randNorm(1, 0);
 }
 
 /** Return a random number from the normal distribution
@@ -623,7 +626,7 @@ double RanGenerator::locked_randNorm(double mean, double variance) const
     lock when calling this function */
 double RanGenerator::locked_randNorm() const
 {
-    return nonconst_d().mersenne_generator.randNorm(1,0);
+    return nonconst_d().mersenne_generator.randNorm(1, 0);
 }
 
 /** Fill the passed array with random numbers drawn from the normal
@@ -636,9 +639,9 @@ void RanGenerator::nrandNorm(QVector<double> &result, double mean, double varian
     {
         double *d = result.data();
 
-        QMutexLocker lkr( &(nonconst_d().mutex) );
+        QMutexLocker lkr(&(nonconst_d().mutex));
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             d[i] = nonconst_d().mersenne_generator.randNorm(mean, variance);
         }
@@ -667,9 +670,9 @@ Vector RanGenerator::locked_vectorOnSphere() const
     {
         Vector v;
 
-        v.setX( 1.0 - 2.0 * nonconst_d().mersenne_generator.rand() );
-        v.setY( 1.0 - 2.0 * nonconst_d().mersenne_generator.rand() );
-        v.setZ( 1.0 - 2.0 * nonconst_d().mersenne_generator.rand() );
+        v.setX(1.0 - 2.0 * nonconst_d().mersenne_generator.rand());
+        v.setY(1.0 - 2.0 * nonconst_d().mersenne_generator.rand());
+        v.setZ(1.0 - 2.0 * nonconst_d().mersenne_generator.rand());
 
         const double lgth2 = v.length2();
 
@@ -684,7 +687,7 @@ Vector RanGenerator::locked_vectorOnSphere() const
 /** Return a random vector on the unit sphere */
 Vector RanGenerator::vectorOnSphere() const
 {
-    QMutexLocker lkr( &(nonconst_d().mutex) );
+    QMutexLocker lkr(&(nonconst_d().mutex));
     return locked_vectorOnSphere();
 }
 
@@ -695,17 +698,17 @@ void RanGenerator::nvectorOnSphere(QVector<Vector> &result) const
 
     if (n > 0)
     {
-        QMutexLocker lkr( &(nonconst_d().mutex) );
+        QMutexLocker lkr(&(nonconst_d().mutex));
 
-        int i=0;
+        int i = 0;
 
         while (i < n)
         {
             Vector &v = result[i];
 
-            v.setX( 1.0 - 2.0 * nonconst_d().mersenne_generator.rand() );
-            v.setY( 1.0 - 2.0 * nonconst_d().mersenne_generator.rand() );
-            v.setZ( 1.0 - 2.0 * nonconst_d().mersenne_generator.rand() );
+            v.setX(1.0 - 2.0 * nonconst_d().mersenne_generator.rand());
+            v.setY(1.0 - 2.0 * nonconst_d().mersenne_generator.rand());
+            v.setZ(1.0 - 2.0 * nonconst_d().mersenne_generator.rand());
 
             const double lgth2 = v.length2();
 
@@ -751,17 +754,17 @@ void RanGenerator::nvectorOnSphere(QVector<Vector> &result, double radius) const
 
     if (n > 0)
     {
-        QMutexLocker lkr( &(nonconst_d().mutex) );
+        QMutexLocker lkr(&(nonconst_d().mutex));
 
-        int i=0;
+        int i = 0;
 
         while (i < n)
         {
             Vector &v = result[i];
 
-            v.setX( 1.0 - 2.0 * nonconst_d().mersenne_generator.rand() );
-            v.setY( 1.0 - 2.0 * nonconst_d().mersenne_generator.rand() );
-            v.setZ( 1.0 - 2.0 * nonconst_d().mersenne_generator.rand() );
+            v.setX(1.0 - 2.0 * nonconst_d().mersenne_generator.rand());
+            v.setY(1.0 - 2.0 * nonconst_d().mersenne_generator.rand());
+            v.setZ(1.0 - 2.0 * nonconst_d().mersenne_generator.rand());
 
             const double lgth2 = v.length2();
 
@@ -790,7 +793,7 @@ QVector<Vector> RanGenerator::nvectorOnSphere(int n, double radius) const
 /** Return a random 32bit unsigned integer in [0,2^32 - 1] */
 quint32 RanGenerator::randInt() const
 {
-    QMutexLocker lkr( &(nonconst_d().mutex) );
+    QMutexLocker lkr(&(nonconst_d().mutex));
     return nonconst_d().mersenne_generator.randInt();
 }
 
@@ -803,7 +806,7 @@ bool RanGenerator::randBool() const
 /** Return a random 32bit unsigned integer in [0,maxval] */
 quint32 RanGenerator::randInt(quint32 maxval) const
 {
-    QMutexLocker lkr( &(nonconst_d().mutex) );
+    QMutexLocker lkr(&(nonconst_d().mutex));
     return nonconst_d().mersenne_generator.randInt(maxval);
 }
 
@@ -813,9 +816,9 @@ qint32 RanGenerator::randInt(qint32 minval, qint32 maxval) const
     if (maxval == minval)
         return maxval;
     else if (maxval < minval)
-        qSwap(minval,maxval);
+        qSwap(minval, maxval);
 
-    return minval + randInt(maxval-minval);
+    return minval + randInt(maxval - minval);
 }
 
 static quint64 randInt64(MTRand &mersenne_generator)
@@ -829,21 +832,21 @@ static quint64 randInt64(MTRand &mersenne_generator)
 /** Return a random 64bit unsigned integer on [0,2^64 - 1] */
 quint64 RanGenerator::randInt64() const
 {
-    QMutexLocker lkr( &(nonconst_d().mutex) );
+    QMutexLocker lkr(&(nonconst_d().mutex));
     return ::randInt64(nonconst_d().mersenne_generator);
 }
 
 /** Return a random 64bit unsigned integer on [0,maxval] */
 quint64 RanGenerator::randInt64(quint64 maxval) const
 {
-    QMutexLocker lkr( &(nonconst_d().mutex) );
+    QMutexLocker lkr(&(nonconst_d().mutex));
 
     if (maxval <= std::numeric_limits<quint32>::max())
-        //maxval can fit into a 32bit int - there is no
-        //point using a 64bit generator!
-        return nonconst_d().mersenne_generator.randInt( quint32(maxval) );
+        // maxval can fit into a 32bit int - there is no
+        // point using a 64bit generator!
+        return nonconst_d().mersenne_generator.randInt(quint32(maxval));
 
-    //use same algorithm in MersenneTwister.h
+    // use same algorithm in MersenneTwister.h
     quint64 used = maxval;
 
     used |= used >> 1;
@@ -858,7 +861,7 @@ quint64 RanGenerator::randInt64(quint64 maxval) const
     do
     {
         i = ::randInt64(nonconst_d().mersenne_generator) & used;
-    } while ( i > maxval );
+    } while (i > maxval);
 
     return i;
 }
@@ -869,9 +872,9 @@ qint64 RanGenerator::randInt64(qint64 minval, qint64 maxval) const
     if (maxval == minval)
         return maxval;
     else if (maxval < minval)
-        qSwap(minval,maxval);
+        qSwap(minval, maxval);
 
-    return minval + randInt(maxval-minval);
+    return minval + randInt(maxval - minval);
 }
 
 /** Return the current state of the random number generator.
@@ -897,16 +900,16 @@ void RanGenerator::setState(const QVector<quint32> &state)
     }
     else
     {
-        d.reset( new RanGeneratorPvt() );
+        d.reset(new RanGeneratorPvt());
         d->loadState(state);
     }
 }
 
-Q_GLOBAL_STATIC( RanGenerator, globalGenerator );
+Q_GLOBAL_STATIC(RanGenerator, globalGenerator);
 
 /** Return a reference to the global random number generator
     (shared between all threads) */
-const RanGenerator& RanGenerator::global()
+const RanGenerator &RanGenerator::global()
 {
     return *(globalGenerator());
 }
@@ -932,10 +935,10 @@ void RanGenerator::seedGlobal(const QVector<quint32> &seed)
 /** Seed the global random number generator */
 void RanGenerator::seedGlobal(const RanGenerator &rangen)
 {
-    globalGenerator()->d.reset( new RanGeneratorPvt(*(rangen.d)) );
+    globalGenerator()->d.reset(new RanGeneratorPvt(*(rangen.d)));
 }
 
-const char* RanGenerator::typeName()
+const char *RanGenerator::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<RanGenerator>() );
+    return QMetaType::typeName(qMetaTypeId<RanGenerator>());
 }

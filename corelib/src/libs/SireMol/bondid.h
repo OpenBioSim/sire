@@ -38,137 +38,124 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class BondID;
+    class BondID;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::BondID&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::BondID&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::BondID &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::BondID &);
 
 namespace SireMaths
 {
-class Vector;
+    class Vector;
 }
 
 namespace SireMol
 {
 
-class MoleculeData;
-class MoleculeInfoData;
-class AtomIdx;
+    class MoleculeData;
+    class MoleculeInfoData;
+    class AtomIdx;
 
-using SireMaths::Vector;
+    using SireMaths::Vector;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-using boost::tuple;
+    using boost::tuple;
 
-/** This class provides a generic ID for a bond between
-    two atoms
+    /** This class provides a generic ID for a bond between
+        two atoms
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT BondID : public SireID::ID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const BondID&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, BondID&);
-
-public:
-    BondID();
-    BondID(const AtomID &atom0, const AtomID &atom1);
-
-    BondID(const BondID &other);
-
-    ~BondID();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT BondID : public SireID::ID
     {
-        return BondID::typeName();
-    }
 
-    BondID* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const BondID &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, BondID &);
 
-    uint hash() const;
+    public:
+        BondID();
+        BondID(const AtomID &atom0, const AtomID &atom1);
 
-    QString toString() const;
+        BondID(const BondID &other);
 
-    bool isNull() const;
+        ~BondID();
 
-    BondID& operator=(const BondID &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return BondID::typeName();
+        }
 
-    bool operator==(const BondID &other) const;
-    bool operator!=(const BondID &other) const;
+        BondID *clone() const;
 
-    BondID mirror() const;
+        uint hash() const;
 
-    const AtomID& operator[](int i) const;
+        QString toString() const;
 
-    tuple<AtomIdx,AtomIdx> map(const MoleculeInfoData &molinfo) const;
-    tuple<AtomIdx,AtomIdx> map(const MoleculeInfoData &mol0info,
-                               const MoleculeInfoData &mol1info) const;
+        bool isNull() const;
 
-    Vector vector(const MoleculeData &moldata,
-                  const PropertyMap &map = PropertyMap()) const;
+        BondID &operator=(const BondID &other);
 
-    Vector vector(const MoleculeData &mol0data,
-                  const MoleculeData &mol1data,
-                  const PropertyMap &map = PropertyMap()) const;
+        bool operator==(const SireID::ID &other) const;
 
-    Vector vector(const MoleculeData &mol0data,
-                  const PropertyMap &map0,
-                  const MoleculeData &mol1data,
-                  const PropertyMap &map1) const;
+        bool operator==(const BondID &other) const;
+        bool operator!=(const BondID &other) const;
 
-    double size(const MoleculeData &moldata,
-                const PropertyMap &map = PropertyMap()) const;
+        BondID mirror() const;
 
-    double size(const MoleculeData &mol0data,
-                const MoleculeData &mol1data,
-                const PropertyMap &map = PropertyMap()) const;
+        const AtomID &operator[](int i) const;
 
-    double size(const MoleculeData &mol0data,
-                const PropertyMap &map0,
-                const MoleculeData &mol1data,
-                const PropertyMap &map1) const;
+        tuple<AtomIdx, AtomIdx> map(const MoleculeInfoData &molinfo) const;
+        tuple<AtomIdx, AtomIdx> map(const MoleculeInfoData &mol0info, const MoleculeInfoData &mol1info) const;
 
-    double length(const MoleculeData &moldata,
-                  const PropertyMap &map = PropertyMap()) const;
+        Vector vector(const MoleculeData &moldata, const PropertyMap &map = PropertyMap()) const;
 
-    double length(const MoleculeData &mol0data,
-                  const MoleculeData &mol1data,
-                  const PropertyMap &map = PropertyMap()) const;
+        Vector vector(const MoleculeData &mol0data, const MoleculeData &mol1data,
+                      const PropertyMap &map = PropertyMap()) const;
 
-    double length(const MoleculeData &mol0data,
-                  const PropertyMap &map0,
-                  const MoleculeData &mol1data,
-                  const PropertyMap &map1) const;
+        Vector vector(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
+                      const PropertyMap &map1) const;
 
-    const AtomID& atom0() const;
-    const AtomID& atom1() const;
+        double size(const MoleculeData &moldata, const PropertyMap &map = PropertyMap()) const;
 
-private:
-    /** The identifiers of the two atoms */
-    AtomIdentifier atm0,atm1;
-};
+        double size(const MoleculeData &mol0data, const MoleculeData &mol1data,
+                    const PropertyMap &map = PropertyMap()) const;
+
+        double size(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
+                    const PropertyMap &map1) const;
+
+        double length(const MoleculeData &moldata, const PropertyMap &map = PropertyMap()) const;
+
+        double length(const MoleculeData &mol0data, const MoleculeData &mol1data,
+                      const PropertyMap &map = PropertyMap()) const;
+
+        double length(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
+                      const PropertyMap &map1) const;
+
+        const AtomID &atom0() const;
+        const AtomID &atom1() const;
+
+    private:
+        /** The identifiers of the two atoms */
+        AtomIdentifier atm0, atm1;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-SIRE_ALWAYS_INLINE uint qHash(const BondID &bondid)
-{
-    return bondid.hash();
-}
+    SIRE_ALWAYS_INLINE uint qHash(const BondID &bondid)
+    {
+        return bondid.hash();
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::BondID);
 
-SIRE_EXPOSE_CLASS( SireMol::BondID )
+SIRE_EXPOSE_CLASS(SireMol::BondID)
 
 SIRE_END_HEADER
 

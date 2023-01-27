@@ -37,96 +37,93 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class SpaceWrapper;
+    class SpaceWrapper;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::SpaceWrapper&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::SpaceWrapper&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::SpaceWrapper &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::SpaceWrapper &);
 
 namespace SireSystem
 {
 
-using SireBase::PropertyMap;
-using SireBase::PropertyName;
+    using SireBase::PropertyMap;
+    using SireBase::PropertyName;
 
-using SireMol::MoleculeGroup;
+    using SireMol::MoleculeGroup;
 
-using SireFF::Point;
+    using SireFF::Point;
 
-using SireVol::SpacePtr;
+    using SireVol::SpacePtr;
 
-/** This is a molecule constraint that constrains
-    a group of molecules to lie within the same
-    periodic box as a specified point - the molecules
-    are wrapped into the box (i.e. they are moved into
-    the opposite side of the box that they leave)
+    /** This is a molecule constraint that constrains
+        a group of molecules to lie within the same
+        periodic box as a specified point - the molecules
+        are wrapped into the box (i.e. they are moved into
+        the opposite side of the box that they leave)
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT SpaceWrapper
-        : public SireBase::ConcreteProperty<SpaceWrapper,MoleculeConstraint>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT SpaceWrapper : public SireBase::ConcreteProperty<SpaceWrapper, MoleculeConstraint>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const SpaceWrapper&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, SpaceWrapper&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const SpaceWrapper &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, SpaceWrapper &);
 
-public:
-    SpaceWrapper();
-    SpaceWrapper(const SireFF::PointRef &point,
-                 const MoleculeGroup &molgroup,
-                 const PropertyMap &map = PropertyMap());
+    public:
+        SpaceWrapper();
+        SpaceWrapper(const SireFF::PointRef &point, const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    SpaceWrapper(const SpaceWrapper &other);
+        SpaceWrapper(const SpaceWrapper &other);
 
-    ~SpaceWrapper();
+        ~SpaceWrapper();
 
-    SpaceWrapper& operator=(const SpaceWrapper &other);
+        SpaceWrapper &operator=(const SpaceWrapper &other);
 
-    bool operator==(const SpaceWrapper &other) const;
-    bool operator!=(const SpaceWrapper &other) const;
+        bool operator==(const SpaceWrapper &other) const;
+        bool operator!=(const SpaceWrapper &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const Point& point() const;
-    const MoleculeGroup& moleculeGroup() const;
-    const PropertyMap& propertyMap() const;
+        const Point &point() const;
+        const MoleculeGroup &moleculeGroup() const;
+        const PropertyMap &propertyMap() const;
 
-protected:
-    void setSystem(const System &system);
-    bool mayChange(const Delta &delta, quint32 last_subversion) const;
+    protected:
+        void setSystem(const System &system);
+        bool mayChange(const Delta &delta, quint32 last_subversion) const;
 
-    bool fullApply(Delta &delta);
-    bool deltaApply(Delta &delta, quint32 last_subversion);
+        bool fullApply(Delta &delta);
+        bool deltaApply(Delta &delta, quint32 last_subversion);
 
-private:
-    /** The point that defines the center of the box */
-    SireFF::PointPtr wrap_point;
+    private:
+        /** The point that defines the center of the box */
+        SireFF::PointPtr wrap_point;
 
-    /** The molecule group containing the molecules to be wrapped */
-    SireMol::MolGroupPtr molgroup;
+        /** The molecule group containing the molecules to be wrapped */
+        SireMol::MolGroupPtr molgroup;
 
-    /** The property map specifying the locations of the space
-        and coordinates properties */
-    PropertyMap map;
+        /** The property map specifying the locations of the space
+            and coordinates properties */
+        PropertyMap map;
 
-    /** The location of the space property */
-    PropertyName space_property;
+        /** The location of the space property */
+        PropertyName space_property;
 
-    /** The location of the coordinates property */
-    PropertyName coords_property;
+        /** The location of the coordinates property */
+        PropertyName coords_property;
 
-    /** The space property itself */
-    SpacePtr spce;
+        /** The space property itself */
+        SpacePtr spce;
 
-    /** The molecules that need to change */
-    Molecules changed_mols;
-};
+        /** The molecules that need to change */
+        Molecules changed_mols;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::SpaceWrapper )
+Q_DECLARE_METATYPE(SireSystem::SpaceWrapper)
 
-SIRE_EXPOSE_CLASS( SireSystem::SpaceWrapper )
+SIRE_EXPOSE_CLASS(SireSystem::SpaceWrapper)
 
 SIRE_END_HEADER
 

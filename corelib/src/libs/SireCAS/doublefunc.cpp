@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "doublefunc.h"
-#include "values.h"
 #include "complexvalues.h"
 #include "identities.h"
+#include "values.h"
 
 #include "SireCAS/errors.h"
 
@@ -39,14 +39,13 @@
 using namespace SireStream;
 using namespace SireCAS;
 
-//register the pure virtual base class
+// register the pure virtual base class
 static const RegisterMetaType<DoubleFunc> r_doublefunc(MAGIC_ONLY, "SireCAS::DoubleFunc");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const DoubleFunc &func)
 {
-    writeHeader(ds, r_doublefunc, 1)
-            << func.ex0 << func.ex1 << static_cast<const ExBase&>(func);
+    writeHeader(ds, r_doublefunc, 1) << func.ex0 << func.ex1 << static_cast<const ExBase &>(func);
 
     return ds;
 }
@@ -58,7 +57,7 @@ QDataStream &operator>>(QDataStream &ds, DoubleFunc &func)
 
     if (v == 1)
     {
-        ds >> func.ex0 >> func.ex1 >> static_cast<ExBase&>(func);
+        ds >> func.ex0 >> func.ex1 >> static_cast<ExBase &>(func);
     }
     else
         throw version_error(v, "1", r_doublefunc, CODELOC);
@@ -68,24 +67,26 @@ QDataStream &operator>>(QDataStream &ds, DoubleFunc &func)
 
 /** Null constructor */
 DoubleFunc::DoubleFunc() : ExBase()
-{}
+{
+}
 
 /** Construct a function that operates on the expressions 'x' and 'y' */
-DoubleFunc::DoubleFunc(const Expression &x, const Expression &y)
-           : ExBase(), ex0(x), ex1(y)
-{}
+DoubleFunc::DoubleFunc(const Expression &x, const Expression &y) : ExBase(), ex0(x), ex1(y)
+{
+}
 
 /** Copy constructor */
-DoubleFunc::DoubleFunc(const DoubleFunc &other)
-           : ExBase(), ex0(other.ex0), ex1(other.ex1)
-{}
+DoubleFunc::DoubleFunc(const DoubleFunc &other) : ExBase(), ex0(other.ex0), ex1(other.ex1)
+{
+}
 
 /** Destructor */
 DoubleFunc::~DoubleFunc()
-{}
+{
+}
 
 /** Copy assignment */
-DoubleFunc& DoubleFunc::operator=(const DoubleFunc &other)
+DoubleFunc &DoubleFunc::operator=(const DoubleFunc &other)
 {
     ExBase::operator=(other);
     ex0 = other.ex0;
@@ -97,7 +98,7 @@ DoubleFunc& DoubleFunc::operator=(const DoubleFunc &other)
 /** Return the conjugate of this function */
 Expression DoubleFunc::conjugate() const
 {
-    return functionOf( ex0.conjugate(), ex1.conjugate() );
+    return functionOf(ex0.conjugate(), ex1.conjugate());
 }
 
 /** Return if this is a function of 'symbol' */
@@ -133,8 +134,7 @@ QString DoubleFunc::toString() const
 /** Substitute into this expression */
 Expression DoubleFunc::substitute(const Identities &identities) const
 {
-    return functionOf( ex0.substitute(identities),
-                       ex1.substitute(identities) );
+    return functionOf(ex0.substitute(identities), ex1.substitute(identities));
 }
 
 /** Return the symbols used in this function */
@@ -159,11 +159,12 @@ Expressions DoubleFunc::children() const
 Expression DoubleFunc::differentiate(const Symbol &symbol) const
 {
     if (ex0.isFunction(symbol) or ex1.isFunction(symbol))
-        throw SireCAS::unavailable_differential( QObject::tr(
-            "SireCAS does not know how to differentiate functions derived "
-            "from \"DoubleFunc\" - so it can't differentiate %1 with respect "
-            "to %2.")
-                .arg(this->toString(), symbol.toString()), CODELOC );
+        throw SireCAS::unavailable_differential(
+            QObject::tr("SireCAS does not know how to differentiate functions derived "
+                        "from \"DoubleFunc\" - so it can't differentiate %1 with respect "
+                        "to %2.")
+                .arg(this->toString(), symbol.toString()),
+            CODELOC);
 
     return Expression(0);
 }
@@ -172,11 +173,11 @@ Expression DoubleFunc::differentiate(const Symbol &symbol) const
 Expression DoubleFunc::integrate(const Symbol &symbol) const
 {
     if (ex0.isFunction(symbol) or ex1.isFunction(symbol))
-        throw SireCAS::unavailable_integral( QObject::tr(
-            "SireCAS does not know how to integrate functions derived "
-            "from \"DoubleFunc\" - so it can't integrate %1 with respect "
-            "to %2.")
-                .arg(this->toString(), symbol.toString()), CODELOC );
+        throw SireCAS::unavailable_integral(QObject::tr("SireCAS does not know how to integrate functions derived "
+                                                        "from \"DoubleFunc\" - so it can't integrate %1 with respect "
+                                                        "to %2.")
+                                                .arg(this->toString(), symbol.toString()),
+                                            CODELOC);
 
     return *this * symbol;
 }
@@ -185,14 +186,14 @@ QList<Factor> DoubleFunc::expand(const Symbol &symbol) const
 {
     if (this->isFunction(symbol))
     {
-        //we cannot expand a function of this symbol...
-        throw SireCAS::rearrangement_error( QObject::tr(
-            "You cannot expand the function %1 in terms of the symbol %2.")
-                .arg(this->toString(), symbol.toString()), CODELOC );
+        // we cannot expand a function of this symbol...
+        throw SireCAS::rearrangement_error(QObject::tr("You cannot expand the function %1 in terms of the symbol %2.")
+                                               .arg(this->toString(), symbol.toString()),
+                                           CODELOC);
     }
 
     QList<Factor> ret;
-    ret.append( Factor(symbol, *this, 0) );
+    ret.append(Factor(symbol, *this, 0));
 
     return ret;
 }

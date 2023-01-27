@@ -42,22 +42,19 @@ using boost::tuple;
 static const RegisterMetaType<MGIDsAndMaps> r_mgidsandmaps;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const MGIDsAndMaps &mgidsandmaps)
+QDataStream &operator<<(QDataStream &ds, const MGIDsAndMaps &mgidsandmaps)
 {
     writeHeader(ds, r_mgidsandmaps, 1);
 
     SharedDataStream sds(ds);
 
-    sds << mgidsandmaps.mgids << mgidsandmaps.maps
-        << static_cast<const Property&>(mgidsandmaps);
+    sds << mgidsandmaps.mgids << mgidsandmaps.maps << static_cast<const Property &>(mgidsandmaps);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       MGIDsAndMaps &mgidsandmaps)
+QDataStream &operator>>(QDataStream &ds, MGIDsAndMaps &mgidsandmaps)
 {
     VersionID v = readHeader(ds, r_mgidsandmaps);
 
@@ -65,8 +62,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> mgidsandmaps.mgids >> mgidsandmaps.maps
-            >> static_cast<Property&>(mgidsandmaps);
+        sds >> mgidsandmaps.mgids >> mgidsandmaps.maps >> static_cast<Property &>(mgidsandmaps);
     }
     else
         throw version_error(v, "1", r_mgidsandmaps, CODELOC);
@@ -75,16 +71,15 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-MGIDsAndMaps::MGIDsAndMaps()
-             : ConcreteProperty<MGIDsAndMaps,Property>()
-{}
+MGIDsAndMaps::MGIDsAndMaps() : ConcreteProperty<MGIDsAndMaps, Property>()
+{
+}
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const MoleculeGroup &mgroup)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const MoleculeGroup &mgroup) : ConcreteProperty<MGIDsAndMaps, Property>()
 {
-    mgids.append( mgroup.number() );
-    maps.append( PropertyMap() );
+    mgids.append(mgroup.number());
+    maps.append(PropertyMap());
 
     mgids.squeeze();
     maps.squeeze();
@@ -92,9 +87,9 @@ MGIDsAndMaps::MGIDsAndMaps(const MoleculeGroup &mgroup)
 
 /** Construct from the passed groups / maps */
 MGIDsAndMaps::MGIDsAndMaps(const MoleculeGroup &mgroup, const PropertyMap &map)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+    : ConcreteProperty<MGIDsAndMaps, Property>()
 {
-    mgids.append( mgroup.number() );
+    mgids.append(mgroup.number());
     maps.append(map);
 
     mgids.squeeze();
@@ -102,11 +97,11 @@ MGIDsAndMaps::MGIDsAndMaps(const MoleculeGroup &mgroup, const PropertyMap &map)
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const tuple<MolGroupPtr,PropertyMap> group_and_map)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const tuple<MolGroupPtr, PropertyMap> group_and_map)
+    : ConcreteProperty<MGIDsAndMaps, Property>()
 {
-    mgids.append( group_and_map.get<0>().read().number() );
-    maps.append( group_and_map.get<1>() );
+    mgids.append(group_and_map.get<0>().read().number());
+    maps.append(group_and_map.get<1>());
 
     mgids.squeeze();
     maps.squeeze();
@@ -132,24 +127,21 @@ static IDOrSet<MGID> getIDSet(const QList<MolGroupPtr> &mgroups)
 {
     QList<MGNum> mgnums;
 
-    for (QList<MolGroupPtr>::const_iterator it = mgroups.constBegin();
-         it != mgroups.constEnd();
-         ++it)
+    for (QList<MolGroupPtr>::const_iterator it = mgroups.constBegin(); it != mgroups.constEnd(); ++it)
     {
-        mgnums.append( it->read().number() );
+        mgnums.append(it->read().number());
     }
 
     return ::getIDSet(mgnums);
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const QList<MolGroupPtr> &mgroups)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const QList<MolGroupPtr> &mgroups) : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     if (not mgroups.isEmpty())
     {
-        mgids.append( ::getIDSet(mgroups) );
-        maps.append( PropertyMap() );
+        mgids.append(::getIDSet(mgroups));
+        maps.append(PropertyMap());
 
         mgids.squeeze();
         maps.squeeze();
@@ -157,18 +149,16 @@ MGIDsAndMaps::MGIDsAndMaps(const QList<MolGroupPtr> &mgroups)
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const QList< tuple<MolGroupPtr,PropertyMap> > &groups_and_maps)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const QList<tuple<MolGroupPtr, PropertyMap>> &groups_and_maps)
+    : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     if (not groups_and_maps.isEmpty())
     {
-        for (QList< tuple<MolGroupPtr,PropertyMap> >::const_iterator
-                                            it = groups_and_maps.constBegin();
-             it != groups_and_maps.constEnd();
-             ++it)
+        for (QList<tuple<MolGroupPtr, PropertyMap>>::const_iterator it = groups_and_maps.constBegin();
+             it != groups_and_maps.constEnd(); ++it)
         {
-            mgids.append( it->get<0>().read().number() );
-            maps.append( it->get<1>() );
+            mgids.append(it->get<0>().read().number());
+            maps.append(it->get<1>());
         }
 
         mgids.squeeze();
@@ -178,12 +168,12 @@ MGIDsAndMaps::MGIDsAndMaps(const QList< tuple<MolGroupPtr,PropertyMap> > &groups
 
 /** Construct from the passed groups / maps */
 MGIDsAndMaps::MGIDsAndMaps(const QList<MolGroupPtr> &mgroups, const PropertyMap &map)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+    : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     if (not mgroups.isEmpty())
     {
-        mgids.append( ::getIDSet(mgroups) );
-        maps.append( map );
+        mgids.append(::getIDSet(mgroups));
+        maps.append(map);
 
         mgids.squeeze();
         maps.squeeze();
@@ -191,13 +181,13 @@ MGIDsAndMaps::MGIDsAndMaps(const QList<MolGroupPtr> &mgroups, const PropertyMap 
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const tuple<QList<MolGroupPtr>,PropertyMap> &groups_and_maps)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const tuple<QList<MolGroupPtr>, PropertyMap> &groups_and_maps)
+    : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     if (not groups_and_maps.get<0>().isEmpty())
     {
-        mgids.append( ::getIDSet(groups_and_maps.get<0>()) );
-        maps.append( groups_and_maps.get<1>() );
+        mgids.append(::getIDSet(groups_and_maps.get<0>()));
+        maps.append(groups_and_maps.get<1>());
 
         mgids.squeeze();
         maps.squeeze();
@@ -205,8 +195,7 @@ MGIDsAndMaps::MGIDsAndMaps(const tuple<QList<MolGroupPtr>,PropertyMap> &groups_a
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const MGID &mgid)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const MGID &mgid) : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     mgids.append(mgid);
     maps.append(PropertyMap());
@@ -216,8 +205,7 @@ MGIDsAndMaps::MGIDsAndMaps(const MGID &mgid)
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const MGID &mgid, const PropertyMap &map)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const MGID &mgid, const PropertyMap &map) : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     mgids.append(mgid);
     maps.append(map);
@@ -227,24 +215,23 @@ MGIDsAndMaps::MGIDsAndMaps(const MGID &mgid, const PropertyMap &map)
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const tuple<MGIdentifier,PropertyMap> mgid_and_map)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const tuple<MGIdentifier, PropertyMap> mgid_and_map)
+    : ConcreteProperty<MGIDsAndMaps, Property>()
 {
-    mgids.append( mgid_and_map.get<0>() );
-    maps.append( mgid_and_map.get<1>() );
+    mgids.append(mgid_and_map.get<0>());
+    maps.append(mgid_and_map.get<1>());
 
     mgids.squeeze();
     maps.squeeze();
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const QList<MGIdentifier> &mgs)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const QList<MGIdentifier> &mgs) : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     if (not mgs.isEmpty())
     {
-        mgids.append( ::getIDSet(mgs) );
-        maps.append( PropertyMap() );
+        mgids.append(::getIDSet(mgs));
+        maps.append(PropertyMap());
 
         mgids.squeeze();
         maps.squeeze();
@@ -252,18 +239,16 @@ MGIDsAndMaps::MGIDsAndMaps(const QList<MGIdentifier> &mgs)
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const QList< tuple<MGIdentifier,PropertyMap> > &mgids_and_maps)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const QList<tuple<MGIdentifier, PropertyMap>> &mgids_and_maps)
+    : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     if (not mgids_and_maps.isEmpty())
     {
-        for (QList< tuple<MGIdentifier,PropertyMap> >::const_iterator
-                                                    it = mgids_and_maps.constBegin();
-             it != mgids_and_maps.constEnd();
-             ++it)
+        for (QList<tuple<MGIdentifier, PropertyMap>>::const_iterator it = mgids_and_maps.constBegin();
+             it != mgids_and_maps.constEnd(); ++it)
         {
-            mgids.append( it->get<0>() );
-            maps.append( it->get<1>() );
+            mgids.append(it->get<0>());
+            maps.append(it->get<1>());
         }
 
         mgids.squeeze();
@@ -273,12 +258,12 @@ MGIDsAndMaps::MGIDsAndMaps(const QList< tuple<MGIdentifier,PropertyMap> > &mgids
 
 /** Construct from the passed groups / maps */
 MGIDsAndMaps::MGIDsAndMaps(const QList<MGIdentifier> &mgs, const PropertyMap &map)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+    : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     if (not mgs.isEmpty())
     {
-        mgids.append( ::getIDSet(mgs) );
-        maps.append( map );
+        mgids.append(::getIDSet(mgs));
+        maps.append(map);
 
         mgids.squeeze();
         maps.squeeze();
@@ -286,13 +271,13 @@ MGIDsAndMaps::MGIDsAndMaps(const QList<MGIdentifier> &mgs, const PropertyMap &ma
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const tuple<QList<MGIdentifier>,PropertyMap> &mgids_and_maps)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const tuple<QList<MGIdentifier>, PropertyMap> &mgids_and_maps)
+    : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     if (not mgids_and_maps.get<0>().isEmpty())
     {
-        mgids.append( ::getIDSet(mgids_and_maps.get<0>()) );
-        maps.append( mgids_and_maps.get<1>() );
+        mgids.append(::getIDSet(mgids_and_maps.get<0>()));
+        maps.append(mgids_and_maps.get<1>());
 
         mgids.squeeze();
         maps.squeeze();
@@ -300,13 +285,11 @@ MGIDsAndMaps::MGIDsAndMaps(const tuple<QList<MGIdentifier>,PropertyMap> &mgids_a
 }
 
 /** Construct from the passed groups / maps */
-MGIDsAndMaps::MGIDsAndMaps(const QList<MGIDsAndMaps> &mgids_and_maps)
-             : ConcreteProperty<MGIDsAndMaps,Property>()
+MGIDsAndMaps::MGIDsAndMaps(const QList<MGIDsAndMaps> &mgids_and_maps) : ConcreteProperty<MGIDsAndMaps, Property>()
 {
     if (not mgids_and_maps.isEmpty())
     {
-        for (QList<MGIDsAndMaps>::const_iterator it = mgids_and_maps.constBegin();
-             it != mgids_and_maps.constEnd();
+        for (QList<MGIDsAndMaps>::const_iterator it = mgids_and_maps.constBegin(); it != mgids_and_maps.constEnd();
              ++it)
         {
             mgids += it->mgids;
@@ -320,16 +303,17 @@ MGIDsAndMaps::MGIDsAndMaps(const QList<MGIDsAndMaps> &mgids_and_maps)
 
 /** Copy constructor */
 MGIDsAndMaps::MGIDsAndMaps(const MGIDsAndMaps &other)
-             : ConcreteProperty<MGIDsAndMaps,Property>(other),
-               mgids(other.mgids), maps(other.maps)
-{}
+    : ConcreteProperty<MGIDsAndMaps, Property>(other), mgids(other.mgids), maps(other.maps)
+{
+}
 
 /** Destructor */
 MGIDsAndMaps::~MGIDsAndMaps()
-{}
+{
+}
 
 /** Copy assignment operator */
-MGIDsAndMaps& MGIDsAndMaps::operator=(const MGIDsAndMaps &other)
+MGIDsAndMaps &MGIDsAndMaps::operator=(const MGIDsAndMaps &other)
 {
     if (this != &other)
     {
@@ -344,8 +328,7 @@ MGIDsAndMaps& MGIDsAndMaps::operator=(const MGIDsAndMaps &other)
 /** Comparison operator */
 bool MGIDsAndMaps::operator==(const MGIDsAndMaps &other) const
 {
-    return this == &other or
-           (maps == other.maps and mgids == other.mgids);
+    return this == &other or (maps == other.maps and mgids == other.mgids);
 }
 
 /** Comparison operator */
@@ -354,9 +337,9 @@ bool MGIDsAndMaps::operator!=(const MGIDsAndMaps &other) const
     return not MGIDsAndMaps::operator==(other);
 }
 
-const char* MGIDsAndMaps::typeName()
+const char *MGIDsAndMaps::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MGIDsAndMaps>() );
+    return QMetaType::typeName(qMetaTypeId<MGIDsAndMaps>());
 }
 
 /** Return whether or not this is an empty group of groups */
@@ -376,25 +359,23 @@ QString MGIDsAndMaps::toString() const
 {
     QStringList ids;
 
-    for (int i=0; i<mgids.count(); ++i)
+    for (int i = 0; i < mgids.count(); ++i)
     {
         if (maps[i].isDefault())
         {
-            ids.append( mgids[i].toString() );
+            ids.append(mgids[i].toString());
         }
         else
         {
-            ids.append( QString("(%1 : %2)")
-                            .arg(mgids[i].toString(), maps[i].toString()) );
+            ids.append(QString("(%1 : %2)").arg(mgids[i].toString(), maps[i].toString()));
         }
-
     }
 
     return QString("MGIDsAndMaps[ %1 ]").arg(ids.join(", "));
 }
 
 /** Return the array of all of the IDs for this group of groups */
-const QVector<MGIdentifier>& MGIDsAndMaps::mgIDs() const
+const QVector<MGIdentifier> &MGIDsAndMaps::mgIDs() const
 {
     return mgids;
 }
@@ -402,7 +383,7 @@ const QVector<MGIdentifier>& MGIDsAndMaps::mgIDs() const
 /** Return the array of the property maps to use for each group
     of IDs in this set (these are in the same order as the groups
     returned in MGIDsAndMaps::mgIDs()) */
-const QVector<PropertyMap>& MGIDsAndMaps::propertyMaps() const
+const QVector<PropertyMap> &MGIDsAndMaps::propertyMaps() const
 {
     return maps;
 }

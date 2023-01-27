@@ -28,17 +28,17 @@
 #include "cpuid.h"
 
 #if defined(_WIN32)
-    #define WIN32_LEAN_AND_MEAN
-    #include <Windows.h>    // CONDITIONAL_INCLUDE
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h> // CONDITIONAL_INCLUDE
 #elif defined(__APPLE__) || defined(__FreeBSD__)
-    #include <sys/param.h>  // CONDITIONAL_INCLUDE
-    #include <sys/sysctl.h> // CONDITIONAL_INCLUDE
+#include <sys/param.h>  // CONDITIONAL_INCLUDE
+#include <sys/sysctl.h> // CONDITIONAL_INCLUDE
 #else
-    #include <sys/sysinfo.h>    // CONDITIONAL_INCLUDE
+#include <sys/sysinfo.h> // CONDITIONAL_INCLUDE
 #endif
 
-#include "SireStream/shareddatastream.h"
 #include "SireError/errors.h"
+#include "SireStream/shareddatastream.h"
 
 #include "tostring.h"
 
@@ -72,55 +72,55 @@ QDataStream &operator>>(QDataStream &ds, CPUID &cpuid)
     return ds;
 }
 
-static QHash<QString,QString> getCPUInfo()
+static QHash<QString, QString> getCPUInfo()
 {
-    QHash<QString,QString> info;
+    QHash<QString, QString> info;
 
-    #if defined(__APPLE__) || defined(__FreeBSD__)
-        char buffer[1024];
-        size_t size=sizeof(buffer);
-        int err = 0;
+#if defined(__APPLE__) || defined(__FreeBSD__)
+    char buffer[1024];
+    size_t size = sizeof(buffer);
+    int err = 0;
 
-        err = sysctlbyname("machdep.cpu.brand_string", &buffer, &size, NULL, 0);
-        if (err == 0)
+    err = sysctlbyname("machdep.cpu.brand_string", &buffer, &size, NULL, 0);
+    if (err == 0)
+    {
+        info["CPU"] = QString(buffer);
+    }
+
+    uint64_t val = 0;
+    size = sizeof(val);
+
+    err = sysctlbyname("hw.cpufrequency", &val, &size, NULL, 0);
+    if (err == 0)
+    {
+        info["CPU.frequency"] = QString("%1 GHz").arg(val / 1000000000);
+    }
+
+    err = sysctlbyname("hw.ncpu", &val, &size, NULL, 0);
+    if (err == 0)
+    {
+        info["CPU.num_cores"] = QString("%1").arg(val);
+    }
+
+    err = sysctlbyname("hw.optional.arm64", &val, &size, NULL, 0);
+    if (err == 0)
+    {
+        if (val == 1)
         {
-            info["CPU"] = QString(buffer);
+            info["CPU.architecture"] = "ARM64";
         }
-
-        uint64_t val = 0;
-        size = sizeof(val);
-
-        err = sysctlbyname("hw.cpufrequency", &val, &size, NULL, 0);
-        if (err == 0)
+        else
         {
-            info["CPU.frequency"] = QString("%1 GHz").arg(val / 1000000000);
+            info["CPU.architecture"] = "x86-64";
         }
+    }
 
-        err = sysctlbyname("hw.ncpu", &val, &size, NULL, 0);
-        if (err == 0)
-        {
-            info["CPU.num_cores"] = QString("%1").arg(val);
-        }
-
-        err = sysctlbyname("hw.optional.arm64", &val, &size, NULL, 0);
-        if (err == 0)
-        {
-            if (val == 1)
-            {
-                info["CPU.architecture"] = "ARM64";
-            }
-            else
-            {
-                info["CPU.architecture"] = "x86-64";
-            }
-        }
-
-        err = sysctlbyname("hw.memsize", &val, &size, NULL, 0);
-        if (err == 0)
-        {
-            info["memory"] = QString("%1 GB").arg(val / (1024*1024*1024));
-        }
-    #endif
+    err = sysctlbyname("hw.memsize", &val, &size, NULL, 0);
+    if (err == 0)
+    {
+        info["memory"] = QString("%1 GB").arg(val / (1024 * 1024 * 1024));
+    }
+#endif
 
     return info;
 }
@@ -131,38 +131,40 @@ QStringList CPUID::supportableFeatures() const
     return QStringList();
 }
 
-QHash<QString,QString>* CPUID::global_props = 0;
+QHash<QString, QString> *CPUID::global_props = 0;
 
-Q_GLOBAL_STATIC( QMutex, globalMutex )
+Q_GLOBAL_STATIC(QMutex, globalMutex)
 
-QHash<QString,QString>* CPUID::getCPUID()
+QHash<QString, QString> *CPUID::getCPUID()
 {
     if (not global_props)
     {
-        QMutexLocker lkr( globalMutex() );
+        QMutexLocker lkr(globalMutex());
 
-        global_props = new QHash<QString,QString>(getCPUInfo());
+        global_props = new QHash<QString, QString>(getCPUInfo());
     }
 
     return global_props;
 }
 
 /** Constructor */
-CPUID::CPUID() : ConcreteProperty<CPUID,Property>()
+CPUID::CPUID() : ConcreteProperty<CPUID, Property>()
 {
     props = *(getCPUID());
 }
 
 /** Copy constructor */
-CPUID::CPUID(const CPUID &other) : ConcreteProperty<CPUID,Property>(), props(other.props)
-{}
+CPUID::CPUID(const CPUID &other) : ConcreteProperty<CPUID, Property>(), props(other.props)
+{
+}
 
 /** Destructor */
 CPUID::~CPUID()
-{}
+{
+}
 
 /** Copy assignment operator */
-CPUID& CPUID::operator=(const CPUID &other)
+CPUID &CPUID::operator=(const CPUID &other)
 {
     props = other.props;
     return *this;
@@ -180,24 +182,24 @@ bool CPUID::operator!=(const CPUID &other) const
     return not CPUID::operator==(other);
 }
 
-CPUID* CPUID::clone() const
+CPUID *CPUID::clone() const
 {
     return new CPUID(*this);
 }
 
-const char* CPUID::what() const
+const char *CPUID::what() const
 {
     return CPUID::typeName();
 }
 
-const char* CPUID::typeName()
+const char *CPUID::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CPUID>() );
+    return QMetaType::typeName(qMetaTypeId<CPUID>());
 }
 
 QString CPUID::toString() const
 {
-    return QObject::tr( "CPUID( %1 )" ).arg( Sire::toString(props) );
+    return QObject::tr("CPUID( %1 )").arg(Sire::toString(props));
 }
 
 /** Returns whether or not the CPU supports the passed feature.
@@ -213,7 +215,7 @@ QStringList CPUID::supportedFeatures() const
 {
     QStringList supported;
 
-    foreach( QString feature, supportableFeatures() )
+    foreach (QString feature, supportableFeatures())
     {
         if (supports(feature))
             supported.append(feature);
@@ -245,19 +247,19 @@ int CPUID::clockSpeed() const
     if this is not known (as we must have at least 1 core!) */
 int CPUID::numCores() const
 {
-    #if defined(_WIN32)
+#if defined(_WIN32)
     SYSTEM_INFO system_info;
     GetSystemInfo(&system_info);
     return system_info.dwNumberOfProcessors;
-    #elif defined(__APPLE__) || defined(__FreeBSD__)
-    int mib[2] = { CTL_HW, HW_NCPU };
+#elif defined(__APPLE__) || defined(__FreeBSD__)
+    int mib[2] = {CTL_HW, HW_NCPU};
     int n_proc = 1;
     size_t len = sizeof(n_proc);
     sysctl(mib, 2, &n_proc, &len, NULL, 0);
     return n_proc;
-    #else
+#else
     return get_nprocs();
-    #endif
+#endif
 }
 
 /** Return whether or not this processor supports SSE2 vector instructions */

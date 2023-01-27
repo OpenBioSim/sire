@@ -41,17 +41,14 @@ using namespace SireSystem;
 
 namespace SireIO
 {
-    QVector<float>
-    _getCoordsArray(const Selector<Atom> &atoms,
-                    const float scl,
-                    const PropertyName &coords_property)
+    QVector<float> _getCoordsArray(const Selector<Atom> &atoms, const float scl, const PropertyName &coords_property)
     {
         const int natoms = atoms.count();
 
-        QVector<float> ret(3*natoms, 0.0);
+        QVector<float> ret(3 * natoms, 0.0);
         float *ret_data = ret.data();
 
-        for (int i=0; i<natoms; ++i)
+        for (int i = 0; i < natoms; ++i)
         {
             const int idx = 3 * i;
 
@@ -60,29 +57,23 @@ namespace SireIO
             const Vector &coords = atom.property<Vector>(coords_property);
 
             ret_data[idx] = coords.x() * scl;
-            ret_data[idx+1] = coords.y() * scl;
-            ret_data[idx+2] = coords.z() * scl;
+            ret_data[idx + 1] = coords.y() * scl;
+            ret_data[idx + 2] = coords.z() * scl;
         }
 
         return ret;
     }
 
-
-    SIREIO_EXPORT QVector<float>
-    getCoordsArray(const SireMol::MoleculeView &mol,
-                   const SireUnits::Dimension::Length &to_unit,
-                   const SireBase::PropertyMap &map)
+    SIREIO_EXPORT QVector<float> getCoordsArray(const SireMol::MoleculeView &mol,
+                                                const SireUnits::Dimension::Length &to_unit,
+                                                const SireBase::PropertyMap &map)
     {
-        return _getCoordsArray(mol.atoms(),
-                               SireUnits::angstrom.to(to_unit),
-                               map["coordinates"]);
+        return _getCoordsArray(mol.atoms(), SireUnits::angstrom.to(to_unit), map["coordinates"]);
     }
 
-
-    SIREIO_EXPORT QVector<float>
-    getCoordsArray(const SireMol::MoleculeGroup &mols,
-                   const SireUnits::Dimension::Length &to_unit,
-                   const SireBase::PropertyMap &map)
+    SIREIO_EXPORT QVector<float> getCoordsArray(const SireMol::MoleculeGroup &mols,
+                                                const SireUnits::Dimension::Length &to_unit,
+                                                const SireBase::PropertyMap &map)
     {
         const auto coords_property = map["coordinates"];
         const float scl = SireUnits::angstrom.to(to_unit);
@@ -95,37 +86,32 @@ namespace SireIO
         }
         else if (nmols == 1)
         {
-            return _getCoordsArray(mols[MolIdx(0)].atoms(),
-                                   scl, coords_property);
+            return _getCoordsArray(mols[MolIdx(0)].atoms(), scl, coords_property);
         }
 
-        QVector< QVector<float> > ret(nmols);
+        QVector<QVector<float>> ret(nmols);
         QVector<float> *ret_data = ret.data();
 
         if (should_run_in_parallel(nmols, map))
         {
-            tbb::parallel_for( tbb::blocked_range<int>(0,nmols),
-                               [&](const tbb::blocked_range<int> &r){
-
-                for (int i=r.begin(); i<r.end(); ++i)
-                {
-                    ret_data[i] = _getCoordsArray(mols[MolIdx(i)].atoms(),
-                                                  scl, coords_property);
-                }
-            });
+            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](const tbb::blocked_range<int> &r)
+                              {
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                ret_data[i] = _getCoordsArray(mols[MolIdx(i)].atoms(), scl, coords_property);
+            } });
         }
         else
         {
-            for (int i=0; i<nmols; ++i)
+            for (int i = 0; i < nmols; ++i)
             {
-                ret_data[i] = _getCoordsArray(mols[MolIdx(i)].atoms(),
-                                              scl, coords_property);
+                ret_data[i] = _getCoordsArray(mols[MolIdx(i)].atoms(), scl, coords_property);
             }
         }
 
         int n = 0;
 
-        for (int i=0; i<nmols; ++i)
+        for (int i = 0; i < nmols; ++i)
         {
             n += ret_data[i].count();
         }
@@ -133,10 +119,9 @@ namespace SireIO
         QVector<float> r(n, 0.0);
         float *r_data = r.data();
 
-        for (int i=0; i<nmols; ++i)
+        for (int i = 0; i < nmols; ++i)
         {
-            std::memcpy(r_data, ret_data[i].constData(),
-                        ret_data[i].count() * sizeof(float));
+            std::memcpy(r_data, ret_data[i].constData(), ret_data[i].count() * sizeof(float));
 
             r_data += ret_data[i].count();
         }
@@ -144,18 +129,17 @@ namespace SireIO
         return r;
     }
 
-    SIREIO_EXPORT QVector<float>
-    getCoordsArray(const SireSystem::System &system,
-                   const SireUnits::Dimension::Length &to_unit,
-                   const SireBase::PropertyMap &map)
+    SIREIO_EXPORT QVector<float> getCoordsArray(const SireSystem::System &system,
+                                                const SireUnits::Dimension::Length &to_unit,
+                                                const SireBase::PropertyMap &map)
     {
         MoleculeGroup tmp("tmp");
 
-        for (int i=0; i<system.nMolecules(); ++i)
+        for (int i = 0; i < system.nMolecules(); ++i)
         {
             tmp.add(system[MolIdx(i)]);
         }
 
         return getCoordsArray(tmp, to_unit, map);
     }
-}
+} // namespace SireIO

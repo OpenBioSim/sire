@@ -36,70 +36,70 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class MGNum;
+    class MGNum;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MGNum&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MGNum&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MGNum &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MGNum &);
 
 namespace SireMol
 {
 
-/** This ID number is used to identify a MoleculeGroup by
-    a unique, program-supplied ID number
+    /** This ID number is used to identify a MoleculeGroup by
+        a unique, program-supplied ID number
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MGNum : public SireID::Number, public MGID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MGNum&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MGNum&);
-
-public:
-    MGNum();
-    explicit MGNum(quint32 num);
-
-    MGNum(const MGNum &other);
-
-    ~MGNum();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MGNum : public SireID::Number, public MGID
     {
-        return MGNum::typeName();
-    }
 
-    MGNum* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MGNum &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MGNum &);
 
-    static MGNum getUniqueNumber();
+    public:
+        MGNum();
+        explicit MGNum(quint32 num);
 
-    bool isNull() const;
+        MGNum(const MGNum &other);
 
-    uint hash() const;
+        ~MGNum();
 
-    QString toString() const;
+        static const char *typeName();
 
-    MGNum& operator=(const MGNum &other);
+        const char *what() const
+        {
+            return MGNum::typeName();
+        }
 
-    bool operator==(const SireID::ID &other) const;
-    bool operator==(const MGNum &other) const;
-    bool operator!=(const MGNum &other) const;
+        MGNum *clone() const;
 
-    bool operator<(const MGNum &other) const;
-    bool operator<=(const MGNum &other) const;
-    bool operator>(const MGNum &other) const;
-    bool operator>=(const MGNum &other) const;
+        static MGNum getUniqueNumber();
 
-    QList<MGNum> map(const MolGroupsBase&) const;
-};
+        bool isNull() const;
 
-}
+        uint hash() const;
+
+        QString toString() const;
+
+        MGNum &operator=(const MGNum &other);
+
+        bool operator==(const SireID::ID &other) const;
+        bool operator==(const MGNum &other) const;
+        bool operator!=(const MGNum &other) const;
+
+        bool operator<(const MGNum &other) const;
+        bool operator<=(const MGNum &other) const;
+        bool operator>(const MGNum &other) const;
+        bool operator>=(const MGNum &other) const;
+
+        QList<MGNum> map(const MolGroupsBase &) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::MGNum);
 
-SIRE_EXPOSE_CLASS( SireMol::MGNum )
+SIRE_EXPOSE_CLASS(SireMol::MGNum)
 
 SIRE_END_HEADER
 

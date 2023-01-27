@@ -27,8 +27,8 @@
 
 #include <QMutex>
 
-#include "qmprogram.h"
 #include "latticecharges.h"
+#include "qmprogram.h"
 
 #include "SireMol/molecule.h"
 
@@ -46,15 +46,14 @@ using namespace SireStream;
 /////// Implementation of QMProgram
 ///////
 
-static const RegisterMetaType<QMProgram> r_qmprog( MAGIC_ONLY,
-                                                   "Squire::QMProgram" );
+static const RegisterMetaType<QMProgram> r_qmprog(MAGIC_ONLY, "Squire::QMProgram");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const QMProgram &qmprog)
 {
     writeHeader(ds, r_qmprog, 1);
 
-    ds << static_cast<const Property&>(qmprog);
+    ds << static_cast<const Property &>(qmprog);
 
     return ds;
 }
@@ -66,7 +65,7 @@ QDataStream &operator>>(QDataStream &ds, QMProgram &qmprog)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(qmprog);
+        ds >> static_cast<Property &>(qmprog);
     }
     else
         throw version_error(v, "1", r_qmprog, CODELOC);
@@ -76,15 +75,18 @@ QDataStream &operator>>(QDataStream &ds, QMProgram &qmprog)
 
 /** Constructor */
 QMProgram::QMProgram() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 QMProgram::QMProgram(const QMProgram &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 QMProgram::~QMProgram()
-{}
+{
+}
 
 /** Return the maximum number of MM atoms supported by this QM program. This
     returns -1 if there is no limit */
@@ -103,119 +105,106 @@ int QMProgram::numberOfMMAtomsLimit(int num_qm_atoms) const
 
 /** Calculate the charges on the molecule 'molecule' using the properties
     specified in the passed property map */
-AtomCharges QMProgram::calculateCharges(const Molecule &molecule,
-                                        const PropertyMap &map) const
+AtomCharges QMProgram::calculateCharges(const Molecule &molecule, const PropertyMap &map) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating the charges via this interface (%1) is not "
-            "yet supported.")
-                .arg(this->what()), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating the charges via this interface (%1) is not "
+                                             "yet supported.")
+                                     .arg(this->what()),
+                                 CODELOC);
 }
 
 /** Calculate the charges on the molecule 'molecule' using the default
     property locations */
 AtomCharges QMProgram::calculateCharges(const Molecule &molecule) const
 {
-    return this->calculateCharges( molecule, PropertyMap() );
+    return this->calculateCharges(molecule, PropertyMap());
 }
 
 /** Return the QM energy of the molecules 'molecules' surrounded by the
     field of point charges 'lattice_charges' */
-double QMProgram::calculateEnergy(const QMPotential::Molecules &molecules,
-                                  const LatticeCharges &lattice_charges,
+double QMProgram::calculateEnergy(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges,
                                   int) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the use of point lattice charges.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(
+        QObject::tr("This QM program (%1) does not support the use of point lattice charges.").arg(this->what()),
+        CODELOC);
 }
 
 /** Calculate the forces on the passed molecules, and place them into the passed
     force table, optionally scaled by 'scale_force' */
-void QMProgram::calculateForce(const QMPotential::Molecules&, ForceTable &,
-                               double, int) const
+void QMProgram::calculateForce(const QMPotential::Molecules &, ForceTable &, double, int) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the calculation of forces.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(
+        QObject::tr("This QM program (%1) does not support the calculation of forces.").arg(this->what()), CODELOC);
 }
 
 /** Calculate the forces on the passed molecules, and place them into the passed
     force table, optionally scaled by 'scale_force', and return the accompanying
     forces on the passed lattice points, also scaled by 'scale_force' */
-QVector<Vector> QMProgram::calculateForce(const QMPotential::Molecules&,
-                                          const LatticeCharges&, ForceTable&,
-                                          double, int) const
+QVector<Vector> QMProgram::calculateForce(const QMPotential::Molecules &, const LatticeCharges &, ForceTable &, double,
+                                          int) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the calculation of forces with "
-        "associated lattice charges.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(QObject::tr("This QM program (%1) does not support the calculation of forces with "
+                                             "associated lattice charges.")
+                                     .arg(this->what()),
+                                 CODELOC);
 
     return QVector<Vector>();
 }
 
 /** Calculate the field around the passed molecules, and place them into the passed
     field table, optionally scaled by 'scale_field' */
-void QMProgram::calculateField(const QMPotential::Molecules&, FieldTable&,
-                               const SireFF::Probe&, double, int) const
+void QMProgram::calculateField(const QMPotential::Molecules &, FieldTable &, const SireFF::Probe &, double, int) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the calculation of fields.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(
+        QObject::tr("This QM program (%1) does not support the calculation of fields.").arg(this->what()), CODELOC);
 }
 
 /** Calculate the fields around the passed molecules, and place them into the passed
     field table, optionally scaled by 'scale_field', and return the accompanying
     fields on the passed lattice points, also scaled by 'scale_field' */
-QVector<Vector> QMProgram::calculateField(const QMPotential::Molecules&,
-                                          const LatticeCharges&, FieldTable&,
-                                          const SireFF::Probe&, double, int) const
+QVector<Vector> QMProgram::calculateField(const QMPotential::Molecules &, const LatticeCharges &, FieldTable &,
+                                          const SireFF::Probe &, double, int) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the calculation of fields with "
-        "associated lattice charges.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(QObject::tr("This QM program (%1) does not support the calculation of fields with "
+                                             "associated lattice charges.")
+                                     .arg(this->what()),
+                                 CODELOC);
 
     return QVector<Vector>();
 }
 
 /** Calculate the potential around the passed molecules, and place them into the passed
     potential table, optionally scaled by 'scale_potential' */
-void QMProgram::calculatePotential(const QMPotential::Molecules&, PotentialTable&,
-                                   const SireFF::Probe&, double, int) const
+void QMProgram::calculatePotential(const QMPotential::Molecules &, PotentialTable &, const SireFF::Probe &, double,
+                                   int) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the calculation of potentials.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(
+        QObject::tr("This QM program (%1) does not support the calculation of potentials.").arg(this->what()), CODELOC);
 }
 
 /** Calculate the potentials around the passed molecules, and place them into the passed
     potential table, optionally scaled by 'scale_potential', and return the accompanying
     potentials on the passed lattice points, also scaled by 'scale_potential' */
-QVector<MolarEnergy> QMProgram::calculatePotential(const QMPotential::Molecules&,
-                                                   const LatticeCharges&,
-                                                   PotentialTable&,
-                                                   const SireFF::Probe&,
-                                                   double, int) const
+QVector<MolarEnergy> QMProgram::calculatePotential(const QMPotential::Molecules &, const LatticeCharges &,
+                                                   PotentialTable &, const SireFF::Probe &, double, int) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the calculation of potentials with "
-        "associated lattice charges.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(QObject::tr("This QM program (%1) does not support the calculation of potentials with "
+                                             "associated lattice charges.")
+                                     .arg(this->what()),
+                                 CODELOC);
 
     return QVector<MolarEnergy>();
 }
 
 /** Return the command file that would be used to calculate the atomic
     partial charges of the passed molecule */
-QString QMProgram::chargeCommandFile(const Molecule &molecule,
-                                     const PropertyMap &map) const
+QString QMProgram::chargeCommandFile(const Molecule &molecule, const PropertyMap &map) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating the charges via this interface (%1) is not "
-            "yet supported.")
-                .arg(this->what()), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating the charges via this interface (%1) is not "
+                                             "yet supported.")
+                                     .arg(this->what()),
+                                 CODELOC);
 }
 
 /** Return the command file that would be used to calculate the atomic
@@ -229,49 +218,43 @@ QString QMProgram::chargeCommandFile(const Molecule &molecule) const
     of the molecules in 'molecules' in the field of point charges in
     'lattice_charges' */
 QString QMProgram::energyCommandFile(const QMPotential::Molecules &molecules,
-                                    const LatticeCharges &lattice_charges) const
+                                     const LatticeCharges &lattice_charges) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the use of point lattice charges.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(
+        QObject::tr("This QM program (%1) does not support the use of point lattice charges.").arg(this->what()),
+        CODELOC);
 }
 
 /** Return the command file that would be used to calculate the forces
     of the molecules in 'molecules' in the field of point charges in
     'lattice_charges' (and the forces on the charges themselves) */
-QString QMProgram::forceCommandFile(const QMPotential::Molecules&,
-                                    const LatticeCharges&,
-                                    const ForceTable&) const
+QString QMProgram::forceCommandFile(const QMPotential::Molecules &, const LatticeCharges &, const ForceTable &) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the use of point lattice charges.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(
+        QObject::tr("This QM program (%1) does not support the use of point lattice charges.").arg(this->what()),
+        CODELOC);
 }
 
 /** Return the command file that would be used to calculate the fields
     of the molecules in 'molecules' in the field of point charges in
     'lattice_charges' */
-QString QMProgram::fieldCommandFile(const QMPotential::Molecules&,
-                                    const LatticeCharges&,
-                                    const FieldTable&,
-                                    const SireFF::Probe&) const
+QString QMProgram::fieldCommandFile(const QMPotential::Molecules &, const LatticeCharges &, const FieldTable &,
+                                    const SireFF::Probe &) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the use of point lattice charges.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(
+        QObject::tr("This QM program (%1) does not support the use of point lattice charges.").arg(this->what()),
+        CODELOC);
 }
 
 /** Return the command file that would be used to calculate the fields
     of the molecules in 'molecules' in the field of point charges in
     'lattice_charges' */
-QString QMProgram::potentialCommandFile(const QMPotential::Molecules&,
-                                        const LatticeCharges&,
-                                        const PotentialTable&,
-                                        const SireFF::Probe&) const
+QString QMProgram::potentialCommandFile(const QMPotential::Molecules &, const LatticeCharges &, const PotentialTable &,
+                                        const SireFF::Probe &) const
 {
-    throw SireError::unsupported( QObject::tr(
-        "This QM program (%1) does not support the use of point lattice charges.")
-            .arg(this->what()), CODELOC );
+    throw SireError::unsupported(
+        QObject::tr("This QM program (%1) does not support the use of point lattice charges.").arg(this->what()),
+        CODELOC);
 }
 
 ///////
@@ -284,7 +267,7 @@ static const RegisterMetaType<NullQM> r_nullqm;
 QDataStream &operator<<(QDataStream &ds, const NullQM &nullqm)
 {
     writeHeader(ds, r_nullqm, 1);
-    ds << static_cast<const QMProgram&>(nullqm);
+    ds << static_cast<const QMProgram &>(nullqm);
 
     return ds;
 }
@@ -296,7 +279,7 @@ QDataStream &operator>>(QDataStream &ds, NullQM &nullqm)
 
     if (v == 1)
     {
-        ds >> static_cast<QMProgram&>(nullqm);
+        ds >> static_cast<QMProgram &>(nullqm);
     }
     else
         throw version_error(v, "1", r_nullqm, CODELOC);
@@ -305,27 +288,29 @@ QDataStream &operator>>(QDataStream &ds, NullQM &nullqm)
 }
 
 /** Constructor */
-NullQM::NullQM() : ConcreteProperty<NullQM,QMProgram>()
-{}
+NullQM::NullQM() : ConcreteProperty<NullQM, QMProgram>()
+{
+}
 
 static SharedPolyPointer<NullQM> shared_null;
 
-const NullQM& QMProgram::null()
+const NullQM &QMProgram::null()
 {
     return *(create_shared_null<NullQM>());
 }
 
 /** Copy constructor */
-NullQM::NullQM(const NullQM &other)
-         : ConcreteProperty<NullQM,QMProgram>(other)
-{}
+NullQM::NullQM(const NullQM &other) : ConcreteProperty<NullQM, QMProgram>(other)
+{
+}
 
 /** Destructor */
 NullQM::~NullQM()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullQM& NullQM::operator=(const NullQM &other)
+NullQM &NullQM::operator=(const NullQM &other)
 {
     return *this;
 }
@@ -344,47 +329,43 @@ bool NullQM::operator!=(const NullQM &other) const
 
 /** Calculate and return the QM energy of all of the molecules
     in 'molecules' */
-double NullQM::calculateEnergy(const QMPotential::Molecules&, int) const
+double NullQM::calculateEnergy(const QMPotential::Molecules &, int) const
 {
     return 0;
 }
 
 /** Return the QM energy of the molecules 'molecules' surrounded by the
     field of point charges 'lattice_charges' */
-double NullQM::calculateEnergy(const QMPotential::Molecules&,
-                               const LatticeCharges&,
-                               int) const
+double NullQM::calculateEnergy(const QMPotential::Molecules &, const LatticeCharges &, int) const
 {
     return 0;
 }
 
 /** Return the command file that would be used to calculate the energy of
     the molecules in 'molecules' */
-QString NullQM::energyCommandFile(const QMPotential::Molecules&) const
+QString NullQM::energyCommandFile(const QMPotential::Molecules &) const
 {
     return QString();
 }
 
 /** Return the command file that would be used to calculate the forces on
     the molecules in 'molecules' */
-QString NullQM::forceCommandFile(const QMPotential::Molecules&,
-                                 const ForceTable&) const
+QString NullQM::forceCommandFile(const QMPotential::Molecules &, const ForceTable &) const
 {
     return QString();
 }
 
 /** Return the command file that would be used to calculate the fields on
     the molecules in 'molecules' */
-QString NullQM::fieldCommandFile(const QMPotential::Molecules&,
-                                 const FieldTable&, const SireFF::Probe&) const
+QString NullQM::fieldCommandFile(const QMPotential::Molecules &, const FieldTable &, const SireFF::Probe &) const
 {
     return QString();
 }
 
 /** Return the command file that would be used to calculate the fields on
     the molecules in 'molecules' */
-QString NullQM::potentialCommandFile(const QMPotential::Molecules&,
-                                     const PotentialTable&, const SireFF::Probe&) const
+QString NullQM::potentialCommandFile(const QMPotential::Molecules &, const PotentialTable &,
+                                     const SireFF::Probe &) const
 {
     return QString();
 }
@@ -392,8 +373,7 @@ QString NullQM::potentialCommandFile(const QMPotential::Molecules&,
 /** Return the command file that would be used to calculate the energy
     of the molecules in 'molecules' in the field of point charges in
     'lattice_charges' */
-QString NullQM::energyCommandFile(const QMPotential::Molecules&,
-                                  const LatticeCharges &lattice_charges) const
+QString NullQM::energyCommandFile(const QMPotential::Molecules &, const LatticeCharges &lattice_charges) const
 {
     return QString();
 }
@@ -401,9 +381,7 @@ QString NullQM::energyCommandFile(const QMPotential::Molecules&,
 /** Return the command file that would be used to calculate the forces
     of the molecules in 'molecules' in the field of point charges in
     'lattice_charges' (and the forces on the charges themselves) */
-QString NullQM::forceCommandFile(const QMPotential::Molecules&,
-                                 const LatticeCharges&,
-                                 const ForceTable&) const
+QString NullQM::forceCommandFile(const QMPotential::Molecules &, const LatticeCharges &, const ForceTable &) const
 {
     return QString();
 }
@@ -411,9 +389,8 @@ QString NullQM::forceCommandFile(const QMPotential::Molecules&,
 /** Return the command file that would be used to calculate the fields
     of the molecules in 'molecules' in the field of point charges in
     'lattice_charges' (and the fields on the charges themselves) */
-QString NullQM::fieldCommandFile(const QMPotential::Molecules&,
-                                 const LatticeCharges&,
-                                 const FieldTable&, const SireFF::Probe&) const
+QString NullQM::fieldCommandFile(const QMPotential::Molecules &, const LatticeCharges &, const FieldTable &,
+                                 const SireFF::Probe &) const
 {
     return QString();
 }
@@ -421,20 +398,18 @@ QString NullQM::fieldCommandFile(const QMPotential::Molecules&,
 /** Return the command file that would be used to calculate the potentials
     of the molecules in 'molecules' in the field of point charges in
     'lattice_charges' (and the potentials on the charges themselves) */
-QString NullQM::potentialCommandFile(const QMPotential::Molecules&,
-                                     const LatticeCharges&,
-                                     const PotentialTable&, const SireFF::Probe&) const
+QString NullQM::potentialCommandFile(const QMPotential::Molecules &, const LatticeCharges &, const PotentialTable &,
+                                     const SireFF::Probe &) const
 {
     return QString();
 }
 
-const char* NullQM::typeName()
+const char *NullQM::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullQM>() );
+    return QMetaType::typeName(qMetaTypeId<NullQM>());
 }
 
-NullQM* NullQM::clone() const
+NullQM *NullQM::clone() const
 {
     return new NullQM(*this);
 }
-

@@ -34,95 +34,92 @@
 #include "SireMol/atomidx.h"
 #include "SireMol/molviewproperty.h"
 
-#include "iobase.h"
 #include "SireVol/space.h"
-
+#include "iobase.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class Amber;
+    class Amber;
 }
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::Amber&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::Amber&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::Amber &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::Amber &);
 
 namespace SireMol
 {
-class Molecules;
-class MoleculeGroup;
-}
+    class Molecules;
+    class MoleculeGroup;
+} // namespace SireMol
 
 namespace SireMM
 {
-class TwoAtomFunctions;
-class ThreeAtomFunctions;
-class FourAtomFunctions;
-class CLJNBPairs;
-}
+    class TwoAtomFunctions;
+    class ThreeAtomFunctions;
+    class FourAtomFunctions;
+    class CLJNBPairs;
+} // namespace SireMM
 
 namespace SireVol
 {
-class Space;
+    class Space;
 }
 
 namespace SireIO
 {
-using boost::tuple;
+    using boost::tuple;
 
-using SireMol::Molecules;
-using SireVol::SpacePtr;
-using SireVol::Space;
+    using SireMol::Molecules;
+    using SireVol::Space;
+    using SireVol::SpacePtr;
 
-/** This class is used to read in an AMBER top file and crd file
+    /** This class is used to read in an AMBER top file and crd file
 
-    @author Julien Michel
-*/
-class SIREIO_EXPORT Amber
-{
+        @author Julien Michel
+    */
+    class SIREIO_EXPORT Amber
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const SireIO::Amber&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, SireIO::Amber&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const SireIO::Amber &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, SireIO::Amber &);
 
-public:
-    Amber();
-    Amber(const Amber &other);
-    ~Amber();
+    public:
+        Amber();
+        Amber(const Amber &other);
+        ~Amber();
 
-    Amber& operator=(const Amber &other);
+        Amber &operator=(const Amber &other);
 
-    bool operator==(const Amber &other) const;
-    bool operator!=(const Amber &other) const;
+        bool operator==(const Amber &other) const;
+        bool operator!=(const Amber &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    void set14Factors(double coul_14, double lj_14);
+        void set14Factors(double coul_14, double lj_14);
 
-    double coulomb14Factor() const;
-    double lj14Factor() const;
+        double coulomb14Factor() const;
+        double lj14Factor() const;
 
-    tuple<MoleculeGroup,SpacePtr> readCrdTop(const QString &crdfile,
-                                             const QString &topfile,
-                                             QString flag_cutting="perresidue") const;
+        tuple<MoleculeGroup, SpacePtr> readCrdTop(const QString &crdfile, const QString &topfile,
+                                                  QString flag_cutting = "perresidue") const;
 
-    void writeCrd(const MoleculeGroup &mols, const Space &space, const QString &crdfile,
-                  const PropertyMap &map = PropertyMap()) const;
+        void writeCrd(const MoleculeGroup &mols, const Space &space, const QString &crdfile,
+                      const PropertyMap &map = PropertyMap()) const;
 
-private:
-    double coul_14scl;
-    double lj_14scl;
-};
+    private:
+        double coul_14scl;
+        double lj_14scl;
+    };
 
-}
+} // namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::Amber )
+Q_DECLARE_METATYPE(SireIO::Amber)
 
-SIRE_EXPOSE_CLASS( SireIO::Amber )
+SIRE_EXPOSE_CLASS(SireIO::Amber)
 
 SIRE_END_HEADER
 
 #endif
-

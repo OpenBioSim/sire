@@ -27,22 +27,22 @@
 
 #include "intragroupff.h"
 
-#include "cljshiftfunction.h"
 #include "cljcalculator.h"
+#include "cljshiftfunction.h"
 
 #include "SireBase/booleanproperty.h"
 #include "SireBase/lengthproperty.h"
 #include "SireBase/refcountdata.h"
 
-#include "SireError/errors.h"
 #include "SireBase/errors.h"
+#include "SireError/errors.h"
 
-#include "SireMol/partialmolecule.h"
+#include "SireMol/atomselection.h"
 #include "SireMol/molecule.h"
 #include "SireMol/molecules.h"
 #include "SireMol/molresid.h"
+#include "SireMol/partialmolecule.h"
 #include "SireMol/residue.h"
-#include "SireMol/atomselection.h"
 #include "SireMol/selector.hpp"
 
 #include "SireUnits/units.h"
@@ -50,8 +50,8 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
-#include <QElapsedTimer>
 #include <QDebug>
+#include <QElapsedTimer>
 
 using namespace SireMM;
 using namespace SireMol;
@@ -60,16 +60,14 @@ using namespace SireBase;
 using namespace SireStream;
 using namespace SireUnits;
 
-QDataStream& operator<<(QDataStream &ds,
-                        const SharedDataPointer<SireMM::detail::IntraGroupFFMolData> &ptr)
+QDataStream &operator<<(QDataStream &ds, const SharedDataPointer<SireMM::detail::IntraGroupFFMolData> &ptr)
 {
     SharedDataStream sds(ds);
     sds << ptr;
     return ds;
 }
 
-QDataStream& operator>>(QDataStream &ds,
-                        SharedDataPointer<SireMM::detail::IntraGroupFFMolData> &ptr)
+QDataStream &operator>>(QDataStream &ds, SharedDataPointer<SireMM::detail::IntraGroupFFMolData> &ptr)
 {
     SharedDataStream sds(ds);
     sds >> ptr;
@@ -84,21 +82,19 @@ namespace SireMM
         class IntraGroupFFData : public RefCountData
         {
         public:
-            IntraGroupFFData() : RefCountData(),
-                                 parallel_calc(true), repro_sum(false)
-            {}
+            IntraGroupFFData() : RefCountData(), parallel_calc(true), repro_sum(false)
+            {
+            }
 
             IntraGroupFFData(const IntraGroupFFData &other)
-                 : RefCountData(),
-                   cljfuncs(other.cljfuncs),
-                   cljcomps(other.cljcomps),
-                   props(other.props),
-                   parallel_calc(other.parallel_calc),
-                   repro_sum(other.repro_sum)
-            {}
+                : RefCountData(), cljfuncs(other.cljfuncs), cljcomps(other.cljcomps), props(other.props),
+                  parallel_calc(other.parallel_calc), repro_sum(other.repro_sum)
+            {
+            }
 
             ~IntraGroupFFData()
-            {}
+            {
+            }
 
             /** The function(s) used to calculate energies */
             QVector<CLJFunctionPtr> cljfuncs;
@@ -149,21 +145,19 @@ namespace SireMM
             /** Whether or not this group needs accepting */
             bool needs_accepting;
 
-            IntraGroupFFMolData() : RefCountData(), connectivity_version(0),
-                                    needs_energy_calc(false), needs_accepting(false)
-            {}
+            IntraGroupFFMolData() : RefCountData(), connectivity_version(0), needs_energy_calc(false), needs_accepting(false)
+            {
+            }
 
-            IntraGroupFFMolData(quint32 group_id,
-                                const MoleculeView &molview,
-                                const PropertyMap &map,
+            IntraGroupFFMolData(quint32 group_id, const MoleculeView &molview, const PropertyMap &map,
                                 const QVector<CLJFunctionPtr> &funcs)
-                    : RefCountData(), needs_energy_calc(true), needs_accepting(false)
+                : RefCountData(), needs_energy_calc(true), needs_accepting(false)
             {
                 cljgroup0 = CLJGroup(CLJAtoms::USE_ATOMIDX, CLJExtractor::EXTRACT_BY_CUTGROUP);
                 cljgroup1 = CLJGroup(CLJAtoms::USE_ATOMIDX, CLJExtractor::EXTRACT_BY_CUTGROUP);
 
-                cljgroup0.setBoxLength( 7.5*angstrom );
-                cljgroup1.setBoxLength( 7.5*angstrom );
+                cljgroup0.setBoxLength(7.5 * angstrom);
+                cljgroup1.setBoxLength(7.5 * angstrom);
 
                 if (group_id == 0)
                     cljgroup0.add(molview, map);
@@ -179,20 +173,18 @@ namespace SireMM
             }
 
             IntraGroupFFMolData(const IntraGroupFFMolData &other)
-                : RefCountData(), cljgroup0(other.cljgroup0),
-                  cljgroup1(other.cljgroup1), cljfuncs(other.cljfuncs),
-                  cty(other.cty), nrg(other.nrg),
-                  connectivity_property(other.connectivity_property),
-                  connectivity_version(other.connectivity_version),
-                  needs_energy_calc(other.needs_energy_calc),
+                : RefCountData(), cljgroup0(other.cljgroup0), cljgroup1(other.cljgroup1), cljfuncs(other.cljfuncs),
+                  cty(other.cty), nrg(other.nrg), connectivity_property(other.connectivity_property),
+                  connectivity_version(other.connectivity_version), needs_energy_calc(other.needs_energy_calc),
                   needs_accepting(other.needs_accepting)
-            {}
+            {
+            }
 
             ~IntraGroupFFMolData()
-            {}
+            {
+            }
 
-            void assertMoleculeCompatible(const MoleculeView &molview,
-                                          const CLJGroup &cljgroup) const
+            void assertMoleculeCompatible(const MoleculeView &molview, const CLJGroup &cljgroup) const
             {
                 if (cljgroup.isEmpty())
                     return;
@@ -201,25 +193,25 @@ namespace SireMM
 
                 if (mols.nMolecules() != 1 or mols.nViews() != 1)
                 {
-                    throw SireError::program_bug( QObject::tr(
-                            "Strange - the IntraGroupFF cljgroup should only contain "
-                            "a single molecule with a single view. Instead, we see "
-                            "nMolecules() = %1 and nViews() = %2.")
-                                .arg(mols.nMolecules())
-                                .arg(mols.nViews()), CODELOC );
+                    throw SireError::program_bug(QObject::tr("Strange - the IntraGroupFF cljgroup should only contain "
+                                                             "a single molecule with a single view. Instead, we see "
+                                                             "nMolecules() = %1 and nViews() = %2.")
+                                                     .arg(mols.nMolecules())
+                                                     .arg(mols.nViews()),
+                                                 CODELOC);
                 }
 
                 const MoleculeData &moldata = mols.constBegin().value().data();
 
                 if (moldata.number() != molview.data().number())
                 {
-                    throw SireError::incompatible_error( QObject::tr(
-                            "You are trying to add a second part of the molecule "
-                            "that is not the same molecule number "
-                            "first part. The first part added was molecule %1 "
-                            "while the second part is molecule %2.")
-                                .arg(molview.data().number().toString())
-                                .arg(moldata.number().toString()), CODELOC );
+                    throw SireError::incompatible_error(QObject::tr("You are trying to add a second part of the molecule "
+                                                                    "that is not the same molecule number "
+                                                                    "first part. The first part added was molecule %1 "
+                                                                    "while the second part is molecule %2.")
+                                                            .arg(molview.data().number().toString())
+                                                            .arg(moldata.number().toString()),
+                                                        CODELOC);
                 }
             }
 
@@ -229,26 +221,25 @@ namespace SireMM
 
                 if (new_connectivity != connectivity_property)
                 {
-                    throw SireError::incompatible_error( QObject::tr(
-                            "You cannot add the second part of the molecule with a "
-                            "different connectivity property! The first part was added "
-                            "with a 'connectivity' property equal to '%1', while you are "
-                            "now adding the second part of the molecule with a "
-                            "'connectivity' property equal to '%2'.")
-                                .arg(connectivity_property.toString())
-                                .arg(new_connectivity.toString()), CODELOC );
+                    throw SireError::incompatible_error(
+                        QObject::tr("You cannot add the second part of the molecule with a "
+                                    "different connectivity property! The first part was added "
+                                    "with a 'connectivity' property equal to '%1', while you are "
+                                    "now adding the second part of the molecule with a "
+                                    "'connectivity' property equal to '%2'.")
+                            .arg(connectivity_property.toString())
+                            .arg(new_connectivity.toString()),
+                        CODELOC);
                 }
             }
 
-            void add(quint32 group_id,
-                     const MoleculeView &molview,
-                     const PropertyMap &map)
+            void add(quint32 group_id, const MoleculeView &molview, const PropertyMap &map)
             {
                 if (group_id == 0)
                 {
                     if (cljgroup0.isEmpty())
                     {
-                        //check that this molecule is compatible with that in cljgroup1
+                        // check that this molecule is compatible with that in cljgroup1
                         assertMoleculeCompatible(molview, cljgroup1);
                         assertConnectivityCompatible(map);
                     }
@@ -259,7 +250,7 @@ namespace SireMM
                 {
                     if (cljgroup1.isEmpty())
                     {
-                        //check that this molecule is compatible with that in cljgroup0
+                        // check that this molecule is compatible with that in cljgroup0
                         assertMoleculeCompatible(molview, cljgroup0);
                         assertConnectivityCompatible(map);
                     }
@@ -274,7 +265,7 @@ namespace SireMM
                 cljgroup1.mustRecalculateFromScratch();
                 needs_accepting = false;
                 needs_energy_calc = true;
-                nrg = MultiCLJEnergy(0,0);
+                nrg = MultiCLJEnergy(0, 0);
             }
 
             void mustReallyRecalculateFromScratch()
@@ -283,16 +274,15 @@ namespace SireMM
                 cljgroup1.mustReallyRecalculateFromScratch();
                 needs_accepting = false;
                 needs_energy_calc = true;
-                nrg = MultiCLJEnergy(0,0);
+                nrg = MultiCLJEnergy(0, 0);
             }
 
             void checkForChangeInConnectivity(const MoleculeView &molview)
             {
                 if (molview.data().version(connectivity_property) != connectivity_version)
                 {
-                    //the connectivity may have changed
-                    Connectivity new_cty = molview.data().property(connectivity_property)
-                                                         .asA<Connectivity>();
+                    // the connectivity may have changed
+                    Connectivity new_cty = molview.data().property(connectivity_property).asA<Connectivity>();
 
                     connectivity_version = molview.data().version(connectivity_property);
 
@@ -300,7 +290,7 @@ namespace SireMM
                     {
                         QVector<CLJFunctionPtr> newfuncs = cljfuncs;
 
-                        for (int i=0; i<newfuncs.count(); ++i)
+                        for (int i = 0; i < newfuncs.count(); ++i)
                         {
                             newfuncs[i].edit().asA<CLJIntraFunction>().setConnectivity(new_cty);
                         }
@@ -316,7 +306,7 @@ namespace SireMM
             {
                 QVector<CLJFunctionPtr> newfuncs = funcs;
 
-                for (int i=0; i<funcs.count(); ++i)
+                for (int i = 0; i < funcs.count(); ++i)
                 {
                     newfuncs[i].edit().asA<CLJIntraFunction>().setConnectivity(cty);
                 }
@@ -325,10 +315,10 @@ namespace SireMM
                 mustNowRecalculateFromScratch();
             }
         };
-    }
-}
+    } // namespace detail
+} // namespace SireMM
 
-QDataStream& operator<<(QDataStream &ds, const SireMM::detail::IntraGroupFFMolData &intraff)
+QDataStream &operator<<(QDataStream &ds, const SireMM::detail::IntraGroupFFMolData &intraff)
 {
     quint32 version = 1;
 
@@ -336,15 +326,14 @@ QDataStream& operator<<(QDataStream &ds, const SireMM::detail::IntraGroupFFMolDa
 
     SharedDataStream sds(ds);
 
-    sds << intraff.cljgroup0 << intraff.cljgroup1 << intraff.cljfuncs << intraff.cty
-        << intraff.nrg << intraff.connectivity_property
-        << intraff.connectivity_version << intraff.needs_energy_calc
+    sds << intraff.cljgroup0 << intraff.cljgroup1 << intraff.cljfuncs << intraff.cty << intraff.nrg
+        << intraff.connectivity_property << intraff.connectivity_version << intraff.needs_energy_calc
         << intraff.needs_accepting;
 
     return ds;
 }
 
-QDataStream& operator>>(QDataStream &ds, SireMM::detail::IntraGroupFFMolData &intraff)
+QDataStream &operator>>(QDataStream &ds, SireMM::detail::IntraGroupFFMolData &intraff)
 {
     quint32 version;
 
@@ -354,15 +343,15 @@ QDataStream& operator>>(QDataStream &ds, SireMM::detail::IntraGroupFFMolData &in
     {
         SharedDataStream sds(ds);
 
-        sds >> intraff.cljgroup0 >> intraff.cljgroup1 >> intraff.cljfuncs >> intraff.cty
-            >> intraff.nrg >> intraff.connectivity_property
-            >> intraff.connectivity_version >> intraff.needs_energy_calc
-            >> intraff.needs_accepting;
+        sds >> intraff.cljgroup0 >> intraff.cljgroup1 >> intraff.cljfuncs >> intraff.cty >> intraff.nrg >>
+            intraff.connectivity_property >> intraff.connectivity_version >> intraff.needs_energy_calc >>
+            intraff.needs_accepting;
     }
     else
-        throw version_error( QObject::tr(
-                "Wrong version of SireMM::detail::IntraGroupFFData. Version %1, while "
-                "only version 1 is supported.").arg(version), CODELOC );
+        throw version_error(QObject::tr("Wrong version of SireMM::detail::IntraGroupFFData. Version %1, while "
+                                        "only version 1 is supported.")
+                                .arg(version),
+                            CODELOC);
 
     return ds;
 }
@@ -375,13 +364,8 @@ QDataStream &operator<<(QDataStream &ds, const IntraGroupFF &intraff)
 
     SharedDataStream sds(ds);
 
-    sds << intraff.moldata
-        << intraff.needs_accepting
-        << intraff.d->cljfuncs
-        << intraff.d->cljcomps
-        << intraff.d->parallel_calc
-        << intraff.d->repro_sum
-        << static_cast<const G2FF&>(intraff);
+    sds << intraff.moldata << intraff.needs_accepting << intraff.d->cljfuncs << intraff.d->cljcomps
+        << intraff.d->parallel_calc << intraff.d->repro_sum << static_cast<const G2FF &>(intraff);
 
     return ds;
 }
@@ -394,13 +378,8 @@ QDataStream &operator>>(QDataStream &ds, IntraGroupFF &intraff)
     {
         SharedDataStream sds(ds);
 
-        sds >> intraff.moldata
-            >> intraff.needs_accepting
-            >> intraff.d->cljfuncs
-            >> intraff.d->cljcomps
-            >> intraff.d->parallel_calc
-            >> intraff.d->repro_sum
-            >> static_cast<G2FF&>(intraff);
+        sds >> intraff.moldata >> intraff.needs_accepting >> intraff.d->cljfuncs >> intraff.d->cljcomps >>
+            intraff.d->parallel_calc >> intraff.d->repro_sum >> static_cast<G2FF &>(intraff);
     }
     else
         throw version_error(v, "1", r_intragroupff, CODELOC);
@@ -408,38 +387,33 @@ QDataStream &operator>>(QDataStream &ds, IntraGroupFF &intraff)
     return ds;
 }
 
-
 /** Constructor */
-IntraGroupFF::IntraGroupFF()
-             : ConcreteProperty<IntraGroupFF,G2FF>(), needs_accepting(false)
+IntraGroupFF::IntraGroupFF() : ConcreteProperty<IntraGroupFF, G2FF>(), needs_accepting(false)
 {
     d = new detail::IntraGroupFFData();
     this->_pvt_updateName();
-    this->setCLJFunction( CLJIntraShiftFunction::defaultShiftFunction()
-                                    .read().asA<CLJIntraFunction>() );
+    this->setCLJFunction(CLJIntraShiftFunction::defaultShiftFunction().read().asA<CLJIntraFunction>());
 }
 
 /** Construct, specifying the name of the forcefield */
-IntraGroupFF::IntraGroupFF(const QString &name)
-             : ConcreteProperty<IntraGroupFF, G2FF>(),
-               needs_accepting(false)
+IntraGroupFF::IntraGroupFF(const QString &name) : ConcreteProperty<IntraGroupFF, G2FF>(), needs_accepting(false)
 {
     d = new detail::IntraGroupFFData();
     G2FF::setName(name);
-    this->setCLJFunction( CLJIntraShiftFunction::defaultShiftFunction()
-                                    .read().asA<CLJIntraFunction>() );
+    this->setCLJFunction(CLJIntraShiftFunction::defaultShiftFunction().read().asA<CLJIntraFunction>());
 }
 
 /** Copy constructor */
 IntraGroupFF::IntraGroupFF(const IntraGroupFF &other)
-             : ConcreteProperty<IntraGroupFF,G2FF>(other),
-               moldata(other.moldata), d(other.d),
-               needs_accepting(other.needs_accepting)
-{}
+    : ConcreteProperty<IntraGroupFF, G2FF>(other), moldata(other.moldata), d(other.d),
+      needs_accepting(other.needs_accepting)
+{
+}
 
 /** Destructor */
 IntraGroupFF::~IntraGroupFF()
-{}
+{
+}
 
 /** Function used to set the CLJIntraFunction used to calculate
     the intramolecular energy */
@@ -456,9 +430,7 @@ void IntraGroupFF::setCLJFunction(const CLJIntraFunction &func)
 
     if (not moldata.isEmpty())
     {
-        for (MolData::iterator it = moldata.begin();
-             it != moldata.end();
-             ++it)
+        for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
         {
             it.value()->setCLJFunctions(d->cljfuncs);
         }
@@ -469,12 +441,11 @@ void IntraGroupFF::setCLJFunction(const CLJIntraFunction &func)
 }
 
 /** Return the function used to calculate the energy */
-const CLJIntraFunction& IntraGroupFF::cljFunction() const
+const CLJIntraFunction &IntraGroupFF::cljFunction() const
 {
     if (d.constData()->cljfuncs.isEmpty())
-        throw SireError::program_bug( QObject::tr(
-                "There should always be at least one CLJFunction in InterGroupFF!"),
-                    CODELOC );
+        throw SireError::program_bug(QObject::tr("There should always be at least one CLJFunction in InterGroupFF!"),
+                                     CODELOC);
 
     return d.constData()->cljfuncs.at(0).read().asA<CLJIntraFunction>();
 }
@@ -484,16 +455,14 @@ void IntraGroupFF::setCLJFunction(QString key, const CLJIntraFunction &cljfunc)
 {
     if (key == "all")
     {
-        for (int i=0; i<d->cljfuncs.count(); ++i)
+        for (int i = 0; i < d->cljfuncs.count(); ++i)
         {
             d->cljfuncs[i] = cljfunc;
         }
 
         if (not moldata.isEmpty())
         {
-            for (MolData::iterator it = moldata.begin();
-                 it != moldata.end();
-                 ++it)
+            for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
             {
                 it.value()->setCLJFunctions(d->cljfuncs);
             }
@@ -513,16 +482,14 @@ void IntraGroupFF::setCLJFunction(QString key, const CLJIntraFunction &cljfunc)
 
         if (idx >= d->cljfuncs.count())
         {
-            d->cljfuncs.resize( idx + 1 );
+            d->cljfuncs.resize(idx + 1);
         }
 
         d->cljfuncs[idx] = cljfunc;
 
         if (not moldata.isEmpty())
         {
-            for (MolData::iterator it = moldata.begin();
-                 it != moldata.end();
-                 ++it)
+            for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
             {
                 it.value()->setCLJFunctions(d->cljfuncs);
             }
@@ -547,9 +514,7 @@ void IntraGroupFF::removeCLJFunctionAt(QString key)
 
             if (not moldata.isEmpty())
             {
-                for (MolData::iterator it = moldata.begin();
-                     it != moldata.end();
-                     ++it)
+                for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
                 {
                     it.value()->setCLJFunctions(d->cljfuncs);
                 }
@@ -576,9 +541,7 @@ void IntraGroupFF::removeAllCLJFunctions()
 
     if (not moldata.isEmpty())
     {
-        for (MolData::iterator it = moldata.begin();
-             it != moldata.end();
-             ++it)
+        for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
         {
             it.value()->setCLJFunctions(d->cljfuncs);
         }
@@ -595,10 +558,9 @@ QStringList IntraGroupFF::cljFunctionKeys() const
 }
 
 /** Return the CLJFunction associated with the passed key */
-const CLJIntraFunction& IntraGroupFF::cljFunction(QString key) const
+const CLJIntraFunction &IntraGroupFF::cljFunction(QString key) const
 {
-    return d.constData()->cljfuncs.at( d.constData()->cljcomps.indexOf(key) )
-                                  .read().asA<CLJIntraFunction>();
+    return d.constData()->cljfuncs.at(d.constData()->cljcomps.indexOf(key)).read().asA<CLJIntraFunction>();
 }
 
 /** Return the number of CLJ functions in this forcefield. There should always
@@ -609,13 +571,13 @@ int IntraGroupFF::nCLJFunctions() const
 }
 
 /** Return the hash of all CLJFunctions in this forcefield, indexed by their key */
-QHash<QString,CLJFunctionPtr> IntraGroupFF::cljFunctions() const
+QHash<QString, CLJFunctionPtr> IntraGroupFF::cljFunctions() const
 {
-    QHash<QString,CLJFunctionPtr> funcs;
+    QHash<QString, CLJFunctionPtr> funcs;
 
     foreach (QString key, d->cljcomps.keys())
     {
-        funcs.insert( key, this->cljFunction(key) );
+        funcs.insert(key, this->cljFunction(key));
     }
 
     return funcs;
@@ -628,18 +590,18 @@ void IntraGroupFF::_pvt_updateName()
     G2FF::_pvt_updateName();
 }
 
-const char* IntraGroupFF::typeName()
+const char *IntraGroupFF::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<IntraGroupFF>() );
+    return QMetaType::typeName(qMetaTypeId<IntraGroupFF>());
 }
 
-const char* IntraGroupFF::what() const
+const char *IntraGroupFF::what() const
 {
     return IntraGroupFF::typeName();
 }
 
 /** Copy assignment operator */
-IntraGroupFF& IntraGroupFF::operator=(const IntraGroupFF &other)
+IntraGroupFF &IntraGroupFF::operator=(const IntraGroupFF &other)
 {
     if (this != &other)
     {
@@ -656,8 +618,7 @@ IntraGroupFF& IntraGroupFF::operator=(const IntraGroupFF &other)
 bool IntraGroupFF::operator==(const IntraGroupFF &other) const
 {
     return (this == &other) or
-           (G2FF::operator==(other) and
-            d->cljfuncs == other.d->cljfuncs and d->cljcomps == other.d->cljcomps and
+           (G2FF::operator==(other) and d->cljfuncs == other.d->cljfuncs and d->cljcomps == other.d->cljcomps and
             moldata == other.moldata and needs_accepting == other.needs_accepting);
 }
 
@@ -667,13 +628,13 @@ bool IntraGroupFF::operator!=(const IntraGroupFF &other) const
     return not operator==(other);
 }
 
-IntraGroupFF* IntraGroupFF::clone() const
+IntraGroupFF *IntraGroupFF::clone() const
 {
     return new IntraGroupFF(*this);
 }
 
 /** Return the energy components of this forcefield */
-const MultiCLJComponent& IntraGroupFF::components() const
+const MultiCLJComponent &IntraGroupFF::components() const
 {
     return d->cljcomps;
 }
@@ -682,24 +643,22 @@ const MultiCLJComponent& IntraGroupFF::components() const
     stores all of the properties of this forcefield */
 void IntraGroupFF::rebuildProps()
 {
-    //collect all of the properties from all of the CLJFunctions - note that
-    //the first 'default' CLJFunction has precedence on the value of
-    //properties
+    // collect all of the properties from all of the CLJFunctions - note that
+    // the first 'default' CLJFunction has precedence on the value of
+    // properties
     d->props = d.constData()->cljfuncs.at(0).read().properties();
 
     for (QString key : d.constData()->cljcomps.keys())
     {
         const int idx = d.constData()->cljcomps.indexOf(key);
 
-        d->props.setProperty( QString("cljFunction[%1]").arg(key),
-                              d.constData()->cljfuncs.at(idx) );
+        d->props.setProperty(QString("cljFunction[%1]").arg(key), d.constData()->cljfuncs.at(idx));
 
         Properties p = d.constData()->cljfuncs.at(idx).read().properties();
 
         foreach (QString propkey, p.propertyKeys())
         {
-            d->props.setProperty( QString("%1[%2]").arg(propkey).arg(key),
-                                  p.property(propkey) );
+            d->props.setProperty(QString("%1[%2]").arg(propkey).arg(key), p.property(propkey));
         }
     }
 
@@ -751,12 +710,12 @@ bool IntraGroupFF::setProperty(const QString &name, const Property &property)
     }
     else
     {
-        //see if the property is in the default CLJFunction
+        // see if the property is in the default CLJFunction
         if (cljFunction().containsProperty(name))
         {
             CLJFunctionPtr newfunc = cljFunction().setProperty(name, property);
 
-            if ( not cljFunction().equals( newfunc.read() ) )
+            if (not cljFunction().equals(newfunc.read()))
             {
                 this->setCLJFunction(newfunc.read().asA<CLJIntraFunction>());
                 return true;
@@ -765,8 +724,8 @@ bool IntraGroupFF::setProperty(const QString &name, const Property &property)
                 return false;
         }
 
-        //ok, it doesn't. Now look to see if the property has an index, meaning
-        //that it may belong to one of the extra CLJ functions
+        // ok, it doesn't. Now look to see if the property has an index, meaning
+        // that it may belong to one of the extra CLJ functions
         auto subscr = getSubscriptedProperty(name);
         QString cljname = subscr.get<0>();
         QString cljkey = subscr.get<1>();
@@ -792,27 +751,26 @@ bool IntraGroupFF::setProperty(const QString &name, const Property &property)
 
             if (cljkey == "all")
             {
-                //set this property in all cljfunctions (if possible)
-                for (int i=0; i<d.constData()->cljfuncs.count(); ++i)
+                // set this property in all cljfunctions (if possible)
+                for (int i = 0; i < d.constData()->cljfuncs.count(); ++i)
                 {
                     PropertyPtr old_prop;
                     bool this_func_has_property = false;
 
                     try
                     {
-                        PropertyPtr old_prop = d.constData()->cljfuncs.at(i)
-                                                                      .read().property(cljname);
+                        PropertyPtr old_prop = d.constData()->cljfuncs.at(i).read().property(cljname);
                         found_property = true;
                         this_func_has_property = true;
                     }
-                    catch(...)
-                    {}
+                    catch (...)
+                    {
+                    }
 
                     if (this_func_has_property and not property.equals(old_prop.read()))
                     {
-                        //need to set the property
-                        CLJFunctionPtr new_func = d->cljfuncs[i].read()
-                                                                .setProperty(cljname, property);
+                        // need to set the property
+                        CLJFunctionPtr new_func = d->cljfuncs[i].read().setProperty(cljname, property);
                         d->cljfuncs[i] = new_func;
                         changed_property = true;
                     }
@@ -820,14 +778,14 @@ bool IntraGroupFF::setProperty(const QString &name, const Property &property)
             }
             else if (cljkey == "default")
             {
-                //set this property in the default cljfunction
+                // set this property in the default cljfunction
                 if (cljFunction().containsProperty(cljname))
                 {
                     found_property = true;
 
                     CLJFunctionPtr newfunc = cljFunction().setProperty(cljname, property);
 
-                    if ( not cljFunction().equals( newfunc.read() ) )
+                    if (not cljFunction().equals(newfunc.read()))
                     {
                         this->setCLJFunction(newfunc.read().asA<CLJIntraFunction>());
                         return true;
@@ -846,7 +804,7 @@ bool IntraGroupFF::setProperty(const QString &name, const Property &property)
                     {
                         CLJFunctionPtr newfunc = cljFunction(cljkey).setProperty(cljname, property);
 
-                        if ( not cljFunction(cljkey).equals( newfunc.read() ) )
+                        if (not cljFunction(cljkey).equals(newfunc.read()))
                         {
                             this->setCLJFunction(cljkey, newfunc.read().asA<CLJIntraFunction>());
                             return true;
@@ -861,9 +819,7 @@ bool IntraGroupFF::setProperty(const QString &name, const Property &property)
             {
                 if (not moldata.isEmpty())
                 {
-                    for (MolData::iterator it = moldata.begin();
-                         it != moldata.end();
-                         ++it)
+                    for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
                     {
                         it.value()->setCLJFunctions(d->cljfuncs);
                     }
@@ -875,24 +831,27 @@ bool IntraGroupFF::setProperty(const QString &name, const Property &property)
             }
             else if (not found_property)
             {
-                throw SireBase::missing_property( QObject::tr(
-                        "No property at the key '%1' in this forcefield. Available "
-                        "properties are %2.").arg(name).arg(Sire::toString(this->propertyKeys())),
-                            CODELOC );
+                throw SireBase::missing_property(
+                    QObject::tr("No property at the key '%1' in this forcefield. Available "
+                                "properties are %2.")
+                        .arg(name)
+                        .arg(Sire::toString(this->propertyKeys())),
+                    CODELOC);
             }
         }
         else
-            throw SireBase::missing_property( QObject::tr(
-                    "No property at the key '%1' in this forcefield. Available "
-                    "properties are %2.").arg(name).arg(Sire::toString(this->propertyKeys())),
-                        CODELOC );
+            throw SireBase::missing_property(QObject::tr("No property at the key '%1' in this forcefield. Available "
+                                                         "properties are %2.")
+                                                 .arg(name)
+                                                 .arg(Sire::toString(this->propertyKeys())),
+                                             CODELOC);
 
         return false;
     }
 }
 
 /** Return the value of the forcefield property with name 'name' */
-const Property& IntraGroupFF::property(const QString &name) const
+const Property &IntraGroupFF::property(const QString &name) const
 {
     return d->props.property(name);
 }
@@ -904,7 +863,7 @@ bool IntraGroupFF::containsProperty(const QString &name) const
 }
 
 /** Return all of the properties of this function */
-const Properties& IntraGroupFF::properties() const
+const Properties &IntraGroupFF::properties() const
 {
     return d->props;
 }
@@ -982,9 +941,7 @@ void IntraGroupFF::mustNowRecalculateFromScratch()
 {
     if (not moldata.isEmpty())
     {
-        for (MolData::iterator it = moldata.begin();
-             it != moldata.end();
-             ++it)
+        for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
         {
             it.value()->mustNowRecalculateFromScratch();
         }
@@ -1000,9 +957,7 @@ void IntraGroupFF::mustNowReallyRecalculateFromScratch()
 {
     if (not moldata.isEmpty())
     {
-        for (MolData::iterator it = moldata.begin();
-             it != moldata.end();
-             ++it)
+        for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
         {
             it.value()->mustReallyRecalculateFromScratch();
         }
@@ -1039,104 +994,94 @@ MultiCLJEnergy IntraGroupFF::calcEnergy(SireMM::detail::IntraGroupFFMolData &mol
 
             if (mol.cljfuncs.count() == 1)
             {
-                tuple<double,double> nrg;
+                tuple<double, double> nrg;
 
                 if (usesParallelCalculation())
                 {
-                    CLJCalculator cljcalc( usesReproducibleCalculation() );
+                    CLJCalculator cljcalc(usesReproducibleCalculation());
 
-                    nrg = cljcalc.calculate( mol.cljfuncs.at(0).read(),
-                                             mol.cljgroup0.cljBoxes(),
-                                             mol.cljgroup1.cljBoxes() );
+                    nrg = cljcalc.calculate(mol.cljfuncs.at(0).read(), mol.cljgroup0.cljBoxes(),
+                                            mol.cljgroup1.cljBoxes());
                 }
                 else
                 {
-                    nrg = mol.cljfuncs.at(0).read().calculate( mol.cljgroup0.cljBoxes(),
-                                                               mol.cljgroup1.cljBoxes() );
+                    nrg = mol.cljfuncs.at(0).read().calculate(mol.cljgroup0.cljBoxes(), mol.cljgroup1.cljBoxes());
                 }
 
-                mol.nrg = MultiCLJEnergy( nrg.get<0>(), nrg.get<1>() );
+                mol.nrg = MultiCLJEnergy(nrg.get<0>(), nrg.get<1>());
                 mol.needs_energy_calc = false;
                 return mol.nrg;
             }
             else
             {
-                tuple< QVector<double>,QVector<double> > nrg;
+                tuple<QVector<double>, QVector<double>> nrg;
 
                 if (usesParallelCalculation())
                 {
-                    CLJCalculator cljcalc( usesReproducibleCalculation() );
+                    CLJCalculator cljcalc(usesReproducibleCalculation());
 
-                    nrg = cljcalc.calculate( mol.cljfuncs, mol.cljgroup0.cljBoxes(),
-                                                           mol.cljgroup1.cljBoxes() );
+                    nrg = cljcalc.calculate(mol.cljfuncs, mol.cljgroup0.cljBoxes(), mol.cljgroup1.cljBoxes());
                 }
                 else
                 {
-                    nrg = CLJFunction::multiCalculate( mol.cljfuncs,
-                                                       mol.cljgroup0.cljBoxes(),
-                                                       mol.cljgroup1.cljBoxes() );
+                    nrg = CLJFunction::multiCalculate(mol.cljfuncs, mol.cljgroup0.cljBoxes(), mol.cljgroup1.cljBoxes());
                 }
 
-                mol.nrg = MultiCLJEnergy( nrg.get<0>(), nrg.get<1>() );
+                mol.nrg = MultiCLJEnergy(nrg.get<0>(), nrg.get<1>());
                 mol.needs_energy_calc = false;
                 return mol.nrg;
             }
         }
         else if (mol.cljgroup0.needsAccepting() and mol.cljgroup1.needsAccepting())
         {
-            //they both need accepting - just recalculate from scratch for the moment
-            //until I have time or need to write a more optimised calculation
+            // they both need accepting - just recalculate from scratch for the moment
+            // until I have time or need to write a more optimised calculation
             mol.mustNowRecalculateFromScratch();
             return this->calcEnergy(mol);
         }
         else if (mol.cljgroup0.needsAccepting())
         {
-            //we can calculate the energy using a delta
+            // we can calculate the energy using a delta
             CLJAtoms changed_atoms = mol.cljgroup0.changedAtoms();
 
             if (mol.cljfuncs.count() == 1)
             {
-                tuple<double,double> delta;
+                tuple<double, double> delta;
 
                 if (usesParallelCalculation())
                 {
                     CLJCalculator cljcalc(usesReproducibleCalculation());
 
-                    delta = cljcalc.calculate( mol.cljfuncs.at(0).read(),
-                                               changed_atoms, mol.cljgroup1.cljBoxes() );
+                    delta = cljcalc.calculate(mol.cljfuncs.at(0).read(), changed_atoms, mol.cljgroup1.cljBoxes());
                 }
                 else
                 {
-                    delta = mol.cljfuncs.at(0).read().calculate(
-                                               changed_atoms, mol.cljgroup1.cljBoxes() );
+                    delta = mol.cljfuncs.at(0).read().calculate(changed_atoms, mol.cljgroup1.cljBoxes());
                 }
 
-                mol.nrg += MultiCLJEnergy(delta.get<0>(),delta.get<1>());
+                mol.nrg += MultiCLJEnergy(delta.get<0>(), delta.get<1>());
 
                 mol.needs_energy_calc = false;
                 mol.needs_accepting = true;
 
                 return mol.nrg;
             }
-            else  // delta calculation with more than one clj function
+            else // delta calculation with more than one clj function
             {
-                tuple< QVector<double>,QVector<double> > delta;
+                tuple<QVector<double>, QVector<double>> delta;
 
                 if (usesParallelCalculation())
                 {
                     CLJCalculator cljcalc(usesReproducibleCalculation());
 
-                    delta = cljcalc.calculate( mol.cljfuncs,
-                                               changed_atoms, mol.cljgroup1.cljBoxes() );
+                    delta = cljcalc.calculate(mol.cljfuncs, changed_atoms, mol.cljgroup1.cljBoxes());
                 }
                 else
                 {
-                    delta = CLJFunction::multiCalculate( mol.cljfuncs,
-                                                         changed_atoms,
-                                                         mol.cljgroup1.cljBoxes() );
+                    delta = CLJFunction::multiCalculate(mol.cljfuncs, changed_atoms, mol.cljgroup1.cljBoxes());
                 }
 
-                mol.nrg += MultiCLJEnergy( delta.get<0>(), delta.get<1>() );
+                mol.nrg += MultiCLJEnergy(delta.get<0>(), delta.get<1>());
 
                 mol.needs_energy_calc = false;
                 mol.needs_accepting = true;
@@ -1146,52 +1091,47 @@ MultiCLJEnergy IntraGroupFF::calcEnergy(SireMM::detail::IntraGroupFFMolData &mol
         }
         else if (mol.cljgroup1.needsAccepting())
         {
-            //we can calculate the energy using a delta
+            // we can calculate the energy using a delta
             CLJAtoms changed_atoms = mol.cljgroup1.changedAtoms();
 
             if (mol.cljfuncs.count() == 1)
             {
-                tuple<double,double> delta;
+                tuple<double, double> delta;
 
                 if (usesParallelCalculation())
                 {
                     CLJCalculator cljcalc(usesReproducibleCalculation());
 
-                    delta = cljcalc.calculate( mol.cljfuncs.at(0).read(),
-                                               changed_atoms, mol.cljgroup0.cljBoxes() );
+                    delta = cljcalc.calculate(mol.cljfuncs.at(0).read(), changed_atoms, mol.cljgroup0.cljBoxes());
                 }
                 else
                 {
-                    delta = mol.cljfuncs.at(0).read().calculate(
-                                               changed_atoms, mol.cljgroup0.cljBoxes() );
+                    delta = mol.cljfuncs.at(0).read().calculate(changed_atoms, mol.cljgroup0.cljBoxes());
                 }
 
-                mol.nrg += MultiCLJEnergy(delta.get<0>(),delta.get<1>());
+                mol.nrg += MultiCLJEnergy(delta.get<0>(), delta.get<1>());
 
                 mol.needs_energy_calc = false;
                 mol.needs_accepting = true;
 
                 return mol.nrg;
             }
-            else  // delta calculation with more than one clj function
+            else // delta calculation with more than one clj function
             {
-                tuple< QVector<double>,QVector<double> > delta;
+                tuple<QVector<double>, QVector<double>> delta;
 
                 if (usesParallelCalculation())
                 {
                     CLJCalculator cljcalc(usesReproducibleCalculation());
 
-                    delta = cljcalc.calculate( mol.cljfuncs,
-                                               changed_atoms, mol.cljgroup0.cljBoxes() );
+                    delta = cljcalc.calculate(mol.cljfuncs, changed_atoms, mol.cljgroup0.cljBoxes());
                 }
                 else
                 {
-                    delta = CLJFunction::multiCalculate( mol.cljfuncs,
-                                                         changed_atoms,
-                                                         mol.cljgroup0.cljBoxes() );
+                    delta = CLJFunction::multiCalculate(mol.cljfuncs, changed_atoms, mol.cljgroup0.cljBoxes());
                 }
 
-                mol.nrg += MultiCLJEnergy( delta.get<0>(), delta.get<1>() );
+                mol.nrg += MultiCLJEnergy(delta.get<0>(), delta.get<1>());
 
                 mol.needs_energy_calc = false;
                 mol.needs_accepting = true;
@@ -1201,14 +1141,14 @@ MultiCLJEnergy IntraGroupFF::calcEnergy(SireMM::detail::IntraGroupFFMolData &mol
         }
         else
         {
-            //something weird - recalculate from scratch
+            // something weird - recalculate from scratch
             mol.mustNowRecalculateFromScratch();
             return calcEnergy(mol);
         }
     }
     else
     {
-        //something weird - recalculate from scratch
+        // something weird - recalculate from scratch
         mol.mustNowRecalculateFromScratch();
         return calcEnergy(mol);
     }
@@ -1221,17 +1161,15 @@ void IntraGroupFF::recalculateEnergy()
 
     if (d.constData()->cljfuncs.count() == 1)
     {
-        cljenergy = MultiCLJEnergy(0,0);
+        cljenergy = MultiCLJEnergy(0, 0);
     }
     else
     {
-        QVector<double> zero( d.constData()->cljfuncs.count(), 0.0 );
+        QVector<double> zero(d.constData()->cljfuncs.count(), 0.0);
         cljenergy = MultiCLJEnergy(zero, zero);
     }
 
-    for (MolData::iterator it = moldata.begin();
-         it != moldata.end();
-         ++it)
+    for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
     {
         if (it.value().constData()->needs_energy_calc)
         {
@@ -1249,18 +1187,15 @@ void IntraGroupFF::recalculateEnergy()
 }
 
 /** Function called to add a molecule to this forcefield */
-void IntraGroupFF::_pvt_added(quint32 group_id,
-                              const SireMol::PartialMolecule &mol,
-                              const SireBase::PropertyMap &map)
+void IntraGroupFF::_pvt_added(quint32 group_id, const SireMol::PartialMolecule &mol, const SireBase::PropertyMap &map)
 {
     MolData::iterator it = moldata.find(mol.number());
 
     if (it == moldata.end())
     {
-        //need to add this as a new molecule
-        moldata.insert( mol.number(), SharedDataPointer<detail::IntraGroupFFMolData>(
-                                new detail::IntraGroupFFMolData(group_id, mol,
-                                                                map, d.constData()->cljfuncs) ) );
+        // need to add this as a new molecule
+        moldata.insert(mol.number(), SharedDataPointer<detail::IntraGroupFFMolData>(
+                                         new detail::IntraGroupFFMolData(group_id, mol, map, d.constData()->cljfuncs)));
     }
     else
     {
@@ -1313,8 +1248,7 @@ void IntraGroupFF::_pvt_removed(quint32 group_id, const SireMol::PartialMolecule
 }
 
 /** Function called to indicate that the passed molecule has changed */
-void IntraGroupFF::_pvt_changed(quint32 group_id,
-                                const Molecule &molecule, bool auto_update)
+void IntraGroupFF::_pvt_changed(quint32 group_id, const Molecule &molecule, bool auto_update)
 {
     MolData::iterator it = moldata.find(molecule.number());
 
@@ -1340,8 +1274,7 @@ void IntraGroupFF::_pvt_changed(quint32 group_id,
 }
 
 /** Function called to indicate that a list of molecules in this forcefield have changed */
-void IntraGroupFF::_pvt_changed(quint32 group_id,
-                                const QList<SireMol::Molecule> &molecules, bool auto_update)
+void IntraGroupFF::_pvt_changed(quint32 group_id, const QList<SireMol::Molecule> &molecules, bool auto_update)
 {
     foreach (const Molecule &molecule, molecules)
     {
@@ -1354,9 +1287,7 @@ void IntraGroupFF::_pvt_removedAll(quint32 group_id)
 {
     QSet<MolNum> mols_to_remove;
 
-    for (MolData::iterator it = moldata.begin();
-         it != moldata.end();
-         ++it)
+    for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
     {
         if (group_id == 0)
         {
@@ -1386,8 +1317,7 @@ void IntraGroupFF::_pvt_removedAll(quint32 group_id)
 
 /** Function called to query whether or not a change in source properties would
     change the properties needed by this forcefield for the molecule with number 'molnum' */
-bool IntraGroupFF::_pvt_wouldChangeProperties(quint32 group_id,
-                                              SireMol::MolNum molnum,
+bool IntraGroupFF::_pvt_wouldChangeProperties(quint32 group_id, SireMol::MolNum molnum,
                                               const SireBase::PropertyMap &map) const
 {
     MolData::const_iterator it = moldata.constFind(molnum);
@@ -1419,9 +1349,7 @@ void IntraGroupFF::accept()
 {
     if (needs_accepting)
     {
-        for (MolData::iterator it = moldata.begin();
-             it != moldata.end();
-             ++it)
+        for (MolData::iterator it = moldata.begin(); it != moldata.end(); ++it)
         {
             if (it.value()->needs_accepting)
             {

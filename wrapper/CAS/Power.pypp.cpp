@@ -45,7 +45,7 @@ void register_Power_class(){
 
     { //::SireCAS::Power
         typedef bp::class_< SireCAS::Power, bp::bases< SireCAS::PowerFunction, SireCAS::ExBase > > Power_exposer_t;
-        Power_exposer_t Power_exposer = Power_exposer_t( "Power", "\nThis class represents an expression raised to a generic power (e.g. x^y). This is also the route to raising expressions to real-number powers, and the base of the implementation of the exp() and invlog_10() functions.\n\nAuthor: Christopher Woods\n", bp::init< >("Construct a null power") );
+        Power_exposer_t Power_exposer = Power_exposer_t( "Power", "\nThis class represents an expression raised to a generic power (e.g. x^y). This is also the route to raising expressions\nto real-number powers, and the base of the implementation of the exp() and invlog_10() functions.\n\nAuthor: Christopher Woods\n", bp::init< >("Construct a null power") );
         bp::scope Power_scope( Power_exposer );
         Power_exposer.def( bp::init< SireCAS::Expression const &, SireCAS::Expression const & >(( bp::arg("base"), bp::arg("power") ), "Construct a power that represents core^power") );
         Power_exposer.def( bp::init< SireCAS::Power const & >(( bp::arg("other") ), "Copy constructor") );

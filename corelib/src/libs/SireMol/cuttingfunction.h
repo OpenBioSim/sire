@@ -34,53 +34,53 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class CuttingFunction;
+    class CuttingFunction;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::CuttingFunction&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::CuttingFunction&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::CuttingFunction &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::CuttingFunction &);
 
 namespace SireMol
 {
 
-class Molecule;
-class MolStructureEditor;
+    class Molecule;
+    class MolStructureEditor;
 
-class ResidueCutting;
+    class ResidueCutting;
 
-/** This is the base class of all cutting functions. These are
-    functions that divide a molecule up into CutGroups.
+    /** This is the base class of all cutting functions. These are
+        functions that divide a molecule up into CutGroups.
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT CuttingFunction : public SireBase::Property
-{
-public:
-    CuttingFunction();
-    CuttingFunction(const CuttingFunction &other);
-
-    virtual ~CuttingFunction();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT CuttingFunction : public SireBase::Property
     {
-        return "SireMol::CuttingFunction";
-    }
+    public:
+        CuttingFunction();
+        CuttingFunction(const CuttingFunction &other);
 
-    virtual CuttingFunction* clone() const=0;
+        virtual ~CuttingFunction();
 
-    virtual Molecule operator()(const Molecule &molecule) const;
-    virtual MolStructureEditor operator()(MolStructureEditor &moleditor) const=0;
+        static const char *typeName()
+        {
+            return "SireMol::CuttingFunction";
+        }
 
-    static const ResidueCutting& null();
-};
+        virtual CuttingFunction *clone() const = 0;
 
-typedef SireBase::PropPtr<CuttingFunction> CutFuncPtr;
+        virtual Molecule operator()(const Molecule &molecule) const;
+        virtual MolStructureEditor operator()(MolStructureEditor &moleditor) const = 0;
 
-}
+        static const ResidueCutting &null();
+    };
 
-SIRE_EXPOSE_CLASS( SireMol::CuttingFunction )
+    typedef SireBase::PropPtr<CuttingFunction> CutFuncPtr;
 
-SIRE_EXPOSE_PROPERTY( SireMol::CutFuncPtr, SireMol::CuttingFunction )
+} // namespace SireMol
+
+SIRE_EXPOSE_CLASS(SireMol::CuttingFunction)
+
+SIRE_EXPOSE_PROPERTY(SireMol::CutFuncPtr, SireMol::CuttingFunction)
 
 SIRE_END_HEADER
 

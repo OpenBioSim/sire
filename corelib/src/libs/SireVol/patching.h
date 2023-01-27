@@ -34,186 +34,182 @@
 
 namespace SireVol
 {
-class Patching;
-class NullPatching;
+    class Patching;
+    class NullPatching;
 
-class BoxPatching;
-}
+    class BoxPatching;
+} // namespace SireVol
 
-SIREVOL_EXPORT QDataStream& operator<<(QDataStream&, const SireVol::Patching&);
-SIREVOL_EXPORT QDataStream& operator>>(QDataStream&, SireVol::Patching&);
+SIREVOL_EXPORT QDataStream &operator<<(QDataStream &, const SireVol::Patching &);
+SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::Patching &);
 
-SIREVOL_EXPORT QDataStream& operator<<(QDataStream&, const SireVol::NullPatching&);
-SIREVOL_EXPORT QDataStream& operator>>(QDataStream&, SireVol::NullPatching&);
+SIREVOL_EXPORT QDataStream &operator<<(QDataStream &, const SireVol::NullPatching &);
+SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::NullPatching &);
 
-SIREVOL_EXPORT QDataStream& operator<<(QDataStream&, const SireVol::BoxPatching&);
-SIREVOL_EXPORT QDataStream& operator>>(QDataStream&, SireVol::BoxPatching&);
+SIREVOL_EXPORT QDataStream &operator<<(QDataStream &, const SireVol::BoxPatching &);
+SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::BoxPatching &);
 
 namespace SireVol
 {
 
-typedef SireBase::PropPtr<Patching> PatchingPtr;
+    typedef SireBase::PropPtr<Patching> PatchingPtr;
 
-/** This is the base class of all Patching classes. Patching
-    represents a scheme for decomposing a space into a set
-    of regions (domain decomposition) that contain neighbouring
-    CoordGroups - this allows inter-CoordGroup calculations to
-    be accelerated as cutoff tests can be applied to the patches
-    to eliminate tests of the contained CoordGroups.
+    /** This is the base class of all Patching classes. Patching
+        represents a scheme for decomposing a space into a set
+        of regions (domain decomposition) that contain neighbouring
+        CoordGroups - this allows inter-CoordGroup calculations to
+        be accelerated as cutoff tests can be applied to the patches
+        to eliminate tests of the contained CoordGroups.
 
-    @author Christopher Woods
-*/
-class SIREVOL_EXPORT Patching : public SireBase::Property
-{
+        @author Christopher Woods
+    */
+    class SIREVOL_EXPORT Patching : public SireBase::Property
+    {
 
-friend SIREVOL_EXPORT QDataStream& ::operator<<(QDataStream&, const Patching&);
-friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, Patching&);
+        friend SIREVOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Patching &);
+        friend SIREVOL_EXPORT QDataStream & ::operator>>(QDataStream &, Patching &);
 
-public:
-    Patching();
-    Patching(const Patching &other);
+    public:
+        Patching();
+        Patching(const Patching &other);
 
-    virtual ~Patching();
+        virtual ~Patching();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual Patching* clone() const=0;
+        virtual Patching *clone() const = 0;
 
-    const Space& space() const;
+        const Space &space() const;
 
-    virtual int nPatches() const=0;
+        virtual int nPatches() const = 0;
 
-    virtual int patchIndex(const Vector &point) const=0;
+        virtual int patchIndex(const Vector &point) const = 0;
 
-    virtual QPair<int,Vector> patchIndexAndCenter(const Vector &point) const=0;
+        virtual QPair<int, Vector> patchIndexAndCenter(const Vector &point) const = 0;
 
-    virtual PatchingPtr repatch(const Space &new_space) const=0;
+        virtual PatchingPtr repatch(const Space &new_space) const = 0;
 
-    virtual PatchingPtr rebalance(const Space &space,
-                                  const QVector<CoordGroupArray> &patchcoords) const;
+        virtual PatchingPtr rebalance(const Space &space, const QVector<CoordGroupArray> &patchcoords) const;
 
-    static NullPatching null();
+        static NullPatching null();
 
-protected:
-    Patching(const Space &space);
+    protected:
+        Patching(const Space &space);
 
-    Patching& operator=(const Patching &other);
+        Patching &operator=(const Patching &other);
 
-    bool operator==(const Patching &other) const;
-    bool operator!=(const Patching &other) const;
+        bool operator==(const Patching &other) const;
+        bool operator!=(const Patching &other) const;
 
-private:
-    /** The space from which the patching was derived */
-    SpacePtr spce;
-};
+    private:
+        /** The space from which the patching was derived */
+        SpacePtr spce;
+    };
 
-/** Null patching */
-class SIREVOL_EXPORT NullPatching
-        : public SireBase::ConcreteProperty<NullPatching,Patching>
-{
+    /** Null patching */
+    class SIREVOL_EXPORT NullPatching : public SireBase::ConcreteProperty<NullPatching, Patching>
+    {
 
-friend SIREVOL_EXPORT QDataStream& ::operator<<(QDataStream&, const NullPatching&);
-friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, NullPatching&);
+        friend SIREVOL_EXPORT QDataStream & ::operator<<(QDataStream &, const NullPatching &);
+        friend SIREVOL_EXPORT QDataStream & ::operator>>(QDataStream &, NullPatching &);
 
-public:
-    NullPatching();
-    NullPatching(const Space &space);
-    NullPatching(const NullPatching &other);
+    public:
+        NullPatching();
+        NullPatching(const Space &space);
+        NullPatching(const NullPatching &other);
 
-    ~NullPatching();
+        ~NullPatching();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    NullPatching& operator=(const NullPatching &other);
+        NullPatching &operator=(const NullPatching &other);
 
-    bool operator==(const NullPatching &other) const;
-    bool operator!=(const NullPatching &other) const;
+        bool operator==(const NullPatching &other) const;
+        bool operator!=(const NullPatching &other) const;
 
-    int nPatches() const;
+        int nPatches() const;
 
-    int patchIndex(const Vector &point) const;
+        int patchIndex(const Vector &point) const;
 
-    QPair<int,Vector> patchIndexAndCenter(const Vector &point) const;
+        QPair<int, Vector> patchIndexAndCenter(const Vector &point) const;
 
-    PatchingPtr repatch(const Space &new_space) const;
-};
+        PatchingPtr repatch(const Space &new_space) const;
+    };
 
-/** This is a simple patching scheme that divides space up into a
-    series of cuboidal boxes (3D grid!)
+    /** This is a simple patching scheme that divides space up into a
+        series of cuboidal boxes (3D grid!)
 
-    @author Christopher Woods
-*/
-class SIREVOL_EXPORT BoxPatching
-        : public SireBase::ConcreteProperty<BoxPatching,Patching>
-{
+        @author Christopher Woods
+    */
+    class SIREVOL_EXPORT BoxPatching : public SireBase::ConcreteProperty<BoxPatching, Patching>
+    {
 
-friend SIREVOL_EXPORT QDataStream& ::operator<<(QDataStream&, const BoxPatching&);
-friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, BoxPatching&);
+        friend SIREVOL_EXPORT QDataStream & ::operator<<(QDataStream &, const BoxPatching &);
+        friend SIREVOL_EXPORT QDataStream & ::operator>>(QDataStream &, BoxPatching &);
 
-public:
-    BoxPatching();
-    BoxPatching(const Space &space);
-    BoxPatching(const Space &space, const Vector &center);
+    public:
+        BoxPatching();
+        BoxPatching(const Space &space);
+        BoxPatching(const Space &space, const Vector &center);
 
-    BoxPatching(const Space &space, SireUnits::Dimension::Length patch_size);
-    BoxPatching(const Space &space, SireUnits::Dimension::Length patch_size,
-                const Vector &center);
+        BoxPatching(const Space &space, SireUnits::Dimension::Length patch_size);
+        BoxPatching(const Space &space, SireUnits::Dimension::Length patch_size, const Vector &center);
 
-    BoxPatching(const BoxPatching &other);
+        BoxPatching(const BoxPatching &other);
 
-    ~BoxPatching();
+        ~BoxPatching();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    BoxPatching& operator=(const BoxPatching &other);
+        BoxPatching &operator=(const BoxPatching &other);
 
-    bool operator==(const BoxPatching &other) const;
-    bool operator!=(const BoxPatching &other) const;
+        bool operator==(const BoxPatching &other) const;
+        bool operator!=(const BoxPatching &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    Vector center() const;
-    SireUnits::Dimension::Length patchSize() const;
+        Vector center() const;
+        SireUnits::Dimension::Length patchSize() const;
 
-    Vector patchDimension() const;
+        Vector patchDimension() const;
 
-    AABox patchBox(int i) const;
-    AABox patchBox(const Vector &point) const;
+        AABox patchBox(int i) const;
+        AABox patchBox(const Vector &point) const;
 
-    int nPatches() const;
+        int nPatches() const;
 
-    int patchIndex(const Vector &point) const;
+        int patchIndex(const Vector &point) const;
 
-    QPair<int,Vector> patchIndexAndCenter(const Vector &point) const;
+        QPair<int, Vector> patchIndexAndCenter(const Vector &point) const;
 
-    PatchingPtr repatch(const Space &new_space) const;
+        PatchingPtr repatch(const Space &new_space) const;
 
-private:
-    int getIndex(const Vector &point) const;
+    private:
+        int getIndex(const Vector &point) const;
 
-    /** The initial dimension used to create the patch */
-    SireUnits::Dimension::Length patch_size;
+        /** The initial dimension used to create the patch */
+        SireUnits::Dimension::Length patch_size;
 
-    /** The origin of the 3D grid */
-    Vector orgn;
+        /** The origin of the 3D grid */
+        Vector orgn;
 
-    /** The inverse unit vector of the 3D grid (the grid is centered
-        around (0,0,0) */
-    Vector inv_gridvec;
+        /** The inverse unit vector of the 3D grid (the grid is centered
+            around (0,0,0) */
+        Vector inv_gridvec;
 
-    /** The number of patches in the X, Y and Z dimensions */
-    int nx, ny, nz;
-};
+        /** The number of patches in the X, Y and Z dimensions */
+        int nx, ny, nz;
+    };
 
-}
+} // namespace SireVol
 
-Q_DECLARE_METATYPE( SireVol::NullPatching )
-Q_DECLARE_METATYPE( SireVol::BoxPatching )
+Q_DECLARE_METATYPE(SireVol::NullPatching)
+Q_DECLARE_METATYPE(SireVol::BoxPatching)
 
-SIRE_EXPOSE_CLASS( SireVol::Patching )
-SIRE_EXPOSE_CLASS( SireVol::NullPatching )
-SIRE_EXPOSE_CLASS( SireVol::BoxPatching )
+SIRE_EXPOSE_CLASS(SireVol::Patching)
+SIRE_EXPOSE_CLASS(SireVol::NullPatching)
+SIRE_EXPOSE_CLASS(SireVol::BoxPatching)
 
-SIRE_EXPOSE_PROPERTY( SireVol::PatchingPtr, SireVol::Patching )
+SIRE_EXPOSE_PROPERTY(SireVol::PatchingPtr, SireVol::Patching)
 
 #endif
