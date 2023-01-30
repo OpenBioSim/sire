@@ -403,8 +403,14 @@ def export_class(mb, classname, aliases, includes, special_code, auto_str_functi
        pass
 
    #run any class specific code
-   if (classname in special_code):
-       special_code[classname](c)
+   fixed_classname = classname
+
+   # replace '>>' template with '> >'
+   while fixed_classname.find(">>") != -1:
+       fixed_classname = fixed_classname.replace(">>", "> >")
+
+   if (fixed_classname in special_code):
+       special_code[fixed_classname](c)
 
    #if this is a noncopyable class then remove all constructors!
    if c.noncopyable:
