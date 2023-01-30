@@ -91,6 +91,7 @@ namespace SireMol
         SelectorMol(const MoleculeGroup &mols);
         SelectorMol(const MolGroupsBase &mols);
         SelectorMol(const SelectResult &mols);
+        SelectorMol(const QList<Molecule> &mols);
 
         template <class T>
         SelectorMol(const SelectorM<T> &other);

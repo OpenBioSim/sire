@@ -268,6 +268,11 @@ SelectorMol::SelectorMol(const Molecules &molecules) : ConcreteProperty<Selector
     }
 }
 
+SelectorMol::SelectorMol(const QList<Molecule> &molecules) : ConcreteProperty<SelectorMol, Property>()
+{
+    mols = molecules;
+}
+
 SelectorMol::SelectorMol(const MoleculeGroup &molecules) : ConcreteProperty<SelectorMol, Property>()
 {
     if (not molecules.isEmpty())

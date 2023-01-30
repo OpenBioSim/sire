@@ -266,11 +266,11 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::MolResID >();
     ObjectRegistry::registerConverterFor< SireMol::MolResNum >();
     ObjectRegistry::registerConverterFor< SireMol::MolWithResID >();
-    ObjectRegistry::registerConverterFor< SireMol::Mover< SireMol::Selector<SireMol::Atom> > >();
-    ObjectRegistry::registerConverterFor< SireMol::Mover< SireMol::Selector<SireMol::Chain> > >();
-    ObjectRegistry::registerConverterFor< SireMol::Mover< SireMol::Selector<SireMol::CutGroup> > >();
-    ObjectRegistry::registerConverterFor< SireMol::Mover< SireMol::Selector<SireMol::Residue> > >();
-    ObjectRegistry::registerConverterFor< SireMol::Mover< SireMol::Selector<SireMol::Segment> > >();
+    ObjectRegistry::registerConverterFor< SireMol::Mover<SireMol::Selector<SireMol::Atom>> >();
+    ObjectRegistry::registerConverterFor< SireMol::Mover<SireMol::Selector<SireMol::Chain>> >();
+    ObjectRegistry::registerConverterFor< SireMol::Mover<SireMol::Selector<SireMol::CutGroup>> >();
+    ObjectRegistry::registerConverterFor< SireMol::Mover<SireMol::Selector<SireMol::Residue>> >();
+    ObjectRegistry::registerConverterFor< SireMol::Mover<SireMol::Selector<SireMol::Segment>> >();
     ObjectRegistry::registerConverterFor< SireMol::PartialMolecule >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMol::PartialMolecule> >();
     ObjectRegistry::registerConverterFor< SireMol::NullPerturbation >();

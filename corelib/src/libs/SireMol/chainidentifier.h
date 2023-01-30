@@ -106,6 +106,16 @@ namespace SireMol
 #include "chainidx.h"
 #include "residx.h"
 
+#ifdef SIRE_INSTANTIATE_TEMPLATES
+template class SireID::Specify<SireMol::ChainID>;
+template class SireMol::AtomsIn<SireMol::ChainID>;
+template class SireMol::ResIn<SireMol::ChainID>;
+template class SireID::IDAndSet<SireMol::ChainID>;
+template class SireID::IDOrSet<SireMol::ChainID>;
+template class SireID::MatchAll<SireMol::ChainID>;
+template class SireID::InvertMatch<SireMol::ChainID>;
+#endif
+
 Q_DECLARE_METATYPE(SireID::Specify<SireMol::ChainID>);
 Q_DECLARE_METATYPE(SireMol::AtomsIn<SireMol::ChainID>);
 Q_DECLARE_METATYPE(SireMol::ResIn<SireMol::ChainID>);

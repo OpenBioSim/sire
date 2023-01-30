@@ -43,7 +43,7 @@ __all__ = [
 
 
 # filter out annoying double-wrapped warnings
-_warnings.filterwarnings('ignore', "to-Python converter for")
+_warnings.filterwarnings("ignore", "to-Python converter for")
 
 
 def _fix_openmm_path():
@@ -629,6 +629,7 @@ if _can_lazy_import:
     analysis = _lazy_import.lazy_module("sire.analysis")
     base = _lazy_import.lazy_module("sire.base")
     cas = _lazy_import.lazy_module("sire.cas")
+    convert = _lazy_import.lazy_module("sire.convert")
     cluster = _lazy_import.lazy_module("sire.cluster")
     error = _lazy_import.lazy_module("sire.error")
     ff = _lazy_import.lazy_module("sire.ff")

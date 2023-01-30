@@ -173,6 +173,10 @@ def find_class(mb, classname):
    # replace Qt integers with C++
    classname = classname.replace("qint64", "long long")
 
+   # replace '>>' template with '> >'
+   while classname.find(">>") != -1:
+       classname = classname.replace(">>", "> >")
+
    for clas in mb.classes():
        if str(clas).find("%s [class]" % classname) != -1 or \
           str(clas).find("%s [struct]" % classname) != -1 or \
@@ -186,7 +190,7 @@ def find_class(mb, classname):
                    return clas
 
    print("Cannot find the class %s" % classname)
-   raise "Cannot find the class %s" % classname
+   raise TypeError("Cannot find the class %s" % classname)
 
 def export_function(mb, function, includes):
    """Do all the work necessary to allow the function 'function'

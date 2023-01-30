@@ -105,6 +105,15 @@ namespace SireMol
 #include "atomidx.h"
 #include "segidx.h"
 
+#ifdef SIRE_INSTANTIATE_TEMPLATES
+template class SireID::Specify<SireMol::SegID>;
+template class SireMol::AtomsIn<SireMol::SegID>;
+template class SireID::IDAndSet<SireMol::SegID>;
+template class SireID::IDOrSet<SireMol::SegID>;
+template class SireID::MatchAll<SireMol::SegID>;
+template class SireID::InvertMatch<SireMol::SegID>;
+#endif
+
 Q_DECLARE_METATYPE(SireID::Specify<SireMol::SegID>);
 Q_DECLARE_METATYPE(SireMol::AtomsIn<SireMol::SegID>);
 Q_DECLARE_METATYPE(SireID::IDAndSet<SireMol::SegID>);
