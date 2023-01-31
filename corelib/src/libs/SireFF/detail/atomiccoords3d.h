@@ -32,101 +32,107 @@
 
 SIRE_BEGIN_HEADER
 
-namespace SireFF { namespace detail { class AtomicCoords3D; } }
+namespace SireFF
+{
+    namespace detail
+    {
+        class AtomicCoords3D;
+    }
+}
 
-SIREFF_EXPORT QDataStream& operator<<(QDataStream&, const SireFF::detail::AtomicCoords3D&);
-SIREFF_EXPORT QDataStream& operator>>(QDataStream&, SireFF::detail::AtomicCoords3D&);
+SIREFF_EXPORT QDataStream &operator<<(QDataStream &, const SireFF::detail::AtomicCoords3D &);
+SIREFF_EXPORT QDataStream &operator>>(QDataStream &, SireFF::detail::AtomicCoords3D &);
 
 namespace SireVol
 {
-class CoordGroup;
-class CoordGroupArray;
-class CoordGroupArrayArray;
+    class CoordGroup;
+    class CoordGroupArray;
+    class CoordGroupArrayArray;
 }
 
 namespace SireMol
 {
-class PartialMolecule;
+    class PartialMolecule;
 }
 
 namespace SireBase
 {
-class PropertyName;
+    class PropertyName;
 }
 
 namespace SireFF
 {
 
-using SireVol::CoordGroup;
-using SireVol::CoordGroupArray;
-using SireVol::CoordGroupArrayArray;
+    using SireVol::CoordGroup;
+    using SireVol::CoordGroupArray;
+    using SireVol::CoordGroupArrayArray;
 
-using SireMol::PartialMolecule;
-using SireBase::PropertyName;
+    using SireBase::PropertyName;
+    using SireMol::PartialMolecule;
 
-namespace detail
-{
+    namespace detail
+    {
 
-SIREFF_EXPORT bool selectedAll(const QSet<quint32> &idxs, quint32 n);
+        SIREFF_EXPORT bool selectedAll(const QSet<quint32> &idxs, quint32 n);
 
-/** This class holds the 3D coordinates of all of the atoms,
-    optimised for access by the forcefield
+        /** This class holds the 3D coordinates of all of the atoms,
+            optimised for access by the forcefield
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT AtomicCoords3D
-{
+            @author Christopher Woods
+        */
+        class SIREFF_EXPORT AtomicCoords3D
+        {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomicCoords3D&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, AtomicCoords3D&);
+            friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomicCoords3D &);
+            friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, AtomicCoords3D &);
 
-public:
-    AtomicCoords3D();
+        public:
+            AtomicCoords3D();
 
-    AtomicCoords3D(const PartialMolecule &molecule,
-                   const PropertyName &coords_property);
+            AtomicCoords3D(const PartialMolecule &molecule,
+                           const PropertyName &coords_property);
 
-    AtomicCoords3D(const CoordGroupArray &coords);
+            AtomicCoords3D(const CoordGroupArray &coords);
 
-    AtomicCoords3D(const AtomicCoords3D &other);
+            AtomicCoords3D(const AtomicCoords3D &other);
 
-    ~AtomicCoords3D();
+            ~AtomicCoords3D();
 
-    AtomicCoords3D& operator=(const AtomicCoords3D &other);
+            AtomicCoords3D &operator=(const AtomicCoords3D &other);
 
-    bool operator==(const AtomicCoords3D &other) const;
-    bool operator!=(const AtomicCoords3D &other) const;
+            bool operator==(const AtomicCoords3D &other) const;
+            bool operator!=(const AtomicCoords3D &other) const;
 
-    const CoordGroupArray& atomicCoordinates() const;
+            const CoordGroupArray &atomicCoordinates() const;
 
-    void setAtomicCoordinates(const AtomicCoords3D &other);
+            void setAtomicCoordinates(const AtomicCoords3D &other);
 
-    bool changedAllGroups(const AtomicCoords3D &params) const;
+            bool changedAllGroups(const AtomicCoords3D &params) const;
 
-    QSet<quint32> getChangedGroups(const AtomicCoords3D &params) const;
+            QSet<quint32> getChangedGroups(const AtomicCoords3D &params) const;
 
-    void addChangedGroups(const AtomicCoords3D &params,
-                          QSet<quint32> &changed_groups) const;
+            void addChangedGroups(const AtomicCoords3D &params,
+                                  QSet<quint32> &changed_groups) const;
 
-    AtomicCoords3D applyMask(const QSet<quint32> &idxs) const;
+            AtomicCoords3D applyMask(const QSet<quint32> &idxs) const;
 
-private:
-    /** The 3D coordinates of all of the atoms in this forcefield,
-        arranged by CutGroup */
-    CoordGroupArray coords;
-};
+        private:
+            /** The 3D coordinates of all of the atoms in this forcefield,
+                arranged by CutGroup */
+            CoordGroupArray coords;
+        };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the 3D coordinates of the atoms in the forcefield */
-SIRE_ALWAYS_INLINE const CoordGroupArray& AtomicCoords3D::atomicCoordinates() const
-{
-    return coords;
-}
+        /** Return the 3D coordinates of the atoms in the forcefield */
+        SIRE_ALWAYS_INLINE const CoordGroupArray &AtomicCoords3D::atomicCoordinates() const
+        {
+            return coords;
+        }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-} // end of namespace detail
+    } // end of namespace detail
 
 } // end of namespace SireFF
 

@@ -42,162 +42,162 @@ SIRE_BEGIN_HEADER
 
 namespace SireCluster
 {
-namespace MPI
-{
-
-class MPICluster;
-class Message;
-class ReplyPtr;
-
-namespace detail
-{
-class ReplyPvt;
-}
-
-/** This class provides the holder for the value of a reply */
-class ReplyValue
-{
-public:
-    ReplyValue();
-    ReplyValue(const ReplyValue &other);
-
-    ~ReplyValue();
-
-    ReplyValue& operator=(const ReplyValue &other);
-
-    bool operator==(const ReplyValue &other) const;
-    bool operator!=(const ReplyValue &other) const;
-
-    static ReplyValue result(const QByteArray &result_data);
-    static ReplyValue error(const QByteArray &error_data);
-
-    bool isError() const;
-
-    template<class T>
-    bool isA() const
+    namespace MPI
     {
-        if (this->is_error)
-            return false;
 
-        try
+        class MPICluster;
+        class Message;
+        class ReplyPtr;
+
+        namespace detail
         {
-            QDataStream ds(this->result_data);
-            T value;
-            ds >> value;
-
-            return true;
+            class ReplyPvt;
         }
-        catch(...)
+
+        /** This class provides the holder for the value of a reply */
+        class ReplyValue
         {
-            return false;
-        }
-    }
+        public:
+            ReplyValue();
+            ReplyValue(const ReplyValue &other);
 
-    template<class T>
-    T asA() const
-    {
-        if (this->is_error)
-            SireError::exception::unpackAndThrow(result_data);
+            ~ReplyValue();
 
-        QDataStream ds(this->result_data);
-        T value;
-        ds >> value;
+            ReplyValue &operator=(const ReplyValue &other);
 
-        return value;
-    }
+            bool operator==(const ReplyValue &other) const;
+            bool operator!=(const ReplyValue &other) const;
 
-private:
-    /** The binary representation of the value */
-    QByteArray result_data;
+            static ReplyValue result(const QByteArray &result_data);
+            static ReplyValue error(const QByteArray &error_data);
 
-    /** Is this reply actually an error? */
-    bool is_error;
-};
+            bool isError() const;
 
-/** This class hold the reply (or replies) to a message. This class
-    provides a space in which the replies will be received, and can
-    be used as a block to wait for a reply
+            template <class T>
+            bool isA() const
+            {
+                if (this->is_error)
+                    return false;
 
-    Replies are arranged according to the rank of the MPI process
-    that sent the reply
+                try
+                {
+                    QDataStream ds(this->result_data);
+                    T value;
+                    ds >> value;
 
-    @author Christopher Woods
-*/
-class Reply
-{
+                    return true;
+                }
+                catch (...)
+                {
+                    return false;
+                }
+            }
 
-friend class MPICluster;
-friend class ReplyPtr;
+            template <class T>
+            T asA() const
+            {
+                if (this->is_error)
+                    SireError::exception::unpackAndThrow(result_data);
 
-public:
-    Reply();
-    Reply(const Message &message);
-    Reply(const ReplyPtr &ptr);
+                QDataStream ds(this->result_data);
+                T value;
+                ds >> value;
 
-    Reply(const Reply &other);
+                return value;
+            }
 
-    ~Reply();
+        private:
+            /** The binary representation of the value */
+            QByteArray result_data;
 
-    Reply& operator=(const Reply &other);
+            /** Is this reply actually an error? */
+            bool is_error;
+        };
 
-    bool operator==(const Reply &other) const;
-    bool operator!=(const Reply &other) const;
+        /** This class hold the reply (or replies) to a message. This class
+            provides a space in which the replies will be received, and can
+            be used as a block to wait for a reply
 
-    bool isNull() const;
+            Replies are arranged according to the rank of the MPI process
+            that sent the reply
 
-    bool isValidRank(int rank);
+            @author Christopher Woods
+        */
+        class Reply
+        {
 
-    void waitFrom(int rank);
-    bool waitFrom(int rank, int timeout);
+            friend class MPICluster;
+            friend class ReplyPtr;
 
-    void wait();
-    bool wait(int timeout);
+        public:
+            Reply();
+            Reply(const Message &message);
+            Reply(const ReplyPtr &ptr);
 
-    ReplyValue from(int rank);
+            Reply(const Reply &other);
 
-    QHash<int,ReplyValue> replies();
+            ~Reply();
 
-protected:
-    static Reply create(const Message &message);
+            Reply &operator=(const Reply &other);
 
-    void setErrorFrom(int rank, const QByteArray &error_data);
-    void setResultFrom(int rank, const QByteArray &result_data);
+            bool operator==(const Reply &other) const;
+            bool operator!=(const Reply &other) const;
 
-    void setProcessDown(int rank);
-    void shutdown();
+            bool isNull() const;
 
-private:
-    Reply(const boost::shared_ptr<detail::ReplyPvt> &ptr);
+            bool isValidRank(int rank);
 
-    /** Private implementation of this object */
-    boost::shared_ptr<detail::ReplyPvt> d;
-};
+            void waitFrom(int rank);
+            bool waitFrom(int rank, int timeout);
 
-/** This is a weak pointer to a Reply */
-class ReplyPtr
-{
-public:
-    ReplyPtr();
-    ReplyPtr(const Reply &reply);
+            void wait();
+            bool wait(int timeout);
 
-    ReplyPtr(const ReplyPtr &other);
+            ReplyValue from(int rank);
 
-    ~ReplyPtr();
+            QHash<int, ReplyValue> replies();
 
-    ReplyPtr& operator=(const ReplyPtr &other);
+        protected:
+            static Reply create(const Message &message);
 
-    bool isNull() const;
+            void setErrorFrom(int rank, const QByteArray &error_data);
+            void setResultFrom(int rank, const QByteArray &result_data);
 
-    Reply operator*() const;
+            void setProcessDown(int rank);
+            void shutdown();
 
-    Reply lock() const;
+        private:
+            Reply(const boost::shared_ptr<detail::ReplyPvt> &ptr);
 
-private:
-    /** The weak pointer itself */
-    boost::weak_ptr<detail::ReplyPvt> d;
-};
+            /** Private implementation of this object */
+            boost::shared_ptr<detail::ReplyPvt> d;
+        };
 
-} // end of namespace MPI
+        /** This is a weak pointer to a Reply */
+        class ReplyPtr
+        {
+        public:
+            ReplyPtr();
+            ReplyPtr(const Reply &reply);
+
+            ReplyPtr(const ReplyPtr &other);
+
+            ~ReplyPtr();
+
+            ReplyPtr &operator=(const ReplyPtr &other);
+
+            bool isNull() const;
+
+            Reply operator*() const;
+
+            Reply lock() const;
+
+        private:
+            /** The weak pointer itself */
+            boost::weak_ptr<detail::ReplyPvt> d;
+        };
+
+    } // end of namespace MPI
 } // end of namespace SireCluster
 
 SIRE_END_HEADER

@@ -30,11 +30,11 @@
 
 #ifdef SIRE_USE_MPI
 
-#include <mpi.h>  // must be at the top, as that is what mpich needs
+#include <mpi.h> // must be at the top, as that is what mpich needs
 
+#include <QMutex>
 #include <QQueue>
 #include <QThread>
-#include <QMutex>
 #include <QWaitCondition>
 
 #include <boost/noncopyable.hpp>
@@ -46,53 +46,53 @@ SIRE_BEGIN_HEADER
 namespace SireCluster
 {
 
-namespace MPI
-{
+    namespace MPI
+    {
 
-/** This is a simple queue that is used to send all of the MPI messages.
-    This ensures that each node only sends one message at a time using
-    the global Send communicator (other messages may be sent using
-    point-to-point communicators).
+        /** This is a simple queue that is used to send all of the MPI messages.
+            This ensures that each node only sends one message at a time using
+            the global Send communicator (other messages may be sent using
+            point-to-point communicators).
 
-    @author Christopher Woods
-*/
-class SendQueue : private QThread, public boost::noncopyable
-{
-public:
-    SendQueue(MPI_Comm send_comm);
-    ~SendQueue();
+            @author Christopher Woods
+        */
+        class SendQueue : private QThread, public boost::noncopyable
+        {
+        public:
+            SendQueue(MPI_Comm send_comm);
+            ~SendQueue();
 
-    void start();
+            void start();
 
-    void send(const Message &message);
+            void send(const Message &message);
 
-    void stop();
+            void stop();
 
-    void wait();
+            void wait();
 
-    bool isRunning();
+            bool isRunning();
 
-protected:
-    void run();
+        protected:
+            void run();
 
-private:
-    /** Mutex to protect access to the queue of messages to send */
-    QMutex datamutex;
+        private:
+            /** Mutex to protect access to the queue of messages to send */
+            QMutex datamutex;
 
-    /** Wait condition used to sleep until there is a message to send */
-    QWaitCondition waiter;
+            /** Wait condition used to sleep until there is a message to send */
+            QWaitCondition waiter;
 
-    /** The communicator to use to send messages */
-    MPI_Comm send_comm;
+            /** The communicator to use to send messages */
+            MPI_Comm send_comm;
 
-    /** The list of messages to send */
-    QQueue<Message> message_queue;
+            /** The list of messages to send */
+            QQueue<Message> message_queue;
 
-    /** Whether or not the queue has been stopped */
-    bool been_stopped;
-};
+            /** Whether or not the queue has been stopped */
+            bool been_stopped;
+        };
 
-} // end of namespace MPI
+    } // end of namespace MPI
 
 } // end of namespace SireCluster
 
@@ -100,4 +100,3 @@ SIRE_END_HEADER
 
 #endif // SIRE_USE_MPI
 #endif
-

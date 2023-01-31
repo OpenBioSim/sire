@@ -27,8 +27,8 @@
 
 #ifdef SIRE_USE_MPI
 
-#include <QThread>
 #include <QMutex>
+#include <QThread>
 #include <QWaitCondition>
 
 #include "messages.h"
@@ -63,11 +63,11 @@ using boost::tuple;
 ///////// Implementation of MessageBase
 /////////
 
-static const RegisterMetaType<MessageBase> r_msgbase( MAGIC_ONLY,
-                                                      MessageBase::typeName() );
+static const RegisterMetaType<MessageBase> r_msgbase(MAGIC_ONLY,
+                                                     MessageBase::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const MessageBase &msgbase)
+QDataStream &operator<<(QDataStream &ds, const MessageBase &msgbase)
 {
     writeHeader(ds, r_msgbase, 1);
 
@@ -78,46 +78,48 @@ QDataStream& operator<<(QDataStream &ds, const MessageBase &msgbase)
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, MessageBase &msgbase)
+QDataStream &operator>>(QDataStream &ds, MessageBase &msgbase)
 {
     VersionID v = readHeader(ds, r_msgbase);
 
     if (v == 1)
     {
-        ds >> msgbase.uid >> msgbase.subject_uid
-           >> msgbase.sent_by >> msgbase.dest;
+        ds >> msgbase.uid >> msgbase.subject_uid >> msgbase.sent_by >> msgbase.dest;
     }
     else
-        throw version_error( v, "1", r_msgbase, CODELOC );
+        throw version_error(v, "1", r_msgbase, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 MessageBase::MessageBase()
-            : QSharedData(), sent_by(-1), dest(-1)
-{}
+    : QSharedData(), sent_by(-1), dest(-1)
+{
+}
 
 static void assertValidDestination(int rank)
 {
     if (rank != -1)
     {
         if (rank < 0 or rank >= MPICluster::getCount())
-            throw SireError::unavailable_resource( QObject::tr(
-                "There is no MPI process with rank %1. Available ranks are "
-                "from 0 to %2.")
-                    .arg(rank).arg(MPICluster::getCount()-1), CODELOC );
+            throw SireError::unavailable_resource(QObject::tr(
+                                                      "There is no MPI process with rank %1. Available ranks are "
+                                                      "from 0 to %2.")
+                                                      .arg(rank)
+                                                      .arg(MPICluster::getCount() - 1),
+                                                  CODELOC);
     }
 }
 
 /** Construct a message that is intended to go to the MPI process
     with rank 'destination' */
 MessageBase::MessageBase(int destination)
-            : QSharedData(),
-              uid( QUuid::createUuid() ),
-              subject_uid( QUuid::createUuid() ),
-              sent_by( MPICluster::getRank() ),
-              dest(destination)
+    : QSharedData(),
+      uid(QUuid::createUuid()),
+      subject_uid(QUuid::createUuid()),
+      sent_by(MPICluster::getRank()),
+      dest(destination)
 {
     assertValidDestination(dest);
 }
@@ -126,29 +128,31 @@ MessageBase::MessageBase(int destination)
     with rank 'destination', and that is a response to the subject
     with UID 'uid' */
 MessageBase::MessageBase(int destination, const QUuid &subuid)
-            : QSharedData(),
-              uid( QUuid::createUuid() ),
-              subject_uid(subuid),
-              sent_by( MPICluster::getRank() ),
-              dest(destination)
+    : QSharedData(),
+      uid(QUuid::createUuid()),
+      subject_uid(subuid),
+      sent_by(MPICluster::getRank()),
+      dest(destination)
 {
     assertValidDestination(dest);
 }
 
 /** Copy constructor */
 MessageBase::MessageBase(const MessageBase &other)
-            : QSharedData(),
-              uid(other.uid),
-              subject_uid(other.subject_uid),
-              sent_by(other.sent_by), dest(other.dest)
-{}
+    : QSharedData(),
+      uid(other.uid),
+      subject_uid(other.subject_uid),
+      sent_by(other.sent_by), dest(other.dest)
+{
+}
 
 /** Destructor */
 MessageBase::~MessageBase()
-{}
+{
+}
 
 /** Copy assignment operator */
-MessageBase& MessageBase::operator=(const MessageBase &other)
+MessageBase &MessageBase::operator=(const MessageBase &other)
 {
     if (this != &other)
     {
@@ -180,14 +184,14 @@ Message MessageBase::reply() const
 }
 
 /** Return the unique ID of this message */
-const QUuid& MessageBase::UID() const
+const QUuid &MessageBase::UID() const
 {
     return uid;
 }
 
 /** Return the unique ID of the subject to which this
     message relates */
-const QUuid& MessageBase::subjectUID() const
+const QUuid &MessageBase::subjectUID() const
 {
     return subject_uid;
 }
@@ -226,7 +230,7 @@ QSet<int> MessageBase::recipients() const
         int nprocs = MPICluster::getCount();
         ranks.reserve(nprocs);
 
-        for (int i=0; i<nprocs; ++i)
+        for (int i = 0; i < nprocs; ++i)
         {
             ranks.insert(i);
         }
@@ -244,7 +248,7 @@ QSet<int> MessageBase::recipients() const
 static const RegisterMetaType<Message> r_message;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const Message &message)
+QDataStream &operator<<(QDataStream &ds, const Message &message)
 {
     writeHeader(ds, r_message, 1);
 
@@ -255,7 +259,7 @@ QDataStream& operator<<(QDataStream &ds, const Message &message)
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, Message &message)
+QDataStream &operator>>(QDataStream &ds, Message &message)
 {
     VersionID v = readHeader(ds, r_message);
 
@@ -265,31 +269,35 @@ QDataStream& operator>>(QDataStream &ds, Message &message)
         sds >> message.d;
     }
     else
-        throw version_error( v, "1", r_message, CODELOC );
+        throw version_error(v, "1", r_message, CODELOC);
 
     return ds;
 }
 
 /** Construct a null message */
 Message::Message()
-{}
+{
+}
 
 /** Construct from the message 'message' */
 Message::Message(const MessageBase &message)
-        : d(message)
-{}
+    : d(message)
+{
+}
 
 /** Copy constructor */
 Message::Message(const Message &other)
-        : d(other.d)
-{}
+    : d(other.d)
+{
+}
 
 /** Destructor */
 Message::~Message()
-{}
+{
+}
 
 /** Copy assignment operator */
-Message& Message::operator=(const Message &other)
+Message &Message::operator=(const Message &other)
 {
     d = other.d;
     return *this;
@@ -311,7 +319,7 @@ QString Message::toString() const
 }
 
 /** Internal function used to return the base object of the message */
-const MessageBase& Message::base() const
+const MessageBase &Message::base() const
 {
     return *d;
 }
@@ -379,7 +387,7 @@ Message Message::reply() const
 static QUuid null_uid;
 
 /** Return the unique ID of this message */
-const QUuid& Message::UID() const
+const QUuid &Message::UID() const
 {
     if (not this->isNull())
     {
@@ -390,7 +398,7 @@ const QUuid& Message::UID() const
 }
 
 /** Return the unique ID of the subject of this message */
-const QUuid& Message::subjectUID() const
+const QUuid &Message::subjectUID() const
 {
     if (not this->isNull())
     {
@@ -458,7 +466,7 @@ QSet<int> Message::recipients() const
 static const RegisterMetaType<Broadcast> r_broadcast;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const Broadcast &broadcast)
+QDataStream &operator<<(QDataStream &ds, const Broadcast &broadcast)
 {
     writeHeader(ds, r_broadcast, 1);
 
@@ -467,43 +475,40 @@ QDataStream& operator<<(QDataStream &ds, const Broadcast &broadcast)
         << broadcast.message_type
         << broadcast.message_data
         << broadcast.replymsg
-        << static_cast<const MessageBase&>(broadcast);
+        << static_cast<const MessageBase &>(broadcast);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, Broadcast &broadcast)
+QDataStream &operator>>(QDataStream &ds, Broadcast &broadcast)
 {
     VersionID v = readHeader(ds, r_broadcast);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> broadcast.destinations
-            >> broadcast.message_type
-            >> broadcast.message_data
-            >> broadcast.replymsg
-            >> static_cast<MessageBase&>(broadcast);
+        sds >> broadcast.destinations >> broadcast.message_type >> broadcast.message_data >> broadcast.replymsg >> static_cast<MessageBase &>(broadcast);
     }
     else
-        throw version_error( v, "1", r_broadcast, CODELOC );
+        throw version_error(v, "1", r_broadcast, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 Broadcast::Broadcast() : MessageBase()
-{}
+{
+}
 
 /** Construct to broadcast the message 'message' to
     every single MPI process */
 Broadcast::Broadcast(const Message &message)
-          : MessageBase(-1)  // -1 means broadcast to all
+    : MessageBase(-1) // -1 means broadcast to all
 {
     if (message.isA<Broadcast>())
     {
-        this->operator=( message.asA<Broadcast>() );
+        this->operator=(message.asA<Broadcast>());
     }
     else
     {
@@ -515,8 +520,8 @@ Broadcast::Broadcast(const Message &message)
 /** Construct to broadcast this message to just the MPI
     process with rank 'rank' */
 Broadcast::Broadcast(const Message &message, int rank)
-          : MessageBase(rank),
-            message_data( message.pack() )
+    : MessageBase(rank),
+      message_data(message.pack())
 {
     assertValidDestination(rank);
 
@@ -539,9 +544,9 @@ Broadcast::Broadcast(const Message &message, int rank)
 /** Construct to broadcast this message to the MPI processes
     with ranks that are in 'ranks' */
 Broadcast::Broadcast(const Message &message, const QSet<qint32> &ranks)
-          : MessageBase(-1),
-            destinations(ranks),
-            message_data( message.pack() )
+    : MessageBase(-1),
+      destinations(ranks),
+      message_data(message.pack())
 {
     foreach (qint32 rank, ranks)
     {
@@ -550,7 +555,7 @@ Broadcast::Broadcast(const Message &message, const QSet<qint32> &ranks)
 
     if (destinations.contains(-1))
     {
-        //this should be sent to everyone
+        // this should be sent to everyone
         destinations = QSet<qint32>();
     }
 
@@ -567,19 +572,21 @@ Broadcast::Broadcast(const Message &message, const QSet<qint32> &ranks)
 
 /** Copy constructor */
 Broadcast::Broadcast(const Broadcast &other)
-          : MessageBase(other),
-            destinations(other.destinations),
-            message_type(other.message_type),
-            message_data(other.message_data),
-            replymsg(other.replymsg)
-{}
+    : MessageBase(other),
+      destinations(other.destinations),
+      message_type(other.message_type),
+      message_data(other.message_data),
+      replymsg(other.replymsg)
+{
+}
 
 /** Destructor */
 Broadcast::~Broadcast()
-{}
+{
+}
 
 /** Copy assignment operator */
-Broadcast& Broadcast::operator=(const Broadcast &other)
+Broadcast &Broadcast::operator=(const Broadcast &other)
 {
     if (this != &other)
     {
@@ -629,12 +636,12 @@ QSet<int> Broadcast::recipients() const
 /** Return a string representation of this message */
 QString Broadcast::toString() const
 {
-    return QString( "Broadcast( %1 )" )
-                .arg( Message::unpack(message_data).toString() );
+    return QString("Broadcast( %1 )")
+        .arg(Message::unpack(message_data).toString());
 }
 
 /** Return the type of the message being broadcast */
-const QString& Broadcast::messageType() const
+const QString &Broadcast::messageType() const
 {
     return message_type;
 }
@@ -643,15 +650,15 @@ const QString& Broadcast::messageType() const
     it is really intended for this node */
 void Broadcast::read()
 {
-    if ( this->isRecipient(MPICluster::getRank()) )
+    if (this->isRecipient(MPICluster::getRank()))
     {
-        //yes - we are an intended recipient
+        // yes - we are an intended recipient
         Message message = Message::unpack(message_data);
 
-        //read the real message
+        // read the real message
         message.read();
 
-        //save any reply
+        // save any reply
         if (message.hasReply())
         {
             replymsg = message.reply();
@@ -678,57 +685,60 @@ Message Broadcast::reply() const
 static const RegisterMetaType<RegisterBackend> r_regbackend;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const RegisterBackend &regbackend)
+QDataStream &operator<<(QDataStream &ds, const RegisterBackend &regbackend)
 {
     writeHeader(ds, r_regbackend, 1);
 
     ds << regbackend.node_uid << regbackend.node_rank
-       << static_cast<const MessageBase&>(regbackend);
+       << static_cast<const MessageBase &>(regbackend);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, RegisterBackend &regbackend)
+QDataStream &operator>>(QDataStream &ds, RegisterBackend &regbackend)
 {
     VersionID v = readHeader(ds, r_regbackend);
 
     if (v == 1)
     {
-        ds >> regbackend.node_uid >> regbackend.node_rank
-           >> static_cast<MessageBase&>(regbackend);
+        ds >> regbackend.node_uid >> regbackend.node_rank >> static_cast<MessageBase &>(regbackend);
     }
     else
-        throw version_error( v, "1", r_regbackend, CODELOC );
+        throw version_error(v, "1", r_regbackend, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 RegisterBackend::RegisterBackend() : node_rank(-1)
-{}
+{
+}
 
 /** Construct the message to register the node with unique
     ID 'node_uid' that resides on this MPI process */
 RegisterBackend::RegisterBackend(const QUuid &uid)
-                : MessageBase( MPICluster::master() ),  // must be sent to the master
-                  node_uid(uid),
-                  node_rank( MPICluster::getRank() )
-{}
+    : MessageBase(MPICluster::master()), // must be sent to the master
+      node_uid(uid),
+      node_rank(MPICluster::getRank())
+{
+}
 
 /** Copy constructor */
 RegisterBackend::RegisterBackend(const RegisterBackend &other)
-                : MessageBase(other),
-                  node_uid(other.node_uid),
-                  node_rank(other.node_rank)
-{}
+    : MessageBase(other),
+      node_uid(other.node_uid),
+      node_rank(other.node_rank)
+{
+}
 
 /** Destructor */
 RegisterBackend::~RegisterBackend()
-{}
+{
+}
 
 /** Copy assignment operator */
-RegisterBackend& RegisterBackend::operator=(const RegisterBackend &other)
+RegisterBackend &RegisterBackend::operator=(const RegisterBackend &other)
 {
     if (this != &other)
     {
@@ -744,19 +754,19 @@ RegisterBackend& RegisterBackend::operator=(const RegisterBackend &other)
 QString RegisterBackend::toString() const
 {
     return QString("RegisterBackend( uid=%1, process=%2 )")
-                .arg(node_uid.toString())
-                .arg(node_rank);
+        .arg(node_uid.toString())
+        .arg(node_rank);
 }
 
 /** Read this message - this must only occur on the master process! */
 void RegisterBackend::read()
 {
     if (not MPICluster::isMaster())
-        throw SireError::program_bug( QObject::tr(
-            "Only the master MPI process is allowed to read a RegisterBackend message."),
-                CODELOC );
+        throw SireError::program_bug(QObject::tr(
+                                         "Only the master MPI process is allowed to read a RegisterBackend message."),
+                                     CODELOC);
 
-    //register the node
+    // register the node
     MPICluster::registerBackend(node_rank, node_uid);
 }
 
@@ -767,51 +777,52 @@ void RegisterBackend::read()
 static const RegisterMetaType<ReserveBackend> r_reservebackend;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const ReserveBackend &reservebackend)
+QDataStream &operator<<(QDataStream &ds, const ReserveBackend &reservebackend)
 {
     writeHeader(ds, r_reservebackend, 1);
 
     ds << reservebackend.backend_uid << reservebackend.nbackends
-       << static_cast<const MessageBase&>(reservebackend);
+       << static_cast<const MessageBase &>(reservebackend);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, ReserveBackend &reservebackend)
+QDataStream &operator>>(QDataStream &ds, ReserveBackend &reservebackend)
 {
     VersionID v = readHeader(ds, r_reservebackend);
 
     if (v == 1)
     {
-        ds >> reservebackend.backend_uid >> reservebackend.nbackends
-           >> static_cast<MessageBase&>(reservebackend);
+        ds >> reservebackend.backend_uid >> reservebackend.nbackends >> static_cast<MessageBase &>(reservebackend);
     }
     else
-        throw version_error( v, "1", r_reservebackend, CODELOC );
+        throw version_error(v, "1", r_reservebackend, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 ReserveBackend::ReserveBackend()
-               : MessageBase( MPICluster::master() ), // must be sent to the master
-                 nbackends(0)
-{}
+    : MessageBase(MPICluster::master()), // must be sent to the master
+      nbackends(0)
+{
+}
 
 /** Construct the message to request that 'n' backends are reserved
     for use by this process */
 ReserveBackend::ReserveBackend(int n)
-               : MessageBase( MPICluster::master() ),  // must be sent to the master
-                 nbackends(n)
-{}
+    : MessageBase(MPICluster::master()), // must be sent to the master
+      nbackends(n)
+{
+}
 
 /** Construct the message to request that the backend with ID 'uid'
     is reserved for use by this process */
 ReserveBackend::ReserveBackend(const QUuid &uid)
-               : MessageBase( MPICluster::master() ), // must be sent to the master
-                 backend_uid(uid),
-                 nbackends(1)
+    : MessageBase(MPICluster::master()), // must be sent to the master
+      backend_uid(uid),
+      nbackends(1)
 {
     if (uid.isNull())
         nbackends = 0;
@@ -819,17 +830,19 @@ ReserveBackend::ReserveBackend(const QUuid &uid)
 
 /** Copy constructor */
 ReserveBackend::ReserveBackend(const ReserveBackend &other)
-               : MessageBase(other),
-                 backend_uid(other.backend_uid),
-                 nbackends(other.nbackends)
-{}
+    : MessageBase(other),
+      backend_uid(other.backend_uid),
+      nbackends(other.nbackends)
+{
+}
 
 /** Destructor */
 ReserveBackend::~ReserveBackend()
-{}
+{
+}
 
 /** Copy assignment operator */
-ReserveBackend& ReserveBackend::operator=(const ReserveBackend &other)
+ReserveBackend &ReserveBackend::operator=(const ReserveBackend &other)
 {
     if (this != &other)
     {
@@ -847,12 +860,12 @@ QString ReserveBackend::toString() const
     if (backend_uid.isNull())
         return QObject::tr("ReserveBackend( nBackends()=%1 )").arg(nbackends);
     else
-        return QObject::tr("ReserveBackend( UID()=%1 )").arg( backend_uid.toString() );
+        return QObject::tr("ReserveBackend( UID()=%1 )").arg(backend_uid.toString());
 }
 
 /** Return the requested UID - this will be null if we don't
     care which backend we get */
-const QUuid& ReserveBackend::requestedUID() const
+const QUuid &ReserveBackend::requestedUID() const
 {
     return backend_uid;
 }
@@ -866,7 +879,7 @@ int ReserveBackend::nBackends() const
 /** Read this message - this must only occur on the master process! */
 void ReserveBackend::read()
 {
-    //tell the reservation manager to process this request
+    // tell the reservation manager to process this request
     ReservationManager::reserveBackends(*this);
 }
 
@@ -877,59 +890,62 @@ void ReserveBackend::read()
 static const RegisterMetaType<RequestAvailability> r_requestavail;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const RequestAvailability &requestavail)
+QDataStream &operator<<(QDataStream &ds, const RequestAvailability &requestavail)
 {
     writeHeader(ds, r_requestavail, 1);
 
     ds << requestavail.request
-       << static_cast<const MessageBase&>(requestavail);
+       << static_cast<const MessageBase &>(requestavail);
 
-    //no need to save available_backends
+    // no need to save available_backends
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, RequestAvailability &requestavail)
+QDataStream &operator>>(QDataStream &ds, RequestAvailability &requestavail)
 {
     VersionID v = readHeader(ds, r_requestavail);
 
     if (v == 1)
     {
-        ds >> requestavail.request
-           >> static_cast<MessageBase&>(requestavail);
+        ds >> requestavail.request >> static_cast<MessageBase &>(requestavail);
     }
     else
-        throw version_error( v, "1", r_requestavail, CODELOC );
+        throw version_error(v, "1", r_requestavail, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 RequestAvailability::RequestAvailability()
-                    : MessageBase(-1) // will be broadcast to everyone
-{}
+    : MessageBase(-1) // will be broadcast to everyone
+{
+}
 
 /** Construct a request to find out what is available that matches the
     request 'request' */
 RequestAvailability::RequestAvailability(const ReserveBackend &reservation_request)
-                    : MessageBase(-1),  // will be broadcast to everyone
-                      request(reservation_request)
-{}
+    : MessageBase(-1), // will be broadcast to everyone
+      request(reservation_request)
+{
+}
 
 /** Copy constructor */
 RequestAvailability::RequestAvailability(const RequestAvailability &other)
-                    : MessageBase(other),
-                      request(other.request),
-                      available_backends(other.available_backends)
-{}
+    : MessageBase(other),
+      request(other.request),
+      available_backends(other.available_backends)
+{
+}
 
 /** Destructor */
 RequestAvailability::~RequestAvailability()
-{}
+{
+}
 
 /** Copy assignment operator */
-RequestAvailability& RequestAvailability::operator=(const RequestAvailability &other)
+RequestAvailability &RequestAvailability::operator=(const RequestAvailability &other)
 {
     if (this != &other)
     {
@@ -944,8 +960,8 @@ RequestAvailability& RequestAvailability::operator=(const RequestAvailability &o
 /** Return a string representation of this message */
 QString RequestAvailability::toString() const
 {
-    return QString( "RequestAvailability( %1 )" )
-                    .arg(request.toString());
+    return QString("RequestAvailability( %1 )")
+        .arg(request.toString());
 }
 
 /** This message always has a reply */
@@ -957,7 +973,7 @@ bool RequestAvailability::hasReply() const
 /** Return the message containing the reply to this message */
 Message RequestAvailability::reply() const
 {
-    return Result( *this, available_backends );
+    return Result(*this, available_backends);
 }
 
 /** Read this message - finds all matching backends on this process
@@ -974,7 +990,7 @@ void RequestAvailability::read()
 static const RegisterMetaType<Reservation> r_reservation;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const Reservation &reservation)
+QDataStream &operator<<(QDataStream &ds, const Reservation &reservation)
 {
     writeHeader(ds, r_reservation, 1);
 
@@ -984,19 +1000,19 @@ QDataStream& operator<<(QDataStream &ds, const Reservation &reservation)
 
     ds << nbackends;
 
-    for (quint32 i=0; i<nbackends; ++i)
+    for (quint32 i = 0; i < nbackends; ++i)
     {
         ds << qint32(reservation.details[i].get<0>())
            << reservation.details[i].get<1>();
     }
 
-    ds << static_cast<const MessageBase&>(reservation);
+    ds << static_cast<const MessageBase &>(reservation);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, Reservation &reservation)
+QDataStream &operator>>(QDataStream &ds, Reservation &reservation)
 {
     VersionID v = readHeader(ds, r_reservation);
 
@@ -1010,51 +1026,55 @@ QDataStream& operator>>(QDataStream &ds, Reservation &reservation)
 
         reservation.details.clear();
 
-        for (quint32 i=0; i<nbackends; ++i)
+        for (quint32 i = 0; i < nbackends; ++i)
         {
             qint32 rank;
             QUuid uid;
 
             ds >> rank >> uid;
 
-            reservation.details.append( tuple<int,QUuid>(rank,uid) );
+            reservation.details.append(tuple<int, QUuid>(rank, uid));
         }
 
-        ds >> static_cast<MessageBase&>(reservation);
+        ds >> static_cast<MessageBase &>(reservation);
     }
     else
-        throw version_error( v, "1", r_reservation, CODELOC );
+        throw version_error(v, "1", r_reservation, CODELOC);
 
     return ds;
 }
 
 /** Constructor */
 Reservation::Reservation()
-            : MessageBase(-1) // will be broadcast to everyone
-{}
+    : MessageBase(-1) // will be broadcast to everyone
+{
+}
 
 /** Construct the message to be broadcast that instructs that the passed
     backends must now make the connections as requested in 'request' */
-Reservation::Reservation(const QList< tuple<int,QUuid> > &reserved_backends,
+Reservation::Reservation(const QList<tuple<int, QUuid>> &reserved_backends,
                          const ReserveBackend &reservation_request)
-            : MessageBase(-1),  // will be broadcast to everyone
-              request(reservation_request),
-              details(reserved_backends)
-{}
+    : MessageBase(-1), // will be broadcast to everyone
+      request(reservation_request),
+      details(reserved_backends)
+{
+}
 
 /** Copy constructor */
 Reservation::Reservation(const Reservation &other)
-                    : MessageBase(other),
-                      request(other.request),
-                      details(other.details)
-{}
+    : MessageBase(other),
+      request(other.request),
+      details(other.details)
+{
+}
 
 /** Destructor */
 Reservation::~Reservation()
-{}
+{
+}
 
 /** Copy assignment operator */
-Reservation& Reservation::operator=(const Reservation &other)
+Reservation &Reservation::operator=(const Reservation &other)
 {
     if (this != &other)
     {
@@ -1069,8 +1089,9 @@ Reservation& Reservation::operator=(const Reservation &other)
 /** Return a string representation of this message */
 QString Reservation::toString() const
 {
-    return QString( "Reservation( %1 : nMatches()=%2 )" )
-                    .arg(request.toString()).arg(details.count());
+    return QString("Reservation( %1 : nMatches()=%2 )")
+        .arg(request.toString())
+        .arg(details.count());
 }
 
 /** This message always has a reply */
@@ -1082,14 +1103,14 @@ bool Reservation::hasReply() const
 /** Return the message containing the reply to this message */
 Message Reservation::reply() const
 {
-    return Result( *this, ReservationManager::establishedConnections(request) );
+    return Result(*this, ReservationManager::establishedConnections(request));
 }
 
 /** Read this message - finds all matching backends on this process
     and reserves them in case they are selected */
 void Reservation::read()
 {
-    ReservationManager::establishConnections( details, request );
+    ReservationManager::establishConnections(details, request);
 }
 
 /////////
@@ -1099,44 +1120,47 @@ void Reservation::read()
 static const RegisterMetaType<Shutdown> r_shutdown;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const Shutdown &shutdown)
+QDataStream &operator<<(QDataStream &ds, const Shutdown &shutdown)
 {
     writeHeader(ds, r_shutdown, 1);
 
-    ds << static_cast<const MessageBase&>(shutdown);
+    ds << static_cast<const MessageBase &>(shutdown);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, Shutdown &shutdown)
+QDataStream &operator>>(QDataStream &ds, Shutdown &shutdown)
 {
     VersionID v = readHeader(ds, r_shutdown);
 
     if (v == 1)
     {
-        ds >> static_cast<MessageBase&>(shutdown);
+        ds >> static_cast<MessageBase &>(shutdown);
     }
     else
-        throw version_error( v, "1", r_shutdown, CODELOC );
+        throw version_error(v, "1", r_shutdown, CODELOC);
 
     return ds;
 }
 
 /** Construct a message to tell everyone to shut down */
-Shutdown::Shutdown() : MessageBase(-1)  // goes to everyone
-{}
+Shutdown::Shutdown() : MessageBase(-1) // goes to everyone
+{
+}
 
 /** Copy constructor */
 Shutdown::Shutdown(const Shutdown &other) : MessageBase(other)
-{}
+{
+}
 
 /** Destructor */
 Shutdown::~Shutdown()
-{}
+{
+}
 
 /** Copy assignment operator */
-Shutdown& Shutdown::operator=(const Shutdown &other)
+Shutdown &Shutdown::operator=(const Shutdown &other)
 {
     MessageBase::operator=(other);
     return *this;
@@ -1150,7 +1174,7 @@ Shutdown& Shutdown::operator=(const Shutdown &other)
 class BG : private QThread
 {
 public:
-    static void call( void (*func)() )
+    static void call(void (*func)())
     {
         QMutexLocker lkr(&runmutex);
         QMutexLocker lkr1(&datamutex);
@@ -1163,10 +1187,12 @@ public:
 
 private:
     BG()
-    {}
+    {
+    }
 
     ~BG()
-    {}
+    {
+    }
 
     void run()
     {
@@ -1197,7 +1223,7 @@ BG BG::runner;
 /** Read this message */
 void Shutdown::read()
 {
-    BG::call( &MPICluster::informedShutdown );
+    BG::call(&MPICluster::informedShutdown);
 }
 
 /////////
@@ -1207,25 +1233,24 @@ void Shutdown::read()
 static const RegisterMetaType<Error> r_error;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const Error &error)
+QDataStream &operator<<(QDataStream &ds, const Error &error)
 {
     writeHeader(ds, r_error, 1);
 
     ds << error.message_data << error.error_data
-       << static_cast<const MessageBase&>(error);
+       << static_cast<const MessageBase &>(error);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, Error &error)
+QDataStream &operator>>(QDataStream &ds, Error &error)
 {
     VersionID v = readHeader(ds, r_error);
 
     if (v == 1)
     {
-        ds >> error.message_data >> error.error_data
-           >> static_cast<MessageBase&>(error);
+        ds >> error.message_data >> error.error_data >> static_cast<MessageBase &>(error);
     }
     else
         throw version_error(v, "1", r_error, CODELOC);
@@ -1240,39 +1265,40 @@ void Error::setError(const SireError::exception &e)
 
 void Error::setUnknownError(const QString &code_loc)
 {
-    this->setError( SireError::unknown_exception( QObject::tr(
-                            "An unknown error occured!"), code_loc ) );
+    this->setError(SireError::unknown_exception(QObject::tr(
+                                                    "An unknown error occured!"),
+                                                code_loc));
 }
 
 void Error::setError(const std::exception &e)
 {
-    this->setError( SireError::std_exception(e) );
+    this->setError(SireError::std_exception(e));
 }
 
 /** Construct a message containing an unknown error
     in response to an unknown sender */
-Error::Error() : MessageBase( MPICluster::master() )
+Error::Error() : MessageBase(MPICluster::master())
 {
     this->setUnknownError(CODELOC);
 }
 
 /** Construct a message containing an unknown error that occured
     at the point 'code_loc' in response to an unknown sender */
-Error::Error(const QString &code_loc) : MessageBase( MPICluster::master() )
+Error::Error(const QString &code_loc) : MessageBase(MPICluster::master())
 {
     this->setUnknownError(code_loc);
 }
 
 /** Construct a message containing the error 'e'
     in response to an unknown sender */
-Error::Error(const SireError::exception &e) : MessageBase( MPICluster::master() )
+Error::Error(const SireError::exception &e) : MessageBase(MPICluster::master())
 {
     this->setError(e);
 }
 
 /** Construct a message containing the error 'e'
     in response to an unknown sender */
-Error::Error(const std::exception &e) : MessageBase( MPICluster::master() )
+Error::Error(const std::exception &e) : MessageBase(MPICluster::master())
 {
     this->setError(e);
 }
@@ -1280,7 +1306,7 @@ Error::Error(const std::exception &e) : MessageBase( MPICluster::master() )
 /** Construct a message containing an unknown error
     in response to the sender that has rank 'sender' */
 Error::Error(int sender)
-      : MessageBase( sender )
+    : MessageBase(sender)
 {
     this->setUnknownError(CODELOC);
 }
@@ -1288,7 +1314,7 @@ Error::Error(int sender)
 /** Construct a message containing an unknown error that occured
     at the point 'code_loc' in response to the sender that has rank 'sender' */
 Error::Error(int sender, const QString &code_loc)
-      : MessageBase( sender )
+    : MessageBase(sender)
 {
     this->setUnknownError(code_loc);
 }
@@ -1296,7 +1322,7 @@ Error::Error(int sender, const QString &code_loc)
 /** Construct a message containing the error 'e'
     in response to the sender that has rank 'sender' */
 Error::Error(int sender, const SireError::exception &e)
-      : MessageBase( sender )
+    : MessageBase(sender)
 {
     this->setError(e);
 }
@@ -1304,7 +1330,7 @@ Error::Error(int sender, const SireError::exception &e)
 /** Construct a message containing the error 'e'
     in response to the sender that has rank 'sender' */
 Error::Error(int sender, const std::exception &e)
-      : MessageBase( sender )
+    : MessageBase(sender)
 {
     this->setError(e);
 }
@@ -1312,7 +1338,7 @@ Error::Error(int sender, const std::exception &e)
 /** Construct a message containing an unknown error
     in response to the message 'message' */
 Error::Error(const Message &message)
-      : MessageBase( message.sender(), message.subjectUID() )
+    : MessageBase(message.sender(), message.subjectUID())
 {
     message_data = message.pack();
     this->setUnknownError(CODELOC);
@@ -1321,7 +1347,7 @@ Error::Error(const Message &message)
 /** Construct a message containing an unknown error that occured at
     the point 'code_loc' in response to the message 'message' */
 Error::Error(const Message &message, const QString &code_loc)
-      : MessageBase( message.sender(), message.subjectUID() )
+    : MessageBase(message.sender(), message.subjectUID())
 {
     message_data = message.pack();
     this->setUnknownError(code_loc);
@@ -1330,7 +1356,7 @@ Error::Error(const Message &message, const QString &code_loc)
 /** Construct a message containing the error 'e'
     in response to the message 'message' */
 Error::Error(const Message &message, const SireError::exception &e)
-      : MessageBase( message.sender(), message.subjectUID() )
+    : MessageBase(message.sender(), message.subjectUID())
 {
     message_data = message.pack();
     this->setError(e);
@@ -1339,7 +1365,7 @@ Error::Error(const Message &message, const SireError::exception &e)
 /** Construct a message containing the error 'e'
     in response to the message 'message' */
 Error::Error(const Message &message, const std::exception &e)
-      : MessageBase( message.sender(), message.subjectUID() )
+    : MessageBase(message.sender(), message.subjectUID())
 {
     message_data = message.pack();
     this->setError(e);
@@ -1349,22 +1375,25 @@ Error::Error(const Message &message, const std::exception &e)
     data on to the master - this is used when an error that can't
     be handled is received */
 Error::Error(const QByteArray &message, const QByteArray &error)
-      : MessageBase( MPICluster::master() ),
-        message_data(message), error_data(error)
-{}
+    : MessageBase(MPICluster::master()),
+      message_data(message), error_data(error)
+{
+}
 
 /** Copy constructor */
 Error::Error(const Error &other)
-             : MessageBase(other),
-               message_data(other.message_data), error_data(other.error_data)
-{}
+    : MessageBase(other),
+      message_data(other.message_data), error_data(other.error_data)
+{
+}
 
 /** Destructor */
 Error::~Error()
-{}
+{
+}
 
 /** Copy assignment operator */
-Error& Error::operator=(const Error &other)
+Error &Error::operator=(const Error &other)
 {
     if (this != &other)
     {
@@ -1379,8 +1408,8 @@ Error& Error::operator=(const Error &other)
 /** Read this message */
 void Error::read()
 {
-    MPICluster::postError( this->subjectUID(), this->sender(),
-                           message_data, error_data );
+    MPICluster::postError(this->subjectUID(), this->sender(),
+                          message_data, error_data);
 }
 
 /////////
@@ -1390,25 +1419,24 @@ void Error::read()
 static const RegisterMetaType<Result> r_result;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const Result &result)
+QDataStream &operator<<(QDataStream &ds, const Result &result)
 {
     writeHeader(ds, r_result, 1);
 
     ds << result.result_data
-       << static_cast<const MessageBase&>(result);
+       << static_cast<const MessageBase &>(result);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, Result &result)
+QDataStream &operator>>(QDataStream &ds, Result &result)
 {
     VersionID v = readHeader(ds, r_result);
 
     if (v == 1)
     {
-        ds >> result.result_data
-           >> static_cast<MessageBase&>(result);
+        ds >> result.result_data >> static_cast<MessageBase &>(result);
     }
     else
         throw version_error(v, "1", r_result, CODELOC);
@@ -1418,21 +1446,24 @@ QDataStream& operator>>(QDataStream &ds, Result &result)
 
 /** Construct a message containing an unknown result
     in response to an unknown sender */
-Result::Result() : MessageBase( MPICluster::master() )
-{}
+Result::Result() : MessageBase(MPICluster::master())
+{
+}
 
 /** Copy constructor */
 Result::Result(const Result &other)
-             : MessageBase(other),
-               result_data(other.result_data)
-{}
+    : MessageBase(other),
+      result_data(other.result_data)
+{
+}
 
 /** Destructor */
 Result::~Result()
-{}
+{
+}
 
 /** Copy assignment operator */
-Result& Result::operator=(const Result &other)
+Result &Result::operator=(const Result &other)
 {
     if (this != &other)
     {
@@ -1446,8 +1477,8 @@ Result& Result::operator=(const Result &other)
 /** Read this message */
 void Result::read()
 {
-    MPICluster::postResult( this->subjectUID(), this->sender(),
-                            result_data );
+    MPICluster::postResult(this->subjectUID(), this->sender(),
+                           result_data);
 }
 
 /////////
@@ -1457,23 +1488,23 @@ void Result::read()
 static const RegisterMetaType<GetUIDs> r_getuids;
 
 /** Serialise to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const GetUIDs &getuids)
+QDataStream &operator<<(QDataStream &ds, const GetUIDs &getuids)
 {
     writeHeader(ds, r_getuids, 1);
 
-    ds << static_cast<const MessageBase&>(getuids);
+    ds << static_cast<const MessageBase &>(getuids);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, GetUIDs &getuids)
+QDataStream &operator>>(QDataStream &ds, GetUIDs &getuids)
 {
     VersionID v = readHeader(ds, r_getuids);
 
     if (v == 1)
     {
-        ds >> static_cast<MessageBase&>(getuids);
+        ds >> static_cast<MessageBase &>(getuids);
     }
     else
         throw version_error(v, "1", r_getuids, CODELOC);
@@ -1483,19 +1514,22 @@ QDataStream& operator>>(QDataStream &ds, GetUIDs &getuids)
 
 /** Construct a message that asks the master to return the UIDs
     of all of the backends */
-GetUIDs::GetUIDs() : MessageBase( MPICluster::master() )
-{}
+GetUIDs::GetUIDs() : MessageBase(MPICluster::master())
+{
+}
 
 /** Copy constructor */
 GetUIDs::GetUIDs(const GetUIDs &other) : MessageBase(other)
-{}
+{
+}
 
 /** Destructor */
 GetUIDs::~GetUIDs()
-{}
+{
+}
 
 /** Copy assignment operator */
-GetUIDs& GetUIDs::operator=(const GetUIDs &other)
+GetUIDs &GetUIDs::operator=(const GetUIDs &other)
 {
     MessageBase::operator=(other);
     return *this;
@@ -1518,106 +1552,106 @@ Message GetUIDs::reply() const
 /** Read this message */
 void GetUIDs::read()
 {
-    //ensure that this is the master process
+    // ensure that this is the master process
     if (not MPICluster::isMaster())
     {
-        throw SireError::program_bug( QObject::tr(
-            "A GetUIDs message can only be read by the master process!"),
-                CODELOC );
+        throw SireError::program_bug(QObject::tr(
+                                         "A GetUIDs message can only be read by the master process!"),
+                                     CODELOC);
     }
 }
 
-const char* Broadcast::typeName()
+const char *Broadcast::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Broadcast>() );
+    return QMetaType::typeName(qMetaTypeId<Broadcast>());
 }
 
-const char* Result::typeName()
+const char *Result::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Result>() );
+    return QMetaType::typeName(qMetaTypeId<Result>());
 }
 
-const char* Error::typeName()
+const char *Error::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Error>() );
+    return QMetaType::typeName(qMetaTypeId<Error>());
 }
 
-const char* RegisterBackend::typeName()
+const char *RegisterBackend::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<RegisterBackend>() );
+    return QMetaType::typeName(qMetaTypeId<RegisterBackend>());
 }
 
-const char* ReserveBackend::typeName()
+const char *ReserveBackend::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ReserveBackend>() );
+    return QMetaType::typeName(qMetaTypeId<ReserveBackend>());
 }
 
-const char* RequestAvailability::typeName()
+const char *RequestAvailability::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<RequestAvailability>() );
+    return QMetaType::typeName(qMetaTypeId<RequestAvailability>());
 }
 
-const char* Reservation::typeName()
+const char *Reservation::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Reservation>() );
+    return QMetaType::typeName(qMetaTypeId<Reservation>());
 }
 
-const char* Shutdown::typeName()
+const char *Shutdown::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Shutdown>() );
+    return QMetaType::typeName(qMetaTypeId<Shutdown>());
 }
 
-const char* GetUIDs::typeName()
+const char *GetUIDs::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<GetUIDs>() );
+    return QMetaType::typeName(qMetaTypeId<GetUIDs>());
 }
 
-const char* Message::typeName()
+const char *Message::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Message>() );
+    return QMetaType::typeName(qMetaTypeId<Message>());
 }
 
-Reservation* Reservation::clone() const
+Reservation *Reservation::clone() const
 {
     return new Reservation(*this);
 }
 
-RequestAvailability* RequestAvailability::clone() const
+RequestAvailability *RequestAvailability::clone() const
 {
     return new RequestAvailability(*this);
 }
 
-Result* Result::clone() const
+Result *Result::clone() const
 {
     return new Result(*this);
 }
 
-GetUIDs* GetUIDs::clone() const
+GetUIDs *GetUIDs::clone() const
 {
     return new GetUIDs(*this);
 }
 
-Shutdown* Shutdown::clone() const
+Shutdown *Shutdown::clone() const
 {
     return new Shutdown(*this);
 }
 
-Broadcast* Broadcast::clone() const
+Broadcast *Broadcast::clone() const
 {
     return new Broadcast(*this);
 }
 
-Error* Error::clone() const
+Error *Error::clone() const
 {
     return new Error(*this);
 }
 
-RegisterBackend* RegisterBackend::clone() const
+RegisterBackend *RegisterBackend::clone() const
 {
     return new RegisterBackend(*this);
 }
 
-ReserveBackend* ReserveBackend::clone() const
+ReserveBackend *ReserveBackend::clone() const
 {
     return new ReserveBackend(*this);
 }
