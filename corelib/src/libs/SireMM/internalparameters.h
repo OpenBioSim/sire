@@ -848,6 +848,7 @@ namespace SireMM
 
         void setAtomicCoordinates(const AtomicCoords3D &coords);
 
+        int nGroups() const;
         int nCutGroups() const;
 
         bool changedAllGroups(const InternalParameters3D &other) const;

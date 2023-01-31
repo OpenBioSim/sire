@@ -37,6 +37,8 @@
 
 #include "SireStream/shareddatastream.h"
 
+#include "tostring.h"
+
 #include <QDebug>
 
 SIRE_BEGIN_HEADER
@@ -454,6 +456,10 @@ namespace SireFF
             : FFMoleculeBase(molecule),
               params(parameters)
         {
+            if (FFMoleculeBase::nCutGroups() != params.nGroups())
+            {
+                qDebug() << "MISMATCH" << FFMoleculeBase::nCutGroups() << params.nGroups();
+            }
         }
 
         /** Copy constructor */
@@ -662,70 +668,15 @@ namespace SireFF
             // ensure that they are compatible
             SireFF::detail::assertCompatible(*this, newmol);
 
-            // how many CutGroups are there in this view?
-            int ncgroups = FFMoleculeBase::molecule().selection().nSelectedCutGroups();
+            int nchanged = this->params.getChangedGroups(newmol.params).count();
 
-            // if there is only one group, then it has either changed or not
-            if (this->params.changedAllGroups(newmol.params))
-                return *this;
-
-            // there is more than one CutGroup in this
-            // selection - get the groups that have changed
-            QSet<quint32> changed_groups = this->params.getChangedGroups(newmol.params);
-
-            if (changed_groups.count() == ncgroups)
-                // all of the CutGroups have changed
-                return *this;
-
-            else if (changed_groups.isEmpty())
-                // nothing has changed
+            if (nchanged == 0)
+                // nothing changed
                 return FFMolecule<PTNL>();
-
             else
-            {
-                // only some of the CutGroups have changed - create a selection
-                // of the CutGroups that changed - remember that we need to convert
-                // the index into the parameters array into the CGIdx...
-                AtomSelection changed_atoms = FFMoleculeBase::molecule().selection();
-
-                QList<CGIdx> changed_cgroups;
-                changed_cgroups.reserve(changed_groups.count());
-
-                if (changed_atoms.selectedAllCutGroups())
-                {
-                    // the indicies correspond exactly with the CGIdxs
-                    for (const auto &changed_group : convert_to_qlist(changed_groups))
-                    {
-                        changed_cgroups.append(CGIdx(changed_group));
-                    }
-                }
-                else
-                {
-                    QList<CGIdx> selected_cgroups = changed_atoms.selectedCutGroups();
-
-                    for (const auto &changed_group : convert_to_qlist(changed_groups))
-                    {
-                        // get the CGIdx of this group
-                        if (changed_group < 0 or changed_group >= selected_cgroups.count())
-                        {
-                            // qDebug() << "WARNING: CHANGED GROUP ERROR?" << changed_group << selected_cgroups.count();
-                            return *this;
-                        }
-                        else
-                        {
-                            changed_cgroups.append(selected_cgroups.at(changed_group));
-                        }
-                    }
-                }
-
-                // now mask the selection so that only atoms in the changed
-                // CutGroups are selected
-                changed_atoms.mask(changed_cgroups);
-
-                return FFMolecule<PTNL>(PartialMolecule(FFMoleculeBase::molecule().data(),
-                                                        changed_atoms),
-                                        params.applyMask(changed_groups));
-            }
+                // assume everything changed - trying to reduce this
+                // change to a subset of this molecule is prone to bugs
+                return *this;
         }
 
         ///////
@@ -1304,7 +1255,6 @@ namespace SireFF
         }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
-
     }
 
 }

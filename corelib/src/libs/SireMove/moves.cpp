@@ -534,10 +534,14 @@ void Moves::postCheck(System &system) const
         SireCAS::Values newnrgs = system.energies();
 
         QStringList broken_nrgs;
+        double largest_delta = 0;
 
         for (SireCAS::Symbol key : oldnrgs.keys())
         {
             double delta = std::abs(newnrgs[key] - oldnrgs[key]);
+
+            if (delta > largest_delta)
+                largest_delta = delta;
 
             if (delta > acceptable_delta)
             {
@@ -562,6 +566,8 @@ void Moves::postCheck(System &system) const
                     .arg(broken_nrgs.join("\n")),
                 CODELOC);
         }
+
+        qDebug() << "PERIODIC RUNNING TOTAL CHECK PASSED" << largest_delta;
     }
 }
 
