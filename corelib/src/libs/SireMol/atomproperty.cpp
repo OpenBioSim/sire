@@ -38,6 +38,9 @@
 #include "atompolarisabilities.h"
 #include "atomradii.h"
 #include "atomvelocities.h"
+#include "atomradicals.h"
+#include "atomradicals.h"
+#include "atompropertylist.h"
 
 #include "SireBase/propertylist.h"
 
@@ -151,3 +154,8 @@ static const RegisterMetaType<AtomElements> r_atomelements;
 static const RegisterMetaType<AtomPolarisabilities> r_atompols;
 static const RegisterMetaType<AtomRadii> r_atomradii;
 static const RegisterMetaType<AtomPropertyProperty> r_atomproprop;
+static const RegisterMetaType<AtomRadicals> r_atomradicals;
+static const RegisterMetaType<AtomPropertyList> r_atompropertylist;
+static const RegisterMetaType<AtomDoubleArrayProperty> r_atomdoublearrayprop;
+static const RegisterMetaType<AtomIntegerArrayProperty> r_atomintarrayprop;
+static const RegisterMetaType<AtomStringArrayProperty> r_atomstringarrayprop;
