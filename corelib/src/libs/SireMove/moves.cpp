@@ -566,8 +566,6 @@ void Moves::postCheck(System &system) const
                     .arg(broken_nrgs.join("\n")),
                 CODELOC);
         }
-
-        qDebug() << "PERIODIC RUNNING TOTAL CHECK PASSED" << largest_delta;
     }
 }
 
