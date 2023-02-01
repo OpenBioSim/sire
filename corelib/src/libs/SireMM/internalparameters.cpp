@@ -2985,10 +2985,10 @@ const CoordGroupArray &InternalParameters3D::atomicCoordinates() const
 /** Set the coordinates used by these parameters */
 void InternalParameters3D::setAtomicCoordinates(const AtomicCoords3D &coords)
 {
-    const int ngroups = coords.atomicCoordinates().count();
+    const int ngroups = coords.atomicCoordinates().nCoordGroups();
 
     // there must be the same number of CutGroups as in the parameters!
-    if (ngroups != atomicCoordinates().count())
+    if (ngroups != atomicCoordinates().nCoordGroups())
     {
         throw SireError::program_bug(QObject::tr("Error setting incompatible coordinates!!! %1 vs. %2")
                                          .arg(ngroups)
@@ -3020,6 +3020,14 @@ int InternalParameters3D::nCutGroups() const
     return AtomicCoords3D::atomicCoordinates().count();
 }
 
+/** Return the number of CutGroup in the molecule whose parameters are
+    contained in this object. Synonym as this is used by FFMolecule
+*/
+int InternalParameters3D::nGroups() const
+{
+    return AtomicCoords3D::atomicCoordinates().count();
+}
+
 /** Return whether or not all of the CutGroup have changed compared to 'other' */
 bool InternalParameters3D::changedAllGroups(const InternalParameters3D &other) const
 {
@@ -3045,12 +3053,14 @@ void InternalParameters3D::addChangedGroups(const InternalParameters3D &other, Q
 
     if (this_coords_array != other_coords_array)
     {
-        quint32 ngroups = qMin(this->atomicCoordinates().count(), other.atomicCoordinates().count());
+        quint32 ngroups = qMin(this->atomicCoordinates().nCoordGroups(), other.atomicCoordinates().nCoordGroups());
 
         for (quint32 i = 0; i < ngroups; ++i)
         {
             if (this_coords_array[i] != other_coords_array[i])
+            {
                 changed_groups.insert(i);
+            }
         }
     }
 
@@ -3059,9 +3069,9 @@ void InternalParameters3D::addChangedGroups(const InternalParameters3D &other, Q
     {
         int count = 0;
 
-        foreach (quint32 cgidx, changed_groups)
+        for (const auto i : changed_groups)
         {
-            if (cgidx < quint32(this->nCutGroups()))
+            if (i < quint32(this->nCutGroups()))
             {
                 ++count;
             }

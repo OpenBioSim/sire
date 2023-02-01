@@ -30,19 +30,19 @@
  *
  * first created on December 27, 2007
  * revised on December 30, 2007
-*/
+ */
 
 #ifndef _REGRESS_H
 #define _REGRESS_H
 
-#include "sireglobal.h"
 #include "SireStream/datastream.h"
-#include <list>
+#include "sireglobal.h"
 #include <cmath>
-#include <vector>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <list>
+#include <vector>
 
 using namespace std;
 
@@ -51,48 +51,48 @@ const unsigned int POLYNOMIAL_DEGREE = 10;
 
 typedef struct
 {
-    double x;   // positions on the x-axis
-    double y;   // values on the y-axis, y=f(x)
+    double x; // positions on the x-axis
+    double y; // values on the y-axis, y=f(x)
 } stREGRESS;
 
 class Regress
 {
 public:
     Regress(
-        const list<stREGRESS>&,                 // structure for ti data
-        unsigned int = POLYNOMIAL_DEGREE );     // maximum degree of polynomial
+        const list<stREGRESS> &,           // structure for ti data
+        unsigned int = POLYNOMIAL_DEGREE); // maximum degree of polynomial
     Regress(
-        const vector<double>&,                  // lambda values
-        const vector<double>&,                  // dG/dl
-        unsigned int = POLYNOMIAL_DEGREE );     // maximum degree of polynomial
-    ~Regress() {};
+        const vector<double> &,            // lambda values
+        const vector<double> &,            // dG/dl
+        unsigned int = POLYNOMIAL_DEGREE); // maximum degree of polynomial
+    ~Regress(){};
 
-    void PrintMatrix() const;                   // print out the matrix
-    bool GetEstimate( const string&, unsigned int ) const;
-    const vector<double>& GetPolynomial( bool = false ) const;
-    double DoIntegral( bool = false ) const;
-    double DoQuadrature( bool = false ) const;
+    void PrintMatrix() const; // print out the matrix
+    bool GetEstimate(const string &, unsigned int) const;
+    const vector<double> &GetPolynomial(bool = false) const;
+    double DoIntegral(bool = false) const;
+    double DoQuadrature(bool = false) const;
 
-    const list<stREGRESS>& LoadData(
-        const list<stREGRESS>&,                 // structure for ti data
-        unsigned int = POLYNOMIAL_DEGREE );     // maximum degree of polynomial
-    const list<stREGRESS>& LoadData(
-        const vector<double>&,                  // lambda values
-        const vector<double>&,                  // dG/dl
-        unsigned int = POLYNOMIAL_DEGREE );     // maximum degree of polynomial
+    const list<stREGRESS> &LoadData(
+        const list<stREGRESS> &,           // structure for ti data
+        unsigned int = POLYNOMIAL_DEGREE); // maximum degree of polynomial
+    const list<stREGRESS> &LoadData(
+        const vector<double> &,            // lambda values
+        const vector<double> &,            // dG/dl
+        unsigned int = POLYNOMIAL_DEGREE); // maximum degree of polynomial
 
 private:
     list<stREGRESS> sample;
-    vector<double> factor;      // coefficients of the polynomial
-    vector<double> matrix;      // matrix for solving linear equations
+    vector<double> factor; // coefficients of the polynomial
+    vector<double> matrix; // matrix for solving linear equations
     unsigned int degree;
 
     void ClearData();
-    void DoPolynomial( unsigned int );  // construct the polynomial using regression
-    bool SetPivot( unsigned int );      // apply partial pivoting to the matrix
-    void Exchange( double&, double& );  // swap the contents of two variables
-    unsigned int SetMatrix();           // construct the matrix
-    unsigned int Translate( unsigned int, unsigned int ) const;
-};  // class definition for nonlinear regression
+    void DoPolynomial(unsigned int);   // construct the polynomial using regression
+    bool SetPivot(unsigned int);       // apply partial pivoting to the matrix
+    void Exchange(double &, double &); // swap the contents of two variables
+    unsigned int SetMatrix();          // construct the matrix
+    unsigned int Translate(unsigned int, unsigned int) const;
+}; // class definition for nonlinear regression
 
-#endif  // _REGRESS_H
+#endif // _REGRESS_H

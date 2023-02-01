@@ -31,13 +31,13 @@
 
 #include <QTime>
 
-#include "mpifrontend.h"
 #include "mpicluster.h"
+#include "mpifrontend.h"
 
 #include "SireCluster/workpacket.h"
 
-#include "SireError/printerror.h"
 #include "SireError/getbacktrace.h"
+#include "SireError/printerror.h"
 
 #include <QDebug>
 
@@ -46,23 +46,26 @@ using namespace SireCluster::MPI;
 
 /** Null constructor */
 MPIFrontend::MPIFrontend() : FrontendBase()
-{}
+{
+}
 
 /** Construct a frontend that uses the passed
     point-to-point communicator to communicate with
     the backend */
 MPIFrontend::MPIFrontend(const P2PComm &p2pcomm)
-            : FrontendBase(), p2p(p2pcomm)
-{}
+    : FrontendBase(), p2p(p2pcomm)
+{
+}
 
 /** Destructor */
 MPIFrontend::~MPIFrontend()
-{}
+{
+}
 
 /** This is only local if the p2p communicator is local */
 bool MPIFrontend::isLocal() const
 {
-    return const_cast<P2PComm*>(&p2p)->isLocal();
+    return const_cast<P2PComm *>(&p2p)->isLocal();
 }
 
 /** Return the UID of the backend */
@@ -75,7 +78,7 @@ QUuid MPIFrontend::UID()
     {
         QMutexLocker lkr(&datamutex);
 
-        p2p.sendMessage( P2PComm::GETUID );
+        p2p.sendMessage(P2PComm::GETUID);
         cached_uid = p2p.awaitResponse<QUuid>(true);
     }
 
@@ -89,7 +92,7 @@ void MPIFrontend::startJob(const WorkPacket &workpacket)
     {
         QMutexLocker lkr(&datamutex);
 
-        p2p.sendMessage( P2PComm::START, workpacket );
+        p2p.sendMessage(P2PComm::START, workpacket);
 
         int result = p2p.awaitIntegerResponse(true);
 
@@ -106,7 +109,7 @@ void MPIFrontend::stopJob()
     {
         QMutexLocker lkr(&datamutex);
 
-        p2p.sendMessage( P2PComm::STOP );
+        p2p.sendMessage(P2PComm::STOP);
 
         int result = p2p.awaitIntegerResponse();
 
@@ -123,7 +126,7 @@ void MPIFrontend::abortJob()
     {
         QMutexLocker lkr(&datamutex);
 
-        p2p.sendMessage( P2PComm::ABORT );
+        p2p.sendMessage(P2PComm::ABORT);
 
         int result = p2p.awaitIntegerResponse();
 
@@ -141,17 +144,17 @@ void MPIFrontend::wait()
         return;
     }
 
-    QMutexLocker lkr( &datamutex );
+    QMutexLocker lkr(&datamutex);
 
     while (true)
     {
-        p2p.sendMessage( P2PComm::IS_RUNNING );
+        p2p.sendMessage(P2PComm::IS_RUNNING);
 
         if (not p2p.awaitIntegerResponse())
             break;
 
         else
-            //wait a second
+            // wait a second
             ::sleep(1);
     }
 }
@@ -174,16 +177,16 @@ bool MPIFrontend::wait(int timeout)
         return true;
     }
 
-    QMutexLocker lkr( &datamutex );
+    QMutexLocker lkr(&datamutex);
 
     while (t.elapsed() < timeout)
     {
-        p2p.sendMessage( P2PComm::IS_RUNNING );
+        p2p.sendMessage(P2PComm::IS_RUNNING);
 
         if (not p2p.awaitIntegerResponse())
             return true;
 
-        //wait a second
+        // wait a second
         if (t.elapsed() + 1000 > timeout)
             break;
 
@@ -200,7 +203,7 @@ float MPIFrontend::progress()
     {
         QMutexLocker lkr(&datamutex);
 
-        p2p.sendMessage( P2PComm::PROGRESS );
+        p2p.sendMessage(P2PComm::PROGRESS);
 
         return p2p.awaitFloatResponse();
     }
@@ -215,7 +218,7 @@ WorkPacket MPIFrontend::interimResult()
     {
         QMutexLocker lkr(&datamutex);
 
-        p2p.sendMessage( P2PComm::INTERIM );
+        p2p.sendMessage(P2PComm::INTERIM);
 
         return p2p.awaitResponse<WorkPacket>();
     }
@@ -231,7 +234,7 @@ WorkPacket MPIFrontend::result()
     {
         QMutexLocker lkr(&datamutex);
 
-        p2p.sendMessage( P2PComm::RESULT );
+        p2p.sendMessage(P2PComm::RESULT);
 
         return p2p.awaitResponse<WorkPacket>();
     }

@@ -32,10 +32,10 @@
 
 #include "SireBase/sharedpolypointer.hpp"
 
+#include <QList>
+#include <QSet>
 #include <QSharedData>
 #include <QUuid>
-#include <QSet>
-#include <QList>
 
 #include <boost/tuple/tuple.hpp>
 
@@ -44,742 +44,742 @@ SIRE_BEGIN_HEADER
 namespace SireCluster
 {
 
-class Frontend;
+    class Frontend;
 
-namespace MPI
-{
+    namespace MPI
+    {
 
-class MessageBase;
-class Message;
+        class MessageBase;
+        class Message;
 
-namespace Messages
-{
-class RegisterBackend;
-class Shutdown;
-class Broadcast;
-class GetUIDs;
-class ReserveBackend;
-class RequestAvailability;
-class Reservation;
+        namespace Messages
+        {
+            class RegisterBackend;
+            class Shutdown;
+            class Broadcast;
+            class GetUIDs;
+            class ReserveBackend;
+            class RequestAvailability;
+            class Reservation;
 
-class Error;
-class Result;
+            class Error;
+            class Result;
+        }
+
+    }
 }
 
-}
-}
+QDataStream &operator<<(QDataStream &, const SireCluster::MPI::Message &);
+QDataStream &operator>>(QDataStream &, SireCluster::MPI::Message &);
 
-QDataStream& operator<<(QDataStream&, const SireCluster::MPI::Message&);
-QDataStream& operator>>(QDataStream&, SireCluster::MPI::Message&);
+QDataStream &operator<<(QDataStream &, const SireCluster::MPI::MessageBase &);
+QDataStream &operator>>(QDataStream &, SireCluster::MPI::MessageBase &);
 
-QDataStream& operator<<(QDataStream&, const SireCluster::MPI::MessageBase&);
-QDataStream& operator>>(QDataStream&, SireCluster::MPI::MessageBase&);
+QDataStream &operator<<(QDataStream &,
+                        const SireCluster::MPI::Messages::RegisterBackend &);
+QDataStream &operator>>(QDataStream &,
+                        SireCluster::MPI::Messages::RegisterBackend &);
 
-QDataStream& operator<<(QDataStream&,
-                        const SireCluster::MPI::Messages::RegisterBackend&);
-QDataStream& operator>>(QDataStream&,
-                        SireCluster::MPI::Messages::RegisterBackend&);
+QDataStream &operator<<(QDataStream &,
+                        const SireCluster::MPI::Messages::Shutdown &);
+QDataStream &operator>>(QDataStream &,
+                        SireCluster::MPI::Messages::Shutdown &);
 
-QDataStream& operator<<(QDataStream&,
-                        const SireCluster::MPI::Messages::Shutdown&);
-QDataStream& operator>>(QDataStream&,
-                        SireCluster::MPI::Messages::Shutdown&);
+QDataStream &operator<<(QDataStream &,
+                        const SireCluster::MPI::Messages::Broadcast &);
+QDataStream &operator>>(QDataStream &,
+                        SireCluster::MPI::Messages::Broadcast &);
 
-QDataStream& operator<<(QDataStream&,
-                       const SireCluster::MPI::Messages::Broadcast&);
-QDataStream& operator>>(QDataStream&,
-                        SireCluster::MPI::Messages::Broadcast&);
+QDataStream &operator<<(QDataStream &,
+                        const SireCluster::MPI::Messages::ReserveBackend &);
+QDataStream &operator>>(QDataStream &,
+                        SireCluster::MPI::Messages::ReserveBackend &);
 
-QDataStream& operator<<(QDataStream&,
-                       const SireCluster::MPI::Messages::ReserveBackend&);
-QDataStream& operator>>(QDataStream&,
-                        SireCluster::MPI::Messages::ReserveBackend&);
+QDataStream &operator<<(QDataStream &,
+                        const SireCluster::MPI::Messages::RequestAvailability &);
+QDataStream &operator>>(QDataStream &,
+                        SireCluster::MPI::Messages::RequestAvailability &);
 
-QDataStream& operator<<(QDataStream&,
-                       const SireCluster::MPI::Messages::RequestAvailability&);
-QDataStream& operator>>(QDataStream&,
-                        SireCluster::MPI::Messages::RequestAvailability&);
+QDataStream &operator<<(QDataStream &,
+                        const SireCluster::MPI::Messages::Reservation &);
+QDataStream &operator>>(QDataStream &,
+                        SireCluster::MPI::Messages::Reservation &);
 
-QDataStream& operator<<(QDataStream&,
-                       const SireCluster::MPI::Messages::Reservation&);
-QDataStream& operator>>(QDataStream&,
-                        SireCluster::MPI::Messages::Reservation&);
+QDataStream &operator<<(QDataStream &,
+                        const SireCluster::MPI::Messages::GetUIDs &);
+QDataStream &operator>>(QDataStream &,
+                        SireCluster::MPI::Messages::GetUIDs &);
 
-QDataStream& operator<<(QDataStream&,
-                       const SireCluster::MPI::Messages::GetUIDs&);
-QDataStream& operator>>(QDataStream&,
-                        SireCluster::MPI::Messages::GetUIDs&);
+QDataStream &operator<<(QDataStream &,
+                        const SireCluster::MPI::Messages::Error &);
+QDataStream &operator>>(QDataStream &,
+                        SireCluster::MPI::Messages::Error &);
 
-QDataStream& operator<<(QDataStream&,
-                       const SireCluster::MPI::Messages::Error&);
-QDataStream& operator>>(QDataStream&,
-                        SireCluster::MPI::Messages::Error&);
-
-QDataStream& operator<<(QDataStream&,
-                       const SireCluster::MPI::Messages::Result&);
-QDataStream& operator>>(QDataStream&,
-                        SireCluster::MPI::Messages::Result&);
+QDataStream &operator<<(QDataStream &,
+                        const SireCluster::MPI::Messages::Result &);
+QDataStream &operator>>(QDataStream &,
+                        SireCluster::MPI::Messages::Result &);
 
 namespace SireError
 {
-class exception;
+    class exception;
 }
 
 namespace SireCluster
 {
-namespace MPI
-{
-
-/** This is the virtual base class of all MPI messages sent between processes
-    in the MPI cluster
-
-    @author Christopher Woods
-*/
-class MessageBase : public QSharedData
-{
-
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const MessageBase&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, MessageBase&);
-
-public:
-    MessageBase(const MessageBase &other);
-
-    virtual ~MessageBase();
-
-    static const char* typeName()
+    namespace MPI
     {
-        return "SireCluster::MPI::MessageBase";
-    }
 
-    virtual const char* what() const=0;
+        /** This is the virtual base class of all MPI messages sent between processes
+            in the MPI cluster
 
-    virtual MessageBase* clone() const=0;
+            @author Christopher Woods
+        */
+        class MessageBase : public QSharedData
+        {
 
-    virtual void read()=0;
+            friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const MessageBase &);
+            friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, MessageBase &);
 
-    virtual QString toString() const;
+        public:
+            MessageBase(const MessageBase &other);
 
-    virtual bool hasReply() const;
+            virtual ~MessageBase();
 
-    virtual Message reply() const;
+            static const char *typeName()
+            {
+                return "SireCluster::MPI::MessageBase";
+            }
 
-    const QUuid& UID() const;
-    const QUuid& subjectUID() const;
+            virtual const char *what() const = 0;
 
-    int sender() const;
-    int destination() const;
+            virtual MessageBase *clone() const = 0;
 
-    virtual bool isRecipient(int rank) const;
+            virtual void read() = 0;
 
-    virtual QSet<int> recipients() const;
+            virtual QString toString() const;
 
-    template<class T>
-    bool isA() const;
+            virtual bool hasReply() const;
 
-    template<class T>
-    T asA() const;
+            virtual Message reply() const;
 
-protected:
-    MessageBase(int destination);
-    MessageBase(int destination, const QUuid &subject_uid);
-    MessageBase();
+            const QUuid &UID() const;
+            const QUuid &subjectUID() const;
 
-    MessageBase& operator=(const MessageBase &other);
+            int sender() const;
+            int destination() const;
 
-private:
-    /** The unique ID of this message (this allows messages and
-        responses to be tallied */
-    QUuid uid;
+            virtual bool isRecipient(int rank) const;
 
-    /** The ID of the subject that this message relates to
-         - this allows several related messages to be exchanged
-           and tracked */
-    QUuid subject_uid;
+            virtual QSet<int> recipients() const;
 
-    /** The MPI rank of the process that sent this message */
-    qint32 sent_by;
+            template <class T>
+            bool isA() const;
 
-    /** The MPI rank of the process that should receive this message */
-    qint32 dest;
-};
+            template <class T>
+            T asA() const;
 
-/** The polymorphic holder of all of the message classes
+        protected:
+            MessageBase(int destination);
+            MessageBase(int destination, const QUuid &subject_uid);
+            MessageBase();
 
-    @author Christopher Woods
-*/
-class Message
-{
+            MessageBase &operator=(const MessageBase &other);
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const Message&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, Message&);
+        private:
+            /** The unique ID of this message (this allows messages and
+                responses to be tallied */
+            QUuid uid;
 
-public:
-    Message();
-    Message(const MessageBase &message);
+            /** The ID of the subject that this message relates to
+                 - this allows several related messages to be exchanged
+                   and tracked */
+            QUuid subject_uid;
 
-    Message(const Message &other);
+            /** The MPI rank of the process that sent this message */
+            qint32 sent_by;
 
-    ~Message();
+            /** The MPI rank of the process that should receive this message */
+            qint32 dest;
+        };
 
-    Message& operator=(const Message &other);
+        /** The polymorphic holder of all of the message classes
 
-    static const char* typeName();
+            @author Christopher Woods
+        */
+        class Message
+        {
 
-    const char* what() const
-    {
-        if (this->isNull())
-            return Message::typeName();
-        else
-            return d->what();
-    }
+            friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const Message &);
+            friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, Message &);
 
-    QString toString() const;
+        public:
+            Message();
+            Message(const MessageBase &message);
 
-    bool isNull() const;
+            Message(const Message &other);
 
-    QByteArray pack() const;
-    static Message unpack(const QByteArray &data);
+            ~Message();
 
-    void read();
+            Message &operator=(const Message &other);
 
-    bool hasReply() const;
+            static const char *typeName();
 
-    Message reply() const;
+            const char *what() const
+            {
+                if (this->isNull())
+                    return Message::typeName();
+                else
+                    return d->what();
+            }
 
-    const QUuid& UID() const;
-    const QUuid& subjectUID() const;
+            QString toString() const;
 
-    int sender() const;
-    int destination() const;
+            bool isNull() const;
 
-    bool isRecipient(int rank) const;
+            QByteArray pack() const;
+            static Message unpack(const QByteArray &data);
 
-    QSet<int> recipients() const;
+            void read();
 
-    template<class T>
-    bool isA() const
-    {
-        if (this->isNull())
-            return false;
-        else
-            return base().isA<T>();
-    }
+            bool hasReply() const;
 
-    template<class T>
-    T asA() const
-    {
-        return base().asA<T>();
-    }
+            Message reply() const;
 
-private:
-    const MessageBase& base() const;
+            const QUuid &UID() const;
+            const QUuid &subjectUID() const;
 
-    /** Polymorphic, implicitly shared pointer to the message */
-    SireBase::SharedPolyPointer<MessageBase> d;
-};
+            int sender() const;
+            int destination() const;
 
-namespace Messages
-{
+            bool isRecipient(int rank) const;
 
-/** This is the message sent by the master node when it re-broadcasts
-    messages sent by the slave nodes (as the slave nodes can't talk
-    to each other directly - not until they open up a point-to-point
-    communicator)
+            QSet<int> recipients() const;
 
-    @author Christopher Woods
-*/
-class Broadcast : public MessageBase
-{
+            template <class T>
+            bool isA() const
+            {
+                if (this->isNull())
+                    return false;
+                else
+                    return base().isA<T>();
+            }
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const Broadcast&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, Broadcast&);
+            template <class T>
+            T asA() const
+            {
+                return base().asA<T>();
+            }
 
-public:
-    Broadcast();
-    Broadcast(const Message &message);
-    Broadcast(const Message &message, int rank);
-    Broadcast(const Message &message, const QSet<qint32> &ranks);
+        private:
+            const MessageBase &base() const;
 
-    Broadcast(const Broadcast &other);
+            /** Polymorphic, implicitly shared pointer to the message */
+            SireBase::SharedPolyPointer<MessageBase> d;
+        };
 
-    ~Broadcast();
+        namespace Messages
+        {
 
-    Broadcast& operator=(const Broadcast &other);
+            /** This is the message sent by the master node when it re-broadcasts
+                messages sent by the slave nodes (as the slave nodes can't talk
+                to each other directly - not until they open up a point-to-point
+                communicator)
 
-    static const char* typeName();
+                @author Christopher Woods
+            */
+            class Broadcast : public MessageBase
+            {
 
-    const char* what() const
-    {
-        return Broadcast::typeName();
-    }
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const Broadcast &);
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, Broadcast &);
 
-    Broadcast* clone() const;
+            public:
+                Broadcast();
+                Broadcast(const Message &message);
+                Broadcast(const Message &message, int rank);
+                Broadcast(const Message &message, const QSet<qint32> &ranks);
 
-    QString toString() const;
+                Broadcast(const Broadcast &other);
 
-    void read();
+                ~Broadcast();
 
-    bool hasReply() const;
+                Broadcast &operator=(const Broadcast &other);
 
-    Message reply() const;
+                static const char *typeName();
 
-    bool isRecipient(int rank) const;
+                const char *what() const
+                {
+                    return Broadcast::typeName();
+                }
 
-    QSet<int> recipients() const;
+                Broadcast *clone() const;
 
-    const QString& messageType() const;
+                QString toString() const;
 
-    template<class T>
-    bool messageIsA() const
-    {
-        return message_type == T::typeName();
-    }
+                void read();
 
-    template<class T>
-    T messageAsA() const
-    {
-        return Message::unpack(message_data).asA<T>();
-    }
+                bool hasReply() const;
 
-private:
-    /** The actual destination of this message - this is empty
-        if it is meant to go to everybody */
-    QSet<qint32> destinations;
+                Message reply() const;
 
-    /** The type of the message being broadcast */
-    QString message_type;
+                bool isRecipient(int rank) const;
 
-    /** The data containing the message being broadcast */
-    QByteArray message_data;
+                QSet<int> recipients() const;
 
-    /** Any reply to this message */
-    Message replymsg;
-};
+                const QString &messageType() const;
 
-/** This is the message sent by a slave node to tell the master
-    node that a new Backend has been created on the slave which
-    the master should register in the global registry
+                template <class T>
+                bool messageIsA() const
+                {
+                    return message_type == T::typeName();
+                }
 
-    @author Christopher Woods
-*/
-class RegisterBackend : public MessageBase
-{
+                template <class T>
+                T messageAsA() const
+                {
+                    return Message::unpack(message_data).asA<T>();
+                }
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const RegisterBackend&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, RegisterBackend&);
+            private:
+                /** The actual destination of this message - this is empty
+                    if it is meant to go to everybody */
+                QSet<qint32> destinations;
 
-public:
-    RegisterBackend();
-    RegisterBackend(const QUuid &node_uid);
+                /** The type of the message being broadcast */
+                QString message_type;
 
-    RegisterBackend(const RegisterBackend &other);
+                /** The data containing the message being broadcast */
+                QByteArray message_data;
 
-    ~RegisterBackend();
+                /** Any reply to this message */
+                Message replymsg;
+            };
 
-    RegisterBackend& operator=(const RegisterBackend &other);
+            /** This is the message sent by a slave node to tell the master
+                node that a new Backend has been created on the slave which
+                the master should register in the global registry
 
-    static const char* typeName();
+                @author Christopher Woods
+            */
+            class RegisterBackend : public MessageBase
+            {
 
-    const char* what() const
-    {
-        return RegisterBackend::typeName();
-    }
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const RegisterBackend &);
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, RegisterBackend &);
 
-    RegisterBackend* clone() const;
+            public:
+                RegisterBackend();
+                RegisterBackend(const QUuid &node_uid);
 
-    QString toString() const;
+                RegisterBackend(const RegisterBackend &other);
 
-    void read();
+                ~RegisterBackend();
 
-private:
-    /** The UID of the node to be registered */
-    QUuid node_uid;
+                RegisterBackend &operator=(const RegisterBackend &other);
 
-    /** The rank of the MPI process that contains this node */
-    qint32 node_rank;
-};
+                static const char *typeName();
 
-/** This message is sent by a node to the master to request the complete
-    list of UIDs of all of the backends. This message expects a response,
-    and will block waiting for that response
+                const char *what() const
+                {
+                    return RegisterBackend::typeName();
+                }
 
-    @author Christopher Woods
-*/
-class GetUIDs : public MessageBase
-{
+                RegisterBackend *clone() const;
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const GetUIDs&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, GetUIDs&);
+                QString toString() const;
 
-public:
-    GetUIDs();
+                void read();
 
-    GetUIDs(const GetUIDs &other);
+            private:
+                /** The UID of the node to be registered */
+                QUuid node_uid;
 
-    ~GetUIDs();
+                /** The rank of the MPI process that contains this node */
+                qint32 node_rank;
+            };
 
-    GetUIDs& operator=(const GetUIDs &other);
+            /** This message is sent by a node to the master to request the complete
+                list of UIDs of all of the backends. This message expects a response,
+                and will block waiting for that response
 
-    static const char* typeName();
+                @author Christopher Woods
+            */
+            class GetUIDs : public MessageBase
+            {
 
-    const char* what() const
-    {
-        return GetUIDs::typeName();
-    }
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const GetUIDs &);
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, GetUIDs &);
 
-    GetUIDs* clone() const;
+            public:
+                GetUIDs();
 
-    void read();
+                GetUIDs(const GetUIDs &other);
 
-    bool hasReply() const;
-    Message reply() const;
-};
+                ~GetUIDs();
 
-/** This message is sent to the master to request the reservation of
-    backends from remote nodes
+                GetUIDs &operator=(const GetUIDs &other);
 
-    @author Christopher Woods
-*/
-class ReserveBackend : public MessageBase
-{
+                static const char *typeName();
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const ReserveBackend&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, ReserveBackend&);
+                const char *what() const
+                {
+                    return GetUIDs::typeName();
+                }
 
-public:
-    ReserveBackend();
-    ReserveBackend(int nbackends);
-    ReserveBackend(const QUuid &backend_uid);
+                GetUIDs *clone() const;
 
-    ReserveBackend(const ReserveBackend &other);
+                void read();
 
-    ~ReserveBackend();
+                bool hasReply() const;
+                Message reply() const;
+            };
 
-    ReserveBackend& operator=(const ReserveBackend &other);
+            /** This message is sent to the master to request the reservation of
+                backends from remote nodes
 
-    static const char* typeName();
+                @author Christopher Woods
+            */
+            class ReserveBackend : public MessageBase
+            {
 
-    const char* what() const
-    {
-        return ReserveBackend::typeName();
-    }
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const ReserveBackend &);
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, ReserveBackend &);
 
-    ReserveBackend* clone() const;
+            public:
+                ReserveBackend();
+                ReserveBackend(int nbackends);
+                ReserveBackend(const QUuid &backend_uid);
 
-    const QUuid& requestedUID() const;
+                ReserveBackend(const ReserveBackend &other);
 
-    int nBackends() const;
+                ~ReserveBackend();
 
-    QString toString() const;
+                ReserveBackend &operator=(const ReserveBackend &other);
 
-    void read();
+                static const char *typeName();
 
-private:
-    /** The UID of the backend to be reserved - null if we
-        don't care which backend we get */
-    QUuid backend_uid;
+                const char *what() const
+                {
+                    return ReserveBackend::typeName();
+                }
 
-    /** The number of backends to reserve */
-    qint32 nbackends;
-};
+                ReserveBackend *clone() const;
 
-/** This message is broadcast by the master to all processes to
-    request that they return their availability to meet the
+                const QUuid &requestedUID() const;
 
+                int nBackends() const;
 
-    @author Christopher Woods
-*/
-class RequestAvailability : public MessageBase
-{
+                QString toString() const;
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const RequestAvailability&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, RequestAvailability&);
+                void read();
 
-public:
-    RequestAvailability();
-    RequestAvailability(const ReserveBackend &reservation_request);
+            private:
+                /** The UID of the backend to be reserved - null if we
+                    don't care which backend we get */
+                QUuid backend_uid;
 
-    RequestAvailability(const RequestAvailability &other);
+                /** The number of backends to reserve */
+                qint32 nbackends;
+            };
 
-    ~RequestAvailability();
+            /** This message is broadcast by the master to all processes to
+                request that they return their availability to meet the
 
-    RequestAvailability& operator=(const RequestAvailability &other);
 
-    static const char* typeName();
+                @author Christopher Woods
+            */
+            class RequestAvailability : public MessageBase
+            {
 
-    const char* what() const
-    {
-        return RequestAvailability::typeName();
-    }
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const RequestAvailability &);
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, RequestAvailability &);
 
-    RequestAvailability* clone() const;
+            public:
+                RequestAvailability();
+                RequestAvailability(const ReserveBackend &reservation_request);
 
-    QString toString() const;
+                RequestAvailability(const RequestAvailability &other);
 
-    void read();
+                ~RequestAvailability();
 
-    bool hasReply() const;
+                RequestAvailability &operator=(const RequestAvailability &other);
 
-    Message reply() const;
+                static const char *typeName();
 
-private:
-    /** The reservation request */
-    ReserveBackend request;
+                const char *what() const
+                {
+                    return RequestAvailability::typeName();
+                }
 
-    /** The available backends on this process */
-    QList<QUuid> available_backends;
-};
+                RequestAvailability *clone() const;
 
-/** This message is sent back from the master, containing the
-    reservation details saying which backends are available
-    for the connection (and, indeed, must be connected to)
+                QString toString() const;
 
-    @author Christopher Woods
-*/
-class Reservation : public MessageBase
-{
+                void read();
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const Reservation&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, Reservation&);
+                bool hasReply() const;
 
-public:
-    Reservation();
+                Message reply() const;
 
-    Reservation(const QList< boost::tuple<int,QUuid> > &reserved_backends,
-                const ReserveBackend &request);
+            private:
+                /** The reservation request */
+                ReserveBackend request;
 
-    Reservation(const Reservation &other);
+                /** The available backends on this process */
+                QList<QUuid> available_backends;
+            };
 
-    ~Reservation();
+            /** This message is sent back from the master, containing the
+                reservation details saying which backends are available
+                for the connection (and, indeed, must be connected to)
 
-    Reservation& operator=(const Reservation &other);
+                @author Christopher Woods
+            */
+            class Reservation : public MessageBase
+            {
 
-    static const char* typeName();
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const Reservation &);
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, Reservation &);
 
-    const char* what() const
-    {
-        return Reservation::typeName();
-    }
+            public:
+                Reservation();
 
-    Reservation* clone() const;
+                Reservation(const QList<boost::tuple<int, QUuid>> &reserved_backends,
+                            const ReserveBackend &request);
 
-    QString toString() const;
+                Reservation(const Reservation &other);
 
-    void read();
+                ~Reservation();
 
-    bool hasReply() const;
+                Reservation &operator=(const Reservation &other);
 
-    Message reply() const;
+                static const char *typeName();
 
-private:
-    /** The initial request that generated this reservation */
-    ReserveBackend request;
+                const char *what() const
+                {
+                    return Reservation::typeName();
+                }
 
-    /** The reservation details for each acquired backend */
-    QList< boost::tuple<int,QUuid> > details;
-};
+                Reservation *clone() const;
 
-/** This message is sent to return a result
+                QString toString() const;
 
-    @author Christopher Woods
-*/
-class Result : public MessageBase
-{
+                void read();
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const Result&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, Result&);
+                bool hasReply() const;
 
-public:
-    Result();
+                Message reply() const;
 
-    template<class T>
-    Result(const Message &message, const T &value)
-          : MessageBase(message.sender(), message.subjectUID())
-    {
-        QDataStream ds(&result_data, QIODevice::WriteOnly);
-        ds << value;
-    }
+            private:
+                /** The initial request that generated this reservation */
+                ReserveBackend request;
 
-    Result(const Result &other);
+                /** The reservation details for each acquired backend */
+                QList<boost::tuple<int, QUuid>> details;
+            };
 
-    ~Result();
+            /** This message is sent to return a result
 
-    Result& operator=(const Result &other);
+                @author Christopher Woods
+            */
+            class Result : public MessageBase
+            {
 
-    static const char* typeName();
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const Result &);
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, Result &);
 
-    const char* what() const
-    {
-        return Result::typeName();
-    }
+            public:
+                Result();
 
-    Result* clone() const;
+                template <class T>
+                Result(const Message &message, const T &value)
+                    : MessageBase(message.sender(), message.subjectUID())
+                {
+                    QDataStream ds(&result_data, QIODevice::WriteOnly);
+                    ds << value;
+                }
 
-    void read();
+                Result(const Result &other);
 
-private:
-    /** A binary representation of the result */
-    QByteArray result_data;
-};
+                ~Result();
 
-/** This message is sent to return an error!
+                Result &operator=(const Result &other);
 
-    @author Christopher Woods
-*/
-class Error : public MessageBase
-{
+                static const char *typeName();
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const Error&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, Error&);
+                const char *what() const
+                {
+                    return Result::typeName();
+                }
 
-public:
-    Error();
-    Error(const QString &code_loc);
-    Error(const SireError::exception &e);
-    Error(const std::exception &e);
+                Result *clone() const;
 
-    Error(const Message &message);
-    Error(const Message &message, const QString &code_loc);
-    Error(const Message &message, const SireError::exception &e);
-    Error(const Message &message, const std::exception &e);
+                void read();
 
-    Error(int sender);
-    Error(int sender, const QString &code_loc);
-    Error(int sender, const SireError::exception &e);
-    Error(int sender, const std::exception &e);
+            private:
+                /** A binary representation of the result */
+                QByteArray result_data;
+            };
 
-    Error(const QByteArray &message_data, const QByteArray &error_data);
+            /** This message is sent to return an error!
 
-    Error(const Error &other);
+                @author Christopher Woods
+            */
+            class Error : public MessageBase
+            {
 
-    ~Error();
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const Error &);
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, Error &);
 
-    Error& operator=(const Error &other);
+            public:
+                Error();
+                Error(const QString &code_loc);
+                Error(const SireError::exception &e);
+                Error(const std::exception &e);
 
-    static const char* typeName();
+                Error(const Message &message);
+                Error(const Message &message, const QString &code_loc);
+                Error(const Message &message, const SireError::exception &e);
+                Error(const Message &message, const std::exception &e);
 
-    const char* what() const
-    {
-        return Error::typeName();
-    }
+                Error(int sender);
+                Error(int sender, const QString &code_loc);
+                Error(int sender, const SireError::exception &e);
+                Error(int sender, const std::exception &e);
 
-    Error* clone() const;
+                Error(const QByteArray &message_data, const QByteArray &error_data);
 
-    void read();
+                Error(const Error &other);
 
-private:
-    void setError(const SireError::exception &e);
-    void setError(const std::exception &e);
-    void setUnknownError(const QString &code_loc);
+                ~Error();
 
-    /** A binary representation of the message that caused the error */
-    QByteArray message_data;
+                Error &operator=(const Error &other);
 
-    /** A binary representation of the error */
-    QByteArray error_data;
-};
+                static const char *typeName();
 
-/** This is the message sent to a node to tell it to shutdown. This
-    is used by the master node to tell all of the slaves
-    to shutdown when the program is exiting
+                const char *what() const
+                {
+                    return Error::typeName();
+                }
 
-    @author Christopher Woods
-*/
-class Shutdown : public MessageBase
-{
+                Error *clone() const;
 
-friend SIRECLUSTER_EXPORT QDataStream& ::operator<<(QDataStream&, const Shutdown&);
-friend SIRECLUSTER_EXPORT QDataStream& ::operator>>(QDataStream&, Shutdown&);
+                void read();
 
-public:
-    Shutdown();
-    Shutdown(const Shutdown &other);
+            private:
+                void setError(const SireError::exception &e);
+                void setError(const std::exception &e);
+                void setUnknownError(const QString &code_loc);
 
-    ~Shutdown();
+                /** A binary representation of the message that caused the error */
+                QByteArray message_data;
 
-    Shutdown& operator=(const Shutdown &other);
+                /** A binary representation of the error */
+                QByteArray error_data;
+            };
 
-    static const char* typeName();
+            /** This is the message sent to a node to tell it to shutdown. This
+                is used by the master node to tell all of the slaves
+                to shutdown when the program is exiting
 
-    const char* what() const
-    {
-        return Shutdown::typeName();
-    }
+                @author Christopher Woods
+            */
+            class Shutdown : public MessageBase
+            {
 
-    Shutdown* clone() const;
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator<<(QDataStream &, const Shutdown &);
+                friend SIRECLUSTER_EXPORT QDataStream & ::operator>>(QDataStream &, Shutdown &);
 
-    void read();
-};
+            public:
+                Shutdown();
+                Shutdown(const Shutdown &other);
 
-}  // end of namespace Messages
+                ~Shutdown();
+
+                Shutdown &operator=(const Shutdown &other);
+
+                static const char *typeName();
+
+                const char *what() const
+                {
+                    return Shutdown::typeName();
+                }
+
+                Shutdown *clone() const;
+
+                void read();
+            };
+
+        } // end of namespace Messages
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-template<>
-SIRE_ALWAYS_INLINE bool MessageBase::isA<Messages::Broadcast>() const
-{
-    return dynamic_cast<const Messages::Broadcast*>(this) != 0;
-}
-
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool MessageBase::isA() const
-{
-    if (dynamic_cast<const T*>(this) == 0)
-    {
-        if (this->isA<Messages::Broadcast>())
+        template <>
+        SIRE_ALWAYS_INLINE bool MessageBase::isA<Messages::Broadcast>() const
         {
-            return this->asA<Messages::Broadcast>().messageIsA<T>();
+            return dynamic_cast<const Messages::Broadcast *>(this) != 0;
         }
-        else
-            return false;
-    }
-    else
-        return true;
-}
 
-template<>
-SIRE_ALWAYS_INLINE Messages::Broadcast MessageBase::asA<Messages::Broadcast>() const
-{
-    return *(dynamic_cast<const Messages::Broadcast*>(this));
-}
-
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-T MessageBase::asA() const
-{
-    const T *ptr = dynamic_cast<const T*>(this);
-
-    if (ptr == 0)
-    {
-        if (this->isA<Messages::Broadcast>())
+        template <class T>
+        SIRE_OUTOFLINE_TEMPLATE bool MessageBase::isA() const
         {
-            return this->asA<Messages::Broadcast>().messageAsA<T>();
+            if (dynamic_cast<const T *>(this) == 0)
+            {
+                if (this->isA<Messages::Broadcast>())
+                {
+                    return this->asA<Messages::Broadcast>().messageIsA<T>();
+                }
+                else
+                    return false;
+            }
+            else
+                return true;
         }
-        else
-            return *ptr;
-    }
-    else
-        return *ptr;
-}
+
+        template <>
+        SIRE_ALWAYS_INLINE Messages::Broadcast MessageBase::asA<Messages::Broadcast>() const
+        {
+            return *(dynamic_cast<const Messages::Broadcast *>(this));
+        }
+
+        template <class T>
+        SIRE_OUTOFLINE_TEMPLATE
+            T
+            MessageBase::asA() const
+        {
+            const T *ptr = dynamic_cast<const T *>(this);
+
+            if (ptr == 0)
+            {
+                if (this->isA<Messages::Broadcast>())
+                {
+                    return this->asA<Messages::Broadcast>().messageAsA<T>();
+                }
+                else
+                    return *ptr;
+            }
+            else
+                return *ptr;
+        }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}  // end of namespace MPI
-}  // end of namespace SireCluster
+    } // end of namespace MPI
+} // end of namespace SireCluster
 
-Q_DECLARE_METATYPE( SireCluster::MPI::Messages::Broadcast )
-Q_DECLARE_METATYPE( SireCluster::MPI::Messages::Result )
-Q_DECLARE_METATYPE( SireCluster::MPI::Messages::Error )
+Q_DECLARE_METATYPE(SireCluster::MPI::Messages::Broadcast)
+Q_DECLARE_METATYPE(SireCluster::MPI::Messages::Result)
+Q_DECLARE_METATYPE(SireCluster::MPI::Messages::Error)
 
-Q_DECLARE_METATYPE( SireCluster::MPI::Messages::RegisterBackend )
-Q_DECLARE_METATYPE( SireCluster::MPI::Messages::ReserveBackend )
-Q_DECLARE_METATYPE( SireCluster::MPI::Messages::RequestAvailability )
-Q_DECLARE_METATYPE( SireCluster::MPI::Messages::Reservation )
-Q_DECLARE_METATYPE( SireCluster::MPI::Messages::Shutdown )
-Q_DECLARE_METATYPE( SireCluster::MPI::Messages::GetUIDs )
+Q_DECLARE_METATYPE(SireCluster::MPI::Messages::RegisterBackend)
+Q_DECLARE_METATYPE(SireCluster::MPI::Messages::ReserveBackend)
+Q_DECLARE_METATYPE(SireCluster::MPI::Messages::RequestAvailability)
+Q_DECLARE_METATYPE(SireCluster::MPI::Messages::Reservation)
+Q_DECLARE_METATYPE(SireCluster::MPI::Messages::Shutdown)
+Q_DECLARE_METATYPE(SireCluster::MPI::Messages::GetUIDs)
 
-Q_DECLARE_METATYPE( SireCluster::MPI::Message )
+Q_DECLARE_METATYPE(SireCluster::MPI::Message)
 
 SIRE_END_HEADER
 
