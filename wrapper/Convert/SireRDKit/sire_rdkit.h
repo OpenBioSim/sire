@@ -5,10 +5,14 @@
 
 #include "SireMol/selectormol.h"
 
+#include "SireBase/propertymap.h"
+
 #include <QList>
 
-SireMol::SelectorMol rdkit_to_sire(const QList<RDKit::ROMol> &mols);
+SireMol::SelectorMol rdkit_to_sire(const QList<RDKit::ROMol> &mols,
+                                   const SireBase::PropertyMap &map);
 
-QList<RDKit::ROMol> sire_to_rdkit(const SireMol::SelectorMol &mols);
+QList<RDKit::ROMol> sire_to_rdkit(const SireMol::SelectorMol &mols,
+                                  const SireBase::PropertyMap &map);
 
 #endif
