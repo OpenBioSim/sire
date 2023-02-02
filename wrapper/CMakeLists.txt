@@ -448,6 +448,7 @@ add_subdirectory (Squire)
 add_subdirectory (System)
 add_subdirectory (Units)
 add_subdirectory (Vol)
+add_subdirectory (Convert)
 
 # also compile Sire's python executable
 add_subdirectory (python)
