@@ -22,6 +22,15 @@ from ..mol import SelectorMol as _SelectorMol
 _use_new_api()
 
 
+def _to_selectormol(obj):
+    if hasattr(obj, "molecules"):
+        return obj.molecules()
+    elif type(obj) is list:
+        raise ValueError()
+    else:
+        return _SelectorMol(obj)
+
+
 def to(obj, map=None):
     """
     Convert the passed object from its current object format to a

@@ -1,6 +1,9 @@
 
 #include "sire_rdkit.h"
 
+#include "SireStream/datastream.h"
+#include "SireStream/shareddatastream.h"
+
 #include "SireMol/core.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/atomelements.h"
@@ -85,6 +88,28 @@ void set_prop(T &atom, const QString &key, const V &value,
 
     if (name.hasSource())
         atom.setProperty(name.source(), value);
+}
+
+ROMol sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
+{
+    RDKit::RWMol molecule;
+    molecule.beginBatchEdit();
+
+    const auto atoms = mol.atoms();
+
+    for (int i = 0; i < atoms.count(); ++i)
+    {
+        const auto atom = atoms(i);
+
+        molecule.addAtom(true);
+        auto a = molecule.getActiveAtom();
+
+        a->setAtomicNum(atom.property<SireMol::Element>(map["element"]).nProtons());
+    }
+
+    molecule.commitBatchEdit();
+
+    return molecule;
 }
 
 Molecule rdkit_to_sire(const ROMol &mol, const PropertyMap &map)
@@ -185,5 +210,12 @@ SelectorMol rdkit_to_sire(const QList<ROMol> &mols, const PropertyMap &map)
 
 QList<ROMol> sire_to_rdkit(const SelectorMol &mols, const PropertyMap &map)
 {
-    return QList<ROMol>();
+    QList<ROMol> rdkit_mols;
+
+    for (const auto &mol : mols)
+    {
+        rdkit_mols.append(sire_to_rdkit(mol, map));
+    }
+
+    return rdkit_mols;
 }

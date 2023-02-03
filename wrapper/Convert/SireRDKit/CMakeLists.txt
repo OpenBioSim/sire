@@ -50,6 +50,9 @@ if (${RDKIT_FOUND})
   target_link_libraries(SireRDKit
                           SirePython
                           SIRE_SireMol
+                          SIRE_SireBase
+                          SIRE_SireStream
+                          SIRE_SireError
                           ${Boost_LIBRARIES}
                           ${RDKIT_LIBRARIES}
                         )
