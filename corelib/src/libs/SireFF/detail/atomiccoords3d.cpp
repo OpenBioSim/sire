@@ -31,8 +31,8 @@
 #include "atomicparameters.hpp"
 #include "atomicparameters3d.hpp"
 
-#include "SireMol/partialmolecule.h"
 #include "SireMol/atomcoords.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireMol/mover.hpp"
 
@@ -52,7 +52,7 @@ using namespace SireStream;
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds,
-                                      const AtomicCoords3D &coords)
+                        const AtomicCoords3D &coords)
 {
     SharedDataStream sds(ds);
 
@@ -63,7 +63,7 @@ QDataStream &operator<<(QDataStream &ds,
 
 /** Extract from a binary datastream */
 QDataStream &operator>>(QDataStream &ds,
-                                      AtomicCoords3D &coords)
+                        AtomicCoords3D &coords)
 {
     SharedDataStream sds(ds);
 
@@ -73,7 +73,7 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 bool SireFF::detail::selectedAll(const QSet<quint32> &changed_groups,
-                                               quint32 n)
+                                 quint32 n)
 {
     if (quint32(changed_groups.count()) >= n)
     {
@@ -98,12 +98,14 @@ bool SireFF::detail::selectedAll(const QSet<quint32> &changed_groups,
 
 /** Null constructor */
 AtomicCoords3D::AtomicCoords3D()
-{}
+{
+}
 
 /** Construct to hold the passed coordinates */
 AtomicCoords3D::AtomicCoords3D(const CoordGroupArray &coordinates)
-               : coords(coordinates)
-{}
+    : coords(coordinates)
+{
+}
 
 /** Construct from the atomic coordinates of the selected view
     of the molecule 'molecule', using the property 'coords_property'
@@ -115,15 +117,15 @@ AtomicCoords3D::AtomicCoords3D(const CoordGroupArray &coordinates)
 AtomicCoords3D::AtomicCoords3D(const PartialMolecule &molecule,
                                const PropertyName &coords_property)
 {
-    //get the coordinates of the atoms
+    // get the coordinates of the atoms
     coords = molecule.property(coords_property).asA<AtomCoords>().array();
 
-    //these are for all of the atoms - we now need to mask this
-    //so that only the coordinates for atoms in CutGroups that
-    //contain at least one selected atom are stored
+    // these are for all of the atoms - we now need to mask this
+    // so that only the coordinates for atoms in CutGroups that
+    // contain at least one selected atom are stored
     if (not molecule.selection().selectedAllCutGroups())
     {
-        //pick out the selected CoordGroups
+        // pick out the selected CoordGroups
         QList<CGIdx> selected_cgroups = molecule.selection().selectedCutGroups();
 
         QVector<CoordGroup> cgroups;
@@ -131,25 +133,27 @@ AtomicCoords3D::AtomicCoords3D(const PartialMolecule &molecule,
 
         foreach (CGIdx selected_cgroup, selected_cgroups)
         {
-            cgroups.append( coords.constData()[selected_cgroup] );
+            cgroups.append(coords.constData()[selected_cgroup]);
         }
 
-        //rebuild the CoordGroupArray
+        // rebuild the CoordGroupArray
         coords = CoordGroupArray(cgroups);
     }
 }
 
 /** Copy constructor */
 AtomicCoords3D::AtomicCoords3D(const AtomicCoords3D &other)
-               : coords(other.coords)
-{}
+    : coords(other.coords)
+{
+}
 
 /** Destructor */
 AtomicCoords3D::~AtomicCoords3D()
-{}
+{
+}
 
 /** Copy assignment operator */
-AtomicCoords3D& AtomicCoords3D::operator=(const AtomicCoords3D &other)
+AtomicCoords3D &AtomicCoords3D::operator=(const AtomicCoords3D &other)
 {
     coords = other.coords;
     return *this;
@@ -181,7 +185,7 @@ bool AtomicCoords3D::changedAllGroups(const AtomicCoords3D &other) const
     const CoordGroup *this_array = coords.constData();
     const CoordGroup *other_array = other.coords.constData();
 
-    for (int i=0; i<ngroups; ++i)
+    for (int i = 0; i < ngroups; ++i)
     {
         if (this_array[i] == other_array[i])
         {
@@ -199,7 +203,7 @@ void AtomicCoords3D::addChangedGroups(const AtomicCoords3D &params,
 {
     quint32 ngroups = coords.count();
 
-    if ( selectedAll(changed_groups, ngroups) )
+    if (selectedAll(changed_groups, ngroups))
         return;
 
     quint32 nsharedgroups = qMin(ngroups, quint32(params.coords.count()));
@@ -207,10 +211,9 @@ void AtomicCoords3D::addChangedGroups(const AtomicCoords3D &params,
     const CoordGroup *this_cgroups = coords.constData();
     const CoordGroup *other_cgroups = params.coords.constData();
 
-    for (quint32 i=0; i<nsharedgroups; ++i)
+    for (quint32 i = 0; i < nsharedgroups; ++i)
     {
-        if (not changed_groups.contains(i)
-            and this_cgroups[i] != other_cgroups[i])
+        if (not changed_groups.contains(i) and this_cgroups[i] != other_cgroups[i])
         {
             changed_groups.insert(i);
 
@@ -242,9 +245,9 @@ AtomicCoords3D AtomicCoords3D::applyMask(const QSet<quint32> &idxs) const
         return AtomicCoords3D();
 
     else if (idxs.count() == 1)
-        return AtomicCoords3D( coords[*(idxs.constBegin())] );
+        return AtomicCoords3D(coords[*(idxs.constBegin())]);
 
-    //mask by the indicies
+    // mask by the indicies
     quint32 ngroups = coords.count();
 
     QVector<CoordGroup> cgroups;
@@ -252,11 +255,11 @@ AtomicCoords3D AtomicCoords3D::applyMask(const QSet<quint32> &idxs) const
 
     const CoordGroup *cgroups_array = coords.constData();
 
-    for (quint32 i=0; i<ngroups; ++i)
+    for (quint32 i = 0; i < ngroups; ++i)
     {
         if (idxs.contains(i))
-            cgroups.append( cgroups_array[i] );
+            cgroups.append(cgroups_array[i]);
     }
 
-    return AtomicCoords3D( CoordGroupArray(cgroups) );
+    return AtomicCoords3D(CoordGroupArray(cgroups));
 }

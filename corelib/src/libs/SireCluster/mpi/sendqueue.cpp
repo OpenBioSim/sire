@@ -27,10 +27,10 @@
 
 #ifdef SIRE_USE_MPI
 
-#include <mpi.h>  // needs to be first for mpich
+#include <mpi.h> // needs to be first for mpich
 
-#include "sendqueue.h"
 #include "mpicluster.h"
+#include "sendqueue.h"
 
 #include "SireMaths/rangenerator.h"
 
@@ -45,9 +45,10 @@ using namespace SireCluster::MPI::Messages;
 /** Construct, using the passed MPI communicator to send the
     messages */
 SendQueue::SendQueue(MPI_Comm comm)
-          : QThread(), boost::noncopyable(),
-            send_comm(comm), been_stopped(false)
-{}
+    : QThread(), boost::noncopyable(),
+      send_comm(comm), been_stopped(false)
+{
+}
 
 /** Destructor */
 SendQueue::~SendQueue()
@@ -62,7 +63,7 @@ SendQueue::~SendQueue()
         waiter.wakeAll();
     }
 
-    MPI_Comm_free( &send_comm );
+    MPI_Comm_free(&send_comm);
 }
 
 /** Start the event loop in a background thread */
@@ -128,38 +129,38 @@ void SendQueue::run()
     while (not message_queue.isEmpty())
     {
         if (been_stopped)
-            //we've been stopped!
+            // we've been stopped!
             break;
 
         Message message = message_queue.dequeue();
         lkr.unlock();
 
-        //qDebug() << MPICluster::getRank() << "sending" << message.toString()
-        //         << "to" << message.destination();
+        // qDebug() << MPICluster::getRank() << "sending" << message.toString()
+        //          << "to" << message.destination();
 
         try
         {
             if (message.destination() == MPICluster::getRank())
             {
-                //the message is for us! - no need to send it
+                // the message is for us! - no need to send it
                 MPICluster::received(message);
             }
-            else if ( MPICluster::isMaster() )
+            else if (MPICluster::isMaster())
             {
-                //we can directly send the messages ourselves!
+                // we can directly send the messages ourselves!
                 if (message.destination() == -1 and
                     not message.isA<Broadcast>())
                 {
-                    //this message is to be broadcast to everyone
+                    // this message is to be broadcast to everyone
                     message = Broadcast(message);
                 }
 
-                //the master sends the message to just the intended recipients
+                // the master sends the message to just the intended recipients
                 QByteArray message_data = message.pack();
 
                 int size = message_data.count();
 
-                BOOST_ASSERT( size != 0 );
+                BOOST_ASSERT(size != 0);
 
                 if (message.isA<Broadcast>())
                 {
@@ -186,7 +187,7 @@ void SendQueue::run()
 
                     if (message.asA<Broadcast>().isRecipient(MPICluster::master()))
                     {
-                        //if this is a shutdown, then process it here
+                        // if this is a shutdown, then process it here
                         //(to prevent a deadlock if the receive queue is still working)
                         if (message.isA<Shutdown>())
                         {
@@ -216,60 +217,60 @@ void SendQueue::run()
 
                 if (message.destination() == MPICluster::master())
                 {
-                    //send this message to the master directly
+                    // send this message to the master directly
                     message_data = message.pack();
                 }
                 else
                 {
-                    //we need to send the message to the master, for
-                    //retransmission to the destination process
-                    Message broadcast( Broadcast(message, message.destination()) );
+                    // we need to send the message to the master, for
+                    // retransmission to the destination process
+                    Message broadcast(Broadcast(message, message.destination()));
                     message_data = broadcast.pack();
                 }
 
-                //maybe change to Isend so that we can kill the send if
+                // maybe change to Isend so that we can kill the send if
                 //'been_stopped' is true
                 MPI_Send(message_data.data(), message_data.count(),
                          MPI_BYTE, MPICluster::master(), 1, send_comm);
             }
         }
-        catch(const SireError::exception &e)
+        catch (const SireError::exception &e)
         {
-            MPICluster::send( Messages::Error(message, e) );
+            MPICluster::send(Messages::Error(message, e));
         }
-        catch(const std::exception &e)
+        catch (const std::exception &e)
         {
-            MPICluster::send( Messages::Error(message, e) );
+            MPICluster::send(Messages::Error(message, e));
         }
-        catch(...)
+        catch (...)
         {
-            MPICluster::send( Messages::Error(message, CODELOC) );
+            MPICluster::send(Messages::Error(message, CODELOC));
         }
 
         lkr.relock();
 
         if (message_queue.isEmpty())
         {
-            //wait until there are some more messages
-            waiter.wait( &datamutex );
+            // wait until there are some more messages
+            waiter.wait(&datamutex);
         }
     }
 
-    //there are no more messages being broadcast - we need to tell
-    //the backend nodes of this fact
-    if ( MPICluster::isMaster() )
+    // there are no more messages being broadcast - we need to tell
+    // the backend nodes of this fact
+    if (MPICluster::isMaster())
     {
         int quit = 0;
-        //send_comm->Barrier();
-        for (int i=0; i<MPICluster::getCount(); ++i)
+        // send_comm->Barrier();
+        for (int i = 0; i < MPICluster::getCount(); ++i)
         {
             if (i != MPICluster::master())
                 MPI_Send(&quit, 1, MPI_INT, i, 1, send_comm);
         }
     }
 
-    //we're not sending any more messages, so release the resources
-    //held by the communicator
+    // we're not sending any more messages, so release the resources
+    // held by the communicator
     MPI_Comm_free(&send_comm);
 }
 

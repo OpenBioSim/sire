@@ -27,8 +27,8 @@
 
 #include "ffmolecules3d.h"
 
-#include "SireMol/partialmolecule.h"
 #include "SireMol/atomcoords.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireMol/mover.hpp"
 
@@ -44,4 +44,4 @@ using namespace SireVol;
 //////// Static data for Coords3DParameterName
 ////////
 
-QString Coords3DParameterName::coords_param( "coordinates" );
+QString Coords3DParameterName::coords_param("coordinates");
