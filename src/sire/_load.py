@@ -9,6 +9,7 @@ __all__ = [
     "tutorial_url",
     "load_test_files",
     "supported_formats",
+    "smiles",
 ]
 
 
@@ -570,3 +571,54 @@ def load_test_files(files: _Union[_List[str], str], *args):
 
     files = expand(tutorial_url, files, suffix=".bz2")
     return load(files, directory=cache_dir, silent=True)
+
+
+def smiles(
+    smiles_string: str,
+    add_hydrogens: bool = True,
+    generate_coordinates: bool = True,
+    map=None,
+):
+    """
+    Return a molecule that has been generated using the passed
+    smiles string. This uses rdkit to create the molecule,
+    so it must be installed.
+
+    Args:
+        smiles_string: str
+            The smiles string to interpret
+        add_hydrogens: bool (default True)
+            Whether or not to automatically add hydrogens
+        generate_coordinates: bool (default True)
+            Whether or not to automatically generate 3D coordinates.
+            Note that generating the coordinates will automatically
+            switch on addition of hydrogens
+        map:
+            Property map if you want to put the molecule properties
+            into different places
+
+    Returns: sire.mol.Molecule
+        The actual molecule
+    """
+    try:
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+    except Exception:
+        raise ModuleNotFoundError(
+            "Could not generate a molecule from a smiles string because "
+            "rdkit could not be loaded. Please install rdkit, e.g. "
+            "by running 'mamba install -c conda-forge rdkit'"
+        )
+
+    mol = Chem.MolFromSmiles(smiles_string)
+
+    if add_hydrogens or generate_coordinates:
+        mol = Chem.AddHs(mol)
+
+    if generate_coordinates:
+        AllChem.EmbedMolecule(mol)
+        AllChem.UFFOptimizeMolecule(mol)
+
+    from .convert import rdkit_to_sire
+
+    return rdkit_to_sire(mol)

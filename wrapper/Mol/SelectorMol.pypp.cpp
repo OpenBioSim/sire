@@ -89,6 +89,32 @@ void register_SelectorMol_class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorMol::append
+        
+            typedef void ( ::SireMol::SelectorMol::*append_function_type)( ::SireMol::Molecule const & ) ;
+            append_function_type append_function_value( &::SireMol::SelectorMol::append );
+            
+            SelectorMol_exposer.def( 
+                "append"
+                , append_function_value
+                , ( bp::arg("mol") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::append
+        
+            typedef void ( ::SireMol::SelectorMol::*append_function_type)( ::SireMol::SelectorMol const & ) ;
+            append_function_type append_function_value( &::SireMol::SelectorMol::append );
+            
+            SelectorMol_exposer.def( 
+                "append"
+                , append_function_value
+                , ( bp::arg("mols") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorMol::atom
         
             typedef ::SireMol::Atom ( ::SireMol::SelectorMol::*atom_function_type)( int,::SireBase::PropertyMap const & ) const;
@@ -878,6 +904,8 @@ void register_SelectorMol_class(){
         
         }
         SelectorMol_exposer.def( bp::self != bp::self );
+        SelectorMol_exposer.def( bp::self + bp::other< SireMol::Molecule >() );
+        SelectorMol_exposer.def( bp::self + bp::self );
         { //::SireMol::SelectorMol::operator=
         
             typedef ::SireMol::SelectorMol & ( ::SireMol::SelectorMol::*assign_function_type)( ::SireMol::SelectorMol const & ) ;

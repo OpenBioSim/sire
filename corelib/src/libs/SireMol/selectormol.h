@@ -143,6 +143,15 @@ namespace SireMol
 
         void update(const Molecules &molecules);
 
+        SelectorMol operator+(const Molecule &mol) const;
+        SelectorMol operator+(const SelectorMol &mols) const;
+
+        SelectorMol &operator+=(const Molecule &mol);
+        SelectorMol &operator+=(const SelectorMol &mols);
+
+        void append(const Molecule &mol);
+        void append(const SelectorMol &mols);
+
         EvaluatorM evaluate() const;
 
         MoleculeGroup toMoleculeGroup() const;

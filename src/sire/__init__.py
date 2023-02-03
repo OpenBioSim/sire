@@ -12,6 +12,7 @@ from ._load import (
     tutorial_url,
     load_test_files,
     supported_formats,
+    smiles,
 )
 
 from ._thumbsup import thumbs_up, get_thumbs_up_info, disable_thumbs_up
@@ -33,6 +34,7 @@ __all__ = [
     "save",
     "save_to_string",
     "segid",
+    "smiles",
     "supported_formats",
     "thumbs_up",
     "tutorial_url",

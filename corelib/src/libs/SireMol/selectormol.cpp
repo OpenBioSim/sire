@@ -388,6 +388,42 @@ Molecule SelectorMol::operator[](const MolID &molid) const
     return this->molecule(molid);
 }
 
+SelectorMol SelectorMol::operator+(const Molecule &mol) const
+{
+    SelectorMol ret(*this);
+    ret += mol;
+    return ret;
+}
+
+SelectorMol SelectorMol::operator+(const SelectorMol &mols) const
+{
+    SelectorMol ret(*this);
+    ret += mols;
+    return ret;
+}
+
+SelectorMol &SelectorMol::operator+=(const Molecule &mol)
+{
+    this->append(mol);
+    return *this;
+}
+
+SelectorMol &SelectorMol::operator+=(const SelectorMol &mols)
+{
+    this->append(mols);
+    return *this;
+}
+
+void SelectorMol::append(const Molecule &mol)
+{
+    this->mols.append(mol);
+}
+
+void SelectorMol::append(const SelectorMol &other)
+{
+    this->mols.append(other.mols);
+}
+
 QList<MolViewPtr> SelectorMol::toList() const
 {
     QList<MolViewPtr> l;
