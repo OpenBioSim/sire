@@ -9,10 +9,10 @@
 
 #include <QList>
 
-SireMol::SelectorMol rdkit_to_sire(const QList<RDKit::ROMol> &mols,
+SireMol::SelectorMol rdkit_to_sire(const QList<RDKit::ROMOL_SPTR> &mols,
                                    const SireBase::PropertyMap &map);
 
-QList<RDKit::ROMol> sire_to_rdkit(const SireMol::SelectorMol &mols,
-                                  const SireBase::PropertyMap &map);
+QList<RDKit::ROMOL_SPTR> sire_to_rdkit(const SireMol::SelectorMol &mols,
+                                       const SireBase::PropertyMap &map);
 
 #endif

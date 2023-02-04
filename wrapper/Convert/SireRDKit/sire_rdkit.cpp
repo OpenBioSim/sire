@@ -23,7 +23,7 @@
 
 #include <QDebug>
 
-using RDKit::ROMol;
+using RDKit::ROMOL_SPTR;
 using SireBase::PropertyMap;
 using SireMol::Molecule;
 using SireMol::SelectorMol;
@@ -90,7 +90,7 @@ void set_prop(T &atom, const QString &key, const V &value,
         atom.setProperty(name.source(), value);
 }
 
-ROMol sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
+ROMOL_SPTR sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
 {
     RDKit::RWMol molecule;
     molecule.beginBatchEdit();
@@ -109,10 +109,10 @@ ROMol sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
 
     molecule.commitBatchEdit();
 
-    return molecule;
+    return ROMOL_SPTR(new RDKit::ROMol(molecule));
 }
 
-Molecule rdkit_to_sire(const ROMol &mol, const PropertyMap &map)
+Molecule rdkit_to_sire(const ROMOL_SPTR &mol, const PropertyMap &map)
 {
     auto cg = Molecule().edit().add(SireMol::CGName("0"));
     auto res = cg.molecule().add(SireMol::ResNum(1));
@@ -124,7 +124,7 @@ Molecule rdkit_to_sire(const ROMol &mol, const PropertyMap &map)
 
     QHash<SireMol::Element, int> element_count;
 
-    for (const auto &atom : mol.atoms())
+    for (const auto &atom : mol->atoms())
     {
         atom_to_idx[atom] = n;
         n += 1;
@@ -155,7 +155,7 @@ Molecule rdkit_to_sire(const ROMol &mol, const PropertyMap &map)
 
         const auto bondtype_as_double = map["bondtype_as_double"];
 
-        for (const auto &bond : mol.bonds())
+        for (const auto &bond : mol->bonds())
         {
             const auto atom0 = atom_to_idx[bond->getBeginAtom()];
             const auto atom1 = atom_to_idx[bond->getEndAtom()];
@@ -174,11 +174,11 @@ Molecule rdkit_to_sire(const ROMol &mol, const PropertyMap &map)
 
     if (map["coordinates"].hasSource())
     {
-        const int nconformers = mol.getNumConformers();
+        const int nconformers = mol->getNumConformers();
 
         if (nconformers > 0)
         {
-            const auto &conformer = mol.getConformer(0);
+            const auto &conformer = mol->getConformer(0);
 
             SireMol::AtomCoords coords(molecule.info());
 
@@ -196,7 +196,7 @@ Molecule rdkit_to_sire(const ROMol &mol, const PropertyMap &map)
     return molecule.commit();
 }
 
-SelectorMol rdkit_to_sire(const QList<ROMol> &mols, const PropertyMap &map)
+SelectorMol rdkit_to_sire(const QList<ROMOL_SPTR> &mols, const PropertyMap &map)
 {
     QList<Molecule> sire_mols;
 
@@ -208,9 +208,9 @@ SelectorMol rdkit_to_sire(const QList<ROMol> &mols, const PropertyMap &map)
     return sire_mols;
 }
 
-QList<ROMol> sire_to_rdkit(const SelectorMol &mols, const PropertyMap &map)
+QList<ROMOL_SPTR> sire_to_rdkit(const SelectorMol &mols, const PropertyMap &map)
 {
-    QList<ROMol> rdkit_mols;
+    QList<ROMOL_SPTR> rdkit_mols;
 
     for (const auto &mol : mols)
     {
