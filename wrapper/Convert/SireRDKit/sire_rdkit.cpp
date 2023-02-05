@@ -231,6 +231,8 @@ ROMOL_SPTR sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
     RDKit::RWMol molecule;
     molecule.beginBatchEdit();
 
+    molecule.setProp<std::string>("_Name", mol.name().value().toStdString());
+
     const auto atoms = mol.atoms();
 
     for (int i = 0; i < atoms.count(); ++i)
@@ -240,6 +242,7 @@ ROMOL_SPTR sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
         molecule.addAtom(true);
         auto a = molecule.getActiveAtom();
 
+        a->setProp<std::string>("_Name", atom.name().value().toStdString());
         a->setAtomicNum(atom.property<SireMol::Element>(map["element"]).nProtons());
 
         try
@@ -313,7 +316,17 @@ ROMOL_SPTR sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
 
 Molecule rdkit_to_sire(const ROMOL_SPTR &mol, const PropertyMap &map)
 {
-    auto cg = Molecule().edit().add(SireMol::CGName("0"));
+    if (mol.get() == 0)
+        return Molecule();
+
+    QString molname;
+
+    if (mol->hasProp("_Name"))
+    {
+        molname = QString::fromStdString(mol->getProp<std::string>("_Name"));
+    }
+
+    auto cg = Molecule().edit().rename(molname).add(SireMol::CGName("0"));
     auto res = cg.molecule().add(SireMol::ResNum(1));
     res.rename(SireMol::ResName("LIG"));
 
@@ -330,10 +343,19 @@ Molecule rdkit_to_sire(const ROMOL_SPTR &mol, const PropertyMap &map)
         auto a = cg.add(SireMol::AtomNum(n));
         a.reparent(res.number());
 
-        a.rename(SireMol::AtomName(
-            QString("%1%2")
-                .arg(QString::fromStdString(atom->getSymbol()))
-                .arg(n)));
+        if (atom->hasProp("_Name"))
+        {
+            a.rename(SireMol::AtomName(
+                QString::fromStdString(
+                    atom->getProp<std::string>("_Name"))));
+        }
+        else
+        {
+            a.rename(SireMol::AtomName(
+                QString("%1%2")
+                    .arg(QString::fromStdString(atom->getSymbol()))
+                    .arg(n)));
+        }
 
         set_prop(a, "element", SireMol::Element(atom->getAtomicNum()), map);
         set_prop(a, "formal_charge", atom->getFormalCharge() * SireUnits::mod_electron, map);

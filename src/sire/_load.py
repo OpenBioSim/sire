@@ -610,15 +610,53 @@ def smiles(
             "by running 'mamba install -c conda-forge rdkit'"
         )
 
-    mol = Chem.MolFromSmiles(smiles_string)
+    if hasattr(smiles_string, "to_csv"):
+        # convert to tsv from a dataframe
+        smiles_col = "smiles"
+        name_col = "name"
+        smiles_string = smiles_string[[smiles_col, name_col]].to_csv(sep="\t")
 
-    if add_hydrogens or generate_coordinates:
-        mol = Chem.AddHs(mol)
+    elif type(smiles_string) is not list:
+        smiles_string = [smiles_string]
 
-    if generate_coordinates:
-        AllChem.EmbedMolecule(mol)
-        AllChem.UFFOptimizeMolecule(mol)
+    if type(smiles_string) is list:
+        # now convert the list to a tsv string so this can be parsed
+        # by the supplier
+        smiles_string = "\n".join([f"{x}\t{x}" for x in smiles_string])
+
+    supplier = Chem.SmilesMolSupplierFromText(
+        text=smiles_string,
+        delimiter="\t",
+        smilesColumn=0,
+        nameColumn=1,
+        titleLine=False,
+        sanitize=True,
+    )
+
+    mols = []
+
+    for mol in supplier:
+        if mol is None:
+            raise SyntaxError(
+                f"Failed to generate from smiles string\n{smiles_string}\n. "
+                "Please check that this is valid and try again."
+            )
+
+        if add_hydrogens or generate_coordinates:
+            try:
+                mol = Chem.AddHs(mol)
+            except Exception:
+                pass
+
+        if generate_coordinates:
+            try:
+                AllChem.EmbedMolecule(mol)
+                AllChem.UFFOptimizeMolecule(mol)
+            except Exception:
+                pass
+
+        mols.append(mol)
 
     from .convert import rdkit_to_sire
 
-    return rdkit_to_sire(mol)
+    return rdkit_to_sire(mols)
