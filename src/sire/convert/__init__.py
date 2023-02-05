@@ -5,6 +5,7 @@ __all__ = [
     "sire_to_biosimspace",
     "sire_to_rdkit",
     "sire_to_openmm",
+    "supported_formats",
     "to",
     "to_biosimspace",
     "to_rdkit",
@@ -31,14 +32,43 @@ def _to_selectormol(obj):
         return _SelectorMol(obj)
 
 
-def to(obj, map=None):
+def supported_formats():
     """
-    Convert the passed object from its current object format to a
-    sire object format. Typically this will be converting
+    Return the current supported object formats for conversion
+    """
+    return ["sire", "biosimspace", "rdkit", "openmm"]
+
+
+def to(obj, format: str = "sire", map=None):
+    """
+    Convert the passed object from its current object format to the
+    specified object format (default "sire"). Typically this will be converting
     from, e.g. a BioSimSpace, OpenMM or rdkit molecule to a sire molecule
     (or from a list of molecules to a SelectorMol).
+
+    Args:
+        obj:
+            The input object to convert
+        format: str (default "sire")
+            The format to convert to
+        map:
+            The property map to use for the conversion
     """
-    return to_sire(obj, map=map)
+    format = format.lower()
+
+    if format == "sire":
+        return to_sire(obj, map=map)
+    elif format == "rdkit":
+        return to_rdkit(obj, map=map)
+    elif format == "biosimspace":
+        return to_biosimspace(obj, map=map)
+    elif format == "openmm":
+        return to_openmm(obj, map=map)
+    else:
+        raise ValueError(
+            f"Cannot convert {obj} as the format '{format}' is "
+            "not recognised."
+        )
 
 
 def to_sire(obj, map=None):
