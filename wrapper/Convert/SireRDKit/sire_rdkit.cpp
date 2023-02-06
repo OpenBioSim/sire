@@ -242,7 +242,6 @@ ROMOL_SPTR sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
         molecule.addAtom(true);
         auto a = molecule.getActiveAtom();
 
-        a->setProp<std::string>("_Name", atom.name().value().toStdString());
         a->setAtomicNum(atom.property<SireMol::Element>(map["element"]).nProtons());
 
         try
@@ -424,20 +423,10 @@ Molecule rdkit_to_sire(const ROMOL_SPTR &mol, const PropertyMap &map)
         n += 1;
         auto a = cg.add(SireMol::AtomNum(n));
         a.reparent(res.number());
-
-        if (atom->hasProp("_Name"))
-        {
-            a.rename(SireMol::AtomName(
-                QString::fromStdString(
-                    atom->getProp<std::string>("_Name"))));
-        }
-        else
-        {
-            a.rename(SireMol::AtomName(
-                QString("%1%2")
-                    .arg(QString::fromStdString(atom->getSymbol()))
-                    .arg(n)));
-        }
+        a.rename(SireMol::AtomName(
+            QString("%1%2")
+                .arg(QString::fromStdString(atom->getSymbol()))
+                .arg(n)));
 
         set_prop(a, "element", SireMol::Element(atom->getAtomicNum()), map);
         set_prop(a, "formal_charge", atom->getFormalCharge() * SireUnits::mod_electron, map);
