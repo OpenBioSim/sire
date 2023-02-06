@@ -37,12 +37,24 @@ if _has_rdkit:
 
         return _Chem.MolToSmiles(rdkit_mol)
 
-    def _view2d(obj, filename=None, map=None):
+    def _view2d(
+        obj,
+        filename: str = None,
+        height: int = 300,
+        width: int = 900,
+        map=None,
+    ):
         """
-        Create a 2D representation of this molecule.
+        Create a 2D representation of this molecule. If 'filename'
+        is set then this will be written to that file. Otherwise
+        this will be returned for visualisation in a jupyter notebook.
         """
         from ..convert import sire_to_rdkit
         from ..base import create_map
+
+        if filename is None:
+            # we need to be in a jupyter notebook or equivalent
+            from IPython.display import SVG
 
         map = create_map(map)
 
@@ -53,12 +65,71 @@ if _has_rdkit:
 
         rdkit_mol = sire_to_rdkit(obj.molecule(), map=map)
 
-        _Chem.AllChem.Compute2DCoords(rdkit_mol)
+        from rdkit.Chem import rdDepictor
+        from rdkit.Chem.Draw import rdMolDraw2D
 
-        from rdkit.Chem import Draw
+        rdDepictor.SetPreferCoordGen(True)
+
+        drawer = rdMolDraw2D.MolDraw2DSVG(width, height)
+        drawer.DrawMolecule(rdkit_mol)
+        drawer.FinishDrawing()
+        svg = drawer.GetDrawingText()
 
         if filename is not None:
-            Draw.MolToFile(rdkit_mol, filename)
+            import os
+
+            (basename, format) = os.path.splitext(os.path.abspath(filename))
+
+            while format.startswith("."):
+                format = format[1:]
+
+            if len(format) == 0:
+                format = "svg"
+
+            format = format.lower()
+
+            if format != "svg":
+                try:
+                    import cairosvg
+                except Exception:
+                    from ..utils import Console
+
+                    Console.warning(
+                        "We need the module `cairosvg` to save image files in "
+                        "any other format than SVG. . As "
+                        "this is not available, we will save the file as a SVG"
+                    )
+
+                    format = "svg"
+
+            filename = f"{basename}.{format}"
+
+            if format == "svg":
+                with open(filename, "w") as FILE:
+                    FILE.write(svg)
+
+            elif format == "pdf":
+                cairosvg.svg2pdf(bytestring=svg.encode(), write_to=filename)
+
+            elif format == "png":
+                cairosvg.svg2png(
+                    bytestring=svg.encode(),
+                    write_to=filename,
+                    output_width=width,
+                    output_height=height,
+                )
+
+            else:
+                raise NotImplementedError(
+                    f"Cannot save image as format {format}. This is not yet "
+                    "supported in this code. Please choose 'png', 'pdf' or "
+                    "'svg'."
+                )
+
+            return filename
+
+        else:
+            return SVG(svg)
 
 elif _rdkit_import_error is not None:
 

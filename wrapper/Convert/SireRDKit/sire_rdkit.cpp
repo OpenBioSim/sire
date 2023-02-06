@@ -309,7 +309,89 @@ ROMOL_SPTR sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
 
     molecule.commitBatchEdit();
 
-    RDKit::MolOps::sanitizeMol(molecule);
+    // try each sanitisation step in turn, skipping failed
+    try
+    {
+        RDKit::MolOps::cleanUp(molecule);
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        molecule.updatePropertyCache();
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        RDKit::MolOps::symmetrizeSSSR(molecule);
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        RDKit::MolOps::Kekulize(molecule);
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        RDKit::MolOps::assignRadicals(molecule);
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        RDKit::MolOps::setAromaticity(molecule);
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        RDKit::MolOps::setConjugation(molecule);
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        RDKit::MolOps::setHybridization(molecule);
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        RDKit::MolOps::cleanupChirality(molecule);
+    }
+    catch (...)
+    {
+    }
+
+    // we DON'T adjust Hs, as we don't want to add extra atoms
+    // to this molecule
+    /*
+    try
+    {
+        RDKit::MolOps::adjustHs(molecule);
+    }
+    catch (...)
+    {
+    }*/
 
     return ROMOL_SPTR(new RDKit::ROMol(molecule));
 }
