@@ -645,15 +645,20 @@ def smiles(
         if add_hydrogens or generate_coordinates:
             try:
                 mol = Chem.AddHs(mol)
-            except Exception:
-                pass
+            except Exception as e:
+                from .utils import Console
+
+                Console.warning(f"Could not add hydrogens: {e}")
+                generate_coordinates = False
 
         if generate_coordinates:
             try:
                 AllChem.EmbedMolecule(mol)
                 AllChem.UFFOptimizeMolecule(mol)
-            except Exception:
-                pass
+            except Exception as e:
+                from .utils import Console
+
+                Console.warning(f"Could not generate coordinates: {e}")
 
         mols.append(mol)
 
