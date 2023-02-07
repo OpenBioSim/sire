@@ -246,7 +246,7 @@ namespace SireUnits
 
                 strings->insert(DimensionKey(kcal), QPair<double, QString>(kcal, "kcal"));
 
-                strings->insert(DimensionKey(kelvin), QPair<double, QString>(kelvin, "°K"));
+                strings->insert(DimensionKey(kelvin), QPair<double, QString>(kelvin, "K"));
 
                 strings->insert(DimensionKey(degree), QPair<double, QString>(degree, "°"));
 
