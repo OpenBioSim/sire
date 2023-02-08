@@ -501,7 +501,17 @@ Atom MoleculeView::atom(const QString &name, const PropertyMap &map) const
     {
         try
         {
-            auto a = this->search(name).views().at(0).atom();
+            auto matches = this->search(name).views();
+
+            if (matches.isEmpty())
+            {
+                throw SireMol::missing_atom(QObject::tr(
+                                                "No atom matches '%1'")
+                                                .arg(name),
+                                            CODELOC);
+            }
+
+            auto a = matches.at(0).atom();
             return this->atom(a.index(), map);
         }
         catch (...)
