@@ -81,10 +81,6 @@ namespace SireStream
         {
         }
 
-        static const char *typeName();
-
-        const char *what() const throw();
-
         void throwSelf() const
         {
             throw SireStream::version_error(*this);

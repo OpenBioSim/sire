@@ -35,10 +35,9 @@ set ( SIRESTREAM_SOURCES
       shareddatastream.cpp
       sharestrings.cpp
       streamdata.cpp
-      version_error.cpp
 
       ThirdParty/md5.c
-    
+
       ${SIRESTREAM_HEADERS}
     )
 

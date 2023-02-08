@@ -3,7 +3,7 @@
 
 #include "SireSystem_registrars.h"
 
-#include "Helpers/version_error_impl.h"
+
 
 #include "anglecomponent.h"
 #include "checkpoint.h"
