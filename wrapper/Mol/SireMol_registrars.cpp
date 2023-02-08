@@ -3,7 +3,7 @@
 
 #include "SireMol_registrars.h"
 
-#include "Helpers/version_error_impl.h"
+
 
 #include "amberparameters.h"
 #include "angleid.h"
