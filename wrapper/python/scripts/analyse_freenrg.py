@@ -649,22 +649,22 @@ if __name__ == "__main__":
             print("working on input file %s" % f)
             # Compressed file
             if f.endswith(".bz2"):
-                bz_file = bz2.BZ2File(f)
+                bz_file = bz2.BZ2File(f, mode="rb")
                 for line in bz_file:
-                    if line.startswith(b"#Alchemical"):
+                    line = line.decode("utf-8")
+
+                    if line.startswith("#Alchemical"):
                         if lamvals is None:
                             lamvals = (
-                                line.split(b"(")[-1].split(b")")[0].split(b",")
+                                line.split("(")[-1].split(")")[0].split(",")
                             )
                             lamvals = numpy.array([float(i) for i in lamvals])
                             lam = lamvals
 
                         else:
-                            lam = (
-                                line.split(b"(")[-1].split(b")")[0].split(b",")
-                            )
+                            lam = line.split("(")[-1].split(")")[0].split(",")
                             lam = numpy.array([float(i) for i in lam])
-                    elif line.startswith(b"#Generating temperature"):
+                    elif line.startswith("#Generating temperature"):
                         temp = line.split()[3]
 
                         try:
@@ -673,7 +673,7 @@ if __name__ == "__main__":
                             # this was a °C or °K (not that °K is correct!)
                             temp, unit = temp.split("°")
 
-                        if unit == b"C":
+                        if unit == "C":
                             T = float(temp) + 273
                         else:
                             T = float(temp)
@@ -693,7 +693,7 @@ if __name__ == "__main__":
                         break
             # Normal file
             else:
-                for line in open(f):
+                for line in open(f, encoding="utf-8"):
                     if line.startswith("#Alchemical"):
                         if lamvals is None:
                             lamvals = (
