@@ -5,7 +5,7 @@
 ##########################################
 
 # Find RDKit libraries
-find_package(RDKit REQUIRED)
+find_package(RDKit)
 
 if (${RDKIT_FOUND})
   # Only compile and install if we have RDKit
